@@ -1,0 +1,16 @@
+{
+  "name": "Plataforma de Pagos BECHAPRA",
+  "short_name": "BECHAPRA",
+  "description": "Sistema de gestión de pagos y usuarios",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#004AB7",
+  "theme_color": "#004AB7",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

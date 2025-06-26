@@ -150,6 +150,133 @@ export default function DashboardPage() {
           </div>
         </header>
 
+        {/* Sidebar Menu */}
+        {isMenuOpen && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setIsMenuOpen(false)} />
+            <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
+              <div className="flex flex-col h-full">
+                <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #004AB7 0%, #0057D9 100%)'}}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold">Panel {getRoleLabel(user?.rol || '')}</h2>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="text-white border-white/30 hover:bg-white/10"
+                    >
+                      ×
+                    </Button>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <span className="text-lg font-bold">{user?.nombre?.charAt(0).toUpperCase()}</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold">{user?.nombre}</p>
+                        <p className="text-sm text-white/80">{getRoleLabel(user?.rol || '')}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex-1 p-4 space-y-2">
+                  <a href="/dashboard" className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-50 text-blue-600">
+                    <Home className="w-5 h-5" />
+                    <span className="font-medium">Dashboard Principal</span>
+                  </a>
+                  
+                  {user?.rol === 'admin_general' && (
+                    <>
+                      <a href="/dashboard/admin" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <Home className="w-5 h-5" />
+                        <span className="font-medium">Dashboard Admin</span>
+                      </a>
+                      <a href="/dashboard/admin/usuarios" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <Users className="w-5 h-5" />
+                        <span className="font-medium">Gestión de Usuarios</span>
+                      </a>
+                      <a href="/dashboard/admin/solicitudes" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <FileText className="w-5 h-5" />
+                        <span className="font-medium">Gestión de Solicitudes</span>
+                      </a>
+                      <a href="/dashboard/admin/reportes" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <TrendingUp className="w-5 h-5" />
+                        <span className="font-medium">Reportes</span>
+                      </a>
+                      <a href="/dashboard/admin/configuracion" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <Settings className="w-5 h-5" />
+                        <span className="font-medium">Configuración</span>
+                      </a>
+                    </>
+                  )}
+
+                  {user?.rol === 'solicitante' && (
+                    <>
+                      <a href="/dashboard/solicitante" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <Home className="w-5 h-5" />
+                        <span className="font-medium">Mi Dashboard</span>
+                      </a>
+                      <a href="/dashboard/solicitante/solicitudes" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <FileText className="w-5 h-5" />
+                        <span className="font-medium">Mis Solicitudes</span>
+                      </a>
+                    </>
+                  )}
+
+                  {user?.rol === 'aprobador' && (
+                    <>
+                      <a href="/dashboard/aprobador" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <Home className="w-5 h-5" />
+                        <span className="font-medium">Mi Dashboard</span>
+                      </a>
+                      <a href="/dashboard/aprobador/pendientes" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <Clock className="w-5 h-5" />
+                        <span className="font-medium">Solicitudes Pendientes</span>
+                      </a>
+                      <a href="/dashboard/aprobador/historial" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <CheckCircle className="w-5 h-5" />
+                        <span className="font-medium">Historial</span>
+                      </a>
+                    </>
+                  )}
+
+                  {user?.rol === 'pagador_banca' && (
+                    <>
+                      <a href="/dashboard/pagador" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <Home className="w-5 h-5" />
+                        <span className="font-medium">Mi Dashboard</span>
+                      </a>
+                      <a href="/dashboard/pagador/pagos" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <CreditCard className="w-5 h-5" />
+                        <span className="font-medium">Procesar Pagos</span>
+                      </a>
+                      <a href="/dashboard/pagador/historial" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                        <DollarSign className="w-5 h-5" />
+                        <span className="font-medium">Historial de Pagos</span>
+                      </a>
+                    </>
+                  )}
+                </div>
+
+                <div className="p-4 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors w-full"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span className="font-medium">Cerrar Sesión</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Welcome Section */}
@@ -225,16 +352,46 @@ export default function DashboardPage() {
               {user?.rol === 'admin_general' && (
                 <>
                   <Button 
-                    className="h-16 text-lg font-semibold bg-white text-primary-blue hover:bg-gray-50"
-                    onClick={() => window.location.href = '/dashboard/admin'}
+                    className="h-16 text-lg font-semibold bg-white text-primary-blue hover:bg-gray-50 flex items-center justify-center space-x-2"
+                    onClick={() => window.location.href = '/dashboard/admin/usuarios'}
                   >
-                    Gestionar Usuarios
+                    <Users className="w-6 h-6" />
+                    <span>Gestionar Usuarios</span>
                   </Button>
                   <Button 
-                    className="h-16 text-lg font-semibold bg-white/20 text-white border border-white/30 hover:bg-white/30"
-                    onClick={() => window.location.href = '/dashboard/admin?tab=solicitudes'}
+                    className="h-16 text-lg font-semibold bg-white/20 text-white border border-white/30 hover:bg-white/30 flex items-center justify-center space-x-2"
+                    onClick={() => window.location.href = '/dashboard/admin/usuarios/create'}
                   >
-                    Ver Solicitudes
+                    <Users className="w-6 h-6" />
+                    <span>Crear Usuario</span>
+                  </Button>
+                  <Button 
+                    className="h-16 text-lg font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 flex items-center justify-center space-x-2"
+                    onClick={() => window.location.href = '/dashboard/admin/reportes'}
+                  >
+                    <FileText className="w-6 h-6" />
+                    <span>Reportes</span>
+                  </Button>
+                  <Button 
+                    className="h-16 text-lg font-semibold bg-emerald-500 text-white hover:bg-emerald-600 flex items-center justify-center space-x-2"
+                    onClick={() => window.location.href = '/dashboard/admin/usuarios?export=true'}
+                  >
+                    <TrendingUp className="w-6 h-6" />
+                    <span>Exportar Datos</span>
+                  </Button>
+                  <Button 
+                    className="h-16 text-lg font-semibold bg-orange-500 text-white hover:bg-orange-600 flex items-center justify-center space-x-2"
+                    onClick={() => window.location.href = '/dashboard/admin/configuracion'}
+                  >
+                    <Settings className="w-6 h-6" />
+                    <span>Configuración</span>
+                  </Button>
+                  <Button 
+                    className="h-16 text-lg font-semibold bg-purple-500 text-white hover:bg-purple-600 flex items-center justify-center space-x-2"
+                    onClick={() => window.location.href = '/dashboard/admin/auditoria'}
+                  >
+                    <AlertCircle className="w-6 h-6" />
+                    <span>Auditoría</span>
                   </Button>
                 </>
               )}

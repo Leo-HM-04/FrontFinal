@@ -1,50 +1,76 @@
-import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
-import "./globals.css";
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
+import "./globals.css";
 
-export const metadata: Metadata = {
-  title: 'Plataforma de Pagos - Bechapra',
-  description: 'Sistema de gestión de solicitudes de pago con autenticación y autorización por roles',
-};
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
+// Optimización de fuentes
+const inter = Inter({ 
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
   preload: true,
+  fallback: ['system-ui', 'arial'],
 });
+
+export const metadata: Metadata = {
+  title: {
+    default: "Plataforma de Pagos BECHAPRA",
+    template: "%s | BECHAPRA"
+  },
+  description: "Sistema de gestión de pagos y usuarios",
+  keywords: ["pagos", "gestión", "usuarios", "BECHAPRA"],
+  authors: [{ name: "BECHAPRA" }],
+  robots: "noindex, nofollow",
+  icons: {
+    icon: "/favicon.ico",
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#004AB7',
+};
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="es" className={`${montserrat.variable} font-montserrat`}>
-      <body className={`font-montserrat antialiased ${montserrat.className}`}>
+    <html lang="es">
+      <head>
+        {/* Preconnect a recursos externos críticos */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Meta tags adicionales para rendimiento */}
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="format-detection" content="telephone=no" />
+      </head>
+      <body className={inter.className}>
         <AuthProvider>
-          {children}
+          <main role="main">
+            {children}
+          </main>
           <Toaster 
             position="top-right"
             toastOptions={{
-              duration: 4000,
+              duration: 3000,
               style: {
-                background: '#ffffff',
-                color: '#111827',
-                fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
-                fontWeight: '500',
+                background: '#363636',
+                color: '#fff',
               },
               success: {
-                style: {
-                  borderLeft: '4px solid #10b981',
+                iconTheme: {
+                  primary: '#10B981',
+                  secondary: '#fff',
                 },
               },
               error: {
-                style: {
-                  borderLeft: '4px solid #ef4444',
+                iconTheme: {
+                  primary: '#EF4444',
+                  secondary: '#fff',
                 },
               },
             }}

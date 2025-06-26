@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
-import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { ConfirmDeleteModal } from '@/components/common/ConfirmDeleteModal';
-import { Users, Plus, Trash2, Edit, ArrowLeft, Menu, LogOut, Eye } from 'lucide-react';
+import { Users, Plus, Trash2, Edit, ArrowLeft, Eye, CheckCircle, Settings, TrendingUp } from 'lucide-react';
 import { UsuariosService } from '@/services/usuarios.service';
 import { usePagination } from '@/hooks/usePagination';
-import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { exportUsuariosToCSV } from '@/utils/exportUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@/types';
@@ -21,15 +20,40 @@ export default function UsuariosPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const [roleFilter, setRoleFilter] = useState('');
+  const { user } = useAuth();
 
-  const {
-    filters,
-    filteredData: filteredUsuarios,
-    resetFilters,
-    updateFilters
-  } = useAdvancedFilters(usuarios, 'usuarios');
+  // Cache simple en sessionStorage
+  const cacheKey = 'usuarios_cache';
+  const CACHE_TTL = 60000; // 1 minuto
+
+  // Memoizar estadísticas para evitar recálculos
+  const stats = useMemo(() => {
+    if (usuarios.length === 0) return { total: 0, activos: 0, admins: 0, nuevos: 0, roleCount: {} };
+    
+    const total = usuarios.length;
+    const activos = usuarios.filter(u => !u.bloqueado).length;
+    const admins = usuarios.filter(u => u.rol === 'admin_general').length;
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const nuevos = usuarios.filter(u => new Date(u.created_at) > weekAgo).length;
+    
+    const roleCount = {
+      admin_general: usuarios.filter(u => u.rol === 'admin_general').length,
+      solicitante: usuarios.filter(u => u.rol === 'solicitante').length,
+      aprobador: usuarios.filter(u => u.rol === 'aprobador').length,
+      pagador_banca: usuarios.filter(u => u.rol === 'pagador_banca').length
+    };
+
+    return { total, activos, admins, nuevos, roleCount };
+  }, [usuarios]);
+
+  // Memoizar filtro por rol
+  const filteredByRole = useMemo(() => {
+    return roleFilter 
+      ? usuarios.filter(u => u.rol === roleFilter)
+      : usuarios;
+  }, [usuarios, roleFilter]);
 
   const {
     currentPage,
@@ -39,35 +63,59 @@ export default function UsuariosPage() {
     paginatedData: paginatedUsuarios,
     goToPage,
     changeItemsPerPage,
-  } = usePagination({ data: filteredUsuarios, initialItemsPerPage: 10 });
+  } = usePagination({ data: filteredByRole, initialItemsPerPage: 5 });
 
-  useEffect(() => {
-    fetchUsuarios();
-  }, []);
-
-  const fetchUsuarios = async () => {
+  const fetchUsuarios = useCallback(async () => {
     try {
+      setLoading(true);
+      
+      // Intentar cargar del cache
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TTL) {
+          setUsuarios(data);
+          setLoading(false);
+          return;
+        }
+      }
+
       const data = await UsuariosService.getAll();
-      setUsuarios(data);
+      const sortedData = data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      
+      // Guardar en cache
+      sessionStorage.setItem(cacheKey, JSON.stringify({
+        data: sortedData,
+        timestamp: Date.now()
+      }));
+      
+      setUsuarios(sortedData);
     } catch (error) {
       console.error('Error fetching usuarios:', error);
+      toast.error('Error al cargar usuarios');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleDelete = (usuario: User) => {
+  useEffect(() => {
+    fetchUsuarios();
+  }, [fetchUsuarios]);
+
+  const handleDelete = useCallback((usuario: User) => {
     setSelectedUser(usuario);
     setShowDeleteModal(true);
-  };
+  }, []);
 
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (!selectedUser) return;
 
     setDeleting(true);
     try {
       await UsuariosService.delete(selectedUser.id_usuario);
       setUsuarios(prev => prev.filter(u => u.id_usuario !== selectedUser.id_usuario));
+      // Limpiar cache después de eliminar
+      sessionStorage.removeItem(cacheKey);
       toast.success('Usuario eliminado exitosamente');
       setShowDeleteModal(false);
       setSelectedUser(null);
@@ -77,14 +125,14 @@ export default function UsuariosPage() {
     } finally {
       setDeleting(false);
     }
-  };
+  }, [selectedUser]);
 
-  const handleExport = () => {
-    exportUsuariosToCSV(filteredUsuarios);
-    toast.success(`${filteredUsuarios.length} usuarios exportados`);
-  };
+  const handleExport = useCallback(() => {
+    exportUsuariosToCSV(filteredByRole);
+    toast.success(`${filteredByRole.length} usuarios exportados`);
+  }, [filteredByRole]);
 
-  const getRoleLabel = (role: string) => {
+  const getRoleLabel = useCallback((role: string) => {
     const roles = {
       admin_general: 'Administrador',
       solicitante: 'Solicitante',
@@ -92,49 +140,63 @@ export default function UsuariosPage() {
       pagador_banca: 'Pagador'
     };
     return roles[role as keyof typeof roles] || role;
-  };
+  }, []);
+
+  const handleRoleFilterChange = useCallback((role: string) => {
+    setRoleFilter(role);
+  }, []);
+
+  const clearRoleFilter = useCallback(() => {
+    setRoleFilter('');
+  }, []);
 
   return (
     <ProtectedRoute requiredRoles={['admin_general']}>
-      <div className="min-h-screen font-montserrat" style={{background: 'linear-gradient(135deg, #0A1933 0%, #004AB7 50%, #0057D9 100%)'}}>
-        {/* Header */}
-        <header className="bg-white/10 backdrop-blur-sm border-b border-white/20">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsMenuOpen(true)}
-                className="text-white border-white/30 hover:bg-white/10 hover:border-white/50"
-              >
-                <Menu className="w-5 h-5 mr-2" />
-                Menú
-              </Button>
-
-              <h1 className="text-2xl font-bold text-white text-center flex-1 font-montserrat tracking-wide">
-                PLATAFORMA DE PAGOS
-              </h1>
-
-              <div className="flex items-center space-x-4">
-                <div className="text-white text-sm">
-                  <span className="font-medium">{user?.nombre}</span>
-                  <span className="block text-xs text-white/80">Administrador</span>
+      <AdminLayout>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Stats Cards optimizadas */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/80">Total Usuarios</p>
+                  <p className="text-2xl font-bold text-white">{stats.total}</p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={logout}
-                  className="text-white border-white/30 hover:bg-white/10 hover:border-white/50"
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
+                <Users className="w-8 h-8 text-white/60" />
+              </div>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/80">Activos</p>
+                  <p className="text-2xl font-bold text-green-400">{stats.activos}</p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-green-400" />
+              </div>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/80">Administradores</p>
+                  <p className="text-2xl font-bold text-blue-400">{stats.admins}</p>
+                </div>
+                <Settings className="w-8 h-8 text-blue-400" />
+              </div>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/80">Nuevos (7 días)</p>
+                  <p className="text-2xl font-bold text-yellow-400">{stats.nuevos}</p>
+                </div>
+                <TrendingUp className="w-8 h-8 text-yellow-400" />
               </div>
             </div>
           </div>
-        </header>
 
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Header with Back Button */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
             <div className="flex items-center justify-between">
@@ -153,39 +215,114 @@ export default function UsuariosPage() {
                     Gestión de Usuarios
                   </h2>
                   <p className="text-white/80">
-                    Total: {totalItems} usuarios
+                    Administra usuarios, roles y permisos del sistema
                   </p>
                 </div>
               </div>
               
-              <Button
-                className="bg-white hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl"
-                style={{color: '#004AB7'}}
-                onClick={() => window.location.href = '/dashboard/admin/usuarios/create'}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Crear Usuario
-              </Button>
+              <div className="flex space-x-3">
+                <Button
+                  variant="outline"
+                  className="text-white border-white/30 hover:bg-white/10"
+                  onClick={handleExport}
+                >
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Exportar
+                </Button>
+                <Button
+                  className="bg-white hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl"
+                  style={{color: '#004AB7'}}
+                  onClick={() => window.location.href = '/dashboard/admin/usuarios/create'}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Crear Usuario
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* Filters */}
+          {/* Filtros simplificados */}
           <div className="bg-white rounded-xl p-4 mb-6">
-            <AdvancedFilters
-              filters={filters}
-              onFiltersChange={updateFilters}
-              onExport={handleExport}
-              onReset={resetFilters}
-              type="usuarios"
-            />
+            <div className="mb-4 pb-4 border-b border-gray-200">
+              <h4 className="text-lg font-semibold text-gray-800 mb-3">Filtrar por Rol</h4>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={clearRoleFilter}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    roleFilter === '' 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Todos ({stats.total})
+                </button>
+                <button
+                  onClick={() => handleRoleFilterChange('admin_general')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    roleFilter === 'admin_general' 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Administradores ({stats.roleCount.admin_general || 0})
+                </button>
+                <button
+                  onClick={() => handleRoleFilterChange('solicitante')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    roleFilter === 'solicitante' 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Solicitantes ({stats.roleCount.solicitante || 0})
+                </button>
+                <button
+                  onClick={() => handleRoleFilterChange('aprobador')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    roleFilter === 'aprobador' 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Aprobadores ({stats.roleCount.aprobador || 0})
+                </button>
+                <button
+                  onClick={() => handleRoleFilterChange('pagador_banca')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    roleFilter === 'pagador_banca' 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Pagadores ({stats.roleCount.pagador_banca || 0})
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Users Table */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
             <div className="p-6">
-              <h3 className="text-xl font-semibold text-white mb-6 font-montserrat">
-                Lista de Usuarios
-              </h3>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-white font-montserrat">
+                  Lista de Usuarios
+                  {roleFilter && (
+                    <span className="ml-2 text-sm font-normal text-white/80">
+                      - Filtrado por: {getRoleLabel(roleFilter)}
+                    </span>
+                  )}
+                </h3>
+                {roleFilter && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearRoleFilter}
+                    className="text-white border-white/30 hover:bg-white/10"
+                  >
+                    Limpiar filtro
+                  </Button>
+                )}
+              </div>
               
               {loading ? (
                 <div className="text-center py-8">
@@ -203,9 +340,6 @@ export default function UsuariosPage() {
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Rol
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Estado
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Fecha Registro
@@ -231,13 +365,6 @@ export default function UsuariosPage() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white" style={{backgroundColor: '#004AB7'}}>
                                 {getRoleLabel(usuario.rol)}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                usuario.bloqueado ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                              }`}>
-                                {usuario.bloqueado ? 'Bloqueado' : 'Activo'}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -290,19 +417,19 @@ export default function UsuariosPage() {
               )}
             </div>
           </div>
-        </div>
 
-        {/* Delete Confirmation Modal */}
-        <ConfirmDeleteModal
-          isOpen={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-          onConfirm={confirmDelete}
-          title="Eliminar Usuario"
-          message="¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer."
-          itemName={selectedUser ? `${selectedUser.nombre} (${selectedUser.email})` : undefined}
-          loading={deleting}
-        />
-      </div>
+          {/* Delete Confirmation Modal */}
+          <ConfirmDeleteModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={confirmDelete}
+            title="Eliminar Usuario"
+            message="¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer."
+            itemName={selectedUser ? `${selectedUser.nombre} (${selectedUser.email})` : undefined}
+            loading={deleting}
+          />
+        </div>
+      </AdminLayout>
     </ProtectedRoute>
   );
 }

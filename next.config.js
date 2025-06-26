@@ -1,29 +1,75 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:4000/api/:path*',
-      },
-    ];
+  // Configuración para desarrollo
+  allowedDevOrigins: [
+    'localhost:3000',
+    '192.168.1.10:3000',
+    '127.0.0.1:3000'
+  ],
+
+  // Optimizaciones de compilación
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
+  
+  // Optimizaciones de imágenes
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 60,
+  },
+  
+  // Configuración de compresión
+  compress: true,
+  
+  // Configuración de webpack simplificada
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    return config;
+  },
+  
+  // Headers para optimización
   async headers() {
     return [
       {
-        source: '/api/:path*',
+        source: '/_next/static/:path*',
         headers: [
-          { key: 'Access-Control-Allow-Credentials', value: 'true' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
-          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization' },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
         ],
       },
     ];
   },
-  images: {
-    domains: [],
-    unoptimized: false,
+  
+  // Redirecciones
+  async redirects() {
+    return [
+      {
+        source: '/usuarios',
+        destination: '/dashboard/admin/usuarios',
+        permanent: true,
+      },
+    ];
   },
 };
 
