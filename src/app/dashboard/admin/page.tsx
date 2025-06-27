@@ -38,7 +38,7 @@ export default function AdminDashboard() {
                   className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium"
                 >
                   <Menu className="w-4 h-4 mr-2" />
-                  Men
+                  Menu
                 </Button>
                 {/* Botón Notificaciones */}
                 <Button

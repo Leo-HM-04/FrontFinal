@@ -1,82 +1,82 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
-import { 
-  CreditCard, 
-  DollarSign,
-  CheckCircle,
-  Menu,
-  Bell,
-  Play,
-  HelpCircle,
-  Settings,
-  Home,
-  Clock,
-  TrendingUp,
-  Building,
-  LogOut
-} from 'lucide-react';
-import { useState } from 'react';
+import { CreditCard, FileText, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PagadorDashboard() {
   const { user, logout } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <ProtectedRoute requiredRoles={['pagador_banca']}>
-      <div className="min-h-screen font-montserrat" style={{background: 'linear-gradient(135deg, #004AB7 0%, #0057D9 100%)'}}>
-        {/* Header exacto al Figma */}
-        <header className="bg-white/10 backdrop-blur-lg border-b border-white/20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-center justify-between h-20">
-              {/* Botón Menú */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsMenuOpen(true)}
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-4 py-2 rounded-xl font-medium"
-              >
-                <Menu className="w-4 h-4 mr-2" />
-                Menú
-              </Button>
-
-              {/* Título Central */}
-              <h1 className="text-3xl font-bold text-white text-center flex-1 font-montserrat tracking-wide">
-                PLATAFORMA DE PAGOS
+      <div className="min-h-screen font-montserrat" style={{background: 'linear-gradient(135deg, #0A1933 0%, #004AB7 50%, #0057D9 100%)'}}>
+        {/* Header */}
+        <header className="bg-white/10 backdrop-blur-sm border-b border-white/20">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center justify-between h-16">
+              <h1 className="text-2xl font-bold text-white text-center flex-1 font-montserrat tracking-wide">
+                DASHBOARD PAGADOR
               </h1>
-
-              {/* Botón Notificaciones */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-4 py-2 rounded-xl font-medium"
-              >
-                <Bell className="w-4 h-4 mr-2" />
-                Notificaciones
-              </Button>
+              <div className="flex items-center space-x-4">
+                <div className="text-white text-sm">
+                  <span className="font-medium">{user?.nombre}</span>
+                  <span className="block text-xs text-white/80">Pagador Banca</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                  className="text-white border-white/30 hover:bg-white/10 hover:border-white/50"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Sidebar Menu */}
-        {isMenuOpen && (
-          <div className="fixed inset-0 z-50 overflow-hidden">
-            <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setIsMenuOpen(false)} />
-            <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
-              <div className="flex flex-col h-full">
-                <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #004AB7 0%, #0057D9 100%)'}}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold font-montserrat">Panel Pagador</h2>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="text-white border-white/30 hover:bg-white/10"
-                    >
-                      ×
-                    </Button>
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Bienvenido, {user?.nombre}
+            </h2>
+            <p className="text-xl text-white/80">
+              Panel de Pagador - Procesa pagos aprobados
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer">
+              <div className="flex items-center justify-between mb-4">
+                <CreditCard className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-lg font-semibold text-white mb-2">Pagos Pendientes</h4>
+              <p className="text-white/80 text-sm">Procesar pagos aprobados</p>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer">
+              <div className="flex items-center justify-between mb-4">
+                <FileText className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-lg font-semibold text-white mb-2">Historial de Pagos</h4>
+              <p className="text-white/80 text-sm">Ver pagos realizados</p>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer">
+              <div className="flex items-center justify-between mb-4">
+                <User className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-lg font-semibold text-white mb-2">Mi Perfil</h4>
+              <p className="text-white/80 text-sm">Actualizar información personal</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+}
                   </div>
                   <div className="bg-white/10 rounded-lg p-4">
                     <div className="flex items-center space-x-3">

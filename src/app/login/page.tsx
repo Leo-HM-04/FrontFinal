@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 
@@ -47,7 +46,32 @@ export default function LoginPage() {
     const success = await login({ email, password });
     
     if (success) {
-      router.push('/dashboard');
+      // Obtener el usuario del contexto después del login exitoso
+      const userData = localStorage.getItem('auth_user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        
+        // Redireccionar según el rol del usuario
+        switch (user.rol) {
+          case 'admin_general':
+            router.push('/dashboard/admin');
+            break;
+          case 'solicitante':
+            router.push('/dashboard/solicitante');
+            break;
+          case 'aprobador':
+            router.push('/dashboard/aprobador');
+            break;
+          case 'pagador_banca':
+            router.push('/dashboard/pagador');
+            break;
+          default:
+            router.push('/dashboard');
+            break;
+        }
+      } else {
+        router.push('/dashboard');
+      }
     }
     
     setLoading(false);

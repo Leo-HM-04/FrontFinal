@@ -1,112 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Pagination } from '@/components/ui/Pagination';
-import { Plus, FileText, Calendar, DollarSign, Building, Eye, Menu, LogOut, Home, Bell, Play, HelpCircle, Settings, CheckCircle, Clock } from 'lucide-react';
-import { SolicitudesService } from '@/services/solicitudes.service';
-import { usePagination } from '@/hooks/usePagination';
-import { Solicitud, CreateSolicitudData } from '@/types';
+import { FileText, Plus, User, LogOut, Menu, Bell, Play, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'react-hot-toast';
 
 export default function SolicitanteDashboard() {
-  const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const [formData, setFormData] = useState<CreateSolicitudData>({
-    departamento: '',
-    monto: 0,
-    cuenta_destino: '',
-    factura_url: '',
-    concepto: '',
-    fecha_limite_pago: '',
-    soporte_url: ''
-  });
-
-  useEffect(() => {
-    fetchMySolicitudes();
-  }, []);
-
-  const fetchMySolicitudes = async () => {
-    try {
-      const data = await SolicitudesService.getMySolicitudes();
-      setSolicitudes(data);
-    } catch (error) {
-      console.error('Error fetching solicitudes:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'monto' ? parseFloat(value) || 0 : value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCreating(true);
-
-    try {
-      const newSolicitud = await SolicitudesService.create(formData);
-      setSolicitudes(prev => [newSolicitud, ...prev]);
-      setShowCreateForm(false);
-      setFormData({
-        departamento: '',
-        monto: 0,
-        cuenta_destino: '',
-        factura_url: '',
-        concepto: '',
-        fecha_limite_pago: '',
-        soporte_url: ''
-      });
-      toast.success('Solicitud creada exitosamente');
-    } catch (error) {
-      console.error('Error creating solicitud:', error);
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const getEstadoColor = (estado: string) => {
-    const colors = {
-      pendiente: 'bg-yellow-100 text-yellow-800',
-      autorizada: 'bg-green-100 text-green-800',
-      rechazada: 'bg-red-100 text-red-800'
-    };
-    return colors[estado as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
-
-  const stats = {
-    total: solicitudes.length,
-    pendientes: solicitudes.filter(s => s.estado === 'pendiente').length,
-    autorizadas: solicitudes.filter(s => s.estado === 'autorizada').length,
-    rechazadas: solicitudes.filter(s => s.estado === 'rechazada').length,
-    montoTotal: solicitudes.reduce((sum, s) => sum + s.monto, 0)
-  };
-  
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
-      <div className="min-h-screen font-montserrat" style={{background: 'linear-gradient(135deg, #004AB7 0%, #0057D9 100%)'}}>
-        {/* Header exacto al Figma */}
+      <div className="min-h-screen font-sans" style={{background: 'linear-gradient(135deg, #004AB7 0%, #0057D9 100%)'}}>
+        {/* Header */}
         <header className="bg-white/10 backdrop-blur-lg border-b border-white/20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-center justify-between h-20">
@@ -115,25 +22,20 @@ export default function SolicitanteDashboard() {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsMenuOpen(true)}
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-4 py-2 rounded-xl font-medium"
+                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium"
               >
                 <Menu className="w-4 h-4 mr-2" />
                 Menú
               </Button>
-
-              {/* Título Central */}
-              <h1 className="text-3xl font-bold text-white text-center flex-1 font-montserrat tracking-wide">
-                PLATAFORMA DE PAGOS
-              </h1>
-
               {/* Botón Notificaciones */}
               <Button
+                onClick={() => alert('Notificaciones')}
                 variant="outline"
-                size="sm"
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-4 py-2 rounded-xl font-medium"
+                size="sm" 
+                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium"
               >
-                <Bell className="w-4 h-4 mr-2" />
                 Notificaciones
+                <Bell className="w-4 h-4 ml-2" />
               </Button>
             </div>
           </div>
@@ -147,7 +49,7 @@ export default function SolicitanteDashboard() {
               <div className="flex flex-col h-full">
                 <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #004AB7 0%, #0057D9 100%)'}}>
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold font-montserrat">Panel Solicitante</h2>
+                    <h2 className="text-xl font-bold">Panel Solicitante</h2>
                     <Button
                       variant="outline"
                       size="sm"
@@ -171,21 +73,21 @@ export default function SolicitanteDashboard() {
                 </div>
                 
                 <div className="flex-1 p-4 space-y-2">
-                  <a href="/dashboard" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-light-bg hover:text-primary-blue transition-colors">
-                    <Home className="w-5 h-5" />
-                    <span className="font-medium">Dashboard</span>
+                  <a href="/dashboard/solicitante" className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-50 text-blue-600">
+                    <User className="w-5 h-5" />
+                    <span className="font-medium">Mi Dashboard</span>
                   </a>
-                  <a href="/dashboard/solicitante" className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-light-bg text-primary-blue">
-                    <FileText className="w-5 h-5" />
-                    <span className="font-medium">Mis Solicitudes</span>
-                  </a>
-                  <a href="/dashboard/solicitante/create" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-light-bg hover:text-primary-blue transition-colors">
+                  <a href="/dashboard/solicitante/nueva-solicitud" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
                     <Plus className="w-5 h-5" />
                     <span className="font-medium">Nueva Solicitud</span>
                   </a>
-                  <a href="#" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-light-bg hover:text-primary-blue transition-colors">
-                    <Settings className="w-5 h-5" />
-                    <span className="font-medium">Configuración</span>
+                  <a href="/dashboard/solicitante/mis-solicitudes" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                    <FileText className="w-5 h-5" />
+                    <span className="font-medium">Mis Solicitudes</span>
+                  </a>
+                  <a href="/dashboard/solicitante/perfil" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                    <User className="w-5 h-5" />
+                    <span className="font-medium">Mi Perfil</span>
                   </a>
                 </div>
 
@@ -207,163 +109,111 @@ export default function SolicitanteDashboard() {
           </div>
         )}
 
-        {/* Main Content - Layout de 2 columnas exacto al Figma */}
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        {/* Main Content - Adaptado al diseño de Figma para Solicitante */}
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[500px]">
             
-            {/* Columna Izquierda - Contenido de texto */}
+            {/* Columna Izquierda - Contenido específico para Solicitante */}
             <div className="text-white space-y-8">
-              <h2 className="text-5xl font-bold font-montserrat leading-tight">
-                Gestiona tus solicitudes de pago fácilmente.
+              {/* Título Principal */}
+              <h1 className="text-5xl font-bold leading-tight">
+                SOLICITUDES DE PAGO
+              </h1>
+              
+              {/* Subtítulo */}
+              <h2 className="text-2xl font-semibold">
+                Gestiona tus solicitudes de manera eficiente.
               </h2>
               
-              <p className="text-xl text-white/90 leading-relaxed">
-                Crea, rastrea y gestiona todas tus solicitudes de pago desde un solo lugar. Nuestra plataforma simplifica el proceso para que puedas enfocarte en lo que realmente importa.
+              {/* Texto descriptivo */}
+              <p className="text-lg text-white leading-relaxed max-w-md">
+                Desde aquí puedes crear nuevas solicitudes de pago, hacer seguimiento a tus solicitudes existentes y gestionar toda tu información personal de manera segura y eficiente.
               </p>
 
+              {/* Botón de ayuda */}
               <Button 
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-8 py-4 rounded-xl font-semibold text-lg"
+                variant="outline"
+                size="lg"
+                onClick={() => alert('Ayuda para Solicitantes')}
+                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-8 py-4 rounded-xl font-medium text-lg"
               >
                 <HelpCircle className="w-5 h-5 mr-3" />
                 ¿Necesitas ayuda?
               </Button>
             </div>
 
-            {/* Columna Derecha - Video Tutorial de Solicitudes */}
+            {/* Columna Derecha - Tutorial adaptado para Solicitante */}
             <div className="flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-md">
-                {/* Container del Video */}
-                <div className="bg-gray-200 rounded-3xl overflow-hidden shadow-2xl aspect-video relative border-2 border-gray-300">
-                  
-                  {/* Header del Video */}
-                  <div className="absolute top-0 left-0 right-0 bg-gray-300 p-3 border-b border-gray-400">
+              <div className="relative w-full max-w-lg">
+                <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-2xl relative border border-gray-300" style={{aspectRatio: '16/10'}}>
+                  <div className="absolute top-0 left-0 right-0 bg-gray-200 p-4 border-b border-gray-300">
                     <div className="flex items-center justify-between">
                       <div className="flex space-x-2">
                         <div className="w-3 h-3 bg-red-400 rounded-full"></div>
                         <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                         <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                           <div className="w-2 h-2 bg-white rounded-full"></div>
                         </div>
-                        <span className="text-gray-700 text-sm font-semibold">Solicitudes Tutorial</span>
+                        <span className="text-gray-700 text-sm font-semibold">Tutorial Solicitudes</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Contenido del Video - Interfaz de Solicitudes */}
-                  <div className="absolute inset-0 mt-12 bg-white">
-                    
-                    {/* Header de la aplicación */}
-                    <div className="absolute top-0 left-0 right-0 h-12 bg-blue-600 flex items-center px-4">
-                      <div className="text-white text-sm font-semibold">Sistema de Solicitudes</div>
-                      <div className="ml-auto flex space-x-2">
-                        <div className="w-6 h-6 bg-white/20 rounded-full"></div>
-                        <div className="w-6 h-6 bg-white/20 rounded-full"></div>
-                      </div>
-                    </div>
-
-                    {/* Contenido principal */}
-                    <div className="mt-12 p-4 h-full bg-gray-50">
-                      
-                      {/* Formulario de solicitud simulado */}
-                      <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
-                        <div className="text-lg font-bold text-gray-800 mb-3">Nueva Solicitud</div>
-                        <div className="space-y-2">
-                          <div className="w-full h-3 bg-gray-200 rounded"></div>
-                          <div className="w-3/4 h-3 bg-gray-200 rounded"></div>
-                          <div className="w-1/2 h-3 bg-blue-200 rounded"></div>
+                  <div className="absolute inset-0 mt-14 bg-white">
+                    <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-50 border-r border-gray-200">
+                      <div className="flex flex-col space-y-1 p-1 pt-3">
+                        <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                          <Plus className="w-5 h-5 text-white" />
                         </div>
-                      </div>
-
-                      {/* Lista de solicitudes simulada */}
-                      <div className="space-y-2">
-                        <div className="bg-white rounded-lg p-3 flex items-center justify-between shadow-sm">
-                          <div className="flex items-center space-x-3">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            <div className="w-20 h-2 bg-gray-300 rounded"></div>
-                          </div>
-                          <div className="w-12 h-2 bg-green-200 rounded"></div>
+                        <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                          <FileText className="w-4 h-4 text-gray-500" />
                         </div>
-                        <div className="bg-white rounded-lg p-3 flex items-center justify-between shadow-sm">
-                          <div className="flex items-center space-x-3">
-                            <Clock className="w-4 h-4 text-yellow-500" />
-                            <div className="w-24 h-2 bg-gray-300 rounded"></div>
-                          </div>
-                          <div className="w-16 h-2 bg-yellow-200 rounded"></div>
+                        <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                          <User className="w-4 h-4 text-gray-500" />
                         </div>
                       </div>
                     </div>
 
-                    {/* Botón de Play centrado */}
+                    <div className="ml-12 h-full bg-gray-100 relative overflow-hidden">
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                        <div className="text-3xl font-bold text-gray-800 mb-1">Solicitudes</div>
+                        <div className="text-2xl font-semibold text-gray-600">de Pago</div>
+                      </div>
+
+                      <div className="absolute top-6 left-8 w-16 h-12 bg-green-200 rounded-lg opacity-60"></div>
+                      <div className="absolute top-8 right-8 w-12 h-12 bg-blue-200 rounded-full opacity-50"></div>
+                      <div className="absolute bottom-12 left-6 w-20 h-8 bg-yellow-200 rounded-lg opacity-60"></div>
+                      <div className="absolute bottom-20 right-12 w-14 h-14 bg-purple-200 rounded-full opacity-50"></div>
+                      <div className="absolute top-20 left-1/3 w-10 h-16 bg-orange-200 rounded-lg opacity-40"></div>
+
+                      <div className="absolute inset-0 opacity-5">
+                        <div className="w-full h-full" style={{
+                          backgroundImage: 'linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)',
+                          backgroundSize: '20px 20px'
+                        }}></div>
+                      </div>
+                    </div>
+
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <button className="w-20 h-20 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-300">
-                        <Play className="w-8 h-8 text-gray-700 ml-1" />
+                      <button className="w-24 h-24 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform duration-300 border border-gray-200">
+                        <Play className="w-10 h-10 text-gray-700 ml-1" fill="currentColor" />
                       </button>
                     </div>
 
-                    {/* Atribución del usuario */}
-                    <div className="absolute bottom-4 right-4">
-                      <div className="bg-black/20 backdrop-blur-sm rounded-lg px-3 py-1">
-                        <span className="text-white text-xs font-medium">tutorial_solicitudes</span>
+                    <div className="absolute bottom-3 right-3">
+                      <div className="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5">
+                        <span className="text-white text-xs font-medium">Tutorial Solicitante</span>
                       </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Elementos decorativos alrededor del video */}
-                <div className="absolute -top-4 -right-4 w-8 h-8 bg-white/30 rounded-full"></div>
-                <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-white/40 rounded-full"></div>
-                <div className="absolute top-1/3 -left-3 w-4 h-4 bg-white/25 rounded-full"></div>
               </div>
             </div>
           </div>
-
-          {/* Cards de acciones rápidas - Específicas para solicitante */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-            <a href="/dashboard/solicitante/create" className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300 group">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white/80">Crear</p>
-                  <p className="text-2xl font-bold text-white mt-1">Nueva Solicitud</p>
-                  <p className="text-sm text-white/60 mt-2">Inicia el proceso de solicitud</p>
-                </div>
-                <div className="p-4 rounded-full bg-white/20">
-                  <Plus className="w-8 h-8 text-white" />
-                </div>
-              </div>
-            </a>
-
-            <a href="/dashboard/solicitante" className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300 group">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white/80">Ver</p>
-                  <p className="text-2xl font-bold text-white mt-1">Mis Solicitudes</p>
-                  <p className="text-sm text-white/60 mt-2">Rastrea el estado de tus solicitudes</p>
-                </div>
-                <div className="p-4 rounded-full bg-white/20">
-                  <FileText className="w-8 h-8 text-white" />
-                </div>
-              </div>
-            </a>
-
-            <a href="#" className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-all duration-300 group">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white/80">Ver</p>
-                  <p className="text-2xl font-bold text-white mt-1">Historial</p>
-                  <p className="text-sm text-white/60 mt-2">Revisa solicitudes anteriores</p>
-                </div>
-                <div className="p-4 rounded-full bg-white/20">
-                  <Calendar className="w-8 h-8 text-white" />
-                </div>
-              </div>
-            </a>
-          </div>
         </div>
-
-        {/* ...existing modal code... */}
       </div>
     </ProtectedRoute>
   );

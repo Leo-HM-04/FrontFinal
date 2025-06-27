@@ -1,16 +1,20 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
-import { User, LoginCredentials } from '@/types';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthService } from '@/services/auth.service';
 import { toast } from 'react-hot-toast';
 
+interface User {
+  id_usuario: string;
+  nombre: string;
+  email: string;
+  rol: string;
+}
+
 interface AuthContextType {
   user: User | null;
-  login: (credentials: LoginCredentials) => Promise<boolean>;
+  login: (credentials: { email: string; password: string }) => Promise<boolean>;
   logout: () => void;
-  hasRole: (role: string) => boolean;
-  hasAnyRole: (roles: string[]) => boolean;
   isLoading: boolean;
 }
 
@@ -18,99 +22,53 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Caché en memoria para el usuario
-  const cachedUser = useMemo(() => {
-    if (typeof window === 'undefined') return null;
-    const cached = localStorage.getItem('auth_user');
-    return cached ? JSON.parse(cached) : null;
-  }, []);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const initAuth = async () => {
-      setLoading(true);
+      const token = localStorage.getItem('auth_token');
+      const cachedUser = localStorage.getItem('auth_user');
       
-      // Usar caché si está disponible
-      if (cachedUser) {
-        setUser(cachedUser);
-        setLoading(false);
-        return;
-      }
-
-      // Verificar autenticación del servidor solo si no hay caché
-      try {
-        // Aquí iría tu lógica de verificación del servidor
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          // Simular verificación
-          setTimeout(() => {
-            const userData = { 
-              id_usuario: '1', 
-              nombre: 'Admin User', 
-              email: 'admin@example.com', 
-              rol: 'admin_general' 
-            };
-            setUser(userData);
-            localStorage.setItem('auth_user', JSON.stringify(userData));
-            setLoading(false);
-          }, 100);
-        } else {
-          setLoading(false);
+      if (token && cachedUser) {
+        try {
+          setUser(JSON.parse(cachedUser));
+        } catch (error) {
+          console.error('Error parsing cached user:', error);
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('auth_user');
         }
-      } catch (error) {
-        console.error('Error verificando autenticación:', error);
-        setLoading(false);
       }
+      setIsLoading(false);
     };
 
     initAuth();
-  }, [cachedUser]);
+  }, []);
 
-  const login = async (credentials: LoginCredentials): Promise<boolean> => {
+  const login = async (credentials: { email: string; password: string }): Promise<boolean> => {
     try {
-      setLoading(true);
       const response = await AuthService.login(credentials);
+      console.log('Login response:', response); // Debug
       setUser(response.user);
+      localStorage.setItem('auth_token', response.token);
       localStorage.setItem('auth_user', JSON.stringify(response.user));
-      localStorage.setItem('auth_token', 'dummy_token');
-      toast.success(`¡Bienvenido, ${response.user.nombre}!`);
+      toast.success(`Bienvenido ${response.user.nombre}`);
       return true;
     } catch (error) {
       console.error('Login error:', error);
+      toast.error('Credenciales incorrectas');
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
   const logout = () => {
-    AuthService.logout();
     setUser(null);
-    localStorage.removeItem('auth_user');
     localStorage.removeItem('auth_token');
-    toast.success('Sesión cerrada correctamente');
-  };
-
-  const hasRole = (role: string): boolean => {
-    return user?.rol === role || false;
-  };
-
-  const hasAnyRole = (roles: string[]): boolean => {
-    return user ? roles.includes(user.rol) : false;
-  };
-
-  const value = {
-    user,
-    loading,
-    login,
-    logout,
-    hasRole,
-    hasAnyRole,
+    localStorage.removeItem('auth_user');
+    toast.success('Sesión cerrada');
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
