@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
-
+import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { ConfirmDeleteModal } from '@/components/common/ConfirmDeleteModal';
-import { FileText, Trash2, Edit, ArrowLeft, LogOut, Eye } from 'lucide-react';
+import { FileText, Trash2, Edit, Eye } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
@@ -22,7 +22,7 @@ export default function SolicitudesPage() {
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const { user, logout } = useAuth();
+  const {} = useAuth();
 
   const { solicitudes, loading, deleteSolicitud } = useSolicitudes();
 
@@ -284,20 +284,19 @@ export default function SolicitudesPage() {
               )}
             </div>
           </div>
-        </div>
 
-        {/* Delete Confirmation Modal */}
-        <ConfirmDeleteModal
-          isOpen={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-          onConfirm={confirmDelete}
-          title="Eliminar Solicitud"
-          message="¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer."
-          itemName={selectedSolicitud ? `Solicitud #${selectedSolicitud.id_solicitud} - ${selectedSolicitud.departamento}` : undefined}
-          loading={deleting}
-        />
-        </AdminLayout>
-      </div>
+          {/* Delete Confirmation Modal */}
+          <ConfirmDeleteModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={confirmDelete}
+            title="Eliminar Solicitud"
+            message="¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer."
+            itemName={selectedSolicitud ? `Solicitud #${selectedSolicitud.id_solicitud} - ${selectedSolicitud.departamento}` : undefined}
+            loading={deleting}
+          />
+        </div>
+      </AdminLayout>
     </ProtectedRoute>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
@@ -25,7 +24,6 @@ const tabs: TabType[] = [
 
 export default function AdminProfilePage() {
   const { user, updateUserData } = useAuth();
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState('personal');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,7 +32,6 @@ export default function AdminProfilePage() {
 
   useEffect(() => {
     if (user) {
-      console.log('👤 Usuario del contexto:', user);
       setFormData({ 
         nombre: user.nombre || '', 
         email: user.email || '', 
@@ -42,25 +39,6 @@ export default function AdminProfilePage() {
       });
     }
   }, [user]);
-
-  // Efecto para sincronizar formData con user del contexto
-  useEffect(() => {
-    if (user) {
-      console.log('🔄 Syncing formData with user context:', user);
-      setFormData({
-        nombre: user.nombre || '',
-        email: user.email || ''
-      });
-    }
-  }, [user]);
-
-  // Efecto para debug inicial
-  useEffect(() => {
-    console.log('🔍 Debug inicial:');
-    console.log('User from context:', user);
-    console.log('LocalStorage auth_user:', localStorage.getItem('auth_user'));
-    console.log('FormData:', formData);
-  }, []);
 
   const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [notifications, setNotifications] = useState({ solicitudesNuevas: true, solicitudesActualizadas: true, usuariosNuevos: false, reportesSemanal: true });
@@ -92,12 +70,9 @@ export default function AdminProfilePage() {
 
       const response = await UsuariosService.updateProfile(profileData);
       
-      console.log('✅ Response from backend:', response);
-      
       // Actualizar el contexto global PRIMERO
       if (updateUserData && typeof updateUserData === 'function') {
         updateUserData(response.user);
-        console.log('✅ Updated user context with:', response.user);
       }
       
       // NO actualizar el formData aquí, dejar que el useEffect lo haga
@@ -106,11 +81,12 @@ export default function AdminProfilePage() {
       setIsEditing(false);
       toast.success(response.message || 'Información actualizada correctamente');
       
-      // NO hacer router.refresh() ya que puede causar problemas
-      
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating profile:', error);
-      toast.error(error.response?.data?.message || 'Error al actualizar la información');
+      const errorMessage = error && typeof error === 'object' && 'response' in error 
+        ? (error.response as { data?: { message?: string } })?.data?.message 
+        : 'Error al actualizar la información';
+      toast.error(errorMessage || 'Error al actualizar la información');
     } finally {
       setLoading(false);
     }
@@ -136,8 +112,11 @@ export default function AdminProfilePage() {
       const response = await UsuariosService.changePassword(changePasswordData);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       toast.success(response.message || 'Contraseña actualizada correctamente');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al actualizar la contraseña');
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'response' in error 
+        ? (error.response as { data?: { message?: string } })?.data?.message 
+        : 'Error al actualizar la contraseña';
+      toast.error(errorMessage || 'Error al actualizar la contraseña');
     } finally {
       setLoading(false);
     }
@@ -181,21 +160,6 @@ export default function AdminProfilePage() {
                 <CheckCircle className="w-3 h-3 mr-1" />
                 Cuenta Verificada
               </span>
-            </div>
-            {/* Debug info */}
-            <div className="mt-2 text-xs text-white/60">
-              <p>Context user: {user?.nombre} | {user?.email}</p>
-              <p>Form data: {formData.nombre} | {formData.email}</p>
-              <button 
-                onClick={() => {
-                  localStorage.removeItem('auth_user');
-                  localStorage.removeItem('auth_token');
-                  window.location.href = '/login';
-                }}
-                className="mt-1 px-2 py-1 bg-red-500 text-white text-xs rounded"
-              >
-                🔄 Refrescar datos (logout)
-              </button>
             </div>
           </div>
         </div>

@@ -1,10 +1,21 @@
 import api from '@/lib/api';
+import axios from 'axios';
 import { Solicitud, CreateSolicitudData, UpdateEstadoData } from '@/types';
 
 export class SolicitudesService {
   static async getAll(): Promise<Solicitud[]> {
-    const response = await api.get<Solicitud[]>('/solicitudes');
-    return response.data;
+    try {
+      const response = await api.get<Solicitud[]>('/solicitudes');
+      return response.data;
+    } catch (error: any) {
+      console.error('SolicitudesService.getAll error:', {
+        message: error.message,
+        status: error.response?.status,
+        url: error.config?.url,
+        baseURL: api.defaults.baseURL,
+      });
+      throw error;
+    }
   }
 
   static async getById(id: number): Promise<Solicitud> {

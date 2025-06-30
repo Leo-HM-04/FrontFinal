@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, User, Mail, Calendar, Shield, AlertCircle } from 'lucide-react';
+import { ArrowLeft, User, Mail, Shield, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { UsuariosService } from '@/services/usuarios.service';
 import { User as UserType } from '@/types';

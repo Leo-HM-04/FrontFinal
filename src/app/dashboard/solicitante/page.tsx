@@ -1,137 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { Button } from '@/components/ui/Button';
-import { FileText, Plus, User, LogOut, Menu, Bell, Play, HelpCircle } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { FileText, Plus, User, Play, HelpCircle } from 'lucide-react';
 
 export default function SolicitanteDashboard() {
-  const { user, logout } = useAuth();
-  const router = useRouter();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
-      <div className="min-h-screen font-sans" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
-        {/* Header */}
-        <header className="bg-white/10 backdrop-blur-lg border-b border-white/20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-center justify-between h-20">
-              {/* Botón Menú */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsMenuOpen(true)}
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium"
-              >
-                <Menu className="w-4 h-4 mr-2" />
-                Menú
-              </Button>
-              {/* Botón Notificaciones */}
-              <Button
-                onClick={() => alert('Notificaciones')}
-                variant="outline"
-                size="sm" 
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium"
-              >
-                Notificaciones
-                <Bell className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          </div>
-        </header>
-
-        {/* Sidebar Menu */}
-        {isMenuOpen && (
-          <div className="fixed inset-0 z-50 overflow-hidden">
-            <div className="absolute inset-0 bg-black opacity-50" onClick={() => setIsMenuOpen(false)} />
-            <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
-              <div className="flex flex-col h-full">
-                <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold">Panel Solicitante</h2>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="text-white border-white/30 hover:bg-white/10"
-                    >
-                      ×
-                    </Button>
-                  </div>
-                  <div className="bg-white/10 rounded-lg p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                        <span className="text-lg font-bold">{user?.nombre?.charAt(0).toUpperCase()}</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold">{user?.nombre}</p>
-                        <p className="text-sm text-white/80">Solicitante</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex-1 p-4 space-y-2">
-                  <a href="/dashboard/solicitante" className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-50 text-blue-600">
-                    <User className="w-5 h-5" />
-                    <span className="font-medium">Mi Dashboard</span>
-                  </a>
-                  <a href="/dashboard/solicitante/nueva-solicitud" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    <Plus className="w-5 h-5" />
-                    <span className="font-medium">Nueva Solicitud</span>
-                  </a>
-                  <a href="/dashboard/solicitante/mis-solicitudes" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    <FileText className="w-5 h-5" />
-                    <span className="font-medium">Mis Solicitudes</span>
-                  </a>
-                  <a href="/dashboard/solicitante/perfil" className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    <User className="w-5 h-5" />
-                    <span className="font-medium">Mi Perfil</span>
-                  </a>
-                </div>
-
-                <div className="p-4 border-t border-gray-200">
-                  <button
-                    onClick={() => {
-                      logout();
-                      setIsMenuOpen(false);
-                      router.push('/login');
-                    }}
-                    className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors w-full"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span className="font-medium">Cerrar Sesión</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Main Content - Adaptado al diseño de Figma para Solicitante */}
+      <SolicitanteLayout>
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[500px]">
-            
             {/* Columna Izquierda - Contenido específico para Solicitante */}
             <div className="text-white space-y-8">
               {/* Título Principal */}
               <h1 className="text-5xl font-bold leading-tight">
                 SOLICITUDES DE PAGO
               </h1>
-              
               {/* Subtítulo */}
               <h2 className="text-2xl font-semibold">
                 Gestiona tus solicitudes de manera eficiente.
               </h2>
-              
               {/* Texto descriptivo */}
               <p className="text-lg text-white leading-relaxed max-w-md">
                 Desde aquí puedes crear nuevas solicitudes de pago, hacer seguimiento a tus solicitudes existentes y gestionar toda tu información personal de manera segura y eficiente.
               </p>
-
               {/* Botón de ayuda */}
               <Button 
                 variant="outline"
@@ -143,7 +37,6 @@ export default function SolicitanteDashboard() {
                 ¿Necesitas ayuda?
               </Button>
             </div>
-
             {/* Columna Derecha - Tutorial adaptado para Solicitante */}
             <div className="flex justify-center lg:justify-end">
               <div className="relative w-full max-w-lg">
@@ -163,7 +56,6 @@ export default function SolicitanteDashboard() {
                       </div>
                     </div>
                   </div>
-
                   <div className="absolute inset-0 mt-14 bg-white">
                     <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-50 border-r border-gray-200">
                       <div className="flex flex-col space-y-1 p-1 pt-3">
@@ -178,19 +70,16 @@ export default function SolicitanteDashboard() {
                         </div>
                       </div>
                     </div>
-
                     <div className="ml-12 h-full bg-gray-100 relative overflow-hidden">
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
                         <div className="text-3xl font-bold text-gray-800 mb-1">Solicitudes</div>
                         <div className="text-2xl font-semibold text-gray-600">de Pago</div>
                       </div>
-
                       <div className="absolute top-6 left-8 w-16 h-12 bg-green-200 rounded-lg opacity-60"></div>
                       <div className="absolute top-8 right-8 w-12 h-12 bg-blue-200 rounded-full opacity-50"></div>
                       <div className="absolute bottom-12 left-6 w-20 h-8 bg-yellow-200 rounded-lg opacity-60"></div>
                       <div className="absolute bottom-20 right-12 w-14 h-14 bg-purple-200 rounded-full opacity-50"></div>
                       <div className="absolute top-20 left-1/3 w-10 h-16 bg-orange-200 rounded-lg opacity-40"></div>
-
                       <div className="absolute inset-0 opacity-5">
                         <div className="w-full h-full" style={{
                           backgroundImage: 'linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)',
@@ -198,13 +87,11 @@ export default function SolicitanteDashboard() {
                         }}></div>
                       </div>
                     </div>
-
                     <div className="absolute inset-0 flex items-center justify-center">
                       <button className="w-24 h-24 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform duration-300 border border-gray-200">
                         <Play className="w-10 h-10 text-gray-700 ml-1" fill="currentColor" />
                       </button>
                     </div>
-
                     <div className="absolute bottom-3 right-3">
                       <div className="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5">
                         <span className="text-white text-xs font-medium">Tutorial Solicitante</span>
@@ -216,7 +103,8 @@ export default function SolicitanteDashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </SolicitanteLayout>
     </ProtectedRoute>
   );
 }
+

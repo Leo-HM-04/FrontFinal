@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
@@ -9,7 +10,6 @@ import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailMo
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { Solicitud } from '@/types';
 import { 
-  ArrowLeft, 
   Eye, 
   Clock,
   CheckCircle,
@@ -19,6 +19,7 @@ import {
   Plus,
   Search
 } from 'lucide-react';
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 
 const getEstadoColor = (estado: string) => {
   switch (estado.toLowerCase()) {
@@ -51,6 +52,7 @@ const getEstadoIcon = (estado: string) => {
 };
 
 export default function MisSolicitudesPage() {
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [filteredSolicitudes, setFilteredSolicitudes] = useState<Solicitud[]>([]);
@@ -58,7 +60,8 @@ export default function MisSolicitudesPage() {
   const [error, setError] = useState('');
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  
+  const [timeoutError, setTimeoutError] = useState(false);
+
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -68,8 +71,36 @@ export default function MisSolicitudesPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
 
+  // Cargar solicitudes con timeout de seguridad
   useEffect(() => {
-    loadSolicitudes();
+    let timeoutId: NodeJS.Timeout;
+    setLoading(true);
+    setTimeoutError(false);
+
+    const fetchSolicitudes = async () => {
+      try {
+        const data = await SolicitudesService.getMySolicitudes();
+        setSolicitudes(data);
+        setError('');
+      } catch (err) {
+        setError('Error al cargar las solicitudes');
+        setSolicitudes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSolicitudes();
+
+    // Timeout de 10 segundos para mostrar mensaje si tarda mucho
+    timeoutId = setTimeout(() => {
+      if (loading) {
+        setTimeoutError(true);
+        setLoading(false);
+      }
+    }, 10000);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   useEffect(() => {
@@ -128,19 +159,6 @@ export default function MisSolicitudesPage() {
     filterSolicitudes();
   }, [solicitudes, searchTerm, statusFilter, dateFilter]);
 
-  const loadSolicitudes = async () => {
-    try {
-      setLoading(true);
-      const data = await SolicitudesService.getMySolicitudes();
-      setSolicitudes(data);
-    } catch (err) {
-      setError('Error al cargar las solicitudes');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleViewDetails = (solicitud: Solicitud) => {
     setSelectedSolicitud(solicitud);
     setIsDetailModalOpen(true);
@@ -183,251 +201,220 @@ export default function MisSolicitudesPage() {
     { value: 'month', label: 'Último mes' }
   ];
 
-  if (loading) {
-    return (
-      <ProtectedRoute requiredRoles={['solicitante']}>
-        <div className="min-h-screen font-sans" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="text-white text-xl">Cargando solicitudes...</div>
-          </div>
-        </div>
-      </ProtectedRoute>
-    );
-  }
-
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
-      <div className="min-h-screen font-sans" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
-        {/* Header */}
-        <div className="bg-white/10 backdrop-blur-lg border-b border-white/20">
-          <div className="max-w-7xl mx-auto px-6 py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard/solicitante')}
-                  className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Volver
-                </Button>
-                <div>
-                  <h1 className="text-2xl font-bold text-white">Mis Solicitudes</h1>
-                  <p className="text-white/80">Gestiona y revisa tus solicitudes de pago</p>
-                </div>
-              </div>
-              <Button
-                onClick={() => router.push('/dashboard/solicitante/nueva-solicitud')}
-                className="bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 transition-all duration-300"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Nueva Solicitud
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
+      <SolicitanteLayout>
         <div className="max-w-7xl mx-auto px-6 py-8">
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
-
-          {/* Filtros */}
-          <div className="mb-8">
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Búsqueda */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Buscar por concepto, departamento o cuenta..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-white/15 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
-                  />
-                </div>
-
-                {/* Filtro por estado */}
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-white/15 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
-                >
-                  {filterOptions.map(option => (
-                    <option key={option.value} value={option.value} className="text-gray-900">
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Filtro por fecha */}
-                <select
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="bg-white/15 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
-                >
-                  {dateOptions.map(option => (
-                    <option key={option.value} value={option.value} className="text-gray-900">
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[300px]">
+              <div className="text-blue-700 text-xl">
+                {timeoutError
+                  ? 'La carga está tardando demasiado. Por favor, verifica tu conexión o intenta recargar la página.'
+                  : 'Cargando solicitudes...'}
               </div>
             </div>
-          </div>
+          ) : (
+            <>
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                  {error}
+                </div>
+              )}
 
-          {/* Estadísticas rápidas */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/80 text-sm">Total Solicitudes</p>
-                  <p className="text-2xl font-bold text-white">{solicitudes.length}</p>
-                </div>
-                <FileText className="w-8 h-8 text-white/60" />
-              </div>
-            </div>
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/80 text-sm">Pendientes</p>
-                  <p className="text-2xl font-bold text-white">
-                    {solicitudes.filter(s => s.estado?.toLowerCase() === 'pendiente').length}
-                  </p>
-                </div>
-                <Clock className="w-8 h-8 text-yellow-300" />
-              </div>
-            </div>
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/80 text-sm">Aprobadas</p>
-                  <p className="text-2xl font-bold text-white">
-                    {solicitudes.filter(s => s.estado?.toLowerCase() === 'aprobada').length}
-                  </p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-green-300" />
-              </div>
-            </div>
-            <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/80 text-sm">Pagadas</p>
-                  <p className="text-2xl font-bold text-white">
-                    {solicitudes.filter(s => s.estado?.toLowerCase() === 'pagada').length}
-                  </p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-blue-300" />
-              </div>
-            </div>
-          </div>
+              {/* Filtros */}
+              <div className="mb-8">
+                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Búsqueda */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
+                      <input
+                        type="text"
+                        placeholder="Buscar por concepto, departamento o cuenta..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 bg-white/15 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                      />
+                    </div>
 
-          {/* Tabla de solicitudes */}
-          <div className="bg-white/15 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-white/10">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Concepto</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Monto</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Cuenta Destino</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Estado</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-white">Fecha</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-white">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {currentSolicitudes.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-white/80">
-                        <FileText className="w-12 h-12 mx-auto mb-4 text-white/40" />
-                        <p className="text-lg">No tienes solicitudes aún</p>
-                        <p className="text-sm text-white/60 mt-1">
-                          {searchTerm || statusFilter || dateFilter 
-                            ? 'No se encontraron solicitudes con los filtros aplicados'
-                            : 'Crea tu primera solicitud de pago'
-                          }
-                        </p>
-                      </td>
-                    </tr>
-                  ) : (
-                    currentSolicitudes.map((solicitud) => (
-                      <tr key={solicitud.id_solicitud} className="hover:bg-white/10 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="text-white font-medium">{solicitud.concepto}</div>
-                          <div className="text-white/70 text-sm mt-1">
-                            {solicitud.departamento}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-white font-semibold">
-                            {formatCurrency(solicitud.monto)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-white">{solicitud.cuenta_destino}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado)}`}>
-                            {getEstadoIcon(solicitud.estado)}
-                            <span className="ml-1 capitalize">{solicitud.estado}</span>
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-white/90 text-sm">
-                            {formatDate(solicitud.fecha_creacion)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewDetails(solicitud)}
-                            className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300"
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Ver
-                          </Button>
-                        </td>
+                    {/* Filtro por estado */}
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="bg-white/15 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                    >
+                      {filterOptions.map(option => (
+                        <option key={option.value} value={option.value} className="text-gray-900">
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Filtro por fecha */}
+                    <select
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      className="bg-white/15 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                    >
+                      {dateOptions.map(option => (
+                        <option key={option.value} value={option.value} className="text-gray-900">
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Estadísticas rápidas */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white/80 text-sm">Total Solicitudes</p>
+                      <p className="text-2xl font-bold text-white">{solicitudes.length}</p>
+                    </div>
+                    <FileText className="w-8 h-8 text-white/60" />
+                  </div>
+                </div>
+                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white/80 text-sm">Pendientes</p>
+                      <p className="text-2xl font-bold text-white">
+                        {solicitudes.filter(s => s.estado?.toLowerCase() === 'pendiente').length}
+                      </p>
+                    </div>
+                    <Clock className="w-8 h-8 text-yellow-300" />
+                  </div>
+                </div>
+                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white/80 text-sm">Aprobadas</p>
+                      <p className="text-2xl font-bold text-white">
+                        {solicitudes.filter(s => s.estado?.toLowerCase() === 'aprobada').length}
+                      </p>
+                    </div>
+                    <CheckCircle className="w-8 h-8 text-green-300" />
+                  </div>
+                </div>
+                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white/80 text-sm">Pagadas</p>
+                      <p className="text-2xl font-bold text-white">
+                        {solicitudes.filter(s => s.estado?.toLowerCase() === 'pagada').length}
+                      </p>
+                    </div>
+                    <CheckCircle className="w-8 h-8 text-blue-300" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Tabla de solicitudes */}
+              <div className="bg-white/15 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-white/10">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Concepto</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Monto</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Cuenta Destino</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Estado</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Fecha</th>
+                        <th className="px-6 py-4 text-center text-sm font-semibold text-white">Acciones</th>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody className="divide-y divide-white/10">
+                      {currentSolicitudes.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-12 text-center text-white/80">
+                            <FileText className="w-12 h-12 mx-auto mb-4 text-white/40" />
+                            <p className="text-lg">No tienes solicitudes aún</p>
+                            <p className="text-sm text-white/60 mt-1">
+                              {searchTerm || statusFilter || dateFilter 
+                                ? 'No se encontraron solicitudes con los filtros aplicados'
+                                : 'Crea tu primera solicitud de pago'
+                              }
+                            </p>
+                          </td>
+                        </tr>
+                      ) : 
+                        currentSolicitudes.map((solicitud) => (
+                          <tr key={solicitud.id_solicitud} className="hover:bg-white/10 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="text-white font-medium">{solicitud.concepto}</div>
+                              <div className="text-white/70 text-sm mt-1">
+                                {solicitud.departamento}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-white font-semibold">
+                                {formatCurrency(solicitud.monto)}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-white">{solicitud.cuenta_destino}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado)}`}>
+                                {getEstadoIcon(solicitud.estado)}
+                                <span className="ml-1 capitalize">{solicitud.estado}</span>
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-white/90 text-sm">
+                                {formatDate(solicitud.fecha_creacion)}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewDetails(solicitud)}
+                                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300"
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                Ver
+                              </Button>
+                            </td>
+                          </tr>
+                        ))
+                      }
+                    </tbody>
+                  </table>
+                </div>
 
-            {/* Paginación */}
-            {totalPages > 1 && (
-              <div className="px-6 py-4 border-t border-white/10 flex justify-center">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  totalItems={filteredSolicitudes.length}
-                  itemsPerPage={itemsPerPage}
-                  onPageChange={setCurrentPage}
-                />
+                {/* Paginación */}
+                {totalPages > 1 && (
+                  <div className="px-6 py-4 border-t border-white/10 flex justify-center">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      totalItems={filteredSolicitudes.length}
+                      itemsPerPage={itemsPerPage}
+                      onPageChange={setCurrentPage}
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* Modal de detalles */}
-        {selectedSolicitud && (
-          <SolicitudDetailModal
-            solicitud={selectedSolicitud}
-            isOpen={isDetailModalOpen}
-            onClose={() => {
-              setIsDetailModalOpen(false);
-              setSelectedSolicitud(null);
-            }}
-          />
-        )}
-      </div>
+              {/* Modal de detalles */}
+              {selectedSolicitud && (
+                <SolicitudDetailModal
+                  solicitud={selectedSolicitud}
+                  isOpen={isDetailModalOpen}
+                  onClose={() => {
+                    setIsDetailModalOpen(false);
+                    setSelectedSolicitud(null);
+                  }}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </SolicitanteLayout>
     </ProtectedRoute>
   );
 }

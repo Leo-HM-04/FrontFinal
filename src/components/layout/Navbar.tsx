@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
-import { LogOut, User, Settings } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 
 export function Navbar() {
   const { user, logout } = useAuth();

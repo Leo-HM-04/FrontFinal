@@ -21,7 +21,7 @@ export default function CreateUserPage() {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<CreateUserData>>({});
-  const { user } = useAuth();
+  const {} = useAuth();
 
   const handleChange = (field: keyof CreateUserData, value: string) => {
     setFormData(prev => ({

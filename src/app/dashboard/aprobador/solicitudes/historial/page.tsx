@@ -6,7 +6,7 @@ import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye, CheckCircle, XCircle, BarChart2, Download } from 'lucide-react';
+import { FileText, Eye, CheckCircle, XCircle, BarChart2 } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';

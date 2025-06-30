@@ -2,7 +2,7 @@
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
-import { CheckCircle, FileText, User, HelpCircle } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 

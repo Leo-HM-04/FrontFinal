@@ -7,7 +7,7 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { ConfirmDeleteModal } from '@/components/common/ConfirmDeleteModal';
-import { Users, Plus, Trash2, Edit, ArrowLeft, Eye, CheckCircle, TrendingUp, Settings } from 'lucide-react';
+import { Users, Plus, Trash2, Edit, ArrowLeft, Eye, TrendingUp } from 'lucide-react';
 import { UsuariosService } from '@/services/usuarios.service';
 import { usePagination } from '@/hooks/usePagination';
 import { exportUsuariosToCSV } from '@/utils/exportUtils';
@@ -321,10 +321,25 @@ export default function UsuariosPage() {
                       <thead style={{backgroundColor: '#F0F4FC'}}>
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                            Usuario
+                            ID
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
+                            Nombre
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
+                            Email
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Rol
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
+                            Estado
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
+                            Fecha de creación
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
+                            Bloqueado
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Acciones
@@ -334,19 +349,37 @@ export default function UsuariosPage() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {paginatedUsuarios.map((usuario) => (
                           <tr key={usuario.id_usuario} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {usuario.id_usuario}
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">
-                                  {usuario.nombre}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                  {usuario.email}
-                                </div>
-                              </div>
+                              <div className="text-sm font-medium text-gray-900">{usuario.nombre}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{usuario.email}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white" style={{backgroundColor: '#3B82F6'}}>
                                 {getRoleLabel(usuario.rol)}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                usuario.bloqueado ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {usuario.bloqueado ? 'Inactivo' : 'Activo'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="text-sm text-gray-700">
+                                {usuario.created_at ? new Date(usuario.created_at).toLocaleDateString('es-CO') : '-'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                usuario.bloqueado ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'
+                              }`}>
+                                {usuario.bloqueado ? 'Sí' : 'No'}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
@@ -370,7 +403,7 @@ export default function UsuariosPage() {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => handleDelete(usuario)}
-                                className="text-red-600  hover:bg-red-500"
+                                className="text-red-600 hover:bg-red-500"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>

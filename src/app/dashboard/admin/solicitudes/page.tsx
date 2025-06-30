@@ -1,22 +1,30 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye } from 'lucide-react';
+import { ConfirmDeleteModal } from '@/components/common/ConfirmDeleteModal';
+import { FileText, Trash2, Edit, Eye } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { exportSolicitudesToCSV } from '@/utils/exportUtils';
+import { useAuth } from '@/contexts/AuthContext';
+import { Solicitud } from '@/types';
 import { toast } from 'react-hot-toast';
 
 export default function SolicitudesPage() {
   const router = useRouter();
-  
-  const { solicitudes, loading } = useSolicitudes();
+  const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const { user, logout } = useAuth();
+
+  const { solicitudes, loading, deleteSolicitud } = useSolicitudes();
 
   const {
     filters,
@@ -35,6 +43,28 @@ export default function SolicitudesPage() {
     changeItemsPerPage,
   } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 10 });
 
+  const handleDelete = (solicitud: Solicitud) => {
+    setSelectedSolicitud(solicitud);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedSolicitud) return;
+
+    setDeleting(true);
+    try {
+      await deleteSolicitud(selectedSolicitud.id_solicitud);
+      setShowDeleteModal(false);
+      setSelectedSolicitud(null);
+      toast.success('Solicitud eliminada exitosamente');
+    } catch (error) {
+      console.error('Error deleting solicitud:', error);
+      toast.error('Error al eliminar la solicitud');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleExport = () => {
     exportSolicitudesToCSV(filteredSolicitudes);
     toast.success(`${filteredSolicitudes.length} solicitudes exportadas`);
@@ -48,24 +78,6 @@ export default function SolicitudesPage() {
     };
     return colors[estado as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
-  
-  // Función para asignar colores por departamento
-  const getDepartmentColorClass = (departamento: string) => {
-    const departamentosColores = {
-      'Finanzas': 'px-3 py-1 text-sm font-medium rounded-lg bg-blue-100 text-blue-800',
-      'Recursos Humanos': 'px-3 py-1 text-sm font-medium rounded-lg bg-purple-100 text-purple-800',
-      'Marketing': 'px-3 py-1 text-sm font-medium rounded-lg bg-green-100 text-green-800',
-      'Ventas': 'px-3 py-1 text-sm font-medium rounded-lg bg-orange-100 text-orange-800',
-      'Operaciones': 'px-3 py-1 text-sm font-medium rounded-lg bg-teal-100 text-teal-800',
-      'Tecnología': 'px-3 py-1 text-sm font-medium rounded-lg bg-indigo-100 text-indigo-800',
-      'Administración': 'px-3 py-1 text-sm font-medium rounded-lg bg-pink-100 text-pink-800',
-      'Logística': 'px-3 py-1 text-sm font-medium rounded-lg bg-amber-100 text-amber-800',
-      'Proyectos': 'px-3 py-1 text-sm font-medium rounded-lg bg-cyan-100 text-cyan-800',
-      'Legal': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800'
-    };
-    
-    return departamentosColores[departamento as keyof typeof departamentosColores] || 'px-3 py-1 text-sm font-medium rounded-lg bg-gray-100 text-gray-800';
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -78,7 +90,7 @@ export default function SolicitudesPage() {
   return (
     <ProtectedRoute requiredRoles={['admin_general']}>
       <AdminLayout>
-        <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Header */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
             <div className="flex items-center justify-between">
@@ -151,7 +163,7 @@ export default function SolicitudesPage() {
           </div>
 
           {/* Filters */}
-          <div className="bg-white/15 rounded-xl p-4 mb-6">
+          <div className="bg-white rounded-xl p-4 mb-6">
             <AdvancedFilters
               filters={filters}
               onFiltersChange={updateFilters}
@@ -180,6 +192,9 @@ export default function SolicitudesPage() {
                       <thead style={{backgroundColor: '#F0F4FC'}}>
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Solicitante
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -195,20 +210,21 @@ export default function SolicitudesPage() {
                             Fecha
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Detalles
+                            Acciones
                           </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {paginatedSolicitudes.map((solicitud) => (
                           <tr key={solicitud.id_solicitud} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              #{solicitud.id_solicitud}
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={getDepartmentColorClass(solicitud.departamento)}>
-                                {solicitud.departamento}
-                              </span>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {solicitud.departamento}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {formatCurrency(solicitud.monto)}
@@ -221,7 +237,7 @@ export default function SolicitudesPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO')}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                               <Button 
                                 variant="outline" 
                                 size="sm"
@@ -229,7 +245,24 @@ export default function SolicitudesPage() {
                                 style={{color: '#3B82F6', borderColor: '#3B82F6'}}
                                 className="hover:bg-blue-50"
                               >
-                                <Eye className="w-4 h-4 mr-2" /> Ver
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => router.push(`/dashboard/admin/solicitudes/${solicitud.id_solicitud}/edit`)}
+                                style={{color: '#3B82F6', borderColor: '#3B82F6'}}
+                                className="hover:bg-blue-50"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleDelete(solicitud)}
+                                className="text-red-600 border-red-300 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </Button>
                             </td>
                           </tr>
@@ -251,6 +284,17 @@ export default function SolicitudesPage() {
               )}
             </div>
           </div>
+
+          {/* Delete Confirmation Modal */}
+          <ConfirmDeleteModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={confirmDelete}
+            title="Eliminar Solicitud"
+            message="¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer."
+            itemName={selectedSolicitud ? `Solicitud #${selectedSolicitud.id_solicitud} - ${selectedSolicitud.departamento}` : undefined}
+            loading={deleting}
+          />
         </div>
       </AdminLayout>
     </ProtectedRoute>
