@@ -160,7 +160,6 @@ export default function UsuariosPage() {
 
   const getRoleLabel = useCallback((role: string) => {
     const roles = {
-      admin_general: 'Administrador',
       solicitante: 'Solicitante',
       aprobador: 'Aprobador',
       pagador_banca: 'Pagador'
@@ -191,15 +190,6 @@ export default function UsuariosPage() {
                 <Users className="w-8 h-8 text-white" />
               </div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white/80">Administradores</p>
-                  <p className="text-2xl font-bold text-ehite">{stats.admins}</p>
-                </div>
-                <Settings className="w-8 h-8 text-white" />
-              </div>
-            </div> 
           </div>
 
           {/* Header with Back Button */}
@@ -260,16 +250,6 @@ export default function UsuariosPage() {
                   }`}
                 >
                   Todos ({stats.total})
-                </button>
-                <button
-                  onClick={() => handleRoleFilterChange('admin_general')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    roleFilter === 'admin_general' 
-                      ? 'bg-blue-400 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Administradores ({stats.roleCount.admin_general || 0})
                 </button>
                 <button
                   onClick={() => handleRoleFilterChange('solicitante')}

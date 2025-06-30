@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { User, Mail, Phone, Shield, Bell, Edit, Save, X, CheckCircle, Lock } from 'lucide-react';
+import { User, Mail, Shield, Bell, Edit, Save, X, CheckCircle, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { UsuariosService, UpdateProfileData, ChangePasswordData } from '@/services/usuarios.service';
 import { toast } from 'react-hot-toast';
 
 interface TabType {
@@ -23,63 +24,93 @@ const tabs: TabType[] = [
 ];
 
 export default function AdminProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUserData } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('personal');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Estados para los formularios
-  const [formData, setFormData] = useState({
-    nombre: user?.nombre || '',
-    email: user?.email || '',
-    telefono: '+57 300 123 4567',
-    cargo: 'Administrador General'
-  });
+  const [formData, setFormData] = useState({ nombre: '', email: '', cargo: 'Administrador General' });
 
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
+  useEffect(() => {
+    if (user) {
+      console.log('👤 Usuario del contexto:', user);
+      setFormData({ 
+        nombre: user.nombre || '', 
+        email: user.email || '', 
+        cargo: 'Administrador General' 
+      });
+    }
+  }, [user]);
 
-  const [notifications, setNotifications] = useState({
-    solicitudesNuevas: true,
-    solicitudesActualizadas: true,
-    usuariosNuevos: false,
-    reportesSemanal: true
-  });
+  // Efecto para sincronizar formData con user del contexto
+  useEffect(() => {
+    if (user) {
+      console.log('🔄 Syncing formData with user context:', user);
+      setFormData({
+        nombre: user.nombre || '',
+        email: user.email || ''
+      });
+    }
+  }, [user]);
+
+  // Efecto para debug inicial
+  useEffect(() => {
+    console.log('🔍 Debug inicial:');
+    console.log('User from context:', user);
+    console.log('LocalStorage auth_user:', localStorage.getItem('auth_user'));
+    console.log('FormData:', formData);
+  }, []);
+
+  const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [notifications, setNotifications] = useState({ solicitudesNuevas: true, solicitudesActualizadas: true, usuariosNuevos: false, reportesSemanal: true });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handlePasswordChange = (field: string, value: string) => {
-    setPasswordData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setPasswordData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleNotificationChange = (field: string, checked: boolean) => {
-    setNotifications(prev => ({
-      ...prev,
-      [field]: checked
-    }));
+    setNotifications(prev => ({ ...prev, [field]: checked }));
   };
 
   const handleSave = async () => {
+    if (!formData.nombre.trim() || !formData.email.trim()) {
+      toast.error('Nombre y correo no pueden estar vacíos');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const profileData: UpdateProfileData = {
+        nombre: formData.nombre,
+        email: formData.email
+      };
+
+      const response = await UsuariosService.updateProfile(profileData);
+      
+      console.log('✅ Response from backend:', response);
+      
+      // Actualizar el contexto global PRIMERO
+      if (updateUserData && typeof updateUserData === 'function') {
+        updateUserData(response.user);
+        console.log('✅ Updated user context with:', response.user);
+      }
+      
+      // NO actualizar el formData aquí, dejar que el useEffect lo haga
+      // cuando detecte el cambio en el contexto user
+      
       setIsEditing(false);
-      toast.success('Información actualizada correctamente');
-    } catch {
-      toast.error('Error al actualizar la información');
+      toast.success(response.message || 'Información actualizada correctamente');
+      
+      // NO hacer router.refresh() ya que puede causar problemas
+      
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      toast.error(error.response?.data?.message || 'Error al actualizar la información');
     } finally {
       setLoading(false);
     }
@@ -90,15 +121,23 @@ export default function AdminProfilePage() {
       toast.error('Las contraseñas no coinciden');
       return;
     }
+    if (passwordData.newPassword.length < 6) {
+      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
 
     setLoading(true);
     try {
-      // Simular actualización
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const changePasswordData: ChangePasswordData = {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      };
+
+      const response = await UsuariosService.changePassword(changePasswordData);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      toast.success('Contraseña actualizada correctamente');
-    } catch {
-      toast.error('Error al actualizar la contraseña');
+      toast.success(response.message || 'Contraseña actualizada correctamente');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al actualizar la contraseña');
     } finally {
       setLoading(false);
     }
@@ -111,7 +150,7 @@ export default function AdminProfilePage() {
         <Button
           onClick={() => isEditing ? handleSave() : setIsEditing(true)}
           disabled={loading}
-          className="bg-white text-blue-600 hover:bg-white/90"
+          className="bg-green-600 text-white hover:bg-green-700 shadow-lg border-0"
         >
           {isEditing ? (
             <>
@@ -135,13 +174,28 @@ export default function AdminProfilePage() {
             </span>
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">{user?.nombre}</h3>
+            <h3 className="text-xl font-bold text-white">{formData.nombre || user?.nombre}</h3>
             <p className="text-white/80">{formData.cargo}</p>
             <div className="flex items-center mt-2">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
                 <CheckCircle className="w-3 h-3 mr-1" />
                 Cuenta Verificada
               </span>
+            </div>
+            {/* Debug info */}
+            <div className="mt-2 text-xs text-white/60">
+              <p>Context user: {user?.nombre} | {user?.email}</p>
+              <p>Form data: {formData.nombre} | {formData.email}</p>
+              <button 
+                onClick={() => {
+                  localStorage.removeItem('auth_user');
+                  localStorage.removeItem('auth_token');
+                  window.location.href = '/login';
+                }}
+                className="mt-1 px-2 py-1 bg-red-500 text-white text-xs rounded"
+              >
+                🔄 Refrescar datos (logout)
+              </button>
             </div>
           </div>
         </div>
@@ -177,20 +231,6 @@ export default function AdminProfilePage() {
 
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">
-              <Phone className="w-4 h-4 inline mr-2" />
-              Teléfono
-            </label>
-            <Input
-              type="tel"
-              value={formData.telefono}
-              onChange={(e) => handleInputChange('telefono', e.target.value)}
-              disabled={!isEditing}
-              className="bg-white/15 border-white/20 text-white"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white/80 text-sm font-medium mb-2">
               <Shield className="w-4 h-4 inline mr-2" />
               Cargo
             </label>
@@ -209,7 +249,7 @@ export default function AdminProfilePage() {
             <Button
               variant="outline"
               onClick={() => setIsEditing(false)}
-              className="bg-transparent text-white border-white/30 hover:bg-white/10"
+              className="bg-gray-600 text-white border-gray-500 hover:bg-gray-700"
             >
               <X className="w-4 h-4 mr-2" />
               Cancelar
@@ -217,7 +257,7 @@ export default function AdminProfilePage() {
             <Button
               onClick={handleSave}
               disabled={loading}
-              className="bg-white text-blue-600 hover:bg-white/90"
+              className="bg-green-600 text-white hover:bg-green-700 shadow-lg border-0"
             >
               <Save className="w-4 h-4 mr-2" />
               Guardar
@@ -228,7 +268,7 @@ export default function AdminProfilePage() {
     </div>
   );
 
-  const renderSecurityContent = () => (
+  const renderSecurity = () => (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-white">Seguridad</h2>
 
@@ -283,7 +323,7 @@ export default function AdminProfilePage() {
           <Button
             onClick={handlePasswordUpdate}
             disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-            className="bg-white text-blue-600 hover:bg-white/90"
+            className="bg-blue-600 text-white hover:bg-blue-700 shadow-lg border-0"
           >
             {loading ? 'Actualizando...' : 'Cambiar Contraseña'}
           </Button>
@@ -307,7 +347,7 @@ export default function AdminProfilePage() {
     </div>
   );
 
-  const renderNotificationsContent = () => (
+  const renderNotifications = () => (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-white">Notificaciones</h2>
 
@@ -381,7 +421,10 @@ export default function AdminProfilePage() {
         </div>
 
         <div className="mt-6 pt-6 border-t border-white/20">
-          <Button onClick={() => toast.success('Preferencias guardadas')} className="bg-white text-blue-600 hover:bg-white/90">
+          <Button 
+            onClick={() => toast.success('Preferencias guardadas')} 
+            className="bg-purple-600 text-white hover:bg-purple-700 shadow-lg border-0"
+          >
             Guardar Preferencias
           </Button>
         </div>
@@ -394,9 +437,9 @@ export default function AdminProfilePage() {
       case 'personal':
         return renderPersonalInfo();
       case 'seguridad':
-        return renderSecurityContent();
+        return renderSecurity();
       case 'notificaciones':
-        return renderNotificationsContent();
+        return renderNotifications();
       default:
         return renderPersonalInfo();
     }
@@ -407,16 +450,11 @@ export default function AdminProfilePage() {
       <AdminLayout>
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-            <h1 className="text-2xl font-bold text-white font-montserrat">
-              Mi Perfil
-            </h1>
-            <p className="text-white/80">
-              Gestiona tu información personal y preferencias
-            </p>
+            <h1 className="text-2xl font-bold text-white font-montserrat">Mi Perfil</h1>
+            <p className="text-white/80">Gestiona tu información personal y preferencias</p>
           </div>
 
           <div className="flex flex-col md:flex-row gap-8">
-            {/* Sidebar con pestañas */}
             <div className="w-full md:w-64">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
                 {tabs.map((tab) => (
@@ -435,8 +473,6 @@ export default function AdminProfilePage() {
                 ))}
               </div>
             </div>
-
-            {/* Contenido principal */}
             <div className="flex-1">
               {renderTabContent()}
             </div>

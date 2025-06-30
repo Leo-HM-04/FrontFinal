@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (credentials: { email: string; password: string }) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  updateUserData: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -78,14 +79,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // window.location.href = '/login'; // Opción más agresiva si hay problemas persistentes
     } catch (error) {
       console.error('Error durante el cierre de sesión:', error);
-      // Intentar limpiar el localStorage incluso si hay un error
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
+      toast.error('Error al cerrar sesión');
     }
   };
 
+  const updateUserData = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, updateUserData }}>
       {children}
     </AuthContext.Provider>
   );

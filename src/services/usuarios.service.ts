@@ -15,6 +15,16 @@ export interface UpdateUserData {
   password?: string;
 }
 
+export interface UpdateProfileData {
+  nombre: string;
+  email: string;
+}
+
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export class UsuariosService {
   static async getAll(): Promise<User[]> {
     const response = await api.get<User[]>('/usuarios');
@@ -38,5 +48,16 @@ export class UsuariosService {
 
   static async delete(id: number): Promise<void> {
     await api.delete(`/usuarios/${id}`);
+  }
+
+  // Métodos para perfil propio
+  static async updateProfile(profileData: UpdateProfileData): Promise<{ message: string; user: User }> {
+    const response = await api.put<{ message: string; user: User }>('/usuarios/profile/update', profileData);
+    return response.data;
+  }
+
+  static async changePassword(passwordData: ChangePasswordData): Promise<{ message: string }> {
+    const response = await api.put<{ message: string }>('/usuarios/profile/change-password', passwordData);
+    return response.data;
   }
 }
