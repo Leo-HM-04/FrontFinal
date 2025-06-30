@@ -23,7 +23,7 @@ export function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <h1 className="text-xl font-bold text-primary-blue">
-              Plataforma de Pagos
+              Plataforma de Pagos 
             </h1>
           </div>
 

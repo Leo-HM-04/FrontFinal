@@ -12,6 +12,7 @@ export interface UpdateUserData {
   nombre?: string;
   email?: string;
   rol?: string;
+  password?: string;
 }
 
 export class UsuariosService {

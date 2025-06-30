@@ -21,7 +21,7 @@ interface AdvancedFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
   onExport?: () => void;
   onReset: () => void;
-  type: 'usuarios' | 'solicitudes';
+  type: 'usuarios' | 'solicitudes' | 'pagos' | 'pagosHistorial';
 }
 
 export function AdvancedFilters({ 
@@ -64,19 +64,19 @@ export function AdvancedFilters({
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-light-bg-300 mb-6 animate-slide-up">
+    <div className="bg-white/10 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 mb-6 animate-slide-up">
       {/* Header de filtros */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-white/20">
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
           {/* Búsqueda principal */}
           <div className="relative flex-1 w-full lg:w-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
             <input
               type="text"
               placeholder={`Buscar ${type === 'usuarios' ? 'usuarios' : 'solicitudes'}...`}
               value={filters.search}
               onChange={(e) => updateFilter('search', e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50"
             />
           </div>
 
@@ -86,14 +86,14 @@ export function AdvancedFilters({
               variant="outline"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
-              className={`flex items-center space-x-2 ${
-                hasActiveFilters ? 'border-primary-blue text-primary-blue' : ''
+              className={`flex items-center space-x-2 bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 ${
+                hasActiveFilters ? 'border-white/60 bg-white/30' : ''
               }`}
             >
               <Filter className="w-4 h-4" />
               <span>Filtros</span>
               {hasActiveFilters && (
-                <span className="bg-primary-blue text-white px-2 py-0.5 rounded-full text-xs">
+                <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
                   {Object.values(filters).filter(v => v !== undefined && v !== '' && v !== null).length}
                 </span>
               )}
@@ -104,7 +104,7 @@ export function AdvancedFilters({
                 variant="outline"
                 size="sm"
                 onClick={onExport}
-                className="flex items-center space-x-2 text-green-600 border-green-300 hover:bg-green-50"
+                className="flex items-center space-x-2 bg-green-500 text-white border-green-500 hover:bg-green-500"
               >
                 <Download className="w-4 h-4" />
                 <span>Exportar</span>
@@ -116,7 +116,7 @@ export function AdvancedFilters({
                 variant="outline"
                 size="sm"
                 onClick={onReset}
-                className="flex items-center space-x-2 text-red-600 border-red-300 hover:bg-red-50"
+                className="flex items-center space-x-2 bg-red-500 text-red-100 border-red-900 hover:bg-red-900"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>Limpiar</span>
@@ -128,19 +128,19 @@ export function AdvancedFilters({
 
       {/* Filtros expandidos */}
       {isExpanded && (
-        <div className="p-4 bg-light-bg-50 animate-fade-in">
+        <div className="p-4 bg-white/5 backdrop-blur-sm animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {type === 'usuarios' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">Rol</label>
                 <select
                   value={filters.rol || ''}
                   onChange={(e) => updateFilter('rol', e.target.value || undefined)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                 >
-                  <option value="">Todos los roles</option>
+                  <option value="" className="text-gray-900">Todos los roles</option>
                   {rolOptions.map(option => (
-                    <option key={option.value} value={option.value}>
+                    <option key={option.value} value={option.value} className="text-gray-900">
                       {option.label}
                     </option>
                   ))}
@@ -151,15 +151,15 @@ export function AdvancedFilters({
             {type === 'solicitudes' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Estado</label>
                   <select
                     value={filters.estado || ''}
                     onChange={(e) => updateFilter('estado', e.target.value || undefined)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                   >
-                    <option value="">Todos los estados</option>
+                    <option value="" className="text-gray-900">Todos los estados</option>
                     {estadoOptions.map(option => (
-                      <option key={option.value} value={option.value}>
+                      <option key={option.value} value={option.value} className="text-gray-900">
                         {option.label}
                       </option>
                     ))}
@@ -167,15 +167,15 @@ export function AdvancedFilters({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Departamento</label>
                   <select
                     value={filters.departamento || ''}
                     onChange={(e) => updateFilter('departamento', e.target.value || undefined)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                   >
-                    <option value="">Todos los departamentos</option>
+                    <option value="" className="text-gray-900">Todos los departamentos</option>
                     {departamentoOptions.map(option => (
-                      <option key={option.value} value={option.value}>
+                      <option key={option.value} value={option.value} className="text-gray-900">
                         {option.label}
                       </option>
                     ))}
@@ -183,55 +183,55 @@ export function AdvancedFilters({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Monto Mínimo</label>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Monto Mínimo</label>
                   <input
                     type="number"
                     placeholder="0"
                     value={filters.montoMin || ''}
                     onChange={(e) => updateFilter('montoMin', e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Monto Máximo</label>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Monto Máximo</label>
                   <input
                     type="number"
                     placeholder="999999999"
                     value={filters.montoMax || ''}
                     onChange={(e) => updateFilter('montoMax', e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                   />
                 </div>
               </>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Desde</label>
+              <label className="block text-sm font-medium text-white/80 mb-1">Fecha Desde</label>
               <input
                 type="date"
                 value={filters.fechaDesde || ''}
                 onChange={(e) => updateFilter('fechaDesde', e.target.value || undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-sm"
+                className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Hasta</label>
+              <label className="block text-sm font-medium text-white/80 mb-1">Fecha Hasta</label>
               <input
                 type="date"
                 value={filters.fechaHasta || ''}
                 onChange={(e) => updateFilter('fechaHasta', e.target.value || undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent text-sm"
+                className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
               />
             </div>
           </div>
 
           {/* Filtros activos */}
           {hasActiveFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-white/20">
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-sm text-gray-600 font-medium">Filtros activos:</span>
+                <span className="text-sm text-white/80 font-medium">Filtros activos:</span>
                 {Object.entries(filters).map(([key, value]) => {
                   if (!value || value === '') return null;
                   
@@ -245,12 +245,12 @@ export function AdvancedFilters({
                   return (
                     <span
                       key={key}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-blue-100 text-primary-blue-800"
+                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white border border-white/30"
                     >
                       {key}: {displayValue}
                       <button
                         onClick={() => updateFilter(key as keyof FilterState, undefined)}
-                        className="ml-2 hover:text-primary-blue-900"
+                        className="ml-2 hover:text-white/70"
                       >
                         <X className="w-3 h-3" />
                       </button>

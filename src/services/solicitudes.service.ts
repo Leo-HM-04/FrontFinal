@@ -27,7 +27,7 @@ export class SolicitudesService {
   }
 
   static async getMySolicitudes(): Promise<Solicitud[]> {
-    const response = await api.get<Solicitud[]>('/solicitudes?own=true');
+    const response = await api.get<Solicitud[]>('/solicitudes');
     return response.data;
   }
 }

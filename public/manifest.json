@@ -4,8 +4,8 @@
   "description": "Sistema de gestión de pagos y usuarios",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#004AB7",
-  "theme_color": "#004AB7",
+  "background_color": "#3B82F6",
+  "theme_color": "#3B82F6",
   "icons": [
     {
       "src": "/favicon.ico",

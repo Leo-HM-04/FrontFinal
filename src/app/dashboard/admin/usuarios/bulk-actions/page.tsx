@@ -1,44 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Users, Download, Upload, Settings } from 'lucide-react';
-
-const Button = ({ children, variant = 'primary', className = '', onClick, ...props }) => {
-  const baseClasses = "inline-flex items-center justify-center font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2";
-  return (
-    <button 
-      className={`${baseClasses} ${className}`}
-      onClick={onClick}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
+import { AdminLayout } from '@/components/layout/AdminLayout';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { Button } from '@/components/ui/Button';
 
 export default function BulkActionsPage() {
-  const [selectedAction, setSelectedAction] = useState('');
+  const router = useRouter();
 
   return (
-    <div className="min-h-screen font-montserrat" style={{background: 'linear-gradient(135deg, #0A1933 0%, #004AB7 50%, #0057D9 100%)'}}>
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              className="text-white border-white/30 hover:bg-white/10 px-4 py-2 rounded-lg"
-              onClick={() => window.location.href = '/dashboard/admin/usuarios'}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Acciones Masivas</h1>
-              <p className="text-white/80">Gestionar múltiples usuarios simultáneamente</p>
+    <ProtectedRoute requiredRoles={['admin_general']}>
+      <AdminLayout>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                className="text-white border-white/30 hover:bg-white/10"
+                onClick={() => router.push('/dashboard/admin/usuarios')}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Volver
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Acciones Masivas</h1>
+                <p className="text-white/80">Gestionar múltiples usuarios simultáneamente</p>
+              </div>
             </div>
           </div>
-        </div>
 
         {/* Bulk Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -95,6 +86,7 @@ export default function BulkActionsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
+    </ProtectedRoute>
   );
 }

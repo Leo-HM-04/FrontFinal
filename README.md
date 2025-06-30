@@ -178,9 +178,9 @@ interface UserRole {
 ### Tema y Colores
 ```css
 :root {
-  --primary-blue: #004AB7;
-  --secondary-blue: #0057D9;
-  --gradient: linear-gradient(135deg, #004AB7 0%, #0057D9 100%);
+  --primary-blue: #3B82F6;
+  --secondary-blue: #60A5FA;
+  --gradient: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
 }
 ```
 

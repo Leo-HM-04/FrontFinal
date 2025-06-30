@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { ConfirmDeleteModal } from '@/components/common/ConfirmDeleteModal';
-import { Users, Plus, Trash2, Edit, ArrowLeft, Eye, CheckCircle, Settings, TrendingUp } from 'lucide-react';
+import { Users, Plus, Trash2, Edit, ArrowLeft, Eye, CheckCircle, TrendingUp, Settings } from 'lucide-react';
 import { UsuariosService } from '@/services/usuarios.service';
 import { usePagination } from '@/hooks/usePagination';
 import { exportUsuariosToCSV } from '@/utils/exportUtils';
@@ -15,6 +16,7 @@ import { User } from '@/types';
 import { toast } from 'react-hot-toast';
 
 export default function UsuariosPage() {
+  const router = useRouter();
   const [usuarios, setUsuarios] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -29,31 +31,55 @@ export default function UsuariosPage() {
 
   // Memoizar estadísticas para evitar recálculos
   const stats = useMemo(() => {
-    if (usuarios.length === 0) return { total: 0, activos: 0, admins: 0, nuevos: 0, roleCount: {} };
+    if (usuarios.length === 0) {
+      return { 
+        total: 0, 
+        activos: 0, 
+        admins: 0, 
+        nuevos: 0, 
+        roleCount: {
+          admin_general: 0,
+          solicitante: 0,
+          aprobador: 0,
+          pagador_banca: 0
+        } 
+      };
+    }
     
-    const total = usuarios.length;
-    const activos = usuarios.filter(u => !u.bloqueado).length;
-    const admins = usuarios.filter(u => u.rol === 'admin_general').length;
+    // Filtramos al admin actual para las estadísticas también
+    const filteredUsers = user?.id_usuario 
+      ? usuarios.filter(u => u.id_usuario !== parseInt(user.id_usuario.toString()))
+      : usuarios;
+
+    const total = filteredUsers.length;
+    const activos = filteredUsers.filter(u => !u.bloqueado).length;
+    const admins = filteredUsers.filter(u => u.rol === 'admin_general').length;
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
-    const nuevos = usuarios.filter(u => new Date(u.created_at) > weekAgo).length;
+    const nuevos = filteredUsers.filter(u => new Date(u.created_at) > weekAgo).length;
     
     const roleCount = {
-      admin_general: usuarios.filter(u => u.rol === 'admin_general').length,
-      solicitante: usuarios.filter(u => u.rol === 'solicitante').length,
-      aprobador: usuarios.filter(u => u.rol === 'aprobador').length,
-      pagador_banca: usuarios.filter(u => u.rol === 'pagador_banca').length
+      admin_general: filteredUsers.filter(u => u.rol === 'admin_general').length,
+      solicitante: filteredUsers.filter(u => u.rol === 'solicitante').length,
+      aprobador: filteredUsers.filter(u => u.rol === 'aprobador').length,
+      pagador_banca: filteredUsers.filter(u => u.rol === 'pagador_banca').length
     };
 
     return { total, activos, admins, nuevos, roleCount };
-  }, [usuarios]);
+  }, [usuarios, user?.id_usuario]);
 
-  // Memoizar filtro por rol
+  // Memoizar filtro por rol y filtrar el admin actual
   const filteredByRole = useMemo(() => {
-    return roleFilter 
-      ? usuarios.filter(u => u.rol === roleFilter)
+    // Primero filtramos al usuario actual (administrador)
+    const filteredUsers = user?.id_usuario 
+      ? usuarios.filter(u => u.id_usuario !== parseInt(user.id_usuario.toString()))
       : usuarios;
-  }, [usuarios, roleFilter]);
+    
+    // Luego aplicamos el filtro por rol si existe
+    return roleFilter 
+      ? filteredUsers.filter(u => u.rol === roleFilter)
+      : filteredUsers;
+  }, [usuarios, roleFilter, user?.id_usuario]);
 
   const {
     currentPage,
@@ -153,7 +179,7 @@ export default function UsuariosPage() {
   return (
     <ProtectedRoute requiredRoles={['admin_general']}>
       <AdminLayout>
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Stats Cards optimizadas */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -162,39 +188,18 @@ export default function UsuariosPage() {
                   <p className="text-sm font-medium text-white/80">Total Usuarios</p>
                   <p className="text-2xl font-bold text-white">{stats.total}</p>
                 </div>
-                <Users className="w-8 h-8 text-white/60" />
+                <Users className="w-8 h-8 text-white" />
               </div>
             </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white/80">Activos</p>
-                  <p className="text-2xl font-bold text-green-400">{stats.activos}</p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-green-400" />
-              </div>
-            </div>
-            
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-white/80">Administradores</p>
-                  <p className="text-2xl font-bold text-blue-400">{stats.admins}</p>
+                  <p className="text-2xl font-bold text-ehite">{stats.admins}</p>
                 </div>
-                <Settings className="w-8 h-8 text-blue-400" />
+                <Settings className="w-8 h-8 text-white" />
               </div>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white/80">Nuevos (7 días)</p>
-                  <p className="text-2xl font-bold text-yellow-400">{stats.nuevos}</p>
-                </div>
-                <TrendingUp className="w-8 h-8 text-yellow-400" />
-              </div>
-            </div>
+            </div> 
           </div>
 
           {/* Header with Back Button */}
@@ -204,7 +209,7 @@ export default function UsuariosPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.location.href = '/dashboard/admin'}
+                  onClick={() => router.push('/dashboard/admin')}
                   className="text-white border-white/30 hover:bg-white/10"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
@@ -231,8 +236,8 @@ export default function UsuariosPage() {
                 </Button>
                 <Button
                   className="bg-white hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl"
-                  style={{color: '#004AB7'}}
-                  onClick={() => window.location.href = '/dashboard/admin/usuarios/create'}
+                  style={{color: '#3B82F6'}}
+                  onClick={() => router.push('/dashboard/admin/usuarios/create')}
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Crear Usuario
@@ -250,7 +255,7 @@ export default function UsuariosPage() {
                   onClick={clearRoleFilter}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     roleFilter === '' 
-                      ? 'bg-blue-500 text-white' 
+                      ? 'bg-blue-400 text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -260,7 +265,7 @@ export default function UsuariosPage() {
                   onClick={() => handleRoleFilterChange('admin_general')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     roleFilter === 'admin_general' 
-                      ? 'bg-blue-500 text-white' 
+                      ? 'bg-blue-400 text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -270,7 +275,7 @@ export default function UsuariosPage() {
                   onClick={() => handleRoleFilterChange('solicitante')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     roleFilter === 'solicitante' 
-                      ? 'bg-blue-500 text-white' 
+                      ? 'bg-blue-400 text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -280,7 +285,7 @@ export default function UsuariosPage() {
                   onClick={() => handleRoleFilterChange('aprobador')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     roleFilter === 'aprobador' 
-                      ? 'bg-blue-500 text-white' 
+                      ? 'bg-blue-400 text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -290,7 +295,7 @@ export default function UsuariosPage() {
                   onClick={() => handleRoleFilterChange('pagador_banca')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     roleFilter === 'pagador_banca' 
-                      ? 'bg-blue-500 text-white' 
+                      ? 'bg-blue-400 text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -317,7 +322,7 @@ export default function UsuariosPage() {
                     variant="outline"
                     size="sm"
                     onClick={clearRoleFilter}
-                    className="text-white border-white/30 hover:bg-white/10"
+                    className="text-white border-white hover:bg-white/10"
                   >
                     Limpiar filtro
                   </Button>
@@ -335,16 +340,13 @@ export default function UsuariosPage() {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead style={{backgroundColor: '#F0F4FC'}}>
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Usuario
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Rol
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Fecha Registro
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Acciones
                           </th>
                         </tr>
@@ -363,29 +365,24 @@ export default function UsuariosPage() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white" style={{backgroundColor: '#004AB7'}}>
+                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white" style={{backgroundColor: '#3B82F6'}}>
                                 {getRoleLabel(usuario.rol)}
                               </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(usuario.created_at).toLocaleDateString('es-CO')}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => window.location.href = `/dashboard/admin/usuarios/${usuario.id_usuario}`}
-                                style={{color: '#004AB7', borderColor: '#004AB7'}}
-                                className="hover:bg-blue-50"
+                                onClick={() => router.push(`/dashboard/admin/usuarios/${usuario.id_usuario}`)}
+                                className="text-blue-600 hover:bg-blue-900"
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => window.location.href = `/dashboard/admin/usuarios/${usuario.id_usuario}/edit`}
-                                style={{color: '#0057D9', borderColor: '#0057D9'}}
-                                className="hover:bg-blue-50"
+                                onClick={() => router.push(`/dashboard/admin/usuarios/${usuario.id_usuario}/edit`)}
+                                className="text-blue-600 hover:bg-blue-900"
                               >
                                 <Edit className="w-4 h-4" />
                               </Button>
@@ -393,7 +390,7 @@ export default function UsuariosPage() {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => handleDelete(usuario)}
-                                className="text-red-600 border-red-300 hover:bg-red-50"
+                                className="text-red-600  hover:bg-red-500"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>

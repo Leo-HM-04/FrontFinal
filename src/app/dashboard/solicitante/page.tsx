@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { FileText, Plus, User, LogOut, Menu, Bell, Play, HelpCircle } from 'lucide-react';
@@ -8,11 +9,12 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function SolicitanteDashboard() {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
-      <div className="min-h-screen font-sans" style={{background: 'linear-gradient(135deg, #004AB7 0%, #0057D9 100%)'}}>
+      <div className="min-h-screen font-sans" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
         {/* Header */}
         <header className="bg-white/10 backdrop-blur-lg border-b border-white/20">
           <div className="max-w-7xl mx-auto px-6">
@@ -44,10 +46,10 @@ export default function SolicitanteDashboard() {
         {/* Sidebar Menu */}
         {isMenuOpen && (
           <div className="fixed inset-0 z-50 overflow-hidden">
-            <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setIsMenuOpen(false)} />
+            <div className="absolute inset-0 bg-black opacity-50" onClick={() => setIsMenuOpen(false)} />
             <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
               <div className="flex flex-col h-full">
-                <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #004AB7 0%, #0057D9 100%)'}}>
+                <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold">Panel Solicitante</h2>
                     <Button
@@ -96,7 +98,7 @@ export default function SolicitanteDashboard() {
                     onClick={() => {
                       logout();
                       setIsMenuOpen(false);
-                      window.location.href = '/login';
+                      router.push('/login');
                     }}
                     className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors w-full"
                   >

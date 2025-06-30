@@ -1,29 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, User, Mail, Calendar, Shield, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { UsuariosService } from '@/services/usuarios.service';
 import { User as UserType } from '@/types';
-
-    const Button = ({ children, variant = 'primary', size = 'md', className = '', onClick, ...props }) => {
-    const baseClasses = "inline-flex items-center justify-center font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2";
-    const variantClasses = variant === 'outline' ? 'border' : '';
-    const sizeClasses = size === 'sm' ? 'text-sm px-4 py-2' : 'text-base px-6 py-3';
-    
-    return (
-        <button 
-        className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className}`}
-        onClick={onClick}
-        {...props}
-        >
-        {children}
-        </button>
-    );
-    };
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 
 export default function UsuarioDetailPage() {
     const params = useParams();
+    const router = useRouter();
     const [usuario, setUsuario] = useState<UserType | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -36,7 +24,7 @@ export default function UsuarioDetailPage() {
 
     const fetchUsuario = async (id: string) => {
         try {
-        const data = await UsuariosService.getById(id);
+        const data = await UsuariosService.getById(parseInt(id));
         setUsuario(data);
         } catch (error) {
         console.error('Error fetching usuario:', error);
@@ -58,7 +46,7 @@ export default function UsuarioDetailPage() {
 
     if (loading) {
         return (
-        <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #0A1933 0%, #004AB7 50%, #0057D9 100%)'}}>
+        <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
             <div className="text-white text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
             <p className="text-lg">Cargando detalles del usuario...</p>
@@ -69,14 +57,14 @@ export default function UsuarioDetailPage() {
 
     if (error) {
         return (
-        <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #0A1933 0%, #004AB7 50%, #0057D9 100%)'}}>
+        <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
             <div className="text-white text-center">
             <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
             <p className="text-lg">{error}</p>
             <Button
                 variant="outline"
                 className="mt-4 text-white border-white/30 hover:bg-white/10"
-                onClick={() => window.location.href = '/dashboard/admin/usuarios'}
+                onClick={() => router.push('/dashboard/admin/usuarios')}
             >
                 Volver a la lista
             </Button>
@@ -86,34 +74,35 @@ export default function UsuarioDetailPage() {
     }
 
     return (
-        <div className="min-h-screen font-montserrat" style={{background: 'linear-gradient(135deg, #0A1933 0%, #004AB7 50%, #0057D9 100%)'}}>
-        <div className="max-w-4xl mx-auto px-4 py-8">
+      <ProtectedRoute requiredRoles={['admin_general']}>
+        <AdminLayout>
+          <div className="max-w-4xl mx-auto px-4 py-8">
             {/* Header */}
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-            <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                <Button
+                  <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.location.href = '/dashboard/admin/usuarios'}
+                    onClick={() => router.push('/dashboard/admin/usuarios')}
                     className="text-white border-white/30 hover:bg-white/10"
-                >
+                  >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Volver
-                </Button>
-                <div>
+                  </Button>
+                  <div>
                     <h1 className="text-2xl font-bold text-white">Detalles del Usuario</h1>
                     <p className="text-white/80">Información completa del usuario</p>
-                </div>
+                  </div>
                 </div>
                 <Button
-                className="bg-white hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl"
-                style={{color: '#004AB7'}}
-                onClick={() => window.location.href = `/dashboard/admin/usuarios/${params.id}/edit`}
+                  className="bg-white hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl"
+                  style={{color: '#3B82F6'}}
+                  onClick={() => router.push(`/dashboard/admin/usuarios/${params.id}/edit`)}
                 >
-                Editar Usuario
+                  Editar Usuario
                 </Button>
-            </div>
+              </div>
             </div>
 
             {/* User Details */}
@@ -147,7 +136,7 @@ export default function UsuarioDetailPage() {
                         <Shield className="w-5 h-5 text-white/70" />
                         <div>
                         <p className="text-white/70 text-sm">Rol</p>
-                        <span className="inline-flex px-3 py-1 text-sm font-semibold rounded-full text-white" style={{backgroundColor: '#004AB7'}}>
+                        <span className="inline-flex px-3 py-1 text-sm font-semibold rounded-full text-white" style={{backgroundColor: '#3B82F6'}}>
                             {getRoleLabel(usuario.rol)}
                         </span>
                         </div>
@@ -156,57 +145,20 @@ export default function UsuarioDetailPage() {
                 </div>
 
                 {/* Estado y Fechas */}
-                <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-white border-b border-white/20 pb-2">
-                    Fechas
-                    </h2>
-                    
-                    <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-white/70" />
-                        <div>
-                        <p className="text-white/70 text-sm">Fecha de registro</p>
-                        <p className="text-white font-medium">
-                            {new Date(usuario.created_at).toLocaleDateString('es-CO', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                            })}
-                        </p>
-                        </div>
-                    </div>
 
-                    <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-white/70" />
-                        <div>
-                        <p className="text-white/70 text-sm">Última actualización</p>
-                        <p className="text-white font-medium">
-                            {new Date(usuario.updated_at).toLocaleDateString('es-CO', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                            })}
-                        </p>
-                        </div>
-                    </div>
-                    </div>
-                </div>
                 </div>
 
                 {/* ID del Usuario */}
                 <div className="mt-8 pt-6 border-t border-white/20">
-                <div className="bg-white/5 rounded-lg p-4">
-                    <p className="text-white/70 text-sm mb-1">ID del Usuario</p>
-                    <p className="text-white font-mono text-lg">{usuario.id_usuario}</p>
-                </div>
+                    <div className="bg-white/5 rounded-lg p-4">
+                        <p className="text-white/70 text-sm mb-1">ID del Usuario</p>
+                        <p className="text-white font-mono text-lg">{usuario.id_usuario}</p>
+                    </div>
                 </div>
             </div>
             )}
-        </div>
-        </div>
+          </div>
+        </AdminLayout>
+      </ProtectedRoute>
     );
 }

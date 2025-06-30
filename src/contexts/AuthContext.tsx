@@ -4,12 +4,11 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { AuthService } from '@/services/auth.service';
 import { toast } from 'react-hot-toast';
 
-interface User {
-  id_usuario: string;
-  nombre: string;
-  email: string;
-  rol: string;
-}
+// Importamos la definición de User desde types/index.ts
+import { User as UserType } from '@/types';
+
+// Usamos el mismo tipo que ya está definido en la aplicación
+type User = UserType;
 
 interface AuthContextType {
   user: User | null;
@@ -61,10 +60,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    toast.success('Sesión cerrada');
+    try {
+      // Limpiar el estado
+      setUser(null);
+      
+      // Limpiar el localStorage
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      
+      // Limpiar otras posibles referencias en sessionStorage
+      sessionStorage.clear();
+      
+      // Mostrar mensaje de éxito
+      toast.success('Sesión cerrada correctamente');
+      
+      // Forzar un refresco de componentes si es necesario
+      // window.location.href = '/login'; // Opción más agresiva si hay problemas persistentes
+    } catch (error) {
+      console.error('Error durante el cierre de sesión:', error);
+      // Intentar limpiar el localStorage incluso si hay un error
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+    }
   };
 
   return (
