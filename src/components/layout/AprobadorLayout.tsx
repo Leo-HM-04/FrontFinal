@@ -4,13 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import { LogOut } from 'lucide-react';
-import { Home } from 'lucide-react';
-import { FileText } from 'lucide-react';
-import { CheckCircle } from 'lucide-react';
-import { Menu } from 'lucide-react';
-import { User } from 'lucide-react';
-import { Bell } from 'lucide-react';
+import { 
+  LogOut, Home, FileText, CheckCircle, Menu, User, Bell 
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 
@@ -18,7 +14,7 @@ interface AprobadorLayoutProps {
     children: React.ReactNode;
 }
 
-    export function AprobadorLayout({ children }: AprobadorLayoutProps) {
+export function AprobadorLayout({ children }: AprobadorLayoutProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const { user, logout } = useAuth();
@@ -171,58 +167,61 @@ interface AprobadorLayoutProps {
         {/* Main Content */}
         <main className="flex-1">
             {children}
-        </main>      {/* Logout Confirmation Modal - Mejorado y Siempre Visible */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden flex items-center justify-center">
-          <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-fade-in"
-            onClick={() => setShowLogoutConfirm(false)}
-            aria-hidden="true"
-          />
-          <div 
-            className="relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-md m-4 z-[10000] animate-slide-up"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-          >
-            <button 
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-500" 
+        </main>
+
+        {/* Logout Confirmation Modal */}
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 z-[9999] overflow-hidden flex items-center justify-center">
+            <div 
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-fade-in"
               onClick={() => setShowLogoutConfirm(false)}
-              aria-label="Cerrar"
+              aria-hidden="true"
+            />
+            <div 
+              className="relative bg-white rounded-xl shadow-2xl p-6 w-full max-w-md m-4 z-[10000] animate-slide-up"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-title"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-            <LogOut className="h-10 w-10 text-red-500 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-3 text-center" id="modal-title">Confirmar cierre de sesión</h3>
-            <p className="text-gray-600 mb-6 text-center">¿Estás seguro de que deseas cerrar tu sesión en la plataforma?</p>
-            
-            <div className="flex justify-center space-x-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <button 
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-500" 
                 onClick={() => setShowLogoutConfirm(false)}
-                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-5"
+                aria-label="Cerrar"
               >
-                Cancelar
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={() => {
-                  logout();
-                  setShowLogoutConfirm(false);
-                  setIsMenuOpen(false);
-                  router.push('/login');
-                }}
-                className="bg-red-600 hover:bg-red-700 text-white px-5"
-              >
-                Sí, cerrar sesión
-              </Button>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+              <LogOut className="h-10 w-10 text-red-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-900 mb-3 text-center" id="modal-title">Confirmar cierre de sesión</h3>
+              <p className="text-gray-600 mb-6 text-center">¿Estás seguro de que deseas cerrar tu sesión en la plataforma?</p>
+              
+              <div className="flex justify-center space-x-4">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-5"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => {
+                    logout();
+                    setShowLogoutConfirm(false);
+                    setIsMenuOpen(false);
+                    router.push('/login');
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white px-5"
+                >
+                  Sí, cerrar sesión
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
         </div>
     );
-    }
+}
+

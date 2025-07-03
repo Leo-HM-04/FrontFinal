@@ -13,6 +13,8 @@ export interface UpdateUserData {
   email?: string;
   rol?: string;
   password?: string;
+  bloqueado?: boolean; // Para bloquear/desbloquear usuarios
+  bloqueo_temporal_fin?: string; // Fecha de fin del bloqueo temporal
 }
 
 export interface UpdateProfileData {

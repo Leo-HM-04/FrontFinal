@@ -68,13 +68,13 @@ export function exportUsuariosToCSV(usuarios: User[]) {
     { key: 'email' as keyof User, label: 'Email' },
     { key: 'rol' as keyof User, label: 'Rol' },
     { key: 'bloqueado' as keyof User, label: 'Bloqueado' },
-    { key: 'created_at' as keyof User, label: 'Fecha Creación' }
+    { key: 'creado_en' as keyof User, label: 'Fecha Creación' }
   ];
   
   const processedData = usuarios.map(user => ({
     ...user,
     bloqueado: user.bloqueado ? 'Sí' : 'No',
-    created_at: new Date(user.created_at).toLocaleDateString('es-CO')
+    creado_en: new Date(user.creado_en).toLocaleDateString('es-CO')
   }));
   
   exportToCSV(processedData, `usuarios_${new Date().toISOString().split('T')[0]}`, columns);

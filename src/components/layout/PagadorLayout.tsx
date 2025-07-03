@@ -4,13 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import { LogOut } from 'lucide-react';
-import { Home } from 'lucide-react';
-import { FileText } from 'lucide-react';
-import { CreditCard } from 'lucide-react';
-import { Menu } from 'lucide-react';
-import { User } from 'lucide-react';
-import { Bell } from 'lucide-react';
+import { 
+  LogOut, Home, FileText, CreditCard, Menu, User, Bell 
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 
@@ -231,7 +227,7 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
         {children}
       </main>
 
-      {/* Logout Confirmation Modal - Mejorado y Siempre Visible */}
+      {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[9999] overflow-hidden flex items-center justify-center">
           <div 
@@ -271,20 +267,14 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
                 size="sm" 
                 onClick={async () => {
                   try {
-                    // Primero, limpiar el estado antes de cerrar sesión
                     setShowLogoutConfirm(false);
                     setIsMenuOpen(false);
-                    
-                    // Luego, redirigir al login (esto es más seguro que hacerlo después del logout)
                     router.push('/login');
-                    
-                    // Finalmente, hacer el logout
                     setTimeout(() => {
                       logout();
                     }, 100);
                   } catch (error) {
                     console.error("Error durante el cierre de sesión:", error);
-                    // Incluso si falla, intentamos redirigir al login
                     router.push('/login');
                   }
                 }}

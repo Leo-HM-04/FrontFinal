@@ -156,7 +156,7 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
           <div className="bg-light-bg-100 p-3 rounded-lg">
             <p className="text-sm text-gray-600">
               <strong>ID:</strong> {user.id_usuario} | 
-              <strong> Creado:</strong> {new Date(user.created_at).toLocaleDateString('es-CO')}
+              <strong> Creado:</strong> {new Date(user.creado_en).toLocaleDateString('es-CO')}
             </p>
             <p className="text-sm text-gray-600">
               <strong>Estado:</strong> 

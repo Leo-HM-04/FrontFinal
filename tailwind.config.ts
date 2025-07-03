@@ -67,29 +67,6 @@ const config: Config = {
         'blue': '0 4px 14px 0 rgba(0, 74, 183, 0.10)',
         'blue-lg': '0 10px 25px -3px rgba(0, 74, 183, 0.15)',
       },
-      animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.3s ease-out',
-        'pulse-blue': 'pulseBlue 2s infinite',
-      },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { transform: 'translateY(10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        pulseBlue: {
-          '0%, 100%': { 
-            boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.7)',
-          },
-          '70%': {
-            boxShadow: '0 0 0 10px rgba(59, 130, 246, 0)',
-          },
-        },
-      },
     },
   },
   plugins: [],

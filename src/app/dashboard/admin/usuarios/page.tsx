@@ -7,7 +7,7 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { ConfirmDeleteModal } from '@/components/common/ConfirmDeleteModal';
-import { Users, Plus, Trash2, Edit, ArrowLeft, Eye, TrendingUp } from 'lucide-react';
+import { Users, Plus, Trash2, Edit, Eye } from 'lucide-react';
 import { UsuariosService } from '@/services/usuarios.service';
 import { usePagination } from '@/hooks/usePagination';
 import { exportUsuariosToCSV } from '@/utils/exportUtils';
@@ -27,7 +27,7 @@ export default function UsuariosPage() {
 
   // Cache simple en sessionStorage
   const cacheKey = 'usuarios_cache';
-  const CACHE_TTL = 60000; // 1 minuto
+  const CACHE_TTL = 10000; // 1 minuto
 
   // Memoizar estadísticas para evitar recálculos
   const stats = useMemo(() => {
@@ -56,7 +56,7 @@ export default function UsuariosPage() {
     const admins = filteredUsers.filter(u => u.rol === 'admin_general').length;
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
-    const nuevos = filteredUsers.filter(u => new Date(u.created_at) > weekAgo).length;
+    const nuevos = filteredUsers.filter(u => new Date(u.creado_en) > weekAgo).length;
     
     const roleCount = {
       admin_general: filteredUsers.filter(u => u.rol === 'admin_general').length,
@@ -107,7 +107,7 @@ export default function UsuariosPage() {
       }
 
       const data = await UsuariosService.getAll();
-      const sortedData = data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      const sortedData = data.sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
       
       // Guardar en cache
       sessionStorage.setItem(cacheKey, JSON.stringify({
@@ -196,15 +196,6 @@ export default function UsuariosPage() {
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/dashboard/admin')}
-                  className="text-white border-white/30 hover:bg-white/10"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Volver
-                </Button>
                 <div>
                   <h2 className="text-2xl font-bold text-white font-montserrat">
                     Gestión de Usuarios
@@ -216,14 +207,6 @@ export default function UsuariosPage() {
               </div>
               
               <div className="flex space-x-3">
-                <Button
-                  variant="outline"
-                  className="text-white border-white/30 hover:bg-white/10"
-                  onClick={handleExport}
-                >
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Exportar
-                </Button>
                 <Button
                   className="bg-white hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl"
                   style={{color: '#3B82F6'}}
@@ -286,7 +269,7 @@ export default function UsuariosPage() {
           </div>
 
           {/* Users Table */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/15">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-white font-montserrat">
@@ -372,7 +355,7 @@ export default function UsuariosPage() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className="text-sm text-gray-700">
-                                {usuario.created_at ? new Date(usuario.created_at).toLocaleDateString('es-CO') : '-'}
+                                {usuario.creado_en ? new Date(usuario.creado_en).toLocaleDateString('es-CO') : '-'}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -383,14 +366,6 @@ export default function UsuariosPage() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => router.push(`/dashboard/admin/usuarios/${usuario.id_usuario}`)}
-                                className="text-blue-600 hover:bg-blue-900"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
                               <Button 
                                 variant="outline" 
                                 size="sm"
@@ -413,16 +388,20 @@ export default function UsuariosPage() {
                       </tbody>
                     </table>
                   </div>
-                  <div style={{backgroundColor: '#F0F4FC'}} className="px-6 py-4">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      totalItems={totalItems}
-                      itemsPerPage={itemsPerPage}
-                      onPageChange={goToPage}
-                      onItemsPerPageChange={changeItemsPerPage}
-                    />
-                  </div>
+                    <div
+                      style={{ backgroundColor: '#F0F4FC', color: 'black' }}
+                      className="px-6 py-4"
+                    >
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={goToPage}
+                        onItemsPerPageChange={changeItemsPerPage}
+                      />
+                    </div>
+
                 </div>
               )}
             </div>

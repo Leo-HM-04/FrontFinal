@@ -1,43 +1,45 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV !== 'production';
+
 const nextConfig = {
-  // Optimizaciones de compilación
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
-  
-  // Optimizaciones de imágenes
-  images: {
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60,
-  },
-  
-  // Configuración de compresión
-  compress: true,
-  
-  // Headers para optimización
+  // Configuración compatible con Turbopack
+  ...(isDev && {
+    // Configuración simplificada para desarrollo
+    webpack: (config, { dev, isServer }) => {
+      if (dev && !isServer) {
+        // Configuración básica de watch
+        config.watchOptions = {
+          poll: 1000,
+          aggregateTimeout: 300,
+          ignored: /node_modules/,
+        };
+      }
+      return config;
+    },
+  }),
+
+  // Headers anti-cache para desarrollo
   async headers() {
-    return [
-      {
-        source: '/_next/static/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
+    if (isDev) {
+      return [
+        {
+          source: '/(.*)',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'no-cache, no-store, must-revalidate',
+            },
+          ],
+        },
+      ];
+    }
+    return [];
   },
-  
-  // Redirecciones
-  async redirects() {
-    return [
-      {
-        source: '/usuarios',
-        destination: '/dashboard/admin/usuarios',
-        permanent: true,
-      },
-    ];
+
+  // Configuración de imágenes
+  images: {
+    minimumCacheTTL: isDev ? 0 : 60,
+    unoptimized: isDev,
   },
 };
 

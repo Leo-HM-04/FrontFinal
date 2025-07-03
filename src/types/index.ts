@@ -9,7 +9,7 @@ export interface User {
   bloqueado: boolean;
   bloqueo_temporal_fin?: string;
   bloqueo_temporal_activado: boolean;
-  created_at: string;
+  creado_en: string; // Cambiado a DataTransfer para manejar fechas
   updated_at: string;
 }
 

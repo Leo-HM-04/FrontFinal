@@ -40,13 +40,13 @@ export function useAdvancedFilters<T extends User | Solicitud>(data: T[], type: 
         if (filters.rol && user.rol !== filters.rol) return false;
         
         if (filters.fechaDesde) {
-          const userDate = new Date(user.created_at);
+          const userDate = new Date(user.creado_en);
           const fromDate = new Date(filters.fechaDesde);
           if (userDate < fromDate) return false;
         }
         
         if (filters.fechaHasta) {
-          const userDate = new Date(user.created_at);
+          const userDate = new Date(user.creado_en);
           const toDate = new Date(filters.fechaHasta);
           toDate.setHours(23, 59, 59, 999); // Incluir todo el día
           if (userDate > toDate) return false;
