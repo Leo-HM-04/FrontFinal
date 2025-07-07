@@ -72,7 +72,7 @@ export function ComprobanteViewModal({ isOpen, pago, onClose }: ComprobanteViewM
           <table className="w-full mb-6">
             <tbody>
               <tr className="border-b border-gray-200">
-                <td className="py-2 text-gray-500">Comprobante #:</td>
+                <td className="py-2 text-gray-500">Comprobante :</td>
                 <td className="py-2 font-medium text-gray-800 text-right">{pago.comprobante_id}</td>
               </tr>
               <tr className="border-b border-gray-200">

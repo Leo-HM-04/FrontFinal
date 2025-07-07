@@ -23,8 +23,7 @@ export default function EditUsuarioPage() {
         nombre: '',
         email: '',
         rol: '',
-        password: '',
-        bloqueado: false
+        password: ''
     });
 
     useEffect(() => {
@@ -41,8 +40,7 @@ export default function EditUsuarioPage() {
                 nombre: data.nombre,
                 email: data.email,
                 rol: data.rol,
-                password: '',
-                bloqueado: data.bloqueado || false
+                password: ''
             });
         } catch (error) {
             console.error('Error fetching usuario:', error);
@@ -62,17 +60,16 @@ export default function EditUsuarioPage() {
                 nombre: formData.nombre.trim(),
                 email: formData.email.trim(),
                 rol: formData.rol,
-                bloqueado: formData.bloqueado,
                 ...(formData.password.trim() ? { password: formData.password } : {})
             };
             
             await UsuariosService.update(usuario.id_usuario, dataToUpdate);
             toast.success('Usuario actualizado exitosamente');
             
-            // Update local state
+            // Update local state (without bloqueado since it's not part of the form)
             setUsuario(prev => prev ? { ...prev, ...dataToUpdate } : null);
             
-            // Clear password field
+            // Clear password field after successful update
             setFormData(prev => ({ ...prev, password: '' }));
         } catch (error) {
             console.error('Error updating usuario:', error);
@@ -82,32 +79,11 @@ export default function EditUsuarioPage() {
         }
     };
 
-    const handleToggleBlock = async () => {
-        if (!usuario) return;
-
-        setTogglingBlock(true);
-        try {
-            const newBlockedStatus = !usuario.bloqueado;
-            await UsuariosService.update(usuario.id_usuario, { bloqueado: newBlockedStatus });
-            
-            // Update local state
-            setUsuario(prev => prev ? { ...prev, bloqueado: newBlockedStatus } : null);
-            setFormData(prev => ({ ...prev, bloqueado: newBlockedStatus }));
-            
-            toast.success(`Usuario ${newBlockedStatus ? 'bloqueado' : 'desbloqueado'} exitosamente`);
-        } catch (error) {
-            console.error('Error toggling user block status:', error);
-            toast.error('Error al cambiar el estado del usuario');
-        } finally {
-            setTogglingBlock(false);
-        }
-    };
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+            [name]: value
         }));
     };
 
@@ -173,12 +149,19 @@ export default function EditUsuarioPage() {
                                 </div>
                             </div>
                             
-                            {/* Dynamic Toggle Switch */}
-                            <div className="flex items-center space-x-4">
+                            {/* Professional Toggle Switch for Block/Unblock */}
+                            <div className="flex items-center space-x-6">
                                 <div className="text-right">
-                                    <p className="text-white text-sm font-medium">Estado del usuario</p>
+                                    <div className="flex items-center space-x-2 mb-1">
+                                        <div className={`w-3 h-3 rounded-full ${
+                                            usuario?.bloqueado ? 'bg-red-500 animate-pulse' : 'bg-green-500'
+                                        }`} />
+                                        <p className="text-white text-sm font-semibold">
+                                            Estado del Usuario
+                                        </p>
+                                    </div>
                                     <p className="text-white/70 text-xs">
-                                        {usuario?.bloqueado ? 'Acceso bloqueado al sistema' : 'Acceso permitido al sistema'}
+                                        {usuario?.bloqueado ? 'Acceso denegado al sistema' : 'Acceso completo al sistema'}
                                     </p>
                                 </div>
                                 
@@ -190,8 +173,13 @@ export default function EditUsuarioPage() {
                                         try {
                                             await UsuariosService.update(usuario!.id_usuario, { bloqueado: newBlockedStatus });
                                             setUsuario(prev => prev ? { ...prev, bloqueado: newBlockedStatus } : null);
-                                            setFormData(prev => ({ ...prev, bloqueado: newBlockedStatus }));
-                                            toast.success(`Usuario ${newBlockedStatus ? 'bloqueado' : 'desbloqueado'} exitosamente`);
+                                            toast.success(
+                                                `Usuario ${newBlockedStatus ? 'bloqueado' : 'desbloqueado'} correctamente`,
+                                                {
+                                                    icon: newBlockedStatus ? '🔒' : '✅',
+                                                    duration: 4000
+                                                }
+                                            );
                                         } catch (error) {
                                             console.error('Error toggling user block status:', error);
                                             toast.error('Error al cambiar el estado del usuario');
@@ -201,6 +189,7 @@ export default function EditUsuarioPage() {
                                     }}
                                     loading={togglingBlock}
                                     size="lg"
+                                    variant="success"
                                     labels={{
                                         inactive: 'Bloqueado',
                                         active: 'Activo'
@@ -209,6 +198,7 @@ export default function EditUsuarioPage() {
                                         active: <UserCheck className="w-full h-full" />,
                                         inactive: <UserX className="w-full h-full" />
                                     }}
+                                    description="Control de acceso al sistema"
                                 />
                             </div>
                         </div>
@@ -246,7 +236,7 @@ export default function EditUsuarioPage() {
                                     </div>
                                     
                                     <div>
-                                        <label className="text-white/70 text-sm">Estado</label>
+                                        <label className="text-white/70 text-sm">Estado Actual</label>
                                         <div className="flex items-center space-x-2 mt-1">
                                             {usuario?.bloqueado ? (
                                                 <UserX className="w-4 h-4 text-red-400" />
@@ -333,38 +323,13 @@ export default function EditUsuarioPage() {
                                                 value={formData.password}
                                                 onChange={handleInputChange}
                                                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                                placeholder="Dejar vacío para mantener actual"
+                                                placeholder="Dejar vacío para mantener contraseña actual"
                                                 minLength={6}
+                                                autoComplete="new-password"
                                             />
                                             <p className="text-white/60 text-xs mt-1">
                                                 Solo introduzca una contraseña si desea cambiarla (mínimo 6 caracteres)
                                             </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Status Toggle in Form */}
-                                    <div className="border-t border-white/20 pt-6">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <label className="text-white font-medium">Estado del usuario</label>
-                                                <p className="text-white/60 text-sm mt-1">
-                                                    Controla si el usuario puede acceder al sistema
-                                                </p>
-                                            </div>
-                                            
-                                            <ToggleSwitch
-                                                checked={!formData.bloqueado}
-                                                onChange={(isActive) => setFormData(prev => ({ ...prev, bloqueado: !isActive }))}
-                                                size="md"
-                                                labels={{
-                                                    inactive: 'Bloqueado',
-                                                    active: 'Activo'
-                                                }}
-                                                icons={{
-                                                    active: <UserCheck className="w-full h-full" />,
-                                                    inactive: <UserX className="w-full h-full" />
-                                                }}
-                                            />
                                         </div>
                                     </div>
 

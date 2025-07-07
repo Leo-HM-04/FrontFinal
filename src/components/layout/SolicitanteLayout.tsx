@@ -19,7 +19,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
     const router = useRouter();
 
     return (
-        <div className="min-h-screen font-sans" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
+        <div className="min-h-screen font-sans" style={{background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)'}}>
             {/* Header */}
             <header className="bg-white/10 backdrop-blur-lg border-b border-white/20">
                 <div className="max-w-7xl mx-auto px-6">
