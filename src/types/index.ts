@@ -7,6 +7,7 @@ export interface User {
   rol: UserRole;
   intentos_fallidos: number;
   bloqueado: boolean;
+  activo: boolean; // ✅ AGREGAR ESTA LÍNEA
   bloqueo_temporal_fin?: string;
   bloqueo_temporal_activado: boolean;
   creado_en: string; // Cambiado a DataTransfer para manejar fechas

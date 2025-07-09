@@ -7,7 +7,7 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { ConfirmDeleteModal } from '@/components/common/ConfirmDeleteModal';
+import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
 import { FileText, Trash2, Edit, Eye } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
@@ -163,7 +163,7 @@ export default function SolicitudesPage() {
           </div>
 
           {/* Filters */}
-          <div className="bg-white rounded-xl p-4 mb-6">
+          <div className="bg-white/10 rounded-xl p-4 mb-6">
             <AdvancedFilters
               filters={filters}
               onFiltersChange={updateFilters}
@@ -286,7 +286,7 @@ export default function SolicitudesPage() {
           </div>
 
           {/* Delete Confirmation Modal */}
-          <ConfirmDeleteModal
+          <ConfirmDeleteSoli
             isOpen={showDeleteModal}
             onClose={() => setShowDeleteModal(false)}
             onConfirm={confirmDelete}

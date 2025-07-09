@@ -1,15 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-times: "Times New Roman", Times, serif;
+  --font-montserrat: 'Montserrat', sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-times: var(--font-times);
+  --font-montserrat: var(--font-montserrat);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,16 +23,15 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-times), "Times New Roman", Times, serif;
+  font-family: var(--font-montserrat);
   font-weight: 400;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Asegurar que todos los elementos usen Times New Roman */
 *, *::before, *::after {
-  font-family: var(--font-times), "Times New Roman", Times, serif;
+  font-family: var(--font-montserrat);
 }
 
 /* Scrollbar personalizado */
@@ -197,28 +197,27 @@ input:focus, select:focus, textarea:focus {
 
 @layer base {
   :root {
-    --font-times: "Times New Roman", Times, serif;
+    --font-montserrat: 'Montserrat', sans-serif;
   }
-  
+
   * {
-    font-family: var(--font-times);
+    font-family: var(--font-montserrat);
   }
-  
+
   body {
-    font-family: var(--font-times);
+    font-family: var(--font-montserrat);
     font-weight: 400;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-times);
+    font-family: var(--font-montserrat);
     font-weight: 700;
   }
-  
+
   button, input, select, textarea {
-    font-family: var(--font-times);
+    font-family: var(--font-montserrat);
   }
 }
-

@@ -4,7 +4,7 @@ import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
-interface ConfirmDeleteModalProps {
+interface ConfirmDeleteSoliProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -14,7 +14,7 @@ interface ConfirmDeleteModalProps {
   loading?: boolean;
 }
 
-export function ConfirmDeleteModal({ 
+export function ConfirmDeleteSoli({ 
   isOpen, 
   onClose, 
   onConfirm, 
@@ -22,7 +22,7 @@ export function ConfirmDeleteModal({
   message, 
   itemName,
   loading = false 
-}: ConfirmDeleteModalProps) {
+}: ConfirmDeleteSoliProps) {
   if (!isOpen) return null;
 
   return (
@@ -61,7 +61,7 @@ export function ConfirmDeleteModal({
 
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-6">
             <p className="text-sm text-red-700">
-              <strong>⚠️</strong> Se eliminaran todos las solicitudes o pagos que esten relacionados a este usuario. Haz esto solo si estas completamente seguro! De lo contrario, marca al usuario como "Bloqueado" para evitar que el usuario pueda interactuar con el sistema.
+              <strong>Advertencia⚠️</strong> Haz esto solo si estas completamente seguro!
             </p>
           </div>
 

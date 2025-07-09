@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -14,6 +15,7 @@ import { exportUsuariosToCSV } from '@/utils/exportUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@/types';
 import { toast } from 'react-hot-toast';
+
 
 export default function UsuariosPage() {
   const router = useRouter();
@@ -91,42 +93,54 @@ export default function UsuariosPage() {
     changeItemsPerPage,
   } = usePagination({ data: filteredByRole, initialItemsPerPage: 5 });
 
-  const fetchUsuarios = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      // Intentar cargar del cache
-      const cached = sessionStorage.getItem(cacheKey);
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < CACHE_TTL) {
-          setUsuarios(data);
-          setLoading(false);
-          return;
-        }
-      }
+  const searchParams = useSearchParams();
+const updatedFlag = searchParams.get('updated'); // también puedes usar 'created' o 'deleted' luego
 
-      const data = await UsuariosService.getAll();
-      const sortedData = data.sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
-      
-      // Guardar en cache
-      sessionStorage.setItem(cacheKey, JSON.stringify({
-        data: sortedData,
-        timestamp: Date.now()
-      }));
-      
-      setUsuarios(sortedData);
-    } catch (error) {
-      console.error('Error fetching usuarios:', error);
-      toast.error('Error al cargar usuarios');
-    } finally {
-      setLoading(false);
+const fetchUsuarios = useCallback(async () => {
+  try {
+    setLoading(true);
+
+    // Si se detecta que se vino desde edición/creación/eliminación
+    if (updatedFlag === '1') {
+      sessionStorage.removeItem(cacheKey); // limpia cache
+      router.replace('/dashboard/admin/usuarios'); // limpia el query param
     }
-  }, []);
+
+    // Intentar cargar del cache
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_TTL) {
+        setUsuarios(data);
+        setLoading(false);
+        return;
+      }
+    }
+
+    // Cargar desde backend si no hay cache válido
+    const data = await UsuariosService.getAll();
+    const sortedData = data.sort(
+      (a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime()
+    );
+
+    sessionStorage.setItem(cacheKey, JSON.stringify({
+      data: sortedData,
+      timestamp: Date.now()
+    }));
+
+    setUsuarios(sortedData);
+  } catch (error) {
+    console.error('Error fetching usuarios:', error);
+    toast.error('Error al cargar usuarios');
+  } finally {
+    setLoading(false);
+  }
+}, [updatedFlag, router]);
+
 
   useEffect(() => {
-    fetchUsuarios();
-  }, [fetchUsuarios]);
+  fetchUsuarios();
+}, [fetchUsuarios]);
 
   const handleDelete = useCallback((usuario: User) => {
     setSelectedUser(usuario);
@@ -315,9 +329,7 @@ export default function UsuariosPage() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Rol
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                            Estado
-                          </th>
+                          
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
                             Fecha de creación
                           </th>
@@ -346,13 +358,7 @@ export default function UsuariosPage() {
                                 {getRoleLabel(usuario.rol)}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                usuario.bloqueado ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                              }`}>
-                                {usuario.bloqueado ? 'Inactivo' : 'Activo'}
-                              </span>
-                            </td>
+                            
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className="text-sm text-gray-700">
                                 {usuario.creado_en ? new Date(usuario.creado_en).toLocaleDateString('es-CO') : '-'}

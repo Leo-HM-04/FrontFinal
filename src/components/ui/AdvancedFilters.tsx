@@ -55,13 +55,19 @@ export function AdvancedFilters({
   ];
 
   const departamentoOptions = [
-    { value: 'Recursos Humanos', label: 'Recursos Humanos' },
-    { value: 'Tecnología', label: 'Tecnología' },
-    { value: 'Finanzas', label: 'Finanzas' },
-    { value: 'Marketing', label: 'Marketing' },
-    { value: 'Operaciones', label: 'Operaciones' },
-    { value: 'Legal', label: 'Legal' }
+    { value: 'administracion', label: 'Administración' },
+    { value: 'atencion_clientes', label: 'Atención a Clientes' },
+    { value: 'automatizaciones', label: 'Automatizaciones' },
+    { value: 'cobranza', label: 'Cobranza' },
+    { value: 'comercial', label: 'Comercial' },
+    { value: 'contabilidad', label: 'Contabilidad' },
+    { value: 'facturacion', label: 'Facturación' },
+    { value: 'nomina', label: 'Nómina' },
+    { value: 'tesoreria', label: 'Tesorería' },
+    { value: 'ti', label: 'TI' },
+    { value: 'vinculacion', label: 'Vinculación' }
   ];
+
 
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 mb-6 animate-slide-up">

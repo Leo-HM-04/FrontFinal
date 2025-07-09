@@ -60,24 +60,7 @@ export function Pagination({
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Selector de elementos por página */}
-        {showPageSizeSelector && onItemsPerPageChange && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Mostrar:</span>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-              className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-            <span className="text-sm text-gray-600">por página</span>
-          </div>
-        )}
-
+        
         {/* Controles de paginación */}
         <div className="flex items-center gap-1">
           <Button

@@ -65,8 +65,8 @@ export default function CreateUserPage() {
     if (!formData.password) {
       newErrors.password = 'La contraseña es requerida';
       isValid = false;
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
       isValid = false;
     }
 
@@ -83,6 +83,10 @@ export default function CreateUserPage() {
     try {
       await UsuariosService.create(formData);
       toast.success('Usuario creado exitosamente');
+
+      // 🧹 Limpiar caché para que se actualice la tabla
+      sessionStorage.removeItem('usuarios_cache');
+
       router.push('/dashboard/admin/usuarios');
     } catch (error) {
       console.error('Error creating user:', error);
@@ -150,7 +154,7 @@ export default function CreateUserPage() {
                     value={formData.email}
                     onChange={(e) => handleChange('email', e.target.value)}
                     className="bg-white/15 border-white/20 text-white"
-                    placeholder="Ej. usuario@example.com"
+                    placeholder="Ej. usuario@bechapra.com"
                   />
                   {errors.email && (
                     <p className="text-red-300 text-xs mt-1">{errors.email}</p>
@@ -171,7 +175,7 @@ export default function CreateUserPage() {
                     placeholder="**********"
                   />
                   {errors.password && (
-                    <p className="text-red-300 text-xs mt-1">{errors.password}</p>
+                    <p className="text-red-500 text-xs mt-1">{errors.password}</p>
                   )}
                 </div>
 
@@ -232,6 +236,7 @@ export default function CreateUserPage() {
 
               <div className="flex justify-end mt-8">
                 <Button
+                  type="button" // ← importante: evitar que sea 'submit'
                   variant="outline"
                   onClick={() => router.push('/dashboard/admin/usuarios')}
                   className="mr-4 text-white border-white/30 hover:bg-white/10"
@@ -240,8 +245,8 @@ export default function CreateUserPage() {
                 </Button>
                 <Button
                   type="submit"
-                  loading={loading}
-                  className="bg-white text-blue-600 hover:bg-white/90 px-6"
+                  loading={loading} 
+                  className="text-white border-white/30 hover:bg-white/10"
                 >
                   Crear Usuario
                 </Button>
