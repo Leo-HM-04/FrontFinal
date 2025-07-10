@@ -60,6 +60,19 @@ export function useSolicitudes() {
     }
   };
 
+  const updateSolicitud = async (id: number, data: Partial<Solicitud>): Promise<boolean> => {
+    try {
+      const updated = await SolicitudesService.update(id, data);
+      setSolicitudes(prev => prev.map(sol => sol.id_solicitud === id ? updated : sol));
+      toast.success('Solicitud actualizada exitosamente');
+      return true;
+    } catch (error) {
+      console.error('Error actualizando solicitud:', error);
+      toast.error('Error al actualizar la solicitud');
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchSolicitudes();
   }, []);
@@ -72,5 +85,6 @@ export function useSolicitudes() {
     createSolicitud,
     updateEstado,
     deleteSolicitud,
+    updateSolicitud,
   };
 }

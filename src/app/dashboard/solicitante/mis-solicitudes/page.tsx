@@ -7,6 +7,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
+import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { Solicitud } from '@/types';
 import { 
@@ -61,10 +62,14 @@ export default function MisSolicitudesPage() {
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [timeoutError, setTimeoutError] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [solicitudAEliminar, setSolicitudAEliminar] = useState<Solicitud | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [success, setSuccess] = useState('');
 
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   // Estados para filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,7 +85,9 @@ export default function MisSolicitudesPage() {
     const fetchSolicitudes = async () => {
       try {
         const data = await SolicitudesService.getMySolicitudes();
-        setSolicitudes(data);
+        // Ordenar por fecha_creacion descendente (más reciente primero)
+        const sorted = data.sort((a, b) => new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime());
+        setSolicitudes(sorted);
         setError('');
       } catch (err) {
         setError('Error al cargar las solicitudes');
@@ -180,10 +187,29 @@ export default function MisSolicitudesPage() {
     });
   };
 
+  const handleDelete = async () => {
+    if (!solicitudAEliminar) return;
+    setDeleting(true);
+    try {
+      await SolicitudesService.deleteSolicitante(solicitudAEliminar.id_solicitud);
+      setSolicitudes(prev => prev.filter(s => s.id_solicitud !== solicitudAEliminar.id_solicitud));
+      setDeleteModalOpen(false);
+      setSolicitudAEliminar(null);
+      setError('');
+      setSuccess('Solicitud eliminada correctamente.');
+      setTimeout(() => setSuccess(''), 3500);
+    } catch (err: any) {
+      const backendMsg = err?.response?.data?.error || err?.response?.data?.message || err.message || 'Error al eliminar la solicitud';
+      setError(backendMsg);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   // Paginación
   const totalPages = Math.ceil(filteredSolicitudes.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredSolicitudes.length);
   const currentSolicitudes = filteredSolicitudes.slice(startIndex, endIndex);
 
   const filterOptions = [
@@ -218,6 +244,11 @@ export default function MisSolicitudesPage() {
               {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
                   {error}
+                </div>
+              )}
+              {success && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+                  {success}
                 </div>
               )}
 
@@ -267,48 +298,59 @@ export default function MisSolicitudesPage() {
               </div>
 
               {/* Estadísticas rápidas */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white/80 text-sm">Total Solicitudes</p>
-                      <p className="text-2xl font-bold text-white">{solicitudes.length}</p>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 w-full">
+                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-white/80 text-sm">Total Solicitudes</p>
+                        <p className="text-2xl font-bold text-white">{solicitudes.length}</p>
+                      </div>
+                      <FileText className="w-8 h-8 text-white/60" />
                     </div>
-                    <FileText className="w-8 h-8 text-white/60" />
+                  </div>
+                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-white/80 text-sm">Pendientes</p>
+                        <p className="text-2xl font-bold text-white">
+                          {solicitudes.filter(s => s.estado?.toLowerCase() === 'pendiente').length}
+                        </p>
+                      </div>
+                      <Clock className="w-8 h-8 text-yellow-300" />
+                    </div>
+                  </div>
+                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-white/80 text-sm">Aprobadas</p>
+                        <p className="text-2xl font-bold text-white">
+                          {solicitudes.filter(s => s.estado?.toLowerCase() === 'aprobada').length}
+                        </p>
+                      </div>
+                      <CheckCircle className="w-8 h-8 text-green-300" />
+                    </div>
+                  </div>
+                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-white/80 text-sm">Pagadas</p>
+                        <p className="text-2xl font-bold text-white">
+                          {solicitudes.filter(s => s.estado?.toLowerCase() === 'pagada').length}
+                        </p>
+                      </div>
+                      <CheckCircle className="w-8 h-8 text-blue-300" />
+                    </div>
                   </div>
                 </div>
-                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white/80 text-sm">Pendientes</p>
-                      <p className="text-2xl font-bold text-white">
-                        {solicitudes.filter(s => s.estado?.toLowerCase() === 'pendiente').length}
-                      </p>
-                    </div>
-                    <Clock className="w-8 h-8 text-yellow-300" />
-                  </div>
-                </div>
-                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white/80 text-sm">Aprobadas</p>
-                      <p className="text-2xl font-bold text-white">
-                        {solicitudes.filter(s => s.estado?.toLowerCase() === 'aprobada').length}
-                      </p>
-                    </div>
-                    <CheckCircle className="w-8 h-8 text-green-300" />
-                  </div>
-                </div>
-                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white/80 text-sm">Pagadas</p>
-                      <p className="text-2xl font-bold text-white">
-                        {solicitudes.filter(s => s.estado?.toLowerCase() === 'pagada').length}
-                      </p>
-                    </div>
-                    <CheckCircle className="w-8 h-8 text-blue-300" />
-                  </div>
+                <div className="flex justify-end md:justify-center mt-4 md:mt-0">
+                  <Button
+                    onClick={() => router.push('/dashboard/solicitante/nueva-solicitud')}
+                    className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold shadow-lg flex items-center gap-2"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Nueva Solicitud
+                  </Button>
                 </div>
               </div>
 
@@ -322,7 +364,8 @@ export default function MisSolicitudesPage() {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Monto</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Cuenta Destino</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Estado</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Fecha</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Fecha Creación</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Fecha Límite</th>
                         <th className="px-6 py-4 text-center text-sm font-semibold text-white">Acciones</th>
                       </tr>
                     </thead>
@@ -368,16 +411,43 @@ export default function MisSolicitudesPage() {
                                 {formatDate(solicitud.fecha_creacion)}
                               </div>
                             </td>
+                            <td className="px-6 py-4">
+                              <div className="text-white/90 text-sm">
+                                {solicitud.fecha_limite_pago ? formatDate(solicitud.fecha_limite_pago) : '-'}
+                              </div>
+                            </td>
                             <td className="px-6 py-4 text-center">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewDetails(solicitud)}
-                                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300"
-                              >
-                                <Eye className="w-4 h-4 mr-1" />
-                                Ver
-                              </Button>
+                              <div className="flex justify-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewDetails(solicitud)}
+                                  className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300"
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  Ver
+                                </Button>
+                                {solicitud.estado?.toLowerCase() === 'pendiente' && (
+                                  <>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => router.push(`/dashboard/solicitante/editar-solicitud/${solicitud.id_solicitud}`)}
+                                      className="bg-yellow-500/20 text-yellow-200 border border-yellow-400/40 hover:bg-yellow-500/40 transition-all duration-300"
+                                    >
+                                      Editar
+                                    </Button>
+                                    <Button
+                                      variant="danger"
+                                      size="sm"
+                                      onClick={() => { setSolicitudAEliminar(solicitud); setDeleteModalOpen(true); }}
+                                      className="bg-red-500/20 text-red-200 border border-red-400/40 hover:bg-red-500/40 transition-all duration-300"
+                                    >
+                                      Eliminar
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -386,18 +456,37 @@ export default function MisSolicitudesPage() {
                   </table>
                 </div>
 
-                {/* Paginación */}
-                {totalPages > 1 && (
-                  <div className="px-6 py-4 border-t border-white/10 flex justify-center">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      totalItems={filteredSolicitudes.length}
-                      itemsPerPage={itemsPerPage}
-                      onPageChange={setCurrentPage}
-                    />
+                {/* Mejoras de paginación visual */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between px-6 py-6 border-t border-white/10 gap-6 bg-gradient-to-r from-blue-900/30 to-blue-700/20">
+                  <div className="text-white/90 text-base font-medium">
+                    Mostrando <span className="font-bold text-blue-200">{filteredSolicitudes.length === 0 ? 0 : startIndex + 1}-{endIndex}</span> de <span className="font-bold text-blue-200">{filteredSolicitudes.length}</span>
                   </div>
-                )}
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                        className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-400/40 shadow-sm ${currentPage === 1 ? 'bg-gray-400/30 text-white/40 cursor-not-allowed' : 'bg-blue-700/80 text-white hover:bg-blue-800/90'}`}
+                      >Primera</button>
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-400/40 shadow-sm ${currentPage === 1 ? 'bg-gray-400/30 text-white/40 cursor-not-allowed' : 'bg-blue-700/80 text-white hover:bg-blue-800/90'}`}
+                      >Anterior</button>
+                      <span className="text-white/90 text-base font-semibold px-2">Página <span className="text-blue-200">{currentPage}</span> de <span className="text-blue-200">{totalPages}</span></span>
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-400/40 shadow-sm ${currentPage === totalPages ? 'bg-gray-400/30 text-white/40 cursor-not-allowed' : 'bg-blue-700/80 text-white hover:bg-blue-800/90'}`}
+                      >Siguiente</button>
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-400/40 shadow-sm ${currentPage === totalPages ? 'bg-gray-400/30 text-white/40 cursor-not-allowed' : 'bg-blue-700/80 text-white hover:bg-blue-800/90'}`}
+                      >Última</button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Modal de detalles */}
@@ -411,6 +500,17 @@ export default function MisSolicitudesPage() {
                   }}
                 />
               )}
+
+              {/* Modal de confirmación de eliminar */}
+              <ConfirmDeleteSoli
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+                title="¿Eliminar solicitud?"
+                message="Esta acción eliminará la solicitud de forma permanente. No podrás recuperarla."
+                itemName={solicitudAEliminar?.concepto || ''}
+                loading={deleting}
+              />
             </>
           )}
         </div>

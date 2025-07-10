@@ -45,6 +45,7 @@ export interface Solicitud {
   updated_at: string;
   usuario_nombre?: string;
   aprobador_nombre?: string;
+  tipo_pago?: string; // <-- agregado para edición
 }
 
 export interface CreateSolicitudData {

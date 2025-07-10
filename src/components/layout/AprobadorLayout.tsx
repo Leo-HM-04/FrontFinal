@@ -82,8 +82,12 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
                     </div>
                     <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                     <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center ring-2 ring-white/30">
-                        <span className="text-lg font-bold">{user?.nombre?.charAt(0).toUpperCase()}</span>
+                        <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center ring-2 ring-white/30 overflow-hidden">
+                            <img
+                                src="/assets/images/Logo_1x1_Azul@2x.png"
+                                alt="Foto de perfil Bechapra"
+                                className="object-cover w-full h-full"
+                            />
                         </div>
                         <div>
                         <p className="font-semibold">{user?.nombre}</p>
@@ -137,7 +141,8 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
                         ? 'bg-blue-50 text-blue-600 shadow-sm' 
                         : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
                     }`}
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={() => setIsMenuOpen(false)
+                    }
                     >
                     <User className="w-5 h-5 transition-transform group-hover:scale-110" />
                     <span className="font-medium">Mi Perfil</span>

@@ -221,17 +221,6 @@ export default function SolicitudDetailPage() {
                     <span>Ver Factura</span>
                     <ExternalLink className="w-4 h-4 ml-2" />
                   </Button>
-                  {solicitud.soporte_url && (
-                    <Button
-                      variant="outline"
-                      onClick={() => window.open(solicitud.soporte_url, '_blank')}
-                      className="text-white border-white/30 hover:bg-white/10 flex items-center space-x-2"
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span>Ver Soporte</span>
-                      <ExternalLink className="w-4 h-4 ml-2" />
-                    </Button>
-                  )}
                 </div>
               </Card>
 

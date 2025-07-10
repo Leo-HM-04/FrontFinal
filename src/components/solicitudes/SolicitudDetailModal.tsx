@@ -45,103 +45,108 @@ export function SolicitudDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-slide-up">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Fondo degradado oscuro/transparente */}
+      <div
+        className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-blue-900/70 backdrop-blur-sm transition-opacity duration-300"
+        onClick={onClose}
+      />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-slide-up border border-blue-200">
+        {/* Botón de cerrar (X) flotante */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white text-blue-700 border border-blue-200 rounded-full p-2 shadow-lg transition-all duration-200"
+          aria-label="Cerrar"
+        >
+          <X className="w-5 h-5" />
+        </button>
         {/* Header */}
-        <div className="bg-gradient-to-r from-primary-blue to-secondary-blue text-white p-6 rounded-t-lg">
+        <div className="bg-gradient-to-r from-blue-700 to-blue-400 text-white p-6 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">
                 Solicitud #{solicitud.id_solicitud}
               </h2>
-              <p className="text-primary-blue-100 mt-1">
+              <p className="text-blue-100 mt-1">
                 Creada el {new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO')}
               </p>
             </div>
-            <div className="flex items-center space-x-3">
-              <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full border ${getEstadoColor(solicitud.estado)}`}>
-                {solicitud.estado.toUpperCase()}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onClose}
-                className="text-white border-white hover:bg-white hover:text-primary-blue"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full border ${getEstadoColor(solicitud.estado)}`}> 
+              {solicitud.estado.toUpperCase()}
+            </span>
           </div>
         </div>
-
         <div className="p-6">
           {/* Información Principal */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <Card className="p-4">
-              <h3 className="text-lg font-semibold text-primary-dark mb-3 flex items-center">
-                <DollarSign className="w-5 h-5 mr-2 text-primary-blue" />
+            <Card className="p-4 bg-white/80 border border-blue-100">
+              <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                <DollarSign className="w-5 h-5 mr-2 text-blue-700" />
                 Información Financiera
               </h3>
               <div className="space-y-3">
                 <div>
-                  <span className="text-sm text-gray-600">Monto:</span>
-                  <p className="text-2xl font-bold text-primary-blue">{formatCurrency(solicitud.monto)}</p>
+                  <span className="text-sm text-blue-700/70">Monto:</span>
+                  <p className="text-2xl font-bold text-blue-700">{formatCurrency(solicitud.monto)}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Cuenta Destino:</span>
-                  <p className="font-mono text-gray-900">{solicitud.cuenta_destino}</p>
+                  <span className="text-sm text-blue-700/70">Cuenta Destino:</span>
+                  <p className="font-mono text-blue-900">{solicitud.cuenta_destino}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Fecha Límite:</span>
-                  <p className="text-gray-900">{new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-CO')}</p>
+                  <span className="text-sm text-blue-700/70">Fecha Límite:</span>
+                  <p className="text-blue-900">{new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-CO')}</p>
                 </div>
               </div>
             </Card>
-
-            <Card className="p-4">
-              <h3 className="text-lg font-semibold text-primary-dark mb-3 flex items-center">
-                <Building className="w-5 h-5 mr-2 text-secondary-blue" />
+            <Card className="p-4 bg-white/80 border border-blue-100">
+              <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                <Building className="w-5 h-5 mr-2 text-blue-700" />
                 Información Organizacional
               </h3>
               <div className="space-y-3">
                 <div>
-                  <span className="text-sm text-gray-600">Departamento:</span>
-                  <p className="text-gray-900">{solicitud.departamento}</p>
+                  <span className="text-sm text-blue-700/70">Departamento:</span>
+                  <p className="text-blue-900">{solicitud.departamento}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Solicitante:</span>
-                  <p className="text-gray-900">{solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}</p>
+                  <span className="text-sm text-blue-700/70">Solicitante:</span>
+                  <p className="text-blue-900">{solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}</p>
                 </div>
                 {solicitud.aprobador_nombre && (
                   <div>
-                    <span className="text-sm text-gray-600">Aprobado por:</span>
-                    <p className="text-gray-900">{solicitud.aprobador_nombre}</p>
+                    <span className="text-sm text-blue-700/70">Aprobado por:</span>
+                    <p className="text-blue-900">{solicitud.aprobador_nombre}</p>
                   </div>
                 )}
               </div>
             </Card>
           </div>
-
           {/* Concepto */}
-          <Card className="p-4 mb-6">
-            <h3 className="text-lg font-semibold text-primary-dark mb-3 flex items-center">
-              <FileText className="w-5 h-5 mr-2 text-primary-blue" />
+          <Card className="p-4 mb-6 bg-white/90 border border-blue-100">
+            <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-blue-700" />
               Concepto
             </h3>
-            <p className="text-gray-900 leading-relaxed">{solicitud.concepto}</p>
+            <p className="text-blue-900 leading-relaxed">{solicitud.concepto}</p>
           </Card>
-
           {/* Documentos */}
-          <Card className="p-4 mb-6">
-            <h3 className="text-lg font-semibold text-primary-dark mb-3 flex items-center">
-              <ExternalLink className="w-5 h-5 mr-2 text-secondary-blue" />
+          <Card className="p-4 mb-6 bg-white/90 border border-blue-100">
+            <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+              <ExternalLink className="w-5 h-5 mr-2 text-blue-700" />
               Documentos Adjuntos
             </h3>
             <div className="flex flex-wrap gap-3">
               <Button
                 variant="outline"
-                onClick={() => window.open(solicitud.factura_url, '_blank')}
-                className="flex items-center space-x-2"
+                onClick={() => {
+                  const backendBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+                  const facturaUrl = solicitud.factura_url.startsWith('http')
+                    ? solicitud.factura_url
+                    : backendBase + solicitud.factura_url;
+                  window.open(facturaUrl, '_blank');
+                }}
+                className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50"
               >
                 <FileText className="w-4 h-4" />
                 <span>Ver Factura</span>
@@ -151,7 +156,7 @@ export function SolicitudDetailModal({
                 <Button
                   variant="outline"
                   onClick={() => window.open(solicitud.soporte_url, '_blank')}
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
                   <FileText className="w-4 h-4" />
                   <span>Ver Soporte</span>
@@ -160,58 +165,6 @@ export function SolicitudDetailModal({
               )}
             </div>
           </Card>
-
-          {/* Comentarios del Aprobador */}
-          {solicitud.comentario_aprobador && (
-            <Card className="p-4 mb-6 bg-gradient-to-r from-light-bg-50 to-light-bg-100">
-              <h3 className="text-lg font-semibold text-primary-dark mb-3 flex items-center">
-                <MessageSquare className="w-5 h-5 mr-2 text-primary-blue" />
-                Comentario del Aprobador
-              </h3>
-              <p className="text-gray-900 italic">"{solicitud.comentario_aprobador}"</p>
-              {solicitud.fecha_revision && (
-                <p className="text-sm text-gray-500 mt-2">
-                  Revisado el {new Date(solicitud.fecha_revision).toLocaleDateString('es-CO')}
-                </p>
-              )}
-            </Card>
-          )}
-
-          {/* Acciones para Aprobadores */}
-          {showActions && solicitud.estado === 'pendiente' && userRole === 'aprobador' && (
-            <Card className="p-4 bg-gradient-to-r from-light-bg-50 to-primary-blue-50">
-              <h3 className="text-lg font-semibold text-primary-dark mb-3">
-                Acciones de Aprobación
-              </h3>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-primary-dark mb-2">
-                  Comentario (Opcional)
-                </label>
-                <textarea
-                  value={comentario}
-                  onChange={(e) => setComentario(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent"
-                  placeholder="Agrega un comentario sobre tu decisión..."
-                />
-              </div>
-              <div className="flex space-x-3">
-                <Button
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => onApprove?.(solicitud.id_solicitud, comentario)}
-                >
-                  <span>✓ Autorizar Solicitud</span>
-                </Button>
-                <Button
-                  variant="danger"
-                  className="flex-1"
-                  onClick={() => onReject?.(solicitud.id_solicitud, comentario)}
-                >
-                  <span>✗ Rechazar Solicitud</span>
-                </Button>
-              </div>
-            </Card>
-          )}
         </div>
       </div>
     </div>

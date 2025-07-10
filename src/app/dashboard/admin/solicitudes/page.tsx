@@ -242,25 +242,15 @@ export default function SolicitudesPage() {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => router.push(`/dashboard/admin/solicitudes/${solicitud.id_solicitud}`)}
-                                style={{color: '#3B82F6', borderColor: '#3B82F6'}}
-                                className="hover:bg-blue-50"
+                                className="text-blue-600 border-blue-300 hover:bg-blue-500"
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => router.push(`/dashboard/admin/solicitudes/${solicitud.id_solicitud}/edit`)}
-                                style={{color: '#3B82F6', borderColor: '#3B82F6'}}
-                                className="hover:bg-blue-50"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
                                 onClick={() => handleDelete(solicitud)}
-                                className="text-red-600 border-red-300 hover:bg-red-50"
+                                className="text-red-600 border-red-300 hover:bg-red-500"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
