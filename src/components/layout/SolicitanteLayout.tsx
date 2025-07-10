@@ -37,7 +37,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
                             variant="outline"
                             size="sm"
                             onClick={() => alert('Notificaciones')}
-                            className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium"
+                            className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium relative"
                         >
                             Notificaciones
                             <Bell className="w-4 h-4 ml-2" />
@@ -55,7 +55,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
                     />
                     <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-out">
                         <div className="flex flex-col h-full">
-                            <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
+                            <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)'}}>
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xl font-bold">Panel Solicitante</h2>
                                 </div>
@@ -70,6 +70,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
                                         </div>
                                         <div>
                                             <p className="font-semibold">{user?.nombre}</p>
+                                            <p className="text-xs text-white/70">{user?.email}</p>
                                             <p className="text-sm text-white/90">Solicitante</p>
                                         </div>
                                     </div>
