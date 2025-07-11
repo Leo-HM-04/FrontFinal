@@ -25,7 +25,7 @@ export interface AuthResponse {
   token: string;
 }
 
-export type SolicitudEstado = 'pendiente' | 'autorizada' | 'rechazada';
+export type SolicitudEstado = 'pendiente' | 'autorizada' | 'rechazada' | 'pagada';
 
 export interface Solicitud {
   id_solicitud: number;
@@ -46,6 +46,7 @@ export interface Solicitud {
   usuario_nombre?: string;
   aprobador_nombre?: string;
   tipo_pago?: string; // <-- agregado para edición
+  nombre_usuario?: string; // <-- Campo agregado
 }
 
 export interface CreateSolicitudData {

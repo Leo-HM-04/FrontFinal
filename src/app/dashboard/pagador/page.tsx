@@ -48,7 +48,7 @@ export default function PagadorDashboardNew() {
     <ProtectedRoute requiredRoles={['pagador_banca']}>
       <PagadorLayout>
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           {/* Header */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
             <h1 className="text-2xl font-bold text-white font-sans">
@@ -60,31 +60,28 @@ export default function PagadorDashboardNew() {
           </div>
 
           {/* Main Content - Dashboard Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start mb-12">
             {/* Left Column - Welcome Content */}
             <div className="text-white space-y-8">
               {/* Title */}
-              <h2 className="text-4xl font-bold leading-tight">
+              <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
                 ÁREA DE PAGADOR
               </h2>
-              
               {/* Subtitle */}
-              <h3 className="text-2xl font-semibold">
+              <h3 className="text-xl sm:text-2xl font-semibold">
                 Bienvenido, {user?.nombre}
               </h3>
-              
               {/* Description */}
-              <p className="text-lg text-white leading-relaxed max-w-md">
+              <p className="text-base sm:text-lg text-white leading-relaxed max-w-md">
                 En esta plataforma podrás procesar pagos de solicitudes aprobadas, consultar el historial de pagos realizados y gestionar tus datos personales.
               </p>
-
               {/* Help Button */}
               <Button 
                 variant="outline"
                 size="lg"
                 onClick={handleRequestHelp}
                 disabled={isSendingHelp}
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-8 py-4 rounded-xl font-medium text-lg"
+                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-medium text-base sm:text-lg w-full sm:w-auto"
               >
                 {isSendingHelp ? (
                   <>
@@ -99,11 +96,10 @@ export default function PagadorDashboardNew() {
                 )}
               </Button>
             </div>
-            
             {/* Right Column - Quick Access */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
               <div 
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer"
+                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer flex flex-col justify-center"
                 onClick={() => router.push('/dashboard/pagador/pagos/pendientes')}
               >
                 <div className="flex flex-col items-center text-center">
@@ -113,7 +109,7 @@ export default function PagadorDashboardNew() {
                 </div>
               </div>
               <div 
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer"
+                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer flex flex-col justify-center"
                 onClick={() => router.push('/dashboard/pagador/pagos/historial')}
               >
                 <div className="flex flex-col items-center text-center">
@@ -123,7 +119,7 @@ export default function PagadorDashboardNew() {
                 </div>
               </div>
               <div 
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer sm:col-span-2"
+                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer flex flex-col justify-center sm:col-span-2"
                 onClick={() => router.push('/dashboard/pagador/perfil')}
               >
                 <div className="flex flex-col items-center text-center">

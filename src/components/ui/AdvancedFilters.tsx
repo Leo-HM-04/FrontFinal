@@ -4,6 +4,10 @@ import React, { useState } from 'react';
 import { Filter, X, Search, Download, RefreshCw } from 'lucide-react';
 import { Button } from './Button';
 import { Input } from './Input';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { es } from 'date-fns/locale/es';
+import 'react-datepicker/dist/react-datepicker.css';
+registerLocale('es', es);
 
 interface FilterState {
   search: string;
@@ -214,21 +218,27 @@ export function AdvancedFilters({
 
             <div>
               <label className="block text-sm font-medium text-white/80 mb-1">Fecha Desde</label>
-              <input
-                type="date"
-                value={filters.fechaDesde || ''}
-                onChange={(e) => updateFilter('fechaDesde', e.target.value || undefined)}
-                className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+              <DatePicker
+                locale="es"
+                selected={filters.fechaDesde ? new Date(filters.fechaDesde) : null}
+                onChange={date => updateFilter('fechaDesde', date ? date.toISOString().slice(0, 10) : undefined)}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Selecciona una fecha"
+                className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                calendarClassName="bg-white text-black"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-white/80 mb-1">Fecha Hasta</label>
-              <input
-                type="date"
-                value={filters.fechaHasta || ''}
-                onChange={(e) => updateFilter('fechaHasta', e.target.value || undefined)}
-                className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+              <DatePicker
+                locale="es"
+                selected={filters.fechaHasta ? new Date(filters.fechaHasta) : null}
+                onChange={date => updateFilter('fechaHasta', date ? date.toISOString().slice(0, 10) : undefined)}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Selecciona una fecha"
+                className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                calendarClassName="bg-white text-black"
               />
             </div>
           </div>

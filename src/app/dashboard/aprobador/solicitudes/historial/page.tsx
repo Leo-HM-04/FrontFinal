@@ -6,7 +6,7 @@ import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye, CheckCircle, XCircle, BarChart2 } from 'lucide-react';
+import { FileText, Eye, CheckCircle, XCircle, BarChart2, UserCheck, UserX } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
@@ -106,6 +106,18 @@ export default function HistorialSolicitudesPage() {
   const autorizadas = solicitudes.filter(s => s.estado === 'autorizada');
   const rechazadas = solicitudes.filter(s => s.estado === 'rechazada');
   const totalAprobado = autorizadas.reduce((sum, s) => sum + s.monto, 0);
+  const totalRechazado = rechazadas.reduce((sum, s) => sum + s.monto, 0);
+
+  // Nuevo: búsqueda rápida
+  const [search, setSearch] = useState('');
+  const quickFilteredSolicitudes = filteredSolicitudes.filter(s =>
+    s.usuario_nombre?.toLowerCase().includes(search.toLowerCase()) ||
+    s.departamento?.toLowerCase().includes(search.toLowerCase()) ||
+    s.estado?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Nuevo: filtrar por rango de fechas
+  // ...puedes agregar un filtro avanzado con datepicker si lo deseas...
 
   return (
     <ProtectedRoute requiredRoles={['aprobador']}>
@@ -113,7 +125,7 @@ export default function HistorialSolicitudesPage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Header */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-white font-sans">
                   Historial de Solicitudes
@@ -122,74 +134,79 @@ export default function HistorialSolicitudesPage() {
                   Total: {totalItems} solicitudes procesadas
                 </p>
               </div>
-              <Button
-                onClick={openExportModal}
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25"
-              >
-                <FileText className="w-4 h-4 mr-2" /> Exportar
-              </Button>
+              <div className="flex gap-2 items-center">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre, departamento o estado..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                  <Eye className="absolute left-2 top-2.5 w-5 h-5 text-white/60" />
+                </div>
+                <Button
+                  onClick={openExportModal}
+                  className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 flex items-center"
+                >
+                  <FileText className="w-4 h-4 mr-2" /> Exportar
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-white/20">
-                  <FileText className="w-8 h-8 text-white" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Total Procesadas</p>
-                  <p className="text-2xl font-bold text-white">{solicitudes.length}</p>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8 w-full">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 flex items-center min-w-0">
+              <div className="p-3 rounded-full bg-white/20 flex-shrink-0">
+                <FileText className="w-8 h-8 text-white" />
+              </div>
+              <div className="ml-4 min-w-0">
+                <p className="text-sm font-medium text-white/80 truncate">Total Procesadas</p>
+                <p className="text-2xl font-bold text-white truncate">{solicitudes.length}</p>
               </div>
             </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-green-500/20">
-                  <CheckCircle className="w-8 h-8 text-green-300" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Aprobadas</p>
-                  <p className="text-2xl font-bold text-white">
-                    {autorizadas.length}
-                  </p>
-                </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 flex items-center min-w-0">
+              <div className="p-3 rounded-full bg-green-500/20 flex-shrink-0">
+                <CheckCircle className="w-8 h-8 text-green-300" />
+              </div>
+              <div className="ml-4 min-w-0">
+                <p className="text-sm font-medium text-white/80 truncate">Aprobadas</p>
+                <p className="text-2xl font-bold text-white truncate">{autorizadas.length}</p>
               </div>
             </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-red-500/20">
-                  <XCircle className="w-8 h-8 text-red-300" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Rechazadas</p>
-                  <p className="text-2xl font-bold text-white">
-                    {rechazadas.length}
-                  </p>
-                </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 flex items-center min-w-0">
+              <div className="p-3 rounded-full bg-red-500/20 flex-shrink-0">
+                <XCircle className="w-8 h-8 text-red-300" />
+              </div>
+              <div className="ml-4 min-w-0">
+                <p className="text-sm font-medium text-white/80 truncate">Rechazadas</p>
+                <p className="text-2xl font-bold text-white truncate">{rechazadas.length}</p>
               </div>
             </div>
-
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-blue-500/20">
-                  <BarChart2 className="w-8 h-8 text-blue-300" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Total Aprobado</p>
-                  <p className="text-2xl font-bold text-white">
-                    {formatCurrency(totalAprobado)}
-                  </p>
-                </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 flex items-center min-w-0">
+              <div className="p-3 rounded-full bg-blue-500/20 flex-shrink-0">
+                <BarChart2 className="w-8 h-8 text-blue-300" />
+              </div>
+              <div className="ml-4 min-w-0">
+                <p className="text-sm font-medium text-white/80 truncate">Total Aprobado</p>
+                <p className="text-2xl font-bold text-white truncate">{formatCurrency(totalAprobado)}</p>
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 flex items-center min-w-0">
+              <div className="p-3 rounded-full bg-red-500/20 flex-shrink-0">
+                <UserX className="w-8 h-8 text-red-400" />
+              </div>
+              <div className="ml-4 min-w-0">
+                <p className="text-sm font-medium text-white/80 truncate">Total Rechazado</p>
+                <p className="text-2xl font-bold text-white truncate">{formatCurrency(totalRechazado)}</p>
               </div>
             </div>
           </div>
 
           {/* Filters */}
-          <div className="bg-white/15 rounded-xl p-4 mb-6">              <AdvancedFilters
+          <div className="bg-white/15 rounded-xl p-4 mb-6">
+            <AdvancedFilters
               filters={filters}
               onFiltersChange={updateFilters}
               onExport={() => openExportModal()}
@@ -204,7 +221,6 @@ export default function HistorialSolicitudesPage() {
               <h3 className="text-xl font-semibold text-white mb-6 font-sans">
                 Solicitudes Procesadas
               </h3>
-              
               {loading ? (
                 <div className="text-center py-8">
                   <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -212,7 +228,7 @@ export default function HistorialSolicitudesPage() {
                 </div>
               ) : (
                 <div className="bg-white rounded-xl overflow-hidden">
-                  {paginatedSolicitudes.length === 0 ? (
+                  {quickFilteredSolicitudes.length === 0 ? (
                     <div className="py-12 text-center">
                       <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                       <p className="text-gray-500 text-lg">No hay solicitudes procesadas</p>
@@ -224,29 +240,17 @@ export default function HistorialSolicitudesPage() {
                         <table className="min-w-full divide-y divide-gray-200">
                           <thead style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Solicitante
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Departamento
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Monto
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Estado
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Fecha Revisión
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Detalles
-                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solicitante</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Revisión</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detalles</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {paginatedSolicitudes.map((solicitud) => (
-                              <tr key={solicitud.id_solicitud} className="hover:bg-gray-50 transition-colors">
+                            {quickFilteredSolicitudes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((solicitud) => (
+                              <tr key={solicitud.id_solicitud} className={`hover:bg-gray-50 transition-colors ${solicitud.estado === 'autorizada' ? 'border-l-4 border-green-500 bg-green-50/10' : 'border-l-4 border-red-500 bg-red-50/10'}`}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                   {solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}
                                 </td>
@@ -259,7 +263,8 @@ export default function HistorialSolicitudesPage() {
                                   {formatCurrency(solicitud.monto)}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(solicitud.estado)}`}>
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(solicitud.estado)} mr-2`}>
+                                    {solicitud.estado === 'autorizada' ? <CheckCircle className="w-4 h-4 mr-1 text-green-500 inline" /> : <XCircle className="w-4 h-4 mr-1 text-red-500 inline" />}
                                     {solicitud.estado === 'autorizada' ? 'Aprobada' : 'Rechazada'}
                                   </span>
                                 </td>
@@ -286,7 +291,7 @@ export default function HistorialSolicitudesPage() {
                         <Pagination
                           currentPage={currentPage}
                           totalPages={totalPages}
-                          totalItems={totalItems}
+                          totalItems={quickFilteredSolicitudes.length}
                           itemsPerPage={itemsPerPage}
                           onPageChange={goToPage}
                           onItemsPerPageChange={changeItemsPerPage}

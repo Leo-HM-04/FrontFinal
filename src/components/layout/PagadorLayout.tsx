@@ -193,6 +193,18 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
                   <span className="font-medium">Historial de Pagos</span>
                 </Link>
                 <Link 
+                  href="/dashboard/pagador/pagos/subir-comprobante" 
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                    pathname.startsWith('/dashboard/pagador/pagos/subir-comprobante') 
+                      ? 'bg-blue-50 text-blue-600 shadow-sm' 
+                      : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <FileText className="w-5 h-5 transition-transform group-hover:scale-110" />
+                  <span className="font-medium">Subir Comprobante</span>
+                </Link>
+                <Link 
                   href="/dashboard/pagador/perfil" 
                   className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                     pathname.startsWith('/dashboard/pagador/perfil') 

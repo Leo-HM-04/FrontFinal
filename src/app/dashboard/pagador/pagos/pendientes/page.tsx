@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { Button } from '@/components/ui/Button';
@@ -12,65 +12,30 @@ import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { toast } from 'react-hot-toast';
 import { exportSolicitudesToCSV, exportSolicitudesToExcel, exportSolicitudesToPDF } from '@/utils/exportUtils';
 import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
-
-// Datos de ejemplo para pagos pendientes
-const pagosPendientes = [
-  {
-    id_pago: 1001,
-    id_solicitud: 501,
-    solicitante: 'Carlos López',
-    departamento: 'Finanzas',
-    monto: 2500000,
-    concepto: 'Pago a proveedores',
-    fecha_aprobacion: '2025-06-25',
-    estado: 'pendiente',
-    urgencia: 'alta',
-    metodo_pago: 'transferencia',
-    banco_destino: 'Bancolombia',
-    cuenta_destino: '1234567890'
-  },
-  {
-    id_pago: 1002,
-    id_solicitud: 502,
-    solicitante: 'Ana Martínez',
-    departamento: 'Marketing',
-    monto: 1800000,
-    concepto: 'Campaña publicitaria',
-    fecha_aprobacion: '2025-06-24',
-    estado: 'pendiente',
-    urgencia: 'media',
-    metodo_pago: 'transferencia',
-    banco_destino: 'Davivienda',
-    cuenta_destino: '0987654321'
-  },
-  {
-    id_pago: 1003,
-    id_solicitud: 503,
-    solicitante: 'Juan Gómez',
-    departamento: 'Tecnología',
-    monto: 3250000,
-    concepto: 'Equipos informáticos',
-    fecha_aprobacion: '2025-06-23',
-    estado: 'pendiente',
-    urgencia: 'baja',
-    metodo_pago: 'transferencia',
-    banco_destino: 'Banco de Bogotá',
-    cuenta_destino: '5678901234'
-  }
-];
+import { getPagosPendientes, marcarPagoComoPagado, subirComprobante } from '@/services/pagosService';
+import type { Solicitud } from '../../../../../types/index';
+import { PagoDetailModal } from '@/components/pagos/PagoDetailModal';
+import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal';
 
 export default function PagosPendientesPage() {
-  const [selectedPago, setSelectedPago] = useState(null);
+  const [selectedPago, setSelectedPago] = useState<Solicitud | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [procesandoPago, setProcesandoPago] = useState(null);
+  const [procesandoPago, setProcesandoPago] = useState<number | null>(null);
+  const [pagosPendientes, setPagosPendientes] = useState<Solicitud[]>([]);
+  const [loadingPagos, setLoadingPagos] = useState(true);
+  const [errorPagos, setErrorPagos] = useState<string | null>(null);
+  const [showComprobanteModal, setShowComprobanteModal] = useState(false);
+  const [comprobantePagoId, setComprobantePagoId] = useState<number | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pagoAConfirmar, setPagoAConfirmar] = useState<Solicitud | null>(null);
 
   const {
     filters,
     filteredData: filteredPagos,
     resetFilters,
     updateFilters
-  } = useAdvancedFilters(pagosPendientes, 'pagos');
+  } = useAdvancedFilters(pagosPendientes, 'solicitudes');
 
   const {
     currentPage,
@@ -82,49 +47,70 @@ export default function PagosPendientesPage() {
     changeItemsPerPage,
   } = usePagination({ data: filteredPagos, initialItemsPerPage: 10 });
 
-  const handleViewDetail = (pago) => {
+  useEffect(() => {
+    setLoadingPagos(true);
+    getPagosPendientes()
+      .then((data) => {
+        setPagosPendientes(data);
+        setErrorPagos(null);
+      })
+      .catch(() => {
+        setErrorPagos('Error al cargar pagos pendientes');
+      })
+      .finally(() => setLoadingPagos(false));
+  }, []);
+
+  const handleViewDetail = (pago: Solicitud) => {
     setSelectedPago(pago);
     setShowDetailModal(true);
   };
 
-  const handleProcesarPago = (pago) => {
-    setProcesandoPago(pago.id_pago);
-    
-    // Simulamos un procesamiento
-    setTimeout(() => {
-      toast.success(`Pago #${pago.id_pago} procesado correctamente`);
-      setProcesandoPago(null);
-    }, 1500);
+  const handleProcesarPago = async (pago: Solicitud) => {
+    setPagoAConfirmar(pago);
+    setShowConfirmModal(true);
   };
 
-  const handleExport = (format) => {
+  const confirmarProcesarPago = async () => {
+    if (!pagoAConfirmar) return;
+    setProcesandoPago(pagoAConfirmar.id_solicitud);
+    setShowConfirmModal(false);
+    try {
+      await marcarPagoComoPagado(pagoAConfirmar.id_solicitud);
+      toast.success(`Pago #${pagoAConfirmar.id_solicitud} procesado correctamente`);
+      toast((t) => (
+        <div>
+          <strong>¡Advertencia!</strong>
+          <div>Tiene un límite de <span className="text-red-600 font-bold">3 días</span> para subir el comprobante de pago.</div>
+          <Button onClick={() => toast.dismiss(t.id)} className="mt-2 bg-blue-600 text-white">Entendido</Button>
+        </div>
+      ), { duration: 8000 });
+      setPagosPendientes((prev) => prev.filter((p) => p.id_solicitud !== pagoAConfirmar.id_solicitud));
+    } catch (err) {
+      toast.error('Error al procesar el pago');
+    }
+    setProcesandoPago(null);
+    setPagoAConfirmar(null);
+  };
+
+  const handleExport = (format: string) => {
     switch(format) {
       case 'csv':
-        exportSolicitudesToCSV(filteredPagos);
+        exportSolicitudesToCSV(filteredPagos as Solicitud[]);
         toast.success(`${filteredPagos.length} pagos exportados a CSV`);
         break;
       case 'excel':
-        exportSolicitudesToExcel(filteredPagos);
+        exportSolicitudesToExcel(filteredPagos as Solicitud[]);
         toast.success(`${filteredPagos.length} pagos exportados a Excel`);
         break;
       case 'pdf':
-        exportSolicitudesToPDF(filteredPagos);
+        exportSolicitudesToPDF(filteredPagos as Solicitud[]);
         toast.success(`${filteredPagos.length} pagos exportados a PDF`);
         break;
     }
   };
 
-  const getUrgenciaColor = (urgencia) => {
-    const colors = {
-      alta: 'bg-red-100 text-red-800',
-      media: 'bg-yellow-100 text-yellow-800',
-      baja: 'bg-green-100 text-green-800'
-    };
-    return colors[urgencia] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getDepartmentColorClass = (departamento) => {
-    const departamentosColores = {
+  const getDepartmentColorClass = (departamento: string) => {
+    const departamentosColores: Record<string, string> = {
       'Finanzas': 'px-3 py-1 text-sm font-medium rounded-lg bg-blue-100 text-blue-800',
       'Recursos Humanos': 'px-3 py-1 text-sm font-medium rounded-lg bg-purple-100 text-purple-800',
       'Marketing': 'px-3 py-1 text-sm font-medium rounded-lg bg-green-100 text-green-800',
@@ -136,11 +122,10 @@ export default function PagosPendientesPage() {
       'Proyectos': 'px-3 py-1 text-sm font-medium rounded-lg bg-cyan-100 text-cyan-800',
       'Legal': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800'
     };
-    
     return departamentosColores[departamento] || 'px-3 py-1 text-sm font-medium rounded-lg bg-gray-100 text-gray-800';
   };
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
@@ -150,6 +135,17 @@ export default function PagosPendientesPage() {
 
   const openExportModal = () => {
     setShowExportModal(true);
+  };
+
+  const handleAbrirComprobanteModal = (id_solicitud: number) => {
+    setComprobantePagoId(id_solicitud);
+    setShowComprobanteModal(true);
+  };
+
+  const handleSubirComprobante = async (file: File) => {
+    if (!comprobantePagoId) return;
+    await subirComprobante(comprobantePagoId, file);
+    toast.success('Comprobante subido correctamente');
   };
 
   return (
@@ -198,7 +194,7 @@ export default function PagosPendientesPage() {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-white/80">Total Pendiente</p>
                   <p className="text-2xl font-bold text-white">
-                    {formatCurrency(pagosPendientes.reduce((sum, p) => sum + p.monto, 0))}
+                    {formatCurrency(pagosPendientes.reduce((sum: number, p: Solicitud) => sum + (p.monto || 0), 0))}
                   </p>
                 </div>
               </div>
@@ -236,7 +232,17 @@ export default function PagosPendientesPage() {
               </h3>
               
               <div className="bg-white rounded-xl overflow-hidden">
-                {paginatedPagos.length === 0 ? (
+                {loadingPagos ? (
+                  <div className="py-12 text-center">
+                    <div className="w-8 h-8 border-4 border-blue-300 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-500 text-lg">Cargando pagos pendientes...</p>
+                  </div>
+                ) : errorPagos ? (
+                  <div className="py-12 text-center">
+                    <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+                    <p className="text-red-500 text-lg">{errorPagos}</p>
+                  </div>
+                ) : paginatedPagos.length === 0 ? (
                   <div className="py-12 text-center">
                     <CreditCard className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <p className="text-gray-500 text-lg">No hay pagos pendientes</p>
@@ -261,10 +267,10 @@ export default function PagosPendientesPage() {
                               Monto
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Fecha Aprobación
+                              Fecha Límite Pago
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Urgencia
+                              Estado
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Acciones
@@ -272,13 +278,13 @@ export default function PagosPendientesPage() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {paginatedPagos.map((pago) => (
-                            <tr key={pago.id_pago} className="hover:bg-gray-50 transition-colors">
+                          {paginatedPagos.map((pago: Solicitud) => (
+                            <tr key={pago.id_solicitud} className="hover:bg-gray-50 transition-colors">
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                #{pago.id_pago}
+                                #{pago.id_solicitud}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {pago.solicitante}
+                                {pago.nombre_usuario || '-'}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={getDepartmentColorClass(pago.departamento)}>
@@ -289,11 +295,11 @@ export default function PagosPendientesPage() {
                                 {formatCurrency(pago.monto)}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {new Date(pago.fecha_aprobacion).toLocaleDateString('es-CO')}
+                                {new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-CO')}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getUrgenciaColor(pago.urgencia)}`}>
-                                  {pago.urgencia.charAt(0).toUpperCase() + pago.urgencia.slice(1)}
+                                <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                  Autorizada
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -308,13 +314,13 @@ export default function PagosPendientesPage() {
                                     <Eye className="w-4 h-4 mr-1" /> Ver
                                   </Button>
                                   <Button 
-                                    variant="default" 
+                                    variant="primary" 
                                     size="sm"
                                     onClick={() => handleProcesarPago(pago)}
-                                    disabled={procesandoPago === pago.id_pago}
+                                    disabled={procesandoPago === pago.id_solicitud}
                                     className="bg-green-600 hover:bg-green-700 text-white"
                                   >
-                                    {procesandoPago === pago.id_pago ? (
+                                    {procesandoPago === pago.id_solicitud ? (
                                       <>
                                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                                         Procesando...
@@ -356,6 +362,32 @@ export default function PagosPendientesPage() {
           onExport={handleExport}
           itemCount={filteredPagos.length}
         />
+
+        {/* Pago Detail Modal */}
+        <PagoDetailModal 
+          isOpen={showDetailModal} 
+          pago={selectedPago} 
+          onClose={() => setShowDetailModal(false)} 
+        />
+        <SubirComprobanteModal 
+          isOpen={showComprobanteModal} 
+          onClose={() => setShowComprobanteModal(false)} 
+          onSubmit={handleSubirComprobante}
+        />
+
+        {/* Modal de confirmación para procesar pago */}
+        {showConfirmModal && pagoAConfirmar && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70">
+            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md text-black">
+              <h3 className="text-xl font-bold mb-3">¿Confirmar procesamiento?</h3>
+              <p className="mb-4">¿Estás seguro que deseas procesar el pago #{pagoAConfirmar.id_solicitud}? Esta acción marcará la solicitud como pagada y deberás subir el comprobante en máximo <span className="text-red-600 font-bold">3 días</span>.</p>
+              <div className="flex space-x-2 justify-end">
+                <Button variant="outline" className="bg-blue-600 text-white" onClick={() => { setShowConfirmModal(false); setPagoAConfirmar(null); }}>Cancelar</Button>
+                <Button variant="primary" className="bg-green-600 text-white" onClick={confirmarProcesarPago}>Confirmar</Button>
+              </div>
+            </div>
+          </div>
+        )}
       </PagadorLayout>
     </ProtectedRoute>
   );

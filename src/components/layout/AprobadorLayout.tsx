@@ -47,21 +47,6 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
                     Notificaciones
                     <Bell className="w-4 h-4 ml-2" />
                   </Button>
-                  
-                  {/* Botón Cerrar Sesión para pantalla completa */}
-                  <Button
-                    variant="outline"
-                    size="sm" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setShowLogoutConfirm(true);
-                    }}
-                    className="bg-white/15 backdrop-blur-sm text-white border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium hidden md:flex"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Cerrar Sesión
-                  </Button>
                 </div>
             </div>
             </div>
