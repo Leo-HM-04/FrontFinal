@@ -42,14 +42,11 @@ export default function LoginPage() {
     setGeneralError('');
     if (!validateForm()) return;
     setLoading(true);
-    const success = await login({ email, password });
-    if (success) {
-      // Obtener el usuario del contexto después del login exitoso
+    const result = await login({ email, password });
+    if (result.success) {
       const userData = localStorage.getItem('auth_user');
       if (userData) {
         const user = JSON.parse(userData);
-        
-        // Redireccionar según el rol del usuario
         switch (user.rol) {
           case 'admin_general':
             router.push('/dashboard/admin');
@@ -70,6 +67,8 @@ export default function LoginPage() {
       } else {
         router.push('/dashboard');
       }
+    } else if (result.error) {
+      setGeneralError(result.error);
     } else {
       setGeneralError('Correo o contraseña incorrectos.');
     }
@@ -115,7 +114,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="correo@gmail.com"
-                className="flex-1 px-4 py-3 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat w-full"
+                className={`flex-1 px-4 py-3 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat w-full ${errors.email ? 'border-2 border-red-400' : ''}`}
                 autoFocus
                 autoComplete="username"
               />
@@ -130,13 +129,12 @@ export default function LoginPage() {
                 Contraseña:
               </label>
               <div className="relative flex-1 w-full">
-                {/* Solo renderiza el input, el botón de ojo va fuera para evitar doble render */}
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Contraseña"
-                  className="w-full px-4 py-3 pr-12 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat"
+                  className={`w-full px-4 py-3 pr-12 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat ${errors.password ? 'border-2 border-red-400' : ''}`}
                   autoComplete="current-password"
                 />
                 {password && (

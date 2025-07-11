@@ -12,7 +12,7 @@ type User = UserType;
 
 interface AuthContextType {
   user: User | null;
-  login: (credentials: { email: string; password: string }) => Promise<boolean>;
+  login: (credentials: { email: string; password: string }) => Promise<{ success: boolean; user?: User; token?: string; error?: string }>;
   logout: () => void;
   isLoading: boolean;
   updateUserData: (user: User) => void;
@@ -44,20 +44,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  const login = async (credentials: { email: string; password: string }): Promise<boolean> => {
-    try {
-      const response = await AuthService.login(credentials);
-      console.log('Login response:', response); // Debug
-      setUser(response.user);
-      localStorage.setItem('auth_token', response.token);
-      localStorage.setItem('auth_user', JSON.stringify(response.user));
-      toast.success(`Bienvenido ${response.user.nombre}`);
-      return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Credenciales incorrectas');
-      return false;
+  const login = async (credentials: { email: string; password: string }): Promise<{ success: boolean; user?: User; token?: string; error?: string }> => {
+    const result = await AuthService.login(credentials);
+    if (result.success && result.user && result.token) {
+      setUser(result.user);
+      localStorage.setItem('auth_token', result.token);
+      localStorage.setItem('auth_user', JSON.stringify(result.user));
+      toast.success(`Bienvenido ${result.user.nombre}`);
+    } else if (result.error) {
+      toast.error(result.error);
     }
+    return result;
   };
 
   const logout = () => {

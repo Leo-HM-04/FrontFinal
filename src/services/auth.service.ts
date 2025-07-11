@@ -3,25 +3,28 @@ import { LoginCredentials, AuthResponse, User } from '@/types';
 import Cookies from 'js-cookie';
 
 export class AuthService {
-  static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/auth/login', credentials);
-    
-    if (response.data.token) {
-      // Guardar token y datos del usuario en cookies
-      Cookies.set('auth_token', response.data.token, { 
-        expires: 1/3, // 8 horas
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
-      });
-      
-      Cookies.set('user_data', JSON.stringify(response.data.user), {
-        expires: 1/3, // 8 horas
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
-      });
+  static async login(credentials: LoginCredentials): Promise<{ success: boolean; user?: User; token?: string; error?: string }> {
+    try {
+      const response = await api.post<AuthResponse>('/auth/login', credentials);
+      if (response.data.token) {
+        Cookies.set('auth_token', response.data.token, { 
+          expires: 1/3,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict'
+        });
+        Cookies.set('user_data', JSON.stringify(response.data.user), {
+          expires: 1/3,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict'
+        });
+        return { success: true, user: response.data.user, token: response.data.token };
+      }
+      return { success: false, error: response.data.message || 'Error desconocido' };
+    } catch (err: any) {
+      // Captura el mensaje del backend si existe
+      const errorMsg = err?.response?.data?.message || err?.message || 'Error de conexión';
+      return { success: false, error: errorMsg };
     }
-    
-    return response.data;
   }
 
   static logout(): void {

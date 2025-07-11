@@ -9,31 +9,29 @@ export default function DashboardPage() {
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-
-      // Redirigir según el rol del usuario
+    if (isLoading) return;
+    let path = '/login';
+    if (user) {
       switch (user.rol) {
         case 'admin_general':
-          router.push('/dashboard/admin');
+          path = '/dashboard/admin';
           break;
         case 'solicitante':
-          router.push('/dashboard/solicitante');
+          path = '/dashboard/solicitante';
           break;
         case 'aprobador':
-          router.push('/dashboard/aprobador');
+          path = '/dashboard/aprobador';
           break;
         case 'pagador_banca':
-          router.push('/dashboard/pagador');
+          path = '/dashboard/pagador';
           break;
         default:
-          router.push('/login');
+          path = '/login';
           break;
       }
     }
+    // Redirigir lo más rápido posible
+    router.replace(path);
   }, [user, isLoading, router]);
 
   return (
