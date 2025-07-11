@@ -4,24 +4,37 @@ import Cookies from 'js-cookie';
 
 export class AuthService {
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/auth/login', credentials);
-    
-    if (response.data.token) {
-      // Guardar token y datos del usuario en cookies
-      Cookies.set('auth_token', response.data.token, { 
-        expires: 1/3, // 8 horas
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
-      });
-      
-      Cookies.set('user_data', JSON.stringify(response.data.user), {
-        expires: 1/3, // 8 horas
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
-      });
+    try {
+      const response = await api.post<AuthResponse>('/auth/login', credentials);
+
+      if (response.data.token) {
+        // Guardar token en cookies
+        Cookies.set('auth_token', response.data.token, { 
+          expires: 1 / 3, // 8 horas
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict'
+        });
+
+        Cookies.set('user_data', JSON.stringify(response.data.user), {
+          expires: 1 / 3,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict'
+        });
+      }
+
+      return response.data;
+
+    } catch (error: any) {
+      // Si el backend manda un mensaje de error, lo extraemos
+      const message = error?.response?.data?.message || 'Error al iniciar sesión';
+
+      // Creamos un nuevo error personalizado que pueda manejar el AuthContext
+      const customError = new Error(message);
+      // @ts-ignore
+      customError.response = { data: { message } };
+
+      throw customError;
     }
-    
-    return response.data;
   }
 
   static logout(): void {

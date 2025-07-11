@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/Button';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'react-hot-toast';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,43 +13,40 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ email: '', password: '' });
-  const [generalError, setGeneralError] = useState('');
 
   const { login } = useAuth();
   const router = useRouter();
 
   const validateForm = () => {
     const newErrors = { email: '', password: '' };
-    
+
     if (!email) {
       newErrors.email = 'El email es requerido';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'El email no es válido';
     }
-    
+
     if (!password) {
       newErrors.password = 'La contraseña es requerida';
     } else if (password.length < 6) {
       newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
-    
+
     setErrors(newErrors);
     return !newErrors.email && !newErrors.password;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setGeneralError('');
     if (!validateForm()) return;
+
     setLoading(true);
-    const success = await login({ email, password });
+    const { success } = await login({ email, password });
+
     if (success) {
-      // Obtener el usuario del contexto después del login exitoso
       const userData = localStorage.getItem('auth_user');
       if (userData) {
         const user = JSON.parse(userData);
-        
-        // Redireccionar según el rol del usuario
         switch (user.rol) {
           case 'admin_general':
             router.push('/dashboard/admin');
@@ -70,16 +67,14 @@ export default function LoginPage() {
       } else {
         router.push('/dashboard');
       }
-    } else {
-      setGeneralError('Correo o contraseña incorrectos.');
     }
+
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4 font-montserrat">
       <div className="w-full max-w-md flex flex-col items-center justify-center">
-        {/* Logo */}
         <div className="text-center mb-8 w-full">
           <Image
             src="/assets/images/bechapra-logo.png"
@@ -91,21 +86,14 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Card de Login */}
         <div className="w-full bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl shadow-2xl p-8 text-white backdrop-blur-sm flex flex-col items-center">
           <div className="text-center mb-8 w-full">
             <h1 className="text-2xl font-bold text-white mb-2 font-montserrat">Inicio de sesión</h1>
             <div className="w-16 h-1 bg-white/30 mx-auto rounded-full"></div>
           </div>
 
-          {generalError && (
-            <div className="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 text-center font-semibold animate-fade-in w-full">
-              {generalError}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-6 w-full">
-            {/* Campo Usuario */}
+            {/* Usuario */}
             <div className="flex flex-col md:flex-row items-center md:space-x-4 w-full">
               <label className="text-white font-medium text-lg min-w-[100px] text-right font-montserrat mb-2 md:mb-0 w-full md:w-auto">
                 Usuario:
@@ -124,13 +112,12 @@ export default function LoginPage() {
               <p className="text-sm text-red-200 md:ml-[116px] font-montserrat animate-fade-in">{errors.email}</p>
             )}
 
-            {/* Campo Contraseña */}
+            {/* Contraseña */}
             <div className="flex flex-col md:flex-row items-center md:space-x-4 w-full">
               <label className="text-white font-medium text-lg min-w-[100px] text-right font-montserrat mb-2 md:mb-0 w-full md:w-auto">
                 Contraseña:
               </label>
               <div className="relative flex-1 w-full">
-                {/* Solo renderiza el input, el botón de ojo va fuera para evitar doble render */}
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -155,7 +142,7 @@ export default function LoginPage() {
               <p className="text-sm text-red-200 md:ml-[116px] font-montserrat animate-fade-in">{errors.password}</p>
             )}
 
-            {/* Botón Ingresar */}
+            {/* Botón */}
             <div className="pt-6 flex justify-center w-full">
               <button
                 type="submit"
@@ -175,7 +162,6 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Enlaces de ayuda */}
         <div className="text-center mt-6 w-full">
           <p className="text-blue-600 font-medium font-montserrat">
             ¿Problemas para iniciar sesión?{' '}
@@ -191,3 +177,4 @@ export default function LoginPage() {
     </div>
   );
 }
+  
