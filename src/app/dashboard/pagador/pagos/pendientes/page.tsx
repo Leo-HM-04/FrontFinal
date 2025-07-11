@@ -75,16 +75,20 @@ export default function PagosPendientesPage() {
     setProcesandoPago(pagoAConfirmar.id_solicitud);
     setShowConfirmModal(false);
     try {
-      await marcarPagoComoPagado(pagoAConfirmar.id_solicitud);
-      toast.success(`Pago #${pagoAConfirmar.id_solicitud} procesado correctamente`);
-      toast((t) => (
-        <div>
-          <strong>¡Advertencia!</strong>
-          <div>Tiene un límite de <span className="text-red-600 font-bold">3 días</span> para subir el comprobante de pago.</div>
-          <Button onClick={() => toast.dismiss(t.id)} className="mt-2 bg-blue-600 text-white">Entendido</Button>
-        </div>
-      ), { duration: 8000 });
-      setPagosPendientes((prev) => prev.filter((p) => p.id_solicitud !== pagoAConfirmar.id_solicitud));
+      const res = await marcarPagoComoPagado(pagoAConfirmar.id_solicitud);
+      if (res && res.error) {
+        toast.error(res.error || 'No se pudo marcar como pagada.');
+      } else {
+        toast.success(`Pago #${pagoAConfirmar.id_solicitud} procesado correctamente`);
+        toast((t) => (
+          <div>
+            <strong>¡Advertencia!</strong>
+            <div>Tiene un límite de <span className="text-red-600 font-bold">3 días</span> para subir el comprobante de pago.</div>
+            <Button onClick={() => toast.dismiss(t.id)} className="mt-2 bg-blue-600 text-white">Entendido</Button>
+          </div>
+        ), { duration: 8000 });
+        setPagosPendientes((prev) => prev.filter((p) => p.id_solicitud !== pagoAConfirmar.id_solicitud));
+      }
     } catch (err) {
       toast.error('Error al procesar el pago');
     }

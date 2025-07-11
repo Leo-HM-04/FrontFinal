@@ -18,7 +18,7 @@ import { Solicitud } from '@/types';
 
 export default function HistorialSolicitudesPage() {
   const { solicitudes: allSolicitudes, loading } = useSolicitudes();
-  // Filtrar solo las solicitudes procesadas (autorizadas o rechazadas)
+  // Filtrar solo las solicitudes procesadas (autorizadas, pagadas o rechazadas)
   const solicitudes = allSolicitudes.filter(s => s.estado !== 'pendiente');
 
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
@@ -68,7 +68,8 @@ export default function HistorialSolicitudesPage() {
     const colors = {
       pendiente: 'bg-yellow-100 text-yellow-800',
       autorizada: 'bg-green-100 text-green-800',
-      rechazada: 'bg-red-100 text-red-800'
+      rechazada: 'bg-red-100 text-red-800',
+      pagada: 'bg-blue-100 text-blue-800'
     };
     return colors[estado as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -249,41 +250,59 @@ export default function HistorialSolicitudesPage() {
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {quickFilteredSolicitudes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((solicitud) => (
-                              <tr key={solicitud.id_solicitud} className={`hover:bg-gray-50 transition-colors ${solicitud.estado === 'autorizada' ? 'border-l-4 border-green-500 bg-green-50/10' : 'border-l-4 border-red-500 bg-red-50/10'}`}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={getDepartmentColorClass(solicitud.departamento)}>
-                                    {solicitud.departamento}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {formatCurrency(solicitud.monto)}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(solicitud.estado)} mr-2`}>
-                                    {solicitud.estado === 'autorizada' ? <CheckCircle className="w-4 h-4 mr-1 text-green-500 inline" /> : <XCircle className="w-4 h-4 mr-1 text-red-500 inline" />}
-                                    {solicitud.estado === 'autorizada' ? 'Aprobada' : 'Rechazada'}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {solicitud.fecha_revision ? new Date(solicitud.fecha_revision).toLocaleDateString('es-CO') : '-'}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleViewDetail(solicitud)}
-                                    style={{color: '#3B82F6', borderColor: '#3B82F6'}}
-                                    className="hover:bg-blue-50"
-                                  >
-                                    <Eye className="w-4 h-4 mr-2" /> Ver
-                                  </Button>
-                                </td>
-                              </tr>
-                            ))}
+                            {quickFilteredSolicitudes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((solicitud) => {
+                              let estadoLabel = '';
+                              let estadoIcon = null;
+                              let rowClass = '';
+                              if (solicitud.estado === 'autorizada') {
+                                estadoLabel = 'Aprobada';
+                                estadoIcon = <CheckCircle className="w-4 h-4 mr-1 text-green-500 inline" />;
+                                rowClass = 'border-l-4 border-green-500 bg-green-50/10';
+                              } else if (solicitud.estado === 'rechazada') {
+                                estadoLabel = 'Rechazada';
+                                estadoIcon = <XCircle className="w-4 h-4 mr-1 text-red-500 inline" />;
+                                rowClass = 'border-l-4 border-red-500 bg-red-50/10';
+                              } else if (solicitud.estado === 'pagada') {
+                                estadoLabel = 'Pagada';
+                                estadoIcon = <CheckCircle className="w-4 h-4 mr-1 text-blue-500 inline" />;
+                                rowClass = 'border-l-4 border-blue-500 bg-blue-50/10';
+                              }
+                              return (
+                                <tr key={solicitud.id_solicitud} className={`hover:bg-gray-50 transition-colors ${rowClass}`}>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={getDepartmentColorClass(solicitud.departamento)}>
+                                      {solicitud.departamento}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {formatCurrency(solicitud.monto)}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(solicitud.estado)} mr-2`}>
+                                      {estadoIcon}
+                                      {estadoLabel}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {solicitud.fecha_revision ? new Date(solicitud.fecha_revision).toLocaleDateString('es-CO') : '-'}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleViewDetail(solicitud)}
+                                      style={{color: '#3B82F6', borderColor: '#3B82F6'}}
+                                      className="hover:bg-blue-50"
+                                    >
+                                      <Eye className="w-4 h-4 mr-2" /> Ver
+                                    </Button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>

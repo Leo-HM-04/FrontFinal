@@ -42,11 +42,11 @@ const getEstadoIcon = (estado: string) => {
     case 'pendiente':
       return <Clock className="w-4 h-4" />;
     case 'aprobada':
-      return <CheckCircle className="w-4 h-4" />;
+      return <CheckCircle className="w-4 h-4 text-green-500" />;
     case 'rechazada':
-      return <XCircle className="w-4 h-4" />;
+      return <XCircle className="w-4 h-4 text-red-500" />;
     case 'pagada':
-      return <CheckCircle className="w-4 h-4" />;
+      return <CheckCircle className="w-4 h-4 text-blue-500" />;
     default:
       return <AlertCircle className="w-4 h-4" />;
   }

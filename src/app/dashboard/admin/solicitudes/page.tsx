@@ -41,7 +41,7 @@ export default function SolicitudesPage() {
     paginatedData: paginatedSolicitudes,
     goToPage,
     changeItemsPerPage,
-  } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 10 });
+  } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 5 });
 
   const handleDelete = (solicitud: Solicitud) => {
     setSelectedSolicitud(solicitud);

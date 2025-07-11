@@ -47,9 +47,26 @@ export default function SolicitudDetailPage() {
     const colors = {
       pendiente: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       autorizada: 'bg-green-100 text-green-800 border-green-200',
-      rechazada: 'bg-red-100 text-red-800 border-red-200'
+      rechazada: 'bg-red-100 text-red-800 border-red-200',
+      pagada: 'bg-blue-100 text-blue-800 border-blue-200'
     };
     return colors[estado as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-200';
+
+  };
+
+  const getEstadoIcon = (estado: string) => {
+    switch (estado) {
+      case 'pendiente':
+        return <AlertCircle className="w-5 h-5 mr-2 text-yellow-500" />;
+      case 'autorizada':
+        return <DollarSign className="w-5 h-5 mr-2 text-green-500" />;
+      case 'rechazada':
+        return <AlertCircle className="w-5 h-5 mr-2 text-red-500" />;
+      case 'pagada':
+        return <DollarSign className="w-5 h-5 mr-2 text-blue-500" />;
+      default:
+        return <AlertCircle className="w-5 h-5 mr-2 text-gray-500" />;
+    }
   };
 
   const getDepartmentColorClass = (departamento: string) => {
@@ -125,8 +142,12 @@ export default function SolicitudDetailPage() {
                 </div>
               </div>
               {solicitud && (
-                <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full border ${getEstadoColor(solicitud.estado)}`}>
+                <span className={`inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full border ${getEstadoColor(solicitud.estado)}`}>
+                  {getEstadoIcon(solicitud.estado)}
                   {solicitud.estado.toUpperCase()}
+                  {solicitud.estado === 'pagada' && solicitud.aprobador_nombre && (
+                    <span className="ml-2 text-xs text-blue-800">por {solicitud.aprobador_nombre}</span>
+                  )}
                 </span>
               )}
             </div>
@@ -214,7 +235,16 @@ export default function SolicitudDetailPage() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     variant="outline"
-                    onClick={() => window.open(solicitud.factura_url, '_blank')}
+                    onClick={() => {
+                      // Si la URL no contiene 'localhost:4000', la reconstruimos
+                      let facturaUrl = solicitud.factura_url;
+                      if (facturaUrl && !facturaUrl.includes('localhost:4000')) {
+                        // Extraer solo el nombre del archivo
+                        const fileName = facturaUrl.split('/').pop();
+                        facturaUrl = `http://localhost:4000/uploads/facturas/${fileName}`;
+                      }
+                      window.open(facturaUrl, '_blank');
+                    }}
                     className="text-white border-white/30 hover:bg-white/10 flex items-center space-x-2"
                   >
                     <FileText className="w-4 h-4" />

@@ -25,8 +25,8 @@ export default function PerfilPagador() {
                 {/* Header */}
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
                     <div className="flex items-center space-x-6">
-                    <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center ring-4 ring-white/30">
-                        <User className="w-10 h-10 text-white" />
+                    <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center ring-4 ring-white/30 overflow-hidden">
+                        <img src="/assets/images/Logo_1x1_Azul@2x.png" alt="Foto de perfil Bechapra" className="object-cover w-full h-full rounded-full" />
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold text-white font-sans">
@@ -66,14 +66,6 @@ export default function PerfilPagador() {
                         <p className="text-white/80 text-sm mb-2">Correo Electrónico:</p>
                         <p className="text-white text-lg font-medium">{user?.email || 'No disponible'}</p>
                         </div>
-
-                        <div>
-                        <p className="text-white/80 text-sm mb-2">Departamento:</p>
-                        <p className="text-white text-lg font-medium flex items-center">
-                            <Building className="w-4 h-4 mr-2 text-blue-300" />
-                            Finanzas
-                        </p>
-                        </div>
                         
                         <div>
                         <p className="text-white/80 text-sm mb-2">Rol:</p>
@@ -87,7 +79,7 @@ export default function PerfilPagador() {
                         <p className="text-white/80 text-sm mb-2">Fecha de Registro:</p>
                         <p className="text-white text-lg font-medium flex items-center">
                             <Calendar className="w-4 h-4 mr-2 text-blue-300" />
-                            {new Date().toLocaleDateString()}
+                            {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </p>
                         </div>
                         
@@ -135,47 +127,6 @@ export default function PerfilPagador() {
                     </div>
                     </Card>
                 </div>
-
-                {/* Información de Actividad */}
-                <Card className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 mt-6">
-                    <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-semibold text-white">
-                        Actividad Reciente
-                    </h3>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-white border-white/30 hover:bg-white/10"
-                        onClick={() => window.open('/dashboard/pagador/pagos/historial', '_self')}
-                    >
-                        Ver Historial Completo
-                    </Button>
-                    </div>
-                    <div className="space-y-4">
-                        {/* Actividad de ejemplo */}
-                        <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                            <div className="flex justify-between">
-                                <span className="text-white font-medium">Pago #1284</span>
-                                <span className="text-green-300 text-sm">Completado</span>
-                            </div>
-                            <p className="text-white/70 text-sm mt-1">Transferencia a Proveedor XYZ - $2,500,000</p>
-                            <p className="text-white/60 text-xs mt-1">28/06/2025 - 15:30</p>
-                        </div>
-                        <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                            <div className="flex justify-between">
-                                <span className="text-white font-medium">Pago #1283</span>
-                                <span className="text-green-300 text-sm">Completado</span>
-                            </div>
-                            <p className="text-white/70 text-sm mt-1">Transferencia a Servicios ABC - $1,750,000</p>
-                            <p className="text-white/60 text-xs mt-1">28/06/2025 - 12:15</p>
-                        </div>
-                    </div>
-                    <div className="mt-6 bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                    <p className="text-white/90 text-sm">
-                        Para ver todos tus pagos procesados, visita la sección <strong>Historial de Pagos</strong> en el menú lateral.
-                    </p>
-                    </div>
-                </Card>
                 </div>
             </PagadorLayout>
         </ProtectedRoute>

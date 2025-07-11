@@ -134,7 +134,7 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
           />
           <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-out">
             <div className="flex flex-col h-full">
-              <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)'}}>
+              <div className="text-white p-6" style={{background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)'}}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold">Panel Pagador</h2>
                 </div>

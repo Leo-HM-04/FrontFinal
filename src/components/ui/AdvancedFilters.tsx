@@ -48,7 +48,8 @@ export function AdvancedFilters({
   const estadoOptions = [
     { value: 'pendiente', label: 'Pendiente' },
     { value: 'autorizada', label: 'Autorizada' },
-    { value: 'rechazada', label: 'Rechazada' }
+    { value: 'rechazada', label: 'Rechazada' },
+    { value: 'pagada', label: 'Pagada' }
   ];
 
   const rolOptions = [

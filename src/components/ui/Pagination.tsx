@@ -59,21 +59,6 @@ export function Pagination({
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
-        {/* Selector de cantidad por página */}
-        {onItemsPerPageChange && showPageSizeSelector && (
-          <div className="flex items-center gap-2 mb-2 sm:mb-0">
-            <span className="text-xs text-gray-500">Por página:</span>
-            <select
-              value={itemsPerPage}
-              onChange={e => onItemsPerPageChange(Number(e.target.value))}
-              className="px-2 py-1 rounded border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-            >
-              {[5].map(size => (
-                <option key={size} value={size}>{size}</option>
-              ))}
-            </select>
-          </div>
-        )}
 
         {/* Controles de paginación */}
         <div className="flex items-center gap-1 w-full justify-center">
