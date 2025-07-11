@@ -3,16 +3,17 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthService } from '@/services/auth.service';
 import { toast } from 'react-hot-toast';
-
-// Importamos la definición de User desde types/index.ts
 import { User as UserType } from '@/types';
 
-// Usamos el mismo tipo que ya está definido en la aplicación
 type User = UserType;
 
 interface AuthContextType {
   user: User | null;
+<<<<<<< HEAD
   login: (credentials: { email: string; password: string }) => Promise<{ success: boolean; user?: User; token?: string; error?: string }>;
+=======
+  login: (credentials: { email: string; password: string }) => Promise<{ success: boolean; message?: string }>;
+>>>>>>> 277a6b402bb48c4c6e4933e93c43027c2f4441c1
   logout: () => void;
   isLoading: boolean;
   updateUserData: (user: User) => void;
@@ -28,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initAuth = async () => {
       const token = localStorage.getItem('auth_token');
       const cachedUser = localStorage.getItem('auth_user');
-      
+
       if (token && cachedUser) {
         try {
           setUser(JSON.parse(cachedUser));
@@ -44,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
+<<<<<<< HEAD
   const login = async (credentials: { email: string; password: string }): Promise<{ success: boolean; user?: User; token?: string; error?: string }> => {
     const result = await AuthService.login(credentials);
     if (result.success && result.user && result.token) {
@@ -53,27 +55,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success(`Bienvenido ${result.user.nombre}`);
     } else if (result.error) {
       toast.error(result.error);
+=======
+  const login = async (credentials: { email: string; password: string }): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const response = await AuthService.login(credentials);
+
+      setUser(response.user);
+      localStorage.setItem('auth_token', response.token);
+      localStorage.setItem('auth_user', JSON.stringify(response.user));
+
+      toast.success(`Bienvenido ${response.user.nombre}`);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Login error:', error);
+
+      const message = error?.response?.data?.message || 'Credenciales incorrectas';
+      toast.error(message);
+
+      return { success: false, message };
+>>>>>>> 277a6b402bb48c4c6e4933e93c43027c2f4441c1
     }
     return result;
   };
 
   const logout = () => {
     try {
-      // Limpiar el estado
       setUser(null);
-      
-      // Limpiar el localStorage
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
-      
-      // Limpiar otras posibles referencias en sessionStorage
       sessionStorage.clear();
-      
-      // Mostrar mensaje de éxito
+
       toast.success('Sesión cerrada correctamente');
-      
-      // Forzar un refresco de componentes si es necesario
-      // window.location.href = '/login'; // Opción más agresiva si hay problemas persistentes
     } catch (error) {
       console.error('Error durante el cierre de sesión:', error);
       toast.error('Error al cerrar sesión');

@@ -337,7 +337,7 @@ export default function SolicitudesPendientesPage() {
                             return (
                               <tr key={solicitud.id_solicitud} className={`hover:bg-gray-50 transition-colors ${isUrgent ? 'border-l-4 border-red-500 bg-red-50' : ''}`}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}
+                                  {solicitud.usuario_nombre || `${solicitud.id_usuario}`}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <span className={getDepartmentColorClass(solicitud.departamento)}>
