@@ -36,50 +36,34 @@ export default function LoginPage() {
     return !newErrors.email && !newErrors.password;
   };
 
+  const redirectByRole = (rol: string) => {
+    const routes: Record<string, string> = {
+      admin_general: '/dashboard/admin',
+      solicitante: '/dashboard/solicitante',
+      aprobador: '/dashboard/aprobador',
+      pagador_banca: '/dashboard/pagador',
+    };
+    router.push(routes[rol] || '/dashboard');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setLoading(true);
-<<<<<<< HEAD
-    const result = await login({ email, password });
-    if (result.success) {
-=======
-    const { success } = await login({ email, password });
+    try {
+      const { success, user } = await login({ email, password });
 
-    if (success) {
->>>>>>> 277a6b402bb48c4c6e4933e93c43027c2f4441c1
-      const userData = localStorage.getItem('auth_user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        switch (user.rol) {
-          case 'admin_general':
-            router.push('/dashboard/admin');
-            break;
-          case 'solicitante':
-            router.push('/dashboard/solicitante');
-            break;
-          case 'aprobador':
-            router.push('/dashboard/aprobador');
-            break;
-          case 'pagador_banca':
-            router.push('/dashboard/pagador');
-            break;
-          default:
-            router.push('/dashboard');
-            break;
-        }
+      if (success && user) {
+        redirectByRole(user.rol);
       } else {
-        router.push('/dashboard');
+        toast.error('Credenciales inválidas o error al iniciar sesión.');
       }
-
-    } else if (result.error) {
-      setGeneralError(result.error);
-    } else {
-      setGeneralError('Correo o contraseña incorrectos.');
+    } catch (error) {
+      toast.error('Ocurrió un error inesperado.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -113,7 +97,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="correo@gmail.com"
-                className={`flex-1 px-4 py-3 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat w-full ${errors.email ? 'border-2 border-red-400' : ''}`}
+                className="flex-1 px-4 py-3 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat w-full"
                 autoFocus
                 autoComplete="username"
               />
@@ -133,7 +117,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Contraseña"
-                  className={`w-full px-4 py-3 pr-12 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat ${errors.password ? 'border-2 border-red-400' : ''}`}
+                  className="w-full px-4 py-3 pr-12 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat"
                   autoComplete="current-password"
                 />
                 {password && (
@@ -187,4 +171,3 @@ export default function LoginPage() {
     </div>
   );
 }
-  

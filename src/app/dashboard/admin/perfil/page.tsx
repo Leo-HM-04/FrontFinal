@@ -25,8 +25,7 @@ const tabs: TabType[] = [
 export default function AdminProfilePage() {
   const { user, updateUserData } = useAuth();
   const [activeTab, setActiveTab] = useState('personal');
-  const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // Eliminado edición y loading
 
   const [formData, setFormData] = useState({ nombre: '', email: '', cargo: 'Administrador General' });
 
@@ -40,111 +39,23 @@ export default function AdminProfilePage() {
     }
   }, [user]);
 
-  const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [notifications, setNotifications] = useState({ solicitudesNuevas: true, solicitudesActualizadas: true, usuariosNuevos: false, reportesSemanal: true });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  // Eliminado handleInputChange
 
-  const handlePasswordChange = (field: string, value: string) => {
-    setPasswordData(prev => ({ ...prev, [field]: value }));
-  };
+  // Eliminado handlePasswordChange
 
   const handleNotificationChange = (field: string, checked: boolean) => {
     setNotifications(prev => ({ ...prev, [field]: checked }));
   };
 
-  const handleSave = async () => {
-    if (!formData.nombre.trim() || !formData.email.trim()) {
-      toast.error('Nombre y correo no pueden estar vacíos');
-      return;
-    }
+  // Eliminado handleSave
 
-    setLoading(true);
-    try {
-      const profileData: UpdateProfileData = {
-        nombre: formData.nombre,
-        email: formData.email
-      };
-
-      const response = await UsuariosService.updateProfile(profileData);
-      
-      // Actualizar el contexto global PRIMERO
-      if (updateUserData && typeof updateUserData === 'function') {
-        updateUserData(response.user);
-      }
-      
-      // NO actualizar el formData aquí, dejar que el useEffect lo haga
-      // cuando detecte el cambio en el contexto user
-      
-      setIsEditing(false);
-      toast.success(response.message || 'Información actualizada correctamente');
-      
-    } catch (error: unknown) {
-      console.error('Error updating profile:', error);
-      const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error.response as { data?: { message?: string } })?.data?.message 
-        : 'Error al actualizar la información';
-      toast.error(errorMessage || 'Error al actualizar la información');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePasswordUpdate = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Las contraseñas no coinciden');
-      return;
-    }
-    if (passwordData.newPassword.length < 6) {
-      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const changePasswordData: ChangePasswordData = {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword
-      };
-
-      const response = await UsuariosService.changePassword(changePasswordData);
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      toast.success(response.message || 'Contraseña actualizada correctamente');
-    } catch (error: unknown) {
-      const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error.response as { data?: { message?: string } })?.data?.message 
-        : 'Error al actualizar la contraseña';
-      toast.error(errorMessage || 'Error al actualizar la contraseña');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Eliminado handlePasswordUpdate
 
   const renderPersonalInfo = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">Información Personal</h2>
-        <Button
-          onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-          disabled={loading}
-          className="bg-green-600 text-white hover:bg-green-700 shadow-lg border-0"
-        >
-          {isEditing ? (
-            <>
-              <Save className="w-4 h-4 mr-2" />
-              {loading ? 'Guardando...' : 'Guardar'}
-            </>
-          ) : (
-            <>
-              <Edit className="w-4 h-4 mr-2" />
-              Editar
-            </>
-          )}
-        </Button>
-      </div>
-
+      <h2 className="text-xl font-bold text-white">Información Personal</h2>
       <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
         <div className="flex items-center space-x-6 mb-8">
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center ring-2 ring-white/30">
@@ -153,8 +64,8 @@ export default function AdminProfilePage() {
             </span>
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">{formData.nombre || user?.nombre}</h3>
-            <p className="text-white/80">{formData.cargo}</p>
+            <h3 className="text-xl font-bold text-white">{user?.nombre}</h3>
+            <p className="text-white/80">Administrador General</p>
             <div className="flex items-center mt-2">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
                 <CheckCircle className="w-3 h-3 mr-1" />
@@ -163,7 +74,6 @@ export default function AdminProfilePage() {
             </div>
           </div>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">
@@ -172,13 +82,11 @@ export default function AdminProfilePage() {
             </label>
             <Input
               type="text"
-              value={formData.nombre}
-              onChange={(e) => handleInputChange('nombre', e.target.value)}
-              disabled={!isEditing}
-              className="bg-white/15 border-white/20 text-white"
+              value={user?.nombre || ''}
+              disabled
+              className="bg-white/10 border-white/10 text-white cursor-not-allowed"
             />
           </div>
-
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">
               <Mail className="w-4 h-4 inline mr-2" />
@@ -186,13 +94,11 @@ export default function AdminProfilePage() {
             </label>
             <Input
               type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              disabled={!isEditing}
-              className="bg-white/15 border-white/20 text-white"
+              value={user?.email || ''}
+              disabled
+              className="bg-white/10 border-white/10 text-white cursor-not-allowed"
             />
           </div>
-
           <div>
             <label className="block text-white/80 text-sm font-medium mb-2">
               <Shield className="w-4 h-4 inline mr-2" />
@@ -200,34 +106,13 @@ export default function AdminProfilePage() {
             </label>
             <Input
               type="text"
-              value={formData.cargo}
+              value="Administrador General"
               disabled
               className="bg-white/10 border-white/10 text-white cursor-not-allowed"
             />
             <p className="text-xs text-white/60 mt-1">El cargo no puede ser modificado</p>
           </div>
         </div>
-
-        {isEditing && (
-          <div className="flex justify-end space-x-4 mt-6 pt-6 border-t border-white/20">
-            <Button
-              variant="outline"
-              onClick={() => setIsEditing(false)}
-              className="bg-gray-600 text-white border-gray-500 hover:bg-gray-700"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={loading}
-              className="bg-green-600 text-white hover:bg-green-700 shadow-lg border-0"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Guardar
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -235,78 +120,12 @@ export default function AdminProfilePage() {
   const renderSecurity = () => (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-white">Seguridad</h2>
-
       <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
         <h3 className="text-lg font-semibold text-white mb-4">
           <Lock className="w-5 h-5 inline mr-2" />
           Cambiar Contraseña
         </h3>
-
-        <div className="grid grid-cols-1 gap-6">
-          <div>
-            <label className="block text-white/80 text-sm font-medium mb-2">
-              Contraseña actual
-            </label>
-            <Input
-              type="password"
-              value={passwordData.currentPassword}
-              onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-              className="bg-white/15 border-white/20 text-white"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white/80 text-sm font-medium mb-2">
-              Nueva contraseña
-            </label>
-            <Input
-              type="password"
-              value={passwordData.newPassword}
-              onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-              className="bg-white/15 border-white/20 text-white"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white/80 text-sm font-medium mb-2">
-              Confirmar nueva contraseña
-            </label>
-            <Input
-              type="password"
-              value={passwordData.confirmPassword}
-              onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-              className="bg-white/15 border-white/20 text-white"
-              placeholder="••••••••"
-            />
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <Button
-            onClick={handlePasswordUpdate}
-            disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-            className="bg-blue-600 text-white hover:bg-blue-700 shadow-lg border-0"
-          >
-            {loading ? 'Actualizando...' : 'Cambiar Contraseña'}
-          </Button>
-        </div>
-      </div>
-      
-      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-        <h3 className="text-lg font-semibold text-white mb-4">Sesiones Activas</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-            <div>
-              <p className="text-white font-medium">Sesión actual</p>
-              <p className="text-white/70 text-sm">Windows • Chrome • Bogotá, Colombia</p>
-            </div>
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              Activa
-            </span>
-          </div>
-        </div>
+        <div className="text-white/80 text-sm">La funcionalidad para cambiar la contraseña está deshabilitada temporalmente.</div>
       </div>
     </div>
   );

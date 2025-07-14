@@ -53,8 +53,8 @@ export class UsuariosService {
   }
 
   // Métodos para perfil propio
-  static async updateProfile(profileData: UpdateProfileData): Promise<{ message: string; user: User }> {
-    const response = await api.put<{ message: string; user: User }>('/usuarios/profile/update', profileData);
+  static async updatee(id: number, userData: UpdateUserData): Promise<User> {
+    const response = await api.put<User>(`/usuarios/${id}`, userData);
     return response.data;
   }
 
