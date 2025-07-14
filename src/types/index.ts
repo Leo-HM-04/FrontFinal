@@ -47,6 +47,7 @@ export interface Solicitud {
   aprobador_nombre?: string;
   tipo_pago?: string; // <-- agregado para edición
   nombre_usuario?: string; // <-- Campo agregado
+  fecha_pago?: string; // <-- Campo agregado para historial
 }
 
 export interface CreateSolicitudData {

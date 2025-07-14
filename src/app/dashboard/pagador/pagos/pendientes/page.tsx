@@ -178,18 +178,7 @@ export default function PagosPendientesPage() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-yellow-500/20">
-                  <AlertCircle className="w-8 h-8 text-yellow-300" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Urgencia Alta</p>
-                  <p className="text-2xl font-bold text-white">1</p>
-                </div>
-              </div>
-            </div>
-            
+
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
               <div className="flex items-center">
                 <div className="p-3 rounded-full bg-blue-500/20">
@@ -200,18 +189,6 @@ export default function PagosPendientesPage() {
                   <p className="text-2xl font-bold text-white">
                     {formatCurrency(pagosPendientes.reduce((sum: number, p: Solicitud) => sum + (p.monto || 0), 0))}
                   </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-green-500/20">
-                  <CheckCircle className="w-8 h-8 text-green-300" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Pagos Realizados</p>
-                  <p className="text-2xl font-bold text-white">53</p>
                 </div>
               </div>
             </div>

@@ -67,58 +67,65 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4 font-montserrat">
-      <div className="w-full max-w-md flex flex-col items-center justify-center">
-        <div className="text-center mb-8 w-full">
-          <Image
-            src="/assets/images/bechapra-logo.png"
-            alt="Bechapra Logo"
-            width={200}
-            height={80}
-            className="mx-auto drop-shadow-sm"
-            priority
-          />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-blue-50 to-blue-100 font-montserrat">
+      <div className="w-full max-w-sm md:max-w-md lg:max-w-lg flex flex-col items-center justify-center px-4 py-8">
+        <div className="text-center mb-8 w-full flex justify-center">
+          <div className="relative flex items-center justify-center">
+            <span className="absolute w-36 h-36 md:w-44 md:h-44 rounded-full bg-blue-600/10 blur-xl"></span>
+            <Image
+              src="/assets/images/bechapra-logo.png"
+              alt="Logo de la plataforma Bechapra"
+              width={180}
+              height={70}
+              className="mx-auto drop-shadow-lg animate-fade-in"
+              priority
+              sizes="(max-width: 768px) 140px, 180px"
+            />
+          </div>
         </div>
 
         <div className="w-full bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl shadow-2xl p-8 text-white backdrop-blur-sm flex flex-col items-center">
           <div className="text-center mb-8 w-full">
-            <h1 className="text-2xl font-bold text-white mb-2 font-montserrat">Inicio de sesión</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 font-montserrat">Inicio de sesión</h1>
             <div className="w-16 h-1 bg-white/30 mx-auto rounded-full"></div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 w-full">
             {/* Usuario */}
-            <div className="flex flex-col md:flex-row items-center md:space-x-4 w-full">
-              <label className="text-white font-medium text-lg min-w-[100px] text-right font-montserrat mb-2 md:mb-0 w-full md:w-auto">
-                Usuario:
+            <div className="flex flex-col gap-2 w-full">
+              <label className="text-white font-semibold text-base font-montserrat" htmlFor="email">
+                Usuario
               </label>
               <input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="correo@gmail.com"
-                className="flex-1 px-4 py-3 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat w-full"
+                className="px-4 py-3 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat w-full"
                 autoFocus
                 autoComplete="username"
               />
             </div>
             {errors.email && (
-              <p className="text-sm text-red-200 md:ml-[116px] font-montserrat animate-fade-in">{errors.email}</p>
+              <p className="text-sm text-red-200 font-montserrat animate-fade-in mt-1">{errors.email}</p>
             )}
 
             {/* Contraseña */}
-            <div className="flex flex-col md:flex-row items-center md:space-x-4 w-full">
-              <label className="text-white font-medium text-lg min-w-[100px] text-right font-montserrat mb-2 md:mb-0 w-full md:w-auto">
-                Contraseña:
+            <div className="flex flex-col gap-2 w-full">
+              <label className="text-white font-semibold text-base font-montserrat" htmlFor="password">
+                Contraseña
               </label>
-              <div className="relative flex-1 w-full">
+              <div className="relative w-full">
                 <input
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Contraseña"
                   className="w-full px-4 py-3 pr-12 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat"
-                  autoComplete="current-password"
+                  autoComplete="off"
+                  inputMode="text"
                 />
                 {password && (
                   <button
@@ -126,6 +133,7 @@ export default function LoginPage() {
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-md hover:bg-gray-100"
                     onClick={() => setShowPassword((v) => !v)}
                     aria-label="Mostrar/ocultar contraseña"
+                    tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -133,7 +141,7 @@ export default function LoginPage() {
               </div>
             </div>
             {errors.password && (
-              <p className="text-sm text-red-200 md:ml-[116px] font-montserrat animate-fade-in">{errors.password}</p>
+              <p className="text-sm text-red-200 font-montserrat animate-fade-in mt-1">{errors.password}</p>
             )}
 
             {/* Botón */}
