@@ -40,6 +40,7 @@ export default function NuevaSolicitudPage() {
   const [fechaLimitePago, setFechaLimitePago] = useState<Date | null>(null);
   const [cuentaValida, setCuentaValida] = useState<null | boolean>(null);
   const [checkingCuenta, setCheckingCuenta] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
   const departamentoOptions = [
     { value: 'contabilidad', label: 'Contabilidad' },
@@ -68,16 +69,26 @@ export default function NuevaSolicitudPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     dispatch({ type: 'SET_FIELD', field: name, value });
+    // Validación en tiempo real
+    if (!value) {
+      setErrors((prev: any) => ({ ...prev, [name]: 'Este campo es obligatorio' }));
+    } else {
+      setErrors((prev: any) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'factura_file') => {
     const file = e.target.files?.[0] || null;
-    
     if (file) {
       const valid = validateFile(file);
-      if (!valid) return;
-
+      if (!valid) {
+        setErrors((prev: any) => ({ ...prev, factura_file: 'Archivo no válido' }));
+        return;
+      }
       dispatch({ type: 'SET_FIELD', field: fieldName, value: file });
+      setErrors((prev: any) => ({ ...prev, factura_file: undefined }));
+    } else {
+      setErrors((prev: any) => ({ ...prev, factura_file: 'Este campo es obligatorio' }));
     }
   };
 
@@ -125,36 +136,26 @@ export default function NuevaSolicitudPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    // Validar cuenta antes de enviar
+    let newErrors: any = {};
+    // Validar campos requeridos
+    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'fecha_limite_pago', 'factura_file'];
+    requiredFields.forEach(field => {
+      if (!formData[field]) {
+        newErrors[field] = 'Este campo es obligatorio';
+      }
+    });
     if (cuentaValida === false) {
-      toast.error('La cuenta destino no es válida o no existe.');
-      setLoading(false);
-      return;
+      newErrors['cuenta_destino'] = 'La cuenta destino no es válida o no existe.';
     }
     if (checkingCuenta) {
-      toast.error('Espera a que termine la verificación de la cuenta destino.');
+      newErrors['cuenta_destino'] = 'Espera a que termine la verificación de la cuenta destino.';
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
       setLoading(false);
       return;
     }
-
     try {
-      // Validaciones básicas
-      const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'fecha_limite_pago'];
-      for (let field of requiredFields) {
-        if (!formData[field]) {
-          toast.error(`Por favor completa el campo: ${field}`);
-          setLoading(false);
-          return;
-        }
-      }
-
-      if (!formData.factura_file) {
-        toast.error('Por favor adjunta la factura');
-        setLoading(false);
-        return;
-      }
-
       const solicitudData = {
         departamento: formData.departamento,
         monto: formData.monto,
@@ -164,7 +165,6 @@ export default function NuevaSolicitudPage() {
         fecha_limite_pago: formData.fecha_limite_pago,
         factura: formData.factura_file
       };
-
       const response = await SolicitudesService.createWithFiles(solicitudData);
       toast.success(response.message || 'Solicitud creada exitosamente');
       router.push('/dashboard/solicitante/mis-solicitudes');
@@ -216,7 +216,7 @@ export default function NuevaSolicitudPage() {
                     value={formData.departamento}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.departamento ? 'border-red-400' : ''}`}
                   >
                     <option value="" className="text-gray-900">Seleccionar departamento</option>
                     {departamentoOptions.map(dept => (
@@ -225,6 +225,7 @@ export default function NuevaSolicitudPage() {
                       </option>
                     ))}
                   </select>
+                  {errors.departamento && <span className="text-red-400 text-sm mt-1 block">{errors.departamento}</span>}
                 </div>
 
                 <div>
@@ -244,9 +245,17 @@ export default function NuevaSolicitudPage() {
                     fixedDecimalScale
                     placeholder="0.00"
                     required
-                    onValueChange={({ value }) => dispatch({ type: 'SET_FIELD', field: 'monto', value })}
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                    onValueChange={({ value }) => {
+                      dispatch({ type: 'SET_FIELD', field: 'monto', value });
+                      if (!value) {
+                        setErrors((prev: any) => ({ ...prev, monto: 'Este campo es obligatorio' }));
+                      } else {
+                        setErrors((prev: any) => ({ ...prev, monto: undefined }));
+                      }
+                    }}
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
                   />  
+                  {errors.monto && <span className="text-red-400 text-sm mt-1 block">{errors.monto}</span>}
                 </div>
 
                 <div>
@@ -262,6 +271,11 @@ export default function NuevaSolicitudPage() {
                       const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 18);
                       dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                       setCuentaValida(null);
+                      if (!value) {
+                        setErrors((prev: any) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
+                      } else {
+                        setErrors((prev: any) => ({ ...prev, cuenta_destino: undefined }));
+                      }
                     }}
                     onBlur={e => verificarCuentaDestino(e.target.value)}
                     placeholder="Número de cuenta (máx. 18 dígitos)"
@@ -270,7 +284,7 @@ export default function NuevaSolicitudPage() {
                     inputMode="numeric"
                     pattern="[0-9]*"
                     autoComplete="off"
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.cuenta_destino ? 'border-red-400' : ''}`}
                   />
                   {checkingCuenta && (
                     <span className="text-blue-300 text-sm ml-2">Verificando cuenta...</span>
@@ -281,6 +295,7 @@ export default function NuevaSolicitudPage() {
                   {cuentaValida === true && !checkingCuenta && (
                     <span className="text-green-400 text-sm ml-2">Cuenta válida</span>
                   )}
+                  {errors.cuenta_destino && <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>}
                 </div>
 
                 <div>
@@ -312,11 +327,16 @@ export default function NuevaSolicitudPage() {
                       onChange={(date: Date | null) => {
                         setFechaLimitePago(date);
                         dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: date ? date.toISOString().split('T')[0] : '' });
+                        if (!date) {
+                          setErrors((prev: any) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
+                        } else {
+                          setErrors((prev: any) => ({ ...prev, fecha_limite_pago: undefined }));
+                        }
                       }}
                       dateFormat="yyyy-MM-dd"
                       minDate={new Date()}
                       placeholderText="Selecciona la fecha"
-                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.fecha_limite_pago ? 'border-red-400' : ''}`}
                       calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg"
                       locale={es}
                     />
@@ -324,6 +344,7 @@ export default function NuevaSolicitudPage() {
                       <Calendar className="w-5 h-5 text-white/70" />
                     </span>
                   </div>
+                  {errors.fecha_limite_pago && <span className="text-red-400 text-sm mt-1 block">{errors.fecha_limite_pago}</span>}
                 </div>
               </div>
 
@@ -340,8 +361,9 @@ export default function NuevaSolicitudPage() {
                   placeholder="Describe el concepto del pago..."
                   required
                   rows={5}
-                  className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none text-base"
+                  className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none text-base ${errors.concepto ? 'border-red-400' : ''}`}
                 />
+                {errors.concepto && <span className="text-red-400 text-sm mt-1 block">{errors.concepto}</span>}
               </div>
 
               {/* Archivos */}
@@ -356,7 +378,7 @@ export default function NuevaSolicitudPage() {
                     accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png"
                     onChange={(e) => handleFileChange(e, 'factura_file')}
                     required
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-white/30 file:text-white hover:file:bg-white/40 text-base"
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-white/30 file:text-white hover:file:bg-white/40 text-base ${errors.factura_file ? 'border-red-400' : ''}`}
                   />
                   {formData.factura_file && (
                     <div className="flex items-center mt-3 p-3 bg-white/10 rounded-lg">
@@ -364,8 +386,17 @@ export default function NuevaSolicitudPage() {
                       <p className="text-white/80 text-sm">
                         {formData.factura_file.name} ({(formData.factura_file.size / 1024 / 1024).toFixed(2)} MB)
                       </p>
+                      {/* Previsualización de imagen si es jpg/png */}
+                      {formData.factura_file.type.startsWith('image/') && (
+                        <img
+                          src={URL.createObjectURL(formData.factura_file)}
+                          alt="Previsualización"
+                          className="ml-4 w-16 h-16 object-contain rounded shadow"
+                        />
+                      )}
                     </div>
                   )}
+                  {errors.factura_file && <span className="text-red-400 text-sm mt-1 block">{errors.factura_file}</span>}
                 </div>
               </div>
 
@@ -381,10 +412,18 @@ export default function NuevaSolicitudPage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={loading}
-                  className="bg-green-600 text-white hover:bg-green-700 shadow-lg border-0 px-8 py-4 font-medium text-base"
+                  disabled={loading || Object.values(errors).some(Boolean)}
+                  className="bg-green-600 text-white hover:bg-green-700 shadow-lg border-0 px-8 py-4 font-medium text-base flex items-center gap-2"
                 >
-                  {loading ? 'Creando solicitud...' : 'Crear Solicitud'}
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      </svg>
+                      Creando solicitud...
+                    </>
+                  ) : 'Crear Solicitud'}
                 </Button>
               </div>
             </form>

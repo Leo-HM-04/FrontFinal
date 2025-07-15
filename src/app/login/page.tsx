@@ -52,10 +52,16 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const { success, user } = await login({ email, password });
-
-      if (success && user) {
-        redirectByRole(user.rol);
+      const response = await login({ email, password });
+      // Si el backend responde con un campo 'error' o 'message', lo usamos
+      if (response.success && response.user) {
+        redirectByRole(response.user.rol);
+      } else if (response.error === 'USER_NOT_FOUND') {
+        setErrors((prev) => ({ ...prev, email: 'El correo no está registrado' }));
+        toast.error('El correo no está registrado.');
+      } else if (response.error === 'INVALID_PASSWORD') {
+        setErrors((prev) => ({ ...prev, password: 'Contraseña incorrecta' }));
+        toast.error('Contraseña incorrecta.');
       } else {
         toast.error('Credenciales inválidas o error al iniciar sesión.');
       }
@@ -101,7 +107,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="correo@gmail.com"
+                placeholder="correo@bechapra.com"
                 className="px-4 py-3 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat w-full"
                 autoFocus
                 autoComplete="username"

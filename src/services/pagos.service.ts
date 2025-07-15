@@ -3,7 +3,7 @@
 import { PagoProcesado } from '@/utils/exportUtils';
 import { pagosProcesadosEjemplo, pagosPendientesEjemplo } from '@/hooks/usePagos';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 /**
  * Obtiene los pagos procesados del servidor
@@ -15,7 +15,7 @@ export async function getPagosProcesados(): Promise<PagoProcesado[]> {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
     });
     

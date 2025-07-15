@@ -69,10 +69,6 @@ export function EditSolicitudModal({ isOpen, onClose, solicitud, onSolicitudUpda
       newErrors.departamento = 'El departamento es requerido';
     }
 
-    if (!formData.monto || formData.monto <= 0) {
-      newErrors.monto = 'El monto debe ser mayor a 0';
-    }
-
     if (!formData.cuenta_destino.trim()) {
       newErrors.cuenta_destino = 'La cuenta destino es requerida';
     }
@@ -182,7 +178,6 @@ export function EditSolicitudModal({ isOpen, onClose, solicitud, onSolicitudUpda
               type="number"
               value={formData.monto}
               onChange={handleInputChange}
-              error={errors.monto}
               min="1"
               icon={<DollarSign className="w-5 h-5 text-gray-400" />}
               placeholder="1000000"

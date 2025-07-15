@@ -108,7 +108,7 @@ export default function HistorialPagosPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full rounded-3xl shadow-2xl border border-blue-300 bg-white">
+              <table className="w-full rounded-[2rem] shadow-2xl border-2 border-blue-300 bg-white">
                 <thead className="bg-blue-700">
                   <tr>
                     <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">ID</th>
