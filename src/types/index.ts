@@ -73,3 +73,23 @@ export interface ApiError {
     message: string;
   }>;
 }
+
+export type EstadoRecurrente = 'pendiente' | 'aprobada' | 'rechazada';
+
+export interface PlantillaRecurrente {
+  fact_recurrente?: string; // Ruta del archivo de factura (opcional)
+  id_recurrente: number;
+  id_usuario: number;
+  departamento: string;
+  monto: number;
+  cuenta_destino: string;
+  concepto: string;
+  tipo_pago: string;
+  frecuencia: string;
+  siguiente_fecha: string;
+  estado: EstadoRecurrente;
+  created_at: string;
+  updated_at: string;
+  nombre_usuario?: string; // opcional si lo agregas por JOIN
+  activo: boolean; // indica si la plantilla está activa o pausada
+}

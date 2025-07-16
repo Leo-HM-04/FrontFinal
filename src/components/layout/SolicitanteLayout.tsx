@@ -114,6 +114,18 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
                                     <span className="font-medium">Mis Solicitudes</span>
                                 </Link>
                                 <Link
+                                    href="/dashboard/solicitante/mis-recurrentes"
+                                    className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                                        pathname === '/dashboard/solicitante/mis-recurrentes'
+                                            ? 'bg-blue-50 text-blue-600 shadow-sm'
+                                            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                                    }`}
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <FileText className="w-5 h-5 transition-transform group-hover:scale-110" />
+                                    <span className="font-medium">Solicitudes Recurrentes</span>
+                                </Link>
+                                <Link
                                     href="/dashboard/solicitante/perfil"
                                     className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                                         pathname.startsWith('/dashboard/solicitante/perfil')
