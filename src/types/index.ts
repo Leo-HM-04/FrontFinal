@@ -91,5 +91,10 @@ export interface PlantillaRecurrente {
   created_at: string;
   updated_at: string;
   nombre_usuario?: string; // opcional si lo agregas por JOIN
+  nombre_aprobador?: string;
+  nombre_pagador?: string;
+  id_aprobador?: number;
+  id_pagador?: number;
+  comentario_aprobador?: string;
   activo: boolean; // indica si la plantilla está activa o pausada
 }

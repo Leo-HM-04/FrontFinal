@@ -29,9 +29,16 @@ export class RecurrentesService {
     return response.data;
   }
 
+
   // Obtener plantillas del usuario autenticado
   static async obtenerMisRecurrentes(): Promise<PlantillaRecurrente[]> {
     const response = await api.get('/recurrentes');
+    return response.data;
+  }
+
+  // Obtener todas las plantillas (admin)
+  static async obtenerTodas(): Promise<PlantillaRecurrente[]> {
+    const response = await api.get('/recurrentes/todas');
     return response.data;
   }
 
@@ -47,9 +54,9 @@ export class RecurrentesService {
     return response.data;
   }
 
-  // Rechazar una plantilla
-  static async rechazar(id: number): Promise<any> {
-    const response = await api.put(`/recurrentes/${id}/rechazar`);
+  // Rechazar una plantilla (con comentario opcional)
+  static async rechazar(id: number, comentario_aprobador?: string): Promise<any> {
+    const response = await api.put(`/recurrentes/${id}/rechazar`, { comentario_aprobador });
     return response.data;
   }
 

@@ -26,7 +26,7 @@ export function ConfirmDeleteSoli({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm animate-fade-in">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md animate-slide-up">
         {/* Header */}
         <div className="bg-red-50 border-b border-red-200 p-6 rounded-t-lg">
@@ -70,6 +70,7 @@ export function ConfirmDeleteSoli({
               variant="outline"
               onClick={onClose}
               disabled={loading}
+              className="border-black text-black hover:bg-black"
             >
               Cancelar
             </Button>

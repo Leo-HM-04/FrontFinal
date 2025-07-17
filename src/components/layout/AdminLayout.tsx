@@ -30,6 +30,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { href: '/dashboard/admin', label: 'Inicio', icon: Home },
     { href: '/dashboard/admin/usuarios', label: 'Gestión de Usuarios', icon: Users },
     { href: '/dashboard/admin/solicitudes', label: 'Gestión de Solicitudes', icon: FileText },
+    { href: '/dashboard/admin/recurrentes', label: 'Solicitudes Recurrentes', icon: FileText },
     { href: '/dashboard/admin/perfil', label: 'Mi Perfil', icon: User },
   ];
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { 
-  LogOut, Home, FileText, CreditCard, Menu, User, Bell 
+  LogOut, Home, FileText, CreditCard, Menu, User, Bell, Repeat 
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
@@ -179,6 +179,18 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
                 >
                   <CreditCard className="w-5 h-5 transition-transform group-hover:scale-110" />
                   <span className="font-medium">Pagos Pendientes</span>
+                </Link>
+                                <Link 
+                  href="/dashboard/pagador/recurrentes" 
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                    pathname.startsWith('/dashboard/pagador/recurrentes') 
+                      ? 'bg-blue-50 text-blue-600 shadow-sm' 
+                      : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Repeat className="w-5 h-5 transition-transform group-hover:scale-110" />
+                  <span className="font-medium">Pagos Recurrentes</span>
                 </Link>
                 <Link 
                   href="/dashboard/pagador/pagos/historial" 

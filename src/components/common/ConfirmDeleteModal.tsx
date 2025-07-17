@@ -26,50 +26,50 @@ export function ConfirmDeleteModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md animate-slide-up">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-blue-200/60 backdrop-blur-[3px] animate-fade-in">
+      <div className="bg-white/90 rounded-3xl shadow-2xl max-w-3xl w-full p-0 relative animate-fade-in border border-red-200 overflow-hidden">
         {/* Header */}
-        <div className="bg-red-50 border-b border-red-200 p-6 rounded-t-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <AlertTriangle className="w-6 h-6 text-red-600 mr-3" />
-              <h2 className="text-lg font-semibold text-red-800">{title}</h2>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onClose}
-              className="text-gray-400 border-gray-300 hover:bg-gray-100 hover:text-gray-600"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+        <div className="relative bg-gradient-to-r from-blue-600/90 to-blue-400/80 px-10 py-4 flex items-center gap-4 mb-6 border-b border-blue-200 shadow">
+          <div className="flex items-center justify-center bg-white rounded-full shadow-lg w-16 h-16">
+            <AlertTriangle className="w-9 h-9 text-red-600" />
           </div>
+          <div>
+            <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow">{title}</h2>
+            <p className="text-blue-100 text-sm mt-1">{message}</p>
+          </div>
+          <button
+            className="absolute top-4 right-6 text-white/70 hover:text-white text-3xl font-bold transition"
+            onClick={onClose}
+            aria-label="Cerrar"
+            title="Cerrar"
+          >
+            ×
+          </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          <p className="text-gray-700 mb-4">{message}</p>
-          
+        <div className="px-10 pb-6">
           {itemName && (
-            <div className="bg-gray-50 p-3 rounded-lg mb-4">
-              <p className="text-sm text-gray-600">
-                <strong>Elemento a eliminar:</strong>
-              </p>
-              <p className="text-sm font-medium text-gray-900">{itemName}</p>
+            <div className="bg-red-50/80 border border-red-100 p-3 rounded-lg mb-4 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-400" />
+              <div>
+                <p className="text-xs text-red-700 font-semibold">Elemento a eliminar:</p>
+                <p className="text-sm font-bold text-red-900">{itemName}</p>
+              </div>
             </div>
           )}
-
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-6">
-            <p className="text-sm text-red-700">
-              <strong>⚠️</strong> Se eliminaran todos las solicitudes o pagos que esten relacionados a este usuario. Haz esto solo si estas completamente seguro! De lo contrario, marca al usuario como "Bloqueado" para evitar que el usuario pueda interactuar con el sistema.
-            </p>
+          <div className="bg-gradient-to-r from-red-100/80 to-white/80 border border-red-200 rounded-lg p-3 mb-6 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+            <span className="text-sm text-red-700 font-semibold">
+              Advertencia <span className="font-normal">Haz esto solo si estas completamente seguro!</span>
+            </span>
           </div>
-
-          <div className="flex justify-end space-x-3">
+          <div className="flex justify-end space-x-3 mt-2">
             <Button
               variant="outline"
               onClick={onClose}
               disabled={loading}
+              className="border-red-400 text-red-700 hover:bg-red-50"
             >
               Cancelar
             </Button>
@@ -77,6 +77,7 @@ export function ConfirmDeleteModal({
               variant="danger"
               onClick={onConfirm}
               loading={loading}
+              className="bg-red-600 hover:bg-red-700 border-red-600"
             >
               Eliminar
             </Button>

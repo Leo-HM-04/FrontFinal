@@ -14,6 +14,9 @@ interface FilterState {
   estado?: string;
   rol?: string;
   departamento?: string;
+  tipo_pago?: string;
+  frecuencia?: string;
+  activo?: string;
   fechaDesde?: string;
   fechaHasta?: string;
   montoMin?: number;
@@ -25,7 +28,7 @@ interface AdvancedFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
   onExport?: () => void;
   onReset: () => void;
-  type: 'usuarios' | 'solicitudes' | 'pagos' | 'pagosHistorial';
+  type: 'usuarios' | 'solicitudes' | 'pagos' | 'pagosHistorial' | 'recurrentes';
 }
 
 export function AdvancedFilters({ 
@@ -141,8 +144,9 @@ export function AdvancedFilters({
       {isExpanded && (
         <div className="p-4 bg-white/5 backdrop-blur-sm animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {/* Filtros para usuarios */}
             {type === 'usuarios' && (
-              <div>
+              <div className="col-span-1 md:col-span-2 lg:col-span-1 xl:col-span-1">
                 <label className="block text-sm font-medium text-white/80 mb-1">Rol</label>
                 <select
                   value={filters.rol || ''}
@@ -159,9 +163,10 @@ export function AdvancedFilters({
               </div>
             )}
 
-            {type === 'solicitudes' && (
+            {/* Filtros para solicitudes y recurrentes */}
+            {(type === 'solicitudes' || type === 'recurrentes') && (
               <>
-                <div>
+                <div className="col-span-1">
                   <label className="block text-sm font-medium text-white/80 mb-1">Estado</label>
                   <select
                     value={filters.estado || ''}
@@ -176,8 +181,54 @@ export function AdvancedFilters({
                     ))}
                   </select>
                 </div>
-
-                <div>
+                {type === 'recurrentes' && (
+                  <>
+                    <div className="col-span-1">
+                      <label className="block text-sm font-medium text-white/80 mb-1">Tipo de Pago</label>
+                      <select
+                        value={filters.tipo_pago || ''}
+                        onChange={(e) => updateFilter('tipo_pago', e.target.value || undefined)}
+                        className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                      >
+                        <option value="" className="text-gray-900">Todos los tipos</option>
+                        <option value="viaticos" className="text-gray-900">Viáticos</option>
+                        <option value="efectivo" className="text-gray-900">Efectivo</option>
+                        <option value="factura" className="text-gray-900">Factura</option>
+                        <option value="nominas" className="text-gray-900">Nóminas</option>
+                        <option value="tarjeta" className="text-gray-900">Tarjeta</option>
+                        <option value="proveedores" className="text-gray-900">Proveedores</option>
+                        <option value="administrativos" className="text-gray-900">Administrativos</option>
+                      </select>
+                    </div>
+                    <div className="col-span-1">
+                      <label className="block text-sm font-medium text-white/80 mb-1">Frecuencia</label>
+                      <select
+                        value={filters.frecuencia || ''}
+                        onChange={(e) => updateFilter('frecuencia', e.target.value || undefined)}
+                        className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                      >
+                        <option value="" className="text-gray-900">Todas las frecuencias</option>
+                        <option value="diario" className="text-gray-900">Diario</option>
+                        <option value="semanal" className="text-gray-900">Semanal</option>
+                        <option value="quincenal" className="text-gray-900">Quincenal</option>
+                        <option value="mensual" className="text-gray-900">Mensual</option>
+                      </select>
+                    </div>
+                    <div className="col-span-1">
+                      <label className="block text-sm font-medium text-white/80 mb-1">Estado de Activación</label>
+                      <select
+                        value={filters.activo || ''}
+                        onChange={(e) => updateFilter('activo', e.target.value || undefined)}
+                        className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                      >
+                        <option value="" className="text-gray-900">Todos</option>
+                        <option value="activo" className="text-gray-900">Activo</option>
+                        <option value="inactivo" className="text-gray-900">Inactivo</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+                <div className="col-span-1">
                   <label className="block text-sm font-medium text-white/80 mb-1">Departamento</label>
                   <select
                     value={filters.departamento || ''}
@@ -192,8 +243,7 @@ export function AdvancedFilters({
                     ))}
                   </select>
                 </div>
-
-                <div>
+                <div className="col-span-1">
                   <label className="block text-sm font-medium text-white/80 mb-1">Monto Mínimo</label>
                   <input
                     type="number"
@@ -203,8 +253,7 @@ export function AdvancedFilters({
                     className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                   />
                 </div>
-
-                <div>
+                <div className="col-span-1">
                   <label className="block text-sm font-medium text-white/80 mb-1">Monto Máximo</label>
                   <input
                     type="number"
