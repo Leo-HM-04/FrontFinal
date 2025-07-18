@@ -4,11 +4,18 @@ import { useEffect, useState } from 'react';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { RecurrentesService } from '@/services/recurrentes.service';
-import { PlantillaRecurrente } from '@/types';
-import { Eye, CheckCircle2 } from 'lucide-react';
 
+import { PlantillaRecurrente } from '@/types';
+import { Eye, User, Building2, DollarSign, Banknote, FileText, Calendar, Repeat, BadgeCheck, PauseCircle, MessageCircle, FileImage, FileCheck2, FileWarning, FileX2 } from 'lucide-react';
+import SimpleModal from '@/components/ui/SimpleModal';
 
 export default function PagadorRecurrentesPage() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selected, setSelected] = useState<PlantillaRecurrente | null>(null);
+  const handleView = (rec: PlantillaRecurrente) => {
+    setSelected(rec);
+    setModalOpen(true);
+  };
   const [recurrentes, setRecurrentes] = useState<PlantillaRecurrente[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,11 +33,19 @@ export default function PagadorRecurrentesPage() {
     fetchRecurrentes();
   }, []);
 
+  // Helper for modal file preview
+  let cleanFile = '';
+  let fileUrl = '';
+  if (selected && selected.fact_recurrente) {
+    cleanFile = selected.fact_recurrente.replace(/^[/\\]*uploads[/\\]*recurrente[/\\]*/i, '');
+    fileUrl = `http://localhost:4000/uploads/recurrente/${cleanFile}`;
+  }
+
   return (
     <ProtectedRoute requiredRoles={['pagador_banca']}>
       <PagadorLayout>
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold text-blue-800 mb-6 text-white">Pagos Recurrentes</h1>
+          <h1 className="text-2xl font-bold text-white mb-6">Pagos Recurrentes</h1>
           <div className="bg-white rounded-3xl shadow-2xl p-8 border border-blue-200">
             {loading ? (
               <div className="text-center py-8 text-blue-700">Cargando solicitudes recurrentes...</div>
@@ -83,23 +98,12 @@ export default function PagadorRecurrentesPage() {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-xs text-blue-900 font-medium">{p.siguiente_fecha ? new Date(p.siguiente_fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}</td>
                           <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium flex gap-2 justify-center">
-                            <button className="text-blue-600 hover:text-blue-900 p-1 rounded-full transition-colors duration-150 group-hover:scale-110" title="Ver Detalle">
-                              <Eye className="w-5 h-5" />
-                            </button>
                             <button
-                              className="text-green-600 hover:text-green-800 p-1 rounded-full transition-colors duration-150 group-hover:scale-110"
-                              title="Marcar como pagada"
-                              onClick={async () => {
-                                if (!window.confirm('¿Marcar esta recurrente como pagada?')) return;
-                                try {
-                                  await RecurrentesService.marcarComoPagada(p.id_recurrente);
-                                  setRecurrentes((prev) => prev.filter((r) => r.id_recurrente !== p.id_recurrente));
-                                } catch (err) {
-                                  alert('Error al marcar como pagada');
-                                }
-                              }}
+                              className="text-blue-600 hover:text-blue-900 p-1 rounded-full transition-colors duration-150 group-hover:scale-110"
+                              title="Ver Detalle"
+                              onClick={() => handleView(p)}
                             >
-                              <CheckCircle2 className="w-5 h-5" />
+                              <Eye className="w-5 h-5" />
                             </button>
                           </td>
                         </tr>
@@ -107,6 +111,66 @@ export default function PagadorRecurrentesPage() {
                     )}
                   </tbody>
                 </table>
+                {/* Modal fuera de la tabla */}
+                <SimpleModal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Detalle de Pago Recurrente">
+                  {selected && (
+                    <div className="space-y-4 text-blue-900 text-[15px] max-w-3xl w-full mx-auto p-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="flex items-center gap-2"><BadgeCheck className="w-5 h-5 text-blue-500" /><span className="font-semibold text-blue-700">ID:</span> #{selected.id_recurrente}</div>
+                        <div className="flex items-center gap-2"><User className="w-5 h-5 text-blue-500" /><span className="font-semibold text-blue-700">Solicitante:</span> {selected.nombre_usuario || `Usuario ${selected.id_usuario}`}</div>
+                        <div className="flex items-center gap-2"><Building2 className="w-5 h-5 text-blue-500" /><span className="font-semibold text-blue-700">Departamento:</span> {selected.departamento}</div>
+                        <div className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-green-600" /><span className="font-semibold text-blue-700">Monto:</span> <span className="font-bold text-green-700">{Number(selected.monto).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span></div>
+                        <div className="flex items-center gap-2"><Banknote className="w-5 h-5 text-blue-500" /><span className="font-semibold text-blue-700">Cuenta Destino:</span> {selected.cuenta_destino}</div>
+                        <div className="flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" /><span className="font-semibold text-blue-700">Concepto:</span> {selected.concepto}</div>
+                        <div className="flex items-center gap-2"><Calendar className="w-5 h-5 text-blue-500" /><span className="font-semibold text-blue-700">Tipo Pago:</span> {selected.tipo_pago}</div>
+                        <div className="flex items-center gap-2"><Repeat className="w-5 h-5 text-blue-500" /><span className="font-semibold text-blue-700">Frecuencia:</span> {selected.frecuencia}</div>
+                        <div className="flex items-center gap-2"><BadgeCheck className="w-5 h-5 text-yellow-500" /><span className="font-semibold text-blue-700">Estado:</span> <span className={`font-bold ${selected.estado === 'aprobada' ? 'text-yellow-700' : selected.estado === 'rechazada' ? 'text-red-700' : 'text-gray-700'}`}>{selected.estado}</span></div>
+                        <div className="flex items-center gap-2">{selected.activo ? <PauseCircle className="w-5 h-5 text-green-600" /> : <PauseCircle className="w-5 h-5 text-red-600" />}<span className="font-semibold text-blue-700">Activa:</span> {selected.activo ? <span className="text-green-700 font-bold">Sí</span> : <span className="text-red-700 font-bold">No</span>}</div>
+                        <div className="flex items-center gap-2"><Calendar className="w-5 h-5 text-blue-500" /><span className="font-semibold text-blue-700">Siguiente Fecha:</span> {selected.siguiente_fecha ? new Date(selected.siguiente_fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}</div>
+                        <div className="flex items-center gap-2"><MessageCircle className="w-5 h-5 text-blue-500" /><span className="font-semibold text-blue-700">Comentario Aprobador:</span> {selected.comentario_aprobador || '-'}</div>
+                      </div>
+                      {selected.fact_recurrente && (
+                        <div className="mt-4 w-full">
+                          <div className="flex items-center gap-2 font-semibold text-blue-700 mb-1"><FileImage className="w-5 h-5 text-blue-500" />Factura:</div>
+                          <div className="rounded-lg border border-blue-200 bg-blue-50 p-2 flex flex-col items-center w-full">
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-700 underline font-medium mb-1 flex items-center gap-1"
+                            >
+                              <FileCheck2 className="w-4 h-4" /> Ver archivo de factura
+                            </a>
+                            {/\.(png|jpg|jpeg|gif)$/i.test(cleanFile) ? (
+                              <img
+                                src={fileUrl}
+                                alt="Factura recurrente"
+                                className="max-h-48 rounded shadow border mt-1"
+                              />
+                            ) : /\.pdf$/i.test(cleanFile) ? (
+                              <object
+                                data={fileUrl}
+                                type="application/pdf"
+                                className="w-full h-48 rounded border mt-1 bg-white"
+                              >
+                                <div className="flex flex-col items-center justify-center h-48 text-center text-blue-700">
+                                  <FileWarning className="w-8 h-8 mb-2 text-yellow-500" />
+                                  <span>No se pudo previsualizar el PDF aquí.<br />
+                                  <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="underline text-blue-700">Abrir factura en otra pestaña</a></span>
+                                </div>
+                              </object>
+                            ) : (
+                              <div className="flex flex-col items-center text-red-600 mt-1">
+                                <FileX2 className="w-6 h-6 mb-1" />
+                                <span>Tipo de archivo no soportado para previsualización.</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </SimpleModal>
               </div>
             )}
           </div>
@@ -114,4 +178,5 @@ export default function PagadorRecurrentesPage() {
       </PagadorLayout>
     </ProtectedRoute>
   );
+
 }
