@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import React from "react";
+import { SolicitudModal } from '../components/SolicitudModal';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PlantillaRecurrente } from '@/types';
@@ -15,6 +17,8 @@ export default function AprobadorRecurrentesPage() {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [comentario, setComentario] = useState<string>('');
   const [rechazoId, setRechazoId] = useState<number | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [solicitudSeleccionada, setSolicitudSeleccionada] = useState<PlantillaRecurrente | null>(null);
 
   useEffect(() => {
     RecurrentesService.obtenerTodas()
@@ -34,8 +38,9 @@ export default function AprobadorRecurrentesPage() {
     setError(null);
     try {
       await RecurrentesService.aprobar(id);
-      setSolicitudes((prev) => prev.map(s => s.id_recurrente === id ? { ...s, estado: 'aprobada' } : s));
+      setSolicitudes((prev) => prev.map(s => s.id_recurrente === id ? { ...s, estado: 'aprobada', comentario_aprobador: 'Solicitud aprobada' } : s));
       setMensaje('Solicitud aprobada correctamente.');
+      setComentario('');
     } catch (err: any) {
       setError(err.message || 'Error inesperado');
     } finally {
@@ -48,8 +53,10 @@ export default function AprobadorRecurrentesPage() {
     setMensaje(null);
     setError(null);
     try {
-      await RecurrentesService.rechazar(id, comentario);
-      setSolicitudes((prev) => prev.map(s => s.id_recurrente === id ? { ...s, estado: 'rechazada', comentario_aprobador: comentario } : s));
+      // Comentario por defecto si está vacío
+      const comentarioRechazo = comentario && comentario.trim() !== '' ? comentario : 'Solicitud rechazada';
+      await RecurrentesService.rechazar(id, comentarioRechazo);
+      setSolicitudes((prev) => prev.map(s => s.id_recurrente === id ? { ...s, estado: 'rechazada', comentario_aprobador: comentarioRechazo } : s));
       setMensaje('Solicitud rechazada correctamente.');
       setComentario('');
       setRechazoId(null);
@@ -194,10 +201,16 @@ export default function AprobadorRecurrentesPage() {
                               <button
                                 className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold border border-blue-200 shadow-sm transition"
                                 title="Ver detalles"
-                                // Aquí podrías abrir un modal de detalles si lo tienes implementado
+                                onClick={() => { setSolicitudSeleccionada(s); setModalOpen(true); }}
                               >
                                 <FaSearch /> Ver
                               </button>
+                                {/* Modal de detalles */}
+                                <SolicitudModal 
+                                  solicitud={solicitudSeleccionada!}
+                                  open={modalOpen && !!solicitudSeleccionada}
+                                  onClose={() => setModalOpen(false)}
+                                />
                               <span className="text-gray-400 text-xs">Sin acciones</span>
                               {s.estado === 'rechazada' && s.comentario_aprobador && (
                                 <span className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1 mt-1" title={s.comentario_aprobador}>

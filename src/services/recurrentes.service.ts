@@ -90,4 +90,15 @@ export class RecurrentesService {
     const response = await api.get(`/recurrentes/${id}/historial`);
     return response.data;
   }
+    // Marcar como pagada una recurrente (pagador)
+  static async marcarComoPagada(id: number): Promise<any> {
+    const response = await api.put(`/recurrentes/${id}/pagar`);
+    return response.data;
+  }
+
+    // Obtener solo las recurrentes aprobadas (pagador)
+  static async obtenerAprobadasParaPagador(): Promise<PlantillaRecurrente[]> {
+    const response = await api.get('/recurrentes/aprobadas');
+    return response.data;
+  }
 }
