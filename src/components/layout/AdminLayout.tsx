@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
-import { Users, LogOut, Home, FileText, Menu, User, Bell } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Users, LogOut, Home, FileText, Menu, User, Bell, Repeat, BarChart2 } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -24,14 +24,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     () => ({ background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)' }),
     []
   );
+  // Color institucional para acentos y fondo sidebar
+  const accentColor = '#0057D9';
+  const sidebarBg = 'bg-white/90 shadow-lg';
+  const sidebarHeaderBg = 'bg-gradient-to-b from-[#0057D9] to-[#004AB7]';
 
   // Definir elementos de navegación en un arreglo para reducir código repetitivo
   const navItems = [
     { href: '/dashboard/admin', label: 'Inicio', icon: Home },
     { href: '/dashboard/admin/usuarios', label: 'Gestión de Usuarios', icon: Users },
     { href: '/dashboard/admin/solicitudes', label: 'Gestión de Solicitudes', icon: FileText },
-    { href: '/dashboard/admin/recurrentes', label: 'Solicitudes Recurrentes', icon: FileText },
-    { href: '/dashboard/admin/graficas', label: 'Gráficas', icon: FileText },
+    { href: '/dashboard/admin/recurrentes', label: 'Solicitudes Recurrentes', icon: Repeat },
+    { href: '/dashboard/admin/graficas', label: 'Gráficas', icon: BarChart2 },
     { href: '/dashboard/admin/perfil', label: 'Mi Perfil', icon: User },
   ];
 
@@ -88,106 +92,129 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen font-sans" style={backgroundGradient}>
+    <div className="min-h-screen font-sans flex flex-col" style={backgroundGradient}>
       {/* Header */}
-      <header className="bg-white/10 backdrop-blur-lg border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-20">
-            <Button
-              variant="outline"
-              size="sm"
+      <header style={{background: 'transparent', borderBottom: 'none', boxShadow: 'none', padding: 0}}>
+        <div className="max-w-7xl mx-auto px-0">
+          <div className="flex items-center justify-between h-16">
+            <button
               onClick={() => setIsMenuOpen(true)}
-              className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium"
               aria-label="Abrir menú"
               aria-expanded={isMenuOpen}
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-transparent hover:bg-white/20 transition-colors duration-200 text-white focus:outline-none shadow-none border-none"
+              style={{border: 'none', boxShadow: 'none', outline: 'none'}}
             >
-              <Menu className="w-4 h-4 mr-2" />
-              Menú
-            </Button>
+              <Menu className="w-7 h-7" />
+            </button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // Placeholder para un sistema de notificaciones
-                console.log('Abrir notificaciones');
-                // Opcional: Implementar con react-hot-toast o similar
-              }}
-              className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 py-3 rounded-xl font-medium"
+            <button
+              onClick={() => { console.log('Abrir notificaciones'); }}
               aria-label="Ver notificaciones"
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-transparent hover:bg-white/20 transition-colors duration-200 text-white focus:outline-none shadow-none border-none"
+              style={{border: 'none', boxShadow: 'none', outline: 'none'}}
             >
-              Notificaciones
-              <Bell className="w-4 h-4 ml-2" />
-            </Button>
+              <Bell className="w-7 h-7" />
+            </button>
           </div>
         </div>
       </header>
 
       {/* Sidebar Menu */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div
-            className="absolute inset-0 backdrop-blur-sm bg-black/30 transition-opacity duration-300"
-            onClick={closeMenu}
-            aria-hidden="true"
-          />
-          <div className="sidebar absolute left-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-out">
-            <div className="flex flex-col h-full">
-              <div className="text-white p-6" style={backgroundGradient}>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold">Panel Administrador</h2>
-                </div>
-                <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center ring-2 ring-white/30 overflow-hidden">
-                      <img
-                        src="/assets/images/Logo_1x1_Azul@2x.png"
-                        alt="Foto de perfil Bechapra"
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-semibold">{user?.nombre || 'Usuario'}</p>
-                      <p className="text-sm text-white/90">Administrador Bechapra</p>
-                    </div>
-                  </div>
+      <AnimatePresence>
+        {isMenuOpen && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            <motion.div
+              className="absolute inset-0 backdrop-blur-sm bg-black/30"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              onClick={closeMenu}
+              aria-hidden="true"
+            />
+            <motion.aside
+              className="sidebar absolute left-0 top-0 h-full w-80 bg-white/80 shadow-2xl flex flex-col backdrop-blur-xl border-r border-blue-100"
+              style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)' }}
+              initial={{ x: -32, opacity: 0, clipPath: 'inset(0 40% 0 0)' }}
+              animate={{ x: 0, opacity: 1, clipPath: 'inset(0 0% 0 0)', boxShadow: '0 16px 48px 0 rgba(31,38,135,0.25)' }}
+              exit={{
+                x: -32,
+                opacity: 0,
+                // Simula una "hoja doblándose" usando una curva en el clipPath
+                clipPath: [
+                  'inset(0 0% 0 0)',
+                  'inset(0 20% 0 0) round 0 40px 0 0',
+                  'inset(0 40% 0 0) round 0 80px 0 0'
+                ]
+              }}
+              transition={{
+                x: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+                opacity: { duration: 0.28, ease: 'easeInOut' },
+                clipPath: { duration: 0.32, ease: [0.65, 0, 0.35, 1] }
+              }}
+            >
+            {/* Logo y encabezado */}
+            <div className="flex flex-col items-start gap-2 pt-8 pb-2 px-8" style={{background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)'}}>
+              {/* Card usuario */}
+              <div className="w-full bg-white/90 rounded-xl border border-blue-200 flex items-center gap-4 px-4 py-3 mb-4 shadow-sm">
+                <img
+                  src="/assets/images/Logo_1x1_Azul@2x.png"
+                  alt="Logo Bechapra"
+                  className="w-12 h-12 rounded-full object-cover border border-blue-300"
+                />
+                <div className="flex flex-col items-start justify-center">
+                  <span className="font-bold text-blue-800 text-base leading-tight">{user?.nombre || 'Administrador'}</span>
+                  <span className="text-xs text-blue-600/90">Administrador Bechapra</span>
                 </div>
               </div>
-
-              <div className="flex-1 p-4 space-y-1 overflow-y-auto">
-                {navItems.map((item) => (
+            </div>
+            {/* ...el card de usuario ya está arriba... */}
+            {/* Navegación */}
+            <nav className="flex-1 flex flex-col gap-1 px-4 py-4 overflow-y-auto bg-white rounded-xl mx-4 mb-4 shadow">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href);
+                return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                      pathname === item.href || pathname.startsWith(item.href)
+                    className={`relative flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group text-base font-medium select-none
+                      ${isActive
                         ? 'bg-blue-50 text-blue-600 shadow-sm'
-                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'
-                    }`}
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'}
+                    `}
                     onClick={closeMenu}
                   >
-                    <item.icon className="w-5 h-5 transition-transform group-hover:scale-110" />
-                    <span className="font-medium">{item.label}</span>
+                    {/* Indicador visual de activo */}
+                    {isActive && (
+                      <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-blue-600" style={{boxShadow: '0 0 6px #2563eb55'}}></span>
+                    )}
+                    <item.icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-blue-700' : ''}`} />
+                    <span>{item.label}</span>
                   </Link>
-                ))}
-              </div>
-
-              <div className="p-4 border-t border-gray-200 bg-gray-50">
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 w-full group"
-                >
-                  <LogOut className="w-5 h-5 transition-transform group-hover:scale-110" />
-                  <span className="font-medium">Cerrar Sesión</span>
-                </button>
-              </div>
+                );
+              })}
+            </nav>
+            {/* Cerrar sesión */}
+            <div className="p-4 border-t border-gray-200 bg-gray-50">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center space-x-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 w-full group"
+                style={{ fontWeight: 600 }}
+              >
+                <LogOut className="w-5 h-5 transition-transform group-hover:scale-110" />
+                <span className="font-medium">Cerrar Sesión</span>
+              </button>
             </div>
+            </motion.aside>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 p-4 min-h-[calc(100vh-4rem)]">
+        {children}
+      </main>
     </div>
   );
 }

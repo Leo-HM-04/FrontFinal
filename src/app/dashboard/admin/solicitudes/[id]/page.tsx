@@ -134,7 +134,7 @@ export default function SolicitudDetailPage() {
                 </Button>
                 <div>
                   <h1 className="text-2xl font-bold text-white">
-                    Solicitud #{solicitud?.id_solicitud}
+                    Solicitud {solicitud?.id_solicitud}
                   </h1>
                   <p className="text-white/80">
                     Creada el {solicitud && new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO')}

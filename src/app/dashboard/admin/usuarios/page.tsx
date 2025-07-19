@@ -8,7 +8,33 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { ConfirmDeleteModal } from '@/components/common/ConfirmDeleteModal';
-import { Users, Plus, Trash2, Edit, Eye } from 'lucide-react';
+import { Users, Plus, Trash2, Edit, Eye, User as UserIcon, Ban, CheckCircle2, UserCheck, UserPlus, UserX } from 'lucide-react';
+import { useRef } from 'react';
+// Utilidad para obtener iniciales
+function getInitials(name = '') {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase();
+}
+
+// Skeleton loader para la tabla
+function TableSkeleton({ rows = 5 }) {
+  return (
+    <tbody>
+      {Array.from({ length: rows }).map((_, i) => (
+        <tr key={i} className="animate-pulse">
+          {Array.from({ length: 7 }).map((_, j) => (
+            <td key={j} className="px-6 py-4">
+              <div className="h-4 bg-gray-200 rounded w-full" />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  );
+}
 import { UsuariosService } from '@/services/usuarios.service';
 import { usePagination } from '@/hooks/usePagination';
 import { exportUsuariosToCSV } from '@/utils/exportUtils';
@@ -83,6 +109,19 @@ export default function UsuariosPage() {
       : filteredUsers;
   }, [usuarios, roleFilter, user?.id_usuario]);
 
+
+  // Estado y lógica para búsqueda
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredBySearch = useMemo(() => {
+    if (!searchQuery.trim()) return filteredByRole;
+    const q = searchQuery.trim().toLowerCase();
+    return filteredByRole.filter(u =>
+      u.nombre.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q)
+    );
+  }, [filteredByRole, searchQuery]);
+
+  // Actualiza paginación para búsqueda
   const {
     currentPage,
     totalPages,
@@ -91,7 +130,7 @@ export default function UsuariosPage() {
     paginatedData: paginatedUsuarios,
     goToPage,
     changeItemsPerPage,
-  } = usePagination({ data: filteredByRole, initialItemsPerPage: 5 });
+  } = usePagination({ data: filteredBySearch, initialItemsPerPage: 5 });
 
   const searchParams = useSearchParams();
 const updatedFlag = searchParams.get('updated'); // también puedes usar 'created' o 'deleted' luego
@@ -193,19 +232,6 @@ const fetchUsuarios = useCallback(async () => {
     <ProtectedRoute requiredRoles={['admin_general']}>
       <AdminLayout>
         <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Stats Cards optimizadas */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white/80">Total Usuarios</p>
-                  <p className="text-2xl font-bold text-white">{stats.total}</p>
-                </div>
-                <Users className="w-8 h-8 text-white" />
-              </div>
-            </div>
-          </div>
-
           {/* Header with Back Button */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
             <div className="flex items-center justify-between">
@@ -233,52 +259,62 @@ const fetchUsuarios = useCallback(async () => {
             </div>
           </div>
 
-          {/* Filtros simplificados */}
-          <div className="bg-white rounded-xl p-4 mb-6">
-            <div className="mb-4 pb-4 border-b border-gray-200">
-              <h4 className="text-lg font-semibold text-gray-800 mb-3">Filtrar por Rol</h4>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={clearRoleFilter}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    roleFilter === '' 
-                      ? 'bg-blue-400 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Todos ({stats.total})
-                </button>
-                <button
-                  onClick={() => handleRoleFilterChange('solicitante')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    roleFilter === 'solicitante' 
-                      ? 'bg-blue-400 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Solicitantes ({stats.roleCount.solicitante || 0})
-                </button>
-                <button
-                  onClick={() => handleRoleFilterChange('aprobador')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    roleFilter === 'aprobador' 
-                      ? 'bg-blue-400 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Aprobadores ({stats.roleCount.aprobador || 0})
-                </button>
-                <button
-                  onClick={() => handleRoleFilterChange('pagador_banca')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    roleFilter === 'pagador_banca' 
-                      ? 'bg-blue-400 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Pagadores ({stats.roleCount.pagador_banca || 0})
-                </button>
+                    {/* Tarjetas de estadísticas visuales */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-400 rounded-xl p-4 shadow flex items-center gap-4">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-white/80">Total Usuarios</p>
+                <p className="text-2xl font-bold text-white animate-fade-in">{stats.total}</p>
               </div>
+              <Users className="w-8 h-8 text-white/80" />
+            </div>
+            <div className="bg-gradient-to-br from-yellow-400 to-yellow-300 rounded-xl p-4 shadow flex items-center gap-4">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-white/80">Nuevos (7d)</p>
+                <p className="text-2xl font-bold text-white animate-fade-in">{stats.nuevos}</p>
+              </div>
+              <UserPlus className="w-8 h-8 text-white/80" />
+            </div>
+          </div>
+
+          {/* Filtros y búsqueda */}
+          <div className="bg-white rounded-xl p-4 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-gray-700 font-semibold mr-2">Filtrar por Rol:</span>
+              <button
+                onClick={clearRoleFilter}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${roleFilter === '' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+              >
+                Todos ({stats.total})
+              </button>
+              <button
+                onClick={() => handleRoleFilterChange('solicitante')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${roleFilter === 'solicitante' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+              >
+                Solicitantes ({stats.roleCount.solicitante || 0})
+              </button>
+              <button
+                onClick={() => handleRoleFilterChange('aprobador')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${roleFilter === 'aprobador' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+              >
+                Aprobadores ({stats.roleCount.aprobador || 0})
+              </button>
+              <button
+                onClick={() => handleRoleFilterChange('pagador_banca')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${roleFilter === 'pagador_banca' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+              >
+                Pagadores ({stats.roleCount.pagador_banca || 0})
+              </button>
+            </div>
+            {/* Búsqueda */}
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <input
+                type="text"
+                placeholder="Buscar por nombre o email..."
+                className="border border-gray-300 rounded-lg px-4 py-2 text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
             </div>
           </div>
 
@@ -306,77 +342,68 @@ const fetchUsuarios = useCallback(async () => {
                 )}
               </div>
               
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-white">Cargando usuarios...</p>
-                </div>
-              ) : (
-                <div className="bg-white rounded-xl overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead style={{backgroundColor: '#F0F4FC'}}>
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                            ID
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                            Nombre
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                            Email
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                            Rol
-                          </th>
-                          
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                            Fecha de creación
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                            Bloqueado
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">
-                            Acciones
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+              <div className="bg-white rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">ID</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Nombre</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Email</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Rol</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Fecha de creación</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Bloqueado</th>
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Acciones</th>
+                      </tr>
+                    </thead>
+                    {loading ? (
+                      <TableSkeleton rows={5} />
+                    ) : (
+                      <tbody className="bg-white divide-y divide-gray-100">
                         {paginatedUsuarios.map((usuario) => (
-                          <tr key={usuario.id_usuario} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {usuario.id_usuario}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                          <tr key={usuario.id_usuario} className="group transition-all hover:bg-blue-50/80 hover:shadow-md">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{usuario.id_usuario}</td>
+                            <td className="px-6 py-4 whitespace-nowrap flex items-center gap-3">
                               <div className="text-sm font-medium text-gray-900">{usuario.nombre}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{usuario.email}</div>
+                              <div className="text-sm text-gray-700">{usuario.email}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white" style={{backgroundColor: '#3B82F6'}}>
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full border shadow-sm
+                                  ${usuario.rol === 'solicitante' ? 'bg-blue-100 text-blue-700 border-blue-300' : ''}
+                                  ${usuario.rol === 'aprobador' ? 'bg-purple-100 text-purple-700 border-purple-300' : ''}
+                                  ${usuario.rol === 'pagador_banca' ? 'bg-green-100 text-green-700 border-green-300' : ''}
+                                  ${usuario.rol === 'admin_general' ? 'bg-gray-200 text-gray-700 border-gray-300' : ''}
+                                `}
+                                style={{ minWidth: 110, justifyContent: 'center' }}
+                              >
+                                {usuario.rol === 'solicitante' && <UserIcon className="w-4 h-4" />}
+                                {usuario.rol === 'aprobador' && <UserCheck className="w-4 h-4" />}
+                                {usuario.rol === 'pagador_banca' && <UserPlus className="w-4 h-4" />}
+                                {usuario.rol === 'admin_general' && <Users className="w-4 h-4" />}
                                 {getRoleLabel(usuario.rol)}
                               </span>
                             </td>
-                            
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className="text-sm text-gray-700">
-                                {usuario.creado_en ? new Date(usuario.creado_en).toLocaleDateString('es-CO') : '-'}
+                                {usuario.creado_en ? new Date(usuario.creado_en).toLocaleString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '') : '-'}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                usuario.bloqueado ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'
-                              }`}>
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full border shadow-sm ${usuario.bloqueado ? 'bg-red-100 text-red-700 border-red-300' : 'bg-green-100 text-green-700 border-green-300'}`}>
+                                {usuario.bloqueado ? <Ban className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
                                 {usuario.bloqueado ? 'Sí' : 'No'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
                               <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => router.push(`/dashboard/admin/usuarios/${usuario.id_usuario}/edit`)}
-                                className="text-blue-600 hover:bg-blue-900"
+                                className="rounded-full border-blue-200 text-blue-600 hover:bg-blue-900 hover:text-blue-900 transition"
+                                title="Editar usuario"
                               >
                                 <Edit className="w-4 h-4" />
                               </Button>
@@ -384,7 +411,8 @@ const fetchUsuarios = useCallback(async () => {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => handleDelete(usuario)}
-                                className="text-red-600 hover:bg-red-500"
+                                className="rounded-full border-red-200 text-red-600 hover:bg-red-600 hover:text-red-900 transition"
+                                title="Eliminar usuario"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
@@ -392,37 +420,94 @@ const fetchUsuarios = useCallback(async () => {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
-                  </div>
-                    <div
-                      style={{ backgroundColor: '#F0F4FC', color: 'black' }}
-                      className="px-6 py-4"
-                    >
-                      <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        totalItems={totalItems}
-                        itemsPerPage={itemsPerPage}
-                        onPageChange={goToPage}
-                        onItemsPerPageChange={changeItemsPerPage}
-                      />
-                    </div>
-
+                    )}
+                  </table>
                 </div>
-              )}
+                <div style={{ backgroundColor: '#F0F4FC', color: 'black' }} className="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 rounded-b-2xl border-t border-blue-100 animate-fade-in">
+                  {/* Paginador profesional fijo a 8 por página */}
+                  <div className="flex items-center gap-2 mx-auto md:mx-0 bg-white/40 backdrop-blur-md rounded-xl px-4 py-2 shadow-lg border border-blue-100">
+                    <button
+                      onClick={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg border-2 transition-all duration-200 shadow-md focus:ring-2 focus:ring-blue-400
+                        ${currentPage === 1 ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white/80 text-blue-700 border-blue-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 active:scale-95'}`}
+                      aria-label="Anterior"
+                    >
+                      &#8592;
+                    </button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }).map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => goToPage(idx + 1)}
+                          className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-base border-2 transition-all duration-200 mx-0.5 focus:ring-2 focus:ring-blue-400
+                            ${currentPage === idx + 1 ? 'bg-gradient-to-br from-blue-600 to-blue-400 text-white border-blue-600 scale-110 shadow-xl' : 'bg-white/80 text-blue-700 border-blue-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 active:scale-95'}`}
+                          aria-current={currentPage === idx + 1 ? 'page' : undefined}
+                        >
+                          {idx + 1}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => goToPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg border-2 transition-all duration-200 shadow-md focus:ring-2 focus:ring-blue-400
+                        ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white/80 text-blue-700 border-blue-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 active:scale-95'}`}
+                      aria-label="Siguiente"
+                    >
+                      &#8594;
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-blue-700 justify-center md:justify-end">
+                    <span>Mostrando <span className="font-bold text-blue-900">{Math.min((currentPage - 1) * 5 + 1, totalItems)}</span> - <span className="font-bold text-blue-900">{Math.min(currentPage * 5, totalItems)}</span> de <span className="font-bold text-blue-900">{totalItems}</span></span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Delete Confirmation Modal */}
-          <ConfirmDeleteModal
-            isOpen={showDeleteModal}
-            onClose={() => setShowDeleteModal(false)}
-            onConfirm={confirmDelete}
-            title="Eliminar Usuario"
-            message="¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer."
-            itemName={selectedUser ? `${selectedUser.nombre} (${selectedUser.email})` : undefined}
-            loading={deleting}
-          />
+          {showDeleteModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in">
+              <div className="bg-white/90 border-2 border-blue-600 rounded-2xl shadow-2xl p-8 max-w-md w-full relative animate-fade-in-up">
+                <div className="flex flex-col items-center text-center">
+                  <div className="bg-blue-100 border-4 border-blue-600 rounded-full p-3 mb-4 animate-pulse">
+                    <Trash2 className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-blue-700 mb-2 font-montserrat">Eliminar Usuario</h2>
+                  <p className="text-gray-700 mb-2 font-medium">¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.</p>
+                  {selectedUser && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-blue-800 font-semibold mb-4">
+                      {selectedUser.nombre} <span className="text-gray-500">({selectedUser.email})</span>
+                    </div>
+                  )}
+                  <div className="flex gap-4 mt-4 w-full justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-blue-600 text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-bold px-6 py-2 rounded-xl transition-all text-black"
+                      onClick={() => setShowDeleteModal(false)}
+                      disabled={deleting}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="button"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-xl shadow-xl transition-all border-0"
+                      onClick={confirmDelete}
+                      disabled={deleting}
+                    >
+                      {deleting ? (
+                        <span className="flex items-center gap-2"><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span> Eliminando...</span>
+                      ) : (
+                        <span className="flex items-center gap-2"><Trash2 className="w-4 h-4" /> Eliminar</span>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </AdminLayout>
     </ProtectedRoute>

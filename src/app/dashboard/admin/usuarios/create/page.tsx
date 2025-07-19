@@ -57,8 +57,8 @@ export default function CreateUserPage() {
     if (!formData.email) {
       newErrors.email = 'El correo es requerido';
       isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'El correo electrónico no es válido';
+    } else if (!/^[^@\s]+@bechapra\.com$/.test(formData.email)) {
+      newErrors.email = 'Solo se permiten correos @bechapra.com';
       isValid = false;
     }
 
@@ -103,15 +103,6 @@ export default function CreateUserPage() {
           {/* Header */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
             <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/dashboard/admin/usuarios')}
-                className="text-white border-white/30 hover:bg-white/10"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver
-              </Button>
               <div>
                 <h1 className="text-2xl font-bold text-white font-sans">
                   Crear Usuario
@@ -121,9 +112,29 @@ export default function CreateUserPage() {
             </div>
           </div>
 
-          {/* Form Container */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-6">
-            <form onSubmit={handleSubmit}>
+          {/* Form Container Mejorado */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-8 shadow-lg flex flex-col md:flex-row gap-8">
+            {/* Card resumen visual */}
+            <div className="hidden md:flex flex-col items-center justify-center w-1/3 bg-gradient-to-br from-blue-600 to-blue-400 rounded-xl p-8 shadow-lg text-white animate-fade-in">
+              <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                <User className="w-10 h-10 text-white/80" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Nuevo Usuario</h3>
+              <div className="text-white/90 text-center mb-2 truncate w-full max-w-[180px]">{formData.nombre || 'Nombre completo'}</div>
+              <div className="text-white/70 text-center text-sm mb-2 truncate w-full max-w-[180px]">{formData.email || 'Correo electrónico'}</div>
+              <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-semibold mt-2 shadow border-2 transition-all max-w-full truncate
+                ${formData.rol === 'solicitante' ? 'bg-blue-600 text-white border-blue-600' : ''}
+                ${formData.rol === 'aprobador' ? 'bg-purple-600 text-white border-purple-600' : ''}
+                ${formData.rol === 'pagador_banca' ? 'bg-green-600 text-white border-green-600' : ''}
+              `}>
+                {formData.rol === 'solicitante' && <User className="w-4 h-4" />}
+                {formData.rol === 'aprobador' && <UserCheck className="w-4 h-4" />}
+                {formData.rol === 'pagador_banca' && <UserCheck className="w-4 h-4" />}
+                <span className="truncate">{formData.rol.charAt(0).toUpperCase() + formData.rol.slice(1).replace('_', ' ')}</span>
+              </div>
+            </div>
+            {/* Formulario */}
+            <form onSubmit={handleSubmit} className="flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 {/* Nombre */}
                 <div>
@@ -135,11 +146,11 @@ export default function CreateUserPage() {
                     type="text"
                     value={formData.nombre}
                     onChange={(e) => handleChange('nombre', e.target.value)}
-                    className="bg-white/15 border-white/20 text-white"
+                    className={`bg-white/15 border-white/20 text-white focus:ring-2 focus:ring-blue-400 ${errors.nombre ? 'border-red-400 ring-2 ring-red-400' : ''}`}
                     placeholder="Ej. Juan Pérez"
                   />
                   {errors.nombre && (
-                    <p className="text-red-300 text-xs mt-1">{errors.nombre}</p>
+                    <p className="text-red-300 text-xs mt-1 animate-shake">{errors.nombre}</p>
                   )}
                 </div>
 
@@ -153,11 +164,11 @@ export default function CreateUserPage() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleChange('email', e.target.value)}
-                    className="bg-white/15 border-white/20 text-white"
+                    className={`bg-white/15 border-white/20 text-white focus:ring-2 focus:ring-blue-400 ${errors.email ? 'border-red-400 ring-2 ring-red-400' : ''}`}
                     placeholder="Ej. usuario@bechapra.com"
                   />
                   {errors.email && (
-                    <p className="text-red-300 text-xs mt-1">{errors.email}</p>
+                    <p className="text-red-300 text-xs mt-1 animate-shake">{errors.email}</p>
                   )}
                 </div>
 
@@ -171,11 +182,11 @@ export default function CreateUserPage() {
                     type="password"
                     value={formData.password}
                     onChange={(e) => handleChange('password', e.target.value)}
-                    className="bg-white/15 border-white/20 text-white"
+                    className={`bg-white/15 border-white/20 text-white focus:ring-2 focus:ring-blue-400 ${errors.password ? 'border-red-400 ring-2 ring-red-400' : ''}`}
                     placeholder="**********"
                   />
                   {errors.password && (
-                    <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                    <p className="text-red-300 text-xs mt-1 animate-shake">{errors.password}</p>
                   )}
                 </div>
 
@@ -185,70 +196,62 @@ export default function CreateUserPage() {
                     <UserCheck className="w-4 h-4 inline mr-2" />
                     Rol del usuario
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
                     <button
                       type="button"
                       onClick={() => handleRoleChange('solicitante')}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors 
+                      className={`w-full px-3 py-2 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2 shadow-sm border-2
                         ${formData.rol === 'solicitante' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-white/15 text-white hover:bg-white/20'}
+                          ? 'bg-blue-600 text-white border-blue-600 scale-105 shadow-lg' 
+                          : 'bg-white/20 text-blue-700 border-blue-200 hover:bg-blue-50 hover:text-blue-900'}
                       `}
+                      title="Solicitante: Puede crear solicitudes de pago."
                     >
-                      Solicitante
+                      <User className="w-5 h-5" /> Solicitante
                     </button>
                     <button
                       type="button"
                       onClick={() => handleRoleChange('aprobador')}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors 
+                      className={`w-full px-3 py-2 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2 shadow-sm border-2
                         ${formData.rol === 'aprobador' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-white/15 text-white hover:bg-white/20'}
+                          ? 'bg-purple-600 text-white border-purple-600 scale-105 shadow-lg' 
+                          : 'bg-white/20 text-purple-700 border-purple-200 hover:bg-purple-50 hover:text-purple-900'}
                       `}
+                      title="Aprobador: Puede aprobar o rechazar solicitudes."
                     >
-                      Aprobador
+                      <UserCheck className="w-5 h-5" /> Aprobador
                     </button>
                     <button
                       type="button"
                       onClick={() => handleRoleChange('pagador_banca')}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors 
+                      className={`w-full px-3 py-2 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2 shadow-sm border-2
                         ${formData.rol === 'pagador_banca' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-white/15 text-white hover:bg-white/20'}
+                          ? 'bg-green-600 text-white border-green-600 scale-105 shadow-lg' 
+                          : 'bg-white/20 text-green-700 border-green-200 hover:bg-green-50 hover:text-green-900'}
                       `}
+                      title="Pagador: Puede ejecutar pagos aprobados."
                     >
-                      Pagador
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleRoleChange('admin_general')}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors 
-                        ${formData.rol === 'admin_general' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-white/15 text-white hover:bg-white/20'}
-                      `}
-                    >
-                      Administrador
+                      <UserCheck className="w-5 h-5" /> Pagador
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end mt-8">
+              <div className="flex justify-end mt-8 gap-4">
                 <Button
-                  type="button" // ← importante: evitar que sea 'submit'
+                  type="button"
                   variant="outline"
                   onClick={() => router.push('/dashboard/admin/usuarios')}
-                  className="mr-4 text-white border-white/30 hover:bg-white/10"
+                  className="mr-2 text-white border-white/30 hover:bg-white/10"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
-                  loading={loading} 
-                  className="text-white border-white/30 hover:bg-white/10"
+                  loading={loading}
+                  className="text-white border-white/30 hover:bg-white/10 bg-blue-600 font-bold px-8 py-3 rounded-lg shadow-lg"
                 >
-                  Crear Usuario
+                  {loading ? 'Creando...' : 'Crear Usuario'}
                 </Button>
               </div>
             </form>
