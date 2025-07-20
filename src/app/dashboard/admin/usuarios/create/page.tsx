@@ -57,8 +57,8 @@ export default function CreateUserPage() {
     if (!formData.email) {
       newErrors.email = 'El correo es requerido';
       isValid = false;
-    } else if (!/^[^@\s]+@bechapra\.com$/.test(formData.email)) {
-      newErrors.email = 'Solo se permiten correos @bechapra.com';
+    } else if (!/^[^@\s]+@(bechapra\.com|gmail\.com)$/.test(formData.email)) {
+      newErrors.email = 'Solo se permiten correos @bechapra.com o @gmail.com';
       isValid = false;
     }
 
@@ -81,8 +81,14 @@ export default function CreateUserPage() {
 
     setLoading(true);
     try {
-      await UsuariosService.create(formData);
-      toast.success('Usuario creado exitosamente');
+      // Definir el tipo esperado de la respuesta
+      type BackendResponse = { id?: number; nombre?: string; email?: string; rol?: string; mensaje?: string };
+      const response = (await UsuariosService.create(formData)) as BackendResponse;
+      if (response?.mensaje && response.mensaje.toLowerCase().includes('verifica tu correo')) {
+        toast.success('Usuario creado. Revisa su correo para verificar la cuenta.');
+      } else {
+        toast.success('Usuario creado exitosamente');
+      }
 
       // 🧹 Limpiar caché para que se actualice la tabla
       sessionStorage.removeItem('usuarios_cache');
@@ -90,7 +96,15 @@ export default function CreateUserPage() {
       router.push('/dashboard/admin/usuarios');
     } catch (error) {
       console.error('Error creating user:', error);
-      toast.error('Error al crear el usuario');
+      // Tipado seguro para error de Axios
+      type AxiosError = { response?: { data?: { mensaje?: string } } };
+      const err = error as AxiosError;
+      const mensaje = err?.response?.data?.mensaje;
+      if (mensaje) {
+        toast.error(mensaje);
+      } else {
+        toast.error('Error al crear el usuario');
+      }
     } finally {
       setLoading(false);
     }

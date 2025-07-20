@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo, Fragment } from 'react';
+import AdminNotifications from '@/components/admin/AdminNotifications';
 import { Dialog, Transition } from '@headlessui/react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,6 +19,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   // const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const pathname = usePathname();
   // const router = useRouter();
 
@@ -67,6 +70,29 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     };
   }, [handleClickOutside, handleEscapeKey]);
 
+  // Cargar cantidad de notificaciones no leídas
+  useEffect(() => {
+    if (!user) return;
+    let token = undefined;
+    try {
+      token = localStorage.getItem('auth_token') || undefined;
+    } catch {}
+    if (!token) {
+      try {
+        token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+      } catch {}
+    }
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones`, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : ''
+      }
+    })
+      .then(async (res) => {
+        const data: { leida: boolean }[] = await res.json();
+        setUnreadCount(Array.isArray(data) ? data.filter((n) => !n.leida).length : 0);
+      });
+  }, [user, showNotifications]);
+
   // Manejar cierre de sesión con pantalla de transición
   const handleLogout = useCallback(() => {
     // Redirigir inmediatamente
@@ -76,6 +102,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       logout();
     }, 50);
   }, [logout]);
+
+  // DEBUG: Log para ver el estado del modal
+  console.log('showNotifications', showNotifications);
 
   return (
     <div className="min-h-screen font-sans flex flex-col" style={backgroundGradient}>
@@ -94,13 +123,19 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </button>
 
             <button
-              onClick={() => { console.log('Abrir notificaciones'); }}
+              onClick={() => setShowNotifications(true)}
               aria-label="Ver notificaciones"
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-transparent hover:bg-white/20 transition-colors duration-200 text-white focus:outline-none shadow-none border-none"
+              className="relative w-12 h-12 flex items-center justify-center rounded-full bg-transparent hover:bg-white/20 transition-colors duration-200 text-white focus:outline-none shadow-none border-none"
               style={{border: 'none', boxShadow: 'none', outline: 'none'}}
             >
               <Bell className="w-7 h-7" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5 font-bold shadow">{unreadCount}</span>
+              )}
             </button>
+      {/* Panel de notificaciones */}
+      {/* Forzar abierto para depuración: open={true} */}
+      <AdminNotifications open={showNotifications} onClose={() => setShowNotifications(false)} />
           </div>
         </div>
       </header>
