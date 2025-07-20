@@ -20,9 +20,28 @@ export class AuthService {
         return { success: true, user: response.data.user, token: response.data.token };
       }
       return { success: false, error: response.data.message || 'Error desconocido' };
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Captura el mensaje del backend si existe
-      const errorMsg = err?.response?.data?.message || err?.message || 'Error de conexión';
+      let errorMsg = 'Error de conexión';
+      if (typeof err === 'object' && err !== null) {
+        // Check for AxiosError shape
+        if ('response' in err && typeof (err as { response?: unknown }).response === 'object' && (err as { response?: unknown }).response !== null) {
+          const response = (err as { response?: { data?: { message?: string } } }).response;
+          if (
+            response &&
+            typeof response === 'object' &&
+            'data' in response &&
+            response.data &&
+            typeof response.data === 'object' &&
+            'message' in response.data &&
+            typeof response.data.message === 'string'
+          ) {
+            errorMsg = response.data.message;
+          }
+        } else if ('message' in err && typeof (err as { message?: unknown }).message === 'string') {
+          errorMsg = (err as { message: string }).message;
+        }
+      }
       return { success: false, error: errorMsg };
     }
   }

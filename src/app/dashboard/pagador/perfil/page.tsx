@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { User, Mail, Shield, Building, Calendar } from 'lucide-react';
+import { User, Mail, Shield, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
+import Image from 'next/image';
 
 export default function PerfilPagador() {
     const { user } = useAuth();
@@ -26,7 +26,14 @@ export default function PerfilPagador() {
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
                     <div className="flex items-center space-x-6">
                     <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center ring-4 ring-white/30 overflow-hidden">
-                        <img src="/assets/images/Logo_1x1_Azul@2x.png" alt="Foto de perfil Bechapra" className="object-cover w-full h-full rounded-full" />
+                        <Image
+                          src="/assets/images/Logo_1x1_Azul@2x.png"
+                          alt="Foto de perfil Bechapra"
+                          width={80}
+                          height={80}
+                          className="object-cover w-full h-full rounded-full"
+                          priority
+                        />
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold text-white font-sans">

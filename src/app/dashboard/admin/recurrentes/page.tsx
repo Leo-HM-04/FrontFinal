@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
@@ -9,14 +9,14 @@ import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
-import { FileText, Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2 } from 'lucide-react';
 import { RecurrenteViewModal } from '@/components/modals/RecurrenteViewModal';
 import { RecurrentesService } from '@/services/recurrentes.service';
 import { PlantillaRecurrente } from '@/types';
 import { toast } from 'react-hot-toast';
 
 export default function AdminRecurrentesPage() {
-  const router = useRouter();
+
   const [recurrentes, setRecurrentes] = useState<PlantillaRecurrente[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecurrente, setSelectedRecurrente] = useState<PlantillaRecurrente | null>(null);
@@ -122,9 +122,9 @@ export default function AdminRecurrentesPage() {
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/15">
             <div className="p-6">
-              <h3 className="text-xl font-semibold text-white mb-6 font-sans">Lista de Recurrentes</h3>
+              <h3 className="text-xl font-semibold text-white font-montserrat mb-6">Lista de Recurrentes</h3>
               <AdvancedFilters
                 filters={filters}
                 onFiltersChange={updateFilters}
@@ -139,27 +139,27 @@ export default function AdminRecurrentesPage() {
               ) : (
                 <div className="bg-white rounded-xl overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead style={{backgroundColor: '#F0F4FC'}}>
+                    <table className="min-w-full rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                      <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cuenta Destino</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo Pago</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frecuencia</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Activa</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Siguiente Fecha</th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">ID</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Usuario</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Departamento</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Monto</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Cuenta Destino</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Concepto</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Tipo Pago</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Frecuencia</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Estado</th>
+                          <th className="px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Activa</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Siguiente Fecha</th>
+                          <th className="px-6 py-3 text-center text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Acciones</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-white divide-y divide-gray-100">
                         {currentRecurrentes.map((p) => (
-                          <tr key={p.id_recurrente} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{p.id_recurrente}</td>
+                          <tr key={p.id_recurrente} className="group transition-all hover:bg-blue-50/80 hover:shadow-md">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">#{p.id_recurrente}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.nombre_usuario || `Usuario ${p.id_usuario}`}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{capitalize(p.departamento)}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(p.monto)}</td>
@@ -174,20 +174,37 @@ export default function AdminRecurrentesPage() {
                               <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getActivaColor(!!p.activo)}`}>{p.activo ? 'Activo' : 'Inactivo'}</span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(p.siguiente_fecha)}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
-                              <Button variant="outline" size="sm" onClick={() => { setViewRecurrente(p); setShowViewModal(true); }} className="text-blue-600 border-blue-300 hover:bg-blue-500"><Eye className="w-4 h-4" /></Button>
-                              <Button variant="outline" size="sm" onClick={() => handleDelete(p)} className="text-red-600 border-red-300 hover:bg-red-500"><Trash2 className="w-4 h-4" /></Button>
+                            <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => { setViewRecurrente(p); setShowViewModal(true); }}
+                                className="rounded-full border-blue-200 text-blue-600 hover:bg-blue-900 hover:text-blue-900 transition"
+                                title="Ver detalle"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleDelete(p)}
+                                className="rounded-full border-red-200 text-red-600 hover:bg-red-600 hover:text-red-900 transition"
+                                title="Eliminar plantilla"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                  <div style={{backgroundColor: '#F0F4FC'}} className="px-6 py-4">
+                  <div style={{ backgroundColor: '#F0F4FC', color: 'black' }} className="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 rounded-b-2xl border-t border-blue-100 animate-fade-in">
+                    <span>Mostrando <span className="font-bold text-blue-900">{Math.min((currentPage - 1) * itemsPerPage + 1, filteredRecurrentes.length)}</span> - <span className="font-bold text-blue-900">{Math.min(currentPage * itemsPerPage, filteredRecurrentes.length)}</span> de <span className="font-bold text-blue-900">{filteredRecurrentes.length}</span></span>
                     <Pagination
                       currentPage={currentPage}
                       totalPages={totalPages}
-                      totalItems={recurrentes.length}
+                      totalItems={filteredRecurrentes.length}
                       itemsPerPage={itemsPerPage}
                       onPageChange={setCurrentPage}
                     />

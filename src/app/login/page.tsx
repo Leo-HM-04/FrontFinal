@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
@@ -16,6 +16,14 @@ export default function LoginPage() {
 
   const { login } = useAuth();
   const router = useRouter();
+
+  // Prefetch de dashboards para navegación instantánea tras login
+  useEffect(() => {
+    router.prefetch('/dashboard/admin');
+    router.prefetch('/dashboard/solicitante');
+    router.prefetch('/dashboard/aprobador');
+    router.prefetch('/dashboard/pagador');
+  }, [router]);
 
   const validateForm = () => {
     const newErrors = { email: '', password: '' };
@@ -65,7 +73,7 @@ export default function LoginPage() {
       } else {
         toast.error('Credenciales inválidas o error al iniciar sesión.');
       }
-    } catch (error) {
+    } catch {
       toast.error('Ocurrió un error inesperado.');
     } finally {
       setLoading(false);
@@ -83,9 +91,10 @@ export default function LoginPage() {
               alt="Logo de la plataforma Bechapra"
               width={180}
               height={70}
-              className="mx-auto drop-shadow-lg animate-fade-in"
+              className="mx-auto drop-shadow-lg animate-fade-in max-w-[180px]"
               priority
               sizes="(max-width: 768px) 140px, 180px"
+              style={{ height: 'auto' }}
             />
           </div>
         </div>
@@ -160,7 +169,7 @@ export default function LoginPage() {
                 {loading ? (
                   <div className="flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Ingresando...
+                    Validando...
                   </div>
                 ) : (
                   'Ingresar'

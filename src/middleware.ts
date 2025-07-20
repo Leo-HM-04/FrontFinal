@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
+  
   // Si accede exactamente a /dashboard, redirigir según el rol
   if (pathname === '/dashboard') {
     // Aquí debes obtener el rol del usuario desde cookies, token, etc.
@@ -12,12 +13,12 @@ export function middleware(request: NextRequest) {
     if (userRole) {
       const roleRoutes = {
         'admin_general': '/dashboard/admin',
-        'administrativo': '/dashboard/administrativo',
-        'tesoreria': '/dashboard/tesoreria',
-        'director': '/dashboard/director'
+        'aprobador': '/dashboard/aprobador',
+        'solicitante': '/dashboard/solicitante',
+        'pagador_banca': '/dashboard/pagador',
       };
       
-      const redirectTo = roleRoutes[userRole];
+      const redirectTo = roleRoutes[userRole as keyof typeof roleRoutes];
       if (redirectTo) {
         return NextResponse.redirect(new URL(redirectTo, request.url));
       }

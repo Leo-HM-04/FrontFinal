@@ -155,7 +155,7 @@ export function EditSolicitudModal({ isOpen, onClose, solicitud, onSolicitudUpda
           {!canEdit && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
               <p className="text-yellow-800 text-sm">
-                <strong>Nota:</strong> Esta solicitud ya no se puede editar porque su estado es "{solicitud.estado}".
+                <strong>Nota:</strong> Esta solicitud ya no se puede editar porque su estado es &quot;{solicitud.estado}&quot;.
               </p>
             </div>
           )}

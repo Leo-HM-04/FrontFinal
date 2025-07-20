@@ -11,7 +11,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale/es";
 import { NumericFormat } from "react-number-format";
 import { SolicitudesService } from "@/services/solicitudes.service";
-import { ArrowLeft, Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle } from "lucide-react";
+import { Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle } from "lucide-react";
 import { Solicitud } from "@/types";
 import { format } from "date-fns";
 
@@ -26,7 +26,7 @@ type FormState = {
 };
 
 type FormAction =
-  | { type: 'SET_FIELD'; field: keyof FormState; value: any }
+  | { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null }
   | { type: 'SET_ALL'; payload: Partial<FormState> };
 
 const initialState: FormState = {
@@ -112,7 +112,7 @@ export default function EditarSolicitudPage() {
         setFacturaUrl(data.factura_url || null);
         setFechaLimitePago(data.fecha_limite_pago ? new Date(data.fecha_limite_pago) : null);
         setEstado(data.estado ?? '');
-      } catch (e) {
+      } catch {
         toast.error('No se pudo cargar la solicitud');
         router.back();
       } finally {
@@ -120,7 +120,7 @@ export default function EditarSolicitudPage() {
       }
     };
     fetchSolicitud();
-  }, [idNum]);
+  }, [idNum, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -159,7 +159,7 @@ export default function EditarSolicitudPage() {
     setCheckingCuenta(true);
     setCuentaValida(null);
     try {
-      await new Promise(r => setTimeout(r, 700));
+      await new Promise<void>((resolve) => setTimeout(resolve, 700));
       setCuentaValida(cuenta.length >= 8);
     } catch {
       setCuentaValida(false);
@@ -183,7 +183,7 @@ export default function EditarSolicitudPage() {
     }
     try {
       const requiredFields: (keyof FormState)[] = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'fecha_limite_pago'];
-      for (let field of requiredFields) {
+      for (const field of requiredFields) {
         if (!formData[field]) {
           toast.error(`Por favor completa el campo: ${field}`);
           setLoading(false);
@@ -204,7 +204,7 @@ export default function EditarSolicitudPage() {
       await SolicitudesService.updateWithFiles(idNum!, solicitudData);
       toast.success('Solicitud actualizada exitosamente');
       router.push('/dashboard/solicitante/mis-solicitudes');
-    } catch (error) {
+    } catch {
       toast.error('Error al actualizar la solicitud');
     } finally {
       setLoading(false);

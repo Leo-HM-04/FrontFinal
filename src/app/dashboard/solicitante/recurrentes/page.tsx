@@ -13,8 +13,22 @@ import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
 
-// Estado inicial
-const initialState = {
+// Estado y tipos
+type FormState = {
+  departamento: string;
+  monto: string;
+  cuenta_destino: string;
+  concepto: string;
+  tipo_pago: string;
+  frecuencia: string;
+  siguiente_fecha: string;
+  activo: boolean;
+};
+
+type FormAction =
+  | { type: 'SET_FIELD'; field: keyof FormState; value: string | boolean };
+
+const initialState: FormState = {
   departamento: '',
   monto: '',
   cuenta_destino: '',
@@ -22,10 +36,10 @@ const initialState = {
   tipo_pago: '',
   frecuencia: '',
   siguiente_fecha: '',
-  activo: true, // por defecto activa
+  activo: true,
 };
 
-const formReducer = (state: any, action: any) => {
+const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
     case 'SET_FIELD':
       return { ...state, [action.field]: action.value };
@@ -61,11 +75,14 @@ export default function NuevaRecurrentePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    // Para selects, siempre guardar como string
-    if (type === 'select-one') {
-      dispatch({ type: 'SET_FIELD', field: name, value: String(value) });
-    } else {
-      dispatch({ type: 'SET_FIELD', field: name, value });
+    // Type guard para asegurar que name es keyof FormState
+    if (Object.prototype.hasOwnProperty.call(initialState, name)) {
+      const field = name as keyof FormState;
+      if (type === 'select-one') {
+        dispatch({ type: 'SET_FIELD', field, value: String(value) });
+      } else {
+        dispatch({ type: 'SET_FIELD', field, value });
+      }
     }
   };
 
@@ -73,8 +90,8 @@ export default function NuevaRecurrentePage() {
     e.preventDefault();
     setLoading(true);
 
-    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'tipo_pago', 'frecuencia', 'siguiente_fecha'];
-    for (let field of requiredFields) {
+    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'tipo_pago', 'frecuencia', 'siguiente_fecha'] as (keyof FormState)[];
+    for (const field of requiredFields) {
       if (!formData[field]) {
         toast.error(`Campo obligatorio faltante: ${field}`);
         setLoading(false);
@@ -99,11 +116,15 @@ export default function NuevaRecurrentePage() {
       data.append('fact_recurrente', facturaFile);
 
       const response = await RecurrentesService.crearRecurrente(data);
-      toast.success(response.message || 'Plantilla recurrente creada exitosamente');
+      let successMsg = 'Plantilla recurrente creada exitosamente';
+      if (response && typeof response === 'object' && 'message' in response && typeof (response as { message?: string }).message === 'string') {
+        successMsg = (response as { message: string }).message;
+      }
+      toast.success(successMsg);
       router.push('/dashboard/solicitante/mis-recurrentes');
-    } catch (error: any) {
-      console.error('Error:', error);
-      toast.error(error.response?.data?.error || 'Error al crear plantilla recurrente');
+    } catch  {
+      console.error('Error:');
+      toast.error('Error al crear plantilla recurrente');
     } finally {
       setLoading(false);
     }

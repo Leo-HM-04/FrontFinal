@@ -3,7 +3,7 @@
 import { PagoProcesado } from '@/utils/exportUtils';
 import { pagosProcesadosEjemplo, pagosPendientesEjemplo } from '@/hooks/usePagos';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 /**
  * Obtiene los pagos procesados del servidor
@@ -58,7 +58,7 @@ export async function getPagosPendientes(): Promise<PagoProcesado[]> {
 /**
  * Procesa un pago pendiente
  */
-export async function procesarPago(idPago: number, datos: any): Promise<any> {
+export async function procesarPago(idPago: number, datos: Record<string, unknown>): Promise<Record<string, unknown>> {
   try {
     const response = await fetch(`${API_URL}/api/pagos/${idPago}/procesar`, {
       method: 'POST',

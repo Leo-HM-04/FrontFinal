@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle,  } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface ConfirmDeleteModalProps {

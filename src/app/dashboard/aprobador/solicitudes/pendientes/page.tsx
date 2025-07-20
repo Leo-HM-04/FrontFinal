@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { Button } from '@/components/ui/Button';
@@ -20,7 +19,6 @@ import Modal from '../../../../../components/ui/Modal';
 import { Solicitud } from '@/types';
 
 export default function SolicitudesPendientesPage() {
-  const router = useRouter();
   
   const { solicitudes: allSolicitudes, loading, fetchSolicitudes } = useSolicitudes();
   // Filtrar solo las solicitudes pendientes
@@ -45,16 +43,8 @@ export default function SolicitudesPendientesPage() {
     totalPages,
     totalItems,
     itemsPerPage,
-    paginatedData: paginatedSolicitudes,
     goToPage,
-    changeItemsPerPage,
   } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 5 });
-
-  // Filtro rápido por nombre o departamento
-  const quickFilteredSolicitudes = filteredSolicitudes.filter(s =>
-    s.usuario_nombre?.toLowerCase().includes(search.toLowerCase()) ||
-    s.departamento?.toLowerCase().includes(search.toLowerCase())
-  );
 
   // Ordenar todas por urgencia y fecha límite de pago (más urgentes y próximas primero)
   const tresDiasDespues = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000);
@@ -386,15 +376,13 @@ export default function SolicitudesPendientesPage() {
 
         {/* Detail Modal */}
         {selectedSolicitud && (
-          <SolicitudDetailModal
-            solicitud={selectedSolicitud}
-            isOpen={showDetailModal}
-            onClose={() => setShowDetailModal(false)}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            showActions={true}
-            userRole="aprobador"
-          />
+        <SolicitudDetailModal
+          solicitud={selectedSolicitud}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+          showActions={true}
+          userRole="aprobador"
+        />
         )}
 
         {/* Export Options Modal */}

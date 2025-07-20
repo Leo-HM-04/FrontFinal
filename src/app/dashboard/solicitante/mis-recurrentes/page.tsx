@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from 'react'; // Agregamos useMemo
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { RecurrentesService } from '@/services/recurrentes.service';
 import { PlantillaRecurrente } from '@/types';
@@ -60,7 +59,7 @@ export default function MisRecurrentesPage() {
     const [detalleModalOpen, setDetalleModalOpen] = useState(false);
     const [recurrenteDetalle, setRecurrenteDetalle] = useState<PlantillaRecurrente | null>(null);
     const router = useRouter();
-    const { user } = useAuth();
+    // const { user } = useAuth();
     const [recurrentes, setRecurrentes] = useState<PlantillaRecurrente[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -87,7 +86,7 @@ export default function MisRecurrentesPage() {
             try {
                 const data = await RecurrentesService.obtenerMisRecurrentes();
                 setRecurrentes(data);
-            } catch (err) {
+            } catch {
                 setError('Error al cargar tus plantillas recurrentes');
             } finally {
                 setLoading(false);
@@ -102,7 +101,7 @@ export default function MisRecurrentesPage() {
             await RecurrentesService.eliminar(recurrenteAEliminar.id_recurrente);
             setRecurrentes(prev => prev.filter(p => p.id_recurrente !== recurrenteAEliminar.id_recurrente));
             setSuccess('Plantilla eliminada correctamente.');
-        } catch (err: any) {
+        } catch {
             setError('Error al eliminar la plantilla');
         } finally {
             setDeleteModalOpen(false);
@@ -423,7 +422,9 @@ export default function MisRecurrentesPage() {
                             if (!recurrenteAToggle) return;
                             try {
                                 const res = await RecurrentesService.cambiarEstadoActiva(recurrenteAToggle.id_recurrente, !recurrenteAToggle.activo);
-                                setRecurrentes(prev => prev.map(r => r.id_recurrente === recurrenteAToggle.id_recurrente ? { ...r, activo: res.recurrente.activo } : r));
+                                if (res && typeof res === 'object' && 'recurrente' in res && typeof (res as { recurrente: { activo: boolean } }).recurrente === 'object' && (res as { recurrente: { activo: boolean } }).recurrente !== null) {
+                                  setRecurrentes(prev => prev.map(r => r.id_recurrente === recurrenteAToggle.id_recurrente ? { ...r, activo: (res as { recurrente: { activo: boolean } }).recurrente.activo } : r));
+                                }
                                 setSuccess(`Plantilla ${recurrenteAToggle.activo ? 'desactivada' : 'activada'} correctamente.`);
                             } catch {
                                 setError('No se pudo cambiar el estado');

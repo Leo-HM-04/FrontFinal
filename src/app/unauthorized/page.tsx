@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import { ShieldX, ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
 
 export default function UnauthorizedPage() {
   const router = useRouter();
@@ -13,7 +14,14 @@ export default function UnauthorizedPage() {
         <div className="mb-8">
           <div className="flex flex-col items-center mb-6">
             <div className="bg-white rounded-xl shadow-lg p-2 mb-2">
-              <img src="/assets/images/Logo_horizontal_Bechapra.png" className="w-48 h-auto" alt="Logo Bechapra" />
+              <Image
+                src="/assets/images/Logo_horizontal_Bechapra.png"
+                alt="Logo Bechapra"
+                width={192}
+                height={64}
+                className="w-48 h-auto"
+                priority
+              />
             </div>
             <span className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-100 shadow-lg">
               <ShieldX className="w-16 h-16 text-red-500" />

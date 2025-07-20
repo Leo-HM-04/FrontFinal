@@ -41,8 +41,12 @@ export default function AprobadorRecurrentesPage() {
       setSolicitudes((prev) => prev.map(s => s.id_recurrente === id ? { ...s, estado: 'aprobada', comentario_aprobador: 'Solicitud aprobada' } : s));
       setMensaje('Solicitud aprobada correctamente.');
       setComentario('');
-    } catch (err: any) {
-      setError(err.message || 'Error inesperado');
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'message' in err && typeof (err as { message?: unknown }).message === 'string') {
+        setError((err as { message: string }).message);
+      } else {
+        setError('Error inesperado');
+      }
     } finally {
       setAccionEnCurso(null);
     }
@@ -60,8 +64,12 @@ export default function AprobadorRecurrentesPage() {
       setMensaje('Solicitud rechazada correctamente.');
       setComentario('');
       setRechazoId(null);
-    } catch (err: any) {
-      setError(err.message || 'Error inesperado');
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'message' in err && typeof (err as { message?: unknown }).message === 'string') {
+        setError((err as { message: string }).message);
+      } else {
+        setError('Error inesperado');
+      }
     } finally {
       setAccionEnCurso(null);
     }

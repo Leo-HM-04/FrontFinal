@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Filter, X, Search, Download, RefreshCw } from 'lucide-react';
 import { Button } from './Button';
-import { Input } from './Input';
+
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { es } from 'date-fns/locale/es';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -40,7 +40,7 @@ export function AdvancedFilters({
 }: AdvancedFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const updateFilter = (key: keyof FilterState, value: any) => {
+  const updateFilter = (key: keyof FilterState, value: string | number | undefined) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
@@ -242,26 +242,6 @@ export function AdvancedFilters({
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="col-span-1">
-                  <label className="block text-sm font-medium text-white/80 mb-1">Monto Mínimo</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={filters.montoMin || ''}
-                    onChange={(e) => updateFilter('montoMin', e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
-                  />
-                </div>
-                <div className="col-span-1">
-                  <label className="block text-sm font-medium text-white/80 mb-1">Monto Máximo</label>
-                  <input
-                    type="number"
-                    placeholder="999999999"
-                    value={filters.montoMax || ''}
-                    onChange={(e) => updateFilter('montoMax', e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
-                  />
                 </div>
               </>
             )}

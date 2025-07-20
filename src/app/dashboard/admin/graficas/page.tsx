@@ -1,5 +1,5 @@
 "use client";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, Area, AreaChart } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Line, Area, AreaChart } from "recharts";
 import { useState } from "react";
 import { TrendingUp, TrendingDown, Users, CreditCard, Clock, CheckCircle } from "lucide-react";
 
@@ -112,30 +112,31 @@ export default function GraficasAdminPage() {
 
                 {/* Tarjetas de estadísticas */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {stats.map((stat, index) => (
-                    <div key={index} className="bg-white rounded-xl shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
+                  {stats.map((stat, index) => (
+                    <div
+                      key={index}
+                      className={`relative rounded-2xl p-6 border border-slate-200 shadow-lg bg-gradient-to-br from-white via-${stat.color}-50 to-white hover:scale-[1.025] transition-transform duration-200`}
+                    >
+                      <div className="flex items-center justify-between">
                         <div>
-                        <p className="text-slate-500 text-sm font-medium">{stat.title}</p>
-                        <p className="text-2xl font-bold text-slate-800 mt-1">{stat.value}</p>
+                          <p className="text-slate-500 text-xs font-semibold tracking-wide uppercase mb-1">{stat.title}</p>
+                          <p className="text-3xl font-extrabold text-slate-800 leading-tight">{stat.value}</p>
                         </div>
-                        <div className={`p-3 rounded-full bg-${stat.color}-50`}>
-                        <stat.icon className={`w-6 h-6 text-${stat.color}-600`} />
+                        <div className={`p-3 rounded-full shadow bg-white border-2 border-${stat.color}-200`}>
+                          <stat.icon className={`w-7 h-7 text-${stat.color}-500`} />
                         </div>
-                    </div>
-                    <div className="flex items-center mt-4">
+                      </div>
+                      <div className="flex items-center mt-5">
                         {stat.positive ? (
-                        <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+                          <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
                         ) : (
-                        <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
+                          <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
                         )}
-                        <span className={`text-sm font-medium ${stat.positive ? 'text-green-600' : 'text-red-600'}`}>
-                        {stat.change}
-                        </span>
-                        <span className="text-slate-500 text-sm ml-1">vs mes anterior</span>
+                        <span className={`text-xs font-bold ${stat.positive ? 'text-green-600' : 'text-red-600'}`}>{stat.change}</span>
+                        <span className="text-slate-400 text-xs ml-2">vs mes anterior</span>
+                      </div>
                     </div>
-                    </div>
-                ))}
+                  ))}
                 </div>
 
                 {/* Filtros de gráficas */}
@@ -157,70 +158,75 @@ export default function GraficasAdminPage() {
 
                 {/* Gráficas principales */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                {(activeChart === "todos" || activeChart === "pagos") && (
-                    <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-slate-800">Pagos Procesados</h2>
-                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                        Total: {getTotalPagos()}
+                  {(activeChart === "todos" || activeChart === "pagos") && (
+                    <div className="bg-white rounded-2xl shadow-lg p-8 border border-blue-100 hover:shadow-xl transition-shadow">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-2xl font-bold text-blue-700 tracking-tight flex items-center gap-2">
+                          <CreditCard className="w-6 h-6 text-blue-400" /> Pagos Procesados
+                        </h2>
+                        <span className="bg-blue-50 text-blue-700 px-4 py-1 rounded-full text-base font-semibold shadow-sm">
+                          Total: {getTotalPagos()}
                         </span>
-                    </div>
-                    <ResponsiveContainer width="100%" height={300}>
+                      </div>
+                      <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={pagosPorMes} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <defs>
+                          <defs>
                             <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
-                            <stop offset="100%" stopColor="#93c5fd" stopOpacity={0.7} />
+                              <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
+                              <stop offset="100%" stopColor="#93c5fd" stopOpacity={0.7} />
                             </linearGradient>
-                        </defs>
-                        <XAxis 
+                          </defs>
+                          <XAxis 
                             dataKey="mes" 
-                            tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }} 
+                            tick={{ fontSize: 13, fontWeight: 700, fill: '#334155' }} 
                             axisLine={false} 
                             tickLine={false} 
-                        />
-                        <YAxis 
-                            tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }} 
+                          />
+                          <YAxis 
+                            tick={{ fontSize: 13, fontWeight: 700, fill: '#334155' }} 
                             axisLine={false} 
                             tickLine={false} 
-                        />
-                        <Tooltip 
+                          />
+                          <Tooltip 
                             contentStyle={{ 
-                            borderRadius: 8, 
-                            background: '#ffffff', 
-                            border: '1px solid #e2e8f0',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                              borderRadius: 12, 
+                              background: '#f8fafc', 
+                              border: '1px solid #dbeafe',
+                              boxShadow: '0 6px 12px -2px rgba(59,130,246,0.10)'
                             }} 
-                        />
-                        <Bar 
+                            labelStyle={{ fontWeight: 700, color: '#2563eb' }}
+                          />
+                          <Bar 
                             dataKey="total" 
                             fill={GRADIENT_BAR} 
-                            radius={[6, 6, 0, 0]} 
+                            radius={[8, 8, 0, 0]} 
                             isAnimationActive={true}
-                        />
-                        <Bar 
+                          />
+                          <Bar 
                             dataKey="objetivo" 
-                            fill="#e2e8f0" 
-                            radius={[6, 6, 0, 0]} 
+                            fill="#e0e7ef" 
+                            radius={[8, 8, 0, 0]} 
                             isAnimationActive={true}
                             opacity={0.3}
-                        />
+                          />
                         </BarChart>
-                    </ResponsiveContainer>
+                      </ResponsiveContainer>
                     </div>
-                )}
+                  )}
 
-                {(activeChart === "todos" || activeChart === "solicitudes") && (
-                    <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-slate-800">Estado de Solicitudes</h2>
-                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                        Total: {getTotalSolicitudes()}
+                  {(activeChart === "todos" || activeChart === "solicitudes") && (
+                    <div className="bg-white rounded-2xl shadow-lg p-8 border border-green-100 hover:shadow-xl transition-shadow">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-2xl font-bold text-green-700 tracking-tight flex items-center gap-2">
+                          <Users className="w-6 h-6 text-green-400" /> Estado de Solicitudes
+                        </h2>
+                        <span className="bg-green-50 text-green-700 px-4 py-1 rounded-full text-base font-semibold shadow-sm">
+                          Total: {getTotalSolicitudes()}
                         </span>
-                    </div>
-                    <ResponsiveContainer width="100%" height={300}>
+                      </div>
+                      <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
-                        <Pie
+                          <Pie
                             data={solicitudesPorEstado}
                             dataKey="value"
                             nameKey="estado"
@@ -228,37 +234,38 @@ export default function GraficasAdminPage() {
                             cy="50%"
                             outerRadius={90}
                             innerRadius={45}
-                            label={({ name, percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
+                            label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
                             isAnimationActive={true}
-                        >
+                          >
                             {solicitudesPorEstado.map((entry, index) => (
-                            <Cell 
+                              <Cell 
                                 key={`cell-${index}`} 
                                 fill={COLORS[index % COLORS.length]} 
                                 stroke="#ffffff" 
                                 strokeWidth={2} 
-                            />
+                              />
                             ))}
-                        </Pie>
-                        <Tooltip 
+                          </Pie>
+                          <Tooltip 
                             contentStyle={{ 
-                            borderRadius: 8, 
-                            background: '#ffffff', 
-                            border: '1px solid #e2e8f0',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                              borderRadius: 12, 
+                              background: '#f8fafc', 
+                              border: '1px solid #bbf7d0',
+                              boxShadow: '0 6px 12px -2px rgba(16,185,129,0.10)'
                             }} 
-                        />
-                        <Legend 
+                            labelStyle={{ fontWeight: 700, color: '#059669' }}
+                          />
+                          <Legend 
                             formatter={(value, entry, i) => (
-                            <span className="font-semibold text-sm" style={{ color: COLORS[i % COLORS.length] }}>
+                              <span className="font-bold text-sm" style={{ color: COLORS[i % COLORS.length] }}>
                                 {value}
-                            </span>
+                              </span>
                             )} 
-                        />
+                          />
                         </PieChart>
-                    </ResponsiveContainer>
+                      </ResponsiveContainer>
                     </div>
-                )}
+                  )}
                 </div>
 
                 {/* Gráfica de tendencias */}
@@ -314,34 +321,34 @@ export default function GraficasAdminPage() {
                 )}
 
                 {/* Resumen de métricas */}
-                <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200 mt-8">
-                <h2 className="text-xl font-bold text-slate-800 mb-4">Resumen Ejecutivo</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100 mt-8">
+                  <h2 className="text-2xl font-bold text-slate-800 mb-6 tracking-tight">Resumen Ejecutivo</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="text-center">
-                    <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mx-auto mb-3">
-                        <CheckCircle className="w-6 h-6 text-green-600" />
-                    </div>
-                    <h3 className="font-semibold text-slate-800">Eficiencia</h3>
-                    <p className="text-2xl font-bold text-green-600 mt-1">85%</p>
-                    <p className="text-sm text-slate-500">Tasa de aprobación</p>
-                    </div>
-                    <div className="text-center">
-                    <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3">
-                        <TrendingUp className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <h3 className="font-semibold text-slate-800">Crecimiento</h3>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">+{getPromedioCrecimiento()}%</p>
-                    <p className="text-sm text-slate-500">Mensual promedio</p>
+                      <div className="flex items-center justify-center w-14 h-14 bg-green-50 rounded-full mx-auto mb-3 shadow">
+                        <CheckCircle className="w-7 h-7 text-green-600" />
+                      </div>
+                      <h3 className="font-semibold text-slate-700 tracking-wide">Eficiencia</h3>
+                      <p className="text-3xl font-extrabold text-green-600 mt-1">85%</p>
+                      <p className="text-xs text-slate-400">Tasa de aprobación</p>
                     </div>
                     <div className="text-center">
-                    <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mx-auto mb-3">
-                        <Users className="w-6 h-6 text-purple-600" />
+                      <div className="flex items-center justify-center w-14 h-14 bg-blue-50 rounded-full mx-auto mb-3 shadow">
+                        <TrendingUp className="w-7 h-7 text-blue-600" />
+                      </div>
+                      <h3 className="font-semibold text-slate-700 tracking-wide">Crecimiento</h3>
+                      <p className="text-3xl font-extrabold text-blue-600 mt-1">+{getPromedioCrecimiento()}%</p>
+                      <p className="text-xs text-slate-400">Mensual promedio</p>
                     </div>
-                    <h3 className="font-semibold text-slate-800">Volumen</h3>
-                    <p className="text-2xl font-bold text-purple-600 mt-1">{getTotalSolicitudes()}</p>
-                    <p className="text-sm text-slate-500">Solicitudes totales</p>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center w-14 h-14 bg-purple-50 rounded-full mx-auto mb-3 shadow">
+                        <Users className="w-7 h-7 text-purple-600" />
+                      </div>
+                      <h3 className="font-semibold text-slate-700 tracking-wide">Volumen</h3>
+                      <p className="text-3xl font-extrabold text-purple-600 mt-1">{getTotalSolicitudes()}</p>
+                      <p className="text-xs text-slate-400">Solicitudes totales</p>
                     </div>
-                </div>
+                  </div>
                 </div>
             </div>
             </div>

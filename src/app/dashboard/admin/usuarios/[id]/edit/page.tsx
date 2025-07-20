@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Save, AlertCircle, Lock, UserCheck, UserX, Shield } from 'lucide-react';
+import { Save, AlertCircle, Lock, UserCheck, UserX, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { UsuariosService } from '@/services/usuarios.service';
@@ -72,7 +72,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   setSaving(true);
   try {
-    const dataToUpdate: any = {
+    const dataToUpdate: Record<string, unknown> = {
       nombre: formData.nombre.trim(),
       email: formData.email.trim(),
       rol: formData.rol,

@@ -8,7 +8,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { AlertCircle } from 'lucide-react';
 import { CheckCircle } from 'lucide-react';
-import { ShieldCheck, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export default function HistorialPagosPage() {
   const [pagos, setPagos] = useState<Solicitud[]>([]);
@@ -126,7 +126,7 @@ export default function HistorialPagosPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pagosPaginados.map((pago, idx) => (
+                  {pagosPaginados.map((pago) => (
                     <tr
                       key={pago.id_solicitud}
                       className={

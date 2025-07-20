@@ -6,7 +6,7 @@ import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye, CheckCircle, CreditCard, AlertCircle, Download } from 'lucide-react';
+import { FileText, Eye, CreditCard, AlertCircle } from 'lucide-react';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { toast } from 'react-hot-toast';
@@ -26,7 +26,7 @@ export default function PagosPendientesPage() {
   const [loadingPagos, setLoadingPagos] = useState(true);
   const [errorPagos, setErrorPagos] = useState<string | null>(null);
   const [showComprobanteModal, setShowComprobanteModal] = useState(false);
-  const [comprobantePagoId, setComprobantePagoId] = useState<number | null>(null);
+  const [comprobantePagoId] = useState<number | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pagoAConfirmar, setPagoAConfirmar] = useState<Solicitud | null>(null);
 
@@ -89,7 +89,7 @@ export default function PagosPendientesPage() {
         ), { duration: 8000 });
         setPagosPendientes((prev) => prev.filter((p) => p.id_solicitud !== pagoAConfirmar.id_solicitud));
       }
-    } catch (err) {
+    } catch {
       toast.error('Error al procesar el pago');
     }
     setProcesandoPago(null);
@@ -139,11 +139,6 @@ export default function PagosPendientesPage() {
 
   const openExportModal = () => {
     setShowExportModal(true);
-  };
-
-  const handleAbrirComprobanteModal = (id_solicitud: number) => {
-    setComprobantePagoId(id_solicitud);
-    setShowComprobanteModal(true);
   };
 
   const handleSubirComprobante = async (file: File) => {

@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
-import { Pagination } from '@/components/ui/Pagination';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
 import { SolicitudesService } from '@/services/solicitudes.service';
@@ -53,7 +51,7 @@ const getEstadoIcon = (estado: string) => {
 };
 
 export default function MisSolicitudesPage() {
-  const { user, logout } = useAuth();
+  //nst { user, logout } = useAuth();
   const router = useRouter();
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [filteredSolicitudes, setFilteredSolicitudes] = useState<Solicitud[]>([]);
@@ -69,7 +67,7 @@ export default function MisSolicitudesPage() {
 
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(5);
 
   // Estados para filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,7 +76,13 @@ export default function MisSolicitudesPage() {
 
   // Cargar solicitudes con timeout de seguridad
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    const timeoutId: NodeJS.Timeout = setTimeout(() => {
+      if (loading) {
+        setTimeoutError(true);
+        setLoading(false);
+      }
+    }, 10000);
+
     setLoading(true);
     setTimeoutError(false);
 
@@ -89,7 +93,7 @@ export default function MisSolicitudesPage() {
         const sorted = data.sort((a, b) => new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime());
         setSolicitudes(sorted);
         setError('');
-      } catch (err) {
+      } catch {
         setError('Error al cargar las solicitudes');
         setSolicitudes([]);
       } finally {
@@ -99,16 +103,8 @@ export default function MisSolicitudesPage() {
 
     fetchSolicitudes();
 
-    // Timeout de 10 segundos para mostrar mensaje si tarda mucho
-    timeoutId = setTimeout(() => {
-      if (loading) {
-        setTimeoutError(true);
-        setLoading(false);
-      }
-    }, 10000);
-
     return () => clearTimeout(timeoutId);
-  }, []);
+  }, [loading]);
 
   useEffect(() => {
     const filterSolicitudes = () => {
@@ -198,8 +194,12 @@ export default function MisSolicitudesPage() {
       setError('');
       setSuccess('Solicitud eliminada correctamente.');
       setTimeout(() => setSuccess(''), 3500);
-    } catch (err: any) {
-      const backendMsg = err?.response?.data?.error || err?.response?.data?.message || err.message || 'Error al eliminar la solicitud';
+    } catch (err: unknown) {
+      let backendMsg = 'Error al eliminar la solicitud';
+      if (typeof err === 'object' && err !== null) {
+        const errorObj = err as { response?: { data?: { error?: string; message?: string } }, message?: string };
+        backendMsg = errorObj.response?.data?.error || errorObj.response?.data?.message || errorObj.message || backendMsg;
+      }
       setError(backendMsg);
     } finally {
       setDeleting(false);

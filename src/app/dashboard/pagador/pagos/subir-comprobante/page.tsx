@@ -7,10 +7,10 @@ import type { Solicitud } from '@/types';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { AlertCircle } from 'lucide-react';
-import { CheckCircle, ShieldCheck, Sparkles, Laptop2, Banknote, Bot } from 'lucide-react';
-import { useRef } from 'react';
+import { CheckCircle, Sparkles, Laptop2, Banknote, Bot } from 'lucide-react';
 import { SubirFacturaModal } from '@/components/pagos/SubirFacturaModal';
 import { VerComprobanteModal } from '@/components/pagos/VerComprobanteModal';
+import type { Comprobante } from '@/components/pagos/VerComprobanteModal';
 import { SolicitudesService } from '@/services/solicitudes.service';
 
 export default function HistorialPagosPage() {
@@ -31,10 +31,9 @@ export default function HistorialPagosPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [solicitudIdFactura, setSolicitudIdFactura] = useState<number | null>(null);
   const [pagos, setPagos] = useState<Solicitud[]>([]);
-  const [comprobantes, setComprobantes] = useState<{ [id: number]: any }>({});
+  const [comprobantes, setComprobantes] = useState<{ [id: number]: Comprobante | null }>({});
   const [verComprobante, setVerComprobante] = useState<{ open: boolean; pago: Solicitud | null }>({ open: false, pago: null });
   // Solo mostrar pagadas
-  const [estadoFiltro, setEstadoFiltro] = useState<'pagada'>('pagada');
   const [departamentoFiltro, setDepartamentoFiltro] = useState<string>('todos');
   const [pagina, setPagina] = useState(1);
   const pagosPorPagina = 5;
@@ -57,7 +56,7 @@ export default function HistorialPagosPage() {
         });
         setPagos(pagosFiltrados);
         // Consultar comprobantes para cada solicitud pagada
-        const comprobantesObj: { [id: number]: any } = {};
+        const comprobantesObj: { [id: number]: null } = {};
         await Promise.all(
           pagosFiltrados.map(async (pago) => {
             if (pago.estado === 'pagada') {
@@ -158,7 +157,7 @@ export default function HistorialPagosPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pagosPaginados.map((pago, idx) => (
+                  {pagosPaginados.map((pago) => (
                     <tr
                       key={pago.id_solicitud}
                       className={
@@ -263,11 +262,11 @@ export default function HistorialPagosPage() {
                 </button>
               </div>
               {/* Modal para ver comprobante fuera de la tabla para evitar error de hidratación */}
-              {verComprobante.open && verComprobante.pago && (
+              {verComprobante.open && verComprobante.pago && comprobantes[verComprobante.pago.id_solicitud] && (
                 <VerComprobanteModal
                   open={verComprobante.open}
                   pago={verComprobante.pago}
-                  comprobante={verComprobante.pago ? comprobantes[verComprobante.pago.id_solicitud] : null}
+                  comprobante={comprobantes[verComprobante.pago.id_solicitud]!}
                   onClose={() => setVerComprobante({ open: false, pago: null })}
                 />
               )}
@@ -282,7 +281,7 @@ export default function HistorialPagosPage() {
                     if (!token || !id) throw new Error('No hay token o id de solicitud');
                     await SolicitudesService.subirFactura(id, file, token);
                     // Opcional: recargar pagos o mostrar mensaje de éxito
-                  } catch (err) {
+                  } catch {
                     alert('Error al subir la factura');
                   } finally {
                     setModalOpen(false);

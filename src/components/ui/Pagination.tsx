@@ -18,8 +18,6 @@ export function Pagination({
   totalItems,
   itemsPerPage,
   onPageChange,
-  onItemsPerPageChange,
-  showPageSizeSelector = true
 }: PaginationProps) {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);

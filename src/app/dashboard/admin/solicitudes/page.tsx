@@ -8,11 +8,11 @@ import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
-import { FileText, Trash2, Edit, Eye } from 'lucide-react';
+import { FileText, Trash2, Eye } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
-import { exportSolicitudesToCSV } from '@/utils/exportUtils';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { Solicitud } from '@/types';
 import { toast } from 'react-hot-toast';
@@ -22,7 +22,7 @@ export default function SolicitudesPage() {
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const { user, logout } = useAuth();
+  const { } = useAuth();
 
   const { solicitudes, loading, deleteSolicitud } = useSolicitudes();
 
@@ -65,10 +65,7 @@ export default function SolicitudesPage() {
     }
   };
 
-  const handleExport = () => {
-    exportSolicitudesToCSV(filteredSolicitudes);
-    toast.success(`${filteredSolicitudes.length} solicitudes exportadas`);
-  };
+
 
   // Badge color y estilo para estado
   const getEstadoColor = (estado: string) => {
@@ -171,59 +168,56 @@ export default function SolicitudesPage() {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-white/20">
-                  <FileText className="w-8 h-8 text-white" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Total</p>
-                  <p className="text-2xl font-bold text-white">{solicitudes.length}</p>
-                </div>
+          {/* Stats Cards Mejorados */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+            {/* Total */}
+            <div className="bg-blue-100/80 rounded-xl p-6 border border-blue-200 shadow-lg flex items-center gap-4">
+              <div className="p-3 rounded-full bg-blue-200 flex items-center justify-center">
+                <FileText className="w-8 h-8 text-blue-700" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-blue-900/90">Total</p>
+                <p className="text-2xl font-extrabold text-blue-900">{solicitudes.length}</p>
               </div>
             </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-yellow-500/20">
-                  <FileText className="w-8 h-8 text-yellow-300" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Pendientes</p>
-                  <p className="text-2xl font-bold text-white">
-                    {solicitudes.filter(s => s.estado === 'pendiente').length}
-                  </p>
-                </div>
+            {/* Pendientes */}
+            <div className="bg-yellow-100/80 rounded-xl p-6 border border-yellow-200 shadow-lg flex items-center gap-4">
+              <div className="p-3 rounded-full bg-yellow-200 flex items-center justify-center">
+                <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2 2m8-2a8 8 0 11-16 0 8 8 0 0116 0z" /></svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-yellow-900/90">Pendientes</p>
+                <p className="text-2xl font-extrabold text-yellow-900">{solicitudes.filter(s => s.estado === 'pendiente').length}</p>
               </div>
             </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-green-500/20">
-                  <FileText className="w-8 h-8 text-green-300" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Autorizadas</p>
-                  <p className="text-2xl font-bold text-white">
-                    {solicitudes.filter(s => s.estado === 'autorizada').length}
-                  </p>
-                </div>
+            {/* Autorizadas */}
+            <div className="bg-green-100/80 rounded-xl p-6 border border-green-200 shadow-lg flex items-center gap-4">
+              <div className="p-3 rounded-full bg-green-200 flex items-center justify-center">
+                <svg className="w-8 h-8 text-green-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-green-900/90">Autorizadas</p>
+                <p className="text-2xl font-extrabold text-green-900">{solicitudes.filter(s => s.estado === 'autorizada').length}</p>
               </div>
             </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-red-500/20">
-                  <FileText className="w-8 h-8 text-red-300" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Rechazadas</p>
-                  <p className="text-2xl font-bold text-white">
-                    {solicitudes.filter(s => s.estado === 'rechazada').length}
-                  </p>
-                </div>
+            {/* Rechazadas */}
+            <div className="bg-red-100/80 rounded-xl p-6 border border-red-200 shadow-lg flex items-center gap-4">
+              <div className="p-3 rounded-full bg-red-200 flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-red-900/90">Rechazadas</p>
+                <p className="text-2xl font-extrabold text-red-900">{solicitudes.filter(s => s.estado === 'rechazada').length}</p>
+              </div>
+            </div>
+            {/* Pagadas */}
+            <div className="bg-indigo-100/80 rounded-xl p-6 border border-indigo-200 shadow-lg flex items-center gap-4">
+              <div className="p-3 rounded-full bg-indigo-200 flex items-center justify-center">
+                <svg className="w-8 h-8 text-indigo-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2 2m4-6a8 8 0 11-16 0 8 8 0 0116 0z" /></svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-indigo-900/90">Pagadas</p>
+                <p className="text-2xl font-extrabold text-indigo-900">{solicitudes.filter(s => s.estado === 'pagada').length}</p>
               </div>
             </div>
           </div>
@@ -233,7 +227,6 @@ export default function SolicitudesPage() {
             <AdvancedFilters
               filters={filters}
               onFiltersChange={updateFilters}
-              onExport={handleExport}
               onReset={resetFilters}
               type="solicitudes"
             />
@@ -269,7 +262,7 @@ export default function SolicitudesPage() {
                       <tbody className="bg-white divide-y divide-gray-100">
                         {paginatedSolicitudes.map((solicitud) => (
                           <tr key={solicitud.id_solicitud} className="group transition-all hover:bg-blue-50/80 hover:shadow-md">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">#{solicitud.id_solicitud}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{solicitud.id_solicitud}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{solicitud.usuario_nombre || `${solicitud.id_usuario}`}</td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex items-center px-3 py-1 rounded-full border font-bold text-xs uppercase tracking-wide shadow-sm ${getDepartamentoColor(solicitud.departamento)}`} style={{minWidth: 90, justifyContent: 'center'}}>

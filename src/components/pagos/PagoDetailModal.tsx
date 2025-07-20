@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import type { Solicitud } from '@/types/index';
-import { CreditCard, FileText, Calendar, Clock, User, Building, Landmark, Hash, Tag } from 'lucide-react';
+import { CreditCard, FileText, Clock, User, Building, Tag } from 'lucide-react';
 
 interface PagoDetailModalProps {
   isOpen: boolean;

@@ -1,17 +1,19 @@
 import React from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Button } from './Button';
+
+interface Filters {
+  estado?: string;
+  departamento?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+}
 
 interface SearchAndFilterProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
-  filters: {
-    estado?: string;
-    departamento?: string;
-    fechaDesde?: string;
-    fechaHasta?: string;
-  };
-  onFilterChange: (filters: any) => void;
+  filters: Filters;
+  onFilterChange: (filters: Filters) => void;
   onClearFilters: () => void;
   estadoOptions?: Array<{ value: string; label: string }>;
   departamentoOptions?: Array<{ value: string; label: string }>;

@@ -1,10 +1,25 @@
 import React from 'react';
 import { Banknote, User2, FileText, FileBadge, X, CalendarDays } from 'lucide-react';
 
+interface Pago {
+  id_solicitud: number;
+  monto: number;
+  cuenta_destino: string;
+  fecha_pago?: string;
+  departamento?: string;
+  nombre_usuario?: string;
+  usuario_nombre?: string;
+  concepto?: string;
+}
+
+export interface Comprobante {
+  ruta_archivo?: string;
+}
+
 interface VerComprobanteModalProps {
   open: boolean;
-  pago: any;
-  comprobante: any;
+  pago: Pago;
+  comprobante: Comprobante;
   onClose: () => void;
 }
 

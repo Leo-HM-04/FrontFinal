@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Users, LogOut, Home, FileText, Menu, User, Bell, Repeat, BarChart2 } from 'lucide-react';
@@ -14,20 +15,17 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  // const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
+  // const router = useRouter();
 
   // Memoizar estilos de fondo para evitar recalcular en cada render
   const backgroundGradient = useMemo(
     () => ({ background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)' }),
     []
   );
-  // Color institucional para acentos y fondo sidebar
-  const accentColor = '#0057D9';
-  const sidebarBg = 'bg-white/90 shadow-lg';
-  const sidebarHeaderBg = 'bg-gradient-to-b from-[#0057D9] to-[#004AB7]';
 
   // Definir elementos de navegación en un arreglo para reducir código repetitivo
   const navItems = [
@@ -71,25 +69,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   // Manejar cierre de sesión con pantalla de transición
   const handleLogout = useCallback(() => {
-    setIsLoggingOut(true);
-    logout();
+    // Redirigir inmediatamente
+    window.location.replace('/login');
+    // Limpiar sesión en segundo plano (sin bloquear el redirect)
     setTimeout(() => {
-      setIsLoggingOut(false);
-      router.push('/login');
-    }, 1000); // Mostrar pantalla de "Cerrando Sesión" por 1 segundo
-  }, [logout, router]);
-
-  // Pantalla de "Cerrando Sesión"
-  if (isLoggingOut) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={backgroundGradient}>
-        <div className="text-center text-white">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mx-auto mb-4"></div>
-          <h2 className="text-2xl font-semibold">Cerrando Sesión...</h2>
-        </div>
-      </div>
-    );
-  }
+      logout();
+    }, 50);
+  }, [logout]);
 
   return (
     <div className="min-h-screen font-sans flex flex-col" style={backgroundGradient}>
@@ -157,10 +143,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex flex-col items-start gap-2 pt-8 pb-2 px-8" style={{background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)'}}>
               {/* Card usuario */}
               <div className="w-full bg-white/90 rounded-xl border border-blue-200 flex items-center gap-4 px-4 py-3 mb-4 shadow-sm">
-                <img
+                <Image
                   src="/assets/images/Logo_1x1_Azul@2x.png"
                   alt="Logo Bechapra"
+                  width={48}
+                  height={48}
                   className="w-12 h-12 rounded-full object-cover border border-blue-300"
+                  priority
                 />
                 <div className="flex flex-col items-start justify-center">
                   <span className="font-bold text-blue-800 text-base leading-tight">{user?.nombre || 'Administrador'}</span>
@@ -198,13 +187,51 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <div className="p-4 border-t border-gray-200 bg-gray-50">
               <button
                 type="button"
-                onClick={handleLogout}
-                className="flex items-center space-x-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 w-full group"
+                onClick={() => setShowLogoutModal(true)}
+                className="flex items-center gap-3 px-5 py-3 rounded-xl bg-white border-2 border-red-200 text-red-600 font-semibold shadow-sm hover:bg-red-50 hover:border-red-400 hover:text-red-700 transition-all duration-200 w-full group"
                 style={{ fontWeight: 600 }}
               >
-                <LogOut className="w-5 h-5 transition-transform group-hover:scale-110" />
-                <span className="font-medium">Cerrar Sesión</span>
+                <LogOut className="w-5 h-5 text-red-500 group-hover:text-red-700 transition-transform group-hover:scale-110" />
+                <span className="font-medium tracking-wide">Cerrar Sesión</span>
               </button>
+              {/* Modal de confirmación de cierre de sesión */}
+              <Transition.Root show={showLogoutModal} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={setShowLogoutModal}>
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100"
+                    leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0"
+                  >
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+                  </Transition.Child>
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100"
+                      leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95"
+                    >
+                      <Dialog.Panel className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-2xl border border-red-200 flex flex-col items-center">
+                        <LogOut className="w-10 h-10 text-red-500 mb-2" />
+                        <Dialog.Title className="text-xl font-bold text-red-700 mb-2">¿Cerrar sesión?</Dialog.Title>
+                        <p className="text-red-900/90 text-base mb-4 text-center">¿Estás seguro de que deseas cerrar tu sesión?<br />Se cerrará tu acceso como administrador.</p>
+                        <div className="flex gap-4 w-full mt-2">
+                          <button
+                            className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                            onClick={() => {
+                              setShowLogoutModal(false);
+                              handleLogout();
+                            }}
+                          >Cerrar sesión</button>
+                          <button
+                            className="flex-1 px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition"
+                            onClick={() => setShowLogoutModal(false)}
+                          >Cancelar</button>
+                        </div>
+                      </Dialog.Panel>
+                    </Transition.Child>
+                  </div>
+                </Dialog>
+              </Transition.Root>
             </div>
             </motion.aside>
           </div>

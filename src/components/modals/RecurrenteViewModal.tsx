@@ -1,6 +1,5 @@
 import React from 'react';
 import { PlantillaRecurrente } from '@/types';
-import { Button } from '../ui/Button';
 import { FileText, User, Building2, CreditCard, Banknote, ClipboardList, Calendar, BadgeCheck, Repeat, CheckCircle, XCircle } from 'lucide-react';
 
 interface RecurrenteViewModalProps {
@@ -9,7 +8,9 @@ interface RecurrenteViewModalProps {
   recurrente: PlantillaRecurrente | null;
 }
 
+
 export const RecurrenteViewModal: React.FC<RecurrenteViewModalProps> = ({ isOpen, onClose, recurrente }) => {
+  const overlayRef = React.useRef<HTMLDivElement>(null);
   if (!isOpen || !recurrente) return null;
 
   // Utilidades visuales
@@ -47,7 +48,6 @@ export const RecurrenteViewModal: React.FC<RecurrenteViewModalProps> = ({ isOpen
     : null;
 
   // Handler to close modal when clicking outside the modal content
-  const overlayRef = React.useRef<HTMLDivElement>(null);
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === overlayRef.current) {
       onClose();
@@ -60,17 +60,17 @@ export const RecurrenteViewModal: React.FC<RecurrenteViewModalProps> = ({ isOpen
       className="fixed inset-0 z-50 flex items-center justify-center bg-white/10 backdrop-blur-sm"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white/90 rounded-3xl shadow-2xl max-w-3xl w-full p-0 relative animate-fade-in border border-blue-500 overflow-hidden">
-        <div className="relative bg-gradient-to-r from-blue-600/90 to-blue-400/80 px-10 py-4 flex items-center gap-4 mb-6 border-b border-blue-500 shadow">
-          <div className="flex items-center justify-center bg-white rounded-full shadow-lg w-16 h-16">
-            <FileText className="w-9 h-9 text-blue-700" />
+      <div className="bg-white/90 rounded-2xl shadow-2xl max-w-4xl w-full p-0 relative animate-fade-in border border-blue-500 overflow-hidden">
+        <div className="relative bg-gradient-to-r from-blue-600/90 to-blue-400/80 px-6 py-2 flex items-center gap-4 mb-2 border-b border-blue-500 shadow">
+          <div className="flex items-center justify-center bg-white rounded-full shadow-lg w-14 h-14">
+            <FileText className="w-7 h-7 text-blue-700" />
           </div>
-          <div>
-            <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow">Detalle de Plantilla Recurrente</h2>
-            <p className="text-blue-100 text-sm mt-1">Consulta la información y factura asociada</p>
+          <div className="flex flex-col justify-center">
+            <h2 className="text-xl font-bold text-white tracking-tight drop-shadow">Detalle de Plantilla Recurrente</h2>
+            <p className="text-blue-100 text-xs mt-1">Consulta la información y factura asociada</p>
           </div>
           <button
-            className="absolute top-4 right-6 text-white/70 hover:text-white text-3xl font-bold transition"
+            className="absolute top-2 right-4 text-white/70 hover:text-white text-2xl font-bold transition"
             onClick={onClose}
             aria-label="Cerrar"
             title="Cerrar"
@@ -78,8 +78,8 @@ export const RecurrenteViewModal: React.FC<RecurrenteViewModalProps> = ({ isOpen
             ×
           </button>
         </div>
-        <div className="px-10 pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-800 text-base">
+        <div className="px-6 pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-800 text-sm">
             <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="ID de la plantilla"><BadgeCheck className="w-5 h-5 text-blue-500" /><span className="font-semibold">ID:</span> #{recurrente.id_recurrente}</div>
             <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="Usuario solicitante"><User className="w-5 h-5 text-blue-500" /><span className="font-semibold">Usuario:</span> {recurrente.nombre_usuario || `Usuario ${recurrente.id_usuario}`}</div>
             <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="Departamento"><Building2 className="w-5 h-5 text-blue-500" /><span className="font-semibold">Departamento:</span> {toUpper(recurrente.departamento)}</div>
@@ -92,11 +92,11 @@ export const RecurrenteViewModal: React.FC<RecurrenteViewModalProps> = ({ isOpen
             <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="¿Está activa?">{recurrente.activo ? <CheckCircle className="w-5 h-5 text-green-500" /> : <XCircle className="w-5 h-5 text-red-500" />}<span className="font-semibold">Activa:</span> {badge(recurrente.activo ? 'SÍ' : 'NO', activaColor(!!recurrente.activo))}</div>
             <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="Siguiente fecha de ejecución"><Calendar className="w-5 h-5 text-blue-500" /><span className="font-semibold">Siguiente Fecha:</span> {formatDate(recurrente.siguiente_fecha)}</div>
           </div>
-          <div className="mt-6 flex flex-col items-center justify-center">
-            <div className="w-full md:w-3/5">
-              <div className="flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 to-blue-50 rounded-xl p-4 border border-blue-200 shadow-inner">
-                <div className="mb-2 text-blue-700 font-semibold flex items-center gap-2 text-lg">
-                  <FileText className="w-6 h-6" /> Factura asociada
+          <div className="mt-3 flex flex-col items-center justify-center">
+            <div className="w-full md:w-1/4">
+              <div className="flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg p-2 border border-blue-200 shadow-inner">
+                <div className="mb-1 text-blue-700 font-semibold flex items-center gap-2 text-xs">
+                  <FileText className="w-4 h-4" /> Factura asociada
                 </div>
                 {facturaUrl ? (
                   <>
@@ -104,15 +104,15 @@ export const RecurrenteViewModal: React.FC<RecurrenteViewModalProps> = ({ isOpen
                       href={facturaUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2 border border-blue-500 text-blue-700 rounded-lg hover:bg-blue-100 transition font-semibold text-base bg-white shadow-sm mt-2"
+                      className="inline-flex items-center gap-2 px-3 py-1 border border-blue-500 text-blue-700 rounded-lg hover:bg-blue-100 transition font-semibold text-xs bg-white shadow-sm mt-1"
                     >
-                      <FileText className="w-5 h-5" /> Ver Factura
+                      <FileText className="w-4 h-4" /> Ver Factura
                     </a>
-                    <span className="text-xs text-gray-500 mt-1">(Se abrirá en una nueva pestaña)</span>
+                    <span className="text-[10px] text-gray-500 mt-1">(Se abrirá en una nueva pestaña)</span>
                   </>
                 ) : (
-                  <span className="inline-flex items-center gap-2 px-5 py-2 border border-gray-300 text-gray-400 rounded-lg bg-gray-50 cursor-not-allowed font-semibold text-base mt-2">
-                    <FileText className="w-5 h-5" /> Factura no existente
+                  <span className="inline-flex items-center gap-2 px-3 py-1 border border-gray-300 text-gray-400 rounded-lg bg-gray-50 cursor-not-allowed font-semibold text-xs mt-1">
+                    <FileText className="w-4 h-4" /> Factura no existente
                   </span>
                 )}
               </div>

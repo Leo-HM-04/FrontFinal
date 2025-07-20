@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { Button } from '@/components/ui/Button';
 import { toast } from 'react-hot-toast';
-import { FileText, Building, DollarSign, CreditCard, Calendar, MessageSquare, Repeat } from 'lucide-react';
+import { Building, DollarSign, CreditCard, Calendar, MessageSquare, Repeat } from 'lucide-react';
 import { RecurrentesService } from '@/services/recurrentes.service';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -14,7 +14,17 @@ import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
 
 // Estado inicial
-const initialState = {
+type FormState = {
+  departamento: string;
+  monto: string;
+  cuenta_destino: string;
+  concepto: string;
+  tipo_pago: string;
+  frecuencia: string;
+  siguiente_fecha: string;
+};
+
+const initialState: FormState = {
   departamento: '',
   monto: '',
   cuenta_destino: '',
@@ -24,7 +34,8 @@ const initialState = {
   siguiente_fecha: ''
 };
 
-const formReducer = (state: any, action: any) => {
+type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string };
+const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
     case 'SET_FIELD':
       return { ...state, [action.field]: action.value };
@@ -59,15 +70,15 @@ export default function NuevaRecurrentePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    dispatch({ type: 'SET_FIELD', field: name, value });
+    dispatch({ type: 'SET_FIELD', field: name as keyof FormState, value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'tipo_pago', 'frecuencia', 'siguiente_fecha'];
-    for (let field of requiredFields) {
+    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'tipo_pago', 'frecuencia', 'siguiente_fecha'] as const;
+    for (const field of requiredFields) {
       if (!formData[field]) {
         toast.error(`Campo obligatorio faltante: ${field}`);
         setLoading(false);
@@ -76,12 +87,26 @@ export default function NuevaRecurrentePage() {
     }
 
     try {
-      const response = await RecurrentesService.crearRecurrente(formData);
-      toast.success(response.message || 'Plantilla recurrente creada exitosamente');
+      // Convertir formData a FormData si el backend espera FormData
+      const fd = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        fd.append(key, value);
+      });
+      const response = await RecurrentesService.crearRecurrente(fd);
+      let successMsg = 'Plantilla recurrente creada exitosamente';
+      if (response && typeof response === 'object' && 'message' in response && typeof (response as { message?: string }).message === 'string') {
+        successMsg = (response as { message: string }).message;
+      }
+      toast.success(successMsg);
       router.push('/dashboard/solicitante/mis-recurrentes');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error);
-      toast.error(error.response?.data?.error || 'Error al crear plantilla recurrente');
+      let errorMsg = 'Error al crear plantilla recurrente';
+      if (typeof error === 'object' && error !== null) {
+        const errObj = error as { response?: { data?: { error?: string } } };
+        errorMsg = errObj.response?.data?.error || errorMsg;
+      }
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

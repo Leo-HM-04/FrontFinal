@@ -1,6 +1,6 @@
 import React from "react";
 import { PlantillaRecurrente } from '@/types';
-import { FaUser, FaBuilding, FaMoneyBillWave, FaCreditCard, FaRedo, FaCheckCircle, FaRegCalendarAlt, FaUserCheck, FaUserTie, FaCommentDots, FaTimesCircle, FaFileAlt, FaDollarSign } from 'react-icons/fa';
+import { FaBuilding, FaRegCalendarAlt, FaTimesCircle, FaFileAlt, FaDollarSign } from 'react-icons/fa';
 
 interface SolicitudModalProps {
   solicitud: PlantillaRecurrente;

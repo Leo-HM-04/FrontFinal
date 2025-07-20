@@ -5,7 +5,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { ArrowLeft, User, Mail, Lock, UserCheck } from 'lucide-react';
+import { User, Mail, Lock, UserCheck } from 'lucide-react';
 import { UsuariosService, CreateUserData } from '@/services/usuarios.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, DollarSign, Building, FileText, User, MessageSquare, Calendar, ExternalLink, AlertCircle } from 'lucide-react';
+import { ArrowLeft, DollarSign, Building, FileText, User, MessageSquare, Calendar, AlertCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { SolicitudesService } from '@/services/solicitudes.service';
@@ -41,6 +41,31 @@ export default function SolicitudDetailPage() {
       currency: 'COP',
       minimumFractionDigits: 0
     }).format(amount);
+  };
+
+  // Convierte el monto a texto (miles, millones, etc.)
+  const formatAmountText = (amount: number) => {
+    const format = (num: number) => num.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (amount >= 1_000_000_000) {
+      return `${format(amount / 1_000_000_000)} mil millones de pesos`;
+    } else if (amount >= 1_000_000) {
+      return `${format(amount / 1_000_000)} millones de pesos`;
+    } else if (amount >= 1_000) {
+      return `${format(amount / 1_000)} mil pesos`;
+    } else {
+      return `${format(amount)} pesos`;
+    }
+  };
+
+  // Formato de fecha largo y amigable
+  const formatLongDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-CO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const getEstadoColor = (estado: string) => {
@@ -137,7 +162,7 @@ export default function SolicitudDetailPage() {
                     Solicitud {solicitud?.id_solicitud}
                   </h1>
                   <p className="text-white/80">
-                    Creada el {solicitud && new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO')}
+                    Creada el {solicitud && formatLongDate(solicitud.fecha_creacion)}
                   </p>
                 </div>
               </div>
@@ -166,6 +191,7 @@ export default function SolicitudDetailPage() {
                     <div>
                       <span className="text-sm text-white/70">Monto:</span>
                       <p className="text-2xl font-bold text-white">{formatCurrency(solicitud.monto)}</p>
+                      <span className="block text-sm text-blue-200 mt-1 italic">{formatAmountText(solicitud.monto)}</span>
                     </div>
                     <div>
                       <span className="text-sm text-white/70">Cuenta Destino:</span>
@@ -175,7 +201,7 @@ export default function SolicitudDetailPage() {
                       <span className="text-sm text-white/70">Fecha Límite de Pago:</span>
                       <p className="text-white flex items-center">
                         <Calendar className="w-4 h-4 mr-2 text-blue-300" />
-                        {new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-CO')}
+                        {formatLongDate(solicitud.fecha_limite_pago)}
                       </p>
                     </div>
                   </div>
@@ -190,7 +216,7 @@ export default function SolicitudDetailPage() {
                     <div>
                       <span className="text-sm text-white/70">Departamento:</span>
                       <p className="mt-1">
-                        <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border ${getDepartmentColorClass(solicitud.departamento)}`}>
+                        <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border uppercase ${getDepartmentColorClass(solicitud.departamento)}`}>
                           {solicitud.departamento}
                         </span>
                       </p>
@@ -215,62 +241,58 @@ export default function SolicitudDetailPage() {
                 </Card>
               </div>
 
-              {/* Concepto */}
-              <Card className="bg-white/10 backdrop-blur-sm border border-white/20 p-6">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                  <FileText className="w-5 h-5 mr-2 text-blue-300" />
-                  Concepto
-                </h3>
-                <p className="text-white leading-relaxed bg-white/5 p-4 rounded-lg">
-                  {solicitud.concepto}
-                </p>
-              </Card>
-
-              {/* Documentos */}
-              <Card className="bg-white/10 backdrop-blur-sm border border-white/20 p-6">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                  <ExternalLink className="w-5 h-5 mr-2 text-blue-300" />
-                  Documentos Adjuntos
-                </h3>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      // Si la URL no contiene 'localhost:4000', la reconstruimos
-                      let facturaUrl = solicitud.factura_url;
-                      if (facturaUrl && !facturaUrl.includes('localhost:4000')) {
-                        // Extraer solo el nombre del archivo
-                        const fileName = facturaUrl.split('/').pop();
-                        facturaUrl = `http://localhost:4000/uploads/facturas/${fileName}`;
-                      }
-                      window.open(facturaUrl, '_blank');
-                    }}
-                    className="text-white border-white/30 hover:bg-white/10 flex items-center space-x-2"
-                  >
-                    <FileText className="w-4 h-4" />
-                    <span>Ver Factura</span>
-                    <ExternalLink className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Comentarios del Aprobador */}
-              {solicitud.comentario_aprobador && (
+              {/* Concepto y Comentario del Aprobador en dos columnas */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Concepto */}
                 <Card className="bg-white/10 backdrop-blur-sm border border-white/20 p-6">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <MessageSquare className="w-5 h-5 mr-2 text-blue-300" />
-                    Comentario del Aprobador
+                    <FileText className="w-5 h-5 mr-2 text-blue-300" />
+                    Concepto
                   </h3>
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <p className="text-white italic">"{solicitud.comentario_aprobador}"</p>
-                    {solicitud.fecha_revision && (
-                      <p className="text-sm text-white/70 mt-2 flex items-center">
-                        <Calendar className="w-4 h-4 mr-1" />
-                        Revisado el {new Date(solicitud.fecha_revision).toLocaleDateString('es-CO')}
-                      </p>
-                    )}
+                  <div className="space-y-4 text-white">
+                    <div>
+                      <span className="text-sm text-white/70">Concepto:</span>
+                      <p className="leading-relaxed font-medium bg-white/5 p-4 rounded-lg text-white">{solicitud.concepto}</p>
+                    </div>
                   </div>
                 </Card>
+
+                {/* Comentarios del Aprobador */}
+                {solicitud.comentario_aprobador && (
+                  <Card className="bg-white/10 backdrop-blur-sm border border-white/20 p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                      <MessageSquare className="w-5 h-5 mr-2 text-blue-300" />
+                      Comentario del Aprobador
+                    </h3>
+                    <div className="space-y-4 text-white">
+                      <div>
+                        <span className="text-sm text-white/70">Comentario:</span>
+                        <p className="italic font-medium bg-white/5 p-4 rounded-lg text-white">&quot;{solicitud.comentario_aprobador}&quot;</p>
+                        {solicitud.fecha_revision && (
+                          <p className="text-sm text-white/70 mt-2 flex items-center">
+                            <Calendar className="w-4 h-4 mr-1" />
+                            Revisado el {new Date(solicitud.fecha_revision).toLocaleDateString('es-CO')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              </div>
+
+              {/* Botón Ver Factura */}
+              {solicitud?.factura_url && (
+                <div className="flex justify-center mt-6">
+                  <a
+                    href={solicitud.factura_url.startsWith('http') ? solicitud.factura_url : `http://localhost:4000${solicitud.factura_url.startsWith('/') ? '' : '/'}${solicitud.factura_url}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition-colors border border-blue-400/30 gap-2 text-base"
+                  >
+                    <ExternalLink className="w-5 h-5 mr-2" />
+                    Ver Factura
+                  </a>
+                </div>
               )}
             </div>
           )}

@@ -8,7 +8,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { BarChart2 } from 'lucide-react';
 
 export default function PagadorDashboardNew() {
   const { user } = useAuth();

@@ -5,26 +5,39 @@ import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, FileText, Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle } from 'lucide-react';
+import { FileText, Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle } from 'lucide-react';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { toast } from 'react-hot-toast';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
+import Image from 'next/image';
 
 // Reducer para manejar el formulario
-const initialState = {
+type FormState = {
+  departamento: string;
+  monto: string;
+  cuenta_destino: string;
+  concepto: string;
+  tipo_pago: string;
+  fecha_limite_pago: string;
+  factura_file: File | null;
+};
+
+type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null };
+
+const initialState: FormState = {
   departamento: '',
   monto: '',
   cuenta_destino: '',
   concepto: '',
   tipo_pago: 'transferencia',
   fecha_limite_pago: '',
-  factura_file: null as File | null
+  factura_file: null
 };
 
-const formReducer = (state: any, action: any) => {
+const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
     case 'SET_FIELD':
       return { ...state, [action.field]: action.value };
@@ -40,7 +53,7 @@ export default function NuevaSolicitudPage() {
   const [fechaLimitePago, setFechaLimitePago] = useState<Date | null>(null);
   const [cuentaValida, setCuentaValida] = useState<null | boolean>(null);
   const [checkingCuenta, setCheckingCuenta] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
 
   const departamentoOptions = [
     { value: 'contabilidad', label: 'Contabilidad' },
@@ -68,27 +81,27 @@ export default function NuevaSolicitudPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    dispatch({ type: 'SET_FIELD', field: name, value });
+    dispatch({ type: 'SET_FIELD', field: name as keyof FormState, value });
     // Validación en tiempo real
     if (!value) {
-      setErrors((prev: any) => ({ ...prev, [name]: 'Este campo es obligatorio' }));
+      setErrors((prev) => ({ ...prev, [name]: 'Este campo es obligatorio' }));
     } else {
-      setErrors((prev: any) => ({ ...prev, [name]: undefined }));
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'factura_file') => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof FormState) => {
     const file = e.target.files?.[0] || null;
     if (file) {
       const valid = validateFile(file);
       if (!valid) {
-        setErrors((prev: any) => ({ ...prev, factura_file: 'Archivo no válido' }));
+        setErrors((prev) => ({ ...prev, factura_file: 'Archivo no válido' }));
         return;
       }
       dispatch({ type: 'SET_FIELD', field: fieldName, value: file });
-      setErrors((prev: any) => ({ ...prev, factura_file: undefined }));
+      setErrors((prev) => ({ ...prev, factura_file: undefined }));
     } else {
-      setErrors((prev: any) => ({ ...prev, factura_file: 'Este campo es obligatorio' }));
+      setErrors((prev) => ({ ...prev, factura_file: 'Este campo es obligatorio' }));
     }
   };
 
@@ -136,11 +149,11 @@ export default function NuevaSolicitudPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    let newErrors: any = {};
+    const newErrors: Record<string, string> = {};
     // Validar campos requeridos
     const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'fecha_limite_pago', 'factura_file'];
     requiredFields.forEach(field => {
-      if (!formData[field]) {
+      if (!formData[field as keyof typeof formData]) {
         newErrors[field] = 'Este campo es obligatorio';
       }
     });
@@ -156,6 +169,9 @@ export default function NuevaSolicitudPage() {
       return;
     }
     try {
+      if (!formData.factura_file) {
+        throw new Error('El archivo de factura es obligatorio.');
+      }
       const solicitudData = {
         departamento: formData.departamento,
         monto: formData.monto,
@@ -163,14 +179,22 @@ export default function NuevaSolicitudPage() {
         concepto: formData.concepto,
         tipo_pago: formData.tipo_pago,
         fecha_limite_pago: formData.fecha_limite_pago,
-        factura: formData.factura_file
+        factura: formData.factura_file as File
       };
       const response = await SolicitudesService.createWithFiles(solicitudData);
-      toast.success(response.message || 'Solicitud creada exitosamente');
+      let successMsg = 'Solicitud creada exitosamente';
+      if (response && typeof response === 'object' && 'message' in response && typeof (response as { message?: string }).message === 'string') {
+        successMsg = (response as { message: string }).message;
+      }
+      toast.success(successMsg);
       router.push('/dashboard/solicitante/mis-solicitudes');
-    } catch (error: any) {
-      console.error('Error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Error al crear la solicitud';
+    } catch (err: unknown) {
+      console.error('Error:', err);
+      let errorMessage = 'Error al crear la solicitud';
+      if (typeof err === 'object' && err !== null) {
+        const errorObj = err as { response?: { data?: { message?: string } }, message?: string };
+        errorMessage = errorObj.response?.data?.message || errorObj.message || errorMessage;
+      }
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -248,9 +272,9 @@ export default function NuevaSolicitudPage() {
                     onValueChange={({ value }) => {
                       dispatch({ type: 'SET_FIELD', field: 'monto', value });
                       if (!value) {
-                        setErrors((prev: any) => ({ ...prev, monto: 'Este campo es obligatorio' }));
+                        setErrors((prev) => ({ ...prev, monto: 'Este campo es obligatorio' }));
                       } else {
-                        setErrors((prev: any) => ({ ...prev, monto: undefined }));
+                        setErrors((prev) => ({ ...prev, monto: undefined }));
                       }
                     }}
                     className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
@@ -272,9 +296,9 @@ export default function NuevaSolicitudPage() {
                       dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                       setCuentaValida(null);
                       if (!value) {
-                        setErrors((prev: any) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
+                        setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
                       } else {
-                        setErrors((prev: any) => ({ ...prev, cuenta_destino: undefined }));
+                        setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
                       }
                     }}
                     onBlur={e => verificarCuentaDestino(e.target.value)}
@@ -328,9 +352,9 @@ export default function NuevaSolicitudPage() {
                         setFechaLimitePago(date);
                         dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: date ? date.toISOString().split('T')[0] : '' });
                         if (!date) {
-                          setErrors((prev: any) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
+                          setErrors((prev) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
                         } else {
-                          setErrors((prev: any) => ({ ...prev, fecha_limite_pago: undefined }));
+                          setErrors((prev) => ({ ...prev, fecha_limite_pago: undefined }));
                         }
                       }}
                       dateFormat="yyyy-MM-dd"
@@ -388,11 +412,15 @@ export default function NuevaSolicitudPage() {
                       </p>
                       {/* Previsualización de imagen si es jpg/png */}
                       {formData.factura_file.type.startsWith('image/') && (
-                        <img
-                          src={URL.createObjectURL(formData.factura_file)}
-                          alt="Previsualización"
-                          className="ml-4 w-16 h-16 object-contain rounded shadow"
-                        />
+                        <div className="ml-4 w-16 h-16 relative">
+                          <Image
+                            src={URL.createObjectURL(formData.factura_file)}
+                            alt="Previsualización"
+                            width={64}
+                            height={64}
+                            className="object-contain rounded shadow"
+                          />
+                        </div>
                       )}
                     </div>
                   )}

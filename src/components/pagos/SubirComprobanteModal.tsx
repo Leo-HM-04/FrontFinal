@@ -27,7 +27,7 @@ export const SubirComprobanteModal: React.FC<SubirComprobanteModalProps> = ({ is
     try {
       await onSubmit(file);
       onClose();
-    } catch (err) {
+    } catch {
       setError('Error al subir el comprobante');
     }
     setLoading(false);

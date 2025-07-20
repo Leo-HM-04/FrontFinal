@@ -1,5 +1,7 @@
+
+
 import React from 'react';
-import { X, ExternalLink, Calendar, DollarSign, Building, FileText, User, MessageSquare } from 'lucide-react';
+import { X, ExternalLink, DollarSign, Building, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Solicitud } from '@/types';
@@ -8,8 +10,6 @@ interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
   isOpen: boolean;
   onClose: () => void;
-  onApprove?: (id: number, comentario?: string) => void;
-  onReject?: (id: number, comentario?: string) => void;
   showActions?: boolean;
   userRole?: string;
 }
@@ -17,13 +17,9 @@ interface SolicitudDetailModalProps {
 export function SolicitudDetailModal({ 
   solicitud, 
   isOpen, 
-  onClose, 
-  onApprove, 
-  onReject, 
-  showActions = false,
-  userRole
+  onClose
 }: SolicitudDetailModalProps) {
-  const [comentario, setComentario] = React.useState('');
+
 
   if (!isOpen || !solicitud) return null;
 

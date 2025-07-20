@@ -1,25 +1,23 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo, useCallback } from 'react';
+import Image from 'next/image';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { User, Mail, Shield, FileText } from 'lucide-react';
+import { User, Mail, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
 
 const PerfilSolicitante = () => {
-    const { user, logout } = useAuth();
-    const router = useRouter();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { user } = useAuth();
 
     // Desestructuración del usuario para evitar repetición
     const { nombre, email } = user || {};
 
-    // Contactar al administrador
-    const handleContactAdmin = () => {
+    // Contactar al administrador (useCallback para dependencias estables)
+    const handleContactAdmin = useCallback(() => {
         if (!user) {
             toast.error('Usuario no encontrado');
             return;
@@ -32,10 +30,10 @@ const PerfilSolicitante = () => {
         try {
             window.location.href = `mailto:kikeramirez160418@gmail.com?subject=${subject}&body=${body}`;
             toast.success('Abriendo su cliente de correo...');
-        } catch (error) {
+        } catch {
             toast.error('No se pudo abrir el cliente de correo. Asegúrese de tener uno configurado.');
         }
-    };
+    }, [user, nombre]);
 
     const accountStatus = useMemo(() => (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100/20 text-green-300 mt-2">
@@ -138,10 +136,13 @@ const PerfilSolicitante = () => {
                     <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
                         <div className="flex items-center space-x-6">
                             <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center ring-4 ring-white/30 overflow-hidden">
-                                <img
+                                <Image
                                     src="/assets/images/Logo_1x1_Azul@2x.png"
                                     alt="Foto de perfil Bechapra"
-                                    className="object-cover w-full h-full"
+                                    width={80}
+                                    height={80}
+                                    className="object-cover w-full h-full rounded-full"
+                                    priority
                                 />
                             </div>
                             <div>

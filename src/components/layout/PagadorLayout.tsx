@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
-
+import Image from 'next/image';
 interface PagadorLayoutProps {
   children: React.ReactNode;
 }
@@ -141,10 +141,13 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
                 <div className="bg-white/15 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center ring-2 ring-white/30 overflow-hidden">
-                      <img
+                      <Image
                         src="/assets/images/Logo_1x1_Azul@2x.png"
                         alt="Foto de perfil Bechapra"
-                        className="object-cover w-full h-full"
+                        width={48}
+                        height={48}
+                        className="object-cover w-full h-full rounded-full"
+                        priority
                       />
                     </div>
                     <div>

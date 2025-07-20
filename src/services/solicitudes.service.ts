@@ -1,9 +1,8 @@
 import api from '@/lib/api';
-import axios from 'axios';
 import { Solicitud, CreateSolicitudData, UpdateEstadoData } from '@/types';
 
 export class SolicitudesService {
-  static async subirFactura(id: number, factura: File, token: string): Promise<any> {
+  static async subirFactura(id: number, factura: File, token: string): Promise<unknown> {
     const formData = new FormData();
     formData.append('archivo', factura); // El backend espera 'archivo'
     formData.append('id_solicitud', String(id));
@@ -27,13 +26,18 @@ export class SolicitudesService {
     try {
       const response = await api.get<Solicitud[]>('/solicitudes');
       return response.data;
-    } catch (error: any) {
-      console.error('SolicitudesService.getAll error:', {
-        message: error.message,
-        status: error.response?.status,
-        url: error.config?.url,
-        baseURL: api.defaults.baseURL,
-      });
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null) {
+        const errObj = error as { message?: string; response?: { status?: number }; config?: { url?: string }; };
+        console.error('SolicitudesService.getAll error:', {
+          message: errObj.message,
+          status: errObj.response?.status,
+          url: errObj.config?.url,
+          baseURL: api.defaults.baseURL,
+        });
+      } else {
+        console.error('SolicitudesService.getAll error:', error);
+      }
       throw error;
     }
   }
@@ -75,7 +79,7 @@ export class SolicitudesService {
     tipo_pago: string;
     fecha_limite_pago: string;
     factura: File;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const formData = new FormData();
     formData.append('departamento', data.departamento);
     formData.append('monto', String(data.monto));
@@ -98,7 +102,7 @@ export class SolicitudesService {
     tipo_pago: string;
     fecha_limite_pago: string;
     factura?: File | null;
-  }): Promise<any> {
+  }): Promise<unknown> {
     const formData = new FormData();
     formData.append('departamento', data.departamento);
     formData.append('monto', String(data.monto));

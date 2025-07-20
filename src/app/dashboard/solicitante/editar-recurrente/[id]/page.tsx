@@ -54,7 +54,7 @@ export default function EditarRecurrentePage() {
         if (data.siguiente_fecha) {
           setFechaInicio(new Date(data.siguiente_fecha));
         }
-      } catch (err) {
+      } catch {
         setError("No se pudo cargar la plantilla");
       } finally {
         setLoading(false);
@@ -69,8 +69,8 @@ export default function EditarRecurrentePage() {
   };
 
   // NumericFormat para monto
-  const handleMontoChange = (values: any) => {
-    setForm((prev) => ({ ...prev, monto: values.value }));
+  const handleMontoChange = (values: { value: string }) => {
+    setForm((prev) => ({ ...prev, monto: values.value === '' ? undefined : Number(values.value) }));
   };
 
   // DatePicker para siguiente_fecha
@@ -91,7 +91,6 @@ export default function EditarRecurrentePage() {
     setSuccess("");
     try {
       if (!id) throw new Error('ID inválido');
-      let response;
       if (file) {
         const formData = new FormData();
         formData.append("departamento", form.departamento || "");
@@ -105,11 +104,11 @@ export default function EditarRecurrentePage() {
         if (!RecurrentesService.editarConArchivo) {
           throw new Error('Falta el método editarConArchivo en RecurrentesService');
         }
-        response = await RecurrentesService.editarConArchivo(id, formData);
+        await RecurrentesService.editarConArchivo(id, formData);
       } else {
-        response = await RecurrentesService.editar(id, {
+        await RecurrentesService.editar(id, {
           departamento: form.departamento || "",
-          monto: form.monto || "",
+          monto: form.monto ?? 0,
           cuenta_destino: form.cuenta_destino || "",
           concepto: form.concepto || "",
           tipo_pago: form.tipo_pago || "",
@@ -120,7 +119,7 @@ export default function EditarRecurrentePage() {
       setSuccess("Plantilla actualizada correctamente");
       toast.success("Plantilla actualizada correctamente");
       setTimeout(() => router.push("/dashboard/solicitante/mis-recurrentes"), 1200);
-    } catch (err) {
+    } catch {
       setError("Error al actualizar la plantilla");
       toast.error("Error al actualizar la plantilla");
     }

@@ -1,5 +1,5 @@
 // Debounce para búsquedas
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -11,11 +11,11 @@ export function debounce<T extends (...args: any[]) => any>(
 }
 
 // Throttle para scroll y resize
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
+  let inThrottle = false;
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);
@@ -26,7 +26,7 @@ export function throttle<T extends (...args: any[]) => any>(
 }
 
 // Cache simple en memoria
-const cache = new Map<string, { data: any; timestamp: number }>();
+const cache = new Map<string, { data: unknown; timestamp: number }>();
 
 export function getFromMemoryCache<T>(key: string, ttl: number = 300000): T | null {
   const cached = cache.get(key);
@@ -37,7 +37,7 @@ export function getFromMemoryCache<T>(key: string, ttl: number = 300000): T | nu
     return null;
   }
   
-  return cached.data;
+  return cached.data as T;
 }
 
 export function setMemoryCache<T>(key: string, data: T): void {

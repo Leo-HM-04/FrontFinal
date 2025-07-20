@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { RecurrentesService } from '@/services/recurrentes.service';
-
 import { PlantillaRecurrente } from '@/types';
 import { Eye, User, Building2, DollarSign, Banknote, FileText, Calendar, Repeat, BadgeCheck, PauseCircle, MessageCircle, FileImage, FileCheck2, FileWarning, FileX2 } from 'lucide-react';
 import SimpleModal from '@/components/ui/SimpleModal';
@@ -141,12 +141,17 @@ export default function PagadorRecurrentesPage() {
                             >
                               <FileCheck2 className="w-4 h-4" /> Ver archivo de factura
                             </a>
-                            {/\.(png|jpg|jpeg|gif)$/i.test(cleanFile) ? (
-                              <img
-                                src={fileUrl}
-                                alt="Factura recurrente"
-                                className="max-h-48 rounded shadow border mt-1"
-                              />
+                            {/(.png|jpg|jpeg|gif)$/i.test(cleanFile) ? (
+                              <div className="relative w-full flex justify-center mt-1">
+                                <Image
+                                  src={fileUrl}
+                                  alt="Factura recurrente"
+                                  width={400}
+                                  height={192}
+                                  className="max-h-48 rounded shadow border object-contain"
+                                  style={{ width: 'auto', height: '12rem', maxWidth: '100%' }}
+                                />
+                              </div>
                             ) : /\.pdf$/i.test(cleanFile) ? (
                               <object
                                 data={fileUrl}
