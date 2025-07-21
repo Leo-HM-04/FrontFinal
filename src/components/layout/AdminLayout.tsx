@@ -110,7 +110,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen font-sans flex flex-col" style={backgroundGradient}>
       {/* Header */}
       <header style={{background: 'transparent', borderBottom: 'none', boxShadow: 'none', padding: 0}}>
-        <div className="max-w-7xl mx-auto px-0">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <button
               onClick={() => setIsMenuOpen(true)}
@@ -125,21 +125,22 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <button
               onClick={() => setShowNotifications(true)}
               aria-label="Ver notificaciones"
-              className="relative w-12 h-12 flex items-center justify-center rounded-full bg-transparent hover:bg-white/20 transition-colors duration-200 text-white focus:outline-none shadow-none border-none"
+              className="relative w-12 h-12 flex items-center justify-center rounded-full bg-transparent hover:bg-white/20 transition-colors duration-200 text-white focus:outline-none shadow-none border-none mr-2"
               style={{border: 'none', boxShadow: 'none', outline: 'none'}}
             >
               <Bell className="w-7 h-7" />
               {unreadCount > 0 && (
-                <span className="absolute top-2 right-2 bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5 font-bold shadow">{unreadCount}</span>
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 font-bold shadow">
+                  {unreadCount}
+                </span>
               )}
             </button>
-      {/* Panel de notificaciones */}
-      {/* Forzar abierto para depuración: open={true} */}
-      <AdminNotifications open={showNotifications} onClose={() => setShowNotifications(false)} />
           </div>
         </div>
       </header>
 
+      {/* Eliminar la barra duplicada */}
+      <AdminNotifications open={showNotifications} onClose={() => setShowNotifications(false)} />
       {/* Sidebar Menu */}
       <AnimatePresence>
         {isMenuOpen && (

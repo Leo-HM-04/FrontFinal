@@ -1,171 +1,152 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useEffect, Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { HelpCircle } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
-import { HelpCircle, Mail, FileText, User, CreditCard } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
-import { useState } from 'react';
-import { toast } from 'react-hot-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default function PagadorDashboardNew() {
+export default function PagadorDashboard() {
   const { user } = useAuth();
-  const router = useRouter();
-  const [isSendingHelp, setIsSendingHelp] = useState(false);
-  const [showHelpModal, setShowHelpModal] = useState(false);
-  
-  // Función para enviar correo al administrador solicitando ayuda
-  const handleRequestHelp = async () => {
-    setIsSendingHelp(true);
-    try {
-      // Simulamos el envío del correo (esto se conectaría a una API real)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // En un entorno real, aquí se enviaría el correo utilizando una API
-      // await fetch('/api/contact', {
-      //   method: 'POST',
-      //   body: JSON.stringify({
-      //     from: user?.email,
-      //     subject: 'Solicitud de ayuda - Módulo Pagador',
-      //     message: `El usuario ${user?.nombre} (${user?.email}) ha solicitado ayuda con el módulo de pagador.`
-      //   })
-      // });
-      
-      // Mostrar confirmación
-      setShowHelpModal(true);
-      toast.success('Solicitud de ayuda enviada al administrador');
-    } catch (error) {
-      console.error('Error al enviar la solicitud de ayuda:', error);
-      toast.error('No se pudo enviar la solicitud. Intente nuevamente.');
-    } finally {
-      setIsSendingHelp(false);
+  const [showVideo] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [openModal, setOpenModal] = useState(false);
+
+  // Listener para saber si el video terminó
+  useEffect(() => {
+    if (!showVideo) return;
+    function handleMessage(event: MessageEvent) {
+      // Solo aceptar mensajes de YouTube
+      if (typeof event.data === 'string' && event.data.indexOf('"event":"onStateChange"') !== -1) {
+        try {
+          const data = JSON.parse(event.data);
+          // 0 = ended
+          if (data.event === 'onStateChange' && data.info === 0) {
+            // Reiniciar el video usando la API de YouTube
+            if (iframeRef.current) {
+              iframeRef.current.contentWindow?.postMessage(
+                JSON.stringify({ event: 'command', func: 'seekTo', args: [0, true] }),
+                '*'
+              );
+              iframeRef.current.contentWindow?.postMessage(
+                JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
+                '*'
+              );
+            }
+          }
+        } catch {}
+      }
     }
-  };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [showVideo]);
 
   return (
     <ProtectedRoute requiredRoles={['pagador_banca']}>
       <PagadorLayout>
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          {/* Header */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-            <h1 className="text-2xl font-bold text-white font-sans">
-              Bienvenido a la Plataforma de Pagos
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Main Content Mejorado */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[500px]">
+            {/* Título Principal ocupa ambas columnas */}
+            <h1 className="col-span-1 lg:col-span-2 text-5xl md:text-6xl font-extrabold leading-tight drop-shadow-lg text-white mb-4 text-center lg:text-left">
+              PAGADOR - PLATAFORMA DE PAGOS
             </h1>
-            <p className="text-white/80">
-              Panel de pagador de Bechapra
-            </p>
-          </div>
-
-          {/* Main Content - Dashboard Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start mb-12">
-            {/* Left Column - Welcome Content */}
+            {/* Columna Izquierda - Contenido */}
             <div className="text-white space-y-8">
-              {/* Title */}
-              <h2 className="text-3xl sm:text-4xl font-bold leading-tight">
-                ÁREA DE PAGADOR
+              {/* Subtítulo */}
+              <h2 className="text-2xl md:text-3xl font-semibold text-blue-200">
+                Panel exclusivo para el pagador: procesa pagos de solicitudes aprobadas y consulta el historial de pagos.
               </h2>
-              {/* Subtitle */}
-              <h3 className="text-xl sm:text-2xl font-semibold">
-                Bienvenido, {user?.nombre}
-              </h3>
-              {/* Description */}
-              <p className="text-base sm:text-lg text-white leading-relaxed max-w-md">
-                En esta plataforma podrás procesar pagos de solicitudes aprobadas, consultar el historial de pagos realizados y gestionar tus datos personales.
-              </p>
-              {/* Help Button */}
-              <Button 
+
+              {/* Texto descriptivo profesional */}
+              <div className="text-lg md:text-xl text-white/90 leading-relaxed max-w-xl text-justify">
+                Bienvenido, <span className="font-bold">{user?.nombre}</span>. Este es el panel de pagador de la plataforma de pagos Bechapra. Aquí puedes procesar pagos de solicitudes aprobadas, consultar el historial de pagos realizados y mantener un control detallado de cada transacción. Todo en un entorno seguro, moderno y diseñado para optimizar tu experiencia como pagador dentro de la organización.
+              </div>
+
+              {/* Botón de ayuda destacado */}
+              <Button
                 variant="outline"
                 size="lg"
-                onClick={handleRequestHelp}
-                disabled={isSendingHelp}
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-medium text-base sm:text-lg w-full sm:w-auto"
+                onClick={() => setOpenModal(true)}
+                className="bg-white border-2 border-blue-400 text-blue-700 font-semibold shadow-md hover:bg-blue-50 hover:border-blue-500 focus:text-blue-700 active:text-blue-700 hover:text-blue-600 transition-all duration-200 px-8 py-4 rounded-xl text-lg flex items-center gap-3 group"
               >
-                {isSendingHelp ? (
-                  <>
-                    <Mail className="w-5 h-5 mr-3 animate-pulse" />
-                    Enviando solicitud...
-                  </>
-                ) : (
-                  <>
-                    <HelpCircle className="w-5 h-5 mr-3" />
-                    Contactar al administrador
-                  </>
-                )}
+                <HelpCircle className="w-7 h-7 text-blue-500 group-hover:text-blue-600 transition-colors duration-200 mr-2" />
+                <span className="tracking-wide group-hover:text-blue-600 group-focus:text-blue-700 group-active:text-blue-700">¿Necesitas ayuda?</span>
               </Button>
+
+              {/* Modal de aviso de correo */}
+              <Transition.Root show={openModal} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={setOpenModal}>
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100"
+                    leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0"
+                  >
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+                  </Transition.Child>
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100"
+                      leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95"
+                    >
+                      <Dialog.Panel className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl border border-blue-200 flex flex-col items-center">
+                        <div className="flex items-center gap-3 mb-4">
+                          <HelpCircle className="w-8 h-8 text-blue-500" />
+                          <Dialog.Title className="text-xl font-bold text-blue-900">Abriendo gestor de correo</Dialog.Title>
+                        </div>
+                        <p className="text-blue-900/90 text-base mb-4 text-center">Se abrirá tu gestor de correo para contactar a soporte. Puedes copiar y personalizar el siguiente ejemplo:</p>
+                        <div className="w-full bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900 font-mono mb-4 select-all">
+Asunto: Solicitud de soporte plataforma Bechapra (Pagador)
+
+Hola equipo de soporte,
+
+Tengo el siguiente problema o duda como pagador:
+[Describe aquí tu situación de forma clara y breve]
+
+Gracias de antemano.
+                        </div>
+                        <button
+                          className="mt-2 px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                          onClick={() => {
+                            setOpenModal(false);
+                            window.open('mailto:kikeramirez160418@gmail.com?subject=Solicitud%20de%20soporte%20plataforma%20Bechapra%20(Pagador)&body=Hola%20equipo%20de%20soporte%2C%0A%0ATengo%20el%20siguiente%20problema%20o%20duda%20como%20pagador%3A%0A%5BDescribe%20aqu%C3%AD%20tu%20situaci%C3%B3n%20de%20forma%20clara%20y%20breve%5D%0A%0AGracias%20de%20antemano.', '_blank');
+                          }}
+                        >Contactar soporte</button>
+                        <button
+                          className="mt-2 px-4 py-1 text-blue-500 hover:underline text-sm"
+                          onClick={() => setOpenModal(false)}
+                        >Cancelar</button>
+                      </Dialog.Panel>
+                    </Transition.Child>
+                  </div>
+                </Dialog>
+              </Transition.Root>
             </div>
-            {/* Right Column - Quick Access */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-              <div 
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer flex flex-col justify-center"
-                onClick={() => router.push('/dashboard/pagador/pagos/pendientes')}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <CreditCard className="w-10 h-10 text-yellow-300 mb-4" />
-                  <h4 className="text-lg font-semibold text-white mb-2">Pagos Pendientes</h4>
-                  <p className="text-white/80 text-sm">Procesar pagos aprobados</p>
+
+            {/* Columna Derecha - Video YouTube mejorado */}
+            <div className="flex justify-center lg:justify-end">
+              {showVideo && (
+                <div className="relative w-full max-w-lg aspect-video rounded-2xl overflow-hidden shadow-2xl border-4 border-blue-200/60 animate-fade-in">
+                  <iframe
+                    ref={iframeRef}
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/8afFGtJuXaI?si=uiPv63ySVzzA2XpQ&autoplay=1&mute=1&controls=1&enablejsapi=1"
+                    title="Tutorial Plataforma de Pagos"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="w-full h-full"
+                  ></iframe>
+                  <div className="absolute inset-0 pointer-events-none rounded-2xl border-4 border-blue-400/30 animate-glow" />
                 </div>
-              </div>
-              <div 
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer flex flex-col justify-center"
-                onClick={() => router.push('/dashboard/pagador/pagos/historial')}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <FileText className="w-10 h-10 text-green-300 mb-4" />
-                  <h4 className="text-lg font-semibold text-white mb-2">Historial de Pagos</h4>
-                  <p className="text-white/80 text-sm">Ver pagos procesados</p>
-                </div>
-              </div>
-              <div 
-                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all cursor-pointer flex flex-col justify-center sm:col-span-2"
-                onClick={() => router.push('/dashboard/pagador/perfil')}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <User className="w-10 h-10 text-blue-300 mb-4" />
-                  <h4 className="text-lg font-semibold text-white mb-2">Mi Perfil</h4>
-                  <p className="text-white/80 text-sm">Ver información personal</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
-        
-        {/* Modal de confirmación de ayuda */}
-        {showHelpModal && (
-          <div className="fixed inset-0 z-[9999] overflow-hidden flex items-center justify-center">
-            <div 
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-fade-in"
-              onClick={() => setShowHelpModal(false)}
-              aria-hidden="true"
-            />
-            <div 
-              className="relative bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg m-4 z-[10000] animate-slide-up flex flex-col items-center"
-              role="dialog"
-              aria-modal="true"
-            >
-              <Mail className="h-16 w-16 text-blue-600 mb-4" />
-              
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">Solicitud Enviada</h3>
-              
-              <p className="text-gray-600 text-center mb-6">
-                Tu solicitud de ayuda ha sido enviada al administrador. Te contactarán a la brevedad posible a través de tu correo registrado ({user?.email}).
-              </p>
-              
-              <div className="border-t border-gray-200 w-full my-4 pt-4 text-center text-gray-500">
-                <p className="mb-2">Si es urgente, también puedes comunicarte al:</p>
-                <p className="font-medium text-blue-600">ti@bechapra.com</p>
-              </div>
-              
-              <Button 
-                onClick={() => setShowHelpModal(false)}
-                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Entendido
-              </Button>
-            </div>
-          </div>
-        )}
       </PagadorLayout>
     </ProtectedRoute>
   );

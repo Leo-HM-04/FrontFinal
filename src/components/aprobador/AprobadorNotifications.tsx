@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef, createContext, useContext } from "react";
+import { useEffect, useState, useCallback, useRef, Fragment } from "react";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Fragment } from "react";
 import { Bell, X, Check, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, Transition } from "@headlessui/react";
@@ -26,48 +25,20 @@ type NotificacionRaw = {
   tipo?: 'info' | 'success' | 'warning' | 'error';
 }
 
-interface AdminNotificationsProps {
+interface AprobadorNotificationsProps {
   open: boolean;
   onClose: () => void;
 }
 
-interface NotiContextType {
-  refreshNotificaciones: () => Promise<void>;
-}
-
-export const NotiContext = createContext<NotiContextType | undefined>(undefined);
-
-export function useNotiContext() {
-  return useContext(NotiContext);
-}
-
-export default function AdminNotifications({ open, onClose }: AdminNotificationsProps) {
+export default function AprobadorNotifications({ open, onClose }: AprobadorNotificationsProps) {
   const { user } = useAuth();
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [loading, setLoading] = useState(false);
-  const [marcandoTodas, setMarcandoTodas] = useState(false);
+  const [marcandoTodas, setMarcarTodas] = useState(false);
   const [filtro, setFiltro] = useState<'todas' | 'no_leidas'>('todas');
   const [pagina, setPagina] = useState(1);
   const porPagina = 10;
-
-  const handleMarcarTodas = async () => {
-    setMarcandoTodas(true);
-    const token = getToken();
-    try {
-      const noLeidas = notificaciones.filter(n => !n.leida);
-      await Promise.all(noLeidas.map(n =>
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id}/marcar-leida`, {
-          method: "POST",
-          headers: {
-            Authorization: token ? `Bearer ${token}` : ''
-          }
-        })
-      ));
-      await fetchNotificaciones();
-    } finally {
-      setMarcandoTodas(false);
-    }
-  };
+  const prevNotiIds = useRef<Set<number>>(new Set());
 
   const getToken = () => {
     let token = undefined;
@@ -82,8 +53,6 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
     return token;
   };
 
-  const prevNotiIds = useRef<Set<number>>(new Set());
-
   const fetchNotificaciones = useCallback(async () => {
     setLoading(true);
     const token = getToken();
@@ -93,18 +62,16 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
           Authorization: token ? `Bearer ${token}` : ''
         }
       });
-      const data = await res.json();
+      const data: NotificacionRaw[] = await res.json();
       const normalizadas = Array.isArray(data)
-        ? data
-            .filter((n: NotificacionRaw) => !n.mensaje.includes('temporizador'))
-            .map((n: NotificacionRaw) => ({
-              ...n,
-              id: n.id_notificacion ?? n.id ?? 0,
-              fecha: n.fecha ?? n.fecha_creacion ?? '',
-              tipo: n.tipo ?? 'info'
-            }))
+        ? data.map((n) => ({
+            ...n,
+            id: n.id_notificacion ?? n.id ?? 0,
+            fecha: n.fecha ?? n.fecha_creacion ?? '',
+            tipo: n.tipo ?? 'info',
+          }))
         : [];
-
+      // Toast para nuevas no leídas
       const nuevosNoLeidos = normalizadas.filter(n => !n.leida && !prevNotiIds.current.has(n.id));
       if (nuevosNoLeidos.length > 0) {
         const ultimaNotificacion = nuevosNoLeidos[0];
@@ -146,14 +113,31 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
     fetchNotificaciones();
   }, [open, user, fetchNotificaciones]);
 
-  const notificacionesFiltradas = notificaciones.filter(n => 
+  const handleMarcarTodas = async () => {
+    setMarcarTodas(true);
+    const token = getToken();
+    try {
+      const noLeidas = notificaciones.filter(n => !n.leida);
+      await Promise.all(noLeidas.map(n =>
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id}/marcar-leida`, {
+          method: "POST",
+          headers: { Authorization: token ? `Bearer ${token}` : '' }
+        })
+      ));
+      await fetchNotificaciones();
+      toast.success("Todas las notificaciones marcadas como leídas");
+    } finally {
+      setMarcarTodas(false);
+    }
+  };
+
+  const notificacionesFiltradas = notificaciones.filter(n =>
     filtro === 'todas' ? true : !n.leida
   );
-
   const notificacionesPaginadas = notificacionesFiltradas.slice(0, pagina * porPagina);
 
   return (
-    <NotiContext.Provider value={{ refreshNotificaciones: fetchNotificaciones }}>
+    <>
       <ToastContainer
         position="top-right"
         autoClose={6000}
@@ -293,6 +277,6 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
           </div>
         </Dialog>
       </Transition.Root>
-    </NotiContext.Provider>
+    </>
   );
 }

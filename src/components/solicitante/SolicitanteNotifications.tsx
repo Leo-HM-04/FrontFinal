@@ -1,128 +1,52 @@
-"use client";
-
-import { useEffect, useState, useCallback, useRef, createContext, useContext } from "react";
-import { ToastContainer, toast, Slide } from "react-toastify";
+import { useEffect, useState, useRef, Fragment } from "react";
+import { toast, ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Fragment } from "react";
-import { Bell, X, Check, AlertCircle } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { Bell, BellRing } from "lucide-react";
 import { Dialog, Transition } from "@headlessui/react";
 
 interface Notificacion {
-  id: number;
+  id_notificacion: number;
   mensaje: string;
-  leida: boolean;
-  fecha: string;
+  leida: number;
+  fecha_creacion: string;
   tipo?: 'info' | 'success' | 'warning' | 'error';
 }
 
-type NotificacionRaw = {
-  id_notificacion?: number;
-  id?: number;
-  mensaje: string;
-  leida: boolean;
-  fecha?: string;
-  fecha_creacion?: string;
-  tipo?: 'info' | 'success' | 'warning' | 'error';
-}
-
-interface AdminNotificationsProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-interface NotiContextType {
-  refreshNotificaciones: () => Promise<void>;
-}
-
-export const NotiContext = createContext<NotiContextType | undefined>(undefined);
-
-export function useNotiContext() {
-  return useContext(NotiContext);
-}
-
-export default function AdminNotifications({ open, onClose }: AdminNotificationsProps) {
-  const { user } = useAuth();
+export default function SolicitanteNotifications({ token }: { token: string }) {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [marcandoTodas, setMarcandoTodas] = useState(false);
-  const [filtro, setFiltro] = useState<'todas' | 'no_leidas'>('todas');
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [lastShownId, setLastShownId] = useState<number | null>(null);
   const [pagina, setPagina] = useState(1);
+  const [filtro, setFiltro] = useState<'todas' | 'no_leidas'>('todas');
+  const [marcandoTodas, setMarcandoTodas] = useState(false);
   const porPagina = 10;
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleMarcarTodas = async () => {
-    setMarcandoTodas(true);
-    const token = getToken();
-    try {
-      const noLeidas = notificaciones.filter(n => !n.leida);
-      await Promise.all(noLeidas.map(n =>
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id}/marcar-leida`, {
-          method: "POST",
-          headers: {
-            Authorization: token ? `Bearer ${token}` : ''
-          }
-        })
-      ));
-      await fetchNotificaciones();
-    } finally {
-      setMarcandoTodas(false);
-    }
-  };
-
-  const getToken = () => {
-    let token = undefined;
-    try {
-      token = localStorage.getItem('auth_token') || undefined;
-    } catch {}
-    if (!token) {
-      try {
-        token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
-      } catch {}
-    }
-    return token;
-  };
-
-  const prevNotiIds = useRef<Set<number>>(new Set());
-
-  const fetchNotificaciones = useCallback(async () => {
+  // Fetch notifications
+  const fetchNotificaciones = async () => {
     setLoading(true);
-    const token = getToken();
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones`, {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : ''
-        }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/solicitante`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      const normalizadas = Array.isArray(data)
-        ? data
-            .filter((n: NotificacionRaw) => !n.mensaje.includes('temporizador'))
-            .map((n: NotificacionRaw) => ({
-              ...n,
-              id: n.id_notificacion ?? n.id ?? 0,
-              fecha: n.fecha ?? n.fecha_creacion ?? '',
-              tipo: n.tipo ?? 'info'
-            }))
-        : [];
-
-      const nuevosNoLeidos = normalizadas.filter(n => !n.leida && !prevNotiIds.current.has(n.id));
-      if (nuevosNoLeidos.length > 0) {
-        const ultimaNotificacion = nuevosNoLeidos[0];
+      setNotificaciones(data);
+      // Mostrar toast solo para la última no leída
+      const unread = data.filter((n: Notificacion) => !n.leida);
+      if (unread.length && unread[0].id_notificacion !== lastShownId && !open) {
         toast(
           <div className="flex items-center gap-3">
             <span className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-400 shadow-lg shadow-blue-500/30">
-              {ultimaNotificacion.tipo === 'success' ? <Check className="w-5 h-5 text-white" /> :
-               ultimaNotificacion.tipo === 'warning' ? <AlertCircle className="w-5 h-5 text-white" /> :
-               ultimaNotificacion.tipo === 'error' ? <X className="w-5 h-5 text-white" /> :
-               <Bell className="w-5 h-5 text-white" />}
+              <Bell className="w-5 h-5 text-white" />
             </span>
             <div className="flex-1 min-w-0">
               <h6 className="font-semibold text-blue-700 text-base mb-0.5">¡Nueva notificación!</h6>
-              <p className="text-gray-700 text-sm leading-snug line-clamp-2">{ultimaNotificacion.mensaje}</p>
+              <p className="text-gray-700 text-sm leading-snug line-clamp-2">{unread[0].mensaje}</p>
             </div>
           </div>,
           {
-            toastId: `noti-${ultimaNotificacion.id}`,
+            toastId: `noti-${unread[0].id_notificacion}`,
             position: "top-right",
             autoClose: 6000,
             hideProgressBar: false,
@@ -133,27 +57,50 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
             className: "!bg-white !shadow-xl !shadow-blue-500/10 !border !border-blue-100 !rounded-2xl !p-4"
           }
         );
+        setLastShownId(unread[0].id_notificacion);
       }
-      prevNotiIds.current = new Set(normalizadas.map(n => n.id));
-      setNotificaciones(normalizadas);
+    } catch {
+      setNotificaciones([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    if (!open || !user) return;
+    if (!token) return;
     fetchNotificaciones();
-  }, [open, user, fetchNotificaciones]);
+    // Polling cada 30s
+    intervalRef.current = setInterval(fetchNotificaciones, 30000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+    // eslint-disable-next-line
+  }, [token, open, lastShownId]);
 
-  const notificacionesFiltradas = notificaciones.filter(n => 
-    filtro === 'todas' ? true : !n.leida
-  );
-
+  // Badge de no leídas
+  const unreadCount = notificaciones.filter(n => !n.leida).length;
+  const notificacionesFiltradas = filtro === 'todas' ? notificaciones : notificaciones.filter(n => !n.leida);
   const notificacionesPaginadas = notificacionesFiltradas.slice(0, pagina * porPagina);
 
+  // Marcar todas como leídas
+  const handleMarcarTodas = async () => {
+    setMarcandoTodas(true);
+    try {
+      const noLeidas = notificaciones.filter(n => !n.leida);
+      await Promise.all(noLeidas.map(n =>
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id_notificacion}/marcar-leida`, {
+          method: "POST",
+          headers: { Authorization: token ? `Bearer ${token}` : '' }
+        })
+      ));
+      await fetchNotificaciones();
+    } finally {
+      setMarcandoTodas(false);
+    }
+  };
+
   return (
-    <NotiContext.Provider value={{ refreshNotificaciones: fetchNotificaciones }}>
+    <>
       <ToastContainer
         position="top-right"
         autoClose={6000}
@@ -168,8 +115,24 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
         theme="light"
         className="!z-[9999]"
       />
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Ver notificaciones"
+        className={`relative w-12 h-12 flex items-center justify-center rounded-full bg-transparent transition-colors duration-200 focus:outline-none hover:bg-white/20`}
+      >
+        {unreadCount > 0 ? (
+          <BellRing className="w-7 h-7 text-white" />
+        ) : (
+          <Bell className="w-7 h-7 text-white" />
+        )}
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 font-bold shadow">
+            {unreadCount}
+          </span>
+        )}
+      </button>
       <Transition.Root show={open} as={Fragment}>
-        <Dialog as="div" className="relative z-[60]" onClose={onClose}>
+        <Dialog as="div" className="relative z-[60]" onClose={setOpen}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -181,7 +144,6 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
           >
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
           </Transition.Child>
-
           <div className="fixed inset-0 z-[60] flex items-start justify-end p-4 sm:p-6 lg:p-8">
             <Transition.Child
               as={Fragment}
@@ -200,18 +162,17 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                       <Dialog.Title className="text-lg font-bold text-white">Notificaciones</Dialog.Title>
                     </div>
                     <span className="px-2.5 py-1 bg-white/20 text-white rounded-full text-sm font-medium backdrop-blur-sm">
-                      {notificaciones.filter(n => !n.leida).length} nuevas
+                      {unreadCount} nuevas
                     </span>
                   </div>
-
                   <div className="flex items-center gap-2 mt-4">
                     <button
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${filtro === 'todas' ? 'bg-white text-blue-600' : 'bg-white/20 text-white hover:bg-white/30'}`}
-                      onClick={() => setFiltro('todas')}
+                      onClick={() => { setFiltro('todas'); setPagina(1); }}
                     >Todas</button>
                     <button
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${filtro === 'no_leidas' ? 'bg-white text-blue-600' : 'bg-white/20 text-white hover:bg-white/30'}`}
-                      onClick={() => setFiltro('no_leidas')}
+                      onClick={() => { setFiltro('no_leidas'); setPagina(1); }}
                     >No leídas</button>
                     {notificaciones.some(n => !n.leida) && (
                       <button
@@ -224,7 +185,6 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                     )}
                   </div>
                 </div>
-
                 {loading ? (
                   <div className="flex-1 flex items-center justify-center p-8">
                     <div className="flex items-center gap-3 text-blue-600 font-medium animate-pulse">
@@ -238,13 +198,13 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                 ) : notificacionesFiltradas.length === 0 ? (
                   <div className="flex-1 flex flex-col items-center justify-center p-8 text-gray-500">
                     <Bell className="w-12 h-12 text-gray-400 mb-3" />
-                    <p className="text-center font-medium">No hay notificaciones {filtro === 'no_leidas' ? 'sin leer' : ''}.</p>
+                    <p className="text-center font-medium">No hay notificaciones.</p>
                   </div>
                 ) : (
                   <div className="flex-1 overflow-hidden flex flex-col">
                     <div className="overflow-y-auto flex-1 divide-y divide-gray-100">
                       {notificacionesPaginadas.map((n) => {
-                        const fechaObj = n.fecha ? new Date(n.fecha) : null;
+                        const fechaObj = n.fecha_creacion ? new Date(n.fecha_creacion) : null;
                         const fechaStr = fechaObj && !isNaN(fechaObj.getTime())
                           ? fechaObj.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
                           : '';
@@ -253,15 +213,12 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                           : '';
                         return (
                           <div
-                            key={n.id}
+                            key={n.id_notificacion}
                             className={`p-4 transition-all duration-200 hover:bg-gray-50 ${n.leida ? '' : 'bg-blue-50/50'}`}
                           >
                             <div className="flex items-start gap-3">
                               <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${!n.leida ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
-                                {n.tipo === 'success' ? <Check className="w-4 h-4" /> :
-                                 n.tipo === 'warning' ? <AlertCircle className="w-4 h-4" /> :
-                                 n.tipo === 'error' ? <X className="w-4 h-4" /> :
-                                 <Bell className="w-4 h-4" />}
+                                {!n.leida ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className={`text-sm ${!n.leida ? 'text-blue-900 font-medium' : 'text-gray-700'}`}>{n.mensaje}</p>
@@ -293,6 +250,6 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
           </div>
         </Dialog>
       </Transition.Root>
-    </NotiContext.Provider>
+    </>
   );
 }

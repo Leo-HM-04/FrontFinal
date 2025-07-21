@@ -76,15 +76,12 @@ export default function MisSolicitudesPage() {
 
   // Cargar solicitudes con timeout de seguridad
   useEffect(() => {
-    const timeoutId: NodeJS.Timeout = setTimeout(() => {
-      if (loading) {
-        setTimeoutError(true);
-        setLoading(false);
-      }
-    }, 10000);
-
     setLoading(true);
     setTimeoutError(false);
+    const timeoutId: NodeJS.Timeout = setTimeout(() => {
+      setTimeoutError(true);
+      setLoading(false);
+    }, 10000);
 
     const fetchSolicitudes = async () => {
       try {
@@ -104,7 +101,7 @@ export default function MisSolicitudesPage() {
     fetchSolicitudes();
 
     return () => clearTimeout(timeoutId);
-  }, [loading]);
+  }, []);
 
   useEffect(() => {
     const filterSolicitudes = () => {
