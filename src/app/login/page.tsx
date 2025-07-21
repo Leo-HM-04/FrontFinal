@@ -99,7 +99,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="w-full bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl shadow-2xl p-8 text-white backdrop-blur-sm flex flex-col items-center">
+        <div className="w-full max-w-xl bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl shadow-2xl px-12 py-6 text-white backdrop-blur-sm flex flex-col items-center min-h-[340px]">
           <div className="text-center mb-8 w-full">
             <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 font-montserrat">Inicio de sesión</h1>
             <div className="w-16 h-1 bg-white/30 mx-auto rounded-full"></div>
