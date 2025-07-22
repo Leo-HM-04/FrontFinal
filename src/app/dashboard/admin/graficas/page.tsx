@@ -63,7 +63,7 @@ export default function GraficasAdminPage() {
 
   useEffect(() => {
     // Solicitudes
-    fetch(`/api/estadisticas/solicitudes`)
+    fetch(`http://localhost:4000/api/estadisticas/solicitudes`)
       .then(res => res.json())
       .then(data => {
         setSolicitudesPorEstado(
@@ -81,7 +81,7 @@ export default function GraficasAdminPage() {
         setLoadingSolicitudes(false);
       });
     // Usuarios
-    fetch(`/api/estadisticas/usuarios`)
+    fetch(`http://localhost:4000/api/estadisticas/usuarios`)
       .then(res => res.json())
       .then(data => {
         setUsuariosPorRol((data.porRol || []).map((item: { rol: string; total: number }) => ({ rol: item.rol, value: item.total })));
@@ -89,7 +89,7 @@ export default function GraficasAdminPage() {
         setLoadingUsuarios(false);
       });
     // Recurrentes
-    fetch(`/api/estadisticas/recurrentes`)
+    fetch(`http://localhost:4000/api/estadisticas/recurrentes`)
       .then(res => res.json())
       .then(data => {
         setRecurrentesPorEstado((data.porEstado || []).map((item: { estado: string; total: number }) => ({ estado: item.estado, value: item.total })));
@@ -97,7 +97,7 @@ export default function GraficasAdminPage() {
         setLoadingRecurrentes(false);
       });
     // Notificaciones
-    fetch(`/api/estadisticas/notificaciones`)
+    fetch(`http://localhost:4000/api/estadisticas/notificaciones`)
       .then(res => res.json())
       .then(data => {
         setNotificacionesPorTipo((data.porLeida || []).map((item: { leida: number; total: number }) => ({ tipo: item.leida ? "Leída" : "No leída", value: item.total })));
@@ -107,7 +107,7 @@ export default function GraficasAdminPage() {
         } else {
           setNotificacionesPorUsuario((data.porUsuario || []).map((item: { id_usuario: string | number; total: number }) => ({ usuario: item.id_usuario, value: item.total })));
           // Intentar obtener nombres de usuario si no vienen
-          fetch('/api/usuarios')
+          fetch('http://localhost:4000/api/usuarios')
             .then(res => res.json())
             .then(usuarios => {
               const nombres: Record<string | number, string> = {};
@@ -120,7 +120,7 @@ export default function GraficasAdminPage() {
         setLoadingNotificaciones(false);
       });
     // Tendencia semanal
-    fetch(`/api/estadisticas/tendencia-semanal`)
+    fetch(`http://localhost:4000/api/estadisticas/tendencia-semanal`)
       .then(res => res.json())
       .then(data => {
         if (data.tendencia) setTendenciaSemanal(data.tendencia);
