@@ -7,63 +7,61 @@ import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 
+const roleRoutes: Record<string, string> = {
+  admin_general: '/dashboard/admin',
+  solicitante: '/dashboard/solicitante',
+  aprobador: '/dashboard/aprobador',
+  pagador_banca: '/dashboard/pagador',
+};
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
 
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const router = useRouter();
+
+  // Redirige si ya está autenticado
+  useEffect(() => {
+    if (user) {
+      const route = roleRoutes[user.rol];
+      router.replace(route || '/dashboard');
+    }
+  }, [user, router]);
 
   // Prefetch de dashboards para navegación instantánea tras login
   useEffect(() => {
-    router.prefetch('/dashboard/admin');
-    router.prefetch('/dashboard/solicitante');
-    router.prefetch('/dashboard/aprobador');
-    router.prefetch('/dashboard/pagador');
+    Object.values(roleRoutes).forEach((route) => router.prefetch(route));
   }, [router]);
 
   const validateForm = () => {
-    const newErrors = { email: '', password: '' };
-
+    const newErrors: typeof errors = {};
     if (!email) {
       newErrors.email = 'El email es requerido';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'El email no es válido';
     }
-
     if (!password) {
       newErrors.password = 'La contraseña es requerida';
     } else if (password.length < 6) {
       newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
-
     setErrors(newErrors);
-    return !newErrors.email && !newErrors.password;
-  };
-
-  const redirectByRole = (rol: string) => {
-    const routes: Record<string, string> = {
-      admin_general: '/dashboard/admin',
-      solicitante: '/dashboard/solicitante',
-      aprobador: '/dashboard/aprobador',
-      pagador_banca: '/dashboard/pagador',
-    };
-    router.push(routes[rol] || '/dashboard');
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-
     setLoading(true);
     try {
       const response = await login({ email, password });
-      // Si el backend responde con un campo 'error' o 'message', lo usamos
       if (response.success && response.user) {
-        redirectByRole(response.user.rol);
+        const route = roleRoutes[response.user.rol];
+        router.push(route || '/dashboard');
       } else if (response.error === 'USER_NOT_FOUND') {
         setErrors((prev) => ({ ...prev, email: 'El correo no está registrado' }));
         toast.error('El correo no está registrado.');
@@ -71,9 +69,11 @@ export default function LoginPage() {
         setErrors((prev) => ({ ...prev, password: 'Contraseña incorrecta' }));
         toast.error('Contraseña incorrecta.');
       } else {
+        setErrors((prev) => ({ ...prev, general: 'Credenciales inválidas o error al iniciar sesión.' }));
         toast.error('Credenciales inválidas o error al iniciar sesión.');
       }
     } catch {
+      setErrors((prev) => ({ ...prev, general: 'Ocurrió un error inesperado.' }));
       toast.error('Ocurrió un error inesperado.');
     } finally {
       setLoading(false);
@@ -105,7 +105,7 @@ export default function LoginPage() {
             <div className="w-16 h-1 bg-white/30 mx-auto rounded-full"></div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6 w-full">
+          <form onSubmit={handleSubmit} className="space-y-6 w-full" aria-busy={loading}>
             {/* Usuario */}
             <div className="flex flex-col gap-2 w-full">
               <label className="text-white font-semibold text-base font-montserrat" htmlFor="email">
@@ -120,10 +120,13 @@ export default function LoginPage() {
                 className="px-4 py-3 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat w-full"
                 autoFocus
                 autoComplete="username"
+                aria-label="Correo electrónico"
+                aria-describedby={errors.email ? 'email-error' : undefined}
+                disabled={loading}
               />
             </div>
             {errors.email && (
-              <p className="text-sm text-red-200 font-montserrat animate-fade-in mt-1">{errors.email}</p>
+              <p id="email-error" className="text-sm text-red-200 font-montserrat animate-fade-in mt-1">{errors.email}</p>
             )}
 
             {/* Contraseña */}
@@ -139,16 +142,21 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Contraseña"
                   className="w-full px-4 py-3 pr-12 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-0 focus:outline-none focus:ring-2 focus:ring-white/70 focus:bg-white focus:shadow-lg transition-all duration-200 font-montserrat"
-                  autoComplete="off"
+                  autoComplete="current-password"
                   inputMode="text"
+                  aria-label="Contraseña"
+                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  disabled={loading}
                 />
                 {password && (
                   <button
                     type="button"
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-md hover:bg-gray-100"
                     onClick={() => setShowPassword((v) => !v)}
-                    aria-label="Mostrar/ocultar contraseña"
-                    tabIndex={-1}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    aria-pressed={showPassword}
+                    tabIndex={0}
+                    disabled={loading}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -156,7 +164,12 @@ export default function LoginPage() {
               </div>
             </div>
             {errors.password && (
-              <p className="text-sm text-red-200 font-montserrat animate-fade-in mt-1">{errors.password}</p>
+              <p id="password-error" className="text-sm text-red-200 font-montserrat animate-fade-in mt-1">{errors.password}</p>
+            )}
+
+            {/* Error general */}
+            {errors.general && (
+              <p className="text-sm text-red-200 font-montserrat animate-fade-in mt-1">{errors.general}</p>
             )}
 
             {/* Botón */}
@@ -165,6 +178,7 @@ export default function LoginPage() {
                 type="submit"
                 disabled={loading}
                 className="bg-white text-blue-600 px-10 py-3 rounded-xl font-semibold hover:bg-gray-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] transform hover:scale-105 font-montserrat"
+                aria-busy={loading}
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
