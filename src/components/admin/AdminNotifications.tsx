@@ -48,7 +48,8 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
   const [marcandoTodas, setMarcandoTodas] = useState(false);
   const [filtro, setFiltro] = useState<'todas' | 'no_leidas'>('todas');
   const [pagina, setPagina] = useState(1);
-  const porPagina = 10;
+  const porPagina = 7;
+  const [loadingMore, setLoadingMore] = useState(false); // Nuevo estado para el loader de scroll
 
   const handleMarcarTodas = async () => {
     setMarcandoTodas(true);
@@ -152,6 +153,35 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
 
   const notificacionesPaginadas = notificacionesFiltradas.slice(0, pagina * porPagina);
 
+  // Referencia para el contenedor scrollable
+  const listaRef = useRef<HTMLDivElement>(null);
+
+  // Scroll infinito: cargar más al llegar al final
+  useEffect(() => {
+    const handleScroll = () => {
+      const el = listaRef.current;
+      if (!el) return;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+        if (notificacionesFiltradas.length > pagina * porPagina && !loadingMore) {
+          setLoadingMore(true);
+          setTimeout(() => {
+            setPagina(p => p + 1);
+            setLoadingMore(false);
+          }, 700); // Simula carga, puedes ajustar o quitar el timeout si la carga es real
+        }
+      }
+    };
+    const el = listaRef.current;
+    if (el) {
+      el.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      if (el) {
+        el.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [notificacionesFiltradas.length, pagina, porPagina, loadingMore]);
+
   return (
     <NotiContext.Provider value={{ refreshNotificaciones: fetchNotificaciones }}>
       <ToastContainer
@@ -242,7 +272,7 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                   </div>
                 ) : (
                   <div className="flex-1 overflow-hidden flex flex-col">
-                    <div className="overflow-y-auto flex-1 divide-y divide-gray-100">
+                    <div ref={listaRef} className="overflow-y-auto flex-1 divide-y divide-gray-100">
                       {notificacionesPaginadas.map((n) => {
                         const fechaObj = n.fecha ? new Date(n.fecha) : null;
                         const fechaStr = fechaObj && !isNaN(fechaObj.getTime())
@@ -257,11 +287,14 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                             className={`p-4 transition-all duration-200 hover:bg-gray-50 ${n.leida ? '' : 'bg-blue-50/50'}`}
                           >
                             <div className="flex items-start gap-3">
-                              <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${!n.leida ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                              <span className={`relative flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${!n.leida ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {n.tipo === 'success' ? <Check className="w-4 h-4" /> :
                                  n.tipo === 'warning' ? <AlertCircle className="w-4 h-4" /> :
                                  n.tipo === 'error' ? <X className="w-4 h-4" /> :
                                  <Bell className="w-4 h-4" />}
+                                {!n.leida && (
+                                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                                )}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className={`text-sm ${!n.leida ? 'text-blue-900 font-medium' : 'text-gray-700'}`}>{n.mensaje}</p>
@@ -275,17 +308,16 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                           </div>
                         );
                       })}
+                      {loadingMore && (
+                        <div className="flex items-center justify-center py-4 gap-3 text-blue-600 font-medium animate-pulse">
+                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          Cargando notificaciones...
+                        </div>
+                      )}
                     </div>
-                    {notificacionesFiltradas.length > pagina * porPagina && (
-                      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-                        <button
-                          className="w-full px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-all flex items-center justify-center gap-2"
-                          onClick={() => setPagina(p => p + 1)}
-                        >
-                          Cargar más notificaciones
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
               </Dialog.Panel>

@@ -123,7 +123,6 @@ export default function NuevaRecurrentePage() {
       toast.success(successMsg);
       router.push('/dashboard/solicitante/mis-recurrentes');
     } catch  {
-      console.error('Error:');
       toast.error('Error al crear plantilla recurrente');
     } finally {
       setLoading(false);

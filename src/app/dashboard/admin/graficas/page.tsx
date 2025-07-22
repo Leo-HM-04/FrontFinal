@@ -6,21 +6,52 @@ import { TrendingUp, TrendingDown, Users, CreditCard, Clock, CheckCircle } from 
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
-// Datos expandidos y más realistas
-const pagosPorMes = [
-  { mes: "Ene", total: 45, objetivo: 50, crecimiento: 12 },
-  { mes: "Feb", total: 62, objetivo: 55, crecimiento: 38 },
-  { mes: "Mar", total: 38, objetivo: 60, crecimiento: -39 },
-  { mes: "Abr", total: 78, objetivo: 65, crecimiento: 105 },
-  { mes: "May", total: 85, objetivo: 70, crecimiento: 9 },
-  { mes: "Jun", total: 92, objetivo: 75, crecimiento: 8 },
-];
+import { useEffect } from "react";
 
-const solicitudesPorEstado = [
-  { estado: "Aprobadas", value: 156, porcentaje: 65 },
-  { estado: "Pendientes", value: 48, porcentaje: 20 },
-  { estado: "Rechazadas", value: 36, porcentaje: 15 },
-];
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001/api/solicitudes";
+
+function mesNombre(num: number): string {
+  return ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"][num - 1] || String(num);
+}
+
+export default function GraficasAdminPage() {
+  const [selectedPeriod, setSelectedPeriod] = useState("6m");
+  const [activeChart, setActiveChart] = useState("todos");
+  const [pagosPorMes, setPagosPorMes] = useState([]);
+  const [solicitudesPorEstado, setSolicitudesPorEstado] = useState([]);
+
+  useEffect(() => {
+    // Monto pagado por mes
+    fetch(`${API_BASE}/estadisticas/monto-pagado`, { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        // data: [{anio, mes, total_pagado}]
+        setPagosPorMes(
+          data.map((item: { mes: number; total_pagado: number }) => ({
+            mes: mesNombre(item.mes),
+            total: item.total_pagado,
+            objetivo: 0, // puedes calcular objetivo si tienes meta
+            crecimiento: 0 // puedes calcular crecimiento si tienes histórico
+          }))
+        );
+      });
+    // Solicitudes por estado
+    fetch(`${API_BASE}/estadisticas/por-estado`, { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        // data: [{estado, cantidad}]
+        setSolicitudesPorEstado(
+          data.map((item: { estado: string; cantidad: number }) => ({
+            estado:
+              item.estado === "autorizada"
+                ? "Aprobadas"
+                : item.estado.charAt(0).toUpperCase() + item.estado.slice(1),
+            value: item.cantidad,
+            porcentaje: 0 // puedes calcular porcentaje si tienes total
+          }))
+        );
+      });
+  }, []);
 
 const tendenciaSemanal = [
   { semana: "S1", pagos: 18, solicitudes: 42 },
@@ -33,27 +64,28 @@ const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
 const GRADIENT_BAR = "url(#barGradient)";
 const GRADIENT_AREA = "url(#areaGradient)";
 
-function getTotalPagos() {
-  return pagosPorMes.reduce((acc, cur) => acc + cur.total, 0);
+
+type PagoMes = { mes: string; total: number; objetivo?: number; crecimiento?: number };
+type EstadoSolicitud = { estado: string; value: number; porcentaje?: number };
+
+function getTotalPagos(pagosPorMes: PagoMes[]): number {
+  return pagosPorMes.reduce((acc: number, cur: PagoMes) => acc + (cur.total || 0), 0);
 }
 
-function getTotalSolicitudes() {
-  return solicitudesPorEstado.reduce((acc, cur) => acc + cur.value, 0);
+function getTotalSolicitudes(solicitudesPorEstado: EstadoSolicitud[]): number {
+  return solicitudesPorEstado.reduce((acc: number, cur: EstadoSolicitud) => acc + (cur.value || 0), 0);
 }
 
-function getPromedioCrecimiento() {
-  const crecimiento = pagosPorMes.reduce((acc, cur) => acc + cur.crecimiento, 0) / pagosPorMes.length;
+function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
+  if (!pagosPorMes.length) return 0;
+  const crecimiento = pagosPorMes.reduce((acc: number, cur: PagoMes) => acc + (cur.crecimiento || 0), 0) / pagosPorMes.length;
   return Math.round(crecimiento * 10) / 10;
 }
-
-export default function GraficasAdminPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState("6m");
-  const [activeChart, setActiveChart] = useState("todos");
 
   const stats = [
     {
       title: "Total Pagos",
-      value: getTotalPagos(),
+      value: getTotalPagos(pagosPorMes),
       icon: CreditCard,
       color: "blue",
       change: "+12%",
@@ -61,7 +93,7 @@ export default function GraficasAdminPage() {
     },
     {
       title: "Total Solicitudes",
-      value: getTotalSolicitudes(),
+      value: getTotalSolicitudes(solicitudesPorEstado),
       icon: Users,
       color: "green",
       change: "+8%",
@@ -69,7 +101,7 @@ export default function GraficasAdminPage() {
     },
     {
       title: "Promedio Crecimiento",
-      value: `${getPromedioCrecimiento()}%`,
+      value: `${getPromedioCrecimiento(pagosPorMes)}%`,
       icon: TrendingUp,
       color: "purple",
       change: "+2.1%",
@@ -165,7 +197,7 @@ export default function GraficasAdminPage() {
                           <CreditCard className="w-6 h-6 text-blue-400" /> Pagos Procesados
                         </h2>
                         <span className="bg-blue-50 text-blue-700 px-4 py-1 rounded-full text-base font-semibold shadow-sm">
-                          Total: {getTotalPagos()}
+                          Total: {getTotalPagos(pagosPorMes)}
                         </span>
                       </div>
                       <ResponsiveContainer width="100%" height={300}>
@@ -221,7 +253,7 @@ export default function GraficasAdminPage() {
                           <Users className="w-6 h-6 text-green-400" /> Estado de Solicitudes
                         </h2>
                         <span className="bg-green-50 text-green-700 px-4 py-1 rounded-full text-base font-semibold shadow-sm">
-                          Total: {getTotalSolicitudes()}
+                          Total: {getTotalSolicitudes(solicitudesPorEstado)}
                         </span>
                       </div>
                       <ResponsiveContainer width="100%" height={300}>
@@ -337,7 +369,7 @@ export default function GraficasAdminPage() {
                         <TrendingUp className="w-7 h-7 text-blue-600" />
                       </div>
                       <h3 className="font-semibold text-slate-700 tracking-wide">Crecimiento</h3>
-                      <p className="text-3xl font-extrabold text-blue-600 mt-1">+{getPromedioCrecimiento()}%</p>
+                      <p className="text-3xl font-extrabold text-blue-600 mt-1">+{getPromedioCrecimiento(pagosPorMes)}%</p>
                       <p className="text-xs text-slate-400">Mensual promedio</p>
                     </div>
                     <div className="text-center">
@@ -345,7 +377,7 @@ export default function GraficasAdminPage() {
                         <Users className="w-7 h-7 text-purple-600" />
                       </div>
                       <h3 className="font-semibold text-slate-700 tracking-wide">Volumen</h3>
-                      <p className="text-3xl font-extrabold text-purple-600 mt-1">{getTotalSolicitudes()}</p>
+                      <p className="text-3xl font-extrabold text-purple-600 mt-1">{getTotalSolicitudes(solicitudesPorEstado)}</p>
                       <p className="text-xs text-slate-400">Solicitudes totales</p>
                     </div>
                   </div>
