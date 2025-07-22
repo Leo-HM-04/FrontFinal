@@ -143,6 +143,7 @@ export default function AdminRecurrentesPage() {
                       <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">ID</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Folio</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Usuario</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Departamento</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Monto</th>
@@ -160,6 +161,7 @@ export default function AdminRecurrentesPage() {
                         {currentRecurrentes.map((p) => (
                           <tr key={p.id_recurrente} className="group transition-all hover:bg-blue-50/80 hover:shadow-md">
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">#{p.id_recurrente}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.folio || '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.nombre_usuario || `Usuario ${p.id_usuario}`}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{capitalize(p.departamento)}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(p.monto)}</td>

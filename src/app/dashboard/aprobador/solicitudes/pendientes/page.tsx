@@ -311,9 +311,11 @@ export default function SolicitudesPendientesPage() {
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
-                        <thead style={{backgroundColor: '#F0F4FC'}}>
+                        <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                           <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solicitante</th>
+                            <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">ID</th>
+                            <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Folio</th>
+                            <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Usuario</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Límite</th>
@@ -322,33 +324,33 @@ export default function SolicitudesPendientesPage() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {paginadas.map((solicitud) => {
-                            const isUrgent = new Date(solicitud.fecha_limite_pago) < tresDiasDespues;
+                          {paginadas.map((s) => {
+                            const isUrgent = new Date(s.fecha_limite_pago) < tresDiasDespues;
                             return (
-                              <tr key={solicitud.id_solicitud} className={`hover:bg-gray-50 transition-colors ${isUrgent ? 'border-l-4 border-red-500 bg-red-50' : ''}`}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {solicitud.usuario_nombre || `${solicitud.id_usuario}`}
-                                </td>
+                              <tr key={s.id_solicitud} className="border-b last:border-b-0 hover:bg-blue-50 transition-colors group">
+                                <td className="px-4 py-3 font-mono text-black text-sm">{s.id_solicitud}</td>
+                                <td className="px-4 py-3 text-black text-sm">{s.folio || '-'}</td>
+                                <td className="px-4 py-3 text-black text-sm">{s.usuario_nombre || `Usuario ${s.id_usuario}`}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={getDepartmentColorClass(solicitud.departamento)}>
-                                    {solicitud.departamento}
+                                  <span className={getDepartmentColorClass(s.departamento)}>
+                                    {s.departamento}
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {formatCurrency(solicitud.monto)}
+                                  {formatCurrency(s.monto)}
                                 </td>
                                 <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isUrgent ? 'text-red-600 font-bold' : 'text-gray-900'}`}> 
-                                  {new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-CO')}
+                                  {new Date(s.fecha_limite_pago).toLocaleDateString('es-CO')}
                                   {isUrgent && <span className="text-xs font-bold text-red-600 ml-2">¡Urgente!</span>}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO')}
+                                  {new Date(s.fecha_creacion).toLocaleDateString('es-CO')}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                   <div className="flex flex-wrap gap-2">
-                                    <Button variant="outline" size="sm" onClick={() => handleViewDetail(solicitud)} style={{ color: '#3B82F6', borderColor: '#3B82F6' }} className="hover:bg-blue-50"><Eye className="w-4 h-4 mr-1" /> Ver</Button>
-                                    <Button variant="outline" size="sm" disabled={actionLoading} onClick={() => openConfirmModal(solicitud, 'approve')} style={{ color: '#16A34A', borderColor: '#16A34A' }} className="hover:bg-green-50 flex items-center">{actionLoading ? (<span className="loader border-green-500 mr-2"></span>) : (<CheckCircle className="w-4 h-4 mr-1" />)}Aprobar</Button>
-                                    <Button variant="outline" size="sm" disabled={actionLoading} onClick={() => openConfirmModal(solicitud, 'reject')} style={{ color: '#DC2626', borderColor: '#DC2626' }} className="hover:bg-red-50 flex items-center">{actionLoading ? (<span className="loader border-red-500 mr-2"></span>) : (<XCircle className="w-4 h-4 mr-1" />)}Rechazar</Button>
+                                    <Button variant="outline" size="sm" onClick={() => handleViewDetail(s)} style={{ color: '#3B82F6', borderColor: '#3B82F6' }} className="hover:bg-blue-50"><Eye className="w-4 h-4 mr-1" /> Ver</Button>
+                                    <Button variant="outline" size="sm" disabled={actionLoading} onClick={() => openConfirmModal(s, 'approve')} style={{ color: '#16A34A', borderColor: '#16A34A' }} className="hover:bg-green-50 flex items-center">{actionLoading ? (<span className="loader border-green-500 mr-2"></span>) : (<CheckCircle className="w-4 h-4 mr-1" />)}Aprobar</Button>
+                                    <Button variant="outline" size="sm" disabled={actionLoading} onClick={() => openConfirmModal(s, 'reject')} style={{ color: '#DC2626', borderColor: '#DC2626' }} className="hover:bg-red-50 flex items-center">{actionLoading ? (<span className="loader border-red-500 mr-2"></span>) : (<XCircle className="w-4 h-4 mr-1" />)}Rechazar</Button>
                                   </div>
                                 </td>
                               </tr>

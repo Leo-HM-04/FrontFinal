@@ -85,7 +85,9 @@ export default function MisRecurrentesPage() {
         const fetchRecurrentes = async () => {
             try {
                 const data = await RecurrentesService.obtenerMisRecurrentes();
-                setRecurrentes(data);
+                // Ordenar por fecha de creación descendente (más reciente primero)
+                const sorted = data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                setRecurrentes(sorted);
             } catch {
                 setError('Error al cargar tus plantillas recurrentes');
             } finally {
@@ -297,6 +299,7 @@ export default function MisRecurrentesPage() {
                         <table className="w-full min-w-[1600px]">
                             <thead className="bg-white/10">
                                 <tr>
+                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Folio</th>
                                     <th className="px-8 py-5 text-left text-sm font-semibold text-white">ID</th>
                                     <th className="px-8 py-5 text-left text-sm font-semibold text-white">Usuario</th>
                                     <th className="px-8 py-5 text-left text-sm font-semibold text-white">Departamento</th>
@@ -329,6 +332,7 @@ export default function MisRecurrentesPage() {
                                 ) : (
                                     currentRecurrentes.map((p) => (
                                         <tr key={p.id_recurrente} className="hover:bg-white/10 transition-colors">
+                                            <td className="px-8 py-5 text-white font-bold">{p.folio || '-'}</td>
                                             <td className="px-8 py-5 text-white">{p.id_recurrente}</td>
                                             <td className="px-8 py-5 text-white">{p.nombre_usuario ? p.nombre_usuario : p.id_usuario}</td>
                                             <td className="px-8 py-5 text-white">{p.departamento.charAt(0).toUpperCase() + p.departamento.slice(1)}</td>

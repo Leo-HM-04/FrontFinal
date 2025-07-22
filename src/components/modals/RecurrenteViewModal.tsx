@@ -81,6 +81,7 @@ export const RecurrenteViewModal: React.FC<RecurrenteViewModalProps> = ({ isOpen
         <div className="px-6 pb-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-800 text-sm">
             <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="ID de la plantilla"><BadgeCheck className="w-5 h-5 text-blue-500" /><span className="font-semibold">ID:</span> #{recurrente.id_recurrente}</div>
+            <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="Folio"><BadgeCheck className="w-5 h-5 text-blue-500" /><span className="font-semibold">Folio:</span> {recurrente.folio || '-'}</div>
             <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="Usuario solicitante"><User className="w-5 h-5 text-blue-500" /><span className="font-semibold">Usuario:</span> {recurrente.nombre_usuario || `Usuario ${recurrente.id_usuario}`}</div>
             <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="Departamento"><Building2 className="w-5 h-5 text-blue-500" /><span className="font-semibold">Departamento:</span> {toUpper(recurrente.departamento)}</div>
             <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-4 py-2" title="Monto"><Banknote className="w-5 h-5 text-blue-500" /><span className="font-semibold">Monto:</span> {formatCurrency(recurrente.monto)}</div>

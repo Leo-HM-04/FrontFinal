@@ -64,6 +64,9 @@ export function SolicitudDetailModal({
                 Solicitud #{solicitud.id_solicitud}
               </h2>
               <p className="text-blue-100 mt-1">
+                Folio: <span className="font-mono text-yellow-200">{solicitud.folio || '-'}</span>
+              </p>
+              <p className="text-blue-100 mt-1">
                 Creada el {new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO')}
               </p>
             </div>

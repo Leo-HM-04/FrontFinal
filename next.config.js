@@ -17,6 +17,16 @@ const nextConfig = {
       return config;
     },
   }),
+  
+  // Agregar configuración de proxy
+  async rewrites() {
+    return [
+      {
+        source: '/api/estadisticas/:path*',
+        destination: 'http://localhost:4000/api/estadisticas/:path*',
+      },
+    ];
+  },
 
   // Headers anti-cache para desarrollo
   async headers() {

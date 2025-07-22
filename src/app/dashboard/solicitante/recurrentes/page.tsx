@@ -209,6 +209,9 @@ export default function NuevaRecurrentePage() {
                   onChange={handleInputChange}
                   required
                   className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
+                  pattern="^\d{18}$"
+                  title="La cuenta CLABE debe tener exactamente 18 dígitos."
+                  maxLength={18}
                 />
               </div>
               <div className="col-span-2 flex items-center mt-2">

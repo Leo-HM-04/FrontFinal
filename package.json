@@ -18,7 +18,9 @@
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
     "@mui/x-data-grid": "^8.9.1",
+    "@tanstack/react-table": "^8.21.3",
     "axios": "^1.10.0",
+    "exceljs": "^4.4.0",
     "framer-motion": "^12.23.6",
     "js-cookie": "^3.0.5",
     "jspdf": "^3.0.1",
@@ -36,7 +38,6 @@
     "react-spinner-material": "^1.4.0",
     "react-toastify": "^11.0.5",
     "recharts": "^3.1.0",
-    "xlsx": "^0.18.5",
     "zustand": "^5.0.6"
   },
   "devDependencies": {

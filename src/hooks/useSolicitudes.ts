@@ -13,7 +13,9 @@ export function useSolicitudes() {
       setLoading(true);
       setError(null);
       const data = await SolicitudesService.getAll();
-      setSolicitudes(data);
+      // Ordena por id_solicitud descendente (más reciente primero)
+      const sorted = [...data].sort((a, b) => b.id_solicitud - a.id_solicitud);
+      setSolicitudes(sorted);
     } catch (err) {
       setError('Error al cargar las solicitudes');
       console.error('Error fetching solicitudes:', err);

@@ -357,6 +357,7 @@ export default function MisSolicitudesPage() {
                   <table className="w-full">
                     <thead className="bg-white/10">
                       <tr>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Folio</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Concepto</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Monto</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Cuenta Destino</th>
@@ -383,6 +384,9 @@ export default function MisSolicitudesPage() {
                       ) : 
                         currentSolicitudes.map((solicitud) => (
                           <tr key={solicitud.id_solicitud} className="hover:bg-white/10 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="text-white font-bold">{solicitud.folio || '-'}</div>
+                            </td>
                             <td className="px-6 py-4">
                               <div className="text-white font-medium">{solicitud.concepto}</div>
                               <div className="text-white/70 text-sm mt-1">

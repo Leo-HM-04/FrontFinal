@@ -297,16 +297,18 @@ export default function NuevaSolicitudPage() {
                       setCuentaValida(null);
                       if (!value) {
                         setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
+                      } else if (!/^\d{18}$/.test(value)) {
+                        setErrors((prev) => ({ ...prev, cuenta_destino: 'La cuenta CLABE debe tener exactamente 18 dígitos.' }));
                       } else {
                         setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
                       }
                     }}
                     onBlur={e => verificarCuentaDestino(e.target.value)}
-                    placeholder="Número de cuenta (máx. 18 dígitos)"
+                    placeholder="Número de cuenta CLABE (18 dígitos)"
                     required
                     maxLength={18}
                     inputMode="numeric"
-                    pattern="[0-9]*"
+                    pattern="^\d{18}$"
                     autoComplete="off"
                     className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.cuenta_destino ? 'border-red-400' : ''}`}
                   />

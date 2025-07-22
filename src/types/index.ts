@@ -29,6 +29,7 @@ export type SolicitudEstado = 'pendiente' | 'autorizada' | 'rechazada' | 'pagada
 
 export interface Solicitud {
   id_solicitud: number;
+  folio?: string;
   id_usuario: number;
   departamento: string;
   monto: number;
@@ -77,6 +78,7 @@ export interface ApiError {
 export type EstadoRecurrente = 'pendiente' | 'aprobada' | 'rechazada';
 
 export interface PlantillaRecurrente {
+  folio?: string;
   fact_recurrente?: string; // Ruta del archivo de factura (opcional)
   id_recurrente: number;
   id_usuario: number;

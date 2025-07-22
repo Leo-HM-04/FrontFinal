@@ -238,9 +238,11 @@ export default function HistorialSolicitudesPage() {
                     <>
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
-                          <thead style={{backgroundColor: '#F0F4FC'}}>
+                          <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solicitante</th>
+                              <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">ID</th>
+                              <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Folio</th>
+                              <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Usuario</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
@@ -268,8 +270,14 @@ export default function HistorialSolicitudesPage() {
                               }
                               return (
                                 <tr key={solicitud.id_solicitud} className={`hover:bg-gray-50 transition-colors ${rowClass}`}>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {solicitud.usuario_nombre || `${solicitud.id_usuario}`}
+                                  <td className="px-4 py-3 font-mono text-black text-sm">
+                                    {solicitud.id_solicitud}
+                                  </td>
+                                  <td className="px-4 py-3 text-black text-sm">
+                                    {solicitud.folio || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 text-black text-sm">
+                                    {solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={getDepartmentColorClass(solicitud.departamento)}>

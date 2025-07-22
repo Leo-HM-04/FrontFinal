@@ -251,6 +251,7 @@ export default function SolicitudesPage() {
                       <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">ID</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Folio</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Solicitante</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Departamento</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Monto</th>
@@ -263,6 +264,7 @@ export default function SolicitudesPage() {
                         {paginatedSolicitudes.map((solicitud) => (
                           <tr key={solicitud.id_solicitud} className="group transition-all hover:bg-blue-50/80 hover:shadow-md">
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{solicitud.id_solicitud}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{solicitud.folio || '-'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{solicitud.usuario_nombre || `${solicitud.id_usuario}`}</td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex items-center px-3 py-1 rounded-full border font-bold text-xs uppercase tracking-wide shadow-sm ${getDepartamentoColor(solicitud.departamento)}`} style={{minWidth: 90, justifyContent: 'center'}}>

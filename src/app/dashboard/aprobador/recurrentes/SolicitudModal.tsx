@@ -25,6 +25,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({ solicitud, open,
         </h2>
         <div className="space-y-3 text-base">
           <div className="flex items-center gap-2"><span className="font-bold text-blue-900">ID:</span> {solicitud.id_recurrente}</div>
+          <div className="flex items-center gap-2"><span className="font-bold text-yellow-700">Folio:</span> {solicitud.folio || '-'}</div>
           <div className="flex items-center gap-2"><FaUser className="text-blue-500" /><span className="font-bold">Usuario:</span> {solicitud.nombre_usuario || '-'}</div>
           <div className="flex items-center gap-2"><FaBuilding className="text-blue-500" /><span className="font-bold">Departamento:</span> {solicitud.departamento}</div>
           <div className="flex items-center gap-2"><FaMoneyBillWave className="text-green-600" /><span className="font-bold">Monto:</span> ${solicitud.monto?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>

@@ -214,6 +214,10 @@ export default function SolicitudDetailPage() {
                   </h3>
                   <div className="space-y-4 text-white">
                     <div>
+                      <span className="text-sm text-white/70">Folio:</span>
+                      <p className="font-mono text-blue-200 text-lg">{solicitud.folio || '-'}</p>
+                    </div>
+                    <div>
                       <span className="text-sm text-white/70">Departamento:</span>
                       <p className="mt-1">
                         <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full border uppercase ${getDepartmentColorClass(solicitud.departamento)}`}>

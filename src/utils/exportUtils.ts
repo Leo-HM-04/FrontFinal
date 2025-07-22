@@ -1,5 +1,5 @@
 import { User, Solicitud } from '@/types';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { autoTable } from 'jspdf-autotable';
@@ -104,7 +104,7 @@ export function exportSolicitudesToCSV(solicitudes: Solicitud[]) {
     fecha_limite_pago: new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-CO'),
     fecha_creacion: new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO'),
     usuario_nombre: solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`,
-    aprobador_nombre: solicitud.aprobador_nombre || (solicitud.id_aprobador ? `Usuario ${solicitud.id_aprobador}` : 'N/A')
+    aprobador_nombre: solicitud.aprobador_nombre ? solicitud.aprobador_nombre : (solicitud.id_aprobador ? `Aprobador ${solicitud.id_aprobador}` : 'N/A')
   }));
   
   exportToCSV(processedData, `solicitudes_${new Date().toISOString().split('T')[0]}`, columns);
@@ -226,24 +226,31 @@ export function exportPagosToPDF(pagos: PagoProcesado[]) {
 }
 
 export function exportToExcel<T>(data: T[], filename: string, columns: Array<{key: keyof T, label: string}>) {
-  // Prepare the data for Excel
-  const header = columns.map(col => col.label);
-  const formattedData = [
-    header,
-    ...data.map(item => columns.map(col => item[col.key]))
-  ];
+  // Crear el libro y la hoja
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Sheet1');
 
-  // Create a workbook and worksheet
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.aoa_to_sheet(formattedData);
+  // Agregar encabezados
+  worksheet.addRow(columns.map(col => col.label));
 
-  // Add the worksheet to the workbook
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+  // Agregar datos
+  data.forEach(item => {
+    worksheet.addRow(columns.map(col => item[col.key]));
+  });
 
-  // Generate and download the Excel file
-  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  downloadFile(blob, `${filename}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  // Ajustar ancho de columnas automáticamente
+  columns.forEach((col, idx) => {
+    worksheet.getColumn(idx + 1).width = Math.max(
+      col.label.length,
+      ...data.map(item => String(item[col.key] || '').length)
+    ) + 2;
+  });
+
+  // Generar y descargar el archivo Excel
+  workbook.xlsx.writeBuffer().then(buffer => {
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    downloadFile(blob, `${filename}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  });
 }
 
 export function exportToPDF<T>(data: T[], filename: string, columns: Array<{key: keyof T, label: string}>, title: string) {
@@ -328,7 +335,7 @@ export function exportSolicitudesToExcel(solicitudes: Solicitud[]) {
     fecha_limite_pago: new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-CO'),
     fecha_creacion: new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO'),
     usuario_nombre: solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`,
-    aprobador_nombre: solicitud.aprobador_nombre || (solicitud.id_aprobador ? `Usuario ${solicitud.id_aprobador}` : 'N/A')
+    aprobador_nombre: solicitud.aprobador_nombre ? solicitud.aprobador_nombre : (solicitud.id_aprobador ? `Aprobador ${solicitud.id_aprobador}` : 'N/A')
   }));
   
   exportToExcel(processedData, `solicitudes_${new Date().toISOString().split('T')[0]}`, columns);
@@ -358,7 +365,7 @@ export function exportSolicitudesToPDF(solicitudes: Solicitud[]) {
     fecha_limite_pago: new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-CO'),
     fecha_creacion: new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO'),
     usuario_nombre: solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`,
-    aprobador_nombre: solicitud.aprobador_nombre || (solicitud.id_aprobador ? `Usuario ${solicitud.id_aprobador}` : 'N/A')
+    aprobador_nombre: solicitud.aprobador_nombre ? solicitud.aprobador_nombre : (solicitud.id_aprobador ? `Aprobador ${solicitud.id_aprobador}` : 'N/A')
   }));
   
   exportToPDF(processedData, `solicitudes_${new Date().toISOString().split('T')[0]}`, columns, 'Reporte de Solicitudes');

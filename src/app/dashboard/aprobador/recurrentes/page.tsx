@@ -99,6 +99,7 @@ export default function AprobadorRecurrentesPage() {
                 <thead className="sticky top-0 z-10" style={{background: 'rgba(240,244,252,0.95)'}}>
                   <tr>
                     <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">ID</th>
+                    <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Folio</th>
                     <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Usuario</th>
                     <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Departamento</th>
                     <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Monto</th>
@@ -124,6 +125,7 @@ export default function AprobadorRecurrentesPage() {
                     solicitudes.map((s) => (
                       <tr key={s.id_recurrente} className="border-b last:border-b-0 hover:bg-blue-50 transition-colors group">
                         <td className="px-4 py-3 font-mono text-black text-sm">{s.id_recurrente}</td>
+                        <td className="px-4 py-3 text-black text-sm">{s.folio || '-'}</td>
                         <td className="px-4 py-3 text-black text-sm">{s.nombre_usuario || '-'}</td>
                         <td className="px-4 py-3 text-black text-sm">{s.departamento}</td>
                         <td className="px-4 py-3 text-black text-sm">${s.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
