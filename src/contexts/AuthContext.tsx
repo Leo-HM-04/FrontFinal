@@ -57,23 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   };
 
-  const logout = () => {
+  const logout = async () => {
     try {
-      // Limpiar el estado
+      await AuthService.logout(); // Marca como inactivo en el backend
       setUser(null);
-      
-      // Limpiar el localStorage
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
-      
-      // Limpiar otras posibles referencias en sessionStorage
       sessionStorage.clear();
-      
-      // Mostrar mensaje de éxito
       toast.success('Sesión cerrada correctamente');
-      
-      // Forzar un refresco de componentes si es necesario
-      // window.location.href = '/login'; // Opción más agresiva si hay problemas persistentes
     } catch (error) {
       console.error('Error durante el cierre de sesión:', error);
       toast.error('Error al cerrar sesión');

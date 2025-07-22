@@ -78,9 +78,9 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
 
 
   // Feedback logout
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setShowLogoutModal(false);
-    logout();
+    await logout(); // Espera que el backend marque como inactivo
     toast.success('Sesión cerrada correctamente', { position: 'top-center', autoClose: 2000 });
     setTimeout(() => router.push('/login'), 800);
   };

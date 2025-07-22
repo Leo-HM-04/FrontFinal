@@ -23,6 +23,9 @@ type FormState = {
   tipo_pago: string;
   fecha_limite_pago: string;
   factura_file: File | null;
+  tipo_cuenta_destino: string;
+  tipo_tarjeta: string;
+  banco_destino: string;
 };
 
 type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null };
@@ -34,7 +37,10 @@ const initialState: FormState = {
   concepto: '',
   tipo_pago: 'transferencia',
   fecha_limite_pago: '',
-  factura_file: null
+  factura_file: null,
+  tipo_cuenta_destino: 'CLABE',
+  tipo_tarjeta: '',
+  banco_destino: ''
 };
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
@@ -179,7 +185,10 @@ export default function NuevaSolicitudPage() {
         concepto: formData.concepto,
         tipo_pago: formData.tipo_pago,
         fecha_limite_pago: formData.fecha_limite_pago,
-        factura: formData.factura_file as File
+        factura: formData.factura_file as File,
+        tipo_cuenta_destino: formData.tipo_cuenta_destino,
+        tipo_tarjeta: formData.tipo_cuenta_destino === 'Tarjeta' ? formData.tipo_tarjeta : '',
+        banco_destino: formData.banco_destino
       };
       const response = await SolicitudesService.createWithFiles(solicitudData);
       let successMsg = 'Solicitud creada exitosamente';
@@ -192,8 +201,12 @@ export default function NuevaSolicitudPage() {
       console.error('Error:', err);
       let errorMessage = 'Error al crear la solicitud';
       if (typeof err === 'object' && err !== null) {
-        const errorObj = err as { response?: { data?: { message?: string } }, message?: string };
-        errorMessage = errorObj.response?.data?.message || errorObj.message || errorMessage;
+        const errorObj = err as { response?: { data?: { message?: string, details?: any } }, message?: string };
+        if (errorObj.response?.data?.details && Array.isArray(errorObj.response.data.details)) {
+          errorMessage = errorObj.response.data.details.map((d: any) => d.message).join(' | ');
+        } else {
+          errorMessage = errorObj.response?.data?.message || errorObj.message || errorMessage;
+        }
       }
       toast.error(errorMessage);
     } finally {
@@ -228,6 +241,56 @@ export default function NuevaSolicitudPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-10">
+              {/* Tipo de cuenta destino */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">
+                    <CreditCard className="w-4 h-4 inline mr-2" />
+                    Tipo de Cuenta Destino *
+                  </label>
+                  <select
+                    name="tipo_cuenta_destino"
+                    value={formData.tipo_cuenta_destino}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                  >
+                    <option value="CLABE">CLABE</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                  </select>
+                </div>
+                {formData.tipo_cuenta_destino === 'Tarjeta' && (
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Tipo de Tarjeta
+                    </label>
+                    <select
+                      name="tipo_tarjeta"
+                      value={formData.tipo_tarjeta}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                    >
+                      <option value="">Selecciona tipo</option>
+                      <option value="Débito">Débito</option>
+                      <option value="Crédito">Crédito</option>
+                    </select>
+                  </div>
+                )}
+                <div className="md:col-span-2">
+                  <label className="block text-base font-medium text-white/90 mb-3">
+                    Banco (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    name="banco_destino"
+                    value={formData.banco_destino}
+                    onChange={handleInputChange}
+                    placeholder="Nombre del banco"
+                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                  />
+                </div>
+              </div>
               {/* Información Básica */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                 <div>

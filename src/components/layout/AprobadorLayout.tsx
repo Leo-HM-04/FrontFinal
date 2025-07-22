@@ -192,10 +192,10 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
             <div className="flex gap-3 w-full mt-2">
               <button
                 className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition"
-                onClick={() => {
+                onClick={async () => {
                   setShowLogoutConfirm(false);
-                  logout();
-                  router.push('/login');
+                  await logout(); // Espera que el backend marque como inactivo
+                  router.push('/login'); // Redirige después de cerrar sesión
                 }}
               >Cerrar sesión</button>
               <button

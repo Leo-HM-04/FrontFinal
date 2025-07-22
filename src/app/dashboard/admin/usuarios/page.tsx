@@ -329,6 +329,7 @@ function UsuariosContent() {
                       <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Rol</th>
                       <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Fecha de creación</th>
                       <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Bloqueado</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Estado</th>
                       <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Acciones</th>
                     </tr>
                   </thead>
@@ -368,9 +369,15 @@ function UsuariosContent() {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full border shadow-sm ${usuario.bloqueado ? 'bg-red-100 text-red-700 border-red-300' : 'bg-green-100 text-green-700 border-green-300'}`}>
-                              {usuario.bloqueado ? <Ban className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
-                              {usuario.bloqueado ? 'Sí' : 'No'}
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full border shadow-sm ${usuario.bloqueado ? 'bg-red-100 text-red-700 border-red-300' : 'bg-green-100 text-green-700 border-green-300'}`}> 
+                              {usuario.bloqueado ? <Ban className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />} 
+                              {usuario.bloqueado ? 'Sí' : 'No'} 
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full border shadow-sm ${usuario.activo ? 'bg-green-100 text-green-700 border-green-300' : 'bg-gray-100 text-gray-500 border-gray-300'}`}> 
+                              {usuario.activo ? <UserCheck className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />} 
+                              {usuario.activo ? 'Activo' : 'Desconectado'} 
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
@@ -460,7 +467,7 @@ function UsuariosContent() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="border-blue-600 text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-bold px-6 py-2 rounded-xl transition-all text-black"
+                    className="border-blue-600 text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-bold px-6 py-2 rounded-xl transition-all"
                     onClick={() => setShowDeleteModal(false)}
                     disabled={deleting}
                   >

@@ -39,7 +39,10 @@ export function Navbar() {
             <Button
               variant="outline"
               size="sm"
-              onClick={logout}
+              onClick={async () => {
+                await logout();
+                window.location.replace('/login');
+              }}
               className="flex items-center space-x-1"
             >
               <LogOut className="w-4 h-4" />

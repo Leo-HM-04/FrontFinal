@@ -94,13 +94,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   }, [user, showNotifications]);
 
   // Manejar cierre de sesión con pantalla de transición
-  const handleLogout = useCallback(() => {
-    // Redirigir inmediatamente
-    window.location.replace('/login');
-    // Limpiar sesión en segundo plano (sin bloquear el redirect)
-    setTimeout(() => {
-      logout();
-    }, 50);
+  const handleLogout = useCallback(async () => {
+    await logout(); // Espera que el backend marque como inactivo
+    window.location.replace('/login'); // Redirige después de cerrar sesión
   }, [logout]);
 
   // DEBUG: Log para ver el estado del modal

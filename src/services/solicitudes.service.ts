@@ -77,6 +77,9 @@ export class SolicitudesService {
     cuenta_destino: string;
     concepto: string;
     tipo_pago: string;
+    tipo_cuenta_destino: string;
+    tipo_tarjeta?: string;
+    banco_destino?: string;
     fecha_limite_pago: string;
     factura: File;
   }): Promise<unknown> {
@@ -88,6 +91,9 @@ export class SolicitudesService {
     formData.append('tipo_pago', data.tipo_pago);
     formData.append('fecha_limite_pago', data.fecha_limite_pago);
     formData.append('factura', data.factura);
+    formData.append('tipo_cuenta_destino', data.tipo_cuenta_destino);
+    formData.append('tipo_tarjeta', data.tipo_tarjeta || '');
+    formData.append('banco_destino', data.banco_destino || '');
     const response = await api.post('/solicitudes', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });

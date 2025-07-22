@@ -1,4 +1,5 @@
 import api from '@/lib/api';
+import { UsuariosService } from './usuarios.service';
 import { LoginCredentials, AuthResponse, User } from '@/types';
 import Cookies from 'js-cookie';
 
@@ -46,7 +47,12 @@ export class AuthService {
     }
   }
 
-  static logout(): void {
+  static async logout(): Promise<void> {
+    try {
+      await UsuariosService.logout();
+    } catch (e) {
+      // Si el backend falla, igual borra el token local
+    }
     Cookies.remove('auth_token');
     Cookies.remove('user_data');
   }

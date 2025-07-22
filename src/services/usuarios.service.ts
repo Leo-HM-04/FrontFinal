@@ -62,4 +62,8 @@ export class UsuariosService {
     const response = await api.put<{ message: string }>('/usuarios/profile/change-password', passwordData);
     return response.data;
   }
+  static async logout(): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>(`/usuarios/logout`);
+    return response.data;
+  }
 }
