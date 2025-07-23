@@ -164,7 +164,9 @@ export default function HistorialPagosPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.fecha_limite_pago ? new Date(pago.fecha_limite_pago).toLocaleDateString('es-CO') : '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.fecha_pago ? new Date(pago.fecha_pago).toLocaleDateString('es-CO') : '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{(pago as any).aprobador_nombre || (pago as any).nombre_aprobador || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{typeof pago.aprobador_nombre === 'string' && pago.aprobador_nombre
+                        ? pago.aprobador_nombre
+                        : '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100 rounded-r-2xl">{pago.comentario_aprobador || '-'}</td>
                     </tr>
                   ))}

@@ -46,7 +46,7 @@ export interface ExportColumn<T> {
   key: keyof T;
   label: string;
   width?: number;
-  formatter?: (value: any, item?: T) => string;
+  formatter?: (value: unknown, item?: T) => string;
   align?: 'left' | 'center' | 'right';
 }
 
@@ -201,12 +201,9 @@ class ExportUtils {
     const headers = columns.map(col => col.label).join(',');
     const rows = data.map(item => 
       columns.map(col => {
-        let value = (item as any)[col.key];
-        if (col.formatter) {
-          value = col.formatter(value, item as any);
-        }
-        // Permitir asignación de string
-        const stringValue = String(value ?? '').replace(/"/g, '""');
+        const value = item[col.key];
+        const formatted = col.formatter ? col.formatter(value, item) : value;
+        const stringValue = String(formatted ?? '').replace(/"/g, '""');
         return stringValue.includes(',') || stringValue.includes('"') ? `"${stringValue}"` : stringValue;
       }).join(',')
     );
@@ -221,7 +218,7 @@ class ExportUtils {
       { key: 'email', label: 'Email' },
       { key: 'rol', label: 'Rol' },
       { key: 'bloqueado', label: 'Bloqueado', formatter: (value) => value ? 'Sí' : 'No' },
-      { key: 'creado_en', label: 'Fecha Creación', formatter: (value) => this.formatDate(value) }
+      { key: 'creado_en', label: 'Fecha Creación', formatter: (value) => this.formatDate(value as string) }
     ];
     
     const filename = this.generateFilename('Usuarios', 'csv', usuarios.length);
@@ -232,14 +229,14 @@ class ExportUtils {
     const columns: ExportColumn<Solicitud>[] = [
       { key: 'id_solicitud', label: 'ID' },
       { key: 'departamento', label: 'Departamento' },
-      { key: 'monto', label: 'Monto', formatter: (value) => this.formatCurrency(value) },
+      { key: 'monto', label: 'Monto', formatter: (value) => this.formatCurrency(typeof value === 'number' ? value : Number(value)) },
       { key: 'cuenta_destino', label: 'Cuenta Destino' },
       { key: 'estado', label: 'Estado' },
       { key: 'concepto', label: 'Concepto' },
-      { key: 'fecha_limite_pago', label: 'Fecha Límite', formatter: (value) => this.formatDate(value) },
-      { key: 'fecha_creacion', label: 'Fecha Creación', formatter: (value) => this.formatDate(value) },
-      { key: 'usuario_nombre', label: 'Solicitante', formatter: (value, item) => value || `Usuario ${(item as any)?.id_usuario ?? ''}` },
-      { key: 'aprobador_nombre', label: 'Aprobador', formatter: (value, item) => value && value !== 'N/A' ? value : ((item as any)?.id_aprobador ? `Aprobador ${(item as any)?.id_aprobador}` : 'N/A') }
+      { key: 'fecha_limite_pago', label: 'Fecha Límite', formatter: (value) => this.formatDate(value as string) },
+      { key: 'fecha_creacion', label: 'Fecha Creación', formatter: (value) => this.formatDate(value as string) },
+      { key: 'usuario_nombre', label: 'Solicitante', formatter: (value, item) => typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '' },
+      { key: 'aprobador_nombre', label: 'Aprobador', formatter: (value, item) => typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A' }
     ];
 
     let csvContent = '';
@@ -261,11 +258,10 @@ class ExportUtils {
     const headers = columns.map(col => col.label).join(',');
     const rows = solicitudes.map(item => 
       columns.map(col => {
-        let value = (item as any)[col.key];
-        if (col.formatter) {
-          value = col.formatter(value, item ?? {});
-        }
-        const stringValue = String(value ?? '').replace(/"/g, '""');
+        // Acceso seguro y tipado estricto
+        const value = item[col.key as keyof Solicitud];
+        const formatted = col.formatter ? col.formatter(value, item) : value;
+        const stringValue = String(formatted ?? '').replace(/"/g, '""');
         return stringValue.includes(',') || stringValue.includes('"') ? `"${stringValue}"` : stringValue;
       }).join(',')
     );
@@ -280,9 +276,9 @@ class ExportUtils {
       { key: 'id_solicitud', label: 'ID Solicitud' },
       { key: 'solicitante', label: 'Solicitante' },
       { key: 'departamento', label: 'Departamento' },
-      { key: 'monto', label: 'Monto', formatter: (value) => this.formatCurrency(value) },
+      { key: 'monto', label: 'Monto', formatter: (value) => this.formatCurrency(typeof value === 'number' ? value : Number(value)) },
       { key: 'concepto', label: 'Concepto' },
-      { key: 'fecha_pago', label: 'Fecha Pago', formatter: (value) => this.formatDate(value) },
+      { key: 'fecha_pago', label: 'Fecha Pago', formatter: (value) => this.formatDate(value as string) },
       { key: 'estado', label: 'Estado' },
       { key: 'urgencia', label: 'Urgencia' },
       { key: 'metodo_pago', label: 'Método de Pago' },
@@ -315,7 +311,7 @@ class ExportUtils {
 
     // Configurar encabezados con estilo
     const headerRow = worksheet.addRow(columns.map(col => col.label));
-    headerRow.eachCell((cell, colNumber) => {
+    headerRow.eachCell((cell) => {
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -335,13 +331,9 @@ class ExportUtils {
     data.forEach((item, rowIndex) => {
       const row = worksheet.addRow(
         columns.map(col => {
-          let value = (item as any)[col.key];
-          if (col.formatter) {
-            value = col.formatter(value, item as any);
-          }
-          // Forzar el tipo a 'any' para evitar error de TypeScript
-          return value as any;
-        }) as any[]
+          const value = item[col.key];
+          return col.formatter ? col.formatter(value, item) : value;
+        })
       );
 
       // Aplicar estilos alternos
@@ -381,22 +373,19 @@ class ExportUtils {
       } else {
         const maxLength = Math.max(
           col.label.length,
-          ...data.map(item => {
-            let value = (item as any)[col.key];
-            if (col.formatter) {
-              value = col.formatter(value, item as any);
-            }
-            // Forzar el tipo a 'any' para evitar error de TypeScript
-            return String(value as any || '').length;
-          })
+      ...data.map(item => {
+        const value = item[col.key];
+        const formatted = col.formatter ? col.formatter(value, item) : value;
+        return String(formatted ?? '').length;
+      })
         );
         column.width = Math.min(Math.max(maxLength + 2, 10), 50);
       }
     });
 
     // Añadir hoja de estadísticas si se solicita
-    if (options.includeStats && typeof data[0] === 'object' && data[0] !== null && 'monto' in (data[0] as any)) {
-      this.addStatsSheet(workbook, data as any);
+    if (options.includeStats && typeof data[0] === 'object' && data[0] !== null && 'monto' in (data[0] as Record<string, unknown>)) {
+      this.addStatsSheet(workbook, data as Solicitud[]);
     }
 
     // Generar y descargar
@@ -412,16 +401,14 @@ class ExportUtils {
     const columns: ExportColumn<Solicitud>[] = [
       { key: 'id_solicitud', label: 'ID', width: 8, align: 'center' },
       { key: 'departamento', label: 'Departamento', width: 20 },
-      { key: 'monto', label: 'Monto', width: 15, align: 'right', formatter: (value) => this.formatCurrency(value) },
+      { key: 'monto', label: 'Monto', width: 15, align: 'right', formatter: (value) => this.formatCurrency(typeof value === 'number' ? value : Number(value)) },
       { key: 'cuenta_destino', label: 'Cuenta Destino', width: 25 },
       { key: 'estado', label: 'Estado', width: 12, align: 'center' },
       { key: 'concepto', label: 'Concepto', width: 30 },
-      { key: 'fecha_limite_pago', label: 'Fecha Límite', width: 12, align: 'center', formatter: (value) => this.formatDate(value) },
-      { key: 'fecha_creacion', label: 'Fecha Creación', width: 12, align: 'center', formatter: (value) => this.formatDate(value) },
-      { key: 'usuario_nombre', label: 'Solicitante', width: 20, formatter: (value, item) => value || `Usuario ${(item as any)?.id_usuario ?? ''}` },
-      { key: 'aprobador_nombre', label: 'Aprobador', width: 20, formatter: (value, item) => 
-        value && value !== 'N/A' ? value : ((item as any)?.id_aprobador ? `Aprobador ${(item as any)?.id_aprobador}` : 'N/A')
-      }
+      { key: 'fecha_limite_pago', label: 'Fecha Límite', width: 12, align: 'center', formatter: (value) => this.formatDate(value as string) },
+      { key: 'fecha_creacion', label: 'Fecha Creación', width: 12, align: 'center', formatter: (value) => this.formatDate(value as string) },
+      { key: 'usuario_nombre', label: 'Solicitante', width: 20, formatter: (value, item) => typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '' },
+      { key: 'aprobador_nombre', label: 'Aprobador', width: 20, formatter: (value, item) => typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A' }
     ];
 
     const filename = this.generateFilename('Solicitudes', 'xlsx', solicitudes.length);
@@ -622,17 +609,17 @@ class ExportUtils {
     ];
 
     const tableData = solicitudes.map(item => columns.map(col => {
-      // Cast explícito para acceso dinámico
-      let value = (item as any)[col.key];
+      // Acceso seguro y tipado estricto
+      let value = item[col.key as keyof Solicitud];
       // Formatear valores específicos
       if (col.key === 'monto') {
-        value = this.formatCurrency(value);
+        value = this.formatCurrency(typeof value === 'number' ? value : Number(value));
       } else if (col.key === 'fecha_limite_pago' || col.key === 'fecha_creacion') {
-        value = this.formatDate(value);
+        value = this.formatDate(value as string);
       } else if (col.key === 'usuario_nombre') {
-        value = value || `Usuario ${(item as any).id_usuario}`;
+        value = typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '';
       } else if (col.key === 'aprobador_nombre') {
-        value = value && value !== 'N/A' ? value : ((item as any).id_aprobador ? `Aprobador ${(item as any).id_aprobador}` : 'N/A');
+        value = typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A';
       } else if (col.key === 'prioridad') {
         // Solo texto limpio
         if (String(value).toLowerCase() === 'alta') value = 'Alta';
@@ -671,11 +658,9 @@ class ExportUtils {
     const tableY = expY + 30;
     autoTable(doc, {
       willDrawCell: function(data) {
-        // Borrar el texto original antes de dibujar la celda de estado
         if (data.column.index === 3 && data.section === 'body') {
           data.cell.text[0] = '';
         }
-        // Borrar el texto original antes de dibujar la celda de prioridad
         if (data.column.index === 8 && data.section === 'body') {
           data.cell.text[0] = '';
         }
@@ -708,15 +693,14 @@ class ExportUtils {
       columnStyles: columns.reduce((acc, col, index) => {
         acc[index] = { 
           cellWidth: col.width,
-          halign: col.key === 'monto' ? 'right' : (col.key === 'id_solicitud' || col.key === 'estado' || col.key === 'prioridad' ? 'center' : 'left')
+          halign: (col.key === 'monto') ? 'right' : ((col.key === 'id_solicitud' || col.key === 'estado' || col.key === 'prioridad') ? 'center' : 'left')
         };
         return acc;
-      }, {} as any),
+      }, {} as { [key: number]: Partial<{ cellWidth: number; halign: 'left' | 'center' | 'right' }> }),
       didDrawCell: function(data) {
         // Colorear estados y prioridad para mejor visualización
-        // Columna Estado
         if (data.column.index === 3 && data.section === 'body') {
-          let estadoRaw: any = undefined;
+          let estadoRaw: unknown;
           if (Array.isArray(data.row.raw)) {
             estadoRaw = data.row.raw[3];
           } else if (data.cell.raw) {
@@ -726,7 +710,7 @@ class ExportUtils {
           }
           const estado = String(estadoRaw).toLowerCase();
           let color: [number, number, number] = [45, 45, 45];
-          let fontStyle = 'bold';
+          const fontStyle = 'bold';
           if (estado.includes('aprobada') || estado.includes('autorizada')) {
             color = COMPANY_CONFIG.colors.success as [number, number, number];
           } else if (estado.includes('pendiente')) {
@@ -743,113 +727,8 @@ class ExportUtils {
           });
         }
 
-        // Columna Prioridad
         if (data.column.index === 8 && data.section === 'body') {
-          let prioridadRaw: any = undefined;
-          if (Array.isArray(data.row.raw)) {
-            prioridadRaw = data.row.raw[8];
-          } else if (data.cell.raw) {
-            prioridadRaw = data.cell.raw;
-          } else {
-            prioridadRaw = data.cell.text[0];
-          }
-          const prioridad = String(prioridadRaw).toLowerCase();
-          let color: [number, number, number] = [45, 45, 45];
-          if (prioridad.includes('alta')) {
-            color = [220, 53, 69]; // Rojo
-          } else if (prioridad.includes('media')) {
-            color = [255, 193, 7]; // Amarillo
-          } else if (prioridad.includes('baja')) {
-            color = [40, 167, 69]; // Verde
-          }
-          doc.setTextColor(color[0], color[1], color[2]);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(10);
-          doc.text(prioridad.charAt(0).toUpperCase() + prioridad.slice(1), data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2, {
-            align: 'center',
-            baseline: 'middle'
-          });
-        }
-      }
-    });
-
-    autoTable(doc, {
-      willDrawCell: function(data) {
-        // Borrar el texto original antes de dibujar la celda de estado
-        if (data.column.index === 3 && data.section === 'body') {
-          data.cell.text[0] = '';
-        }
-        // Borrar el texto original antes de dibujar la celda de prioridad
-        if (data.column.index === 8 && data.section === 'body') {
-          data.cell.text[0] = '';
-        }
-      },
-      head: [columns.map(col => col.label)],
-      body: tableData,
-      startY: startY + 8,
-      theme: 'striped',
-      headStyles: {
-        fillColor: COMPANY_CONFIG.colors.primary,
-        textColor: [255, 255, 255],
-        fontStyle: 'bold',
-        fontSize: 11,
-        halign: 'center',
-        valign: 'middle',
-        cellPadding: { top: 6, right: 2, bottom: 6, left: 2 }
-      },
-      alternateRowStyles: { 
-        fillColor: [248, 249, 250] 
-      },
-      styles: {
-        fontSize: 9,
-        cellPadding: { top: 3, right: 2, bottom: 3, left: 2 },
-        valign: 'middle',
-        textColor: [45, 45, 45],
-        overflow: 'linebreak',
-        lineWidth: 0.3,
-        lineColor: [220, 220, 220]
-      },
-      columnStyles: columns.reduce((acc, col, index) => {
-        acc[index] = { 
-          cellWidth: col.width,
-          halign: col.key === 'monto' ? 'right' : (col.key === 'id_solicitud' || col.key === 'estado' || col.key === 'prioridad' ? 'center' : 'left')
-        };
-        return acc;
-      }, {} as any),
-      didDrawCell: function(data) {
-        // Colorear estados y prioridad para mejor visualización
-        // Columna Estado
-        if (data.column.index === 3 && data.section === 'body') {
-          let estadoRaw: any = undefined;
-          if (Array.isArray(data.row.raw)) {
-            estadoRaw = data.row.raw[3];
-          } else if (data.cell.raw) {
-            estadoRaw = data.cell.raw;
-          } else {
-            estadoRaw = data.cell.text[0];
-          }
-          const estado = String(estadoRaw).toLowerCase();
-          let color: [number, number, number] = [45, 45, 45];
-          let fontStyle = 'bold';
-          if (estado.includes('aprobada') || estado.includes('autorizada')) {
-            color = COMPANY_CONFIG.colors.success as [number, number, number];
-          } else if (estado.includes('pendiente')) {
-            color = COMPANY_CONFIG.colors.warning as [number, number, number];
-          } else if (estado.includes('rechazada')) {
-            color = COMPANY_CONFIG.colors.danger as [number, number, number];
-          }
-          doc.setTextColor(color[0], color[1], color[2]);
-          doc.setFont('helvetica', fontStyle);
-          doc.setFontSize(10);
-          doc.text(estado.charAt(0).toUpperCase() + estado.slice(1), data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2, {
-            align: 'center',
-            baseline: 'middle'
-          });
-        }
-
-        // Columna Prioridad
-        if (data.column.index === 8 && data.section === 'body') {
-          let prioridadRaw: any = undefined;
+          let prioridadRaw: unknown;
           if (Array.isArray(data.row.raw)) {
             prioridadRaw = data.row.raw[8];
           } else if (data.cell.raw) {
@@ -964,7 +843,7 @@ class ExportUtils {
         }
       },
       analisis_detallado: {
-        por_departamento: solicitudes.reduce((acc, s) => {
+        por_departamento: solicitudes.reduce((acc: Record<string, { cantidad: number; monto_total: number; monto_promedio: number }>, s) => {
           if (!acc[s.departamento]) {
             acc[s.departamento] = { cantidad: 0, monto_total: 0, monto_promedio: 0 };
           }
@@ -972,7 +851,7 @@ class ExportUtils {
           acc[s.departamento].monto_total += s.monto;
           acc[s.departamento].monto_promedio = acc[s.departamento].monto_total / acc[s.departamento].cantidad;
           return acc;
-        }, {} as Record<string, any>),
+        }, {}),
         por_tipo_pago: pagosPorTipo,
         tendencias_temporales: this.calculateTemporalTrends(solicitudes)
       }
@@ -983,18 +862,16 @@ class ExportUtils {
   }
 
   private static calculateTemporalTrends(solicitudes: Solicitud[]) {
-    const trends = solicitudes.reduce((acc, s) => {
+    const trends = solicitudes.reduce((acc: Record<string, { cantidad: number; monto_total: number; crecimiento_cantidad?: string; crecimiento_monto?: string }>, s) => {
       const fecha = new Date(s.fecha_creacion);
       const mes = `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}`;
-      
       if (!acc[mes]) {
         acc[mes] = { cantidad: 0, monto_total: 0 };
       }
       acc[mes].cantidad++;
       acc[mes].monto_total += s.monto;
-      
       return acc;
-    }, {} as Record<string, any>);
+    }, {});
 
     // Calcular crecimiento mes a mes
     const meses = Object.keys(trends).sort();
@@ -1040,8 +917,8 @@ class ExportUtils {
       return { isValid: false, errors };
     }
     // Validaciones específicas para solicitudes
-    if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null && 'monto' in (data[0] as any)) {
-      const solicitudes = data as any[];
+    if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null && 'monto' in (data[0] as Record<string, unknown>)) {
+      const solicitudes = data as Solicitud[];
       const invalidMontos = solicitudes.filter(s => !s.monto || s.monto <= 0);
       if (invalidMontos.length > 0) {
         errors.push(`${invalidMontos.length} solicitudes tienen montos inválidos`);

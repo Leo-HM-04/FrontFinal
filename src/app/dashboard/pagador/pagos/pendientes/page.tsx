@@ -263,7 +263,11 @@ export default function PagosPendientesPage() {
                                 #{pago.id_solicitud}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {(pago as any).nombre_usuario || (pago as any).usuario_nombre || '-'}
+                                {typeof pago.nombre_usuario === 'string' && pago.nombre_usuario
+                                  ? pago.nombre_usuario
+                                  : typeof pago.usuario_nombre === 'string' && pago.usuario_nombre
+                                  ? pago.usuario_nombre
+                                  : '-'}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={getDepartmentColorClass(pago.departamento)}>
@@ -289,7 +293,9 @@ export default function PagosPendientesPage() {
                                 {pago.banco_destino || ''}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {(pago as any).aprobador_nombre || (pago as any).nombre_aprobador || '-'}
+                                {typeof pago.aprobador_nombre === 'string' && pago.aprobador_nombre
+                                  ? pago.aprobador_nombre
+                                  : '-'}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div className="flex space-x-2">
