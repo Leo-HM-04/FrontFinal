@@ -361,6 +361,8 @@ export default function MisSolicitudesPage() {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Concepto</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Monto</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Cuenta Destino</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Tipo de Cuenta/Tarjeta</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Banco Destino</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Estado</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Fecha Creación</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Fecha Límite</th>
@@ -400,6 +402,16 @@ export default function MisSolicitudesPage() {
                             </td>
                             <td className="px-6 py-4">
                               <div className="text-white">{solicitud.cuenta_destino}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-white">
+                                {solicitud.tipo_cuenta_destino === 'Tarjeta'
+                                  ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
+                                  : solicitud.tipo_cuenta_destino || '-'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-white">{solicitud.banco_destino || '-'}</div>
                             </td>
                             <td className="px-6 py-4">
                               <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado)}`}>

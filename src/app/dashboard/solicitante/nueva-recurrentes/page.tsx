@@ -22,6 +22,8 @@ type FormState = {
   tipo_pago: string;
   frecuencia: string;
   siguiente_fecha: string;
+  tipo_cuenta_destino: string;
+  tipo_tarjeta: string;
 };
 
 const initialState: FormState = {
@@ -31,7 +33,9 @@ const initialState: FormState = {
   concepto: '',
   tipo_pago: '',
   frecuencia: '',
-  siguiente_fecha: ''
+  siguiente_fecha: '',
+  tipo_cuenta_destino: 'CLABE',
+  tipo_tarjeta: ''
 };
 
 type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string };
@@ -71,19 +75,35 @@ export default function NuevaRecurrentePage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     dispatch({ type: 'SET_FIELD', field: name as keyof FormState, value });
+    // Reset tipo_tarjeta si cambia tipo_cuenta_destino
+    if (name === 'tipo_cuenta_destino' && value === 'CLABE') {
+      dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta', value: '' });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'tipo_pago', 'frecuencia', 'siguiente_fecha'] as const;
+    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'tipo_pago', 'frecuencia', 'siguiente_fecha', 'tipo_cuenta_destino'] as const;
     for (const field of requiredFields) {
       if (!formData[field]) {
         toast.error(`Campo obligatorio faltante: ${field}`);
         setLoading(false);
         return;
       }
+    }
+    // Validación dinámica de cuenta destino
+    const cuenta = formData.cuenta_destino.replace(/[^0-9]/g, '');
+    if (formData.tipo_cuenta_destino === 'CLABE' && cuenta.length !== 18) {
+      toast.error('La cuenta CLABE debe tener exactamente 18 dígitos.');
+      setLoading(false);
+      return;
+    }
+    if (formData.tipo_cuenta_destino === 'Tarjeta' && cuenta.length !== 16) {
+      toast.error('La tarjeta debe tener exactamente 16 dígitos.');
+      setLoading(false);
+      return;
     }
 
     try {
@@ -126,6 +146,38 @@ export default function NuevaRecurrentePage() {
               <div className="flex flex-col md:flex-row gap-8 md:gap-12 w-full items-start">
                 {/* Columna Izquierda */}
                 <div className="flex-1 space-y-8 w-full md:max-w-[600px]">
+                  <div>
+                    <label className="text-white/90 block mb-3 font-medium">
+                      <CreditCard className="inline w-4 h-4 mr-2" />
+                      Tipo de Cuenta Destino *
+                    </label>
+                    <select
+                      name="tipo_cuenta_destino"
+                      value={formData.tipo_cuenta_destino}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
+                    >
+                      <option value="CLABE" className="text-black">CLABE</option>
+                      <option value="Tarjeta" className="text-black">Tarjeta</option>
+                    </select>
+                  </div>
+                  {formData.tipo_cuenta_destino === 'Tarjeta' && (
+                    <div>
+                      <label className="text-white/90 block mb-3 font-medium">Tipo de Tarjeta *</label>
+                      <select
+                        name="tipo_tarjeta"
+                        value={formData.tipo_tarjeta}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
+                      >
+                        <option value="" className="text-black">Selecciona tipo</option>
+                        <option value="Débito" className="text-black">Débito</option>
+                        <option value="Crédito" className="text-black">Crédito</option>
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="text-white/90 block mb-3 font-medium">
                       <Building className="inline w-4 h-4 mr-2" />
@@ -173,9 +225,18 @@ export default function NuevaRecurrentePage() {
                       type="text"
                       name="cuenta_destino"
                       value={formData.cuenta_destino}
-                      onChange={handleInputChange}
+                      onChange={e => {
+                        let value = e.target.value.replace(/[^0-9]/g, '');
+                        const maxLen = formData.tipo_cuenta_destino === 'Tarjeta' ? 16 : 18;
+                        value = value.slice(0, maxLen);
+                        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
+                      }}
                       required
+                      maxLength={formData.tipo_cuenta_destino === 'Tarjeta' ? 16 : 18}
+                      inputMode="numeric"
+                      autoComplete="off"
                       className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
+                      placeholder={formData.tipo_cuenta_destino === 'Tarjeta' ? 'Número de tarjeta (16 dígitos)' : 'Número de cuenta CLABE (18 dígitos)'}
                     />
                   </div>
                   <div>

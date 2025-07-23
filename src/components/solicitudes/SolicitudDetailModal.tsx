@@ -93,6 +93,18 @@ export function SolicitudDetailModal({
                   <p className="font-mono text-blue-900">{solicitud.cuenta_destino}</p>
                 </div>
                 <div>
+                  <span className="text-sm text-blue-700/70">Tipo de Cuenta/Tarjeta:</span>
+                  <p className="text-blue-900">
+                    {solicitud.tipo_cuenta_destino === 'Tarjeta'
+                      ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
+                      : solicitud.tipo_cuenta_destino || '-'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-blue-700/70">Banco Destino:</span>
+                  <p className="text-blue-900">{solicitud.banco_destino || '-'}</p>
+                </div>
+                <div>
                   <span className="text-sm text-blue-700/70">Fecha Límite:</span>
                   <p className="text-blue-900">{new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-CO')}</p>
                 </div>

@@ -61,6 +61,21 @@ export default function NuevaSolicitudPage() {
   const [checkingCuenta, setCheckingCuenta] = useState(false);
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
 
+  // Configuración dinámica para cuenta destino
+  const cuentaConfig = formData.tipo_cuenta_destino === 'Tarjeta'
+    ? {
+        maxLength: 16,
+        pattern: '^\d{16}$',
+        placeholder: 'Número de tarjeta (16 dígitos)',
+        errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
+      }
+    : {
+        maxLength: 18,
+        pattern: '^\d{18}$',
+        placeholder: 'Número de cuenta CLABE (18 dígitos)',
+        errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
+      };
+
   const departamentoOptions = [
     { value: 'contabilidad', label: 'Contabilidad' },
     { value: 'facturacion', label: 'Facturación' },
@@ -92,7 +107,18 @@ export default function NuevaSolicitudPage() {
     if (!value) {
       setErrors((prev) => ({ ...prev, [name]: 'Este campo es obligatorio' }));
     } else {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+      if (name === 'cuenta_destino') {
+        const maxLen = cuentaConfig.maxLength;
+        const val = value.replace(/[^0-9]/g, '').slice(0, maxLen);
+        // Solo mostrar error si el valor tiene la longitud máxima y no cumple el patrón
+        if (val.length === maxLen && !new RegExp(cuentaConfig.pattern).test(val)) {
+          setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
+        } else {
+          setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+        }
+      } else {
+        setErrors((prev) => ({ ...prev, [name]: undefined }));
+      }
     }
   };
 
@@ -305,6 +331,10 @@ export default function NuevaSolicitudPage() {
                       <option value="Banco del Bajío" className="text-black">Banco del Bajío</option>
                       <option value="Banco Multiva" className="text-black">Banco Multiva</option>
                       <option value="Banco Famsa" className="text-black">Banco Famsa</option>
+                      <option value="Banco del Bajío" className="text-black">Banco del Bajío</option>
+                      <option value="Banco Multiva" className="text-black">Banco Multiva</option>
+                      <option value="Otros" className="text-black">Otros</option>
+                      <option value="No Aplica" className="text-black">No Aplica</option>
                     </select>
                   </div>
                   <div className="mb-0">
@@ -316,24 +346,25 @@ export default function NuevaSolicitudPage() {
                       type="text"
                       name="cuenta_destino"
                       value={formData.cuenta_destino}
-                      onChange={e => {
-                        const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 18);
-                        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
-                        setCuentaValida(null);
-                        if (!value) {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
-                        } else if (!/^\d{18}$/.test(value)) {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: 'La cuenta CLABE debe tener exactamente 18 dígitos.' }));
-                        } else {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
-                        }
-                      }}
+                        onChange={e => {
+                          const maxLen = cuentaConfig.maxLength;
+                          const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                          dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
+                          setCuentaValida(null);
+                          // Solo mostrar error si la longitud es incorrecta o el patrón no se cumple
+                          if (value.length > 0 && value.length < maxLen) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: `Debe tener exactamente ${maxLen} dígitos.` }));
+                          } else if (value.length === maxLen && !new RegExp(cuentaConfig.pattern).test(value)) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                          }
+                        }}
                       onBlur={e => verificarCuentaDestino(e.target.value)}
-                      placeholder="Número de cuenta CLABE (18 dígitos)"
+                      placeholder={cuentaConfig.placeholder}
                       required
-                      maxLength={18}
+                      maxLength={cuentaConfig.maxLength}
                       inputMode="numeric"
-                      pattern="^\d{18}$"
                       autoComplete="off"
                       className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.cuenta_destino ? 'border-red-400' : ''}`}
                     />
@@ -346,7 +377,10 @@ export default function NuevaSolicitudPage() {
                     {cuentaValida === true && !checkingCuenta && (
                       <span className="text-green-400 text-sm ml-2">Cuenta válida</span>
                     )}
-                    {errors.cuenta_destino && <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>}
+                    {/* Solo mostrar el error si el campo tiene valor */}
+                        {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
+                          <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
+                        )}
                   </div>
                 </div>
                 {/* Columna derecha: datos de la solicitud */}
@@ -518,7 +552,17 @@ export default function NuevaSolicitudPage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={loading || Object.values(errors).some(Boolean)}
+                  disabled={
+                    loading ||
+                    !formData.departamento ||
+                    !formData.monto ||
+                    !formData.cuenta_destino ||
+                    !formData.concepto ||
+                    !formData.fecha_limite_pago ||
+                    !formData.factura_file ||
+                    cuentaValida === false ||
+                    checkingCuenta
+                  }
                   className="bg-green-600 text-white hover:bg-green-700 shadow-lg border-0 px-8 py-4 font-medium text-base flex items-center gap-2"
                 >
                   {loading ? (

@@ -23,6 +23,9 @@ type FormState = {
   tipo_pago: string;
   fecha_limite_pago: string;
   factura_file: File | null;
+  tipo_cuenta_destino: string;
+  tipo_tarjeta: string;
+  banco_destino: string;
 };
 
 type FormAction =
@@ -36,7 +39,10 @@ const initialState: FormState = {
   concepto: '',
   tipo_pago: 'transferencia',
   fecha_limite_pago: '',
-  factura_file: null
+  factura_file: null,
+  tipo_cuenta_destino: 'CLABE',
+  tipo_tarjeta: '',
+  banco_destino: ''
 };
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
@@ -100,6 +106,10 @@ export default function EditarSolicitudPage() {
       setLoading(true);
       try {
         const data: Solicitud = await SolicitudesService.getById(idNum);
+        // Forzar valores válidos para los campos clave
+        const tipo_cuenta_destino = (data.tipo_cuenta_destino === undefined || data.tipo_cuenta_destino === null || data.tipo_cuenta_destino === '') ? 'CLABE' : data.tipo_cuenta_destino;
+        const tipo_tarjeta = (data.tipo_tarjeta === undefined || data.tipo_tarjeta === null) ? '' : data.tipo_tarjeta;
+        const banco_destino = (data.banco_destino === undefined || data.banco_destino === null) ? '' : data.banco_destino;
         dispatch({ type: 'SET_ALL', payload: {
           departamento: data.departamento || '',
           monto: String(data.monto ?? ''),
@@ -107,7 +117,10 @@ export default function EditarSolicitudPage() {
           concepto: data.concepto || '',
           tipo_pago: data.tipo_pago || 'transferencia',
           fecha_limite_pago: data.fecha_limite_pago || '',
-          factura_file: null
+          factura_file: null,
+          tipo_cuenta_destino,
+          tipo_tarjeta,
+          banco_destino
         }});
         setFacturaUrl(data.factura_url || null);
         setFechaLimitePago(data.fecha_limite_pago ? new Date(data.fecha_limite_pago) : null);
@@ -125,6 +138,10 @@ export default function EditarSolicitudPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     dispatch({ type: 'SET_FIELD', field: name as keyof FormState, value });
+    // Reset tipo_tarjeta si cambia tipo_cuenta_destino
+    if (name === 'tipo_cuenta_destino' && value === 'CLABE') {
+      dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta', value: '' });
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof FormState) => {
@@ -182,13 +199,31 @@ export default function EditarSolicitudPage() {
       return;
     }
     try {
-      const requiredFields: (keyof FormState)[] = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'fecha_limite_pago'];
+      const requiredFields: (keyof FormState)[] = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'fecha_limite_pago', 'tipo_cuenta_destino'];
       for (const field of requiredFields) {
         if (!formData[field]) {
           toast.error(`Por favor completa el campo: ${field}`);
           setLoading(false);
           return;
         }
+      }
+      // Validación especial para concepto
+      if (!formData.concepto || formData.concepto.trim().length < 3) {
+        toast.error('Debes actualizar el campo concepto para poder guardar los cambios.');
+        setLoading(false);
+        return;
+      }
+      // Validación dinámica de cuenta destino
+      const cuenta = formData.cuenta_destino.replace(/[^0-9]/g, '');
+      if (formData.tipo_cuenta_destino === 'CLABE' && cuenta.length !== 18) {
+        toast.error('La cuenta CLABE debe tener exactamente 18 dígitos.');
+        setLoading(false);
+        return;
+      }
+      if (formData.tipo_cuenta_destino === 'Tarjeta' && cuenta.length !== 16) {
+        toast.error('La tarjeta debe tener exactamente 16 dígitos.');
+        setLoading(false);
+        return;
       }
       const solicitudData = {
         departamento: formData.departamento,
@@ -199,7 +234,10 @@ export default function EditarSolicitudPage() {
         fecha_limite_pago: formData.fecha_limite_pago
           ? format(new Date(formData.fecha_limite_pago), "yyyy-MM-dd")
           : "",
-        factura: formData.factura_file ?? undefined
+        factura: formData.factura_file ?? undefined,
+        tipo_cuenta_destino: formData.tipo_cuenta_destino,
+        tipo_tarjeta: formData.tipo_cuenta_destino === 'Tarjeta' ? formData.tipo_tarjeta : '',
+        banco_destino: formData.banco_destino
       };
       await SolicitudesService.updateWithFiles(idNum!, solicitudData);
       toast.success('Solicitud actualizada exitosamente');
@@ -250,6 +288,64 @@ export default function EditarSolicitudPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                 <div>
                   <label className="block text-base font-medium text-white/90 mb-3">
+                    <CreditCard className="w-4 h-4 inline mr-2" />
+                    Tipo de Cuenta Destino *
+                  </label>
+                  <select
+                    name="tipo_cuenta_destino"
+                    value={formData.tipo_cuenta_destino}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                  >
+                    <option value="CLABE" className="text-black">CLABE</option>
+                    <option value="Tarjeta" className="text-black">Tarjeta</option>
+                  </select>
+                </div>
+                {formData.tipo_cuenta_destino === 'Tarjeta' && (
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">Tipo de Tarjeta *</label>
+                    <select
+                      name="tipo_tarjeta"
+                      value={formData.tipo_tarjeta}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                    >
+                      <option value="" className="text-black">Selecciona tipo</option>
+                      <option value="Débito" className="text-black">Débito</option>
+                      <option value="Crédito" className="text-black">Crédito</option>
+                    </select>
+                  </div>
+                )}
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">Banco Destino (opcional)</label>
+                  <select
+                    name="banco_destino"
+                    value={formData.banco_destino}
+                    onChange={handleInputChange}
+                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                  >
+                    <option value="" className="text-black">Selecciona banco</option>
+                    <option value="BBVA" className="text-black">BBVA</option>
+                    <option value="Banorte" className="text-black">Banorte</option>
+                    <option value="Santander" className="text-black">Santander</option>
+                    <option value="Citibanamex" className="text-black">Citibanamex</option>
+                    <option value="HSBC" className="text-black">HSBC</option>
+                    <option value="Scotiabank" className="text-black">Scotiabank</option>
+                    <option value="Inbursa" className="text-black">Inbursa</option>
+                    <option value="Banco Azteca" className="text-black">Banco Azteca</option>
+                    <option value="Bancoppel" className="text-black">Bancoppel</option>
+                    <option value="Afirme" className="text-black">Afirme</option>
+                    <option value="Banregio" className="text-black">Banregio</option>
+                    <option value="Banjército" className="text-black">Banjército</option>
+                    <option value="Banco del Bajío" className="text-black">Banco del Bajío</option>
+                    <option value="Banco Multiva" className="text-black">Banco Multiva</option>
+                    <option value="Banco Famsa" className="text-black">Banco Famsa</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">
                     <Building className="w-4 h-4 inline mr-2" />
                     Departamento *
                   </label>
@@ -296,16 +392,17 @@ export default function EditarSolicitudPage() {
                     name="cuenta_destino"
                     value={formData.cuenta_destino}
                     onChange={e => {
-                      const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 18);
+                      let value = e.target.value.replace(/[^0-9]/g, '');
+                      const maxLen = formData.tipo_cuenta_destino === 'Tarjeta' ? 16 : 18;
+                      value = value.slice(0, maxLen);
                       dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                       setCuentaValida(null);
                     }}
                     onBlur={e => verificarCuentaDestino(e.target.value)}
-                    placeholder="Número de cuenta (máx. 18 dígitos)"
+                    placeholder={formData.tipo_cuenta_destino === 'Tarjeta' ? 'Número de tarjeta (16 dígitos)' : 'Número de cuenta CLABE (18 dígitos)'}
                     required
-                    maxLength={18}
+                    maxLength={formData.tipo_cuenta_destino === 'Tarjeta' ? 16 : 18}
                     inputMode="numeric"
-                    pattern="[0-9]*"
                     autoComplete="off"
                     className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                   />

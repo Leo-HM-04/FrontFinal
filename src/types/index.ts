@@ -28,6 +28,7 @@ export interface AuthResponse {
 export type SolicitudEstado = 'pendiente' | 'autorizada' | 'rechazada' | 'pagada';
 
 export interface Solicitud {
+  tipo_cuenta_destino?: string;
   id_solicitud: number;
   folio?: string;
   id_usuario: number;
@@ -49,6 +50,8 @@ export interface Solicitud {
   tipo_pago?: string; // <-- agregado para edición
   nombre_usuario?: string; // <-- Campo agregado
   fecha_pago?: string; // <-- Campo agregado para historial
+  tipo_tarjeta?: string;
+  banco_destino?: string;
 }
 
 export interface CreateSolicitudData {

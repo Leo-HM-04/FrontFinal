@@ -132,6 +132,9 @@ export class SolicitudesService {
     concepto: string;
     tipo_pago: string;
     fecha_limite_pago: string;
+    tipo_cuenta_destino: string;
+    tipo_tarjeta?: string;
+    banco_destino?: string;
     factura?: File | null;
   }): Promise<unknown> {
     const token = localStorage.getItem('token');
@@ -142,9 +145,15 @@ export class SolicitudesService {
     formData.append('concepto', data.concepto);
     formData.append('tipo_pago', data.tipo_pago);
     formData.append('fecha_limite_pago', data.fecha_limite_pago || '');
+    // Siempre enviar el campo factura, aunque sea vacío, para que el backend lo maneje igual que en createWithFiles
     if (data.factura instanceof File) {
       formData.append('factura', data.factura);
+    } else {
+      formData.append('factura', '');
     }
+    formData.append('tipo_cuenta_destino', data.tipo_cuenta_destino || '');
+    formData.append('tipo_tarjeta', data.tipo_tarjeta || '');
+    formData.append('banco_destino', data.banco_destino || '');
     // DEBUG: log FormData
     // for (let pair of formData.entries()) {
     //   console.log(pair[0]+ ': ' + pair[1]);
