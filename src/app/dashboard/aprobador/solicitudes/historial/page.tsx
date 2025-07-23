@@ -247,6 +247,8 @@ export default function HistorialSolicitudesPage() {
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Revisión</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Cuenta/Tarjeta</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Banco Destino</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detalles</th>
                             </tr>
                           </thead>
@@ -295,6 +297,13 @@ export default function HistorialSolicitudesPage() {
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {solicitud.fecha_revision ? new Date(solicitud.fecha_revision).toLocaleDateString('es-CO') : '-'}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {solicitud.tipo_cuenta_destino ? solicitud.tipo_cuenta_destino : ''}
+                                    {solicitud.tipo_tarjeta ? ` / ${solicitud.tipo_tarjeta}` : ''}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {solicitud.banco_destino || ''}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <Button 

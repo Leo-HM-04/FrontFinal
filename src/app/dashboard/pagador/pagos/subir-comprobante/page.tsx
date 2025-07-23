@@ -148,6 +148,8 @@ export default function HistorialPagosPage() {
                     <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Cuenta Destino</th>
                     <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Concepto</th>
                     <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Tipo Pago</th>
+                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Tipo de Cuenta/Tarjeta</th>
+                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Banco Destino</th>
                     <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Estado</th>
                     <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Fecha Límite</th>
                     <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Fecha Pago</th>
@@ -177,6 +179,8 @@ export default function HistorialPagosPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-base text-blue-700 font-extrabold border-b border-blue-100">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.cuenta_destino}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.concepto}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.tipo_cuenta_destino ? pago.tipo_cuenta_destino : ''}{pago.tipo_tarjeta ? ` / ${pago.tipo_tarjeta}` : ''}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.banco_destino || ''}</td>
                       <td className={
                         `px-6 py-4 whitespace-nowrap text-base font-extrabold border-b border-blue-100 flex items-center gap-2 rounded-xl shadow ` +
                         (pago.estado === 'pagada'

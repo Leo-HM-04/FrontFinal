@@ -248,6 +248,9 @@ export default function PagosPendientesPage() {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Estado
                             </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Cuenta/Tarjeta</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Banco Destino</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aprobador</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Acciones
                             </th>
@@ -260,7 +263,7 @@ export default function PagosPendientesPage() {
                                 #{pago.id_solicitud}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {pago.nombre_usuario || '-'}
+                                {(pago as any).nombre_usuario || (pago as any).usuario_nombre || '-'}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={getDepartmentColorClass(pago.departamento)}>
@@ -277,6 +280,16 @@ export default function PagosPendientesPage() {
                                 <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                                   Autorizada
                                 </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {pago.tipo_cuenta_destino ? pago.tipo_cuenta_destino : ''}
+                                {pago.tipo_tarjeta ? ` / ${pago.tipo_tarjeta}` : ''}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {pago.banco_destino || ''}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {(pago as any).aprobador_nombre || (pago as any).nombre_aprobador || '-'}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div className="flex space-x-2">

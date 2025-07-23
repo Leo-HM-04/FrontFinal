@@ -87,7 +87,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-gray-500">Solicitante:</p>
-                <p className="font-medium text-gray-800">{pago.nombre_usuario || '-'}</p>
+                <p className="font-medium text-gray-800">{(pago as any).nombre_usuario || (pago as any).usuario_nombre || '-'}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Departamento:</p>

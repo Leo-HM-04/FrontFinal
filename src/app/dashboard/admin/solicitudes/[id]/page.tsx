@@ -198,6 +198,18 @@ export default function SolicitudDetailPage() {
                       <p className="font-mono text-white">{solicitud.cuenta_destino}</p>
                     </div>
                     <div>
+                      <span className="text-sm text-white/70">Tipo de Cuenta/Tarjeta:</span>
+                      <p className="text-white">
+                        {solicitud.tipo_cuenta_destino === 'Tarjeta'
+                          ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
+                          : solicitud.tipo_cuenta_destino || '-'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm text-white/70">Banco Destino:</span>
+                      <p className="text-white">{solicitud.banco_destino || '-'}</p>
+                    </div>
+                    <div>
                       <span className="text-sm text-white/70">Fecha Límite de Pago:</span>
                       <p className="text-white flex items-center">
                         <Calendar className="w-4 h-4 mr-2 text-blue-300" />

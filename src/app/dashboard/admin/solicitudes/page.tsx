@@ -254,6 +254,8 @@ export default function SolicitudesPage() {
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Folio</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Solicitante</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Departamento</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Tipo de Cuenta/Tarjeta</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Banco Destino</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Monto</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Estado</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Fecha</th>
@@ -270,6 +272,14 @@ export default function SolicitudesPage() {
                               <span className={`inline-flex items-center px-3 py-1 rounded-full border font-bold text-xs uppercase tracking-wide shadow-sm ${getDepartamentoColor(solicitud.departamento)}`} style={{minWidth: 90, justifyContent: 'center'}}>
                                 {solicitud.departamento?.toUpperCase()}
                               </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {solicitud.tipo_cuenta_destino === 'Tarjeta'
+                                ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
+                                : solicitud.tipo_cuenta_destino || '-'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {solicitud.banco_destino || '-'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-base font-semibold">
                               {formatMontoVisual(solicitud.monto)}
