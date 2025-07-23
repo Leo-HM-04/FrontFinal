@@ -241,200 +241,212 @@ export default function NuevaSolicitudPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-10">
-              {/* Tipo de cuenta destino */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
-                    <CreditCard className="w-4 h-4 inline mr-2" />
-                    Tipo de Cuenta Destino *
-                  </label>
-                  <select
-                    name="tipo_cuenta_destino"
-                    value={formData.tipo_cuenta_destino}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
-                  >
-                    <option value="CLABE">CLABE</option>
-                    <option value="Tarjeta">Tarjeta</option>
-                  </select>
-                </div>
-                {formData.tipo_cuenta_destino === 'Tarjeta' && (
-                  <div>
+            <form onSubmit={handleSubmit} className="space-y-10 max-w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0 w-full">
+                {/* Columna izquierda: datos bancarios */}
+                <div className="flex-1 space-y-8">
+                  <div className="mb-0">
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      Tipo de Tarjeta
+                      <CreditCard className="w-4 h-4 inline mr-2" />
+                      Tipo de Cuenta Destino *
                     </label>
                     <select
-                      name="tipo_tarjeta"
-                      value={formData.tipo_tarjeta}
+                      name="tipo_cuenta_destino"
+                      value={formData.tipo_cuenta_destino}
                       onChange={handleInputChange}
                       required
                       className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                     >
-                      <option value="">Selecciona tipo</option>
-                      <option value="Débito">Débito</option>
-                      <option value="Crédito">Crédito</option>
+                      <option value="CLABE" className="text-black">CLABE</option>
+                      <option value="Tarjeta" className="text-black">Tarjeta</option>
                     </select>
                   </div>
-                )}
-                <div className="md:col-span-2">
-                  <label className="block text-base font-medium text-white/90 mb-3">
-                    Banco (opcional)
-                  </label>
-                  <input
-                    type="text"
-                    name="banco_destino"
-                    value={formData.banco_destino}
-                    onChange={handleInputChange}
-                    placeholder="Nombre del banco"
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
-                  />
-                </div>
-              </div>
-              {/* Información Básica */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
-                    <Building className="w-4 h-4 inline mr-2" />
-                    Departamento *
-                  </label>
-                  <select
-                    name="departamento"
-                    value={formData.departamento}
-                    onChange={handleInputChange}
-                    required
-                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.departamento ? 'border-red-400' : ''}`}
-                  >
-                    <option value="" className="text-gray-900">Seleccionar departamento</option>
-                    {departamentoOptions.map(dept => (
-                      <option key={dept.value} value={dept.value} className="text-gray-900">
-                        {dept.label}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.departamento && <span className="text-red-400 text-sm mt-1 block">{errors.departamento}</span>}
-                </div>
-
-                <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
-                    <DollarSign className="w-4 h-4 inline mr-2" />
-                    Monto *
-                  </label>
-                  {/* Campo de Monto mejorado */}
-                  <NumericFormat
-                    value={formData.monto}
-                    name="monto"
-                    thousandSeparator="," 
-                    decimalSeparator="."
-                    allowNegative={false}
-                    allowLeadingZeros={false}
-                    decimalScale={2}
-                    fixedDecimalScale
-                    placeholder="0.00"
-                    required
-                    onValueChange={({ value }) => {
-                      dispatch({ type: 'SET_FIELD', field: 'monto', value });
-                      if (!value) {
-                        setErrors((prev) => ({ ...prev, monto: 'Este campo es obligatorio' }));
-                      } else {
-                        setErrors((prev) => ({ ...prev, monto: undefined }));
-                      }
-                    }}
-                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
-                  />  
-                  {errors.monto && <span className="text-red-400 text-sm mt-1 block">{errors.monto}</span>}
-                </div>
-
-                <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
-                    <CreditCard className="w-4 h-4 inline mr-2" />
-                    Cuenta Destino *
-                  </label>
-                  <input
-                    type="text"
-                    name="cuenta_destino"
-                    value={formData.cuenta_destino}
-                    onChange={e => {
-                      const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 18);
-                      dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
-                      setCuentaValida(null);
-                      if (!value) {
-                        setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
-                      } else if (!/^\d{18}$/.test(value)) {
-                        setErrors((prev) => ({ ...prev, cuenta_destino: 'La cuenta CLABE debe tener exactamente 18 dígitos.' }));
-                      } else {
-                        setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
-                      }
-                    }}
-                    onBlur={e => verificarCuentaDestino(e.target.value)}
-                    placeholder="Número de cuenta CLABE (18 dígitos)"
-                    required
-                    maxLength={18}
-                    inputMode="numeric"
-                    pattern="^\d{18}$"
-                    autoComplete="off"
-                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.cuenta_destino ? 'border-red-400' : ''}`}
-                  />
-                  {checkingCuenta && (
-                    <span className="text-blue-300 text-sm ml-2">Verificando cuenta...</span>
+                  {formData.tipo_cuenta_destino === 'Tarjeta' && (
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Tipo de Tarjeta
+                      </label>
+                      <select
+                        name="tipo_tarjeta"
+                        value={formData.tipo_tarjeta}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                      >
+                        <option value="" className="text-black">Selecciona tipo</option>
+                        <option value="Débito" className="text-black">Débito</option>
+                        <option value="Crédito" className="text-black">Crédito</option>
+                      </select>
+                    </div>
                   )}
-                  {cuentaValida === false && !checkingCuenta && (
-                    <span className="text-red-400 text-sm ml-2">Cuenta no válida o no existe</span>
-                  )}
-                  {cuentaValida === true && !checkingCuenta && (
-                    <span className="text-green-400 text-sm ml-2">Cuenta válida</span>
-                  )}
-                  {errors.cuenta_destino && <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>}
-                </div>
-
-                <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
-                    Tipo de Pago
-                  </label>
-                  <select
-                    name="tipo_pago"
-                    value={formData.tipo_pago}
-                    onChange={handleInputChange}
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
-                  >
-                    {tipoPagoOptions.map(tipo => (
-                      <option key={tipo.value} value={tipo.value} className="text-gray-900">
-                        {tipo.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-base font-medium text-white/90 mb-3">
-                    <Calendar className="w-4 h-4 inline mr-2" />
-                    Fecha Límite de Pago *
-                  </label>
-                  <div className="relative">
-                    <DatePicker
-                      selected={fechaLimitePago}
-                      onChange={(date: Date | null) => {
-                        setFechaLimitePago(date);
-                        dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: date ? date.toISOString().split('T')[0] : '' });
-                        if (!date) {
-                          setErrors((prev) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
+                  <div className="mb-0">
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Banco (opcional)
+                    </label>
+                    <select
+                      name="banco_destino"
+                      value={formData.banco_destino}
+                      onChange={handleInputChange}
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                    >
+                      <option value="" className="text-black">Selecciona banco</option>
+                      <option value="BBVA" className="text-black">BBVA</option>
+                      <option value="Banorte" className="text-black">Banorte</option>
+                      <option value="Santander" className="text-black">Santander</option>
+                      <option value="Citibanamex" className="text-black">Citibanamex</option>
+                      <option value="HSBC" className="text-black">HSBC</option>
+                      <option value="Scotiabank" className="text-black">Scotiabank</option>
+                      <option value="Inbursa" className="text-black">Inbursa</option>
+                      <option value="Banco Azteca" className="text-black">Banco Azteca</option>
+                      <option value="Bancoppel" className="text-black">Bancoppel</option>
+                      <option value="Afirme" className="text-black">Afirme</option>
+                      <option value="Banregio" className="text-black">Banregio</option>
+                      <option value="Banjército" className="text-black">Banjército</option>
+                      <option value="Banco del Bajío" className="text-black">Banco del Bajío</option>
+                      <option value="Banco Multiva" className="text-black">Banco Multiva</option>
+                      <option value="Banco Famsa" className="text-black">Banco Famsa</option>
+                    </select>
+                  </div>
+                  <div className="mb-0">
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      <CreditCard className="w-4 h-4 inline mr-2" />
+                      Cuenta Destino *
+                    </label>
+                    <input
+                      type="text"
+                      name="cuenta_destino"
+                      value={formData.cuenta_destino}
+                      onChange={e => {
+                        const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 18);
+                        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
+                        setCuentaValida(null);
+                        if (!value) {
+                          setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
+                        } else if (!/^\d{18}$/.test(value)) {
+                          setErrors((prev) => ({ ...prev, cuenta_destino: 'La cuenta CLABE debe tener exactamente 18 dígitos.' }));
                         } else {
-                          setErrors((prev) => ({ ...prev, fecha_limite_pago: undefined }));
+                          setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
                         }
                       }}
-                      dateFormat="yyyy-MM-dd"
-                      minDate={new Date()}
-                      placeholderText="Selecciona la fecha"
-                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.fecha_limite_pago ? 'border-red-400' : ''}`}
-                      calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg"
-                      locale={es}
+                      onBlur={e => verificarCuentaDestino(e.target.value)}
+                      placeholder="Número de cuenta CLABE (18 dígitos)"
+                      required
+                      maxLength={18}
+                      inputMode="numeric"
+                      pattern="^\d{18}$"
+                      autoComplete="off"
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.cuenta_destino ? 'border-red-400' : ''}`}
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Calendar className="w-5 h-5 text-white/70" />
-                    </span>
+                    {checkingCuenta && (
+                      <span className="text-blue-300 text-sm ml-2">Verificando cuenta...</span>
+                    )}
+                    {cuentaValida === false && !checkingCuenta && (
+                      <span className="text-red-400 text-sm ml-2">Cuenta no válida o no existe</span>
+                    )}
+                    {cuentaValida === true && !checkingCuenta && (
+                      <span className="text-green-400 text-sm ml-2">Cuenta válida</span>
+                    )}
+                    {errors.cuenta_destino && <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>}
                   </div>
-                  {errors.fecha_limite_pago && <span className="text-red-400 text-sm mt-1 block">{errors.fecha_limite_pago}</span>}
+                </div>
+                {/* Columna derecha: datos de la solicitud */}
+                <div className="flex-1 space-y-8">
+                  <div className="mb-0">
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      <Building className="w-4 h-4 inline mr-2" />
+                      Departamento *
+                    </label>
+                    <select
+                      name="departamento"
+                      value={formData.departamento}
+                      onChange={handleInputChange}
+                      required
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.departamento ? 'border-red-400' : ''}`}
+                    >
+                      <option value="" className="text-gray-900">Seleccionar departamento</option>
+                      {departamentoOptions.map(dept => (
+                        <option key={dept.value} value={dept.value} className="text-gray-900">
+                          {dept.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.departamento && <span className="text-red-400 text-sm mt-1 block">{errors.departamento}</span>}
+                  </div>
+                  <div className="mb-0">
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      <DollarSign className="w-4 h-4 inline mr-2" />
+                      Monto *
+                    </label>
+                    <NumericFormat
+                      value={formData.monto}
+                      name="monto"
+                      thousandSeparator="," 
+                      decimalSeparator="."
+                      allowNegative={false}
+                      allowLeadingZeros={false}
+                      decimalScale={2}
+                      fixedDecimalScale
+                      placeholder="0.00"
+                      required
+                      onValueChange={({ value }) => {
+                        dispatch({ type: 'SET_FIELD', field: 'monto', value });
+                        if (!value) {
+                          setErrors((prev) => ({ ...prev, monto: 'Este campo es obligatorio' }));
+                        } else {
+                          setErrors((prev) => ({ ...prev, monto: undefined }));
+                        }
+                      }}
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
+                    />  
+                    {errors.monto && <span className="text-red-400 text-sm mt-1 block">{errors.monto}</span>}
+                  </div>
+                  <div className="mb-0">
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Tipo de Pago
+                    </label>
+                    <select
+                      name="tipo_pago"
+                      value={formData.tipo_pago}
+                      onChange={handleInputChange}
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                    >
+                      {tipoPagoOptions.map(tipo => (
+                        <option key={tipo.value} value={tipo.value} className="text-gray-900">
+                          {tipo.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      <Calendar className="w-4 h-4 inline mr-2" />
+                      Fecha Límite de Pago *
+                    </label>
+                    <div className="relative w-full flex items-center">
+                      <DatePicker
+                        selected={fechaLimitePago}
+                        onChange={(date: Date | null) => {
+                          setFechaLimitePago(date);
+                          dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: date ? date.toISOString().split('T')[0] : '' });
+                          if (!date) {
+                            setErrors((prev) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, fecha_limite_pago: undefined }));
+                          }
+                        }}
+                        dateFormat="yyyy-MM-dd"
+                        minDate={new Date()}
+                        placeholderText="Selecciona la fecha"
+                        className={`w-full px-5 py-4 pr-12 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.fecha_limite_pago ? 'border-red-400' : ''}`}
+                        calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg"
+                        locale={es}
+                      />
+                      <span className="absolute right-4 pointer-events-none">
+                        <Calendar className="w-5 h-5 text-white/70" />
+                      </span>
+                    </div>
+                    {errors.fecha_limite_pago && <span className="text-red-400 text-sm mt-1 block">{errors.fecha_limite_pago}</span>}
+                  </div>
                 </div>
               </div>
 
