@@ -23,8 +23,11 @@ export class SolicitudesService {
     return response.data;
   }
   static async getAll(): Promise<Solicitud[]> {
+    const token = localStorage.getItem('token');
     try {
-      const response = await api.get<Solicitud[]>('/solicitudes');
+      const response = await api.get<Solicitud[]>('/solicitudes', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
       return response.data;
     } catch (error: unknown) {
       if (typeof error === 'object' && error !== null) {
@@ -43,31 +46,49 @@ export class SolicitudesService {
   }
 
   static async getById(id: number): Promise<Solicitud> {
-    const response = await api.get<Solicitud>(`/solicitudes/${id}`);
+    const token = localStorage.getItem('token');
+    const response = await api.get<Solicitud>(`/solicitudes/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
     return response.data;
   }
 
   static async create(solicitudData: CreateSolicitudData): Promise<Solicitud> {
-    const response = await api.post<Solicitud>('/solicitudes', solicitudData);
+    const token = localStorage.getItem('token');
+    const response = await api.post<Solicitud>('/solicitudes', solicitudData, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
     return response.data;
   }
 
   static async updateEstado(id: number, estadoData: UpdateEstadoData): Promise<Solicitud> {
-    const response = await api.put<Solicitud>(`/solicitudes/${id}/estado`, estadoData);
+    const token = localStorage.getItem('token');
+    const response = await api.put<Solicitud>(`/solicitudes/${id}/estado`, estadoData, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
     return response.data;
   }
 
   static async delete(id: number): Promise<void> {
-    await api.delete(`/solicitudes/${id}`);
+    const token = localStorage.getItem('token');
+    await api.delete(`/solicitudes/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
   }
 
   static async getMySolicitudes(): Promise<Solicitud[]> {
-    const response = await api.get<Solicitud[]>('/solicitudes');
+    const token = localStorage.getItem('token');
+    const response = await api.get<Solicitud[]>('/solicitudes', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
     return response.data;
   }
 
   static async update(id: number, data: Partial<Solicitud>): Promise<Solicitud> {
-    const response = await api.put<Solicitud>(`/solicitudes/${id}`, data);
+    const token = localStorage.getItem('token');
+    const response = await api.put<Solicitud>(`/solicitudes/${id}`, data, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
     return response.data;
   }
 
@@ -83,6 +104,7 @@ export class SolicitudesService {
     fecha_limite_pago: string;
     factura: File;
   }): Promise<unknown> {
+    const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('departamento', data.departamento);
     formData.append('monto', String(data.monto));
@@ -95,7 +117,10 @@ export class SolicitudesService {
     formData.append('tipo_tarjeta', data.tipo_tarjeta || '');
     formData.append('banco_destino', data.banco_destino || '');
     const response = await api.post('/solicitudes', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
     });
     return response.data;
   }
@@ -109,6 +134,7 @@ export class SolicitudesService {
     fecha_limite_pago: string;
     factura?: File | null;
   }): Promise<unknown> {
+    const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('departamento', data.departamento);
     formData.append('monto', String(data.monto));
@@ -124,12 +150,18 @@ export class SolicitudesService {
     //   console.log(pair[0]+ ': ' + pair[1]);
     // }
     const response = await api.put(`/solicitudes/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
     });
     return response.data;
   }
 
   static async deleteSolicitante(id: number): Promise<void> {
-    await api.delete(`/solicitudes/solicitante/${id}`);
+    const token = localStorage.getItem('token');
+    await api.delete(`/solicitudes/solicitante/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
   }
 }
