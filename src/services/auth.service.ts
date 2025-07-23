@@ -50,7 +50,7 @@ export class AuthService {
   static async logout(): Promise<void> {
     try {
       await UsuariosService.logout();
-    } catch (e) {
+    } catch  {
       // Si el backend falla, igual borra el token local
     }
     Cookies.remove('auth_token');

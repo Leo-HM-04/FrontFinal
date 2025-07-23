@@ -201,9 +201,10 @@ export default function NuevaSolicitudPage() {
       console.error('Error:', err);
       let errorMessage = 'Error al crear la solicitud';
       if (typeof err === 'object' && err !== null) {
-        const errorObj = err as { response?: { data?: { message?: string, details?: any } }, message?: string };
+        type ErrorDetail = { message: string };
+        const errorObj = err as { response?: { data?: { message?: string, details?: ErrorDetail[] } }, message?: string };
         if (errorObj.response?.data?.details && Array.isArray(errorObj.response.data.details)) {
-          errorMessage = errorObj.response.data.details.map((d: any) => d.message).join(' | ');
+          errorMessage = errorObj.response.data.details.map((d: ErrorDetail) => d.message).join(' | ');
         } else {
           errorMessage = errorObj.response?.data?.message || errorObj.message || errorMessage;
         }
