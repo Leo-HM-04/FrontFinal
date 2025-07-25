@@ -275,7 +275,7 @@ useEffect(() => {
                         if (/elimin[oó] solicitud/i.test(mensaje)) return `Un usuario eliminó una solicitud`;
                         if (/usuario/i.test(mensaje)) return `El administrador realizó una acción sobre un usuario`;
                         if (/solicitud/i.test(mensaje)) return `Un usuario realizó una acción sobre una solicitud`;
-                        return 'Notificación';
+                        return mensaje;
                       }
                       return (
                         <div

@@ -64,7 +64,7 @@ export default function PagadorRecurrentesPage() {
       // Recargar la lista
       const data = await RecurrentesService.obtenerTodasParaPagador();
       setRecurrentes(data.filter(r => r.estado === 'aprobada' || r.estado === 'pagada'));
-    } catch (err) {
+    } catch {
       // Manejar error (puedes mostrar un toast, etc)
     } finally {
       setProcessingId(null);

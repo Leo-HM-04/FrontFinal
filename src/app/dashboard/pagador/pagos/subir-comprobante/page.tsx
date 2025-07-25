@@ -7,26 +7,13 @@ import type { Solicitud } from '@/types';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { AlertCircle } from 'lucide-react';
-import { CheckCircle, Sparkles, Laptop2, Banknote, Bot } from 'lucide-react';
+// ...otros imports...
 import { SubirFacturaModal } from '@/components/pagos/SubirFacturaModal';
 import { VerComprobanteModal } from '@/components/pagos/VerComprobanteModal';
 import type { Comprobante } from '@/components/pagos/VerComprobanteModal';
 import { SolicitudesService } from '@/services/solicitudes.service';
 
 export default function HistorialPagosPage() {
-  // Iconos por departamento
-  const getDepartamentoIcon = (dep: string) => {
-    switch (dep?.toLowerCase()) {
-      case 'ti':
-        return <Laptop2 className="inline-block mr-2 w-5 h-5 text-blue-500 align-middle" />;
-      case 'cobranza':
-        return <Banknote className="inline-block mr-2 w-5 h-5 text-green-500 align-middle" />;
-      case 'automatizaciones':
-        return <Bot className="inline-block mr-2 w-5 h-5 text-purple-500 align-middle" />;
-      default:
-        return null;
-    }
-  };
   // Estado para modal de subir factura
   const [modalOpen, setModalOpen] = useState(false);
   const [solicitudIdFactura, setSolicitudIdFactura] = useState<number | null>(null);

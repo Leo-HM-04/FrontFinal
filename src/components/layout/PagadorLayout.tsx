@@ -189,14 +189,15 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
             {/* Navegación */}
             <nav className="flex-1 flex flex-col gap-1 px-4 py-4 overflow-y-auto bg-white rounded-xl mx-4 mb-4 shadow">
               {navItems.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href);
+                // Solo resalta la opción exacta
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={`relative flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group text-base font-medium select-none
                       ${isActive
-                        ? 'bg-blue-50 text-blue-600 shadow-sm'
+                        ? 'bg-blue-50 text-blue-600 shadow-sm border border-blue-200'
                         : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'}
                     `}
                     onClick={closeMenu}
