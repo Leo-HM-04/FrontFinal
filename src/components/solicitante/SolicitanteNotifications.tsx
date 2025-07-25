@@ -1,81 +1,87 @@
-import { useEffect, useState, useRef, Fragment } from "react";
-import { toast, ToastContainer, Slide } from "react-toastify";
+"use client";
+
+import { useEffect, useState, Fragment, useCallback } from "react";
+import { ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Bell, BellRing } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, Transition } from "@headlessui/react";
+
 
 interface Notificacion {
   id_notificacion: number;
   mensaje: string;
-  leida: number;
+  leida: boolean;
   fecha_creacion: string;
   tipo?: 'info' | 'success' | 'warning' | 'error';
 }
 
-export default function SolicitanteNotifications({ token }: { token: string }) {
-  const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [lastShownId, setLastShownId] = useState<number | null>(null);
-  const [pagina, setPagina] = useState(1);
-  const [filtro, setFiltro] = useState<'todas' | 'no_leidas'>('todas');
-  const [marcandoTodas, setMarcandoTodas] = useState(false);
-  const porPagina = 10;
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+type NotificacionRaw = {
+  id_notificacion?: number;
+  id?: number;
+  mensaje: string;
+  leida: boolean;
+  fecha?: string;
+  fecha_creacion?: string;
+  tipo?: 'info' | 'success' | 'warning' | 'error';
+}
 
-  // Fetch notifications
-  const fetchNotificaciones = async () => {
+interface SolicitanteNotificationsProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+
+export default function SolicitanteNotifications({ open, onClose }: SolicitanteNotificationsProps) {
+  useAuth();
+  const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [marcandoTodas, setMarcandoTodas] = useState(false);
+  const [filtro, setFiltro] = useState<'todas' | 'no_leidas'>('todas');
+  const [pagina, setPagina] = useState(1);
+  const porPagina = 10;
+
+  const [openModal, setOpenModal] = useState(open);
+
+  const getToken = () => {
+    let token = undefined;
+    try {
+      token = localStorage.getItem('auth_token') || undefined;
+    } catch {}
+    if (!token) {
+      try {
+        token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+      } catch {}
+    }
+    return token;
+  };
+
+  const fetchNotificaciones = useCallback(async () => {
     setLoading(true);
+    const token = getToken();
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/solicitante`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: token ? `Bearer ${token}` : ''
+        }
       });
-      const data = await res.json();
-      setNotificaciones(data);
-      // Mostrar toast solo para la última no leída
-      const unread = data.filter((n: Notificacion) => !n.leida);
-      if (unread.length && unread[0].id_notificacion !== lastShownId && !open) {
-        toast(
-          <div className="flex items-center gap-3">
-            <span className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-400 shadow-lg shadow-blue-500/30">
-              <Bell className="w-5 h-5 text-white" />
-            </span>
-            <div className="flex-1 min-w-0">
-              <h6 className="font-semibold text-blue-700 text-base mb-0.5">¡Nueva notificación!</h6>
-              <p className="text-gray-700 text-sm leading-snug line-clamp-2">{unread[0].mensaje}</p>
-            </div>
-          </div>,
-          {
-            toastId: `noti-${unread[0].id_notificacion}`,
-            position: "top-right",
-            autoClose: 6000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            className: "!bg-white !shadow-xl !shadow-blue-500/10 !border !border-blue-100 !rounded-2xl !p-4"
-          }
-        );
-        setLastShownId(unread[0].id_notificacion);
-      }
-    } catch {
-      setNotificaciones([]);
+      const data: NotificacionRaw[] = await res.json();
+      const normalizadas = Array.isArray(data)
+        ? data.map((n) => ({
+            id_notificacion: n.id_notificacion || n.id || 0,
+            mensaje: n.mensaje,
+            leida: !!n.leida,
+            fecha_creacion: n.fecha_creacion || n.fecha || '',
+            tipo: n.tipo || 'info',
+          }))
+        : [];
+      setNotificaciones(normalizadas);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    if (!token) return;
-    fetchNotificaciones();
-    // Polling cada 30s
-    intervalRef.current = setInterval(fetchNotificaciones, 30000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-    // eslint-disable-next-line
-  }, [token, open, lastShownId]);
+  }, []);
 
   // Badge de no leídas
   const unreadCount = notificaciones.filter(n => !n.leida).length;
@@ -85,18 +91,37 @@ export default function SolicitanteNotifications({ token }: { token: string }) {
   // Marcar todas como leídas
   const handleMarcarTodas = async () => {
     setMarcandoTodas(true);
+    const token = getToken();
     try {
       const noLeidas = notificaciones.filter(n => !n.leida);
-      await Promise.all(noLeidas.map(n =>
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id_notificacion}/marcar-leida`, {
-          method: "POST",
-          headers: { Authorization: token ? `Bearer ${token}` : '' }
-        })
-      ));
+      if (noLeidas.length > 0) {
+        await Promise.all(noLeidas.map(n =>
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id_notificacion}/marcar-leida`, {
+            method: "POST",
+            headers: { Authorization: token ? `Bearer ${token}` : '' }
+          })
+        ));
+      }
       await fetchNotificaciones();
     } finally {
       setMarcandoTodas(false);
     }
+  };
+
+  useEffect(() => {
+    if (openModal) {
+      fetchNotificaciones();
+    }
+  }, [openModal, fetchNotificaciones]);
+
+  useEffect(() => {
+    setOpenModal(open);
+  }, [open]);
+
+  const handleOpen = () => setOpenModal(true);
+  const handleClose = () => {
+    setOpenModal(false);
+    if (onClose) onClose();
   };
 
   return (
@@ -116,7 +141,7 @@ export default function SolicitanteNotifications({ token }: { token: string }) {
         className="!z-[9999]"
       />
       <button
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         aria-label="Ver notificaciones"
         className={`relative w-12 h-12 flex items-center justify-center rounded-full bg-transparent transition-colors duration-200 focus:outline-none hover:bg-white/20`}
       >
@@ -131,8 +156,8 @@ export default function SolicitanteNotifications({ token }: { token: string }) {
           </span>
         )}
       </button>
-      <Transition.Root show={open} as={Fragment}>
-        <Dialog as="div" className="relative z-[60]" onClose={setOpen}>
+      <Transition.Root show={openModal} as={Fragment}>
+        <Dialog as="div" className="relative z-[60]" onClose={handleClose}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -203,7 +228,7 @@ export default function SolicitanteNotifications({ token }: { token: string }) {
                 ) : (
                   <div className="flex-1 overflow-hidden flex flex-col">
                     <div className="overflow-y-auto flex-1 divide-y divide-gray-100">
-                      {notificacionesPaginadas.map((n) => {
+                      {notificacionesPaginadas.map((n, idx) => {
                         const fechaObj = n.fecha_creacion ? new Date(n.fecha_creacion) : null;
                         const fechaStr = fechaObj && !isNaN(fechaObj.getTime())
                           ? fechaObj.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -211,14 +236,26 @@ export default function SolicitanteNotifications({ token }: { token: string }) {
                         const horaStr = fechaObj && !isNaN(fechaObj.getTime())
                           ? fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
                           : '';
+                        // Acción individual: marcar como leída
+                        const handleMarcarLeida = async () => {
+                          const token = getToken();
+                          await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id_notificacion}/marcar-leida`, {
+                            method: "POST",
+                            headers: { Authorization: token ? `Bearer ${token}` : '' }
+                          });
+                          await fetchNotificaciones();
+                        };
                         return (
                           <div
-                            key={n.id_notificacion}
+                            key={n.id_notificacion || idx}
                             className={`p-4 transition-all duration-200 hover:bg-gray-50 ${n.leida ? '' : 'bg-blue-50/50'}`}
                           >
                             <div className="flex items-start gap-3">
-                              <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${!n.leida ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                              <span className={`relative flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${!n.leida ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {!n.leida ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                                {!n.leida && (
+                                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                                )}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className={`text-sm ${!n.leida ? 'text-blue-900 font-medium' : 'text-gray-700'}`}>{n.mensaje}</p>
@@ -228,6 +265,15 @@ export default function SolicitanteNotifications({ token }: { token: string }) {
                                   <span>{horaStr}</span>
                                 </div>
                               </div>
+                              {!n.leida && (
+                                <button
+                                  onClick={handleMarcarLeida}
+                                  className="ml-2 px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-200 transition"
+                                  title="Marcar como leída"
+                                >
+                                  Marcar como leída
+                                </button>
+                              )}
                             </div>
                           </div>
                         );

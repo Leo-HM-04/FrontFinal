@@ -100,7 +100,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
               <Menu className="w-7 h-7" />
             </button>
             {/* Notificaciones del solicitante */}
-            <SolicitanteNotifications token={typeof window !== 'undefined' ? localStorage.getItem('auth_token') || '' : ''} />
+            <SolicitanteNotifications open={false} onClose={() => {}} />
           </div>
         </div>
       </header>

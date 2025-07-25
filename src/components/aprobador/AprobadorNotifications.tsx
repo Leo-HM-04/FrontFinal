@@ -37,7 +37,8 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
   const [marcandoTodas, setMarcarTodas] = useState(false);
   const [filtro, setFiltro] = useState<'todas' | 'no_leidas'>('todas');
   const [pagina, setPagina] = useState(1);
-  const porPagina = 10;
+  const [cargandoMas, setCargandoMas] = useState(false);
+  const porPagina = 5;
   const prevNotiIds = useRef<Set<number>>(new Set());
 
   const getToken = () => {
@@ -111,7 +112,12 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
   useEffect(() => {
     if (!open || !user) return;
     fetchNotificaciones();
+    setPagina(1); // Reinicia paginación al abrir
   }, [open, user, fetchNotificaciones]);
+
+  useEffect(() => {
+    setPagina(1); // Reinicia paginación al cambiar filtro
+  }, [filtro]);
 
   const handleMarcarTodas = async () => {
     setMarcarTodas(true);
@@ -131,10 +137,16 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
     }
   };
 
-  const notificacionesFiltradas = notificaciones.filter(n =>
+  let notificacionesFiltradas = notificaciones.filter(n =>
     filtro === 'todas' ? true : !n.leida
   );
+  // Ordenar: no leídas primero, luego leídas
+  notificacionesFiltradas = [
+    ...notificacionesFiltradas.filter(n => !n.leida),
+    ...notificacionesFiltradas.filter(n => n.leida)
+  ];
   const notificacionesPaginadas = notificacionesFiltradas.slice(0, pagina * porPagina);
+  const puedeCargarMas = notificacionesPaginadas.length < notificacionesFiltradas.length;
 
   return (
     <>
@@ -176,7 +188,7 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all border border-blue-100 flex flex-col h-[calc(100vh-4rem)]">
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all border border-blue-100 max-h-[90vh]">
                 <div className="bg-gradient-to-br from-blue-600 to-blue-500 p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -225,8 +237,25 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
                     <p className="text-center font-medium">No hay notificaciones {filtro === 'no_leidas' ? 'sin leer' : ''}.</p>
                   </div>
                 ) : (
-                  <div className="flex-1 overflow-hidden flex flex-col">
-                    <div className="overflow-y-auto flex-1 divide-y divide-gray-100">
+                  <div>
+                    <div
+                      className="overflow-y-auto divide-y divide-gray-100 max-h-[400px]"
+                      onScroll={async e => {
+                        const target = e.currentTarget;
+                        if (
+                          !cargandoMas &&
+                          puedeCargarMas &&
+                          target.scrollTop + target.clientHeight >= target.scrollHeight - 10
+                        ) {
+                          setCargandoMas(true);
+                          // Simula carga (puedes quitar el timeout si la carga es real)
+                          setTimeout(() => {
+                            setPagina(p => p + 1);
+                            setCargandoMas(false);
+                          }, 700);
+                        }
+                      }}
+                    >
                       {notificacionesPaginadas.map((n) => {
                         const fechaObj = n.fecha ? new Date(n.fecha) : null;
                         const fechaStr = fechaObj && !isNaN(fechaObj.getTime())
@@ -241,11 +270,14 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
                             className={`p-4 transition-all duration-200 hover:bg-gray-50 ${n.leida ? '' : 'bg-blue-50/50'}`}
                           >
                             <div className="flex items-start gap-3">
-                              <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${!n.leida ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
+                              <span className={`relative flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${!n.leida ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
                                 {n.tipo === 'success' ? <Check className="w-4 h-4" /> :
                                  n.tipo === 'warning' ? <AlertCircle className="w-4 h-4" /> :
                                  n.tipo === 'error' ? <X className="w-4 h-4" /> :
                                  <Bell className="w-4 h-4" />}
+                                {!n.leida && (
+                                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                                )}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className={`text-sm ${!n.leida ? 'text-blue-900 font-medium' : 'text-gray-700'}`}>{n.mensaje}</p>
@@ -255,21 +287,36 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
                                   <span>{horaStr}</span>
                                 </div>
                               </div>
+                              {!n.leida && (
+                                <button
+                                  onClick={async () => {
+                                    const token = getToken();
+                                    await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id}/marcar-leida`, {
+                                      method: "POST",
+                                      headers: { Authorization: token ? `Bearer ${token}` : '' }
+                                    });
+                                    await fetchNotificaciones();
+                                  }}
+                                  className="ml-2 px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-200 transition"
+                                  title="Marcar como leída"
+                                >
+                                  Marcar como leída
+                                </button>
+                              )}
                             </div>
                           </div>
                         );
                       })}
+                      {cargandoMas && (
+                        <div className="flex items-center justify-center py-4 text-blue-600 text-sm font-medium">
+                          <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          Cargando...
+                        </div>
+                      )}
                     </div>
-                    {notificacionesFiltradas.length > pagina * porPagina && (
-                      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-                        <button
-                          className="w-full px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-all flex items-center justify-center gap-2"
-                          onClick={() => setPagina(p => p + 1)}
-                        >
-                          Cargar más notificaciones
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
               </Dialog.Panel>

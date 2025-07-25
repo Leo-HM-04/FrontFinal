@@ -147,13 +147,14 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
     fetchNotificaciones();
   }, [open, user, fetchNotificaciones]);
 
-  // Ordenar: primero no leídas, luego leídas
+
+  // Ordenar: no leídas primero, luego leídas
   const notificacionesOrdenadas = [...notificaciones].sort((a, b) => {
     if (a.leida === b.leida) return 0;
     return a.leida ? 1 : -1;
   });
 
-  const notificacionesFiltradas = notificacionesOrdenadas.filter(n => 
+  const notificacionesFiltradas = notificacionesOrdenadas.filter(n =>
     filtro === 'todas' ? true : !n.leida
   );
 
@@ -228,7 +229,7 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all border border-blue-100 flex flex-col h-[calc(100vh-4rem)]">
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all border border-blue-100 flex flex-col max-h-[90vh]">
                 <div className="bg-gradient-to-br from-blue-600 to-blue-500 p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -277,8 +278,8 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                     <p className="text-center font-medium">No hay notificaciones {filtro === 'no_leidas' ? 'sin leer' : ''}.</p>
                   </div>
                 ) : (
-                  <div className="flex-1 overflow-hidden flex flex-col">
-                    <div ref={listaRef} className="overflow-y-auto flex-1 divide-y divide-gray-100">
+                  <div>
+                    <div ref={listaRef} className="overflow-y-auto max-h-[60vh] divide-y divide-gray-100">
                       {notificacionesPaginadas.map((n) => {
                         const fechaObj = n.fecha ? new Date(n.fecha) : null;
                         const fechaStr = fechaObj && !isNaN(fechaObj.getTime())
@@ -287,15 +288,106 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                         const horaStr = fechaObj && !isNaN(fechaObj.getTime())
                           ? fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
                           : '';
-                        // Mensaje amigable para el admin
-                        let mensajeAmigable = n.mensaje;
-                        if (mensajeAmigable.includes('creó solicitud')) {
-                          mensajeAmigable = `Nuevo registro: El usuario ha creado una solicitud.`;
-                        } else if (mensajeAmigable.includes('actualizó usuario')) {
-                          mensajeAmigable = `Actualización: Se modificó la información de un usuario.`;
-                        } else if (mensajeAmigable.includes('bloqueado')) {
-                          mensajeAmigable = `Alerta: Un usuario ha sido bloqueado.`;
+                        const handleMarcarLeida = async () => {
+                          const token = getToken();
+                          await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id}/marcar-leida`, {
+                            method: "POST",
+                            headers: {
+                              Authorization: token ? `Bearer ${token}` : ''
+                            }
+                          });
+                          await fetchNotificaciones();
+                        };
+
+                        // Procesar mensaje para mostrarlo de forma profesional y clara
+                        function formatearMensaje(mensaje: string): string {
+                          // 1. Crear usuario
+                          let match = mensaje.match(/cre[oó] usuario.*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El administrador agregó un nuevo usuario: ${match[1].trim()}`;
+                          }
+                          // 2. Eliminar usuario
+                          match = mensaje.match(/elimin[oó] usuario.*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El administrador eliminó al usuario: ${match[1].trim()}`;
+                          }
+                          // 3. Actualizar usuario
+                          match = mensaje.match(/actualiz[oó] usuario.*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El administrador actualizó los datos de: ${match[1].trim()}`;
+                          }
+                          // 4. Crear solicitud
+                          match = mensaje.match(/El usuario ([^ ]+) \(([^)]+)\) cre[oó] solicitud/i);
+                          if (match) {
+                            const nombre = match[1];
+                            const rol = match[2];
+                            if (rol.toLowerCase().includes('solicitante')) {
+                              return `El solicitante ${nombre} creó una solicitud`;
+                            } else if (rol.toLowerCase().includes('admin')) {
+                              return `El administrador ${nombre} creó una solicitud`;
+                            } else {
+                              return `${rol.charAt(0).toUpperCase() + rol.slice(1)} ${nombre} creó una solicitud`;
+                            }
+                          }
+                          // 5. Si el mensaje contiene "usuario" y "Nombre:"
+                          match = mensaje.match(/usuario.*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El administrador realizó una acción sobre el usuario: ${match[1].trim()}`;
+                          }
+                          // 6. Si el mensaje contiene "creó solicitud" y un nombre
+                          match = mensaje.match(/cre[oó] solicitud.*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El usuario ${match[1].trim()} creó una solicitud`;
+                          }
+                          // 7. Si el mensaje contiene "actualizó solicitud" y un nombre
+                          match = mensaje.match(/actualiz[oó] solicitud.*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El usuario ${match[1].trim()} actualizó una solicitud`;
+                          }
+                          // 8. Si el mensaje contiene "eliminó solicitud" y un nombre
+                          match = mensaje.match(/elimin[oó] solicitud.*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El usuario ${match[1].trim()} eliminó una solicitud`;
+                          }
+                          // 9. Si el mensaje contiene "creó" y un nombre
+                          match = mensaje.match(/cre[oó].*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El usuario ${match[1].trim()} realizó una acción`;
+                          }
+                          // 10. Si el mensaje contiene "actualizó" y un nombre
+                          match = mensaje.match(/actualiz[oó].*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El usuario ${match[1].trim()} actualizó información`;
+                          }
+                          // 11. Si el mensaje contiene "eliminó" y un nombre
+                          match = mensaje.match(/elimin[oó].*Nombre: ([^,\n]+),?/i);
+                          if (match) {
+                            return `El usuario ${match[1].trim()} fue eliminado`;
+                          }
+                          // 12. Si el mensaje contiene "creó solicitud"
+                          if (/cre[oó] solicitud/i.test(mensaje)) {
+                            return `Un usuario creó una solicitud`;
+                          }
+                          // 13. Si el mensaje contiene "actualizó solicitud"
+                          if (/actualiz[oó] solicitud/i.test(mensaje)) {
+                            return `Un usuario actualizó una solicitud`;
+                          }
+                          // 14. Si el mensaje contiene "eliminó solicitud"
+                          if (/elimin[oó] solicitud/i.test(mensaje)) {
+                            return `Un usuario eliminó una solicitud`;
+                          }
+                          // 15. Si el mensaje contiene "usuario"
+                          if (/usuario/i.test(mensaje)) {
+                            return `El administrador realizó una acción sobre un usuario`;
+                          }
+                          // 16. Si el mensaje contiene "solicitud"
+                          if (/solicitud/i.test(mensaje)) {
+                            return `Un usuario realizó una acción sobre una solicitud`;
+                          }
+                          // 17. Por defecto, solo mostrar "Notificación"
+                          return 'Notificación';
                         }
+
                         return (
                           <div
                             key={n.id}
@@ -312,28 +404,18 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                                 )}
                               </span>
                               <div className="flex-1 min-w-0">
-                                <p className={`text-sm ${!n.leida ? 'text-blue-900 font-medium' : 'text-gray-700'}`}>{mensajeAmigable}</p>
+                                <p className={`text-sm ${!n.leida ? 'text-blue-900 font-medium' : 'text-gray-700'}`}>{formatearMensaje(n.mensaje)}</p>
                                 <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
                                   <span>{fechaStr}</span>
                                   <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                                   <span>{horaStr}</span>
                                 </div>
                               </div>
-                              {/* Botón para marcar como leída */}
                               {!n.leida && (
                                 <button
-                                  className="ml-2 px-2 py-1 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-all"
-                                  onClick={async () => {
-                                    const token = getToken();
-                                    await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id}/marcar-leida`, {
-                                      method: "POST",
-                                      headers: {
-                                        Authorization: token ? `Bearer ${token}` : ''
-                                      }
-                                    });
-                                    await fetchNotificaciones();
-                                  }}
-                                  disabled={loading}
+                                  onClick={handleMarcarLeida}
+                                  className="ml-2 px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-200 transition"
+                                  title="Marcar como leída"
                                 >
                                   Marcar como leída
                                 </button>
