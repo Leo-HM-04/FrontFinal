@@ -244,7 +244,7 @@ export default function NuevaSolicitudPage() {
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="max-w-4xl mx-auto px-6 py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-8 py-12 md:py-16">
           {/* Header */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-white/20">
             <div className="flex items-center justify-between">
@@ -256,7 +256,7 @@ export default function NuevaSolicitudPage() {
               </div>
             </div>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-10 md:p-14">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
             <div className="flex items-center space-x-4 mb-12">
               <div className="p-4 rounded-full bg-white/20">
                 <FileText className="w-7 h-7 text-white" />
@@ -516,24 +516,34 @@ export default function NuevaSolicitudPage() {
                     required
                     className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-white/30 file:text-white hover:file:bg-white/40 text-base ${errors.factura_file ? 'border-red-400' : ''}`}
                   />
+                  {/* Previsualización instantánea del archivo seleccionado */}
                   {formData.factura_file && (
                     <div className="flex items-center mt-3 p-3 bg-white/10 rounded-lg">
                       <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                      <p className="text-white/80 text-sm">
-                        {formData.factura_file.name} ({(formData.factura_file.size / 1024 / 1024).toFixed(2)} MB)
-                      </p>
-                      {/* Previsualización de imagen si es jpg/png */}
-                      {formData.factura_file.type.startsWith('image/') && (
-                        <div className="ml-4 w-16 h-16 relative">
-                          <Image
-                            src={URL.createObjectURL(formData.factura_file)}
-                            alt="Previsualización"
-                            width={64}
-                            height={64}
-                            className="object-contain rounded shadow"
-                          />
-                        </div>
-                      )}
+                      <div className="flex flex-col">
+                        <p className="text-white/80 text-sm">
+                          {formData.factura_file.name} ({(formData.factura_file.size / 1024 / 1024).toFixed(2)} MB)
+                        </p>
+                        {/* Previsualización de imagen si es jpg/png */}
+                        {formData.factura_file.type.startsWith('image/') && (
+                          <div className="mt-2 w-32 h-32 relative">
+                            <Image
+                              src={URL.createObjectURL(formData.factura_file)}
+                              alt="Previsualización"
+                              width={128}
+                              height={128}
+                              className="object-contain rounded shadow"
+                            />
+                          </div>
+                        )}
+                        {/* Previsualización de PDF/Excel: solo icono y nombre */}
+                        {(formData.factura_file.type === 'application/pdf' || formData.factura_file.type.includes('excel')) && (
+                          <div className="mt-2 flex items-center space-x-2">
+                            <FileText className="w-8 h-8 text-white/80" />
+                            <span className="text-white/70 text-xs">Archivo listo para subir</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                   {errors.factura_file && <span className="text-red-400 text-sm mt-1 block">{errors.factura_file}</span>}

@@ -10,8 +10,6 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 import { useEffect } from "react";
 
-// API_BASE eliminado, no se usa
-
 function mesNombre(num: number): string {
   return ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"][num - 1] || String(num);
 }
@@ -49,7 +47,7 @@ export default function GraficasAdminPage() {
   const [loadingTendencia, setLoadingTendencia] = useState(true);
 
   // Estados para cada entidad
-  const [activeChart, setActiveChart] = useState<string>("todos");
+  const [activeChart] = useState<string>("todos");
   const [pagosPorMes, setPagosPorMes] = useState<{ mes: string; total: number }[]>([]);
   const [solicitudesPorEstado, setSolicitudesPorEstado] = useState<{ estado: string; value: number }[]>([]);
   const [usuariosPorRol, setUsuariosPorRol] = useState<{ rol: string; value: number }[]>([]);
@@ -131,7 +129,7 @@ export default function GraficasAdminPage() {
 const [tendenciaSemanal, setTendenciaSemanal] = useState<{ semana: string; pagos: number; solicitudes: number }[]>([]);
 
 const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
-const GRADIENT_BAR = "url(#barGradient)";
+// const GRADIENT_BAR = "url(#barGradient)"; // Eliminado porque no se usa
 const GRADIENT_AREA = "url(#areaGradient)";
 
 
@@ -234,24 +232,6 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                   ))}
                 </div>
 
-                {/* Filtros de gráficas */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {["todos", "pagos", "solicitudes", "tendencias"].map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setActiveChart(filter)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                        activeChart === filter
-                          ? "bg-blue-600 text-white shadow-md scale-105"
-                          : "bg-white text-slate-600 hover:bg-blue-50 border border-slate-200"
-                      }`}
-                      style={{ transitionDelay: `${showStats ? 200 : 0}ms` }}
-                    >
-                      {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                    </button>
-                  ))}
-                </div>
-
                 {/* Gráficas modernas y ordenadas para cada entidad */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                   {/* Solicitudes */}
@@ -264,10 +244,16 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                     ) : (
                       <ResponsiveContainer width="100%" height={260}>
                         <BarChart data={[...solicitudesPorEstado].sort((a,b)=>b.value-a.value)}>
+                          <defs>
+                            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#2563eb" stopOpacity={0.8}/>
+                              <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.7}/>
+                            </linearGradient>
+                          </defs>
                           <XAxis dataKey="estado" tick={{ fontWeight: 700, fontSize: 13, fill: '#334155' }} />
                           <YAxis tick={{ fontWeight: 700, fontSize: 13, fill: '#334155' }} />
-                          <Tooltip contentStyle={{ borderRadius: 12, background: '#f8fafc', border: '1px solid #dbeafe' }} />
-                          <Bar dataKey="value" fill={GRADIENT_BAR} radius={[8,8,0,0]} />
+                          <Tooltip contentStyle={{ borderRadius: 12, background: '#e0e7ff', border: '1px solid #2563eb', color: '#1e293b' }} />
+                          <Bar dataKey="value" fill="url(#barGradient)" radius={[10,10,0,0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
@@ -295,7 +281,15 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                       </div>
                     ) : (
                       <ResponsiveContainer width="100%" height={260}>
-                        <BarChart data={[...usuariosPorRol].sort((a,b)=>b.value-a.value)}>
+                        <BarChart data={[...usuariosPorRol
+                          .filter(u => u.rol.toLowerCase() !== 'admin_general')
+                          .map(u => ({
+                            ...u,
+                            rol: u.rol.toLowerCase() === 'pagador_banca'
+                              ? 'PAGADOR'
+                              : u.rol.replace(/_/g, ' ').toUpperCase()
+                          }))
+                        ].sort((a,b)=>b.value-a.value)}>
                           <XAxis dataKey="rol" tick={{ fontWeight: 700, fontSize: 13, fill: '#334155' }} />
                           <YAxis tick={{ fontWeight: 700, fontSize: 13, fill: '#334155' }} />
                           <Tooltip />
@@ -351,7 +345,7 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                     </ResponsiveContainer>
                   </div>
                   {/* Notificaciones */}
-                  <div className="rounded-2xl shadow-lg p-8 border border-yellow-100 hover:shadow-xl transition-shadow bg-transparent backdrop-blur-md">
+                  <div className="rounded-2xl shadow-lg p-8 border border-yellow-100 hover:shadow-xl transition-shadow bg-white backdrop-blur-md">
                     <h2 className="text-xl font-bold text-yellow-700 mb-4">Notificaciones por Estado de Lectura</h2>
                     {loadingNotificaciones ? (
                       <div className="w-full h-[260px] flex items-center justify-center">

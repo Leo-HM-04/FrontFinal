@@ -128,12 +128,12 @@ export default function EditarRecurrentePage() {
   return (
     <ProtectedRoute requiredRoles={["solicitante"]}>
       <SolicitanteLayout>
-        <div className="w-full px-0 py-12 md:py-16">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 md:p-8 mb-12 border border-white/20 w-full text-left">
+        <div className="max-w-screen-xl mx-auto px-12 py-12 md:py-16">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 mb-12 border border-white/20 w-full text-left shadow-xl">
             <h1 className="text-3xl font-bold text-white font-montserrat mb-1">Editar Plantilla Recurrente</h1>
             <p className="text-white/80 text-lg">Modifica los campos necesarios y guarda los cambios</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-4 md:p-10 w-full text-left">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-14 md:p-20 w-full text-left shadow-xl">
             {loading ? (
               <div className="text-center text-blue-200">Cargando...</div>
             ) : error ? (

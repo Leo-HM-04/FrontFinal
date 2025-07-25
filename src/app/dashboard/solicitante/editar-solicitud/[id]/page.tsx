@@ -12,6 +12,7 @@ import { es } from "date-fns/locale/es";
 import { NumericFormat } from "react-number-format";
 import { SolicitudesService } from "@/services/solicitudes.service";
 import { Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle } from "lucide-react";
+import Image from "next/image";
 import { Solicitud } from "@/types";
 import { format } from "date-fns";
 
@@ -269,8 +270,8 @@ export default function EditarSolicitudPage() {
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="max-w-4xl mx-auto px-6 py-12 md:py-16">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-white/20">
+        <div className="max-w-7xl mx-auto px-8 py-12 md:py-16">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-10 mb-12 border border-white/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
                 {/* <Button type="button" variant="outline" onClick={() => router.back()} className="bg-gray-600 text-white border-gray-500 hover:bg-gray-700 px-6 py-2 text-base">
@@ -283,7 +284,7 @@ export default function EditarSolicitudPage() {
               </div>
             </div>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-10 md:p-14">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
             <form onSubmit={handleSubmit} className="space-y-10">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                 <div>
@@ -491,11 +492,42 @@ export default function EditarSolicitudPage() {
                       </p>
                     </div>
                   ) : facturaUrl ? (
-                    <div className="flex items-center mt-3 p-3 bg-white/10 rounded-lg">
-                      <CheckCircle className="w-4 h-4 text-blue-400 mr-2" />
-                      <a href={facturaLink!} target="_blank" rel="noopener noreferrer" className="text-blue-300 underline text-sm">
-                        Ver factura actual
-                      </a>
+                    <div className="mt-3 p-3 bg-white/10 rounded-lg">
+                      <CheckCircle className="w-4 h-4 text-blue-400 mr-2 inline" />
+                      <span className="text-blue-300 text-sm font-semibold">Factura actual:</span>
+                      {/* Previsualización según tipo */}
+                      {(() => {
+                        const ext = facturaUrl.split('.').pop()?.toLowerCase();
+                        if (["png", "jpg", "jpeg"].includes(ext || "")) {
+                          return (
+                            <div className="mt-3 rounded-lg shadow max-h-64 border border-blue-200 mx-auto" style={{maxWidth: '100%', position: 'relative', height: '256px'}}>
+                              <Image
+                                src={facturaLink!}
+                                alt="Factura"
+                                layout="fill"
+                                objectFit="contain"
+                                className="rounded-lg"
+                              />
+                            </div>
+                          );
+                        }
+                        if (ext === "pdf") {
+                          return (
+                            <embed src={facturaLink!} type="application/pdf" className="mt-3 rounded-lg shadow border border-blue-200 mx-auto" style={{width: '100%', height: '350px'}} />
+                          );
+                        }
+                        if (["xls", "xlsx"].includes(ext || "")) {
+                          return (
+                            <div className="flex items-center mt-3">
+                              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="mr-2"><rect width="24" height="24" rx="4" fill="#2563eb"/><text x="12" y="18" textAnchor="middle" fontSize="12" fill="#fff">XLS</text></svg>
+                              <span className="text-blue-700 font-medium">{facturaUrl.replace(/^.*[\\\/]/, '')}</span>
+                            </div>
+                          );
+                        }
+                        return (
+                          <a href={facturaLink!} target="_blank" rel="noopener noreferrer" className="text-blue-300 underline text-sm block mt-3">Ver factura actual</a>
+                        );
+                      })()}
                     </div>
                   ) : null}
                 </div>

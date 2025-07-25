@@ -203,11 +203,28 @@ export default function MisSolicitudesPage() {
     }
   };
 
+  // Ordenar por estado: pendientes, aprobadas/autorizadas, pagadas, rechazadas, otros
+  const estadoOrden = {
+    'pendiente': 1,
+    'aprobada': 2,
+    'autorizada': 2,
+    'pagada': 3,
+    'rechazada': 4
+  };
+  const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
+    const estadoA = (a.estado || '').toLowerCase();
+    const estadoB = (b.estado || '').toLowerCase();
+    const ordenA = estadoOrden[estadoA as keyof typeof estadoOrden] ?? 99;
+    const ordenB = estadoOrden[estadoB as keyof typeof estadoOrden] ?? 99;
+    if (ordenA !== ordenB) return ordenA - ordenB;
+    // Si tienen el mismo estado, ordenar por fecha de creación descendente
+    return new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime();
+  });
   // Paginación
-  const totalPages = Math.ceil(filteredSolicitudes.length / itemsPerPage);
+  const totalPages = Math.ceil(solicitudesOrdenadas.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredSolicitudes.length);
-  const currentSolicitudes = filteredSolicitudes.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + itemsPerPage, solicitudesOrdenadas.length);
+  const currentSolicitudes = solicitudesOrdenadas.slice(startIndex, endIndex);
 
   const filterOptions = [
     { value: '', label: 'Todos los estados' },

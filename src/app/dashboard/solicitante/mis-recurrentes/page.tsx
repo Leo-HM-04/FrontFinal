@@ -142,7 +142,7 @@ export default function MisRecurrentesPage() {
         return Array.from(set);
     }, [recurrentes]);
 
-    // Lógica de filtrado combinada
+    // Lógica de filtrado combinada y orden por estado
     const filteredRecurrentes = useMemo(() => {
         let result = recurrentes;
         if (filtroEstado !== 'todas') {
@@ -170,6 +170,15 @@ export default function MisRecurrentesPage() {
                 (p.id_usuario && p.id_usuario.toString().toLowerCase().includes(busq))
             );
         }
+        // Ordenar por estado: pendiente, aprobada, rechazada
+        const estadoOrder = { pendiente: 0, aprobada: 1, rechazada: 2 };
+        result = result.slice().sort((a, b) => {
+            const estadoA = estadoOrder[(a.estado?.toLowerCase() ?? '') as keyof typeof estadoOrder] ?? 99;
+            const estadoB = estadoOrder[(b.estado?.toLowerCase() ?? '') as keyof typeof estadoOrder] ?? 99;
+            if (estadoA !== estadoB) return estadoA - estadoB;
+            // Si tienen el mismo estado, ordenar por fecha de creación descendente
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
         return result;
     }, [recurrentes, filtroEstado, filtroDepartamento, filtroTipoPago, filtroFrecuencia, filtroFechaInicio, filtroFechaFin, filtroBusqueda]);
 
