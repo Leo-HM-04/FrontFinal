@@ -78,7 +78,7 @@ export interface ApiError {
   }>;
 }
 
-export type EstadoRecurrente = 'pendiente' | 'aprobada' | 'rechazada';
+export type EstadoRecurrente = 'pendiente' | 'aprobada' | 'rechazada' | 'pagada';
 
 export interface PlantillaRecurrente {
   folio?: string;
@@ -102,4 +102,5 @@ export interface PlantillaRecurrente {
   id_pagador?: number;
   comentario_aprobador?: string;
   activo: boolean; // indica si la plantilla está activa o pausada
+  com_recurrente?: string; // Ruta del comprobante de pago (opcional)
 }

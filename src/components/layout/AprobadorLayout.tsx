@@ -13,6 +13,7 @@ import {
   User,
   Bell,
   Repeat,
+  FileCheck2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
@@ -125,14 +126,15 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
                 { href: '/dashboard/aprobador/recurrentes', label: 'Solicitudes Recurrentes', icon: Repeat },
                 { href: '/dashboard/aprobador/perfil', label: 'Mi Perfil', icon: User },
               ].map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href);
+                // Solo resalta la opción exacta
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={`relative flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group text-base font-medium select-none
                       ${isActive
-                        ? 'bg-blue-50 text-blue-600 shadow-sm'
+                        ? 'bg-blue-50 text-blue-600 shadow-sm border border-blue-200'
                         : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600'}
                     `}
                     onClick={() => setIsMenuOpen(false)}

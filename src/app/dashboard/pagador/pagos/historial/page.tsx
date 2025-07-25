@@ -60,35 +60,45 @@ export default function HistorialPagosPage() {
   return (
     <ProtectedRoute requiredRoles={['pagador_banca']}>
       <PagadorLayout>
-        <div className="max-w-5xl mx-auto mt-12 bg-white/80 rounded-xl shadow-lg p-10 border border-blue-200">
+        <div className="w-full max-w-7xl mx-auto mt-12 bg-white rounded-3xl shadow-2xl p-12 border-t-4 border-b-4 border-blue-200">
           <h2 className="text-3xl font-extrabold mb-6 text-blue-700 text-center">Historial de Pagos Realizados</h2>
           {/* Filtros */}
           <div className="flex flex-wrap justify-end gap-4 mb-6">
-            <div>
-              <label className="mr-2 font-bold text-blue-700">Filtrar por estado:</label>
-              <select
-                value={estadoFiltro}
-                onChange={e => { setEstadoFiltro(e.target.value as 'todas' | 'pagada' | 'autorizada'); setPagina(1); }}
-                className="border border-blue-300 rounded-lg px-3 py-2 text-blue-900 font-semibold bg-white shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                <option value="todas">Todas</option>
-                <option value="pagada">Pagadas</option>
-                <option value="autorizada">Autorizadas</option>
-              </select>
+            <div className="flex items-center gap-3 bg-blue-50 p-3 rounded-xl shadow border border-blue-200">
+              <label className="font-bold text-blue-700 text-lg">Filtrar por estado:</label>
+              <div className="relative">
+                <select
+                  value={estadoFiltro}
+                  onChange={e => { setEstadoFiltro(e.target.value as 'todas' | 'pagada' | 'autorizada'); setPagina(1); }}
+                  className="w-56 border border-blue-300 rounded-xl px-4 py-3 text-blue-900 font-semibold bg-white shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-150"
+                >
+                  <option value="todas" className="py-2">Todas</option>
+                  <option value="pagada" className="py-2">Pagadas</option>
+                  <option value="autorizada" className="py-2">Autorizadas</option>
+                </select>
+                <span className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-blue-400">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </div>
             </div>
-            <div>
-              <label className="mr-2 font-bold text-blue-700">Filtrar por departamento:</label>
-              <select
-                value={departamentoFiltro}
-                onChange={e => { setDepartamentoFiltro(e.target.value); setPagina(1); }}
-                className="border border-blue-300 rounded-lg px-3 py-2 text-blue-900 font-semibold bg-white shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                <option value="todos">Todos</option>
-                {/* Opciones dinámicas de departamento */}
-                {[...new Set(pagosFiltradosPorEstado.map(p => p.departamento).filter(Boolean))].map(dep => (
-                  <option key={dep} value={dep}>{dep}</option>
-                ))}
-              </select>
+            <div className="flex items-center gap-3 bg-blue-50 p-3 rounded-xl shadow border border-blue-200">
+              <label className="font-bold text-blue-700 text-lg">Filtrar por departamento:</label>
+              <div className="relative">
+                <select
+                  value={departamentoFiltro}
+                  onChange={e => { setDepartamentoFiltro(e.target.value); setPagina(1); }}
+                  className="w-56 border border-blue-300 rounded-xl px-4 py-3 text-blue-900 font-semibold bg-white shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-150"
+                >
+                  <option value="todos" className="py-2">Todos</option>
+                  {/* Opciones dinámicas de departamento */}
+                  {[...new Set(pagosFiltradosPorEstado.map(p => p.departamento).filter(Boolean))].map(dep => (
+                    <option key={dep} value={dep} className="py-2">{dep}</option>
+                  ))}
+                </select>
+                <span className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-blue-400">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6"/></svg>
+                </span>
+              </div>
             </div>
           </div>
           {loading ? (
@@ -107,72 +117,57 @@ export default function HistorialPagosPage() {
               <p className="text-lg text-gray-700">No hay pagos realizados aún.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full rounded-[2rem] shadow-2xl border-2 border-blue-300 bg-white">
-                <thead className="bg-blue-700">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">ID</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Solicitante</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Departamento</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Monto</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Cuenta Destino</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Concepto</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Tipo Pago</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Tipo de Cuenta/Tarjeta</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Banco Destino</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Estado</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Fecha Límite</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Fecha Pago</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Aprobador</th>
-                    <th className="px-6 py-4 text-left text-base font-extrabold text-white uppercase border-b border-blue-400 tracking-wide">Comentario</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pagosPaginados.map((pago) => (
-                    <tr
-                      key={pago.id_solicitud}
-                      className={
-                        `transition-colors ` +
-                        (pago.estado === 'pagada'
-                          ? 'bg-blue-50 hover:bg-blue-200'
-                          : 'bg-blue-100 hover:bg-blue-200')
-                      }
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 font-extrabold border-b border-blue-100 rounded-l-2xl">#{pago.id_solicitud}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.usuario_nombre ? pago.usuario_nombre : (pago.nombre_usuario ? pago.nombre_usuario : '-')}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.departamento}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-700 font-extrabold border-b border-blue-100">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-700 font-extrabold border-b border-blue-100">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.cuenta_destino}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.concepto}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.tipo_cuenta_destino ? pago.tipo_cuenta_destino : ''}{pago.tipo_tarjeta ? ` / ${pago.tipo_tarjeta}` : ''}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.banco_destino || ''}</td>
-                      <td className={
-                        `px-6 py-4 whitespace-nowrap text-base font-extrabold border-b border-blue-100 flex items-center gap-2 rounded-xl shadow ` +
-                        (pago.estado === 'pagada'
-                          ? 'text-white bg-blue-700'
-                          : 'text-blue-900 bg-blue-300 border border-blue-400')
-                      }>
-                        <span title={pago.estado === 'pagada' ? 'Pago realizado' : 'Autorización pendiente'}>
-                          {pago.estado === 'pagada' ? (
-                            <CheckCircle className="w-5 h-5 text-white" />
-                          ) : (
-                            <Sparkles className="w-5 h-5 text-blue-700" />
-                          )}
-                        </span>
-                        {pago.estado === 'pagada' ? 'Pagada' : 'Autorizada'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.fecha_limite_pago ? new Date(pago.fecha_limite_pago).toLocaleDateString('es-CO') : '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{pago.fecha_pago ? new Date(pago.fecha_pago).toLocaleDateString('es-CO') : '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100">{typeof pago.aprobador_nombre === 'string' && pago.aprobador_nombre
-                        ? pago.aprobador_nombre
-                        : '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-base text-blue-900 border-b border-blue-100 rounded-r-2xl">{pago.comentario_aprobador || '-'}</td>
+            <>
+              <div className="bg-white rounded-3xl shadow-2xl border-t-4 border-b-4 border-blue-200 overflow-x-auto p-10 w-full max-w-7xl mx-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead style={{backgroundColor: '#F0F4FC'}}>
+                    <tr>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">ID</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Solicitante</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Departamento</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Monto</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Cuenta Destino</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Concepto</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Tipo Pago</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Tipo de Cuenta/Tarjeta</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Banco Destino</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Estado</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Fecha Límite</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Fecha Pago</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Aprobador</th>
+                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Comentario</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {/* Paginación */}
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-100">
+                    {pagosPaginados.map((pago, idx) => (
+                      <tr
+                        key={pago.id_solicitud}
+                        className={`transition-colors rounded-xl ${idx % 2 === 0 ? 'bg-blue-50' : 'bg-white'} hover:bg-blue-100`}
+                      >
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900 font-bold">#{pago.id_solicitud}</td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900">{pago.usuario_nombre ? pago.usuario_nombre : (pago.nombre_usuario ? pago.nombre_usuario : '-')}</td>
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <span className="px-3 py-1 text-sm font-semibold rounded-xl bg-blue-200 text-blue-800 shadow">{pago.departamento || '-'}</span>
+                        </td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900">{pago.cuenta_destino}</td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900">{pago.concepto}</td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900">{pago.tipo_pago}</td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900">{pago.tipo_cuenta_destino ? pago.tipo_cuenta_destino : ''}{pago.tipo_tarjeta ? ` / ${pago.tipo_tarjeta}` : ''}</td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900">{pago.banco_destino || ''}</td>
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-blue-300 text-blue-900 shadow">{pago.estado === 'pagada' ? 'Pagada' : 'Autorizada'}</span>
+                        </td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-700">{pago.fecha_limite_pago ? new Date(pago.fecha_limite_pago).toLocaleDateString('es-CO') : '-'}</td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-700">{pago.fecha_pago ? new Date(pago.fecha_pago).toLocaleDateString('es-CO') : '-'}</td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900">{typeof pago.aprobador_nombre === 'string' && pago.aprobador_nombre ? pago.aprobador_nombre : '-'}</td>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-blue-900">{pago.comentario_aprobador || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* Paginación fija debajo de la tabla */}
               <div className="flex justify-center items-center gap-4 mt-8">
                 <button
                   className="flex items-center gap-1 px-3 py-2 rounded-full bg-blue-200 text-blue-700 font-bold border border-blue-400 shadow hover:bg-blue-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
@@ -210,7 +205,7 @@ export default function HistorialPagosPage() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                 </button>
               </div>
-            </div>
+            </>
           )}
         </div>
       </PagadorLayout>

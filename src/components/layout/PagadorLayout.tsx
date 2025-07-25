@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Home, FileText, Menu, User, Bell, Repeat, CreditCard } from 'lucide-react';
+import { LogOut, Home, FileText, Menu, User, Bell, Repeat, CreditCard, FileCheck2 } from 'lucide-react';
 
 interface PagadorLayoutProps {
   children: React.ReactNode;
@@ -35,6 +35,7 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
     { href: '/dashboard/pagador/recurrentes', label: 'Pagos Recurrentes', icon: Repeat },
     { href: '/dashboard/pagador/pagos/historial', label: 'Historial de Pagos', icon: FileText },
     { href: '/dashboard/pagador/pagos/subir-comprobante', label: 'Subir Comprobante', icon: FileText },
+    { href: '/dashboard/pagador/pagos/subir-comprobante-recurrente', label: 'Subir Comprobante Recurrente', icon: FileCheck2 },
     { href: '/dashboard/pagador/perfil', label: 'Mi Perfil', icon: User },
   ];
 

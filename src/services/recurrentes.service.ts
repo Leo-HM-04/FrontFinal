@@ -3,6 +3,20 @@ import api from '@/lib/api';
 import { PlantillaRecurrente } from '@/types';
 
 export class RecurrentesService {
+  // Subir comprobante/factura para una recurrente pagada
+  static async subirFactura(id: number, file: File): Promise<unknown> {
+    const formData = new FormData();
+    formData.append('fact_recurrente', file);
+    const response = await api.put(`/recurrentes/${id}/factura`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+  // Obtener todas las plantillas para pagador (sin filtrar por estado)
+  static async obtenerTodasParaPagador(): Promise<PlantillaRecurrente[]> {
+    const response = await api.get('/recurrentes');
+    return response.data;
+  }
   // Activar o pausar plantilla recurrente
   static async cambiarEstadoActiva(id: number, activo: boolean): Promise<unknown> {
     const response = await api.put(`/recurrentes/${id}/activa`, { activo });
@@ -99,6 +113,16 @@ export class RecurrentesService {
     // Obtener solo las recurrentes aprobadas (pagador)
   static async obtenerAprobadasParaPagador(): Promise<PlantillaRecurrente[]> {
     const response = await api.get('/recurrentes/aprobadas');
+    return response.data;
+  }
+
+  // Subir comprobante para una recurrente pagada (pagador_banca o admin_general)
+  static async subirComprobante(id: number, comprobante: File): Promise<unknown> {
+    const formData = new FormData();
+    formData.append('comprobante', comprobante);
+    const response = await api.put(`/recurrentes/${id}/comprobante`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   }
 }
