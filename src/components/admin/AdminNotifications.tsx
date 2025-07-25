@@ -147,7 +147,13 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
     fetchNotificaciones();
   }, [open, user, fetchNotificaciones]);
 
-  const notificacionesFiltradas = notificaciones.filter(n => 
+  // Ordenar: primero no leídas, luego leídas
+  const notificacionesOrdenadas = [...notificaciones].sort((a, b) => {
+    if (a.leida === b.leida) return 0;
+    return a.leida ? 1 : -1;
+  });
+
+  const notificacionesFiltradas = notificacionesOrdenadas.filter(n => 
     filtro === 'todas' ? true : !n.leida
   );
 
@@ -281,6 +287,15 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                         const horaStr = fechaObj && !isNaN(fechaObj.getTime())
                           ? fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
                           : '';
+                        // Mensaje amigable para el admin
+                        let mensajeAmigable = n.mensaje;
+                        if (mensajeAmigable.includes('creó solicitud')) {
+                          mensajeAmigable = `Nuevo registro: El usuario ha creado una solicitud.`;
+                        } else if (mensajeAmigable.includes('actualizó usuario')) {
+                          mensajeAmigable = `Actualización: Se modificó la información de un usuario.`;
+                        } else if (mensajeAmigable.includes('bloqueado')) {
+                          mensajeAmigable = `Alerta: Un usuario ha sido bloqueado.`;
+                        }
                         return (
                           <div
                             key={n.id}
@@ -297,13 +312,32 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                                 )}
                               </span>
                               <div className="flex-1 min-w-0">
-                                <p className={`text-sm ${!n.leida ? 'text-blue-900 font-medium' : 'text-gray-700'}`}>{n.mensaje}</p>
+                                <p className={`text-sm ${!n.leida ? 'text-blue-900 font-medium' : 'text-gray-700'}`}>{mensajeAmigable}</p>
                                 <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
                                   <span>{fechaStr}</span>
                                   <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                                   <span>{horaStr}</span>
                                 </div>
                               </div>
+                              {/* Botón para marcar como leída */}
+                              {!n.leida && (
+                                <button
+                                  className="ml-2 px-2 py-1 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition-all"
+                                  onClick={async () => {
+                                    const token = getToken();
+                                    await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id}/marcar-leida`, {
+                                      method: "POST",
+                                      headers: {
+                                        Authorization: token ? `Bearer ${token}` : ''
+                                      }
+                                    });
+                                    await fetchNotificaciones();
+                                  }}
+                                  disabled={loading}
+                                >
+                                  Marcar como leída
+                                </button>
+                              )}
                             </div>
                           </div>
                         );
