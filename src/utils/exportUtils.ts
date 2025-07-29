@@ -419,6 +419,7 @@ class ExportUtils {
     const statsSheet = workbook.addWorksheet('Estadísticas');
     const stats = this.calculateStats(solicitudes);
     const pagosPorTipo = this.calculatePaymentTypeStats(solicitudes);
+    const estados = this.calculateStateTotals(solicitudes);
 
     // Título
     const titleRow = statsSheet.addRow(['RESUMEN EJECUTIVO']);
@@ -442,9 +443,17 @@ class ExportUtils {
       row.getCell(1).font = { bold: true };
     });
 
+    // Resumen por estado con montos
+    statsSheet.addRow([]);
+    statsSheet.addRow(['RESUMEN POR ESTADO']);
+    statsSheet.addRow(['Aprobadas', estados.aprobadas.cantidad, this.formatCurrency(estados.aprobadas.monto)]);
+    statsSheet.addRow(['Pendientes', estados.pendientes.cantidad, this.formatCurrency(estados.pendientes.monto)]);
+    statsSheet.addRow(['Rechazadas', estados.rechazadas.cantidad, this.formatCurrency(estados.rechazadas.monto)]);
+    if (statsSheet.lastRow) {
+      statsSheet.getRow(statsSheet.lastRow.number).font = { bold: true };
+    }
     statsSheet.addRow([]);
     statsSheet.addRow(['ANÁLISIS POR TIPO DE PAGO']).getCell(1).font = { size: 14, bold: true };
-    
     Object.entries(pagosPorTipo).forEach(([tipo, data]) => {
       const percentage = ((data.total / stats.montoTotal) * 100).toFixed(1);
       statsSheet.addRow([tipo, `${data.cantidad} solicitudes (${percentage}%)`, this.formatCurrency(data.total)]);
@@ -480,7 +489,7 @@ class ExportUtils {
 
     // Crear contenido del PDF
     await this.createProfessionalHeader(doc, pageWidth, stats, options);
-
+    
     // Descripción general del reporte (centrada y clara)
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
@@ -591,7 +600,19 @@ class ExportUtils {
       doc.text(metric.title, x + cardWidth/2, cardY + 18, { align: 'center' });
     });
 
-    return cardY + cardHeight + 20;
+    // Resumen por estado con montos
+    const estados = this.calculateStateTotals(solicitudes);
+    const resumenY = cardY + cardHeight + 10;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...COMPANY_CONFIG.colors.success);
+    doc.text(`Aprobadas: ${estados.aprobadas.cantidad} | Ganancia: ${this.formatCurrency(estados.aprobadas.monto)}`, 15, resumenY);
+    doc.setTextColor(...COMPANY_CONFIG.colors.warning);
+    doc.text(`Pendientes: ${estados.pendientes.cantidad} | Monto: ${this.formatCurrency(estados.pendientes.monto)}`, 15, resumenY + 8);
+    doc.setTextColor(...COMPANY_CONFIG.colors.danger);
+    doc.text(`Rechazadas: ${estados.rechazadas.cantidad} | Monto: ${this.formatCurrency(estados.rechazadas.monto)}`, 15, resumenY + 16);
+
+    return resumenY + 24;
   }
 
   private static async createSolicitudesTable(doc: jsPDF, solicitudes: Solicitud[], startY: number, pageWidth: number): Promise<void> {
@@ -807,6 +828,29 @@ class ExportUtils {
     });
 
     return pagosPorTipo;
+  }
+
+  // Calcula totales y montos por estado
+  private static calculateStateTotals(solicitudes: Solicitud[]) {
+    const estados = {
+      aprobadas: { cantidad: 0, monto: 0 },
+      pendientes: { cantidad: 0, monto: 0 },
+      rechazadas: { cantidad: 0, monto: 0 }
+    };
+    solicitudes.forEach(s => {
+      const estado = s.estado.toLowerCase();
+      if (estado === 'aprobada' || estado === 'autorizada') {
+        estados.aprobadas.cantidad++;
+        estados.aprobadas.monto += s.monto;
+      } else if (estado === 'pendiente') {
+        estados.pendientes.cantidad++;
+        estados.pendientes.monto += s.monto;
+      } else if (estado === 'rechazada') {
+        estados.rechazadas.cantidad++;
+        estados.rechazadas.monto += s.monto;
+      }
+    });
+    return estados;
   }
 
   static exportDetailedReport(usuarios: User[], solicitudes: Solicitud[]): void {
