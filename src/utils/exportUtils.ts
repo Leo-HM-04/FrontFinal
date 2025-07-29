@@ -83,6 +83,31 @@ const LOCALE_CONFIG = {
 // ============ UTILIDADES CORE ============
 
 class ExportUtils {
+  // Formatea números grandes con unidades (mil, millones, etc.) sin redondear, usando separador de miles
+  private static formatLargeNumberExact(amount: number): string {
+    const absAmount = Math.abs(amount);
+    let unit = '';
+    let value = amount;
+    if (absAmount >= 1_000_000_000_000) {
+      value = amount / 1_000_000_000_000;
+      unit = ' billones';
+    } else if (absAmount >= 1_000_000_000) {
+      value = amount / 1_000_000_000;
+      unit = ' mil millones';
+    } else if (absAmount >= 1_000_000) {
+      value = amount / 1_000_000;
+      unit = ' millones';
+    } else if (absAmount >= 1_000) {
+      value = amount / 1_000;
+      unit = ' mil';
+    } else {
+      value = amount;
+      unit = '';
+    }
+    // Mostrar todos los decimales exactos, sin redondear, y con separador de miles
+    const valueStr = value.toLocaleString(LOCALE_CONFIG.country, { minimumFractionDigits: 0, maximumFractionDigits: 20 }).replace(/\.?0+$/, '');
+    return valueStr + unit;
+  }
   private static async downloadFile(content: string | Blob, filename: string, mimeType: string): Promise<void> {
     const blob = typeof content === 'string' 
       ? new Blob([content], { type: mimeType }) 
@@ -226,15 +251,23 @@ class ExportUtils {
   }
 
   static exportSolicitudesToCSV(solicitudes: Solicitud[], options: ExportOptions = {}): void {
-    const columns: ExportColumn<Solicitud>[] = [
+    const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
+    const columns: ExportColumn<Solicitud & { tipoCuentaTarjeta?: string }>[] = [
       { key: 'id_solicitud', label: 'ID' },
+      { key: 'fecha_creacion', label: 'Fecha Solicitud', formatter: (value) => this.formatDate(value as string) },
       { key: 'departamento', label: 'Departamento' },
       { key: 'monto', label: 'Monto', formatter: (value) => this.formatCurrency(typeof value === 'number' ? value : Number(value)) },
       { key: 'cuenta_destino', label: 'Cuenta Destino' },
+      { key: 'tipoCuentaTarjeta', label: 'Tipo de Cuenta/Tarjeta', formatter: (v, item) => {
+        const s = item as Solicitud;
+        if (s.tipo_cuenta_destino && s.tipo_tarjeta) return `${s.tipo_cuenta_destino} / ${s.tipo_tarjeta}`;
+        if (s.tipo_cuenta_destino) return s.tipo_cuenta_destino;
+        if (s.tipo_tarjeta) return s.tipo_tarjeta;
+        return '-';
+      } },
       { key: 'estado', label: 'Estado' },
       { key: 'concepto', label: 'Concepto' },
       { key: 'fecha_limite_pago', label: 'Fecha Límite', formatter: (value) => this.formatDate(value as string) },
-      { key: 'fecha_creacion', label: 'Fecha Creación', formatter: (value) => this.formatDate(value as string) },
       { key: 'usuario_nombre', label: 'Solicitante', formatter: (value, item) => typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '' },
       { key: 'aprobador_nombre', label: 'Aprobador', formatter: (value, item) => typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A' }
     ];
@@ -398,15 +431,23 @@ class ExportUtils {
   }
 
   static async exportSolicitudesToExcel(solicitudes: Solicitud[], options: ExportOptions = {}): Promise<void> {
-    const columns: ExportColumn<Solicitud>[] = [
+    const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
+    const columns: ExportColumn<Solicitud & { tipoCuentaTarjeta?: string }>[] = [
       { key: 'id_solicitud', label: 'ID', width: 8, align: 'center' },
+      { key: 'fecha_creacion', label: 'Fecha Solicitud', width: 14, align: 'center', formatter: (value) => this.formatDate(value as string) },
       { key: 'departamento', label: 'Departamento', width: 20 },
       { key: 'monto', label: 'Monto', width: 15, align: 'right', formatter: (value) => this.formatCurrency(typeof value === 'number' ? value : Number(value)) },
       { key: 'cuenta_destino', label: 'Cuenta Destino', width: 25 },
+      { key: 'tipoCuentaTarjeta', label: 'Tipo de Cuenta/Tarjeta', width: 22, formatter: (v, item) => {
+        const s = item as Solicitud;
+        if (s.tipo_cuenta_destino && s.tipo_tarjeta) return `${s.tipo_cuenta_destino} / ${s.tipo_tarjeta}`;
+        if (s.tipo_cuenta_destino) return s.tipo_cuenta_destino;
+        if (s.tipo_tarjeta) return s.tipo_tarjeta;
+        return '-';
+      } },
       { key: 'estado', label: 'Estado', width: 12, align: 'center' },
       { key: 'concepto', label: 'Concepto', width: 30 },
       { key: 'fecha_limite_pago', label: 'Fecha Límite', width: 12, align: 'center', formatter: (value) => this.formatDate(value as string) },
-      { key: 'fecha_creacion', label: 'Fecha Creación', width: 12, align: 'center', formatter: (value) => this.formatDate(value as string) },
       { key: 'usuario_nombre', label: 'Solicitante', width: 20, formatter: (value, item) => typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '' },
       { key: 'aprobador_nombre', label: 'Aprobador', width: 20, formatter: (value, item) => typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A' }
     ];
@@ -421,31 +462,58 @@ class ExportUtils {
     const pagosPorTipo = this.calculatePaymentTypeStats(solicitudes);
     const estados = this.calculateStateTotals(solicitudes);
 
+    // Detectar si hay columna folio
+    const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
+
     // Título
     const titleRow = statsSheet.addRow(['RESUMEN EJECUTIVO']);
     titleRow.getCell(1).font = { size: 16, bold: true, color: { argb: 'FF' + COMPANY_CONFIG.colors.primary.map(c => c.toString(16).padStart(2, '0')).join('') } };
     statsSheet.addRow([]);
 
     // Métricas generales
-    const metrics = [
-      ['Total de Solicitudes', stats.totalSolicitudes],
-      ['Monto Total', this.formatCurrency(stats.montoTotal)],
-      ['Monto Promedio', this.formatCurrency(stats.montoPromedio)],
-      ['Solicitudes Aprobadas', `${stats.aprobadas} (${((stats.aprobadas/stats.totalSolicitudes)*100).toFixed(1)}%)`],
-      ['Solicitudes Pendientes', `${stats.pendientes} (${((stats.pendientes/stats.totalSolicitudes)*100).toFixed(1)}%)`],
-      ['Solicitudes Rechazadas', `${stats.rechazadas} (${((stats.rechazadas/stats.totalSolicitudes)*100).toFixed(1)}%)`],
-      ['Departamentos Únicos', stats.departamentos.size],
-      ['Promedio Diario', stats.solicitudesPorDia.toFixed(2)]
+    const columns = [
+      { key: 'id_solicitud', label: 'ID', width: 15 },
+      ...(hasFolio ? [{ key: 'folio', label: 'Folio', width: 22 }] : []),
+      { key: 'fecha_creacion', label: 'Fecha Solicitud', width: 18 },
+      { key: 'departamento', label: 'Departamento', width: 30 },
+      { key: 'monto', label: 'Monto', width: 25 },
+      { key: 'cuenta_destino', label: 'Cuenta Destino', width: 25 },
+      { key: 'tipoCuentaTarjeta', label: 'Tipo de Cuenta/Tarjeta', width: 28 },
+      { key: 'estado', label: 'Estado', width: 20 },
+      { key: 'concepto', label: 'Concepto', width: 60 },
+      { key: 'fecha_limite_pago', label: 'F. Límite', width: 25 },
+      { key: 'usuario_nombre', label: 'Solicitante', width: 30 },
+      { key: 'aprobador_nombre', label: 'Aprobador', width: 30 },
+      { key: 'prioridad', label: 'Prioridad', width: 20 }
     ];
 
-    metrics.forEach(([label, value]) => {
-      const row = statsSheet.addRow([label, value]);
-      row.getCell(1).font = { bold: true };
+    const tableData = solicitudes.map(item => {
+      let tipoCuentaTarjeta = '-';
+      if (item.tipo_cuenta_destino && item.tipo_tarjeta) {
+        tipoCuentaTarjeta = `${item.tipo_cuenta_destino} / ${item.tipo_tarjeta}`;
+      } else if (item.tipo_cuenta_destino) {
+        tipoCuentaTarjeta = item.tipo_cuenta_destino;
+      } else if (item.tipo_tarjeta) {
+        tipoCuentaTarjeta = item.tipo_tarjeta;
+      }
+      return columns.map(col => {
+        let value = (col.key === 'tipoCuentaTarjeta') ? tipoCuentaTarjeta : item[col.key as keyof Solicitud];
+        if (col.key === 'monto') {
+          value = this.formatCurrency(typeof value === 'number' ? value : Number(value));
+        } else if (col.key === 'fecha_limite_pago' || col.key === 'fecha_creacion') {
+          value = this.formatDate(value as string);
+        } else if (col.key === 'usuario_nombre') {
+          value = typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '';
+        } else if (col.key === 'aprobador_nombre') {
+          value = typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A';
+        } else if (col.key === 'prioridad') {
+          if (String(value).toLowerCase() === 'alta') value = 'Alta';
+          else if (String(value).toLowerCase() === 'media') value = 'Media';
+          else value = 'Baja';
+        }
+        return String(value || '');
+      });
     });
-
-    // Resumen por estado con montos
-    statsSheet.addRow([]);
-    statsSheet.addRow(['RESUMEN POR ESTADO']);
     statsSheet.addRow(['Aprobadas', estados.aprobadas.cantidad, this.formatCurrency(estados.aprobadas.monto)]);
     statsSheet.addRow(['Pendientes', estados.pendientes.cantidad, this.formatCurrency(estados.pendientes.monto)]);
     statsSheet.addRow(['Rechazadas', estados.rechazadas.cantidad, this.formatCurrency(estados.rechazadas.monto)]);
@@ -474,7 +542,6 @@ class ExportUtils {
       format: 'a4',
       compress: true
     });
-    
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const stats = this.calculateStats(solicitudes);
@@ -487,9 +554,14 @@ class ExportUtils {
       creator: COMPANY_CONFIG.name
     });
 
-    // Crear contenido del PDF
+    // Cabecera profesional
     await this.createProfessionalHeader(doc, pageWidth, stats, options);
-    
+
+    // Línea divisoria elegante bajo la cabecera
+    doc.setDrawColor(18, 61, 140);
+    doc.setLineWidth(1.2);
+    doc.line(10, 42, pageWidth - 10, 42);
+
     // Descripción general del reporte (centrada y clara)
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
@@ -501,11 +573,74 @@ class ExportUtils {
       50,
       { align: 'center', maxWidth: pageWidth - 40 }
     );
-    const summaryY = await this.createExecutiveSummary(doc, pageWidth, stats, solicitudes, options);
+
+    // Resumen de montos por estado (pendiente, rechazado, pagado, autorizado) con íconos y resaltados sutiles
+    const resumenMontosY = 62;
+    const estadosMontos = this.calculateMontosPorEstado(solicitudes);
+    const resumenLabels = [
+      { label: 'Pendientes', color: [241,196,15], monto: Number(estadosMontos.pendiente) || 0 },
+      { label: 'Rechazadas', color: [231,76,60], monto: Number(estadosMontos.rechazada) || 0 },
+      { label: 'Pagadas', color: [52,152,219], monto: Number(estadosMontos.pagada) || 0 },
+      { label: 'Autorizadas', color: [46,204,113], monto: Number(estadosMontos.autorizada) || 0 }
+    ];
+    // El total general debe ser la suma de todos los montos de todas las solicitudes
+    // Sumar todos los montos válidos, incluso si vienen como string o 0
+    const totalGeneral = solicitudes.reduce((sum, s) => {
+      let monto = 0;
+      if (typeof s.monto === 'number' && !isNaN(s.monto)) {
+        monto = s.monto;
+      } else if (typeof s.monto === 'string') {
+        const parsed = parseFloat(String(s.monto).replace(/[^\d.-]/g, ''));
+        monto = !isNaN(parsed) ? parsed : 0;
+      } else {
+        // Fallback: try to coerce to number
+        const parsed = Number(s.monto);
+        monto = !isNaN(parsed) ? parsed : 0;
+      }
+      return sum + monto;
+    }, 0);
+    const cardW = (pageWidth - 40) / resumenLabels.length;
+    // Color de fondo suave corporativo (azul claro)
+    const resumenBg = [230, 240, 255]; // azul muy claro
+    resumenLabels.forEach((r, i) => {
+      const x = 15 + i * (cardW + 2);
+      // Fondo suave
+      doc.setFillColor(resumenBg[0], resumenBg[1], resumenBg[2]);
+      doc.roundedRect(x, resumenMontosY, cardW, 16, 2, 2, 'F');
+      // Borde sutil
+      doc.setDrawColor(r.color[0], r.color[1], r.color[2]);
+      doc.setLineWidth(0.7);
+      doc.roundedRect(x, resumenMontosY, cardW, 16, 2, 2);
+      // Label centrado y profesional
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(40, 40, 60);
+      doc.text(r.label, x + cardW / 2, resumenMontosY + 7, { align: 'center' });
+      // Solo monto con unidad, centrado
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(r.color[0], r.color[1], r.color[2]);
+      const montoUnidad = this.formatLargeNumberExact(r.monto);
+      doc.text(montoUnidad, x + cardW / 2, resumenMontosY + 13, { align: 'center' });
+    });
+    // Total general
+    // Espacio profesional y sin superposición para Total General
+    const totalY = resumenMontosY + 32; // Más espacio debajo de las tarjetas
+    const totalLabel = 'Total General:';
+    const totalUnidad = this.formatLargeNumberExact(Number(totalGeneral) || 0);
+    // Ajustar fuente y color
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.setTextColor(18, 61, 140);
+    // Imprimir ambos en la misma línea, bien alineados y con espacio suficiente
+    // El label a la izquierda, el valor a la derecha
+    doc.text(totalLabel, 15, totalY, { align: 'left' });
+    doc.text(totalUnidad, pageWidth - 15, totalY, { align: 'right' });
+
     // Asegura que la tabla y leyenda siempre queden al menos 10mm debajo del resumen
-    const tableStartY = Math.max(summaryY, 52) + 10;
+    const tableStartY = resumenMontosY + 35;
     await this.createSolicitudesTable(doc, solicitudes, tableStartY, pageWidth);
-    this.addProfessionalFooter(doc, pageWidth, pageHeight, options);
+    this.addProfessionalFooter(doc, pageWidth, pageHeight, options, true);
 
     // Guardar archivo
     const filename = this.generateFilename('Solicitudes', 'pdf', solicitudes.length);
@@ -543,7 +678,7 @@ class ExportUtils {
 
     // Información resumida (corregir NaN)
     const montoTotal = isNaN(stats.montoTotal) ? 0 : stats.montoTotal;
-    const headerInfo = `${stats.totalSolicitudes} Solicitudes | ${stats.departamentos.size} Departamentos | Monto Total: ${this.formatCurrency(montoTotal)}`;
+    const headerInfo = `${stats.totalSolicitudes} Solicitudes | ${stats.departamentos.size} Departamentos`;
     doc.setFontSize(13);
     doc.text(headerInfo, 40, 36);
 
@@ -617,22 +752,56 @@ class ExportUtils {
 
   private static async createSolicitudesTable(doc: jsPDF, solicitudes: Solicitud[], startY: number, pageWidth: number): Promise<void> {
     // Agregar columna de prioridad con iconos
-    const columns = [
-      { key: 'id_solicitud', label: 'ID', width: 15 },
-      { key: 'departamento', label: 'Departamento', width: 30 },
-      { key: 'monto', label: 'Monto', width: 25 },
-      { key: 'estado', label: 'Estado', width: 20 },
-      { key: 'concepto', label: 'Concepto', width: 40 },
-      { key: 'fecha_limite_pago', label: 'F. Límite', width: 25 },
-      { key: 'usuario_nombre', label: 'Solicitante', width: 30 },
-      { key: 'aprobador_nombre', label: 'Aprobador', width: 30 },
-      { key: 'prioridad', label: 'Prioridad', width: 32 } // Mucho más ancho para que no se corte
+    // Ajuste de columnas para mayor estabilidad visual y evitar cortes
+    // Si existe la propiedad 'folio' en los datos, agregar la columna
+    const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
+    // Mejorar legibilidad: mostrar solo columnas clave y aumentar anchos
+    // Puedes ajustar aquí qué columnas ocultar si es necesario
+    // Restaurar todas las columnas clave y ajustar anchos para que la tabla no se corte ni se vea apretada
+    // Suma total de anchos aprox. <= 275mm para A4 landscape
+    // Mejorar legibilidad: filas más altas, fuente y padding mayores, columnas clave más anchas
+    // Ajustar para que la suma de anchos ocupe el ancho útil de la hoja
+    // A4 landscape útil: ~275mm (márgenes incluidos)
+    // Rediseño: columnas distribuidas dinámicamente para ocupar el 100% del ancho útil
+    const margin = 15;
+    const usableWidth = pageWidth - margin * 2;
+    // Ajuste: más espacio para Monto, F. Límite, Cuenta Destino y Tipo de Cuenta/Tarjeta
+    const baseColumns = [
+      { key: 'id_solicitud', label: 'ID', min: 12, rel: 0.9 },
+      ...(hasFolio ? [{ key: 'folio', label: 'Folio', min: 16, rel: 1.1 }] : []),
+      { key: 'departamento', label: 'Departamento', min: 22, rel: 1.2 },
+      { key: 'monto', label: 'Monto', min: 22, rel: 1.5 },
+      { key: 'cuenta_destino', label: 'Cuenta Destino', min: 36, rel: 2.1 },
+      { key: 'tipoCuentaTarjeta', label: 'Tipo Cuenta/Tarj.', min: 30, rel: 1.7 },
+      { key: 'estado', label: 'Estado', min: 13, rel: 0.9 },
+      { key: 'concepto', label: 'Concepto', min: 28, rel: 1.5 },
+      { key: 'fecha_limite_pago', label: 'F. Límite', min: 20, rel: 1.5 },
+      { key: 'usuario_nombre', label: 'Solicitante', min: 14, rel: 1 },
+      { key: 'aprobador_nombre', label: 'Aprobador', min: 14, rel: 1 },
+      { key: 'prioridad', label: 'Prioridad', min: 10, rel: 0.7 }
     ];
+    const totalRel = baseColumns.reduce((sum, c) => sum + c.rel, 0);
+    // Calcular anchos proporcionales pero nunca menores al mínimo
+    let columns = baseColumns.map(c => ({
+      ...c,
+      width: Math.max(c.min, Math.floor((c.rel / totalRel) * usableWidth))
+    }));
+    // Ajuste final: si sobra o falta por redondeo, ajustar la última columna
+    const widthSum = columns.reduce((sum, c) => sum + c.width, 0);
+    if (widthSum !== usableWidth) {
+      columns[columns.length - 1].width += usableWidth - widthSum;
+    }
 
     const tableData = solicitudes.map(item => columns.map(col => {
-      // Acceso seguro y tipado estricto
-      let value = item[col.key as keyof Solicitud];
-      // Formatear valores específicos
+      let value: any;
+      if (col.key === 'tipoCuentaTarjeta') {
+        if (item.tipo_cuenta_destino && item.tipo_tarjeta) value = `${item.tipo_cuenta_destino} / ${item.tipo_tarjeta}`;
+        else if (item.tipo_cuenta_destino) value = item.tipo_cuenta_destino;
+        else if (item.tipo_tarjeta) value = item.tipo_tarjeta;
+        else value = '-';
+      } else {
+        value = item[col.key as keyof Solicitud];
+      }
       if (col.key === 'monto') {
         value = this.formatCurrency(typeof value === 'number' ? value : Number(value));
       } else if (col.key === 'fecha_limite_pago' || col.key === 'fecha_creacion') {
@@ -642,41 +811,67 @@ class ExportUtils {
       } else if (col.key === 'aprobador_nombre') {
         value = typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A';
       } else if (col.key === 'prioridad') {
-        // Solo texto limpio
         if (String(value).toLowerCase() === 'alta') value = 'Alta';
         else if (String(value).toLowerCase() === 'media') value = 'Media';
         else value = 'Baja';
       }
-      // Mostrar el texto completo, sin truncar
       return String(value || '');
     }));
 
-    // Leyenda visual de prioridad (centrada, con espacio y fuente clara)
-    const legendY = startY + 10; // Más separación respecto al resumen/tabla
+    // Leyenda visual de prioridad (más ordenada y profesional)
+    const legendY = startY + 10;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     doc.setTextColor(30, 30, 60);
     doc.text('Leyenda de prioridad', pageWidth / 2, legendY, { align: 'center' });
 
-    // Texto de niveles de prioridad, cada uno en su línea, con fuente y color diferenciados y más espacio entre líneas
-    const expY = legendY + 12;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(220, 53, 69); // Rojo para Alta
-    doc.text('Alta: Solicitudes urgentes que requieren atención inmediata.', pageWidth / 2, expY, { align: 'center', maxWidth: pageWidth - 60 });
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(255, 193, 7); // Amarillo para Media
-    doc.text('Media: Importantes pero no urgentes.', pageWidth / 2, expY + 10, { align: 'center', maxWidth: pageWidth - 60 });
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(40, 167, 69); // Verde para Baja
-    doc.text('Baja: Pueden esperar sin afectar procesos críticos.', pageWidth / 2, expY + 20, { align: 'center', maxWidth: pageWidth - 60 });
+    // Tarjetas de prioridad más compactas y mejor centradas
+    const legendCardW = (pageWidth - 36) / 3;
+    const legendCardH = 18;
+    const legendCardY = legendY + 8;
+    const legendBg = [245, 250, 255]; // azul grisáceo muy claro
+    const legendData = [
+      {
+        label: 'Alta',
+        desc: 'Solicitudes urgentes que requieren atención inmediata.',
+        color: [220, 53, 69]
+      },
+      {
+        label: 'Media',
+        desc: 'Importantes pero no urgentes.',
+        color: [255, 193, 7]
+      },
+      {
+        label: 'Baja',
+        desc: 'Pueden esperar sin afectar procesos críticos.',
+        color: [40, 167, 69]
+      }
+    ];
+    legendData.forEach((item, idx) => {
+      const x = 8 + idx * (legendCardW + 10);
+      // Fondo suave
+      doc.setFillColor(legendBg[0], legendBg[1], legendBg[2]);
+      doc.roundedRect(x, legendCardY, legendCardW, legendCardH, 4, 4, 'F');
+      // Borde sutil
+      doc.setDrawColor(item.color[0], item.color[1], item.color[2]);
+      doc.setLineWidth(0.8);
+      doc.roundedRect(x, legendCardY, legendCardW, legendCardH, 4, 4);
+      // Centrado vertical y horizontal
+      const centerY = legendCardY + legendCardH / 2;
+      // Label
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.setTextColor(item.color[0], item.color[1], item.color[2]);
+      doc.text(item.label + ':', x + 10, centerY - 1.5, { align: 'left' });
+      // Descripción
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(60, 60, 60);
+      doc.text(item.desc, x + 10, centerY + 4.5, { align: 'left', maxWidth: legendCardW - 16 });
+    });
 
     // Ajustar el inicio de la tabla para que nunca se sobreponga con la leyenda
-    const tableY = expY + 30;
+    const tableY = legendCardY + legendCardH + 8;
     autoTable(doc, {
       willDrawCell: function(data) {
         if (data.column.index === 3 && data.section === 'body') {
@@ -694,22 +889,28 @@ class ExportUtils {
         fillColor: COMPANY_CONFIG.colors.primary,
         textColor: [255, 255, 255],
         fontStyle: 'bold',
-        fontSize: 11,
+        fontSize: 9.5,
         halign: 'center',
         valign: 'middle',
-        cellPadding: { top: 6, right: 2, bottom: 6, left: 2 }
+        cellPadding: { top: 1.5, right: 1.5, bottom: 1.5, left: 1.5 },
+        lineWidth: 0.6,
+        lineColor: [18, 61, 140],
+        overflow: 'visible',
+        minCellHeight: 7
       },
       alternateRowStyles: { 
-        fillColor: [248, 249, 250] 
+        fillColor: [242, 245, 252] // Contraste sutil, look corporativo
       },
       styles: {
-        fontSize: 9,
-        cellPadding: { top: 3, right: 2, bottom: 3, left: 2 },
+        fontSize: 9.5,
+        cellPadding: { top: 1.5, right: 1.5, bottom: 1.5, left: 1.5 },
         valign: 'middle',
-        textColor: [45, 45, 45],
+        halign: 'center',
+        textColor: [40, 40, 40],
         overflow: 'linebreak',
         lineWidth: 0.3,
-        lineColor: [220, 220, 220]
+        lineColor: [180, 180, 200],
+        minCellHeight: 7
       },
       columnStyles: columns.reduce((acc, col, index) => {
         acc[index] = { 
@@ -741,7 +942,7 @@ class ExportUtils {
           }
           doc.setTextColor(color[0], color[1], color[2]);
           doc.setFont('helvetica', fontStyle);
-          doc.setFontSize(10);
+          doc.setFontSize(9.5);
           doc.text(estado.charAt(0).toUpperCase() + estado.slice(1), data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2, {
             align: 'center',
             baseline: 'middle'
@@ -768,7 +969,7 @@ class ExportUtils {
           }
           doc.setTextColor(color[0], color[1], color[2]);
           doc.setFont('helvetica', 'bold');
-          doc.setFontSize(10);
+          doc.setFontSize(9.5);
           doc.text(prioridad.charAt(0).toUpperCase() + prioridad.slice(1), data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2, {
             align: 'center',
             baseline: 'middle'
@@ -778,34 +979,56 @@ class ExportUtils {
     });
   }
 
-  private static addProfessionalFooter(doc: jsPDF, pageWidth: number, pageHeight: number, options: ExportOptions): void {
+  private static addProfessionalFooter(doc: jsPDF, pageWidth: number, pageHeight: number, options: ExportOptions, showContact = false): void {
     const totalPages = doc.getNumberOfPages();
     const confidentiality = options.confidentialityLevel?.toUpperCase() || 'CONFIDENCIAL - USO INTERNO';
-    
+    const contacto = 'Contacto: soporte@bechapra.com | +57 123 456 7890';
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      
       // Línea superior del footer
       doc.setDrawColor(200, 200, 200);
       doc.setLineWidth(0.5);
       doc.line(15, pageHeight - 20, pageWidth - 15, pageHeight - 20);
-      
       // Información del footer
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(120, 120, 120);
-      
       // Izquierda: Información de la empresa
       doc.text(`© ${COMPANY_CONFIG.fullName}`, 15, pageHeight - 12);
-      doc.text('Documento generado automáticamente', 15, pageHeight - 8);
-      
+      if (showContact) {
+        doc.text(contacto, 15, pageHeight - 8);
+      } else {
+        doc.text('Documento generado automáticamente', 15, pageHeight - 8);
+      }
       // Centro: Clasificación del documento
       doc.text(confidentiality, pageWidth/2, pageHeight - 10, { align: 'center' });
-      
       // Derecha: Numeración de páginas y fecha
       doc.text(`Página ${i} de ${totalPages}`, pageWidth - 15, pageHeight - 12, { align: 'right' });
       doc.text(this.formatDate(new Date()), pageWidth - 15, pageHeight - 8, { align: 'right' });
     }
+  }
+
+  // Calcula montos por estado para el resumen profesional
+  private static calculateMontosPorEstado(solicitudes: Solicitud[]) {
+    const estados = {
+      pendiente: 0,
+      rechazada: 0,
+      pagada: 0,
+      autorizada: 0
+    };
+    solicitudes.forEach(s => {
+      const estado = s.estado.toLowerCase();
+      if (estado === 'pendiente') {
+        estados.pendiente += s.monto;
+      } else if (estado === 'rechazada') {
+        estados.rechazada += s.monto;
+      } else if (estado === 'pagada') {
+        estados.pagada += s.monto;
+      } else if (estado === 'autorizada' || estado === 'aprobada') {
+        estados.autorizada += s.monto;
+      }
+    });
+    return estados;
   }
 
   // ============ UTILIDADES ESPECÍFICAS ============
@@ -1044,28 +1267,3 @@ export const exportSolicitudesToExcel = ExportUtils.exportSolicitudesToExcel.bin
 export const exportSolicitudesToPDF = ExportUtils.exportSolicitudesToPDF.bind(ExportUtils);
 export const exportDetailedReport = ExportUtils.exportDetailedReport.bind(ExportUtils);
 export const exportPagosToCSV = ExportUtils.exportPagosToCSV.bind(ExportUtils);
-
-// Ejemplo de uso:
-/*
-// Exportación básica
-await ExportUtils.exportSolicitudesToPDF(solicitudes);
-
-// Exportación con opciones avanzadas
-await ExportUtils.exportSolicitudesToPDF(solicitudes, {
-  includeStats: true,
-  includeCharts: true,
-  customTitle: 'Reporte Mensual de Solicitudes',
-  confidentialityLevel: 'restricted'
-});
-
-// Exportación con validación
-const success = await ExportUtils.exportWithValidation(
-  solicitudes,
-  (data) => ExportUtils.exportSolicitudesToExcel(data, { includeStats: true })
-);
-
-// Obtener formato recomendado
-const format = ExportUtils.getRecommendedFormat(solicitudes.length, true);
-console.log(`Formato recomendado: ${format}`);
-console.log(`Tamaño estimado: ${ExportUtils.estimateFileSize(solicitudes.length, format)}`);
-*/

@@ -1,3 +1,4 @@
+
 import api from '@/lib/api';
 import { Solicitud, CreateSolicitudData, UpdateEstadoData } from '@/types';
 
@@ -172,5 +173,21 @@ export class SolicitudesService {
     await api.delete(`/solicitudes/solicitante/${id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
+  }
+
+  static async aprobarLote(ids: number[], comentario_aprobador = ''): Promise<any> {
+    const token = localStorage.getItem('token');
+    const response = await api.put('/solicitudes/aprobar-lote', { ids, comentario_aprobador }, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    return response.data;
+  }
+
+  static async rechazarLote(ids: number[], comentario_aprobador = ''): Promise<any> {
+    const token = localStorage.getItem('token');
+    const response = await api.put('/solicitudes/rechazar-lote', { ids, comentario_aprobador }, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    return response.data;
   }
 }
