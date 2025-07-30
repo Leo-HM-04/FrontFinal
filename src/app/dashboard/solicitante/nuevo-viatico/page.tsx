@@ -47,13 +47,13 @@ export default function NuevoViaticoPage() {
         }
         try {
           const id_usuario = localStorage.getItem('id_usuario');
-          const { viatico_url, ...formSinArchivo } = f.form;
           const data = {
-            ...formSinArchivo,
+            ...f.form,
             id_usuario: id_usuario || undefined,
             tipo_pago: 'viaticos',
+            viatico_url: f.file
           };
-          await ViaticosService.createWithFile({ ...data, viatico_url: f.file });
+          await ViaticosService.createWithFile(data);
           nuevos[idx].mensaje = 'Viático creado correctamente';
         } catch {
           nuevos[idx].mensaje = 'Error al crear viático';
@@ -192,6 +192,7 @@ export default function NuevoViaticoPage() {
                   <label className="text-blue-900 font-medium">Banco destino</label>
                   <select
                     name="banco_destino"
+                    onChange={e => handleChange(idx, e)}
                     className="input input-bordered text-black uppercase"
                     defaultValue=""
                   >

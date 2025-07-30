@@ -243,6 +243,7 @@ export default function MisViaticosPage() {
                 <thead className="bg-blue-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">ID</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Folio</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Departamento</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Concepto</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Monto</th>
@@ -270,6 +271,7 @@ export default function MisViaticosPage() {
                     currentViaticos.map((v: any) => (
                       <tr key={v.id_viatico} className="hover:bg-blue-50 transition-colors">
                         <td className="px-6 py-4 text-blue-900 font-bold">{v.id_viatico}</td>
+                        <td className="px-6 py-4 text-blue-900 font-mono">{v.folio || '-'}</td>
                         <td className="px-6 py-4 text-blue-900 font-medium">{v.departamento}</td>
                         <td className="px-6 py-4 text-blue-900 uppercase tracking-wide">{v.concepto}</td>
                         <td className="px-6 py-4 text-blue-900 font-extrabold">{formatCurrency(Number(v.monto))}</td>

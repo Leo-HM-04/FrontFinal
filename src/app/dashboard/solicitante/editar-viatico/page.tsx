@@ -204,7 +204,7 @@ export default function EditarViaticoPage() {
               <label className="block text-sm font-semibold text-blue-900 mb-1">Archivo actual:</label>
               {viatico.viatico_url ? (
                 <a
-                  href={`http://localhost:4000/uploads/viaticos/${viatico.viatico_url.split('/').pop()}`}
+                  href={viatico.viatico_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-700 underline break-all"
@@ -224,27 +224,21 @@ export default function EditarViaticoPage() {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    const formData = new FormData();
-                    formData.append('viatico_url', file);
-                    formData.append('id_viatico', viatico.id_viatico || viatico.id);
                     try {
-                      const res = await fetch('http://localhost:4000/api/viaticos/subir', {
-                        method: 'POST',
-                        body: formData,
-                        credentials: 'include', // Asegura que se envíen las cookies de sesión
-                      });
-                      const data = await res.json();
-                    if (res.ok) {
+                      await ViaticosService.updateWithFiles(
+                        viatico.id_viatico || viatico.id,
+                        {
+                          ...form,
+                          viatico_url: file
+                        }
+                      );
                       // Refrescar el viatico desde el backend para asegurar la URL correcta
                       const idNum = Number(viatico.id_viatico || viatico.id);
                       const actualizado = await ViaticosService.getById(idNum);
                       setViatico(actualizado);
                       setMensaje('Archivo actualizado correctamente.');
-                    } else {
-                      setMensaje(data.error || 'Error al subir el archivo.');
-                    }
-                    } catch {
-                      setMensaje('Error al subir el archivo.');
+                    } catch (err: any) {
+                      setMensaje(err?.response?.data?.error || 'Error al subir el archivo.');
                     }
                   }}
                 />
