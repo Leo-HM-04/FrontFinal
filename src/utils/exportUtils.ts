@@ -251,7 +251,7 @@ class ExportUtils {
   }
 
   static exportSolicitudesToCSV(solicitudes: Solicitud[], options: ExportOptions = {}): void {
-    const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
+    // const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
     const columns: ExportColumn<Solicitud & { tipoCuentaTarjeta?: string }>[] = [
       { key: 'id_solicitud', label: 'ID' },
       { key: 'fecha_creacion', label: 'Fecha Solicitud', formatter: (value) => this.formatDate(value as string) },
@@ -431,7 +431,7 @@ class ExportUtils {
   }
 
   static async exportSolicitudesToExcel(solicitudes: Solicitud[], options: ExportOptions = {}): Promise<void> {
-    const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
+    // const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
     const columns: ExportColumn<Solicitud & { tipoCuentaTarjeta?: string }>[] = [
       { key: 'id_solicitud', label: 'ID', width: 8, align: 'center' },
       { key: 'fecha_creacion', label: 'Fecha Solicitud', width: 14, align: 'center', formatter: (value) => this.formatDate(value as string) },
@@ -463,7 +463,7 @@ class ExportUtils {
     const estados = this.calculateStateTotals(solicitudes);
 
     // Detectar si hay columna folio
-    const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
+    // const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
 
     // Título
     const titleRow = statsSheet.addRow(['RESUMEN EJECUTIVO']);
@@ -471,49 +471,9 @@ class ExportUtils {
     statsSheet.addRow([]);
 
     // Métricas generales
-    const columns = [
-      { key: 'id_solicitud', label: 'ID', width: 15 },
-      ...(hasFolio ? [{ key: 'folio', label: 'Folio', width: 22 }] : []),
-      { key: 'fecha_creacion', label: 'Fecha Solicitud', width: 18 },
-      { key: 'departamento', label: 'Departamento', width: 30 },
-      { key: 'monto', label: 'Monto', width: 25 },
-      { key: 'cuenta_destino', label: 'Cuenta Destino', width: 25 },
-      { key: 'tipoCuentaTarjeta', label: 'Tipo de Cuenta/Tarjeta', width: 28 },
-      { key: 'estado', label: 'Estado', width: 20 },
-      { key: 'concepto', label: 'Concepto', width: 60 },
-      { key: 'fecha_limite_pago', label: 'F. Límite', width: 25 },
-      { key: 'usuario_nombre', label: 'Solicitante', width: 30 },
-      { key: 'aprobador_nombre', label: 'Aprobador', width: 30 },
-      { key: 'prioridad', label: 'Prioridad', width: 20 }
-    ];
+    // columns no se usa
 
-    const tableData = solicitudes.map(item => {
-      let tipoCuentaTarjeta = '-';
-      if (item.tipo_cuenta_destino && item.tipo_tarjeta) {
-        tipoCuentaTarjeta = `${item.tipo_cuenta_destino} / ${item.tipo_tarjeta}`;
-      } else if (item.tipo_cuenta_destino) {
-        tipoCuentaTarjeta = item.tipo_cuenta_destino;
-      } else if (item.tipo_tarjeta) {
-        tipoCuentaTarjeta = item.tipo_tarjeta;
-      }
-      return columns.map(col => {
-        let value = (col.key === 'tipoCuentaTarjeta') ? tipoCuentaTarjeta : item[col.key as keyof Solicitud];
-        if (col.key === 'monto') {
-          value = this.formatCurrency(typeof value === 'number' ? value : Number(value));
-        } else if (col.key === 'fecha_limite_pago' || col.key === 'fecha_creacion') {
-          value = this.formatDate(value as string);
-        } else if (col.key === 'usuario_nombre') {
-          value = typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '';
-        } else if (col.key === 'aprobador_nombre') {
-          value = typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A';
-        } else if (col.key === 'prioridad') {
-          if (String(value).toLowerCase() === 'alta') value = 'Alta';
-          else if (String(value).toLowerCase() === 'media') value = 'Media';
-          else value = 'Baja';
-        }
-        return String(value || '');
-      });
-    });
+    // const tableData = ... (no se usa)
     statsSheet.addRow(['Aprobadas', estados.aprobadas.cantidad, this.formatCurrency(estados.aprobadas.monto)]);
     statsSheet.addRow(['Pendientes', estados.pendientes.cantidad, this.formatCurrency(estados.pendientes.monto)]);
     statsSheet.addRow(['Rechazadas', estados.rechazadas.cantidad, this.formatCurrency(estados.rechazadas.monto)]);
@@ -677,7 +637,7 @@ class ExportUtils {
     doc.text(options.customTitle || 'Reporte de Solicitudes de Pago', 40, 25);
 
     // Información resumida (corregir NaN)
-    const montoTotal = isNaN(stats.montoTotal) ? 0 : stats.montoTotal;
+    // const montoTotal = isNaN(stats.montoTotal) ? 0 : stats.montoTotal;
     const headerInfo = `${stats.totalSolicitudes} Solicitudes | ${stats.departamentos.size} Departamentos`;
     doc.setFontSize(13);
     doc.text(headerInfo, 40, 36);
@@ -782,7 +742,7 @@ class ExportUtils {
     ];
     const totalRel = baseColumns.reduce((sum, c) => sum + c.rel, 0);
     // Calcular anchos proporcionales pero nunca menores al mínimo
-    let columns = baseColumns.map(c => ({
+    const columns = baseColumns.map(c => ({
       ...c,
       width: Math.max(c.min, Math.floor((c.rel / totalRel) * usableWidth))
     }));
@@ -793,7 +753,7 @@ class ExportUtils {
     }
 
     const tableData = solicitudes.map(item => columns.map(col => {
-      let value: any;
+      let value: unknown;
       if (col.key === 'tipoCuentaTarjeta') {
         if (item.tipo_cuenta_destino && item.tipo_tarjeta) value = `${item.tipo_cuenta_destino} / ${item.tipo_tarjeta}`;
         else if (item.tipo_cuenta_destino) value = item.tipo_cuenta_destino;
