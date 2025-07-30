@@ -1,0 +1,404 @@
+'use client';
+import { FaFilePdf, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { Clock, CheckCircle, XCircle, AlertCircle, FileText, Search } from 'lucide-react';
+
+import Link from 'next/link';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
+import { useEffect, useState } from 'react';
+import { ViaticosService } from '@/services/viaticos.service';
+
+export default function MisViaticosPage() {
+  const [viaticos, setViaticos] = useState<any[]>([]);
+  const [filteredViaticos, setFilteredViaticos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [mensaje, setMensaje] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [viaticoAEliminar, setViaticoAEliminar] = useState<number|null>(null);
+
+  const handleEliminar = async () => {
+    if (!viaticoAEliminar) return;
+    try {
+      await ViaticosService.delete(viaticoAEliminar);
+      setMensaje('Viático eliminado correctamente.');
+      setViaticos(viaticos.filter(v => v.id_viatico !== viaticoAEliminar));
+    } catch {
+      setMensaje('Error al eliminar el viático.');
+    }
+    setShowModal(false);
+    setViaticoAEliminar(null);
+  };
+
+  useEffect(() => {
+    ViaticosService.getMyViaticos()
+      .then((data) => {
+        setViaticos(data);
+        setError('');
+      })
+      .catch(() => setError('Error al cargar viáticos'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...viaticos];
+    if (searchTerm) {
+      filtered = filtered.filter(v =>
+        v.concepto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        v.departamento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        v.cuenta_destino?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (statusFilter) {
+      filtered = filtered.filter(v => v.estado?.toLowerCase() === statusFilter.toLowerCase());
+    }
+    if (dateFilter) {
+      const today = new Date();
+      const filterDate = new Date(today);
+      switch (dateFilter) {
+        case 'today':
+          filterDate.setHours(0, 0, 0, 0);
+          filtered = filtered.filter(v => {
+            const vDate = new Date(v.fecha_creacion || v.fecha_limite_pago);
+            vDate.setHours(0, 0, 0, 0);
+            return vDate.getTime() === filterDate.getTime();
+          });
+          break;
+        case 'week':
+          filterDate.setDate(today.getDate() - 7);
+          filtered = filtered.filter(v => new Date(v.fecha_creacion || v.fecha_limite_pago) >= filterDate);
+          break;
+        case 'month':
+          filterDate.setMonth(today.getMonth() - 1);
+          filtered = filtered.filter(v => new Date(v.fecha_creacion || v.fecha_limite_pago) >= filterDate);
+          break;
+      }
+    }
+    setFilteredViaticos(filtered);
+    setCurrentPage(1);
+  }, [viaticos, searchTerm, statusFilter, dateFilter]);
+
+  const estadoOrden = {
+    'pendiente': 1,
+    'autorizada': 2,
+    'pagada': 3,
+    'rechazada': 4
+  };
+  const viaticosOrdenados = [...filteredViaticos].sort((a, b) => {
+    const estadoA = (a.estado || '').toLowerCase();
+    const estadoB = (b.estado || '').toLowerCase();
+    const ordenA = estadoOrden[estadoA as keyof typeof estadoOrden] ?? 99;
+    const ordenB = estadoOrden[estadoB as keyof typeof estadoOrden] ?? 99;
+    if (ordenA !== ordenB) return ordenA - ordenB;
+    return new Date(b.fecha_creacion || b.fecha_limite_pago).getTime() - new Date(a.fecha_creacion || a.fecha_limite_pago).getTime();
+  });
+  const totalPages = Math.ceil(viaticosOrdenados.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, viaticosOrdenados.length);
+  const currentViaticos = viaticosOrdenados.slice(startIndex, endIndex);
+
+  const filterOptions = [
+    { value: '', label: 'Todos los estados' },
+    { value: 'pendiente', label: 'Pendiente' },
+    { value: 'autorizada', label: 'Autorizada' },
+    { value: 'rechazada', label: 'Rechazada' },
+    { value: 'pagada', label: 'Pagada' }
+  ];
+  const dateOptions = [
+    { value: '', label: 'Todas las fechas' },
+    { value: 'today', label: 'Hoy' },
+    { value: 'week', label: 'Última semana' },
+    { value: 'month', label: 'Último mes' }
+  ];
+  const getEstadoColor = (estado: string) => {
+    switch ((estado || '').toLowerCase()) {
+      case 'pendiente': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'autorizada': return 'bg-green-100 text-green-800 border-green-200';
+      case 'rechazada': return 'bg-red-100 text-red-800 border-red-200';
+      case 'pagada': return 'bg-blue-100 text-blue-800 border-blue-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+  const getEstadoIcon = (estado: string) => {
+    switch ((estado || '').toLowerCase()) {
+      case 'pendiente': return <Clock className="w-4 h-4" />;
+      case 'autorizada': return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'rechazada': return <XCircle className="w-4 h-4 text-red-500" />;
+      case 'pagada': return <CheckCircle className="w-4 h-4 text-blue-500" />;
+      default: return <AlertCircle className="w-4 h-4" />;
+    }
+  };
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  if (loading) return <div>Cargando...</div>;
+  if (error) return <div>{error}</div>;
+
+  return (
+    <ProtectedRoute requiredRoles={['solicitante']}>
+      <SolicitanteLayout>
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-6">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center rounded-full bg-blue-100 p-2 shadow-sm">
+                <FaFilePdf className="text-blue-600 w-7 h-7" />
+              </span>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Viáticos</h1>
+            </div>
+            <Link
+              href="/dashboard/solicitante/nuevo-viatico"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 text-white font-bold shadow-lg transition-all text-lg md:text-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              <FaPlus className="w-5 h-5" />
+              Crear viático
+            </Link>
+          </div>
+          {/* Filtros */}
+          <div className="mb-8">
+            <div className="bg-white rounded-xl p-6 border border-blue-200 shadow-md">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por concepto, departamento o cuenta..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-white border border-blue-200 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                </div>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="bg-white border border-blue-200 rounded-lg px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                >
+                  {filterOptions.map(option => (
+                    <option key={option.value} value={option.value} className="text-gray-900">
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="bg-white border border-blue-200 rounded-lg px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                >
+                  {dateOptions.map(option => (
+                    <option key={option.value} value={option.value} className="text-gray-900">
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+
+          {/* Notificación tipo toast para borrar */}
+          {mensaje && (
+            <div
+              className={`fixed top-8 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl font-semibold text-base animate-fade-in-up transition-all duration-300
+                ${mensaje.includes('eliminado')
+                  ? 'bg-green-50 border border-green-200 text-green-800'
+                  : 'bg-red-50 border border-red-200 text-red-800'}
+              `}
+              style={{ minWidth: 280 }}
+            >
+              {mensaje.includes('eliminado') ? (
+                <CheckCircle className="w-6 h-6 text-green-500" />
+              ) : (
+                <XCircle className="w-6 h-6 text-red-500" />
+              )}
+              <span>{mensaje}</span>
+              <button
+                className="ml-2 text-xl text-gray-400 hover:text-gray-600 font-bold px-2 py-1 rounded-full transition"
+                onClick={() => setMensaje("")}
+                title="Cerrar"
+              >×</button>
+            </div>
+          )}
+
+          {/* Tabla de viáticos */}
+          <div className="bg-white rounded-xl border border-blue-200 shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-blue-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">ID</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Departamento</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Concepto</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Monto</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Cuenta Destino</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Estado</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Fecha Límite</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-blue-900">Archivo</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-blue-900">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-blue-100">
+                  {currentViaticos.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-12 text-center text-blue-900/80">
+                        <FileText className="w-12 h-12 mx-auto mb-4 text-blue-300" />
+                        <p className="text-lg font-semibold">No tienes viáticos aún</p>
+                        <p className="text-sm text-blue-500 mt-1">
+                          {searchTerm || statusFilter || dateFilter
+                            ? 'No se encontraron viáticos con los filtros aplicados'
+                            : 'Crea tu primer viático'}
+                        </p>
+                      </td>
+                    </tr>
+                  ) :
+                    currentViaticos.map((v: any) => (
+                      <tr key={v.id_viatico} className="hover:bg-blue-50 transition-colors">
+                        <td className="px-6 py-4 text-blue-900 font-bold">{v.id_viatico}</td>
+                        <td className="px-6 py-4 text-blue-900 font-medium">{v.departamento}</td>
+                        <td className="px-6 py-4 text-blue-900 uppercase tracking-wide">{v.concepto}</td>
+                        <td className="px-6 py-4 text-blue-900 font-extrabold">{formatCurrency(Number(v.monto))}</td>
+                        <td className="px-6 py-4 text-blue-900">{v.cuenta_destino}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getEstadoColor(v.estado)} shadow-sm bg-white`}>
+                            {getEstadoIcon(v.estado)}
+                            <span className="ml-1 capitalize">{v.estado || 'pendiente'}</span>
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-blue-900/90 text-sm">
+                          {formatDate(v.fecha_limite_pago)}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {v.viatico_url ? (
+                            <a
+                              href={`http://localhost:4000/uploads/viaticos/${v.viatico_url.split('/').pop()}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-blue-700 hover:underline font-semibold"
+                            >
+                              <FaFilePdf className="text-red-600" /> Ver
+                            </a>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                            <Link
+                              href={`/dashboard/solicitante/editar-viatico?id=${v.id_viatico}`}
+                              className="inline-flex items-center justify-center p-2 rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200 mr-2 transition"
+                              title="Editar"
+                            >
+                              <FaEdit className="w-4 h-4" />
+                            </Link>
+                            {String(v.estado).toLowerCase() === 'pendiente' ? (
+                                <button
+                                title="Eliminar"
+                                className="inline-flex items-center justify-center p-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition"
+                              onClick={() => { setShowModal(true); setViaticoAEliminar(v.id_viatico); }}
+                                >
+                                <FaTrash className="w-4 h-4" />
+                                </button>
+                            ) : (
+                                <button
+                                title="Solo puedes eliminar viáticos pendientes"
+                                className="inline-flex items-center justify-center p-2 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
+                                disabled
+                                >
+                                <FaTrash className="w-4 h-4" />
+                                </button>
+                            )}
+                            {/* Modal de confirmación para eliminar */}
+                            {showModal && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a237e19] backdrop-blur-sm">
+                                <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+                                    <div className="flex items-center justify-between px-6 py-4 bg-red-50 rounded-t-2xl border-b border-red-200">
+                                    <div className="flex items-center gap-2">
+                                        <AlertCircle className="w-6 h-6 text-red-600" />
+                                        <span className="text-lg font-bold text-red-700">¿Eliminar viático?</span>
+                                    </div>
+                                    <button onClick={() => { setShowModal(false); setViaticoAEliminar(null); }} className="text-red-400 hover:text-red-600 text-xl font-bold px-2 py-1 rounded-full transition">×</button>
+                                    </div>
+                                    <div className="px-8 py-6 flex flex-col items-center">
+                                    <p className="text-blue-900 text-base mb-4 text-center">Esta acción eliminará el viático de forma permanente. No podrás recuperarlo.</p>
+                                    <div className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mb-4 text-left">
+                                        <span className="block text-xs text-gray-500 font-semibold mb-1">Elemento a eliminar:</span>
+                                        <span className="font-mono text-blue-800 text-sm">ID {viaticoAEliminar}</span>
+                                    </div>
+                                    <div className="w-full bg-red-50 border border-red-200 rounded-lg px-4 py-2 mb-6 flex items-center gap-2">
+                                        <span className="text-red-600 font-bold">Advertencia</span>
+                                        <span className="text-xs text-red-700">⚠️ Haz esto solo si estás completamente seguro</span>
+                                    </div>
+                                    <div className="flex gap-4 w-full justify-center">
+                                        <button
+                                        className="px-6 py-2 rounded-lg border border-gray-400 bg-white text-gray-800 font-semibold hover:bg-gray-100 transition"
+                                        onClick={() => { setShowModal(false); setViaticoAEliminar(null); }}
+                                        >Cancelar</button>
+                                        <button
+                                        className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                                        onClick={() => handleEliminar()}
+                                        >Eliminar</button>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                            )}
+                        </td>
+                      </tr>
+                    ))
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            {/* Paginación visual */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between px-6 py-6 border-t border-blue-100 gap-6 bg-gradient-to-r from-blue-100/60 to-blue-50/80">
+              <div className="text-blue-900 text-base font-medium">
+                Mostrando <span className="font-bold text-blue-700">{filteredViaticos.length === 0 ? 0 : startIndex + 1}-{endIndex}</span> de <span className="font-bold text-blue-700">{filteredViaticos.length}</span>
+              </div>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === 1 ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >Primera</button>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === 1 ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >Anterior</button>
+                  <span className="text-blue-900 text-base font-semibold px-2">Página <span className="text-blue-700">{currentPage}</span> de <span className="text-blue-700">{totalPages}</span></span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === totalPages ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >Siguiente</button>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === totalPages ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >Última</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </SolicitanteLayout>
+    </ProtectedRoute>
+  );
+}

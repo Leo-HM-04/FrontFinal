@@ -1,6 +1,5 @@
 'use client';
 
-
 import React, { useState, useCallback, useMemo, Fragment } from 'react';
 import Link from 'next/link';
 import SolicitanteNotifications from '@/components/solicitante/SolicitanteNotifications';
@@ -60,6 +59,8 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
     { href: '/dashboard/solicitante', label: 'Inicio', icon: <Home className="w-5 h-5" /> },
     { href: '/dashboard/solicitante/nueva-solicitud', label: 'Nueva Solicitud', icon: <Plus className="w-5 h-5" /> },
     { href: '/dashboard/solicitante/mis-solicitudes', label: 'Mis Solicitudes', icon: <FileText className="w-5 h-5" /> },
+    { href: '/dashboard/solicitante/nuevo-viatico', label: 'Nuevo Viático', icon: <Plus className="w-5 h-5" /> },
+    { href: '/dashboard/solicitante/mis-viaticos', label: 'Mis Viáticos', icon: <FileText className="w-5 h-5" /> },
     { href: '/dashboard/solicitante/mis-recurrentes', label: 'Solicitudes Recurrentes', icon: <FileText className="w-5 h-5" /> },
     { href: '/dashboard/solicitante/perfil', label: 'Mi Perfil', icon: <User className="w-5 h-5" /> },
   ];
