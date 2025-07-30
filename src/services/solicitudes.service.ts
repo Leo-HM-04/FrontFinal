@@ -175,19 +175,27 @@ export class SolicitudesService {
     });
   }
 
-  static async aprobarLote(ids: number[], comentario_aprobador = ''): Promise<any> {
+  static async aprobarLote(ids: number[], comentario_aprobador = ''): Promise<{ success: boolean; message?: string; updated?: number }> {
     const token = localStorage.getItem('token');
-    const response = await api.put('/solicitudes/aprobar-lote', { ids, comentario_aprobador }, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
+    const response = await api.put<{ success: boolean; message?: string; updated?: number }>(
+      '/solicitudes/aprobar-lote',
+      { ids, comentario_aprobador },
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      }
+    );
     return response.data;
   }
 
-  static async rechazarLote(ids: number[], comentario_aprobador = ''): Promise<any> {
+  static async rechazarLote(ids: number[], comentario_aprobador = ''): Promise<{ success: boolean; message?: string; updated?: number }> {
     const token = localStorage.getItem('token');
-    const response = await api.put('/solicitudes/rechazar-lote', { ids, comentario_aprobador }, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
+    const response = await api.put<{ success: boolean; message?: string; updated?: number }>(
+      '/solicitudes/rechazar-lote',
+      { ids, comentario_aprobador },
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      }
+    );
     return response.data;
   }
 }

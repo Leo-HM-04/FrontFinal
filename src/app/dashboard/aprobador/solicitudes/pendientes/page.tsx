@@ -81,7 +81,7 @@ export default function SolicitudesPendientesPage() {
       toast.success('Viáticos aprobados correctamente');
       setSelectedViaticos([]);
       fetchSolicitudes();
-    } catch (error) {
+    } catch {
       toast.error('Error al aprobar viáticos');
     } finally {
       setBatchLoading(false);
@@ -102,7 +102,7 @@ export default function SolicitudesPendientesPage() {
       toast.success('Viáticos rechazados correctamente');
       setSelectedViaticos([]);
       fetchSolicitudes();
-    } catch (error) {
+    } catch {
       toast.error('Error al rechazar viáticos');
     } finally {
       setBatchLoading(false);
