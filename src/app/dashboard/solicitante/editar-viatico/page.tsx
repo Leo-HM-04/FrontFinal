@@ -4,17 +4,26 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ViaticosService } from "@/services/viaticos.service";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { SolicitanteLayout } from "@/components/layout/SolicitanteLayout";
-import { FaEdit } from "react-icons/fa";
+import { Suspense } from "react";
+import type { Viatico as BaseViatico } from '@/services/viaticos.service';
 
-export default function EditarViaticoPage() {
+type Viatico = BaseViatico & {
+  id_viatico?: number;
+  folio?: string;
+  estado?: string;
+  fecha_creacion?: string;
+};
+
+
+function EditarViaticoPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [mensaje, setMensaje] = useState("");
-  const [viatico, setViatico] = useState<any>(null);
-  const [form, setForm] = useState<any>({});
+  const [viatico, setViatico] = useState<Viatico | null>(null);
+  const [form, setForm] = useState<Partial<Viatico>>({});
 
   useEffect(() => {
     if (!id) {
@@ -24,7 +33,7 @@ export default function EditarViaticoPage() {
     }
     const idNum = Number(id);
     ViaticosService.getById(idNum)
-      .then((data) => {
+      .then((data: Viatico) => {
         setViatico(data);
         setForm({
           concepto: data.concepto,
@@ -42,7 +51,7 @@ export default function EditarViaticoPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await ViaticosService.update(Number(id), form);
@@ -63,7 +72,8 @@ export default function EditarViaticoPage() {
         <div className="max-w-2xl mx-auto px-6 py-10">
           <div className="flex items-center gap-3 mb-8">
             <span className="inline-flex items-center justify-center rounded-full bg-yellow-100 p-2 shadow-sm">
-              <FaEdit className="text-yellow-600 w-7 h-7" />
+              {/* Icono de edición */}
+              <svg className="text-yellow-600 w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a4 4 0 01-1.414.828l-4.243 1.414 1.414-4.243a4 4 0 01.828-1.414z" /></svg>
             </span>
             <h1 className="text-3xl font-extrabold text-blue-900 tracking-tight">Editar Viático</h1>
           </div>
@@ -226,9 +236,17 @@ export default function EditarViaticoPage() {
                     if (!file) return;
                     try {
                       await ViaticosService.updateWithFiles(
-                        viatico.id_viatico || viatico.id,
+                        Number(viatico.id_viatico ?? viatico.id),
                         {
-                          ...form,
+                          departamento: form.departamento || '',
+                          monto: form.monto || '',
+                          cuenta_destino: form.cuenta_destino || '',
+                          concepto: form.concepto || '',
+                          tipo_pago: "viaticos",
+                          fecha_limite_pago: form.fecha_limite_pago || '',
+                          tipo_cuenta_destino: form.tipo_cuenta_destino || '',
+                          tipo_tarjeta: form.tipo_tarjeta || '',
+                          banco_destino: form.banco_destino || '',
                           viatico_url: file
                         }
                       );
@@ -237,7 +255,8 @@ export default function EditarViaticoPage() {
                       const actualizado = await ViaticosService.getById(idNum);
                       setViatico(actualizado);
                       setMensaje('Archivo actualizado correctamente.');
-                    } catch (err: any) {
+                    } catch (err) {
+                      // @ts-expect-error: Puede no tener response
                       setMensaje(err?.response?.data?.error || 'Error al subir el archivo.');
                     }
                   }}
@@ -260,5 +279,13 @@ export default function EditarViaticoPage() {
         </div>
       </SolicitanteLayout>
     </ProtectedRoute>
+  );
+}
+
+export default function EditarViaticoPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Cargando...</div>}>
+      <EditarViaticoPageInner />
+    </Suspense>
   );
 }

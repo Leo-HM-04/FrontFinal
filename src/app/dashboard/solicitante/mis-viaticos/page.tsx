@@ -7,10 +7,19 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { useEffect, useState } from 'react';
 import { ViaticosService } from '@/services/viaticos.service';
+import type { Viatico as BaseViatico } from '@/services/viaticos.service';
+
+
+type Viatico = BaseViatico & {
+  id_viatico: number;
+  folio?: string;
+  estado?: string;
+  fecha_creacion?: string;
+};
 
 export default function MisViaticosPage() {
-  const [viaticos, setViaticos] = useState<any[]>([]);
-  const [filteredViaticos, setFilteredViaticos] = useState<any[]>([]);
+  const [viaticos, setViaticos] = useState<Viatico[]>([]);
+  const [filteredViaticos, setFilteredViaticos] = useState<Viatico[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +47,16 @@ export default function MisViaticosPage() {
   useEffect(() => {
     ViaticosService.getMyViaticos()
       .then((data) => {
-        setViaticos(data);
+        // Mapear para asegurar que todos los campos requeridos existen
+        const viaticosExtendidos = data.map((v: BaseViatico) => ({
+          ...v,
+          id_viatico: (v as Record<string, unknown>)["id_viatico"] ?? (v as Record<string, unknown>)["id"] ?? 0,
+          folio: (v as Record<string, unknown>)["folio"] ?? '',
+          estado: (v as Record<string, unknown>)["estado"] ?? '',
+          fecha_creacion: (v as Record<string, unknown>)["fecha_creacion"] ?? '',
+        }) as Viatico);
+        setViaticos(viaticosExtendidos);
+        setViaticos(viaticosExtendidos);
         setError('');
       })
       .catch(() => setError('Error al cargar viáticos'))
@@ -268,7 +286,7 @@ export default function MisViaticosPage() {
                       </td>
                     </tr>
                   ) :
-                    currentViaticos.map((v: any) => (
+                    currentViaticos.map((v: Viatico) => (
                       <tr key={v.id_viatico} className="hover:bg-blue-50 transition-colors">
                         <td className="px-6 py-4 text-blue-900 font-bold">{v.id_viatico}</td>
                         <td className="px-6 py-4 text-blue-900 font-mono">{v.folio || '-'}</td>
@@ -277,8 +295,8 @@ export default function MisViaticosPage() {
                         <td className="px-6 py-4 text-blue-900 font-extrabold">{formatCurrency(Number(v.monto))}</td>
                         <td className="px-6 py-4 text-blue-900">{v.cuenta_destino}</td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getEstadoColor(v.estado)} shadow-sm bg-white`}>
-                            {getEstadoIcon(v.estado)}
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getEstadoColor(v.estado || '')} shadow-sm bg-white`}>
+                            {getEstadoIcon(v.estado || '')}
                             <span className="ml-1 capitalize">{v.estado || 'pendiente'}</span>
                           </span>
                         </td>

@@ -7,12 +7,28 @@ import { useRouter } from 'next/navigation';
 import { ViaticosService } from '@/services/viaticos.service';
 import { FaTrash } from 'react-icons/fa';
 
+// Si no existe el tipo Viatico, defínelo aquí o impórtalo desde '@/types/viatico'
+type Viatico = {
+  departamento: string;
+  monto: string;
+  cuenta_destino: string;
+  concepto: string;
+  tipo_pago: string;
+  tipo_cuenta_destino: string;
+  tipo_tarjeta: string;
+  banco_destino: string;
+  fecha_limite_pago: string;
+  viatico_url?: string;
+  id_usuario?: string;
+};
+
+type FormState = {
+  form: Partial<Viatico>;
+  file: File | null;
+  mensaje: string;
+};
+
 export default function NuevoViaticoPage() {
-  type FormState = {
-    form: any;
-    file: File | null;
-    mensaje: string;
-  };
   const [formularios, setFormularios] = useState<FormState[]>([
     { form: {}, file: null, mensaje: '' }
   ]);
@@ -48,10 +64,17 @@ export default function NuevoViaticoPage() {
         try {
           const id_usuario = localStorage.getItem('id_usuario');
           const data = {
-            ...f.form,
-            id_usuario: id_usuario || undefined,
+            departamento: f.form.departamento || '',
+            monto: f.form.monto || '',
+            cuenta_destino: f.form.cuenta_destino || '',
+            concepto: f.form.concepto || '',
             tipo_pago: 'viaticos',
-            viatico_url: f.file
+            tipo_cuenta_destino: f.form.tipo_cuenta_destino || '',
+            tipo_tarjeta: f.form.tipo_tarjeta || '',
+            banco_destino: f.form.banco_destino || '',
+            fecha_limite_pago: f.form.fecha_limite_pago || '',
+            viatico_url: f.file,
+            id_usuario: id_usuario || undefined,
           };
           await ViaticosService.createWithFile(data);
           nuevos[idx].mensaje = 'Viático creado correctamente';
@@ -73,7 +96,6 @@ export default function NuevoViaticoPage() {
       setExito(false);
     }
   };
-
 
   const handleAgregarOtro = () => {
     setFormularios([...formularios, { form: {}, file: null, mensaje: '' }]);

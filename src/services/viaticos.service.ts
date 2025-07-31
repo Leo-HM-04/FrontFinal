@@ -1,14 +1,29 @@
 
+
 import api from '@/lib/api';
 
-export class ViaticosService {
+export type Viatico = {
+  id?: number | string;
+  departamento: string;
+  monto: string | number;
+  cuenta_destino: string;
+  concepto: string;
+  tipo_pago: string;
+  tipo_cuenta_destino: string;
+  tipo_tarjeta?: string;
+  banco_destino?: string;
+  fecha_limite_pago: string;
+  viatico_url?: string;
+  id_usuario?: string | number;
+};
 
-  static async getMyViaticos(): Promise<any[]> {
+export class ViaticosService {
+  static async getMyViaticos(): Promise<Viatico[]> {
     const token = localStorage.getItem('token');
     const response = await api.get('/viaticos', {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
-    return response.data;
+    return response.data as Viatico[];
   }
 
   static async createWithFile(data: {
@@ -23,7 +38,7 @@ export class ViaticosService {
     fecha_limite_pago: string;
     viatico_url: File;
     id_usuario?: string | number;
-  }): Promise<any> {
+  }): Promise<Viatico> {
     const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('departamento', data.departamento);
@@ -47,24 +62,24 @@ export class ViaticosService {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
     });
-    return res.data;
+    return res.data as Viatico;
   }
 
 
-  static async getById(id: number): Promise<any> {
+  static async getById(id: number): Promise<Viatico> {
     const token = localStorage.getItem('token');
     const response = await api.get(`/viaticos/${id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
-    return response.data;
+    return response.data as Viatico;
   }
 
-  static async update(id: number, data: any): Promise<any> {
+  static async update(id: number, data: Partial<Viatico>): Promise<Viatico> {
     const token = localStorage.getItem('token');
     const response = await api.put(`/viaticos/${id}`, data, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
-    return response.data;
+    return response.data as Viatico;
   }
 
   static async delete(id: number): Promise<void> {
@@ -75,7 +90,7 @@ export class ViaticosService {
   }
 
 
-  static async createWithFileFormData(formData: FormData): Promise<any> {
+  static async createWithFileFormData(formData: FormData): Promise<Viatico> {
     const token = localStorage.getItem('token');
     const res = await api.post('/viaticos', formData, {
       headers: {
@@ -83,10 +98,10 @@ export class ViaticosService {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
     });
-    return res.data;
+    return res.data as Viatico;
   }
 
-    static async updateWithFiles(id: number | string, data: {
+  static async updateWithFiles(id: number | string, data: {
     departamento: string;
     monto: string | number;
     cuenta_destino: string;
@@ -97,7 +112,7 @@ export class ViaticosService {
     tipo_tarjeta?: string;
     banco_destino?: string;
     viatico_url?: File | null;
-  }): Promise<any> {
+  }): Promise<Viatico> {
     const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('departamento', data.departamento);
@@ -118,6 +133,6 @@ export class ViaticosService {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
     });
-    return response.data;
+    return response.data as Viatico;
   }
 }
