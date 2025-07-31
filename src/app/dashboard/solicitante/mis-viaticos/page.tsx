@@ -45,8 +45,8 @@ export default function MisViaticosPage() {
   };
 
   useEffect(() => {
-    ViaticosService.getMyViaticos()
-      .then((data) => {
+    ViaticosService.getAll()
+      .then((data: BaseViatico[]) => {
         // Mapear para asegurar que todos los campos requeridos existen
         const viaticosExtendidos = data.map((v: BaseViatico) => ({
           ...v,
@@ -55,7 +55,6 @@ export default function MisViaticosPage() {
           estado: (v as Record<string, unknown>)["estado"] ?? '',
           fecha_creacion: (v as Record<string, unknown>)["fecha_creacion"] ?? '',
         }) as Viatico);
-        setViaticos(viaticosExtendidos);
         setViaticos(viaticosExtendidos);
         setError('');
       })

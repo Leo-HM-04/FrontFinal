@@ -25,6 +25,14 @@ const nextConfig = {
         source: '/api/estadisticas/:path*',
         destination: 'http://localhost:4000/api/estadisticas/:path*',
       },
+      {
+        source: '/api/viaticos/mios',
+        destination: 'http://localhost:4000/viaticos/mios',
+      },
+      {
+        source: '/api/viaticos/:path*',
+        destination: 'http://localhost:4000/viaticos/:path*',
+      },
     ];
   },
 

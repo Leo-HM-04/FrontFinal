@@ -31,6 +31,7 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
   // Definir elementos de navegación en un arreglo para reducir código repetitivo
   const navItems = [
     { href: '/dashboard/pagador', label: 'Inicio', icon: Home },
+    { href: '/dashboard/pagador/viaticos', label: 'Viáticos a Pagar', icon: CreditCard },
     { href: '/dashboard/pagador/pagos/pendientes', label: 'Pagos Pendientes', icon: CreditCard },
     { href: '/dashboard/pagador/recurrentes', label: 'Pagos Recurrentes', icon: Repeat },
     { href: '/dashboard/pagador/pagos/historial', label: 'Historial de Pagos', icon: FileText },

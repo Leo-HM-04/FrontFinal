@@ -52,6 +52,7 @@ export interface Solicitud {
   fecha_pago?: string; // <-- Campo agregado para historial
   tipo_tarjeta?: string;
   banco_destino?: string;
+  viatico_url?: string;
 }
 
 export interface CreateSolicitudData {

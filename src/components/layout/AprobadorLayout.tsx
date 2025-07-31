@@ -123,6 +123,7 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
                 { href: '/dashboard/aprobador/solicitudes/pendientes', label: 'Solicitudes Pendientes', icon: FileText },
                 { href: '/dashboard/aprobador/solicitudes/historial', label: 'Historial de Aprobaciones', icon: CheckCircle },
                 { href: '/dashboard/aprobador/recurrentes', label: 'Solicitudes Recurrentes', icon: Repeat },
+                { href: '/dashboard/aprobador/viaticos', label: 'Viáticos', icon: FileText },
                 { href: '/dashboard/aprobador/perfil', label: 'Mi Perfil', icon: User },
               ].map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href);
