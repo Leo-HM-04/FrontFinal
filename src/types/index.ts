@@ -53,6 +53,9 @@ export interface Solicitud {
   tipo_tarjeta?: string;
   banco_destino?: string;
   viatico_url?: string;
+  tipo_pago_descripcion?: string;
+  empresa_a_pagar?: string;
+  nombre_persona?: string;
 }
 
 export interface CreateSolicitudData {

@@ -14,7 +14,7 @@ export default function PerfilPagador() {
     
     const handleContactAdmin = () => {
         // Abrir correo electrónico del administrador
-        window.location.href = `mailto:kikeramirez160418@gmail.com?subject=Solicitud de cambio de datos - Usuario ${user?.nombre}&body=Hola administrador,%0D%0A%0D%0ASoy ${user?.nombre} con rol de Pagador. Necesito realizar los siguientes cambios en mi información:%0D%0A%0D%0A[Describa los cambios requeridos]%0D%0A%0D%0AGracias.`;
+        window.location.href = `mailto:automatizaciones@bechapra.com.mx?subject=Solicitud de cambio de datos - Usuario ${user?.nombre}&body=Hola administrador,%0D%0A%0D%0ASoy ${user?.nombre} con rol de Pagador. Necesito realizar los siguientes cambios en mi información:%0D%0A%0D%0A[Describa los cambios requeridos]%0D%0A%0D%0AGracias.`;
         toast.success('Abriendo su cliente de correo...');
     };
 
@@ -119,7 +119,7 @@ export default function PerfilPagador() {
                         
                         <div className="bg-white/5 p-4 rounded-lg">
                         <p className="text-white/90 text-sm mb-1">Correo del Administrador:</p>
-                        <p className="text-white font-medium">kikeramirez160418@gmail.com</p>
+                        <p className="text-white font-medium">automatizaciones@bechapra.com.mx</p>
                         </div>
                         
                         <div className="pt-4">

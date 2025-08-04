@@ -19,6 +19,11 @@ import {
   Search
 } from 'lucide-react';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
+import {
+  exportMisSolicitudesCSV,
+  exportMisSolicitudesExcel,
+  exportMisSolicitudesPDF
+} from '@/utils/exportMisSolicitudes';
 
 const getEstadoColor = (estado: string) => {
   switch (estado.toLowerCase()) {
@@ -39,7 +44,7 @@ const getEstadoIcon = (estado: string) => {
   switch (estado.toLowerCase()) {
     case 'pendiente':
       return <Clock className="w-4 h-4" />;
-    case 'aprobada':
+    case 'autorizada':
       return <CheckCircle className="w-4 h-4 text-green-500" />;
     case 'rechazada':
       return <XCircle className="w-4 h-4 text-red-500" />;
@@ -51,6 +56,21 @@ const getEstadoIcon = (estado: string) => {
 };
 
 export default function MisSolicitudesPage() {
+  // Estado para el formato y rango de exportación
+  const [exportFormat, setExportFormat] = useState('pdf');
+  const [exportRango, setExportRango] = useState('total');
+
+  // Función para exportar
+  const handleExport = () => {
+    const solicitudesExport = filteredSolicitudes;
+    if (exportFormat === 'pdf') {
+      exportMisSolicitudesPDF(solicitudesExport, exportRango);
+    } else if (exportFormat === 'excel') {
+      exportMisSolicitudesExcel(solicitudesExport, exportRango);
+    } else if (exportFormat === 'csv') {
+      exportMisSolicitudesCSV(solicitudesExport, exportRango);
+    }
+  };
   //nst { user, logout } = useAuth();
   const router = useRouter();
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -206,7 +226,7 @@ export default function MisSolicitudesPage() {
   // Ordenar por estado: pendientes, aprobadas/autorizadas, pagadas, rechazadas, otros
   const estadoOrden = {
     'pendiente': 1,
-    'aprobada': 2,
+    'autorizadas': 2,
     'autorizada': 2,
     'pagada': 3,
     'rechazada': 4
@@ -229,7 +249,7 @@ export default function MisSolicitudesPage() {
   const filterOptions = [
     { value: '', label: 'Todos los estados' },
     { value: 'pendiente', label: 'Pendiente' },
-    { value: 'aprobada', label: 'Aprobada' },
+    { value: 'autorizada', label: 'Autorizadas' },
     { value: 'rechazada', label: 'Rechazada' },
     { value: 'pagada', label: 'Pagada' }
   ];
@@ -266,105 +286,92 @@ export default function MisSolicitudesPage() {
                 </div>
               )}
 
-              {/* Filtros */}
-              <div className="mb-8">
-                <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Búsqueda */}
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
-                      <input
-                        type="text"
-                        placeholder="Buscar por concepto, departamento o cuenta..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-white/15 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
-                      />
-                    </div>
-
-                    {/* Filtro por estado */}
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="bg-white/15 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
-                    >
-                      {filterOptions.map(option => (
-                        <option key={option.value} value={option.value} className="text-gray-900">
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-
-                    {/* Filtro por fecha */}
-                    <select
-                      value={dateFilter}
-                      onChange={(e) => setDateFilter(e.target.value)}
-                      className="bg-white/15 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
-                    >
-                      {dateOptions.map(option => (
-                        <option key={option.value} value={option.value} className="text-gray-900">
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/* Botón de exportar */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <div className="flex gap-2 items-center">
+                  <select
+                    value={exportFormat}
+                    onChange={e => setExportFormat(e.target.value)}
+                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none"
+                  >
+                    <option value="pdf">PDF</option>
+                    <option value="excel">Excel</option>
+                    <option value="csv">CSV</option>
+                  </select>
+                  <select
+                    value={exportRango}
+                    onChange={e => setExportRango(e.target.value)}
+                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none"
+                  >
+                    <option value="dia">Día</option>
+                    <option value="semana">Semana</option>
+                    <option value="mes">Mes</option>
+                    <option value="año">Año</option>
+                    <option value="total">Total</option>
+                  </select>
+                  <Button
+                    onClick={handleExport}
+                    className="bg-green-600 text-white hover:bg-green-700 px-5 py-2 rounded-lg font-semibold shadow-lg"
+                  >
+                    Exportar
+                  </Button>
                 </div>
               </div>
 
-              {/* Estadísticas rápidas */}
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 w-full">
-                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-white/80 text-sm">Total Solicitudes</p>
-                        <p className="text-2xl font-bold text-white">{solicitudes.length}</p>
+              {/* Filtros */}
+              <div className="mb-8">
+                <div className="bg-gradient-to-r from-blue-400/30 to-blue-700/30 backdrop-blur-xl rounded-2xl p-8 border border-blue-300/30 shadow-xl flex flex-col gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Filtro de búsqueda */}
+                    <div className="flex flex-col gap-2">
+                      <label className="block text-white/90 text-base font-semibold">Buscar</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={searchTerm}
+                          onChange={e => setSearchTerm(e.target.value)}
+                          className="w-full bg-white/20 border border-blue-300/30 rounded-xl px-5 py-3 text-white focus:outline-none placeholder:text-white/50 shadow-md"
+                          placeholder="Concepto, departamento o cuenta..."
+                        />
+                        <Search className="absolute right-4 top-3 w-6 h-6 text-white/50" />
                       </div>
-                      <FileText className="w-8 h-8 text-white/60" />
+                    </div>
+                    {/* Filtro de estado */}
+                    <div className="flex flex-col gap-2">
+                      <label className="block text-white/90 text-base font-semibold">Estado</label>
+                      <select
+                        value={statusFilter}
+                        onChange={e => setStatusFilter(e.target.value)}
+                        className="w-full bg-white/20 border border-blue-300/30 rounded-xl px-5 py-3 text-white focus:outline-none shadow-md"
+                      >
+                        {filterOptions.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    {/* Filtro de fecha */}
+                    <div className="flex flex-col gap-2">
+                      <label className="block text-white/90 text-base font-semibold">Fecha</label>
+                      <select
+                        value={dateFilter}
+                        onChange={e => setDateFilter(e.target.value)}
+                        className="w-full bg-white/20 border border-blue-300/30 rounded-xl px-5 py-3 text-white focus:outline-none shadow-md"
+                      >
+                        {dateOptions.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
-                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-white/80 text-sm">Pendientes</p>
-                        <p className="text-2xl font-bold text-white">
-                          {solicitudes.filter(s => s.estado?.toLowerCase() === 'pendiente').length}
-                        </p>
-                      </div>
-                      <Clock className="w-8 h-8 text-yellow-300" />
-                    </div>
+                  <div className="flex justify-end md:justify-center">
+                    <Button
+                      onClick={() => router.push('/dashboard/solicitante/nueva-solicitud')}
+                      className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 rounded-xl font-bold shadow-2xl flex items-center gap-3 text-lg transition-all duration-200"
+                    >
+                      <Plus className="w-6 h-6" />
+                      Nueva Solicitud
+                    </Button>
                   </div>
-                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-white/80 text-sm">Aprobadas</p>
-                        <p className="text-2xl font-bold text-white">
-                          {solicitudes.filter(s => s.estado?.toLowerCase() === 'aprobada').length}
-                        </p>
-                      </div>
-                      <CheckCircle className="w-8 h-8 text-green-300" />
-                    </div>
-                  </div>
-                  <div className="bg-white/15 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-white/80 text-sm">Pagadas</p>
-                        <p className="text-2xl font-bold text-white">
-                          {solicitudes.filter(s => s.estado?.toLowerCase() === 'pagada').length}
-                        </p>
-                      </div>
-                      <CheckCircle className="w-8 h-8 text-blue-300" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-end md:justify-center mt-4 md:mt-0">
-                  <Button
-                    onClick={() => router.push('/dashboard/solicitante/nueva-solicitud')}
-                    className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold shadow-lg flex items-center gap-2"
-                  >
-                    <Plus className="w-5 h-5" />
-                    Nueva Solicitud
-                  </Button>
                 </div>
               </div>
 
@@ -389,7 +396,7 @@ export default function MisSolicitudesPage() {
                     <tbody className="divide-y divide-white/10">
                       {currentSolicitudes.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-6 py-12 text-center text-white/80">
+                          <td colSpan={10} className="px-6 py-12 text-center text-white/80">
                             <FileText className="w-12 h-12 mx-auto mb-4 text-white/40" />
                             <p className="text-lg">No tienes solicitudes aún</p>
                             <p className="text-sm text-white/60 mt-1">

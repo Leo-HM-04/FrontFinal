@@ -36,3 +36,23 @@ export function useViaticos() {
 
   return { viaticos, loading, error, refetch: fetchViaticos };
 }
+
+export function useViaticosPagados() {
+  const [viaticos, setViaticos] = useState<Viatico[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchViaticos = useCallback(() => {
+    setLoading(true);
+    ViaticosService.getPagados()
+      .then(setViaticos)
+      .catch((err) => setError(err.message || 'Error al obtener viáticos pagados'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetchViaticos();
+  }, [fetchViaticos]);
+
+  return { viaticos, loading, error, refetch: fetchViaticos };
+}

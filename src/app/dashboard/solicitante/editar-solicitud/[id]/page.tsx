@@ -22,6 +22,9 @@ type FormState = {
   cuenta_destino: string;
   concepto: string;
   tipo_pago: string;
+  tipo_pago_descripcion: string;
+  empresa_a_pagar: string;
+  nombre_persona: string;
   fecha_limite_pago: string;
   factura_file: File | null;
   tipo_cuenta_destino: string;
@@ -39,12 +42,20 @@ const initialState: FormState = {
   cuenta_destino: '',
   concepto: '',
   tipo_pago: 'transferencia',
+  tipo_pago_descripcion: '',
+  empresa_a_pagar: '',
+  nombre_persona: '',
   fecha_limite_pago: '',
   factura_file: null,
   tipo_cuenta_destino: 'CLABE',
   tipo_tarjeta: '',
   banco_destino: ''
 };
+
+const bancoOptions = [
+  "ACTINVER","AFIRME","albo","ARCUS FI","ASP INTEGRA OPC","AUTOFIN","AZTECA","BaBien","BAJIO","BANAMEX","BANCO COVALTO","BANCOMEXT","BANCOPPEL","BANCO S3","BANCREA","BANJERCITO","BANKAOOL","BANK OF AMERICA","BANK OF CHINA","BANOBRAS","BANORTE","BANREGIO","BANSI","BANXICO","BARCLAYS","BBASE","BBVA MEXICO","BMONEX","CAJA POP MEXICA","CAJA TELEFONIST","CASHI CUENTA","CB INTERCAM","CIBANCO","CI BOLSA","CITI MEXICO","CoDi Valida","COMPARTAMOS","CONSUBANCO","CREDICAPITAL","CREDICLUB","CRISTOBAL COLON","Cuenca","Dep y Pag Dig","DONDE","FINAMEX","FINCOMUN","FINCO PAY","FOMPED","FONDEADORA","FONDO (FIRA)","GBM","HEY BANCO","HIPOTECARIA FED","HSBC","ICBC","INBURSA","INDEVAL","INMOBILIARIO","INTERCAM BANCO","INVEX","JP MORGAN","KLAR","KUSPIT","LIBERTAD","MASARI","Mercado Pago W","MexPago","MIFEL","MIZUHO BANK","MONEXCB","MUFG","MULTIVA BANCO","NAFIN","NU MEXICO","NVIO","PAGATODO","Peibo","PROFUTURO","SABADELL","SANTANDER","SCOTIABANK","SHINHAN","SPIN BY OXXO","STP","TESORED","TRANSFER","UALA","UNAGRA","VALMEX","VALUE","VECTOR","VE POR MAS","VOLKSWAGEN"
+];
+
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
@@ -92,10 +103,8 @@ export default function EditarSolicitudPage() {
     { value: 'nomina', label: 'Nómina' }
   ];
   const tipoPagoOptions = [
-    { value: 'viaticos', label: 'Viáticos' },
     { value: 'efectivo', label: 'Efectivo' },
     { value: 'factura', label: 'Factura' },
-    { value: 'nominas', label: 'Nóminas' },
     { value: 'tarjeta', label: 'Tarjeta' },
     { value: 'proveedores', label: 'Proveedores' },
     { value: 'administrativos', label: 'Administrativos' }
@@ -117,6 +126,9 @@ export default function EditarSolicitudPage() {
           cuenta_destino: data.cuenta_destino || '',
           concepto: data.concepto || '',
           tipo_pago: data.tipo_pago || 'transferencia',
+          tipo_pago_descripcion: data.tipo_pago_descripcion || '',
+          empresa_a_pagar: data.empresa_a_pagar || '',
+          nombre_persona: data.nombre_persona || '',
           fecha_limite_pago: data.fecha_limite_pago || '',
           factura_file: null,
           tipo_cuenta_destino,
@@ -232,6 +244,9 @@ export default function EditarSolicitudPage() {
         cuenta_destino: formData.cuenta_destino,
         concepto: formData.concepto,
         tipo_pago: formData.tipo_pago,
+        tipo_pago_descripcion: (formData.tipo_pago_descripcion !== undefined && formData.tipo_pago_descripcion !== null) ? String(formData.tipo_pago_descripcion) : '',
+        empresa_a_pagar: (formData.empresa_a_pagar !== undefined && formData.empresa_a_pagar !== null) ? String(formData.empresa_a_pagar) : '',
+        nombre_persona: (formData.nombre_persona !== undefined && formData.nombre_persona !== null) ? String(formData.nombre_persona) : '',
         fecha_limite_pago: formData.fecha_limite_pago
           ? format(new Date(formData.fecha_limite_pago), "yyyy-MM-dd")
           : "",
@@ -321,29 +336,17 @@ export default function EditarSolicitudPage() {
                 )}
                 <div>
                   <label className="block text-base font-medium text-white/90 mb-3">Banco Destino (opcional)</label>
-                  <select
-                    name="banco_destino"
-                    value={formData.banco_destino}
-                    onChange={handleInputChange}
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
-                  >
-                    <option value="" className="text-black">Selecciona banco</option>
-                    <option value="BBVA" className="text-black">BBVA</option>
-                    <option value="Banorte" className="text-black">Banorte</option>
-                    <option value="Santander" className="text-black">Santander</option>
-                    <option value="Citibanamex" className="text-black">Citibanamex</option>
-                    <option value="HSBC" className="text-black">HSBC</option>
-                    <option value="Scotiabank" className="text-black">Scotiabank</option>
-                    <option value="Inbursa" className="text-black">Inbursa</option>
-                    <option value="Banco Azteca" className="text-black">Banco Azteca</option>
-                    <option value="Bancoppel" className="text-black">Bancoppel</option>
-                    <option value="Afirme" className="text-black">Afirme</option>
-                    <option value="Banregio" className="text-black">Banregio</option>
-                    <option value="Banjército" className="text-black">Banjército</option>
-                    <option value="Banco del Bajío" className="text-black">Banco del Bajío</option>
-                    <option value="Banco Multiva" className="text-black">Banco Multiva</option>
-                    <option value="Banco Famsa" className="text-black">Banco Famsa</option>
-                  </select>
+                    <select
+                      name="banco_destino"
+                      value={formData.banco_destino}
+                      onChange={handleInputChange}
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                    >
+                      <option value="" className="text-black">Selecciona banco</option>
+                      {bancoOptions.map(banco => (
+                        <option key={banco} value={banco} className="text-black">{banco}</option>
+                      ))}
+                    </select>
                 </div>
                 <div>
                   <label className="block text-base font-medium text-white/90 mb-3">
@@ -418,19 +421,36 @@ export default function EditarSolicitudPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
-                    Tipo de Pago
-                  </label>
-                  <select
-                    name="tipo_pago"
-                    value={formData.tipo_pago}
-                    onChange={handleInputChange}
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
-                  >
-                    {tipoPagoOptions.map(tipo => (
-                      <option key={tipo.value} value={tipo.value} className="text-gray-900">{tipo.label}</option>
-                    ))}
-                  </select>
+                <label className="block text-base font-medium text-white/90 mb-3">
+                  Tipo de Pago
+                </label>
+                <select
+                  name="tipo_pago"
+                  value={formData.tipo_pago}
+                  onChange={handleInputChange}
+                  className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                >
+                  <option value="" className="text-gray-900">Selecciona tipo de pago</option>
+                  {tipoPagoOptions.map(tipo => (
+                    <option key={tipo.value} value={tipo.value} className="text-gray-900">{tipo.label}</option>
+                  ))}
+                </select>
+                {/* Mostrar descripción solo si hay tipo de pago seleccionado y no está vacío */}
+                {formData.tipo_pago !== '' && (
+                  <div className="mt-6">
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Descripción del tipo de pago
+                    </label>
+                    <textarea
+                      name="tipo_pago_descripcion"
+                      value={formData.tipo_pago_descripcion}
+                      onChange={handleInputChange}
+                      placeholder="Agrega una descripción para el tipo de pago..."
+                      rows={3}
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none text-base"
+                    />
+                  </div>
+                )}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-base font-medium text-white/90 mb-3">
@@ -470,6 +490,35 @@ export default function EditarSolicitudPage() {
                   required
                   rows={5}
                   className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none text-base"
+                />
+              </div>
+              {/* Empresa a pagar (opcional) */}
+              <div>
+                <label className="block text-base font-medium text-white/90 mb-3">
+                  Empresa a pagar (opcional)
+                </label>
+                <input
+                  type="text"
+                  name="empresa_a_pagar"
+                  value={formData.empresa_a_pagar}
+                  onChange={handleInputChange}
+                  placeholder="Nombre de la empresa"
+                  className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                />
+              </div>
+              {/* Nombre de la persona (obligatorio) */}
+              <div>
+                <label className="block text-base font-medium text-white/90 mb-3">
+                  Nombre de la persona que recibe el pago *
+                </label>
+                <input
+                  type="text"
+                  name="nombre_persona"
+                  value={formData.nombre_persona}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Nombre completo de la persona"
+                  className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">

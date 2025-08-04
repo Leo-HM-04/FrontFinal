@@ -44,7 +44,7 @@ export default function UnauthorizedPage() {
             <span>Ir a Login</span>
           </Button>
           <div className="pt-2">
-            <p className="text-xs text-blue-700">¿Necesitas ayuda? <a href="mailto:kikeramirez160418@gmail.com" className="underline">Contacta al administrador</a></p>
+            <p className="text-xs text-blue-700">¿Necesitas ayuda? <a href="mailto:automatizaciones@bechapra.com.mx" className="underline">Contacta al administrador</a></p>
           </div>
         </div>
       </div>

@@ -89,11 +89,23 @@ export function SolicitudDetailModal({
                   <p className="text-2xl font-bold text-blue-700">{formatCurrency(solicitud.monto)}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-blue-700/70">Cuenta Destino:</span>
+                  <span className="text-sm text-blue-700/70">Descripción del tipo de pago:</span>
+                  <p className="text-blue-900">{solicitud.tipo_pago_descripcion || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-blue-700/70">Empresa a pagar:</span>
+                  <p className="text-blue-900">{solicitud.empresa_a_pagar || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-blue-700/70">Nombre de la persona que recibe el pago:</span>
+                  <p className="text-blue-900">{solicitud.nombre_persona || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-blue-700/70">Cuenta destino:</span>
                   <p className="font-mono text-blue-900">{solicitud.cuenta_destino}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-blue-700/70">Tipo de Cuenta/Tarjeta:</span>
+                  <span className="text-sm text-blue-700/70">Tipo de cuenta/tarjeta:</span>
                   <p className="text-blue-900">
                     {solicitud.tipo_cuenta_destino === 'Tarjeta'
                       ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
@@ -101,12 +113,20 @@ export function SolicitudDetailModal({
                   </p>
                 </div>
                 <div>
-                  <span className="text-sm text-blue-700/70">Banco Destino:</span>
+                  <span className="text-sm text-blue-700/70">Banco destino:</span>
                   <p className="text-blue-900">{solicitud.banco_destino || '-'}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-blue-700/70">Fecha Límite:</span>
-                  <p className="text-blue-900">{new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-CO')}</p>
+                  <span className="text-sm text-blue-700/70">Fecha límite:</span>
+                  <p className="text-blue-900">{
+                    solicitud.fecha_limite_pago
+                      ? new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-MX', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      : '-'
+                  }</p>
                 </div>
               </div>
             </Card>
@@ -118,7 +138,7 @@ export function SolicitudDetailModal({
               <div className="space-y-3">
                 <div>
                   <span className="text-sm text-blue-700/70">Departamento:</span>
-                  <p className="text-blue-900">{solicitud.departamento}</p>
+                  <p className="text-blue-900">{solicitud.departamento ? solicitud.departamento.charAt(0).toUpperCase() + solicitud.departamento.slice(1) : '-'}</p>
                 </div>
                 <div>
                   <span className="text-sm text-blue-700/70">Solicitante:</span>
@@ -147,33 +167,72 @@ export function SolicitudDetailModal({
               <ExternalLink className="w-5 h-5 mr-2 text-blue-700" />
               Documentos Adjuntos
             </h3>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const backendBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
-                  const facturaUrl = solicitud.factura_url.startsWith('http')
-                    ? solicitud.factura_url
-                    : backendBase + solicitud.factura_url;
-                  window.open(facturaUrl, '_blank');
-                }}
-                className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50"
-              >
-                <FileText className="w-4 h-4" />
-                <span>Ver Factura</span>
-                <ExternalLink className="w-4 h-4" />
-              </Button>
-              {solicitud.soporte_url && (
+            <div className="flex flex-col gap-4">
+              {/* Previsualización de factura */}
+              {solicitud.factura_url && (() => {
+                const backendBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+                const facturaUrl = solicitud.factura_url.startsWith('http')
+                  ? solicitud.factura_url
+                  : backendBase + solicitud.factura_url;
+                const fileName = facturaUrl.split('/').pop();
+                const isImage = /\.(jpg|jpeg|png|gif)$/i.test(facturaUrl);
+                const isPdf = /\.pdf$/i.test(facturaUrl);
+                if (isImage) {
+                  return (
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm text-blue-700/70 mb-1">Previsualización de factura:</span>
+                      <img src={facturaUrl} alt="Factura" className="max-h-48 rounded border border-blue-200 shadow" style={{objectFit: 'contain'}} />
+                    </div>
+                  );
+                } else if (isPdf) {
+                  return (
+                    <div className="flex flex-col items-start w-full">
+                      <span className="text-sm text-blue-700/70 mb-1">Previsualización de factura (PDF):</span>
+                      <iframe src={facturaUrl} title="Factura PDF" className="w-full" style={{height: '300px', border: '1px solid #93c5fd', borderRadius: '8px'}} />
+                    </div>
+                  );
+                } else {
+                  // Otros formatos: solo mostrar nombre y botón para descargar
+                  return (
+                    <div className="flex flex-col items-start w-full">
+                      <span className="text-sm text-blue-700/70 mb-1">Archivo adjunto:</span>
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="w-4 h-4 text-blue-700" />
+                        <span className="text-blue-900 font-mono text-xs">{fileName}</span>
+                        <span className="text-xs text-gray-500">(No se puede previsualizar, descarga para ver el contenido)</span>
+                      </div>
+                    </div>
+                  );
+                }
+              })()}
+              <div className="flex flex-wrap gap-3 mt-2">
                 <Button
                   variant="outline"
-                  onClick={() => window.open(solicitud.soporte_url, '_blank')}
+                  onClick={() => {
+                    const backendBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+                    const facturaUrl = solicitud.factura_url.startsWith('http')
+                      ? solicitud.factura_url
+                      : backendBase + solicitud.factura_url;
+                    window.open(facturaUrl, '_blank');
+                  }}
                   className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50"
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Ver Soporte</span>
+                  <span>Ver Factura</span>
                   <ExternalLink className="w-4 h-4" />
                 </Button>
-              )}
+                {solicitud.soporte_url && (
+                  <Button
+                    variant="outline"
+                    onClick={() => window.open(solicitud.soporte_url, '_blank')}
+                    className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Ver Soporte</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </Card>
         </div>

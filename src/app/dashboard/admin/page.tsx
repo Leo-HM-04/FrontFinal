@@ -99,20 +99,20 @@ export default function AdminDashboard() {
                         </div>
                         <p className="text-blue-900/90 text-base mb-4 text-center">Se abrirá tu gestor de correo para contactar a soporte. Puedes copiar y personalizar el siguiente ejemplo:</p>
                         <div className="w-full bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900 font-mono mb-4 select-all">
-Asunto: Solicitud de soporte plataforma Bechapra
+                          Asunto: Solicitud de soporte plataforma Bechapra
 
-Hola equipo de soporte,
+                          Hola equipo de soporte,
 
-Tengo el siguiente problema o duda:
-[Describe aquí tu situación de forma clara y breve]
+                          Tengo el siguiente problema o duda:
+                          [Describe aquí tu situación de forma clara y breve]
 
-Gracias de antemano.
+                          Gracias de antemano.
                         </div>
                         <button
                           className="mt-2 px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
                           onClick={() => {
                             setOpenModal(false);
-                            window.open('mailto:kikeramirez160418@gmail.com?subject=Solicitud%20de%20soporte%20plataforma%20Bechapra&body=Hola%20equipo%20de%20soporte%2C%0A%0ATengo%20el%20siguiente%20problema%20o%20duda%3A%0A%5BDescribe%20aqu%C3%AD%20tu%20situaci%C3%B3n%20de%20forma%20clara%20y%20breve%5D%0A%0AGracias%20de%20antemano.', '_blank');
+                            window.open('mailto:automatizaciones@bechapra.com.mx?subject=Solicitud%20de%20soporte%20plataforma%20Bechapra&body=Hola%20equipo%20de%20soporte%2C%0A%0ATengo%20el%20siguiente%20problema%20o%20duda%3A%0A%5BDescribe%20aqu%C3%AD%20tu%20situaci%C3%B3n%20de%20forma%20clara%20y%20breve%5D%0A%0AGracias%20de%20antemano.', '_blank');
                           }}
                         >Contactar soporte</button>
                         <button

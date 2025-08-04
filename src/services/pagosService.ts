@@ -18,7 +18,6 @@ export async function subirComprobante(id_solicitud: number, file: File) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/solicitudes/${id_solicitud}/comprobante`, {
     method: 'PUT',
     body: formData,
-    credentials: 'include',
   });
   if (!res.ok) throw new Error('Error al subir comprobante');
   return await res.json();

@@ -18,4 +18,9 @@ export class ViaticosService {
   static async marcarComoPagado(id: number): Promise<void> {
     await api.put(`/viaticos/${id}/pagar`);
   }
+
+  static async getPagados(): Promise<Viatico[]> {
+    const response = await api.get<Viatico[]>('/viaticos?estado=pagado');
+    return response.data;
+  }
 }

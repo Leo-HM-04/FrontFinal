@@ -28,7 +28,7 @@ const PerfilSolicitante = () => {
         
         // Intentar abrir el cliente de correo predeterminado
         try {
-            window.location.href = `mailto:kikeramirez160418@gmail.com?subject=${subject}&body=${body}`;
+            window.location.href = `mailto:automatizaciones@bechapra.com.mx?subject=${subject}&body=${body}`;
             toast.success('Abriendo su cliente de correo...');
         } catch {
             toast.error('No se pudo abrir el cliente de correo. Asegúrese de tener uno configurado.');

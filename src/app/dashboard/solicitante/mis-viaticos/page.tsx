@@ -1,13 +1,18 @@
 'use client';
 import { FaFilePdf, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { Clock, CheckCircle, XCircle, AlertCircle, FileText, Search } from 'lucide-react';
-
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { Button } from '@/components/ui/Button';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { useEffect, useState } from 'react';
 import { ViaticosService } from '@/services/viaticos.service';
 import type { Viatico as BaseViatico } from '@/services/viaticos.service';
+import {
+  exportMisViaticosCSV,
+  exportMisViaticosExcel,
+  exportMisViaticosPDF
+} from '@/utils/exportMisViaticos';
 
 
 type Viatico = BaseViatico & {
@@ -18,6 +23,22 @@ type Viatico = BaseViatico & {
 };
 
 export default function MisViaticosPage() {
+  // Estados para exportación
+  const [exportFormat, setExportFormat] = useState('pdf');
+  const [exportRango, setExportRango] = useState('total');
+
+  // Función para manejar la exportación
+  const handleExport = () => {
+    const viaticosExport = filteredViaticos;
+    if (exportFormat === 'pdf') {
+      exportMisViaticosPDF(viaticosExport, exportRango);
+    } else if (exportFormat === 'excel') {
+      exportMisViaticosExcel(viaticosExport, exportRango);
+    } else if (exportFormat === 'csv') {
+      exportMisViaticosCSV(viaticosExport, exportRango);
+    }
+  };
+
   const [viaticos, setViaticos] = useState<Viatico[]>([]);
   const [filteredViaticos, setFilteredViaticos] = useState<Viatico[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,13 +201,52 @@ export default function MisViaticosPage() {
               </span>
               <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Viáticos</h1>
             </div>
-            <Link
-              href="/dashboard/solicitante/nuevo-viatico"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 text-white font-bold shadow-lg transition-all text-lg md:text-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
-            >
-              <FaPlus className="w-5 h-5" />
-              Crear viático
-            </Link>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                href="/dashboard/solicitante/nuevo-viatico"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 text-white font-bold shadow-lg transition-all text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                <FaPlus className="w-5 h-5" />
+                Crear viático
+              </Link>
+              
+              {/* Controles de exportación */}
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20 shadow-xl">
+                <div className="flex items-center gap-2 px-2">
+                  <span className="text-white/80 text-sm font-medium">Exportar como:</span>
+                  <select
+                    value={exportFormat}
+                    onChange={e => setExportFormat(e.target.value)}
+                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
+                  >
+                    <option value="pdf">PDF</option>
+                    <option value="excel">Excel</option>
+                    <option value="csv">CSV</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2 px-2 border-l border-white/10">
+                  <span className="text-white/80 text-sm font-medium">Período:</span>
+                  <select
+                    value={exportRango}
+                    onChange={e => setExportRango(e.target.value)}
+                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
+                  >
+                    <option value="dia">Último día</option>
+                    <option value="semana">Última semana</option>
+                    <option value="mes">Último mes</option>
+                    <option value="año">Último año</option>
+                    <option value="total">Todo el historial</option>
+                  </select>
+                </div>
+                <Button
+                  onClick={handleExport}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg inline-flex items-center gap-2 transition-all duration-200 border border-white/10"
+                >
+                  <FaFilePdf className="w-4 h-4" />
+                  <span>Exportar</span>
+                </Button>
+              </div>
+            </div>
           </div>
           {/* Filtros */}
           <div className="mb-8">

@@ -197,7 +197,7 @@ export default function LoginPage() {
           <p className="text-blue-600 font-medium font-montserrat">
             ¿Problemas para iniciar sesión?{' '}
             <a
-              href="mailto:kikeramirez160418@gmail.com?subject=Problema%20con%20inicio%20de%20sesión"
+              href="mailto:automatizaciones@bechapra.com.mx?subject=Problema%20con%20inicio%20de%20sesión"
               className="underline hover:text-blue-700 transition-colors"
             >
               Contacta con administración

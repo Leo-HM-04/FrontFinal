@@ -104,6 +104,9 @@ export class SolicitudesService {
     banco_destino?: string;
     fecha_limite_pago: string;
     factura: File;
+    nombre_persona: string;
+    tipo_pago_descripcion?: string;
+    empresa_a_pagar?: string;
   }): Promise<unknown> {
     const token = localStorage.getItem('token');
     const formData = new FormData();
@@ -117,6 +120,9 @@ export class SolicitudesService {
     formData.append('tipo_cuenta_destino', data.tipo_cuenta_destino);
     formData.append('tipo_tarjeta', data.tipo_tarjeta || '');
     formData.append('banco_destino', data.banco_destino || '');
+    formData.append('nombre_persona', data.nombre_persona || '');
+    formData.append('tipo_pago_descripcion', data.tipo_pago_descripcion || '');
+    formData.append('empresa_a_pagar', data.empresa_a_pagar || '');
     const response = await api.post('/solicitudes', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -132,6 +138,9 @@ export class SolicitudesService {
     cuenta_destino: string;
     concepto: string;
     tipo_pago: string;
+    tipo_pago_descripcion?: string;
+    empresa_a_pagar?: string;
+    nombre_persona?: string;
     fecha_limite_pago: string;
     tipo_cuenta_destino: string;
     tipo_tarjeta?: string;
@@ -145,7 +154,7 @@ export class SolicitudesService {
     formData.append('cuenta_destino', data.cuenta_destino);
     formData.append('concepto', data.concepto);
     formData.append('tipo_pago', data.tipo_pago);
-    formData.append('fecha_limite_pago', data.fecha_limite_pago || '');
+    formData.append('fecha_limite_pago', data.fecha_limite_pago);
     // Siempre enviar el campo factura, aunque sea vacío, para que el backend lo maneje igual que en createWithFiles
     if (data.factura instanceof File) {
       formData.append('factura', data.factura);
@@ -155,6 +164,9 @@ export class SolicitudesService {
     formData.append('tipo_cuenta_destino', data.tipo_cuenta_destino || '');
     formData.append('tipo_tarjeta', data.tipo_tarjeta || '');
     formData.append('banco_destino', data.banco_destino || '');
+    formData.append('tipo_pago_descripcion', (data.tipo_pago_descripcion !== undefined && data.tipo_pago_descripcion !== null) ? String(data.tipo_pago_descripcion) : '');
+    formData.append('empresa_a_pagar', (data.empresa_a_pagar !== undefined && data.empresa_a_pagar !== null) ? String(data.empresa_a_pagar) : '');
+    formData.append('nombre_persona', (data.nombre_persona !== undefined && data.nombre_persona !== null) ? String(data.nombre_persona) : '');
     // DEBUG: log FormData
     // for (let pair of formData.entries()) {
     //   console.log(pair[0]+ ': ' + pair[1]);
