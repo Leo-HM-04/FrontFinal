@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
-import { FileText, Trash2, Eye } from 'lucide-react';
+import { FileText, Trash2, Eye, Download } from 'lucide-react';
+import { exportSolicitudesPDF, exportSolicitudesExcel, exportSolicitudesCSV } from '@/utils/exportSolicitudes';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
+import { ExportOptions } from '@/components/common/ExportOptions';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 
@@ -21,6 +23,7 @@ export default function SolicitudesPage() {
   const router = useRouter();
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { } = useAuth();
 
@@ -164,6 +167,17 @@ export default function SolicitudesPage() {
                 <p className="text-white/80">
                   Total: {totalItems} solicitudes
                 </p>
+              </div>
+              <div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowExportModal(true)}
+                  className="bg-blue-600 text-white hover:bg-blue-700 rounded-full px-4"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Exportar
+                </Button>
               </div>
             </div>
           </div>
@@ -344,6 +358,29 @@ export default function SolicitudesPage() {
             message="¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer."
             itemName={selectedSolicitud ? `Solicitud #${selectedSolicitud.id_solicitud} - ${selectedSolicitud.departamento}` : undefined}
             loading={deleting}
+          />
+
+          {/* Export Options Modal */}
+          <ExportOptions
+            isOpen={showExportModal}
+            onClose={() => setShowExportModal(false)}
+            onExport={(format, rango, estado) => {
+              const solicitudesFiltradas = estado 
+                ? solicitudes.filter(s => s.estado === estado)
+                : solicitudes;
+
+              switch (format) {
+                case 'pdf':
+                  exportSolicitudesPDF(solicitudesFiltradas, rango);
+                  break;
+                case 'excel':
+                  exportSolicitudesExcel(solicitudesFiltradas, rango);
+                  break;
+                case 'csv':
+                  exportSolicitudesCSV(solicitudesFiltradas, rango);
+                  break;
+              }
+            }}
           />
         </div>
       </AdminLayout>

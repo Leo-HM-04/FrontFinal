@@ -20,6 +20,12 @@ type FormState = {
   cuenta_destino: string;
   concepto: string;
   tipo_pago: string;
+  tipo_pago_descripcion: string;
+  empresa_a_pagar: string;
+  nombre_persona: string;
+  tipo_cuenta_destino: string;
+  tipo_tarjeta: string;
+  banco_destino: string;
   frecuencia: string;
   siguiente_fecha: string;
   activo: boolean;
@@ -34,6 +40,12 @@ const initialState: FormState = {
   cuenta_destino: '',
   concepto: '',
   tipo_pago: '',
+  tipo_pago_descripcion: '',
+  empresa_a_pagar: '',
+  nombre_persona: '',
+  tipo_cuenta_destino: 'CLABE',
+  tipo_tarjeta: '',
+  banco_destino: '',
   frecuencia: '',
   siguiente_fecha: '',
   activo: true,
@@ -66,12 +78,31 @@ const departamentos = [
 
 const frecuencias = ['diario', 'semanal', 'quincenal', 'mensual'];
 
+const bancoOptions = [
+  "ACTINVER","AFIRME","albo","ARCUS FI","ASP INTEGRA OPC","AUTOFIN","AZTECA","BaBien","BAJIO","BANAMEX","BANCO COVALTO","BANCOMEXT","BANCOPPEL","BANCO S3","BANCREA","BANJERCITO","BANKAOOL","BANK OF AMERICA","BANK OF CHINA","BANOBRAS","BANORTE","BANREGIO","BANSI","BANXICO","BARCLAYS","BBASE","BBVA MEXICO","BMONEX","CAJA POP MEXICA","CAJA TELEFONIST","CASHI CUENTA","CB INTERCAM","CIBANCO","CI BOLSA","CITI MEXICO","CoDi Valida","COMPARTAMOS","CONSUBANCO","CREDICAPITAL","CREDICLUB","CRISTOBAL COLON","Cuenca","Dep y Pag Dig","DONDE","FINAMEX","FINCOMUN","FINCO PAY","FOMPED","FONDEADORA","FONDO (FIRA)","GBM","HEY BANCO","HIPOTECARIA FED","HSBC","ICBC","INBURSA","INDEVAL","INMOBILIARIO","INTERCAM BANCO","INVEX","JP MORGAN","KLAR","KUSPIT","LIBERTAD","MASARI","Mercado Pago W","MexPago","MIFEL","MIZUHO BANK","MONEXCB","MUFG","MULTIVA BANCO","NAFIN","NU MEXICO","NVIO","PAGATODO","Peibo","PROFUTURO","SABADELL","SANTANDER","SCOTIABANK","SHINHAN","SPIN BY OXXO","STP","TESORED","TRANSFER","UALA","UNAGRA","VALMEX","VALUE","VECTOR","VE POR MAS","VOLKSWAGEN"
+];
+
 export default function NuevaRecurrentePage() {
   const router = useRouter();
   const [formData, dispatch] = useReducer(formReducer, initialState);
   const [loading, setLoading] = useState(false);
   const [fechaInicio, setFechaInicio] = useState<Date | null>(null);
   const [facturaFile, setFacturaFile] = useState<File | null>(null);
+
+  // Configuración dinámica para cuenta destino
+  const cuentaConfig = formData.tipo_cuenta_destino === 'Tarjeta'
+    ? {
+        maxLength: 16,
+        pattern: '^\d{16}$',
+        placeholder: 'Número de tarjeta (16 dígitos)',
+        errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
+      }
+    : {
+        maxLength: 18,
+        pattern: '^\d{18}$',
+        placeholder: 'Número de cuenta CLABE (18 dígitos)',
+        errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
+      };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -90,7 +121,7 @@ export default function NuevaRecurrentePage() {
     e.preventDefault();
     setLoading(true);
 
-    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'tipo_pago', 'frecuencia', 'siguiente_fecha'] as (keyof FormState)[];
+    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'tipo_pago', 'frecuencia', 'siguiente_fecha', 'nombre_persona'] as (keyof FormState)[];
     for (const field of requiredFields) {
       if (!formData[field]) {
         toast.error(`Campo obligatorio faltante: ${field}`);
@@ -98,6 +129,27 @@ export default function NuevaRecurrentePage() {
         return;
       }
     }
+    
+    // Validación de cuenta destino
+    const cuenta = formData.cuenta_destino.replace(/[^0-9]/g, '');
+    if (formData.tipo_cuenta_destino === 'CLABE' && cuenta.length !== 18) {
+      toast.error('La cuenta CLABE debe tener exactamente 18 dígitos.');
+      setLoading(false);
+      return;
+    }
+    if (formData.tipo_cuenta_destino === 'Tarjeta' && cuenta.length !== 16) {
+      toast.error('La tarjeta debe tener exactamente 16 dígitos.');
+      setLoading(false);
+      return;
+    }
+    
+    // Validación de tipo tarjeta si es necesario
+    if (formData.tipo_cuenta_destino === 'Tarjeta' && !formData.tipo_tarjeta) {
+      toast.error('Tipo de tarjeta es obligatorio cuando seleccionas Tarjeta');
+      setLoading(false);
+      return;
+    }
+    
     if (!facturaFile) {
       toast.error('Debes subir el archivo de la factura');
       setLoading(false);
@@ -149,6 +201,82 @@ export default function NuevaRecurrentePage() {
                 </h2>
                 <hr className="border-blue-400/30 mb-2" />
               </div>
+              
+              <div className="text-left">
+                <label className="text-white/90 block mb-3 font-medium text-left">
+                  <CreditCard className="inline w-4 h-4 mr-2" /> Tipo de Cuenta Destino *
+                </label>
+                <select
+                  name="tipo_cuenta_destino"
+                  value={formData.tipo_cuenta_destino}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
+                >
+                  <option value="CLABE" className="text-black">CLABE</option>
+                  <option value="Tarjeta" className="text-black">Tarjeta</option>
+                </select>
+              </div>
+
+              {formData.tipo_cuenta_destino === 'Tarjeta' && (
+                <div className="text-left">
+                  <label className="text-white/90 block mb-3 font-medium text-left">
+                    Tipo de Tarjeta *
+                  </label>
+                  <select
+                    name="tipo_tarjeta"
+                    value={formData.tipo_tarjeta}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
+                  >
+                    <option value="" className="text-black">Selecciona tipo</option>
+                    <option value="Débito" className="text-black">Débito</option>
+                    <option value="Crédito" className="text-black">Crédito</option>
+                  </select>
+                </div>
+              )}
+
+              <div className="text-left">
+                <label className="text-white/90 block mb-3 font-medium text-left">
+                  Banco (opcional)
+                </label>
+                <select
+                  name="banco_destino"
+                  value={formData.banco_destino}
+                  onChange={handleInputChange}
+                  className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
+                >
+                  <option value="" className="text-black">Selecciona banco</option>
+                  {bancoOptions.map(banco => (
+                    <option key={banco} value={banco} className="text-black text-left">
+                      {banco}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="text-left">
+                <label className="text-white/90 block mb-3 font-medium text-left">
+                  <CreditCard className="inline w-4 h-4 mr-2" /> Cuenta Destino *
+                </label>
+                <input
+                  type="text"
+                  name="cuenta_destino"
+                  value={formData.cuenta_destino}
+                  onChange={e => {
+                    const maxLen = cuentaConfig.maxLength;
+                    const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                    dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
+                  }}
+                  required
+                  className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
+                  placeholder={cuentaConfig.placeholder}
+                  maxLength={cuentaConfig.maxLength}
+                  inputMode="numeric"
+                />
+              </div>
+
               <div className="text-left">
                 <label className="text-white/90 block mb-3 font-medium text-left">
                   Factura (PDF o imagen) *
@@ -161,6 +289,7 @@ export default function NuevaRecurrentePage() {
                   className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left file:text-left file:pl-0"
                 />
               </div>
+              
               <div className="text-left">
                 <label className="text-white/90 block mb-3 font-medium text-left">
                   <Building className="inline w-4 h-4 mr-2" /> Departamento *
@@ -172,7 +301,7 @@ export default function NuevaRecurrentePage() {
                   required
                   className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
                 >
-                  <option value="">Selecciona departamento</option>
+                  <option value="" className="text-black">Selecciona departamento</option>
                   {departamentos.map(dep => (
                     <option key={dep} value={dep} className="text-black text-left">
                       {dep.charAt(0).toUpperCase() + dep.slice(1)}
@@ -180,6 +309,7 @@ export default function NuevaRecurrentePage() {
                   ))}
                 </select>
               </div>
+              
               <div className="text-left">
                 <label className="text-white/90 block mb-3 font-medium text-left">
                   <DollarSign className="inline w-4 h-4 mr-2" /> Monto *
@@ -198,22 +328,36 @@ export default function NuevaRecurrentePage() {
                   inputMode="decimal"
                 />
               </div>
-              <div className="text-left">
+
+              <div className="col-span-2 text-left">
                 <label className="text-white/90 block mb-3 font-medium text-left">
-                  <CreditCard className="inline w-4 h-4 mr-2" /> Cuenta Destino *
+                  Empresa a pagar (opcional)
                 </label>
                 <input
                   type="text"
-                  name="cuenta_destino"
-                  value={formData.cuenta_destino}
+                  name="empresa_a_pagar"
+                  value={formData.empresa_a_pagar}
                   onChange={handleInputChange}
-                  required
+                  placeholder="Nombre de la empresa"
                   className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
-                  pattern="^\d{18}$"
-                  title="La cuenta CLABE debe tener exactamente 18 dígitos."
-                  maxLength={18}
                 />
               </div>
+
+              <div className="col-span-2 text-left">
+                <label className="text-white/90 block mb-3 font-medium text-left">
+                  Nombre de la persona que recibe el pago *
+                </label>
+                <input
+                  type="text"
+                  name="nombre_persona"
+                  value={formData.nombre_persona}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Nombre completo de la persona"
+                  className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
+                />
+              </div>
+              
               <div className="col-span-2 flex items-center mt-2">
                 <input
                   type="checkbox"
@@ -252,6 +396,23 @@ export default function NuevaRecurrentePage() {
                     </option>
                   ))}
                 </select>
+                
+                {/* Mostrar descripción solo si hay tipo de pago seleccionado y no está vacío */}
+                {formData.tipo_pago !== '' && (
+                  <div className="mt-4">
+                    <label className="text-white/90 block mb-3 font-medium text-left">
+                      Descripción del tipo de pago
+                    </label>
+                    <textarea
+                      name="tipo_pago_descripcion"
+                      value={formData.tipo_pago_descripcion}
+                      onChange={handleInputChange}
+                      placeholder="Agrega una descripción para el tipo de pago..."
+                      rows={2}
+                      className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left resize-none"
+                    />
+                  </div>
+                )}
               </div>
               <div className="text-left">
                 <label className="text-white/90 block mb-3 font-medium text-left">

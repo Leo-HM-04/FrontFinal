@@ -1,5 +1,5 @@
-
 "use client";
+
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { useState } from 'react';
@@ -20,17 +20,21 @@ type Viatico = {
   fecha_limite_pago: string;
   viatico_url?: string;
   id_usuario?: string;
+  tipo_pago_descripcion?: string;
+  empresa_a_pagar?: string;
+  nombre_persona: string;
 };
 
 type FormState = {
   form: Partial<Viatico>;
   file: File | null;
   mensaje: string;
+  errors: Record<string, string>;
 };
 
 export default function NuevoViaticoPage() {
   const [formularios, setFormularios] = useState<FormState[]>([
-    { form: {}, file: null, mensaje: '' }
+    { form: {}, file: null, mensaje: '', errors: {} }
   ]);
   const [mensajeGlobal, setMensajeGlobal] = useState<string>('');
   const [exito, setExito] = useState<boolean>(false);
@@ -50,31 +54,70 @@ export default function NuevoViaticoPage() {
     }
   };
 
+  const bancoOptions = [
+    "ACTINVER","AFIRME","albo","ARCUS FI","ASP INTEGRA OPC","AUTOFIN","AZTECA","BaBien","BAJIO","BANAMEX","BANCO COVALTO","BANCOMEXT","BANCOPPEL","BANCO S3","BANCREA","BANJERCITO","BANKAOOL","BANK OF AMERICA","BANK OF CHINA","BANOBRAS","BANORTE","BANREGIO","BANSI","BANXICO","BARCLAYS","BBASE","BBVA MEXICO","BMONEX","CAJA POP MEXICA","CAJA TELEFONIST","CASHI CUENTA","CB INTERCAM","CIBANCO","CI BOLSA","CITI MEXICO","CoDi Valida","COMPARTAMOS","CONSUBANCO","CREDICAPITAL","CREDICLUB","CRISTOBAL COLON","Cuenca","Dep y Pag Dig","DONDE","FINAMEX","FINCOMUN","FINCO PAY","FOMPED","FONDEADORA","FONDO (FIRA)","GBM","HEY BANCO","HIPOTECARIA FED","HSBC","ICBC","INBURSA","INDEVAL","INMOBILIARIO","INTERCAM BANCO","INVEX","JP MORGAN","KLAR","KUSPIT","LIBERTAD","MASARI","Mercado Pago W","MexPago","MIFEL","MIZUHO BANK","MONEXCB","MUFG","MULTIVA BANCO","NAFIN","NU MEXICO","NVIO","PAGATODO","Peibo","PROFUTURO","SABADELL","SANTANDER","SCOTIABANK","SHINHAN","SPIN BY OXXO","STP","TESORED","TRANSFER","UALA","UNAGRA","VALMEX","VALUE","VECTOR","VE POR MAS","VOLKSWAGEN"
+  ];
+
   const handleSubmitTodos = async (e: React.FormEvent) => {
     e.preventDefault();
     const nuevos = [...formularios];
     let huboError = false;
+
+    // Validar todos los formularios antes de enviar
+    nuevos.forEach((f, idx) => {
+      const errors: Record<string, string> = {};
+      
+      // Validar archivo
+      if (!f.file) {
+        errors.file = 'Adjunta un archivo';
+        huboError = true;
+      }
+
+      // Validar cuenta según el tipo
+      if (f.form.tipo_cuenta_destino === 'clabe') {
+        if (!f.form.cuenta_destino || f.form.cuenta_destino.length !== 18) {
+          errors.cuenta_destino = 'La CLABE debe tener 18 dígitos';
+          huboError = true;
+        }
+      } else if (f.form.tipo_cuenta_destino === 'tarjeta') {
+        if (!f.form.tipo_tarjeta) {
+          errors.tipo_tarjeta = 'Selecciona el tipo de tarjeta';
+          huboError = true;
+        }
+        if (!f.form.cuenta_destino || f.form.cuenta_destino.length !== 16) {
+          errors.cuenta_destino = 'El número de tarjeta debe tener 16 dígitos';
+          huboError = true;
+        }
+      }
+
+      nuevos[idx].errors = errors;
+    });
+
+    if (huboError) {
+      setFormularios(nuevos);
+      setMensajeGlobal('Por favor corrige los errores antes de continuar.');
+      setExito(false);
+      return;
+    }
+
+    // Si no hay errores, proceder con el envío
     await Promise.all(
       nuevos.map(async (f, idx) => {
-        if (!f.file) {
-          nuevos[idx].mensaje = 'Adjunta un archivo';
-          huboError = true;
-          return;
-        }
         try {
-          const id_usuario = localStorage.getItem('id_usuario');
           const data = {
             departamento: f.form.departamento || '',
-            monto: f.form.monto || '',
+            monto: parseFloat(f.form.monto || '0'),
             cuenta_destino: f.form.cuenta_destino || '',
             concepto: f.form.concepto || '',
             tipo_pago: 'viaticos',
-            tipo_cuenta_destino: f.form.tipo_cuenta_destino || '',
+            tipo_cuenta_destino: f.form.tipo_cuenta_destino || 'clabe',
             tipo_tarjeta: f.form.tipo_tarjeta || '',
             banco_destino: f.form.banco_destino || '',
-            fecha_limite_pago: f.form.fecha_limite_pago || '',
-            viatico_url: f.file,
-            id_usuario: id_usuario || undefined,
+            fecha_limite_pago: f.form.fecha_limite_pago || new Date().toISOString().split('T')[0],
+            viatico_url: f.file || undefined,
+            tipo_pago_descripcion: f.form.tipo_pago_descripcion || '',
+            empresa_a_pagar: f.form.empresa_a_pagar || '',
+            nombre_persona: f.form.nombre_persona || '',
           };
           await ViaticosService.createWithFile(data);
           nuevos[idx].mensaje = 'Viático creado correctamente';
@@ -98,7 +141,7 @@ export default function NuevoViaticoPage() {
   };
 
   const handleAgregarOtro = () => {
-    setFormularios([...formularios, { form: {}, file: null, mensaje: '' }]);
+    setFormularios([...formularios, { form: {}, file: null, mensaje: '', errors: {} }]);
   };
 
   const handleEliminar = (idx: number) => {
@@ -132,7 +175,125 @@ export default function NuevoViaticoPage() {
                     <FaTrash className="w-3 h-3" /> Eliminar
                   </button>
                 )}
-                {/* 1. Departamento y Concepto */}
+                {/* 1. Tipo de cuenta y datos bancarios */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-blue-900 font-medium">Tipo de Cuenta Destino *</label>
+                  <select
+                    name="tipo_cuenta_destino"
+                    onChange={e => {
+                      const nuevos = [...formularios];
+                      nuevos[idx].form = { 
+                        ...nuevos[idx].form, 
+                        [e.target.name]: e.target.value,
+                        cuenta_destino: '', // Reset cuenta_destino when type changes
+                        tipo_tarjeta: e.target.value === 'tarjeta' ? '' : undefined // Reset tipo_tarjeta
+                      };
+                      nuevos[idx].errors = {}; // Clear previous errors
+                      setFormularios(nuevos);
+                    }}
+                    required
+                    className="input input-bordered text-black uppercase"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Tipo de pago</option>
+                    <option value="clabe">CLABE</option>
+                    <option value="tarjeta">Tarjeta</option>
+                  </select>
+                  {formularios[idx].errors?.tipo_cuenta_destino && (
+                    <span className="text-red-500 text-sm">{formularios[idx].errors.tipo_cuenta_destino}</span>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-blue-900 font-medium">
+                    Cuenta destino
+                    {formularios[idx].form.tipo_cuenta_destino === 'clabe' && ' (18 dígitos)'}
+                    {formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && ' (16 dígitos)'}
+                  </label>
+                  <input 
+                    name="cuenta_destino" 
+                    placeholder={
+                      formularios[idx].form.tipo_cuenta_destino === 'clabe' ? "CLABE (18 dígitos)" :
+                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? "Número de tarjeta (16 dígitos)" :
+                      "Cuenta destino"
+                    }
+                    value={formularios[idx].form.cuenta_destino || ''}
+                    onChange={e => {
+                      const value = e.target.value.replace(/\D/g, ''); // Solo permite dígitos
+                      const nuevos = [...formularios];
+                      nuevos[idx].form = { ...nuevos[idx].form, cuenta_destino: value };
+                      
+                      // Validaciones específicas
+                      if (nuevos[idx].form.tipo_cuenta_destino === 'clabe') {
+                        if (value.length > 0 && value.length !== 18) {
+                          nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'La CLABE debe tener 18 dígitos' };
+                        } else {
+                          const { cuenta_destino: _, ...otherErrors } = nuevos[idx].errors || {};
+                          nuevos[idx].errors = otherErrors;
+                        }
+                      } else if (nuevos[idx].form.tipo_cuenta_destino === 'tarjeta') {
+                        if (value.length > 0 && value.length !== 16) {
+                          nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de tarjeta debe tener 16 dígitos' };
+                        } else {
+                          const { cuenta_destino: _, ...otherErrors } = nuevos[idx].errors || {};
+                          nuevos[idx].errors = otherErrors;
+                        }
+                      }
+                      
+                      setFormularios(nuevos);
+                    }}
+                    maxLength={formularios[idx].form.tipo_cuenta_destino === 'clabe' ? 18 : 
+                             formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? 16 : undefined}
+                    required 
+                    className={`input input-bordered ${formularios[idx].errors?.cuenta_destino ? 'border-red-500' : ''}`}
+                  />
+                  {formularios[idx].errors?.cuenta_destino && (
+                    <span className="text-red-500 text-sm">{formularios[idx].errors.cuenta_destino}</span>
+                  )}
+                </div>
+
+                {formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && (
+                  <div className="flex flex-col gap-2">
+                    <label className="text-blue-900 font-medium">Tipo de tarjeta</label>
+                    <select
+                      name="tipo_tarjeta"
+                      onChange={e => handleChange(idx, e)}
+                      className="input input-bordered text-black uppercase"
+                      defaultValue=""
+                      required
+                    >
+                      <option value="" disabled>SELECCIONA TIPO DE TARJETA</option>
+                      <option value="debito">DÉBITO</option>
+                      <option value="credito">CRÉDITO</option>
+                    </select>
+                    {formularios[idx].errors?.tipo_tarjeta && (
+                      <span className="text-red-500 text-sm">{formularios[idx].errors.tipo_tarjeta}</span>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-blue-900 font-medium">Banco destino</label>
+                  <select
+                    name="banco_destino"
+                    onChange={e => handleChange(idx, e)}
+                    className="input input-bordered text-black uppercase"
+                    defaultValue=""
+                  >
+                    <option value="" className="text-black">Selecciona banco</option>
+                      {bancoOptions.map(banco => (
+                        <option key={banco} value={banco} className="text-black">{banco}</option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* 2. Monto */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-blue-900 font-medium">Monto</label>
+                  <input name="monto" placeholder="Monto" type="number" onChange={e => handleChange(idx, e)} required className="input input-bordered" />
+                </div>
+
+                {/* 3. Departamento */}
                 <div className="flex flex-col gap-2">
                   <label className="text-blue-900 font-medium">Departamento</label>
                   <select
@@ -156,86 +317,52 @@ export default function NuevoViaticoPage() {
                     <option value="nomina">NÓMINA</option>
                   </select>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Concepto</label>
-                  <input name="concepto" placeholder="Concepto" onChange={e => handleChange(idx, e)} required className="input input-bordered" />
-                </div>
-                {/* 2. Monto y Fecha límite de pago */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Monto</label>
-                  <input name="monto" placeholder="Monto" type="number" onChange={e => handleChange(idx, e)} required className="input input-bordered" />
-                </div>
+
+                {/* 4. Fecha límite de pago */}
                 <div className="flex flex-col gap-2">
                   <label className="text-blue-900 font-medium">Fecha límite de pago</label>
                   <input name="fecha_limite_pago" type="date" onChange={e => handleChange(idx, e)} required className="input input-bordered" />
                 </div>
-                {/* 3. Datos bancarios */}
+
+                {/* 5. Concepto */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Cuenta destino</label>
-                  <input name="cuenta_destino" placeholder="Cuenta destino" onChange={e => handleChange(idx, e)} required className="input input-bordered" />
+                  <label className="text-blue-900 font-medium">Concepto</label>
+                  <input name="concepto" placeholder="Concepto" onChange={e => handleChange(idx, e)} required className="input input-bordered" />
                 </div>
+
+                {/* Nuevos campos */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Tipo de cuenta</label>
-                  <select
-                    name="tipo_cuenta_destino"
-                    onChange={e => handleChange(idx, e)}
+                  <label className="text-blue-900 font-medium">Tipo de Pago (Descripción)</label>
+                  <input 
+                    name="tipo_pago_descripcion" 
+                    placeholder="Descripción del tipo de pago" 
+                    onChange={e => handleChange(idx, e)} 
+                    className="input input-bordered" 
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-blue-900 font-medium">Empresa a Pagar</label>
+                  <input 
+                    name="empresa_a_pagar" 
+                    placeholder="Nombre de la empresa" 
+                    onChange={e => handleChange(idx, e)} 
+                    className="input input-bordered" 
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-blue-900 font-medium">Nombre de la Persona *</label>
+                  <input 
+                    name="nombre_persona" 
+                    placeholder="Nombre completo" 
+                    onChange={e => handleChange(idx, e)} 
                     required
-                    className="input input-bordered text-black uppercase"
-                    defaultValue=""
-                  >
-                    <option value="" disabled>SELECCIONA TIPO DE CUENTA</option>
-                    <option value="debito">DÉBITO</option>
-                    <option value="credito">CRÉDITO</option>
-                    <option value="nomina">NÓMINA</option>
-                    <option value="cheques">CHEQUES</option>
-                    <option value="ahorro">AHORRO</option>
-                    <option value="inversion">INVERSIÓN</option>
-                    <option value="vale">VALE</option>
-                    <option value="otra">OTRA</option>
-                  </select>
+                    className="input input-bordered" 
+                  />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Tipo de tarjeta</label>
-                  <select
-                    name="tipo_tarjeta"
-                    onChange={e => handleChange(idx, e)}
-                    className="input input-bordered text-black uppercase"
-                    defaultValue=""
-                  >
-                    <option value="" disabled>SELECCIONA TIPO DE TARJETA</option>
-                    <option value="debito">DÉBITO</option>
-                    <option value="credito">CRÉDITO</option>
-                    <option value="nomina">NÓMINA</option>
-                    <option value="vale">VALE</option>
-                    <option value="otra">OTRA</option>
-                  </select>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Banco destino</label>
-                  <select
-                    name="banco_destino"
-                    onChange={e => handleChange(idx, e)}
-                    className="input input-bordered text-black uppercase"
-                    defaultValue=""
-                  >
-                    <option value="" disabled>SELECCIONA BANCO</option>
-                    <option value="bbva">BBVA</option>
-                    <option value="banamex">BANAMEX</option>
-                    <option value="santander">SANTANDER</option>
-                    <option value="banorte">BANORTE</option>
-                    <option value="hsbc">HSBC</option>
-                    <option value="scotiabank">SCOTIABANK</option>
-                    <option value="inbursa">INBURSA</option>
-                    <option value="banco azteca">BANCO AZTECA</option>
-                    <option value="banregio">BANREGIO</option>
-                    <option value="bancoppel">BANCOPPEL</option>
-                    <option value="afirme">AFIRME</option>
-                    <option value="ci banco">CI BANCO</option>
-                    <option value="bajio">BANCO DEL BAJÍO</option>
-                    <option value="otro">OTRO</option>
-                  </select>
-                </div>
-                {/* 4. Archivo comprobante */}
+
+                {/* 6. Archivo comprobante */}
                 <div className="flex flex-col gap-2 md:col-span-3">
                   <label className="text-blue-900 font-medium">Archivo comprobante</label>
                   <input type="file" name="viatico_url" onChange={e => handleFile(idx, e)} required className="file-input file-input-bordered" />

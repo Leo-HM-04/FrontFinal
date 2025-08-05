@@ -33,6 +33,10 @@ const departamentos = [
 ];
 const frecuencias = ['diaria', 'semanal', 'quincenal', 'mensual'];
 
+const bancoOptions = [
+  "ACTINVER","AFIRME","albo","ARCUS FI","ASP INTEGRA OPC","AUTOFIN","AZTECA","BaBien","BAJIO","BANAMEX","BANCO COVALTO","BANCOMEXT","BANCOPPEL","BANCO S3","BANCREA","BANJERCITO","BANKAOOL","BANK OF AMERICA","BANK OF CHINA","BANOBRAS","BANORTE","BANREGIO","BANSI","BANXICO","BARCLAYS","BBASE","BBVA MEXICO","BMONEX","CAJA POP MEXICA","CAJA TELEFONIST","CASHI CUENTA","CB INTERCAM","CIBANCO","CI BOLSA","CITI MEXICO","CoDi Valida","COMPARTAMOS","CONSUBANCO","CREDICAPITAL","CREDICLUB","CRISTOBAL COLON","Cuenca","Dep y Pag Dig","DONDE","FINAMEX","FINCOMUN","FINCO PAY","FOMPED","FONDEADORA","FONDO (FIRA)","GBM","HEY BANCO","HIPOTECARIA FED","HSBC","ICBC","INBURSA","INDEVAL","INMOBILIARIO","INTERCAM BANCO","INVEX","JP MORGAN","KLAR","KUSPIT","LIBERTAD","MASARI","Mercado Pago W","MexPago","MIFEL","MIZUHO BANK","MONEXCB","MUFG","MULTIVA BANCO","NAFIN","NU MEXICO","NVIO","PAGATODO","Peibo","PROFUTURO","SABADELL","SANTANDER","SCOTIABANK","SHINHAN","SPIN BY OXXO","STP","TESORED","TRANSFER","UALA","UNAGRA","VALMEX","VALUE","VECTOR","VE POR MAS","VOLKSWAGEN"
+];
+
 export default function EditarRecurrentePage() {
   const [file, setFile] = useState<File | null>(null);
   const router = useRouter();
@@ -43,6 +47,21 @@ export default function EditarRecurrentePage() {
   const [success, setSuccess] = useState("");
   const [form, setForm] = useState<Partial<PlantillaRecurrente>>({});
   const [fechaInicio, setFechaInicio] = useState<Date | null>(null);
+
+  // Configuración dinámica para cuenta destino
+  const cuentaConfig = (form.tipo_cuenta_destino || 'CLABE') === 'Tarjeta'
+    ? {
+        maxLength: 16,
+        pattern: '^\d{16}$',
+        placeholder: 'Número de tarjeta (16 dígitos)',
+        errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
+      }
+    : {
+        maxLength: 18,
+        pattern: '^\d{18}$',
+        placeholder: 'Número de cuenta CLABE (18 dígitos)',
+        errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
+      };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,6 +117,12 @@ export default function EditarRecurrentePage() {
         formData.append("cuenta_destino", form.cuenta_destino || "");
         formData.append("concepto", form.concepto || "");
         formData.append("tipo_pago", form.tipo_pago || "");
+        formData.append("tipo_pago_descripcion", form.tipo_pago_descripcion || "");
+        formData.append("empresa_a_pagar", form.empresa_a_pagar || "");
+        formData.append("nombre_persona", form.nombre_persona || "");
+        formData.append("tipo_cuenta_destino", form.tipo_cuenta_destino || "CLABE");
+        formData.append("tipo_tarjeta", form.tipo_tarjeta || "");
+        formData.append("banco_destino", form.banco_destino || "");
         formData.append("frecuencia", form.frecuencia || "");
         formData.append("siguiente_fecha", form.siguiente_fecha || "");
         formData.append("fact_recurrente", file);
@@ -106,15 +131,23 @@ export default function EditarRecurrentePage() {
         }
         await RecurrentesService.editarConArchivo(id, formData);
       } else {
-        await RecurrentesService.editar(id, {
+        // Enviar todos los campos incluyendo los nuevos
+        const updateData = {
           departamento: form.departamento || "",
           monto: form.monto ?? 0,
           cuenta_destino: form.cuenta_destino || "",
           concepto: form.concepto || "",
           tipo_pago: form.tipo_pago || "",
+          tipo_pago_descripcion: form.tipo_pago_descripcion || "",
+          empresa_a_pagar: form.empresa_a_pagar || "",
+          nombre_persona: form.nombre_persona || "",
+          tipo_cuenta_destino: form.tipo_cuenta_destino || "CLABE",
+          tipo_tarjeta: form.tipo_tarjeta || "",
+          banco_destino: form.banco_destino || "",
           frecuencia: form.frecuencia || "",
           siguiente_fecha: form.siguiente_fecha || "",
-        });
+        };
+        await RecurrentesService.editar(id, updateData);
       }
       setSuccess("Plantilla actualizada correctamente");
       toast.success("Plantilla actualizada correctamente");
@@ -145,6 +178,83 @@ export default function EditarRecurrentePage() {
                   <div className="flex-1 space-y-8 w-full md:max-w-[600px]">
                     <div>
                       <label className="text-white/90 block mb-3 font-medium">
+                        <CreditCard className="inline w-4 h-4 mr-2" />
+                        Tipo de Cuenta Destino *
+                      </label>
+                      <select
+                        name="tipo_cuenta_destino"
+                        value={form.tipo_cuenta_destino || "CLABE"}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
+                      >
+                        <option value="CLABE" className="text-black">CLABE</option>
+                        <option value="Tarjeta" className="text-black">Tarjeta</option>
+                      </select>
+                    </div>
+
+                    {(form.tipo_cuenta_destino || 'CLABE') === 'Tarjeta' && (
+                      <div>
+                        <label className="text-white/90 block mb-3 font-medium">
+                          Tipo de Tarjeta *
+                        </label>
+                        <select
+                          name="tipo_tarjeta"
+                          value={form.tipo_tarjeta || ""}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
+                        >
+                          <option value="" className="text-black">Selecciona tipo</option>
+                          <option value="Débito" className="text-black">Débito</option>
+                          <option value="Crédito" className="text-black">Crédito</option>
+                        </select>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="text-white/90 block mb-3 font-medium">
+                        Banco (opcional)
+                      </label>
+                      <select
+                        name="banco_destino"
+                        value={form.banco_destino || ""}
+                        onChange={handleInputChange}
+                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
+                      >
+                        <option value="" className="text-black">Selecciona banco</option>
+                        {bancoOptions.map(banco => (
+                          <option key={banco} value={banco} className="text-black">
+                            {banco}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-white/90 block mb-3 font-medium">
+                        <CreditCard className="inline w-4 h-4 mr-2" />
+                        Cuenta Destino *
+                      </label>
+                      <input
+                        type="text"
+                        name="cuenta_destino"
+                        value={form.cuenta_destino || ""}
+                        onChange={e => {
+                          const maxLen = cuentaConfig.maxLength;
+                          const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                          setForm(prev => ({ ...prev, cuenta_destino: value }));
+                        }}
+                        required
+                        placeholder={cuentaConfig.placeholder}
+                        maxLength={cuentaConfig.maxLength}
+                        inputMode="numeric"
+                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-white/90 block mb-3 font-medium">
                         <Building className="inline w-4 h-4 mr-2" />
                         Departamento *
                       </label>
@@ -163,6 +273,7 @@ export default function EditarRecurrentePage() {
                         ))}
                       </select>
                     </div>
+                    
                     <div>
                       <label className="text-white/90 block mb-3 font-medium">
                         <DollarSign className="inline w-4 h-4 mr-2" />
@@ -181,20 +292,36 @@ export default function EditarRecurrentePage() {
                         className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
                       />
                     </div>
+
                     <div>
                       <label className="text-white/90 block mb-3 font-medium">
-                        <CreditCard className="inline w-4 h-4 mr-2" />
-                        Cuenta Destino *
+                        Empresa a pagar (opcional)
                       </label>
                       <input
                         type="text"
-                        name="cuenta_destino"
-                        value={form.cuenta_destino || ""}
+                        name="empresa_a_pagar"
+                        value={form.empresa_a_pagar || ""}
                         onChange={handleInputChange}
-                        required
+                        placeholder="Nombre de la empresa"
                         className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
                       />
                     </div>
+
+                    <div>
+                      <label className="text-white/90 block mb-3 font-medium">
+                        Nombre de la persona que recibe el pago *
+                      </label>
+                      <input
+                        type="text"
+                        name="nombre_persona"
+                        value={form.nombre_persona || ""}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="Nombre completo de la persona"
+                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
+                      />
+                    </div>
+
                     <div>
                       <label className="text-white/90 block mb-3 font-medium">
                         <MessageSquare className="inline w-4 h-4 mr-2" />
@@ -231,7 +358,25 @@ export default function EditarRecurrentePage() {
                           </option>
                         ))}
                       </select>
+                      
+                      {/* Mostrar descripción solo si hay tipo de pago seleccionado y no está vacío */}
+                      {(form.tipo_pago || '') !== '' && (
+                        <div className="mt-4">
+                          <label className="text-white/90 block mb-3 font-medium">
+                            Descripción del tipo de pago
+                          </label>
+                          <textarea
+                            name="tipo_pago_descripcion"
+                            value={form.tipo_pago_descripcion || ""}
+                            onChange={handleInputChange}
+                            placeholder="Agrega una descripción para el tipo de pago..."
+                            rows={2}
+                            className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 resize-none"
+                          />
+                        </div>
+                      )}
                     </div>
+                    
                     <div>
                       <label className="text-white/90 block mb-3 font-medium">
                         <Repeat className="inline w-4 h-4 mr-2" />

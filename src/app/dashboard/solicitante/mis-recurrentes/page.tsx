@@ -529,12 +529,18 @@ export default function MisRecurrentesPage() {
                                     cuenta_destino: recurrenteDetalle.cuenta_destino,
                                     concepto: recurrenteDetalle.concepto,
                                     tipo_pago: recurrenteDetalle.tipo_pago,
+                                    tipo_pago_descripcion: recurrenteDetalle.tipo_pago_descripcion,
+                                    empresa_a_pagar: recurrenteDetalle.empresa_a_pagar,
+                                    nombre_persona: recurrenteDetalle.nombre_persona,
+                                    tipo_cuenta_destino: recurrenteDetalle.tipo_cuenta_destino,
+                                    tipo_tarjeta: recurrenteDetalle.tipo_tarjeta,
+                                    banco_destino: recurrenteDetalle.banco_destino,
                                     frecuencia: recurrenteDetalle.frecuencia,
                                     siguiente_fecha: recurrenteDetalle.siguiente_fecha,
-                                    activo: (recurrenteDetalle.estado
-                                        ? recurrenteDetalle.estado.toLowerCase() !== 'rechazada'
-                                        : true),
+                                    activo: recurrenteDetalle.activo,
                                     fact_recurrente: recurrenteDetalle.fact_recurrente,
+                                    nombre_usuario: recurrenteDetalle.nombre_usuario,
+                                    estado: recurrenteDetalle.estado,
                                 }
                                 : null
                         }

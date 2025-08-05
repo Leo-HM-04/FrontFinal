@@ -29,7 +29,20 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({ solicitud, open,
           <div className="flex items-center gap-2"><FaUser className="text-blue-500" /><span className="font-bold">Usuario:</span> {solicitud.nombre_usuario || '-'}</div>
           <div className="flex items-center gap-2"><FaBuilding className="text-blue-500" /><span className="font-bold">Departamento:</span> {solicitud.departamento}</div>
           <div className="flex items-center gap-2"><FaMoneyBillWave className="text-green-600" /><span className="font-bold">Monto:</span> ${solicitud.monto?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+          
+          {/* Nuevos campos */}
+          <div className="flex items-center gap-2"><FaCreditCard className="text-blue-400" /><span className="font-bold">Tipo de Cuenta:</span> {solicitud.tipo_cuenta_destino || 'CLABE'}</div>
+          {solicitud.tipo_cuenta_destino === 'Tarjeta' && (
+            <div className="flex items-center gap-2"><FaCreditCard className="text-blue-400" /><span className="font-bold">Tipo de Tarjeta:</span> {solicitud.tipo_tarjeta}</div>
+          )}
+          <div className="flex items-center gap-2"><FaCreditCard className="text-blue-400" /><span className="font-bold">Banco:</span> {solicitud.banco_destino || '-'}</div>
           <div className="flex items-center gap-2"><FaCreditCard className="text-blue-400" /><span className="font-bold">Cuenta destino:</span> {solicitud.cuenta_destino}</div>
+          
+          {solicitud.empresa_a_pagar && (
+            <div className="flex items-center gap-2"><FaBuilding className="text-blue-500" /><span className="font-bold">Empresa a pagar:</span> {solicitud.empresa_a_pagar}</div>
+          )}
+          <div className="flex items-center gap-2"><FaUser className="text-blue-500" /><span className="font-bold">Persona que recibe:</span> {solicitud.nombre_persona || '-'}</div>
+          
           <div className="flex items-center gap-2"><FaRedo className="text-purple-500" /><span className="font-bold">Frecuencia:</span> {solicitud.frecuencia}</div>
           <div className="flex items-center gap-2">
             {solicitud.estado === 'aprobada' && <FaCheckCircle className="text-green-600" />}
@@ -37,6 +50,10 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({ solicitud, open,
             {solicitud.estado === 'rechazada' && <FaTimesCircle className="text-red-500" />}
             <span className="font-bold">Estado:</span> {solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1)}
           </div>
+          
+          {solicitud.tipo_pago_descripcion && (
+            <div className="flex items-center gap-2"><FaCommentDots className="text-blue-500" /><span className="font-bold">Descripción del tipo de pago:</span> {solicitud.tipo_pago_descripcion}</div>
+          )}
           <div className="flex items-center gap-2"><FaRegCalendarAlt className="text-blue-400" /><span className="font-bold">Siguiente fecha:</span> {solicitud.siguiente_fecha ? new Date(solicitud.siguiente_fecha).toLocaleString('es-MX') : '-'}</div>
           <div className="flex items-center gap-2"><FaUserCheck className="text-green-700" /><span className="font-bold">Aprobador:</span> {solicitud.nombre_aprobador || '-'} {solicitud.id_aprobador ? `(ID: ${solicitud.id_aprobador})` : ''}</div>
           <div className="flex items-center gap-2"><FaUserTie className="text-blue-700" /><span className="font-bold">Pagador:</span> {solicitud.nombre_pagador || '-'}</div>

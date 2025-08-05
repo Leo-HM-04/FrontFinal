@@ -14,6 +14,7 @@ import {
   exportMisViaticosExcel,
   exportMisViaticosPDF
 } from '@/utils/exportMisViaticos';
+import { handleFileDownload } from '@/utils/downloadFile';
 
 
 type Viatico = BaseViatico & {
@@ -381,7 +382,7 @@ export default function MisViaticosPage() {
                         <td className="px-3 py-2.5 text-center">
                           {v.viatico_url ? (
                             <a
-                              href={`http://localhost:4000/uploads/viaticos/${v.viatico_url.split('/').pop()}`}
+                              href={`http://localhost:4000${v.viatico_url.startsWith('/') ? '' : '/'}${v.viatico_url}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
@@ -395,29 +396,25 @@ export default function MisViaticosPage() {
                         </td>
                         <td className="px-3 py-2.5">
                           <div className="flex items-center justify-center gap-1.5">
-                            <Link
-                              href={`/dashboard/solicitante/editar-viatico?id=${v.id_viatico}`}
-                              className="inline-flex items-center justify-center p-1.5 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
-                              title="Editar"
-                            >
-                              <FaEdit className="w-3.5 h-3.5" />
-                            </Link>
                             {String(v.estado).toLowerCase() === 'pendiente' ? (
-                              <button
-                                title="Eliminar"
-                                className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
-                                onClick={() => { setShowModal(true); setViaticoAEliminar(v.id_viatico); }}
-                              >
-                                <FaTrash className="w-3.5 h-3.5" />
-                              </button>
+                              <>
+                                <Link
+                                  href={`/dashboard/solicitante/editar-viatico?id=${v.id_viatico}`}
+                                  className="inline-flex items-center justify-center p-1.5 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
+                                  title="Editar"
+                                >
+                                  <FaEdit className="w-3.5 h-3.5" />
+                                </Link>
+                                <button
+                                  title="Eliminar"
+                                  className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                                  onClick={() => { setShowModal(true); setViaticoAEliminar(v.id_viatico); }}
+                                >
+                                  <FaTrash className="w-3.5 h-3.5" />
+                                </button>
+                              </>
                             ) : (
-                              <button
-                                title="Solo puedes eliminar viáticos pendientes"
-                                className="inline-flex items-center justify-center p-1.5 rounded-md bg-gray-50 text-gray-400 cursor-not-allowed"
-                                disabled
-                              >
-                                <FaTrash className="w-3.5 h-3.5" />
-                              </button>
+                              <span className="text-gray-400 text-xs font-medium">No disponible</span>
                             )}
                           </div>
                             {/* Modal de confirmación para eliminar */}

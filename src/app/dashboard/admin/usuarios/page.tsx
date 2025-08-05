@@ -14,6 +14,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@/types';
 import { toast } from 'react-hot-toast';
 import { Suspense } from 'react'; 
+import { exportUsuariosPDF, exportUsuariosExcel, exportUsuariosCSV } from '@/utils/exportUsuarios';
+import { FileDown } from 'lucide-react';
 
 // Skeleton loader para la tabla
 function TableSkeleton({ rows = 5 }) {
@@ -41,11 +43,45 @@ function UsuariosContent() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [roleFilter, setRoleFilter] = useState('');
+  const [exportRange, setExportRange] = useState('total');
   const { user } = useAuth();
 
-  // Cache simple en sessionStorage
-  const cacheKey = 'usuarios_cache';
-  const CACHE_TTL = 10000; // 1 minuto
+  // Función auxiliar para exportar
+  const handleExport = useCallback((format: 'pdf' | 'excel' | 'csv', range: string) => {
+    try {
+      switch (format) {
+        case 'pdf':
+          exportUsuariosPDF(usuarios, range);
+          break;
+        case 'excel':
+          exportUsuariosExcel(usuarios, range);
+          break;
+        case 'csv':
+          exportUsuariosCSV(usuarios, range);
+          break;
+      }
+      toast.success(`Reporte exportado en formato ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      toast.error('Error al generar el reporte');
+    }
+  }, [usuarios]);
+
+  // Cache simple en sessionStorage con versioning
+  const CACHE_VERSION = '1.0';
+  const cacheKey = `usuarios_cache_${CACHE_VERSION}`;
+  const CACHE_TTL = 60000; // 1 minuto
+  
+  // Función para validar cache
+  const isCacheValid = useCallback((cached: string | null) => {
+    if (!cached) return false;
+    try {
+      const { data, timestamp, version } = JSON.parse(cached);
+      return version === CACHE_VERSION && Date.now() - timestamp < CACHE_TTL && Array.isArray(data);
+    } catch {
+      return false;
+    }
+  }, []);
 
   // Memoizar estadísticas para evitar recálculos
   const stats = useMemo(() => {
@@ -150,10 +186,18 @@ function UsuariosContent() {
         (a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime()
       );
 
-      sessionStorage.setItem(cacheKey, JSON.stringify({
-        data: sortedData,
-        timestamp: Date.now()
-      }));
+      // Guardar en cache con versioning y validación
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify({
+          data: sortedData,
+          timestamp: Date.now(),
+          version: CACHE_VERSION
+        }));
+      } catch (error) {
+        console.warn('Error al guardar en cache:', error);
+        // Limpiar cache si hay error al guardar
+        sessionStorage.removeItem(cacheKey);
+      }
 
       setUsuarios(sortedData);
     } catch (error) {
@@ -204,11 +248,15 @@ function UsuariosContent() {
 
   const handleRoleFilterChange = useCallback((role: string) => {
     setRoleFilter(role);
-  }, []);
+    // Reset página al cambiar filtro
+    goToPage(1);
+  }, [goToPage]);
 
   const clearRoleFilter = useCallback(() => {
     setRoleFilter('');
-  }, []);
+    // Reset página al limpiar filtro
+    goToPage(1);
+  }, [goToPage]);
 
   return (
     <>
@@ -226,7 +274,45 @@ function UsuariosContent() {
                 </p>
               </div>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 flex items-center gap-2">
+                <select 
+                  className="text-sm rounded-lg border-gray-300 bg-white/80 text-gray-700 px-2 py-1"
+                  value={exportRange}
+                  onChange={(e) => setExportRange(e.target.value)}
+                >
+                  <option value="total">Todo el historial</option>
+                  <option value="dia">Último día</option>
+                  <option value="semana">Última semana</option>
+                  <option value="mes">Último mes</option>
+                  <option value="año">Último año</option>
+                </select>
+                
+                <Button
+                  onClick={() => handleExport('pdf', exportRange)}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                  size="sm"
+                >
+                  <FileDown className="w-4 h-4 mr-1" /> PDF
+                </Button>
+                
+                <Button
+                  onClick={() => handleExport('excel', exportRange)}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  size="sm"
+                >
+                  <FileDown className="w-4 h-4 mr-1" /> Excel
+                </Button>
+                
+                <Button
+                  onClick={() => handleExport('csv', exportRange)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  size="sm"
+                >
+                  <FileDown className="w-4 h-4 mr-1" /> CSV
+                </Button>
+              </div>
+
               <Button
                 className="bg-white hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl"
                 style={{color: '#3B82F6'}}

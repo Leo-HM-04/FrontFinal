@@ -86,6 +86,12 @@ export class RecurrentesService {
     cuenta_destino: string;
     concepto: string;
     tipo_pago: string;
+    tipo_pago_descripcion?: string;
+    empresa_a_pagar?: string;
+    nombre_persona?: string;
+    tipo_cuenta_destino?: string;
+    tipo_tarjeta?: string;
+    banco_destino?: string;
     frecuencia: string;
     siguiente_fecha: string;
   }): Promise<unknown> {
