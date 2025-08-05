@@ -83,7 +83,7 @@ function filtrarViaticosPorRango(viaticos: Viatico[], rango: string) {
 
 // Exportar a CSV
 export function exportMisViaticosCSV(viaticos: Viatico[], rango: string = 'total') {
-  const datos = filtrarViaticosPorRango(viaticos, rango as any);
+  const datos = filtrarViaticosPorRango(viaticos, rango);
   const headers = ['ID', 'Folio', 'Concepto', 'Monto', 'Departamento', 'Estado', 'Fecha Límite', 'Tipo de Pago', 'Cuenta Destino', 'Banco'];
   const rows = datos.map(v => [
     v.id_viatico,
@@ -117,7 +117,7 @@ export function exportMisViaticosCSV(viaticos: Viatico[], rango: string = 'total
 
 // Exportar a Excel
 export async function exportMisViaticosExcel(viaticos: Viatico[], rango: string = 'total') {
-  const datos = filtrarViaticosPorRango(viaticos, rango as any);
+  const datos = filtrarViaticosPorRango(viaticos, rango);
   const workbook = new XLSX.Workbook();
   const sheet = workbook.addWorksheet('Mis Viáticos');
 
@@ -185,7 +185,7 @@ export async function exportMisViaticosExcel(viaticos: Viatico[], rango: string 
 
   // Datos
   datos.forEach(v => {
-    let monto = Number(v.monto) || 0;
+    const monto = Number(v.monto) || 0;
 
     const row = sheet.addRow([
       v.id_viatico,
@@ -239,7 +239,7 @@ export async function exportMisViaticosExcel(viaticos: Viatico[], rango: string 
 
 // Exportar a PDF
 export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 'total') {
-  const datos = filtrarViaticosPorRango(viaticos, rango as any);
+  const datos = filtrarViaticosPorRango(viaticos, rango);
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'px',
@@ -247,7 +247,7 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
   });
 
   // Función para agregar pie de página y número de página
-  const agregarPiePagina = (doc: any) => {
+  const agregarPiePagina = (doc: jsPDF) => {
     const pageHeight = doc.internal.pageSize.getHeight();
     const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFontSize(8);
@@ -267,7 +267,7 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
 
   // Encabezado con degradado
   const headerHeight = 130;
-  const gradient = doc.setFillColor(18, 61, 140); // Color principal #123D8C
+  doc.setFillColor(18, 61, 140); // Color principal #123D8C
   doc.rect(0, 0, pageWidth, headerHeight, 'F');
   
   // Franja decorativa
@@ -300,7 +300,7 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
       };
       
       reader.readAsDataURL(blob);
-    } catch (error) {
+    } catch {
       // Fallback: Si hay error al cargar el logo, mostrar texto
       doc.setFillColor(255, 255, 255);
       doc.setDrawColor(255, 255, 255);
@@ -480,7 +480,7 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
     body: detallesData,
     theme: 'grid',
     pageBreak: 'auto',
-    didDrawPage: function(data) {
+    didDrawPage: function() {
       agregarPiePagina(doc);
     },
     styles: {
@@ -546,19 +546,21 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
     }
   });
 
-  // Agregar una nueva página para el gráfico
+  // Agregar una nueva página para el gráfico y su diseño
   doc.addPage();
 
   // Resetear el margen superior para la nueva página
   const graficoY = 80;
   
   // Título de la sección de gráficos
+  doc.setFillColor(245, 247, 250); // Un fondo gris muy claro
+  doc.rect(0, 0, pageWidth, pageHeight, 'F');
   doc.setFillColor(18, 61, 140);
-  doc.rect(0, 0, pageWidth, 50, 'F');
+  doc.rect(0, 0, pageWidth, 60, 'F');
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(20);
+  doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('Análisis Gráfico de Viáticos', pageWidth / 2, 30, { align: 'center' });
+  doc.text('Análisis Gráfico de Viáticos', pageWidth / 2, 38, { align: 'center' });
 
   // Dibujar el gráfico de barras
   const montosPorDepartamento = datos.reduce((acc: {[key: string]: number}, v) => {
@@ -568,59 +570,82 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
   }, {});
 
   // Configuración del gráfico
-  const barWidth = 50;
-  const maxBarHeight = 150;
-  const startX = margin + 50;
-  let x = startX;
+  const chartX = margin + 20;
+  const chartY = graficoY + 20;
+  const chartWidth = pageWidth - (margin * 2) - 40;
+  const chartHeight = 220;
+  const barGap = 15;
+  const numBars = Object.keys(montosPorDepartamento).length;
+  const barWidth = (chartWidth - (barGap * (numBars - 1))) / numBars;
 
   // Encontrar el monto máximo para escalar las barras
-  const maxMonto = Math.max(...Object.values(montosPorDepartamento));
+  const maxMonto = Math.max(...Object.values(montosPorDepartamento), 1); // Evitar división por cero
 
-  // Dibujar título del gráfico
-  doc.setFontSize(16);
-  doc.setTextColor(18, 61, 140);
-  doc.text('Distribución de Viáticos por Departamento', margin, graficoY);
+  // Dibujar fondo del gráfico y ejes
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(220, 220, 220);
+  doc.setLineWidth(1);
+  doc.rect(chartX, chartY, chartWidth, chartHeight, 'FD');
 
-  // Agregar una línea decorativa bajo el título
-  doc.setDrawColor(18, 61, 140);
+  // Dibujar líneas de la cuadrícula horizontal
+  const gridLines = 5;
+  doc.setDrawColor(240, 240, 240);
   doc.setLineWidth(0.5);
-  doc.line(margin, graficoY + 5, pageWidth - margin, graficoY + 5);
+  for (let i = 1; i <= gridLines; i++) {
+    const y = chartY + (i * (chartHeight / gridLines));
+    doc.line(chartX, y, chartX + chartWidth, y);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    const label = formatoMoneda(maxMonto * (1 - i / gridLines));
+    doc.text(label, chartX - 10, y + 3, { align: 'right' });
+  }
+
+  // Paleta de colores profesional
+  const colors = ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51', '#606c38', '#283618'];
 
   // Dibujar barras
+  let currentX = chartX;
   Object.entries(montosPorDepartamento).forEach(([depto, monto], index) => {
-    const barHeight = (monto / maxMonto) * maxBarHeight;
-    const y = graficoY + 50 + maxBarHeight - barHeight;
+    const barHeight = (monto / maxMonto) * chartHeight;
+    const y = chartY + chartHeight - barHeight;
+    const color = colors[index % colors.length];
     
-    // Dibujar barra con gradiente
-    doc.setFillColor(18, 61, 140);
-    doc.rect(x, y, barWidth - 15, barHeight, 'F');
+    // Sombra de la barra
+    doc.setFillColor(200, 200, 200);
+    doc.rect(currentX + 2, y + 2, barWidth, barHeight, 'F');
+
+    // Barra principal
+    doc.setFillColor(color);
+    doc.rect(currentX, y, barWidth, barHeight, 'F');
     
-    // Borde de la barra
-    doc.setDrawColor(18, 61, 140);
-    doc.setLineWidth(0.5);
-    doc.rect(x, y, barWidth - 15, barHeight, 'S');
-    
-    // Etiqueta del departamento
-    doc.setFontSize(10);
-    doc.setTextColor(50, 50, 50);
-    doc.text(depto, x, graficoY + maxBarHeight + 70, { 
-      align: 'left',
-      angle: 45
+    // Etiqueta del departamento (abajo)
+    doc.setFontSize(9);
+    doc.setTextColor(80, 80, 80);
+    doc.text(depto, currentX + barWidth / 2, chartY + chartHeight + 15, { 
+      align: 'center',
+      maxWidth: barWidth + 5
     });
     
-    // Valor de la barra
-    doc.setFontSize(10);
-    doc.setTextColor(18, 61, 140);
-    doc.text(formatoMoneda(monto), x, y - 10, { align: 'left' });
+    // Valor de la barra (arriba)
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(color);
+    doc.text(formatoMoneda(monto), currentX + barWidth / 2, y - 8, { align: 'center' });
     
-    x += barWidth + 25;
+    currentX += barWidth + barGap;
   });
+
+  // Título del gráfico
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(18, 61, 140);
+  doc.text('Distribución de Viáticos por Departamento', chartX, chartY - 20);
 
   // Agregar una leyenda
   doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text('* Los montos mostrados representan el total de viáticos por departamento', 
-    margin, pageHeight - 50);
+  doc.setTextColor(120, 120, 120);
+  doc.text('* Los montos mostrados representan el total de viáticos por departamento.', 
+    chartX, pageHeight - 60);
 
   // Agregar pie de página en la página del gráfico
   agregarPiePagina(doc);

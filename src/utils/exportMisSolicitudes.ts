@@ -79,7 +79,7 @@ export function filtrarSolicitudesPorRango(solicitudes: Solicitud[], rango: 'dia
 
 // Exportar a CSV
 export function exportMisSolicitudesCSV(solicitudes: Solicitud[], rango: string = 'total') {
-  const datos = filtrarSolicitudesPorRango(solicitudes, rango as any);
+  const datos = filtrarSolicitudesPorRango(solicitudes, rango as 'dia' | 'semana' | 'mes' | 'año' | 'total');
   const headers = ['ID', 'Folio', 'Concepto', 'Monto', 'Departamento', 'Estado', 'Fecha Creación', 'Solicitante', 'Cuenta Destino', 'Banco'];
   const rows = datos.map(s => [
     s.id_solicitud,
@@ -106,7 +106,7 @@ export function exportMisSolicitudesCSV(solicitudes: Solicitud[], rango: string 
 
 // Exportar a Excel
 export async function exportMisSolicitudesExcel(solicitudes: Solicitud[], rango: string = 'total') {
-  const datos = filtrarSolicitudesPorRango(solicitudes, rango as any);
+  const datos = filtrarSolicitudesPorRango(solicitudes, rango as 'dia' | 'semana' | 'mes' | 'año' | 'total');
   const workbook = new ExcelJS.Workbook();
   
   // Configurar metadatos del documento
@@ -325,7 +325,7 @@ export async function exportMisSolicitudesExcel(solicitudes: Solicitud[], rango:
 
 // Exportar a PDF
 export function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: string = 'total') {
-  const datos = filtrarSolicitudesPorRango(solicitudes, rango as any);
+  const datos = filtrarSolicitudesPorRango(solicitudes, rango as 'dia' | 'semana' | 'mes' | 'año' | 'total');
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'A4' });
   
   // Calcular estadísticas
@@ -478,7 +478,9 @@ export function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: string 
   autoTable(doc, {
     head: [columns],
     body: rows,
-    startY: (doc as any).lastAutoTable.finalY + 30,
+    startY: (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ? 
+            (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 30 : 
+            150,
     theme: 'grid',
     headStyles: { fillColor: [18, 61, 140], textColor: 255, fontStyle: 'bold', fontSize: 13, halign: 'center', valign: 'middle', cellPadding: 10 },
     bodyStyles: { fontSize: 12, textColor: [40, 40, 40], cellPadding: 9, halign: 'center' },
@@ -493,7 +495,7 @@ export function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: string 
       6: { halign: 'center' }  // Fecha Creación
     },
     styles: { cellPadding: 9, valign: 'middle' },
-    didDrawPage: (data) => {
+    didDrawPage: () => {
       // Pie de página
       doc.setFontSize(10);
       doc.setTextColor(120, 120, 120);

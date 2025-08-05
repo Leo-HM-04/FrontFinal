@@ -1,6 +1,7 @@
 
 
 import React from 'react';
+import Image from 'next/image';
 import { X, ExternalLink, DollarSign, Building, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -179,9 +180,34 @@ export function SolicitudDetailModal({
                 const isPdf = /\.pdf$/i.test(facturaUrl);
                 if (isImage) {
                   return (
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm text-blue-700/70 mb-1">Previsualización de factura:</span>
-                      <img src={facturaUrl} alt="Factura" className="max-h-48 rounded border border-blue-200 shadow" style={{objectFit: 'contain'}} />
+                    <div className="flex flex-col items-start w-full">
+                      <span className="text-sm text-blue-700/70 mb-2 flex items-center">
+                        <FileText className="w-4 h-4 mr-1.5 text-blue-600" />
+                        Previsualización de factura:
+                      </span>
+                      <div className="relative w-full h-64 group">
+                        <div className="absolute inset-0 rounded-lg bg-gradient-to-b from-blue-50 to-blue-100 animate-pulse" />
+                        <Image
+                          src={facturaUrl}
+                          alt="Factura"
+                          fill
+                          className="rounded-lg border-2 border-blue-200 shadow-lg transition-all duration-300 hover:border-blue-400 hover:shadow-xl object-contain bg-white/80 backdrop-blur-sm group-hover:scale-[1.02]"
+                          onLoadingComplete={(img) => {
+                            img.classList.remove('animate-pulse');
+                          }}
+                          quality={100}
+                          priority
+                        />
+                        <div className="absolute inset-0 bg-blue-900/0 hover:bg-blue-900/5 transition-colors duration-300 rounded-lg cursor-zoom-in"
+                             onClick={() => window.open(facturaUrl, '_blank')}
+                        />
+                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="bg-white/90 backdrop-blur-sm text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200 shadow-sm flex items-center">
+                            <ExternalLink className="w-4 h-4 mr-1.5" />
+                            Click para ampliar
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   );
                 } else if (isPdf) {

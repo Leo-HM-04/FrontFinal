@@ -1,4 +1,15 @@
 export async function subirComprobanteViatico(id_viatico: number, file: File, token?: string) {
+    // Try to get error message from response
+    const errorMessage = `Error al subir comprobante: ${res.status} ${res.statusText}`;
+    
+    try {
+      const errorData = await res.json();
+      throw new Error(errorData.error || errorMessage);
+    } catch {
+      // If we can't parse the error as JSON, just use the status code
+      throw new Error(errorMessage);
+    }
+  }irComprobanteViatico(id_viatico: number, file: File, token?: string) {
   const formData = new FormData();
   formData.append('archivo', file);
   formData.append('id_viatico', String(id_viatico));
@@ -14,42 +25,22 @@ export async function subirComprobanteViatico(id_viatico: number, file: File, to
     body: formData,
     headers,
   });
-  
   if (!res.ok) {
     // Try to get error message from response
-    const errorMessage = `Error al subir comprobante: ${res.status} ${res.statusText}`;
-    
     try {
       const errorData = await res.json();
-      throw new Error(errorData.error || errorMessage);
+      throw new Error(errorData.error || `Error al subir comprobante: ${res.status} ${res.statusText}`);
     } catch {
-      // If we can't parse the error as JSON, just use the status code
-      throw new Error(errorMessage);
+      throw new Error(`Error al subir comprobante: ${res.status} ${res.statusText}`);
     }
   }
-  
   return await res.json();
 }
 
 export async function getComprobantesPorViatico(id_viatico: number, token?: string) {
-  const headers: HeadersInit = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/comprobantes-viaticos/${id_viatico}`, {
-    headers
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
-  
-  if (!res.ok) {
-    const errorMessage = `Error al obtener comprobantes: ${res.status} ${res.statusText}`;
-    try {
-      const errorData = await res.json();
-      throw new Error(errorData.error || errorMessage);
-    } catch {
-      throw new Error(errorMessage);
-    }
-  }
-  
+  if (!res.ok) throw new Error('Error al obtener comprobantes');
   return await res.json();
 }

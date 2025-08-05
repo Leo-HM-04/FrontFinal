@@ -2,14 +2,12 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { FaFilePdf } from 'react-icons/fa';
 import axios from 'axios';
 import { useViaticos } from '@/hooks/useViaticos';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { usePagination } from '@/hooks/usePagination';
-import { Pagination } from '@/components/ui/Pagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { Solicitud } from '@/types';
@@ -30,7 +28,6 @@ const ViaticoRow: React.FC<{
   onToggle: (id: number) => void;
   tresDiasDespues: Date;
 }> = React.memo(({ v, isSelected, onToggle, tresDiasDespues }) => {
-  const router = useRouter();
   if (!v.id_solicitud) return null;
   const isUrgent = new Date(v.fecha_limite_pago) < tresDiasDespues;
   let tipoCuentaTarjeta = '-';
@@ -123,9 +120,6 @@ const Viaticos: React.FC = () => {
     setSelectedViaticos(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   }, []);
 
-  // Modo de paginación: global o por usuario
-  const [porUsuario, setPorUsuario] = React.useState(false);
-
   // Ordenar y normalizar viaticos
   // Filtrar solo viáticos pendientes antes de ordenar y normalizar
   const viaticosOrdenados = useMemo(() =>
@@ -167,14 +161,8 @@ const Viaticos: React.FC = () => {
   }, [filteredViaticos]);
 
   // PAGINACIÓN GLOBAL (sobre todos los viáticos filtrados)
-  const {
-    currentPage,
-    totalPages,
-    totalItems,
-    itemsPerPage,
-    paginatedData,
-    goToPage
-  } = usePagination({ data: filteredViaticos, initialItemsPerPage: DEFAULT_ITEMS_PER_PAGE });
+  // Aquí usamos usePagination pero no usamos sus valores de retorno actualmente
+  usePagination({ data: filteredViaticos, initialItemsPerPage: DEFAULT_ITEMS_PER_PAGE });
 
   // Paginación local por usuario (hook reutilizable)
   const userIds = useMemo(() => Object.keys(viaticosPorUsuario), [viaticosPorUsuario]);

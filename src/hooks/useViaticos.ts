@@ -14,7 +14,7 @@ export type Viatico = {
   estado: string;
   comentario_aprobador?: string;
   viatico_url?: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined | null;
 };
 
 export function useViaticos() {

@@ -9,9 +9,13 @@ import type { Viatico as BaseViatico } from '@/services/viaticos.service';
 
 type Viatico = BaseViatico & {
   id_viatico?: number;
+  id?: number;
   folio?: string;
   estado?: string;
   fecha_creacion?: string;
+  tipo_cuenta_destino?: string;
+  tipo_tarjeta?: string;
+  banco_destino?: string;
 };
 
 
@@ -54,7 +58,13 @@ function EditarViaticoPageInner() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await ViaticosService.update(Number(id), form);
+      // Ensure monto is a number before submitting
+      const formData = {
+        ...form,
+        monto: typeof form.monto === 'string' ? Number(form.monto) : form.monto
+      };
+      
+      await ViaticosService.update(Number(id), formData);
       setMensaje("Viático actualizado correctamente.");
       setTimeout(() => router.push("/dashboard/solicitante/mis-viaticos"), 1500);
     } catch {
@@ -88,7 +98,7 @@ function EditarViaticoPageInner() {
                   name="departamento"
                   className="w-full border border-blue-200 rounded-lg px-4 py-2 text-blue-900 uppercase focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={form.departamento || ''}
-                  onChange={e => setForm({ ...form, departamento: e.target.value })}
+                  onChange={e => setForm({ ...form, departamento: e.target.value as string })}
                   required
                 >
                   <option value="" disabled>SELECCIONA UN DEPARTAMENTO</option>
@@ -111,7 +121,7 @@ function EditarViaticoPageInner() {
                   type="text"
                   className="w-full border border-blue-200 rounded-lg px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={form.concepto || ''}
-                  onChange={e => setForm({ ...form, concepto: e.target.value })}
+                  onChange={e => setForm({ ...form, concepto: e.target.value as string })}
                   required
                 />
               </div>
@@ -121,7 +131,7 @@ function EditarViaticoPageInner() {
                   type="number"
                   className="w-full border border-blue-200 rounded-lg px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={form.monto || ''}
-                  onChange={e => setForm({ ...form, monto: e.target.value })}
+                  onChange={e => setForm({ ...form, monto: Number(e.target.value) })}
                   min={1}
                   step="0.01"
                   required
@@ -133,7 +143,7 @@ function EditarViaticoPageInner() {
                   type="date"
                   className="w-full border border-blue-200 rounded-lg px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={form.fecha_limite_pago || ''}
-                  onChange={e => setForm({ ...form, fecha_limite_pago: e.target.value })}
+                  onChange={e => setForm({ ...form, fecha_limite_pago: e.target.value as string })}
                   required
                 />
               </div>
@@ -143,7 +153,7 @@ function EditarViaticoPageInner() {
                   type="text"
                   className="w-full border border-blue-200 rounded-lg px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={form.cuenta_destino || ''}
-                  onChange={e => setForm({ ...form, cuenta_destino: e.target.value })}
+                  onChange={e => setForm({ ...form, cuenta_destino: e.target.value as string })}
                   required
                 />
               </div>
@@ -153,7 +163,7 @@ function EditarViaticoPageInner() {
                   name="tipo_cuenta_destino"
                   className="w-full border border-blue-200 rounded-lg px-4 py-2 text-blue-900 uppercase focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={form.tipo_cuenta_destino || ''}
-                  onChange={e => setForm({ ...form, tipo_cuenta_destino: e.target.value })}
+                  onChange={e => setForm({ ...form, tipo_cuenta_destino: e.target.value as string })}
                   required
                 >
                   <option value="" disabled>SELECCIONA TIPO DE CUENTA</option>
@@ -173,7 +183,7 @@ function EditarViaticoPageInner() {
                   name="tipo_tarjeta"
                   className="w-full border border-blue-200 rounded-lg px-4 py-2 text-blue-900 uppercase focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={form.tipo_tarjeta || ''}
-                  onChange={e => setForm({ ...form, tipo_tarjeta: e.target.value })}
+                  onChange={e => setForm({ ...form, tipo_tarjeta: e.target.value as string })}
                 >
                   <option value="" disabled>SELECCIONA TIPO DE TARJETA</option>
                   <option value="debito">DÉBITO</option>
@@ -189,7 +199,7 @@ function EditarViaticoPageInner() {
                   name="banco_destino"
                   className="w-full border border-blue-200 rounded-lg px-4 py-2 text-blue-900 uppercase focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={form.banco_destino || ''}
-                  onChange={e => setForm({ ...form, banco_destino: e.target.value })}
+                  onChange={e => setForm({ ...form, banco_destino: e.target.value as string })}
                 >
                   <option value="" disabled>SELECCIONA BANCO</option>
                   <option value="bbva">BBVA</option>
@@ -235,20 +245,21 @@ function EditarViaticoPageInner() {
                     const file = e.target.files?.[0];
                     if (!file) return;
                     try {
+                      const formData = new FormData();
+                      formData.append('departamento', String(form.departamento || ''));
+                      formData.append('monto', String(form.monto || ''));
+                      formData.append('cuenta_destino', String(form.cuenta_destino || ''));
+                      formData.append('concepto', String(form.concepto || ''));
+                      formData.append('tipo_pago', "viaticos");
+                      formData.append('fecha_limite_pago', String(form.fecha_limite_pago || ''));
+                      formData.append('tipo_cuenta_destino', String(form.tipo_cuenta_destino || ''));
+                      formData.append('tipo_tarjeta', String(form.tipo_tarjeta || ''));
+                      formData.append('banco_destino', String(form.banco_destino || ''));
+                      formData.append('viatico_file', file);
+                      
                       await ViaticosService.updateWithFiles(
                         Number(viatico.id_viatico ?? viatico.id),
-                        {
-                          departamento: form.departamento || '',
-                          monto: form.monto || '',
-                          cuenta_destino: form.cuenta_destino || '',
-                          concepto: form.concepto || '',
-                          tipo_pago: "viaticos",
-                          fecha_limite_pago: form.fecha_limite_pago || '',
-                          tipo_cuenta_destino: form.tipo_cuenta_destino || '',
-                          tipo_tarjeta: form.tipo_tarjeta || '',
-                          banco_destino: form.banco_destino || '',
-                          viatico_url: file
-                        }
+                        formData
                       );
                       // Refrescar el viatico desde el backend para asegurar la URL correcta
                       const idNum = Number(viatico.id_viatico || viatico.id);

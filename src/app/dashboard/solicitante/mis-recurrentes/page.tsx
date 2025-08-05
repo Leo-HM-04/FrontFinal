@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { RecurrentesService } from '@/services/recurrentes.service';
 import { PlantillaRecurrente } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { exportMisRecurrentesPDF, exportMisRecurrentesExcel, exportMisRecurrentesCSV } from '@/utils/exportMisRecurrentes';
 import { Pagination } from '@/components/ui/Pagination';
 import { Plus, FileText, Clock, CheckCircle, XCircle, Eye } from 'lucide-react';
 import { RecurrenteDetalleModal } from '@/components/RecurrenteDetalleModal';
@@ -56,6 +57,22 @@ const getEstadoIcon = (estado: string) => {
 };
 
 export default function MisRecurrentesPage() {
+    // Estados para exportación
+    const [exportFormat, setExportFormat] = useState('pdf');
+    const [exportRango, setExportRango] = useState('total');
+
+    // Función para manejar la exportación
+    const handleExport = () => {
+        const recurrentesExport = filteredRecurrentes;
+        if (exportFormat === 'pdf') {
+            exportMisRecurrentesPDF(recurrentesExport, exportRango);
+        } else if (exportFormat === 'excel') {
+            exportMisRecurrentesExcel(recurrentesExport, exportRango);
+        } else if (exportFormat === 'csv') {
+            exportMisRecurrentesCSV(recurrentesExport, exportRango);
+        }
+    };
+
     const [detalleModalOpen, setDetalleModalOpen] = useState(false);
     const [recurrenteDetalle, setRecurrenteDetalle] = useState<PlantillaRecurrente | null>(null);
     const router = useRouter();
@@ -197,14 +214,58 @@ export default function MisRecurrentesPage() {
         <ProtectedRoute requiredRoles={['solicitante']}>
             <SolicitanteLayout>
                 <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold text-white">Mis Recurrentes</h1>
-                        <Button
-                            onClick={() => router.push('/dashboard/solicitante/recurrentes')}
-                            className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold shadow-lg flex items-center gap-2"
-                        >
-                            <Plus className="w-5 h-5" /> Nueva Plantilla
-                        </Button>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-6">
+                        <div className="flex items-center gap-3">
+                            <span className="inline-flex items-center justify-center rounded-full bg-blue-100 p-2 shadow-sm">
+                                <FileText className="text-blue-600 w-7 h-7" />
+                            </span>
+                            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Recurrentes</h1>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-4">
+                            <Button
+                                onClick={() => router.push('/dashboard/solicitante/recurrentes')}
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 text-white font-bold shadow-lg transition-all text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            >
+                                <Plus className="w-5 h-5" /> Nueva Plantilla
+                            </Button>
+                            
+                            {/* Controles de exportación */}
+                            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20 shadow-xl">
+                                <div className="flex items-center gap-2 px-2">
+                                    <span className="text-white/80 text-sm font-medium">Exportar como:</span>
+                                    <select
+                                        value={exportFormat}
+                                        onChange={e => setExportFormat(e.target.value)}
+                                        className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
+                                    >
+                                        <option value="pdf">PDF</option>
+                                        <option value="excel">Excel</option>
+                                        <option value="csv">CSV</option>
+                                    </select>
+                                </div>
+                                <div className="flex items-center gap-2 px-2 border-l border-white/10">
+                                    <span className="text-white/80 text-sm font-medium">Período:</span>
+                                    <select
+                                        value={exportRango}
+                                        onChange={e => setExportRango(e.target.value)}
+                                        className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
+                                    >
+                                        <option value="dia">Último día</option>
+                                        <option value="semana">Última semana</option>
+                                        <option value="mes">Último mes</option>
+                                        <option value="año">Último año</option>
+                                        <option value="total">Todo el historial</option>
+                                    </select>
+                                </div>
+                                <Button
+                                    onClick={handleExport}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg inline-flex items-center gap-2 transition-all duration-200 border border-white/10"
+                                >
+                                    <FileText className="w-4 h-4" />
+                                    <span>Exportar</span>
+                                </Button>
+                            </div>
+                        </div>
                     </div>
 
                     {error && <div className="bg-red-100 text-red-800 border border-red-300 p-4 rounded mb-4">{error}</div>}
@@ -304,23 +365,23 @@ export default function MisRecurrentesPage() {
                         </div>
                     </div>
 
-                    <div className="bg-white/15 backdrop-blur-sm rounded-xl border border-white/20 overflow-x-auto">
-                        <table className="w-full min-w-[1600px]">
+                    <div className="bg-white/15 backdrop-blur-sm rounded-xl border border-white/20 overflow-x-auto shadow-xl">
+                        <table className="w-full min-w-[1200px]">
                             <thead className="bg-white/10">
                                 <tr>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Folio</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">ID</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Usuario</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Departamento</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Monto</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Cuenta Destino</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Concepto</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Tipo Pago</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Frecuencia</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Estado</th>
-                                    <th className="px-8 py-5 text-center text-sm font-semibold text-white">Activa</th>
-                                    <th className="px-8 py-5 text-left text-sm font-semibold text-white">Siguiente Fecha</th>
-                                    <th className="px-8 py-5 text-center text-sm font-semibold text-white">Acciones</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-24">Folio</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-16">ID</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-32">Usuario</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-40">Departamento</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-28">Monto</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-36">Cuenta Destino</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-48">Concepto</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-28">Tipo Pago</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-28">Frecuencia</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-28">Estado</th>
+                                    <th className="px-4 py-4 text-center text-sm font-semibold text-white w-28">Activa</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-32">Siguiente Fecha</th>
+                                    <th className="px-4 py-4 text-center text-sm font-semibold text-white w-40">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/10">
@@ -341,13 +402,13 @@ export default function MisRecurrentesPage() {
                                 ) : (
                                     currentRecurrentes.map((p) => (
                                         <tr key={p.id_recurrente} className="hover:bg-white/10 transition-colors">
-                                            <td className="px-8 py-5 text-white font-bold">{p.folio || '-'}</td>
-                                            <td className="px-8 py-5 text-white">{p.id_recurrente}</td>
-                                            <td className="px-8 py-5 text-white">{p.nombre_usuario ? p.nombre_usuario : p.id_usuario}</td>
-                                            <td className="px-8 py-5 text-white">{p.departamento.charAt(0).toUpperCase() + p.departamento.slice(1)}</td>
-                                            <td className="px-8 py-5 text-white">{p.monto}</td>
-                                            <td className="px-8 py-5 text-white">{p.cuenta_destino}</td>
-                                            <td className="px-8 py-5 text-white">{p.concepto}</td>
+                                            <td className="px-4 py-3 text-white font-mono text-sm">{p.folio || '-'}</td>
+                                            <td className="px-4 py-3 text-white text-sm">{p.id_recurrente}</td>
+                                            <td className="px-4 py-3 text-white text-sm truncate">{p.nombre_usuario ? p.nombre_usuario : p.id_usuario}</td>
+                                            <td className="px-4 py-3 text-white text-sm truncate">{p.departamento.charAt(0).toUpperCase() + p.departamento.slice(1)}</td>
+                                            <td className="px-4 py-3 text-white font-medium text-sm">{p.monto}</td>
+                                            <td className="px-4 py-3 text-white text-sm truncate">{p.cuenta_destino}</td>
+                                            <td className="px-4 py-3 text-white text-sm truncate max-w-[200px]">{p.concepto}</td>
                                             <td className="px-8 py-5 text-white">{p.tipo_pago.charAt(0).toUpperCase() + p.tipo_pago.slice(1)}</td>
                                             <td className="px-8 py-5 text-white capitalize">{p.frecuencia}</td>
                                             <td className="px-8 py-5">

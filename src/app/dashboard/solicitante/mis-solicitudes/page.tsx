@@ -96,31 +96,46 @@ export default function MisSolicitudesPage() {
 
   // Cargar solicitudes con timeout de seguridad
   useEffect(() => {
+    let isMounted = true;
     setLoading(true);
     setTimeoutError(false);
     const timeoutId: NodeJS.Timeout = setTimeout(() => {
-      setTimeoutError(true);
-      setLoading(false);
+      if (isMounted) {
+        setTimeoutError(true);
+        setLoading(false);
+      }
     }, 10000);
 
     const fetchSolicitudes = async () => {
       try {
         const data = await SolicitudesService.getMySolicitudes();
-        // Ordenar por fecha_creacion descendente (más reciente primero)
-        const sorted = data.sort((a, b) => new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime());
-        setSolicitudes(sorted);
-        setError('');
-      } catch {
-        setError('Error al cargar las solicitudes');
-        setSolicitudes([]);
+        if (isMounted) {
+          // Ordenar por fecha_creacion descendente (más reciente primero)
+          const sorted = data.sort((a, b) => new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime());
+          setSolicitudes(sorted);
+          setFilteredSolicitudes(sorted);
+          setError('');
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Error al cargar solicitudes:', error);
+          setError('Error al cargar las solicitudes');
+          setSolicitudes([]);
+          setFilteredSolicitudes([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchSolicitudes();
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
@@ -205,13 +220,16 @@ export default function MisSolicitudesPage() {
     setDeleting(true);
     try {
       await SolicitudesService.deleteSolicitante(solicitudAEliminar.id_solicitud);
-      setSolicitudes(prev => prev.filter(s => s.id_solicitud !== solicitudAEliminar.id_solicitud));
+      const updatedSolicitudes = solicitudes.filter(s => s.id_solicitud !== solicitudAEliminar.id_solicitud);
+      setSolicitudes(updatedSolicitudes);
+      setFilteredSolicitudes(prev => prev.filter(s => s.id_solicitud !== solicitudAEliminar.id_solicitud));
       setDeleteModalOpen(false);
       setSolicitudAEliminar(null);
       setError('');
       setSuccess('Solicitud eliminada correctamente.');
       setTimeout(() => setSuccess(''), 3500);
     } catch (err: unknown) {
+      console.error('Error al eliminar solicitud:', err);
       let backendMsg = 'Error al eliminar la solicitud';
       if (typeof err === 'object' && err !== null) {
         const errorObj = err as { response?: { data?: { error?: string; message?: string } }, message?: string };
@@ -286,33 +304,44 @@ export default function MisSolicitudesPage() {
                 </div>
               )}
 
-              {/* Botón de exportar */}
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                <div className="flex gap-2 items-center">
-                  <select
-                    value={exportFormat}
-                    onChange={e => setExportFormat(e.target.value)}
-                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none"
-                  >
-                    <option value="pdf">PDF</option>
-                    <option value="excel">Excel</option>
-                    <option value="csv">CSV</option>
-                  </select>
-                  <select
-                    value={exportRango}
-                    onChange={e => setExportRango(e.target.value)}
-                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none"
-                  >
-                    <option value="dia">Día</option>
-                    <option value="semana">Semana</option>
-                    <option value="mes">Mes</option>
-                    <option value="año">Año</option>
-                    <option value="total">Total</option>
-                  </select>
+              {/* Controles de exportación */}
+              <div className="bg-gradient-to-r from-blue-400/30 to-blue-700/30 backdrop-blur-xl rounded-xl p-4 border border-blue-300/30 shadow-lg mb-6">
+                <div className="flex flex-col md:flex-row items-center gap-4">
+                  <div className="flex-1 flex items-center gap-4">
+                    <div className="flex-1">
+                      <label className="block text-white text-base font-semibold mb-1">Formato</label>
+                      <select
+                        value={exportFormat}
+                        onChange={e => setExportFormat(e.target.value)}
+                        className="w-full bg-white border border-blue-300/30 rounded-xl px-5 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-md appearance-none cursor-pointer"
+                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236B7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
+                      >
+                        <option value="pdf" className="text-gray-800">PDF</option>
+                        <option value="excel" className="text-gray-800">Excel</option>
+                        <option value="csv" className="text-gray-800">CSV</option>
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-white text-base font-semibold mb-1">Periodo</label>
+                      <select
+                        value={exportRango}
+                        onChange={e => setExportRango(e.target.value)}
+                        className="w-full bg-white border border-blue-300/30 rounded-xl px-5 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-md appearance-none cursor-pointer"
+                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236B7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
+                      >
+                        <option value="dia" className="text-gray-800">Día</option>
+                        <option value="semana" className="text-gray-800">Semana</option>
+                        <option value="mes" className="text-gray-800">Mes</option>
+                        <option value="año" className="text-gray-800">Año</option>
+                        <option value="total" className="text-gray-800">Total</option>
+                      </select>
+                    </div>
+                  </div>
                   <Button
                     onClick={handleExport}
-                    className="bg-green-600 text-white hover:bg-green-700 px-5 py-2 rounded-lg font-semibold shadow-lg"
+                    className="w-full md:w-auto bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 rounded-xl font-bold shadow-2xl flex items-center gap-3 text-lg transition-all duration-200"
                   >
+                    <FileText className="w-6 h-6" />
                     Exportar
                   </Button>
                 </div>
@@ -324,41 +353,45 @@ export default function MisSolicitudesPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Filtro de búsqueda */}
                     <div className="flex flex-col gap-2">
-                      <label className="block text-white/90 text-base font-semibold">Buscar</label>
-                      <div className="relative">
+                      <label className="block text-white text-base font-semibold">Buscar</label>
+                      <div className="relative flex items-center">
+                        <div className="absolute left-4">
+                          <Search className="w-5 h-5 text-gray-400" />
+                        </div>
                         <input
                           type="text"
                           value={searchTerm}
                           onChange={e => setSearchTerm(e.target.value)}
-                          className="w-full bg-white/20 border border-blue-300/30 rounded-xl px-5 py-3 text-white focus:outline-none placeholder:text-white/50 shadow-md"
-                          placeholder="Concepto, departamento o cuenta..."
+                          className="w-full h-[50px] bg-white border border-blue-300/30 rounded-xl pl-12 pr-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 shadow-md transition-all duration-200 hover:border-blue-400/60"
+                          placeholder="Buscar por concepto, departamento o cuenta..."
                         />
-                        <Search className="absolute right-4 top-3 w-6 h-6 text-white/50" />
                       </div>
                     </div>
                     {/* Filtro de estado */}
                     <div className="flex flex-col gap-2">
-                      <label className="block text-white/90 text-base font-semibold">Estado</label>
+                      <label className="block text-white text-base font-semibold">Estado</label>
                       <select
                         value={statusFilter}
                         onChange={e => setStatusFilter(e.target.value)}
-                        className="w-full bg-white/20 border border-blue-300/30 rounded-xl px-5 py-3 text-white focus:outline-none shadow-md"
+                        className="w-full bg-white border border-blue-300/30 rounded-xl px-5 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-md appearance-none cursor-pointer"
+                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236B7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
                       >
                         {filterOptions.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          <option key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</option>
                         ))}
                       </select>
                     </div>
                     {/* Filtro de fecha */}
                     <div className="flex flex-col gap-2">
-                      <label className="block text-white/90 text-base font-semibold">Fecha</label>
+                      <label className="block text-white text-base font-semibold">Fecha</label>
                       <select
                         value={dateFilter}
                         onChange={e => setDateFilter(e.target.value)}
-                        className="w-full bg-white/20 border border-blue-300/30 rounded-xl px-5 py-3 text-white focus:outline-none shadow-md"
+                        className="w-full bg-white border border-blue-300/30 rounded-xl px-5 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-md appearance-none cursor-pointer"
+                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236B7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
                       >
                         {dateOptions.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          <option key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</option>
                         ))}
                       </select>
                     </div>
@@ -381,16 +414,16 @@ export default function MisSolicitudesPage() {
                   <table className="w-full">
                     <thead className="bg-white/10">
                       <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Folio</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Concepto</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Monto</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Cuenta Destino</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Tipo de Cuenta/Tarjeta</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Banco Destino</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Estado</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Fecha Creación</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Fecha Límite</th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-white">Acciones</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Folio</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-white min-w-[200px]">Concepto</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Monto</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-white min-w-[150px]">Cuenta Destino</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Tipo Cuenta</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-white min-w-[120px]">Banco</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Estado</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Creación</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Límite</th>
+                        <th className="px-4 py-3 text-center text-sm font-semibold text-white whitespace-nowrap w-[180px]">Acciones</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10">
@@ -410,50 +443,50 @@ export default function MisSolicitudesPage() {
                       ) : 
                         currentSolicitudes.map((solicitud) => (
                           <tr key={solicitud.id_solicitud} className="hover:bg-white/10 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="text-white font-bold">{solicitud.folio || '-'}</div>
+                            <td className="px-4 py-3">
+                              <div className="text-white font-bold text-sm">{solicitud.folio || '-'}</div>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white font-medium">{solicitud.concepto}</div>
-                              <div className="text-white/70 text-sm mt-1">
+                            <td className="px-4 py-3">
+                              <div className="text-white font-medium text-sm truncate max-w-[200px]">{solicitud.concepto}</div>
+                              <div className="text-white/70 text-xs mt-0.5 truncate">
                                 {solicitud.departamento}
                               </div>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white font-semibold">
+                            <td className="px-4 py-3">
+                              <div className="text-white font-semibold text-sm">
                                 {formatCurrency(solicitud.monto)}
                               </div>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white">{solicitud.cuenta_destino}</div>
+                            <td className="px-4 py-3">
+                              <div className="text-white text-sm truncate max-w-[150px]">{solicitud.cuenta_destino}</div>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white">
+                            <td className="px-4 py-3">
+                              <div className="text-white text-sm">
                                 {solicitud.tipo_cuenta_destino === 'Tarjeta'
-                                  ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
+                                  ? solicitud.tipo_tarjeta || 'Tarjeta'
                                   : solicitud.tipo_cuenta_destino || '-'}
                               </div>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white">{solicitud.banco_destino || '-'}</div>
+                            <td className="px-4 py-3">
+                              <div className="text-white text-sm truncate">{solicitud.banco_destino || '-'}</div>
                             </td>
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado)}`}>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado)}`}>
                                 {getEstadoIcon(solicitud.estado)}
                                 <span className="ml-1 capitalize">{solicitud.estado}</span>
                               </span>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white/90 text-sm">
+                            <td className="px-4 py-3">
+                              <div className="text-white/90 text-sm whitespace-nowrap">
                                 {formatDate(solicitud.fecha_creacion)}
                               </div>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="text-white/90 text-sm">
+                            <td className="px-4 py-3">
+                              <div className="text-white/90 text-sm whitespace-nowrap">
                                 {solicitud.fecha_limite_pago ? formatDate(solicitud.fecha_limite_pago) : '-'}
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-center">
+                            <td className="px-4 py-3 text-center">
                               <div className="flex justify-center gap-2">
                                 <Button
                                   variant="outline"

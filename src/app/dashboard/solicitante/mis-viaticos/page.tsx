@@ -1,4 +1,5 @@
 'use client';
+
 import { FaFilePdf, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { Clock, CheckCircle, XCircle, AlertCircle, FileText, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -314,21 +315,21 @@ export default function MisViaticosPage() {
           )}
 
           {/* Tabla de viáticos */}
-          <div className="bg-white rounded-xl border border-blue-200 shadow-md overflow-hidden">
+          <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-blue-50">
+              <table className="min-w-full divide-y divide-blue-200">
+                <thead className="bg-gradient-to-r from-blue-50 to-blue-100/50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">ID</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Folio</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Departamento</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Concepto</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Monto</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Cuenta Destino</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Estado</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-blue-900">Fecha Límite</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-blue-900">Archivo</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-blue-900">Acciones</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-16">ID</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-28">Folio</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-40">Departamento</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Concepto</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-32">Monto</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-40">Cuenta Destino</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-32">Estado</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-32">Fecha Límite</th>
+                    <th className="px-3 py-3 text-center text-xs font-semibold text-blue-900 uppercase tracking-wider w-24">Archivo</th>
+                    <th className="px-3 py-3 text-center text-xs font-semibold text-blue-900 uppercase tracking-wider w-24">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-blue-100">
@@ -346,61 +347,79 @@ export default function MisViaticosPage() {
                     </tr>
                   ) :
                     currentViaticos.map((v: Viatico) => (
-                      <tr key={v.id_viatico} className="hover:bg-blue-50 transition-colors">
-                        <td className="px-6 py-4 text-blue-900 font-bold">{v.id_viatico}</td>
-                        <td className="px-6 py-4 text-blue-900 font-mono">{v.folio || '-'}</td>
-                        <td className="px-6 py-4 text-blue-900 font-medium">{v.departamento}</td>
-                        <td className="px-6 py-4 text-blue-900 uppercase tracking-wide">{v.concepto}</td>
-                        <td className="px-6 py-4 text-blue-900 font-extrabold">{formatCurrency(Number(v.monto))}</td>
-                        <td className="px-6 py-4 text-blue-900">{v.cuenta_destino}</td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${getEstadoColor(v.estado || '')} shadow-sm bg-white`}>
+                      <tr key={v.id_viatico} className="hover:bg-blue-50/70 transition-colors">
+                        <td className="px-3 py-2.5 text-blue-900 font-medium text-sm">{v.id_viatico}</td>
+                        <td className="px-3 py-2.5">
+                          <span className="font-mono text-xs text-blue-800 bg-blue-50 px-2 py-0.5 rounded">{v.folio || '-'}</span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm text-blue-900 font-medium truncate max-w-[160px]">
+                            {v.departamento?.split(' ').map(word => 
+                              word.toLowerCase() === 'ti' ? 'TI' :
+                              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                            ).join(' ')}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm text-blue-900 truncate max-w-[200px]">{v.concepto}</div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm font-bold text-blue-900">{formatCurrency(Number(v.monto))}</div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm text-blue-900/90 font-medium truncate max-w-[160px]">{v.cuenta_destino}</div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getEstadoColor(v.estado || '')} shadow-sm bg-white/90`}>
                             {getEstadoIcon(v.estado || '')}
-                            <span className="ml-1 capitalize">{v.estado || 'pendiente'}</span>
+                            <span className="ml-1 capitalize truncate max-w-[80px]">{v.estado || 'pendiente'}</span>
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-blue-900/90 text-sm">
-                          {formatDate(v.fecha_limite_pago)}
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm text-blue-900/80">{formatDate(v.fecha_limite_pago)}</div>
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-3 py-2.5 text-center">
                           {v.viatico_url ? (
                             <a
                               href={`http://localhost:4000/uploads/viaticos/${v.viatico_url.split('/').pop()}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-blue-700 hover:underline font-semibold"
+                              className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                              title="Ver archivo"
                             >
-                              <FaFilePdf className="text-red-600" /> Ver
+                              <FaFilePdf className="w-3.5 h-3.5" />
                             </a>
                           ) : (
-                            <span className="text-gray-400">-</span>
+                            <span className="text-gray-400 text-sm">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-3 py-2.5">
+                          <div className="flex items-center justify-center gap-1.5">
                             <Link
                               href={`/dashboard/solicitante/editar-viatico?id=${v.id_viatico}`}
-                              className="inline-flex items-center justify-center p-2 rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200 mr-2 transition"
+                              className="inline-flex items-center justify-center p-1.5 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
                               title="Editar"
                             >
-                              <FaEdit className="w-4 h-4" />
+                              <FaEdit className="w-3.5 h-3.5" />
                             </Link>
                             {String(v.estado).toLowerCase() === 'pendiente' ? (
-                                <button
+                              <button
                                 title="Eliminar"
-                                className="inline-flex items-center justify-center p-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition"
-                              onClick={() => { setShowModal(true); setViaticoAEliminar(v.id_viatico); }}
-                                >
-                                <FaTrash className="w-4 h-4" />
-                                </button>
+                                className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                                onClick={() => { setShowModal(true); setViaticoAEliminar(v.id_viatico); }}
+                              >
+                                <FaTrash className="w-3.5 h-3.5" />
+                              </button>
                             ) : (
-                                <button
+                              <button
                                 title="Solo puedes eliminar viáticos pendientes"
-                                className="inline-flex items-center justify-center p-2 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
+                                className="inline-flex items-center justify-center p-1.5 rounded-md bg-gray-50 text-gray-400 cursor-not-allowed"
                                 disabled
-                                >
-                                <FaTrash className="w-4 h-4" />
-                                </button>
+                              >
+                                <FaTrash className="w-3.5 h-3.5" />
+                              </button>
                             )}
+                          </div>
                             {/* Modal de confirmación para eliminar */}
                             {showModal && (
                                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a237e19] backdrop-blur-sm">
