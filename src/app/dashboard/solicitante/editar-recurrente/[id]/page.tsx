@@ -15,7 +15,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
 
-
 // Opciones igual que en crear
 const tipoPagoOptions = [
   { value: 'viaticos', label: 'Viáticos' },
@@ -161,294 +160,141 @@ export default function EditarRecurrentePage() {
   return (
     <ProtectedRoute requiredRoles={["solicitante"]}>
       <SolicitanteLayout>
-        <div className="max-w-screen-xl mx-auto px-12 py-12 md:py-16">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 mb-12 border border-white/20 w-full text-left shadow-xl">
-            <h1 className="text-3xl font-bold text-white font-montserrat mb-1">Editar Plantilla Recurrente</h1>
-            <p className="text-white/80 text-lg">Modifica los campos necesarios y guarda los cambios</p>
+        <div className="max-w-screen-lg mx-auto px-6 py-10">
+          <div className="bg-gradient-to-br from-blue-700/60 via-blue-400/30 to-blue-100/10 rounded-2xl p-8 mb-8 border border-blue-200 w-full text-left shadow-xl">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="bg-yellow-400 text-blue-900 rounded-full p-2"><FileText className="w-6 h-6" /></span>
+              <h1 className="text-3xl font-bold text-blue-900 font-montserrat">Editar Viático Recurrente</h1>
+            </div>
+            <p className="text-blue-900/80 text-lg">Modifica los campos necesarios y guarda los cambios</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-14 md:p-20 w-full text-left shadow-xl">
+          <div className="bg-white/95 rounded-2xl border border-blue-200 p-8 w-full text-left shadow-xl">
             {loading ? (
               <div className="text-center text-blue-200">Cargando...</div>
             ) : error ? (
               <div className="bg-red-100 text-red-800 border border-red-300 p-4 rounded mb-4">{error}</div>
             ) : (
-              <form onSubmit={handleSubmit} className="w-full">
-                <div className="flex flex-col md:flex-row gap-8 md:gap-12 w-full items-start">
-                  {/* Columna Izquierda */}
-                  <div className="flex-1 space-y-8 w-full md:max-w-[600px]">
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        <CreditCard className="inline w-4 h-4 mr-2" />
-                        Tipo de Cuenta Destino *
-                      </label>
-                      <select
-                        name="tipo_cuenta_destino"
-                        value={form.tipo_cuenta_destino || "CLABE"}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      >
-                        <option value="CLABE" className="text-black">CLABE</option>
-                        <option value="Tarjeta" className="text-black">Tarjeta</option>
-                      </select>
-                    </div>
-
-                    {(form.tipo_cuenta_destino || 'CLABE') === 'Tarjeta' && (
-                      <div>
-                        <label className="text-white/90 block mb-3 font-medium">
-                          Tipo de Tarjeta *
-                        </label>
-                        <select
-                          name="tipo_tarjeta"
-                          value={form.tipo_tarjeta || ""}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                        >
-                          <option value="" className="text-black">Selecciona tipo</option>
-                          <option value="Débito" className="text-black">Débito</option>
-                          <option value="Crédito" className="text-black">Crédito</option>
-                        </select>
-                      </div>
-                    )}
-
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        Banco (opcional)
-                      </label>
-                      <select
-                        name="banco_destino"
-                        value={form.banco_destino || ""}
-                        onChange={handleInputChange}
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      >
-                        <option value="" className="text-black">Selecciona banco</option>
-                        {bancoOptions.map(banco => (
-                          <option key={banco} value={banco} className="text-black">
-                            {banco}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        <CreditCard className="inline w-4 h-4 mr-2" />
-                        Cuenta Destino *
-                      </label>
-                      <input
-                        type="text"
-                        name="cuenta_destino"
-                        value={form.cuenta_destino || ""}
-                        onChange={e => {
-                          const maxLen = cuentaConfig.maxLength;
-                          const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
-                          setForm(prev => ({ ...prev, cuenta_destino: value }));
-                        }}
-                        required
-                        placeholder={cuentaConfig.placeholder}
-                        maxLength={cuentaConfig.maxLength}
-                        inputMode="numeric"
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        <Building className="inline w-4 h-4 mr-2" />
-                        Departamento *
-                      </label>
-                      <select
-                        name="departamento"
-                        value={form.departamento || ""}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      >
-                        <option value="">Selecciona departamento</option>
-                        {departamentos.map(dep => (
-                          <option key={dep} value={dep} className="text-black">
-                            {dep.charAt(0).toUpperCase() + dep.slice(1)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        <DollarSign className="inline w-4 h-4 mr-2" />
-                        Monto *
-                      </label>
-                      <NumericFormat
-                        value={form.monto || ""}
-                        name="monto"
-                        thousandSeparator="," 
-                        decimalSeparator="."
-                        decimalScale={2}
-                        fixedDecimalScale
-                        allowNegative={false}
-                        placeholder="0.00"
-                        onValueChange={handleMontoChange}
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        Empresa a pagar (opcional)
-                      </label>
-                      <input
-                        type="text"
-                        name="empresa_a_pagar"
-                        value={form.empresa_a_pagar || ""}
-                        onChange={handleInputChange}
-                        placeholder="Nombre de la empresa"
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        Nombre de la persona que recibe el pago *
-                      </label>
-                      <input
-                        type="text"
-                        name="nombre_persona"
-                        value={form.nombre_persona || ""}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="Nombre completo de la persona"
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        <MessageSquare className="inline w-4 h-4 mr-2" />
-                        Concepto *
-                      </label>
-                      <textarea
-                        name="concepto"
-                        value={form.concepto || ""}
-                        onChange={handleInputChange}
-                        required
-                        rows={4}
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                        placeholder="Describe el motivo del pago..."
-                      />
-                    </div>
+              <form onSubmit={handleSubmit} className="w-full space-y-6">
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Departamento *</label>
+                    <select name="departamento" value={form.departamento || ""} onChange={handleInputChange} required className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200">
+                      <option value="">Selecciona departamento</option>
+                      {departamentos.map(dep => (
+                        <option key={dep} value={dep} className="text-blue-900">{dep.charAt(0).toUpperCase() + dep.slice(1)}</option>
+                      ))}
+                    </select>
                   </div>
-                  {/* Columna Derecha */}
-                  <div className="flex-1 space-y-8 w-full md:max-w-[600px]">
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        Tipo de Pago *
-                      </label>
-                      <select
-                        name="tipo_pago"
-                        value={form.tipo_pago || ""}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      >
-                        <option value="">Selecciona tipo de pago</option>
-                        {tipoPagoOptions.map(opt => (
-                          <option key={opt.value} value={opt.value} className="text-black">
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                      
-                      {/* Mostrar descripción solo si hay tipo de pago seleccionado y no está vacío */}
-                      {(form.tipo_pago || '') !== '' && (
-                        <div className="mt-4">
-                          <label className="text-white/90 block mb-3 font-medium">
-                            Descripción del tipo de pago
-                          </label>
-                          <textarea
-                            name="tipo_pago_descripcion"
-                            value={form.tipo_pago_descripcion || ""}
-                            onChange={handleInputChange}
-                            placeholder="Agrega una descripción para el tipo de pago..."
-                            rows={2}
-                            className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 resize-none"
-                          />
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        <Repeat className="inline w-4 h-4 mr-2" />
-                        Frecuencia *
-                      </label>
-                      <select
-                        name="frecuencia"
-                        value={form.frecuencia || ""}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      >
-                        <option value="">Selecciona frecuencia</option>
-                        {frecuencias.map(f => (
-                          <option key={f} value={f} className="text-black">
-                            {f.charAt(0).toUpperCase() + f.slice(1)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-white/90 block mb-3 font-medium">
-                        <Calendar className="inline w-4 h-4 mr-2" />
-                        Fecha de Inicio *
-                      </label>
-                      <DatePicker
-                        selected={fechaInicio}
-                        onChange={handleFechaChange}
-                        dateFormat="yyyy-MM-dd"
-                        minDate={new Date()}
-                        placeholderText="Selecciona la fecha"
-                        locale={es}
-                        className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                      />
-                    </div>
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Monto *</label>
+                    <NumericFormat value={form.monto || ""} name="monto" thousandSeparator="," decimalSeparator="." decimalScale={2} fixedDecimalScale allowNegative={false} placeholder="0.00" onValueChange={handleMontoChange} className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200" />
                   </div>
-                </div>
-                <div>
-                  <label className="text-white/90 block mb-3 font-medium">
-                    <FileText className="inline w-4 h-4 mr-2" />
-                    Factura (PDF o imagen)
-                  </label>
-                  {form.fact_recurrente && (
-                    <div className="mb-2 text-white/80 text-sm">
-                      Archivo actual: <a href={form.fact_recurrente} target="_blank" rel="noopener noreferrer" className="underline text-blue-200">Ver archivo</a>
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Empresa a pagar (opcional)</label>
+                    <input type="text" name="empresa_a_pagar" value={form.empresa_a_pagar || ""} onChange={handleInputChange} placeholder="Nombre de la empresa" className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200" />
+                  </div>
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Nombre de la persona que recibe el pago *</label>
+                    <input type="text" name="nombre_persona" value={form.nombre_persona || ""} onChange={handleInputChange} required placeholder="Nombre completo de la persona" className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200" />
+                  </div>
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Concepto *</label>
+                    <textarea name="concepto" value={form.concepto || ""} onChange={handleInputChange} required rows={3} className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200" placeholder="Describe el motivo del pago..." />
+                  </div>
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Tipo de Cuenta Destino *</label>
+                    <select name="tipo_cuenta_destino" value={form.tipo_cuenta_destino || "CLABE"} onChange={handleInputChange} required className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200">
+                      <option value="CLABE" className="text-blue-900">CLABE</option>
+                      <option value="Tarjeta" className="text-blue-900">Tarjeta</option>
+                    </select>
+                  </div>
+                  {(form.tipo_cuenta_destino || 'CLABE') === 'Tarjeta' && (
+                    <div>
+                      <label className="text-blue-900 block mb-2 font-semibold">Tipo de Tarjeta *</label>
+                      <select name="tipo_tarjeta" value={form.tipo_tarjeta || ""} onChange={handleInputChange} required className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200">
+                        <option value="" className="text-blue-900">Selecciona tipo</option>
+                        <option value="Débito" className="text-blue-900">Débito</option>
+                        <option value="Crédito" className="text-blue-900">Crédito</option>
+                      </select>
                     </div>
                   )}
-                  <input
-                    type="file"
-                    name="fact_recurrente"
-                    accept=".pdf,image/*"
-                    onChange={handleFileChange}
-                    className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30"
-                  />
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Banco (opcional)</label>
+                    <select name="banco_destino" value={form.banco_destino || ""} onChange={handleInputChange} className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200">
+                      <option value="" className="text-blue-900">Selecciona banco</option>
+                      {bancoOptions.map(banco => (
+                        <option key={banco} value={banco} className="text-blue-900">{banco}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Cuenta Destino *</label>
+                    <input type="text" name="cuenta_destino" value={form.cuenta_destino || ""} onChange={e => {
+                      const maxLen = cuentaConfig.maxLength;
+                      const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                      setForm(prev => ({ ...prev, cuenta_destino: value }));
+                    }} required placeholder={cuentaConfig.placeholder} maxLength={cuentaConfig.maxLength} inputMode="numeric" className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200" />
+                  </div>
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Tipo de Pago *</label>
+                    <select name="tipo_pago" value={form.tipo_pago || ""} onChange={handleInputChange} required className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200">
+                      <option value="">Selecciona tipo de pago</option>
+                      {tipoPagoOptions.map(opt => (
+                        <option key={opt.value} value={opt.value} className="text-blue-900">{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {(form.tipo_pago || '') !== '' && (
+                    <div>
+                      <label className="text-blue-900 block mb-2 font-semibold">Descripción del tipo de pago</label>
+                      <textarea name="tipo_pago_descripcion" value={form.tipo_pago_descripcion || ""} onChange={handleInputChange} placeholder="Agrega una descripción para el tipo de pago..." rows={2} className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200 resize-none" />
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Frecuencia *</label>
+                    <select name="frecuencia" value={form.frecuencia || ""} onChange={handleInputChange} required className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200">
+                      <option value="">Selecciona frecuencia</option>
+                      {frecuencias.map(f => (
+                        <option key={f} value={f} className="text-blue-900">{f.charAt(0).toUpperCase() + f.slice(1)}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Fecha de Inicio *</label>
+                    <DatePicker selected={fechaInicio} onChange={handleFechaChange} dateFormat="yyyy-MM-dd" minDate={new Date()} placeholderText="Selecciona la fecha" locale={es} className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200" />
+                  </div>
+                  <div>
+                    <label className="text-blue-900 block mb-2 font-semibold">Archivo Adjunto</label>
+                    {form.fact_recurrente && (
+                      <div className="mb-2 text-blue-900/80 text-sm">
+                        Archivo actual: <a href={form.fact_recurrente} target="_blank" rel="noopener noreferrer" className="underline text-blue-700">Ver archivo actual</a>
+                      </div>
+                    )}
+                    <input type="file" name="fact_recurrente" accept=".pdf,image/*" onChange={handleFileChange} className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200" />
+                  </div>
                 </div>
-                <div className="flex justify-end space-x-8 pt-12">
+                <div className="flex justify-end space-x-6 pt-8">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => router.back()}
-                    className="bg-gray-600 text-white border-gray-500 hover:bg-gray-700 px-8 py-4 text-base"
+                    className="bg-gray-100 text-blue-900 border-gray-300 hover:bg-gray-200 px-8 py-3 text-base font-bold rounded-lg shadow"
                   >
                     Cancelar
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 text-base"
+                    className="bg-blue-700 text-white hover:bg-blue-800 px-8 py-3 text-base font-bold rounded-lg shadow"
                   >
                     Guardar Cambios
                   </Button>
                 </div>
-                {success && <div className="bg-green-100 text-green-800 border border-green-300 p-3 rounded mt-4">{success}</div>}
+                {success && (
+                  <div className="mt-6 flex items-center justify-center gap-3 text-center font-bold text-lg px-6 py-3 rounded-xl shadow-lg drop-shadow-lg border-2 bg-green-50 border-green-400 text-green-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" /></svg>
+                    <span>{success}</span>
+                  </div>
+                )}
               </form>
             )}
           </div>

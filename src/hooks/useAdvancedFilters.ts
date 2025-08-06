@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { User, Solicitud, PlantillaRecurrente } from '@/types';
 
-
 interface FilterState {
   search: string;
   estado?: string;

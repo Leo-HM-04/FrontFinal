@@ -16,102 +16,192 @@ import {
   AlertCircle,
   FileText,
   Plus,
-  Search
+  Search,
+  Download,
+  Filter,
+  Calendar,
+  Edit,
+  Trash2,
+  TrendingUp,
+  DollarSign,
+  FileCheck,
+  AlertTriangle,
+  BarChart3,
+  Info,
+  Database
 } from 'lucide-react';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
+import { ExportModal } from '@/components/modals/ExportModal';
 import {
   exportMisSolicitudesCSV,
   exportMisSolicitudesExcel,
   exportMisSolicitudesPDF
 } from '@/utils/exportMisSolicitudes';
 
-const getEstadoColor = (estado: string) => {
-  switch (estado.toLowerCase()) {
-    case 'pendiente':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'aprobada':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'rechazada':
-      return 'bg-red-100 text-red-800 border-red-200';
-    case 'pagada':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
-  }
-};
+// Tipos para mejor organización
+interface EstadisticasSolicitudes {
+  total: number;
+  pendientes: number;
+  aprobadas: number;
+  rechazadas: number;
+  montoTotal: number;
+}
 
-const getEstadoIcon = (estado: string) => {
-  switch (estado.toLowerCase()) {
-    case 'pendiente':
-      return <Clock className="w-4 h-4" />;
-    case 'autorizada':
-      return <CheckCircle className="w-4 h-4 text-green-500" />;
-    case 'rechazada':
-      return <XCircle className="w-4 h-4 text-red-500" />;
-    case 'pagada':
-      return <CheckCircle className="w-4 h-4 text-blue-500" />;
-    default:
-      return <AlertCircle className="w-4 h-4" />;
-  }
-};
+// Configuraciones constantes
+const ITEMS_PER_PAGE = 5;
+const LOAD_TIMEOUT = 10000;
 
-export default function MisSolicitudesPage() {
-  // Estado para el formato y rango de exportación
-  const [exportFormat, setExportFormat] = useState('pdf');
-  const [exportRango, setExportRango] = useState('total');
+const ESTADO_ORDEN = {
+  'pendiente': 1,
+  'autorizadas': 2,
+  'autorizada': 2,
+  'pagada': 3,
+  'rechazada': 4
+} as const;
 
-  // Función para exportar
-  const handleExport = () => {
-    const solicitudesExport = filteredSolicitudes;
-    if (exportFormat === 'pdf') {
-      exportMisSolicitudesPDF(solicitudesExport, exportRango);
-    } else if (exportFormat === 'excel') {
-      exportMisSolicitudesExcel(solicitudesExport, exportRango);
-    } else if (exportFormat === 'csv') {
-      exportMisSolicitudesCSV(solicitudesExport, exportRango);
+const FILTER_OPTIONS = [
+  { value: '', label: 'Todos los estados' },
+  { value: 'pendiente', label: 'Pendiente' },
+  { value: 'autorizada', label: 'Autorizadas' },
+  { value: 'rechazada', label: 'Rechazada' },
+  { value: 'pagada', label: 'Pagada' }
+];
+
+const DATE_OPTIONS = [
+  { value: '', label: 'Todas las fechas' },
+  { value: 'today', label: 'Hoy' },
+  { value: 'week', label: 'Última semana' },
+  { value: 'month', label: 'Último mes' }
+];
+
+const EXPORT_FORMATS = [
+  { value: 'pdf', label: 'PDF', icon: FileText },
+  { value: 'excel', label: 'Excel', icon: BarChart3 },
+  { value: 'csv', label: 'CSV', icon: Database }
+];
+
+const EXPORT_PERIODS = [
+  { value: 'dia', label: 'Hoy', icon: Clock },
+  { value: 'semana', label: 'Última Semana', icon: Calendar },
+  { value: 'mes', label: 'Último Mes', icon: Calendar },
+  { value: 'año', label: 'Último Año', icon: Calendar },
+  { value: 'total', label: 'Todo el historial', icon: Database }
+];
+
+// Utilidades
+const getEstadoConfig = (estado: string) => {
+  const configs = {
+    pendiente: {
+      color: 'bg-amber-50 text-amber-700 border-amber-200',
+      icon: <Clock className="w-4 h-4" />,
+      bgColor: 'bg-amber-500'
+    },
+    autorizada: {
+      color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      icon: <CheckCircle className="w-4 h-4" />,
+      bgColor: 'bg-emerald-500'
+    },
+    aprobada: {
+      color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      icon: <CheckCircle className="w-4 h-4" />,
+      bgColor: 'bg-emerald-500'
+    },
+    rechazada: {
+      color: 'bg-red-50 text-red-700 border-red-200',
+      icon: <XCircle className="w-4 h-4" />,
+      bgColor: 'bg-red-500'
+    },
+    pagada: {
+      color: 'bg-blue-50 text-blue-700 border-blue-200',
+      icon: <CheckCircle className="w-4 h-4" />,
+      bgColor: 'bg-blue-500'
     }
   };
-  //nst { user, logout } = useAuth();
+  
+  return configs[estado?.toLowerCase() as keyof typeof configs] || {
+    color: 'bg-gray-50 text-gray-700 border-gray-200',
+    icon: <AlertCircle className="w-4 h-4" />,
+    bgColor: 'bg-gray-500'
+  };
+};
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('es-CO', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+// Componente principal
+export default function MisSolicitudesPage() {
   const router = useRouter();
+  
+  // Estados principales
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [filteredSolicitudes, setFilteredSolicitudes] = useState<Solicitud[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [timeoutError, setTimeoutError] = useState(false);
+  
+  // Estados de modales
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [timeoutError, setTimeoutError] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [solicitudAEliminar, setSolicitudAEliminar] = useState<Solicitud | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [success, setSuccess] = useState('');
-
-  // Estados para paginación
+  
+  // Estados de paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
-
-  // Estados para filtros
+  
+  // Estados de filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  
+  // Estados de exportación
+  const [exportFormat, setExportFormat] = useState('pdf');
+  const [exportRango, setExportRango] = useState('total');
+  const [showExportModal, setShowExportModal] = useState(false);
 
-  // Cargar solicitudes con timeout de seguridad
+  // Calcular estadísticas
+  const estadisticas: EstadisticasSolicitudes = {
+    total: solicitudes.length,
+    pendientes: solicitudes.filter(s => s.estado?.toLowerCase() === 'pendiente').length,
+    aprobadas: solicitudes.filter(s => ['autorizada', 'aprobada', 'pagada'].includes(s.estado?.toLowerCase() || '')).length,
+    rechazadas: solicitudes.filter(s => s.estado?.toLowerCase() === 'rechazada').length,
+    montoTotal: solicitudes.reduce((sum, s) => sum + (s.monto || 0), 0)
+  };
+
+  // Cargar solicitudes
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
     setTimeoutError(false);
-    const timeoutId: NodeJS.Timeout = setTimeout(() => {
+    
+    const timeoutId = setTimeout(() => {
       if (isMounted) {
         setTimeoutError(true);
         setLoading(false);
       }
-    }, 10000);
+    }, LOAD_TIMEOUT);
 
     const fetchSolicitudes = async () => {
       try {
         const data = await SolicitudesService.getMySolicitudes();
         if (isMounted) {
-          // Ordenar por fecha_creacion descendente (más reciente primero)
-          const sorted = data.sort((a, b) => new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime());
+          const sorted = data.sort((a, b) => 
+            new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime()
+          );
           setSolicitudes(sorted);
           setFilteredSolicitudes(sorted);
           setError('');
@@ -131,93 +221,115 @@ export default function MisSolicitudesPage() {
     };
 
     fetchSolicitudes();
-
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
     };
   }, []);
 
+  // Filtrar solicitudes
   useEffect(() => {
-    const filterSolicitudes = () => {
-      let filtered = [...solicitudes];
+    let filtered = [...solicitudes];
 
-      // Filtro por texto
-      if (searchTerm) {
-        filtered = filtered.filter(solicitud => 
-          solicitud.concepto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          solicitud.departamento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          solicitud.cuenta_destino?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    if (searchTerm) {
+      filtered = filtered.filter(solicitud => 
+        solicitud.concepto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        solicitud.departamento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        solicitud.cuenta_destino?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        solicitud.folio?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter(solicitud => 
+        solicitud.estado?.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+
+    if (dateFilter) {
+      const today = new Date();
+      const filterDate = new Date(today);
+      
+      switch (dateFilter) {
+        case 'today':
+          filterDate.setHours(0, 0, 0, 0);
+          filtered = filtered.filter(solicitud => {
+            const solicitudDate = new Date(solicitud.fecha_creacion);
+            solicitudDate.setHours(0, 0, 0, 0);
+            return solicitudDate.getTime() === filterDate.getTime();
+          });
+          break;
+        case 'week':
+          filterDate.setDate(today.getDate() - 7);
+          filtered = filtered.filter(solicitud => 
+            new Date(solicitud.fecha_creacion) >= filterDate
+          );
+          break;
+        case 'month':
+          filterDate.setMonth(today.getMonth() - 1);
+          filtered = filtered.filter(solicitud => 
+            new Date(solicitud.fecha_creacion) >= filterDate
+          );
+          break;
       }
+    }
 
-      // Filtro por estado
-      if (statusFilter) {
-        filtered = filtered.filter(solicitud => 
-          solicitud.estado?.toLowerCase() === statusFilter.toLowerCase()
-        );
-      }
-
-      // Filtro por fecha
-      if (dateFilter) {
-        const today = new Date();
-        const filterDate = new Date(today);
-        
-        switch (dateFilter) {
-          case 'today':
-            filterDate.setHours(0, 0, 0, 0);
-            filtered = filtered.filter(solicitud => {
-              const solicitudDate = new Date(solicitud.fecha_creacion);
-              solicitudDate.setHours(0, 0, 0, 0);
-              return solicitudDate.getTime() === filterDate.getTime();
-            });
-            break;
-          case 'week':
-            filterDate.setDate(today.getDate() - 7);
-            filtered = filtered.filter(solicitud => 
-              new Date(solicitud.fecha_creacion) >= filterDate
-            );
-            break;
-          case 'month':
-            filterDate.setMonth(today.getMonth() - 1);
-            filtered = filtered.filter(solicitud => 
-              new Date(solicitud.fecha_creacion) >= filterDate
-            );
-            break;
-        }
-      }
-
-      setFilteredSolicitudes(filtered);
-      setCurrentPage(1); // Reset page when filtering
-    };
-
-    filterSolicitudes();
+    setFilteredSolicitudes(filtered);
+    setCurrentPage(1);
   }, [solicitudes, searchTerm, statusFilter, dateFilter]);
+
+  // Ordenar solicitudes
+  const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
+    const estadoA = (a.estado || '').toLowerCase();
+    const estadoB = (b.estado || '').toLowerCase();
+    const ordenA = ESTADO_ORDEN[estadoA as keyof typeof ESTADO_ORDEN] ?? 99;
+    const ordenB = ESTADO_ORDEN[estadoB as keyof typeof ESTADO_ORDEN] ?? 99;
+    
+    if (ordenA !== ordenB) return ordenA - ordenB;
+    return new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime();
+  });
+
+  // Paginación
+  const totalPages = Math.ceil(solicitudesOrdenadas.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, solicitudesOrdenadas.length);
+  const currentSolicitudes = solicitudesOrdenadas.slice(startIndex, endIndex);
+
+  // Handlers
+  const handleExport = (format: string, filter: 'todos' | 'activo' | 'inactivo') => {
+    let solicitudesExport = filteredSolicitudes;
+    
+    // Aplicar filtro adicional si es necesario
+    if (filter === 'activo') {
+      solicitudesExport = filteredSolicitudes.filter(s => 
+        ['autorizada', 'aprobada', 'pagada'].includes(s.estado?.toLowerCase() || '')
+      );
+    } else if (filter === 'inactivo') {
+      solicitudesExport = filteredSolicitudes.filter(s => 
+        ['pendiente', 'rechazada'].includes(s.estado?.toLowerCase() || '')
+      );
+    }
+    
+    if (format === 'pdf') {
+      exportMisSolicitudesPDF(solicitudesExport, filter);
+    } else if (format === 'excel') {
+      exportMisSolicitudesExcel(solicitudesExport, filter);
+    } else if (format === 'csv') {
+      exportMisSolicitudesCSV(solicitudesExport, filter);
+    }
+    
+    setShowExportModal(false);
+  };
 
   const handleViewDetails = (solicitud: Solicitud) => {
     setSelectedSolicitud(solicitud);
     setIsDetailModalOpen(true);
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-CO', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   const handleDelete = async () => {
     if (!solicitudAEliminar) return;
     setDeleting(true);
+    
     try {
       await SolicitudesService.deleteSolicitante(solicitudAEliminar.id_solicitud);
       const updatedSolicitudes = solicitudes.filter(s => s.id_solicitud !== solicitudAEliminar.id_solicitud);
@@ -241,348 +353,453 @@ export default function MisSolicitudesPage() {
     }
   };
 
-  // Ordenar por estado: pendientes, aprobadas/autorizadas, pagadas, rechazadas, otros
-  const estadoOrden = {
-    'pendiente': 1,
-    'autorizadas': 2,
-    'autorizada': 2,
-    'pagada': 3,
-    'rechazada': 4
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('');
+    setDateFilter('');
   };
-  const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
-    const estadoA = (a.estado || '').toLowerCase();
-    const estadoB = (b.estado || '').toLowerCase();
-    const ordenA = estadoOrden[estadoA as keyof typeof estadoOrden] ?? 99;
-    const ordenB = estadoOrden[estadoB as keyof typeof estadoOrden] ?? 99;
-    if (ordenA !== ordenB) return ordenA - ordenB;
-    // Si tienen el mismo estado, ordenar por fecha de creación descendente
-    return new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime();
-  });
-  // Paginación
-  const totalPages = Math.ceil(solicitudesOrdenadas.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, solicitudesOrdenadas.length);
-  const currentSolicitudes = solicitudesOrdenadas.slice(startIndex, endIndex);
 
-  const filterOptions = [
-    { value: '', label: 'Todos los estados' },
-    { value: 'pendiente', label: 'Pendiente' },
-    { value: 'autorizada', label: 'Autorizadas' },
-    { value: 'rechazada', label: 'Rechazada' },
-    { value: 'pagada', label: 'Pagada' }
-  ];
+  // Componente de estadísticas
+  const EstadisticasCard = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-600">Total Solicitudes</p>
+            <p className="text-3xl font-bold text-gray-900">{estadisticas.total}</p>
+          </div>
+          <div className="p-3 bg-blue-100 rounded-xl">
+            <FileText className="w-6 h-6 text-blue-600" />
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-600">Pendientes</p>
+            <p className="text-3xl font-bold text-amber-600">{estadisticas.pendientes}</p>
+          </div>
+          <div className="p-3 bg-amber-100 rounded-xl">
+            <Clock className="w-6 h-6 text-amber-600" />
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-600">Aprobadas</p>
+            <p className="text-3xl font-bold text-emerald-600">{estadisticas.aprobadas}</p>
+          </div>
+          <div className="p-3 bg-emerald-100 rounded-xl">
+            <CheckCircle className="w-6 h-6 text-emerald-600" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
-  const dateOptions = [
-    { value: '', label: 'Todas las fechas' },
-    { value: 'today', label: 'Hoy' },
-    { value: 'week', label: 'Última semana' },
-    { value: 'month', label: 'Último mes' }
-  ];
+  // Componente de herramientas superiores
+  const ToolsSection = () => (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-8">
+      {/* Sección de filtros mejorada */}
+      <div className="p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 bg-blue-100 rounded-xl flex items-center justify-center">
+            <Filter className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 leading-tight">Filtros</h3>
+            <p className="text-sm text-gray-500">Refina tu búsqueda de solicitudes</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder="Buscar por folio, concepto..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+              />
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+            >
+              {FILTER_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Fecha</label>
+            <select
+              value={dateFilter}
+              onChange={e => setDateFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+            >
+              {DATE_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button
+              onClick={clearFilters}
+              variant="outline"
+              className="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
+            >
+              Limpiar Filtros
+            </Button>
+            {(searchTerm || statusFilter || dateFilter) && (
+              <span className="text-sm text-gray-500">
+                Mostrando <span className="font-semibold">{filteredSolicitudes.length}</span> de <span className="font-semibold">{solicitudes.length}</span> solicitudes
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={() => router.push('/dashboard/solicitante/nueva-solicitud')}
+              className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-lg font-medium flex items-center gap-2 shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Nueva Solicitud
+            </Button>
+            <Button
+              onClick={() => setShowExportModal(true)}
+              className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-lg font-medium flex items-center gap-2 shadow-sm"
+            >
+              <Download className="w-4 h-4" />
+              Exportar
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <ProtectedRoute requiredRoles={['solicitante']}>
+        <SolicitanteLayout>
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-lg text-gray-600">
+                  {timeoutError
+                    ? 'La carga está tardando demasiado. Por favor, verifica tu conexión o intenta recargar la página.'
+                    : 'Cargando solicitudes...'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </SolicitanteLayout>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
         <div className="max-w-7xl mx-auto px-6 py-8">
-          {loading ? (
-            <div className="flex items-center justify-center min-h-[300px]">
-              <div className="text-blue-700 text-xl">
-                {timeoutError
-                  ? 'La carga está tardando demasiado. Por favor, verifica tu conexión o intenta recargar la página.'
-                  : 'Cargando solicitudes...'}
-              </div>
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">Mis Solicitudes</h1>
+            <p className="text-white">Administra y controla todas tus solicitudes de pago</p>
+          </div>
+
+          {/* Mensajes */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              {error}
             </div>
-          ) : (
-            <>
-              {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                  {success}
-                </div>
-              )}
+          )}
+          
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+              {success}
+            </div>
+          )}
 
-              {/* Controles de exportación */}
-              <div className="bg-gradient-to-r from-blue-400/30 to-blue-700/30 backdrop-blur-xl rounded-xl p-4 border border-blue-300/30 shadow-lg mb-6">
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <div className="flex-1 flex items-center gap-4">
-                    <div className="flex-1">
-                      <label className="block text-white text-base font-semibold mb-1">Formato</label>
-                      <select
-                        value={exportFormat}
-                        onChange={e => setExportFormat(e.target.value)}
-                        className="w-full bg-white border border-blue-300/30 rounded-xl px-5 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-md appearance-none cursor-pointer"
-                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236B7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
-                      >
-                        <option value="pdf" className="text-gray-800">PDF</option>
-                        <option value="excel" className="text-gray-800">Excel</option>
-                        <option value="csv" className="text-gray-800">CSV</option>
-                      </select>
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-white text-base font-semibold mb-1">Periodo</label>
-                      <select
-                        value={exportRango}
-                        onChange={e => setExportRango(e.target.value)}
-                        className="w-full bg-white border border-blue-300/30 rounded-xl px-5 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-md appearance-none cursor-pointer"
-                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236B7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
-                      >
-                        <option value="dia" className="text-gray-800">Día</option>
-                        <option value="semana" className="text-gray-800">Semana</option>
-                        <option value="mes" className="text-gray-800">Mes</option>
-                        <option value="año" className="text-gray-800">Año</option>
-                        <option value="total" className="text-gray-800">Total</option>
-                      </select>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={handleExport}
-                    className="w-full md:w-auto bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 rounded-xl font-bold shadow-2xl flex items-center gap-3 text-lg transition-all duration-200"
-                  >
-                    <FileText className="w-6 h-6" />
-                    Exportar
-                  </Button>
-                </div>
-              </div>
+          {/* Estadísticas */}
+          <EstadisticasCard />
 
-              {/* Filtros */}
-              <div className="mb-8">
-                <div className="bg-gradient-to-r from-blue-400/30 to-blue-700/30 backdrop-blur-xl rounded-2xl p-8 border border-blue-300/30 shadow-xl flex flex-col gap-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Filtro de búsqueda */}
-                    <div className="flex flex-col gap-2">
-                      <label className="block text-white text-base font-semibold">Buscar</label>
-                      <div className="relative flex items-center">
-                        <div className="absolute left-4">
-                          <Search className="w-5 h-5 text-gray-400" />
+          {/* Herramientas */}
+          <ToolsSection />
+
+          {/* Tabla */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Folio</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Concepto</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Monto</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Cuenta</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Estado</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Fecha</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {currentSolicitudes.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-16 text-center">
+                        <div className="flex flex-col items-center">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <FileText className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-1">
+                            {searchTerm || statusFilter || dateFilter 
+                              ? 'No se encontraron solicitudes'
+                              : 'No tienes solicitudes aún'
+                            }
+                          </h3>
+                          <p className="text-gray-500 mb-4">
+                            {searchTerm || statusFilter || dateFilter 
+                              ? 'Intenta ajustar los filtros de búsqueda'
+                              : 'Crea tu primera solicitud de pago'
+                            }
+                          </p>
+                          {!searchTerm && !statusFilter && !dateFilter && (
+                            <Button
+                              onClick={() => router.push('/dashboard/solicitante/nueva-solicitud')}
+                              className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-lg font-medium flex items-center gap-2"
+                            >
+                              <Plus className="w-4 h-4" />
+                              Nueva Solicitud
+                            </Button>
+                          )}
                         </div>
-                        <input
-                          type="text"
-                          value={searchTerm}
-                          onChange={e => setSearchTerm(e.target.value)}
-                          className="w-full h-[50px] bg-white border border-blue-300/30 rounded-xl pl-12 pr-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 shadow-md transition-all duration-200 hover:border-blue-400/60"
-                          placeholder="Buscar por concepto, departamento o cuenta..."
-                        />
-                      </div>
-                    </div>
-                    {/* Filtro de estado */}
-                    <div className="flex flex-col gap-2">
-                      <label className="block text-white text-base font-semibold">Estado</label>
-                      <select
-                        value={statusFilter}
-                        onChange={e => setStatusFilter(e.target.value)}
-                        className="w-full bg-white border border-blue-300/30 rounded-xl px-5 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-md appearance-none cursor-pointer"
-                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236B7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
-                      >
-                        {filterOptions.map(opt => (
-                          <option key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {/* Filtro de fecha */}
-                    <div className="flex flex-col gap-2">
-                      <label className="block text-white text-base font-semibold">Fecha</label>
-                      <select
-                        value={dateFilter}
-                        onChange={e => setDateFilter(e.target.value)}
-                        className="w-full bg-white border border-blue-300/30 rounded-xl px-5 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-md appearance-none cursor-pointer"
-                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236B7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em 1.5em' }}
-                      >
-                        {dateOptions.map(opt => (
-                          <option key={opt.value} value={opt.value} className="text-gray-800">{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
+                      </td>
+                    </tr>
+                  ) : 
+                    currentSolicitudes.map((solicitud) => {
+                      const estadoConfig = getEstadoConfig(solicitud.estado);
+                      return (
+                        <tr key={solicitud.id_solicitud} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="font-mono text-sm font-semibold text-gray-900">
+                              {solicitud.folio || '-'}
+                            </div>
+                          </td>
+                          
+                          <td className="px-6 py-4">
+                            <div className="max-w-xs">
+                              <div className="font-medium text-gray-900 truncate">
+                                {solicitud.concepto}
+                              </div>
+                              <div className="text-sm text-gray-500 truncate">
+                                {solicitud.departamento}
+                              </div>
+                            </div>
+                          </td>
+                          
+                          <td className="px-6 py-4">
+                            <div className="text-sm font-semibold text-gray-900">
+                              {formatCurrency(solicitud.monto)}
+                            </div>
+                          </td>
+                          
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900 font-mono">
+                              {solicitud.cuenta_destino}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {solicitud.banco_destino}
+                            </div>
+                          </td>
+                          
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${estadoConfig.color}`}>
+                              {estadoConfig.icon}
+                              <span className="ml-1.5 capitalize">{solicitud.estado}</span>
+                            </span>
+                          </td>
+                          
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">
+                              {formatDate(solicitud.fecha_creacion)}
+                            </div>
+                            {solicitud.fecha_limite_pago && (
+                              <div className="text-xs text-gray-500">
+                                Límite: {formatDate(solicitud.fecha_limite_pago)}
+                              </div>
+                            )}
+                          </td>
+                          
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewDetails(solicitud)}
+                                className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                Ver
+                              </Button>
+                              
+                              {solicitud.estado?.toLowerCase() === 'pendiente' && (
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => router.push(`/dashboard/solicitante/editar-solicitud/${solicitud.id_solicitud}`)}
+                                    className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1"
+                                  >
+                                    <Edit className="w-3.5 h-3.5" />
+                                    Editar
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => { 
+                                      setSolicitudAEliminar(solicitud); 
+                                      setDeleteModalOpen(true); 
+                                    }}
+                                    className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Eliminar
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            {/* Paginación mejorada */}
+            {totalPages > 1 && (
+              <div className="border-t border-gray-100 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-700">
+                    Mostrando <span className="font-medium">{filteredSolicitudes.length === 0 ? 0 : startIndex + 1}</span> a{' '}
+                    <span className="font-medium">{endIndex}</span> de{' '}
+                    <span className="font-medium">{filteredSolicitudes.length}</span> resultados
                   </div>
-                  <div className="flex justify-end md:justify-center">
+                  
+                  <div className="flex items-center gap-2">
                     <Button
-                      onClick={() => router.push('/dashboard/solicitante/nueva-solicitud')}
-                      className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 rounded-xl font-bold shadow-2xl flex items-center gap-3 text-lg transition-all duration-200"
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      variant="outline"
+                      size="sm"
+                      className="px-3 py-1.5 text-sm"
                     >
-                      <Plus className="w-6 h-6" />
-                      Nueva Solicitud
+                      Primera
+                    </Button>
+                    <Button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      variant="outline"
+                      size="sm"
+                      className="px-3 py-1.5 text-sm"
+                    >
+                      Anterior
+                    </Button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${
+                              pageNum === currentPage
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <Button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      variant="outline"
+                      size="sm"
+                      className="px-3 py-1.5 text-sm"
+                    >
+                      Siguiente
+                    </Button>
+                    <Button
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      variant="outline"
+                      size="sm"
+                      className="px-3 py-1.5 text-sm"
+                    >
+                      Última
                     </Button>
                   </div>
                 </div>
               </div>
+            )}
+          </div>
 
-              {/* Tabla de solicitudes */}
-              <div className="bg-white/15 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-white/10">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Folio</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-white min-w-[200px]">Concepto</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Monto</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-white min-w-[150px]">Cuenta Destino</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Tipo Cuenta</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-white min-w-[120px]">Banco</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Estado</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Creación</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-white whitespace-nowrap">Límite</th>
-                        <th className="px-4 py-3 text-center text-sm font-semibold text-white whitespace-nowrap w-[180px]">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/10">
-                      {currentSolicitudes.length === 0 ? (
-                        <tr>
-                          <td colSpan={10} className="px-6 py-12 text-center text-white/80">
-                            <FileText className="w-12 h-12 mx-auto mb-4 text-white/40" />
-                            <p className="text-lg">No tienes solicitudes aún</p>
-                            <p className="text-sm text-white/60 mt-1">
-                              {searchTerm || statusFilter || dateFilter 
-                                ? 'No se encontraron solicitudes con los filtros aplicados'
-                                : 'Crea tu primera solicitud de pago'
-                              }
-                            </p>
-                          </td>
-                        </tr>
-                      ) : 
-                        currentSolicitudes.map((solicitud) => (
-                          <tr key={solicitud.id_solicitud} className="hover:bg-white/10 transition-colors">
-                            <td className="px-4 py-3">
-                              <div className="text-white font-bold text-sm">{solicitud.folio || '-'}</div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="text-white font-medium text-sm truncate max-w-[200px]">{solicitud.concepto}</div>
-                              <div className="text-white/70 text-xs mt-0.5 truncate">
-                                {solicitud.departamento}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="text-white font-semibold text-sm">
-                                {formatCurrency(solicitud.monto)}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="text-white text-sm truncate max-w-[150px]">{solicitud.cuenta_destino}</div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="text-white text-sm">
-                                {solicitud.tipo_cuenta_destino === 'Tarjeta'
-                                  ? solicitud.tipo_tarjeta || 'Tarjeta'
-                                  : solicitud.tipo_cuenta_destino || '-'}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="text-white text-sm truncate">{solicitud.banco_destino || '-'}</div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado)}`}>
-                                {getEstadoIcon(solicitud.estado)}
-                                <span className="ml-1 capitalize">{solicitud.estado}</span>
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="text-white/90 text-sm whitespace-nowrap">
-                                {formatDate(solicitud.fecha_creacion)}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="text-white/90 text-sm whitespace-nowrap">
-                                {solicitud.fecha_limite_pago ? formatDate(solicitud.fecha_limite_pago) : '-'}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              <div className="flex justify-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewDetails(solicitud)}
-                                  className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300"
-                                >
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  Ver
-                                </Button>
-                                {solicitud.estado?.toLowerCase() === 'pendiente' && (
-                                  <>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => router.push(`/dashboard/solicitante/editar-solicitud/${solicitud.id_solicitud}`)}
-                                      className="bg-yellow-500/20 text-yellow-200 border border-yellow-400/40 hover:bg-yellow-500/40 transition-all duration-300"
-                                    >
-                                      Editar
-                                    </Button>
-                                    <Button
-                                      variant="danger"
-                                      size="sm"
-                                      onClick={() => { setSolicitudAEliminar(solicitud); setDeleteModalOpen(true); }}
-                                      className="bg-red-500/20 text-red-200 border border-red-400/40 hover:bg-red-500/40 transition-all duration-300"
-                                    >
-                                      Eliminar
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      }
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mejoras de paginación visual */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between px-6 py-6 border-t border-white/10 gap-6 bg-gradient-to-r from-blue-900/30 to-blue-700/20">
-                  <div className="text-white/90 text-base font-medium">
-                    Mostrando <span className="font-bold text-blue-200">{filteredSolicitudes.length === 0 ? 0 : startIndex + 1}-{endIndex}</span> de <span className="font-bold text-blue-200">{filteredSolicitudes.length}</span>
-                  </div>
-                  {totalPages > 1 && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setCurrentPage(1)}
-                        disabled={currentPage === 1}
-                        className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-400/40 shadow-sm ${currentPage === 1 ? 'bg-gray-400/30 text-white/40 cursor-not-allowed' : 'bg-blue-700/80 text-white hover:bg-blue-800/90'}`}
-                      >Primera</button>
-                      <button
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-400/40 shadow-sm ${currentPage === 1 ? 'bg-gray-400/30 text-white/40 cursor-not-allowed' : 'bg-blue-700/80 text-white hover:bg-blue-800/90'}`}
-                      >Anterior</button>
-                      <span className="text-white/90 text-base font-semibold px-2">Página <span className="text-blue-200">{currentPage}</span> de <span className="text-blue-200">{totalPages}</span></span>
-                      <button
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                        className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-400/40 shadow-sm ${currentPage === totalPages ? 'bg-gray-400/30 text-white/40 cursor-not-allowed' : 'bg-blue-700/80 text-white hover:bg-blue-800/90'}`}
-                      >Siguiente</button>
-                      <button
-                        onClick={() => setCurrentPage(totalPages)}
-                        disabled={currentPage === totalPages}
-                        className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-400/40 shadow-sm ${currentPage === totalPages ? 'bg-gray-400/30 text-white/40 cursor-not-allowed' : 'bg-blue-700/80 text-white hover:bg-blue-800/90'}`}
-                      >Última</button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Modal de detalles */}
-              {selectedSolicitud && (
-                <SolicitudDetailModal
-                  solicitud={selectedSolicitud}
-                  isOpen={isDetailModalOpen}
-                  onClose={() => {
-                    setIsDetailModalOpen(false);
-                    setSelectedSolicitud(null);
-                  }}
-                />
-              )}
-
-              {/* Modal de confirmación de eliminar */}
-              <ConfirmDeleteSoli
-                isOpen={deleteModalOpen}
-                onClose={() => setDeleteModalOpen(false)}
-                onConfirm={handleDelete}
-                title="¿Eliminar solicitud?"
-                message="Esta acción eliminará la solicitud de forma permanente. No podrás recuperarla."
-                itemName={solicitudAEliminar?.concepto || ''}
-                loading={deleting}
-              />
-            </>
+          {/* Modales */}
+          {selectedSolicitud && (
+            <SolicitudDetailModal
+              solicitud={selectedSolicitud}
+              isOpen={isDetailModalOpen}
+              onClose={() => {
+                setIsDetailModalOpen(false);
+                setSelectedSolicitud(null);
+              }}
+            />
           )}
+
+          <ConfirmDeleteSoli
+            isOpen={deleteModalOpen}
+            onClose={() => setDeleteModalOpen(false)}
+            onConfirm={handleDelete}
+            title="¿Eliminar solicitud?"
+            message="Esta acción eliminará la solicitud de forma permanente. No podrás recuperarla."
+            itemName={solicitudAEliminar?.concepto || ''}
+            loading={deleting}
+          />
+
+          {/* Modal de Exportación */}
+          <ExportModal
+            isOpen={showExportModal}
+            onClose={() => setShowExportModal(false)}
+            title="Exportar Mis Solicitudes"
+            description="Selecciona el formato y filtro deseado para exportar tus solicitudes"
+            onExportPDF={(filter) => handleExport('pdf', filter)}
+            onExportExcel={(filter) => handleExport('excel', filter)}
+            onExportCSV={(filter) => handleExport('csv', filter)}
+          />
         </div>
       </SolicitanteLayout>
     </ProtectedRoute>

@@ -225,11 +225,11 @@ export default function MisViaticosPage() {
                   <select
                     value={exportFormat}
                     onChange={e => setExportFormat(e.target.value)}
-                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
+                    className="text-bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
                   >
-                    <option value="pdf">PDF</option>
-                    <option value="excel">Excel</option>
-                    <option value="csv">CSV</option>
+                    <option value="pdf" className="text-black">PDF</option>
+                    <option value="excel" className="text-black">Excel</option>
+                    <option value="csv" className="text-black">CSV</option>
                   </select>
                 </div>
                 <div className="flex items-center gap-2 px-2 border-l border-white/10">
@@ -239,11 +239,11 @@ export default function MisViaticosPage() {
                     onChange={e => setExportRango(e.target.value)}
                     className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
                   >
-                    <option value="dia">Último día</option>
-                    <option value="semana">Última semana</option>
-                    <option value="mes">Último mes</option>
-                    <option value="año">Último año</option>
-                    <option value="total">Todo el historial</option>
+                    <option value="dia" className="text-black">Último día</option>
+                    <option value="semana" className="text-black">Última semana</option>
+                    <option value="mes" className="text-black">Último mes</option>
+                    <option value="año" className="text-black">Último año</option>
+                    <option value="total" className="text-black">Todo el historial</option>
                   </select>
                 </div>
                 <Button

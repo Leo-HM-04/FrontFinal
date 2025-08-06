@@ -45,6 +45,56 @@ interface SolicitanteLayoutProps {
 }
 
 export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
+  // Estado para el contador de notificaciones no leídas
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Función para obtener el token
+  const getToken = () => {
+    let token = undefined;
+    try {
+      token = localStorage.getItem('auth_token') || undefined;
+    } catch {}
+    if (!token) {
+      try {
+        token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+      } catch {}
+    }
+    return token;
+  };
+
+  // Llamada para obtener el número de notificaciones no leídas
+  const fetchUnreadCount = React.useCallback(async () => {
+    const token = getToken();
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/solicitante`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : ''
+        }
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        const count = data.filter((n: any) => !n.leida).length;
+        setUnreadCount(count);
+      }
+    } catch (e) {
+      setUnreadCount(0);
+    }
+  }, []);
+
+  // Refrescar el contador cuando se cierre el modal de notificaciones
+  React.useEffect(() => {
+    const handler = () => fetchUnreadCount();
+    window.addEventListener('refreshSolicitanteNotificationsCount', handler);
+    return () => window.removeEventListener('refreshSolicitanteNotificationsCount', handler);
+  }, [fetchUnreadCount]);
+
+  // Cargar el contador al montar el layout
+  React.useEffect(() => {
+    fetchUnreadCount();
+    // Opcional: puedes agregar un polling aquí si quieres refrescar cada cierto tiempo
+    // const interval = setInterval(fetchUnreadCount, 60000);
+    // return () => clearInterval(interval);
+  }, [fetchUnreadCount]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
@@ -100,8 +150,31 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
               style={{border: 'none', boxShadow: 'none', outline: 'none'}}>
               <Menu className="w-7 h-7" />
             </button>
-            {/* Notificaciones del solicitante */}
-            <SolicitanteNotifications open={false} onClose={() => {}} />
+            {/* Notificaciones del solicitante con badge */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  // Abrir el modal de notificaciones (delegado al componente)
+                  const evt = new CustomEvent('openSolicitanteNotifications');
+                  window.dispatchEvent(evt);
+                  // Limpiar el contador visualmente (opcional)
+                  setUnreadCount(0);
+                }}
+                aria-label="Ver notificaciones"
+                className="relative w-12 h-12 flex items-center justify-center rounded-full bg-transparent transition-colors duration-200 focus:outline-none hover:bg-white/20"
+              >
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 font-bold shadow">
+                    {unreadCount > 99 ? '+99' : unreadCount}
+                  </span>
+                )}
+              </button>
+              {/* El modal real sigue siendo renderizado */}
+              <SolicitanteNotifications open={false} onClose={() => {}} />
+            </div>
           </div>
         </div>
       </header>

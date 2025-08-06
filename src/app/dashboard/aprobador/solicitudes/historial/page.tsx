@@ -134,24 +134,6 @@ export default function HistorialSolicitudesPage() {
                   Total: {totalItems} solicitudes procesadas
                 </p>
               </div>
-              <div className="flex gap-2 items-center">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Buscar por nombre, departamento o estado..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <Eye className="absolute left-2 top-2.5 w-5 h-5 text-white/60" />
-                </div>
-                <Button
-                  onClick={openExportModal}
-                  className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 flex items-center"
-                >
-                  <FileText className="w-4 h-4 mr-2" /> Exportar
-                </Button>
-              </div>
             </div>
           </div>
 
@@ -182,24 +164,6 @@ export default function HistorialSolicitudesPage() {
               <div className="ml-4 min-w-0">
                 <p className="text-sm font-medium text-white/80 truncate">Rechazadas</p>
                 <p className="text-2xl font-bold text-white truncate">{rechazadas.length}</p>
-              </div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 flex items-center min-w-0">
-              <div className="p-3 rounded-full bg-blue-500/20 flex-shrink-0">
-                <BarChart2 className="w-8 h-8 text-blue-300" />
-              </div>
-              <div className="ml-4 min-w-0">
-                <p className="text-sm font-medium text-white/80 truncate">Total Aprobado</p>
-                <p className="text-2xl font-bold text-white truncate">{formatCurrency(totalAprobado)}</p>
-              </div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 flex items-center min-w-0">
-              <div className="p-3 rounded-full bg-red-500/20 flex-shrink-0">
-                <UserX className="w-8 h-8 text-red-400" />
-              </div>
-              <div className="ml-4 min-w-0">
-                <p className="text-sm font-medium text-white/80 truncate">Total Rechazado</p>
-                <p className="text-2xl font-bold text-white truncate">{formatCurrency(totalRechazado)}</p>
               </div>
             </div>
           </div>

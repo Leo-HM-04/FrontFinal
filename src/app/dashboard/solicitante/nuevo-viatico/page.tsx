@@ -152,83 +152,62 @@ export default function NuevoViaticoPage() {
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="max-w-7xl mx-auto bg-white/90 rounded-2xl shadow-lg px-24 py-10 mt-8">
-          <h1 className="text-3xl font-extrabold text-blue-800 mb-8 tracking-tight">Nuevo Viático</h1>
+        <div className="max-w-screen-2xl mx-auto bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-2xl shadow-xl px-10 py-4 mt-8">
+          <h1 className="text-4xl font-extrabold text-blue-900 mb-4 tracking-tight text-center drop-shadow">Nuevo Viático</h1>
           {mensajeGlobal && (
-            <div className={`mb-6 text-center font-bold text-lg ${exito ? 'text-green-700' : 'text-red-700'}`}>{mensajeGlobal}</div>
+            <div className={`mb-4 flex items-center justify-center gap-3 text-center font-bold text-lg px-6 py-3 rounded-xl shadow-lg drop-shadow-lg border-2 ${exito ? 'bg-green-50 border-green-400 text-green-800' : 'bg-red-50 border-red-400 text-red-800'}`}>
+              {exito ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" /></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 9l-6 6M9 9l6 6" /></svg>
+              )}
+              <span>{mensajeGlobal}</span>
+            </div>
           )}
           <form onSubmit={handleSubmitTodos}>
             {formularios.map((f, idx) => (
               <div
                 key={idx}
-                className="relative grid grid-cols-1 md:grid-cols-3 gap-x-14 gap-y-4 mb-10 border border-blue-200 bg-white/80 rounded-xl shadow-sm px-4 pt-8 pb-6"
+                className="relative mb-4 border border-blue-200 bg-white/95 rounded-xl shadow-lg px-6 pt-2 pb-2"
               >
                 {/* Identificador del formulario */}
-                <div className="absolute -top-5 left-4 bg-blue-700 text-white text-xs font-bold px-4 py-1 rounded-full shadow-md select-none">Viático {idx + 1}</div>
+                <div className="absolute -top-4 left-6 bg-blue-700 text-white text-base font-bold px-4 py-1 rounded-full shadow-lg select-none">Viático {idx + 1}</div>
                 {formularios.length > 1 && (
                   <button
                     type="button"
                     title="Eliminar este formulario"
                     onClick={() => handleEliminar(idx)}
-                    className="absolute top-2 right-4 z-10 flex items-center gap-1 px-3 py-1 rounded-md bg-red-100 text-red-700 hover:bg-red-200 font-semibold text-xs shadow transition"
+                    className="text-red-700 absolute top-3 right-6 z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 font-semibold text-sm shadow transition"
                   >
-                    <FaTrash className="w-3 h-3" /> Eliminar
+                    <FaTrash className="w-4 h-4" /> Eliminar
                   </button>
                 )}
-                {/* 1. Tipo de cuenta y datos bancarios */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Tipo de Cuenta Destino *</label>
-                  <select
-                    name="tipo_cuenta_destino"
-                    onChange={e => {
+                {/* Bloque: Datos bancarios */}
+                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Tipo de Cuenta Destino *</label>
+                    <select name="tipo_cuenta_destino" onChange={e => {
                       const nuevos = [...formularios];
-                      nuevos[idx].form = { 
-                        ...nuevos[idx].form, 
-                        [e.target.name]: e.target.value,
-                        cuenta_destino: '', // Reset cuenta_destino when type changes
-                        tipo_tarjeta: e.target.value === 'tarjeta' ? '' : undefined // Reset tipo_tarjeta
-                      };
-                      nuevos[idx].errors = {}; // Clear previous errors
+                      nuevos[idx].form = { ...nuevos[idx].form, [e.target.name]: e.target.value, cuenta_destino: '', tipo_tarjeta: e.target.value === 'tarjeta' ? '' : undefined };
+                      nuevos[idx].errors = {};
                       setFormularios(nuevos);
-                    }}
-                    required
-                    className="input input-bordered text-black uppercase"
-                    defaultValue=""
-                  >
-                    <option value="" disabled>Tipo de pago</option>
-                    <option value="clabe">CLABE</option>
-                    <option value="tarjeta">Tarjeta</option>
-                  </select>
-                  {formularios[idx].errors?.tipo_cuenta_destino && (
-                    <span className="text-red-500 text-sm">{formularios[idx].errors.tipo_cuenta_destino}</span>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">
-                    Cuenta destino
-                    {formularios[idx].form.tipo_cuenta_destino === 'clabe' && ' (18 dígitos)'}
-                    {formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && ' (16 dígitos)'}
-                  </label>
-                  <input 
-                    name="cuenta_destino" 
-                    placeholder={
-                      formularios[idx].form.tipo_cuenta_destino === 'clabe' ? "CLABE (18 dígitos)" :
-                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? "Número de tarjeta (16 dígitos)" :
-                      "Cuenta destino"
-                    }
-                    value={formularios[idx].form.cuenta_destino || ''}
-                    onChange={e => {
-                      const value = e.target.value.replace(/\D/g, ''); // Solo permite dígitos
+                    }} required className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="">
+                      <option value="" disabled>Tipo de pago</option>
+                      <option value="clabe">CLABE</option>
+                      <option value="tarjeta">Tarjeta</option>
+                    </select>
+                    {formularios[idx].errors?.tipo_cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.tipo_cuenta_destino}</span>)}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Cuenta destino {formularios[idx].form.tipo_cuenta_destino === 'clabe' && ' (18 dígitos)'}{formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && ' (16 dígitos)'}</label>
+                    <input name="cuenta_destino" placeholder={formularios[idx].form.tipo_cuenta_destino === 'clabe' ? "CLABE (18 dígitos)" : formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? "Número de tarjeta (16 dígitos)" : "Cuenta destino"} value={formularios[idx].form.cuenta_destino || ''} onChange={e => {
+                      const value = e.target.value.replace(/\D/g, '');
                       const nuevos = [...formularios];
                       nuevos[idx].form = { ...nuevos[idx].form, cuenta_destino: value };
-                      
-                      // Validaciones específicas
                       if (nuevos[idx].form.tipo_cuenta_destino === 'clabe') {
                         if (value.length > 0 && value.length !== 18) {
                           nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'La CLABE debe tener 18 dígitos' };
                         } else {
-                          // Crear un nuevo objeto errors omitiendo la propiedad cuenta_destino
                           const errorsObj = { ...(nuevos[idx].errors || {}) };
                           delete errorsObj.cuenta_destino;
                           nuevos[idx].errors = errorsObj;
@@ -237,158 +216,118 @@ export default function NuevoViaticoPage() {
                         if (value.length > 0 && value.length !== 16) {
                           nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de tarjeta debe tener 16 dígitos' };
                         } else {
-                          // Crear un nuevo objeto errors omitiendo la propiedad cuenta_destino
                           const errorsObj = { ...(nuevos[idx].errors || {}) };
                           delete errorsObj.cuenta_destino;
                           nuevos[idx].errors = errorsObj;
                         }
                       }
-                      
                       setFormularios(nuevos);
-                    }}
-                    maxLength={formularios[idx].form.tipo_cuenta_destino === 'clabe' ? 18 : 
-                             formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? 16 : undefined}
-                    required 
-                    className={`input input-bordered ${formularios[idx].errors?.cuenta_destino ? 'border-red-500' : ''}`}
-                  />
-                  {formularios[idx].errors?.cuenta_destino && (
-                    <span className="text-red-500 text-sm">{formularios[idx].errors.cuenta_destino}</span>
-                  )}
-                </div>
-
-                {formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && (
-                  <div className="flex flex-col gap-2">
-                    <label className="text-blue-900 font-medium">Tipo de tarjeta</label>
-                    <select
-                      name="tipo_tarjeta"
-                      onChange={e => handleChange(idx, e)}
-                      className="input input-bordered text-black uppercase"
-                      defaultValue=""
-                      required
-                    >
-                      <option value="" disabled>SELECCIONA TIPO DE TARJETA</option>
-                      <option value="debito">DÉBITO</option>
-                      <option value="credito">CRÉDITO</option>
-                    </select>
-                    {formularios[idx].errors?.tipo_tarjeta && (
-                      <span className="text-red-500 text-sm">{formularios[idx].errors.tipo_tarjeta}</span>
-                    )}
+                    }} maxLength={formularios[idx].form.tipo_cuenta_destino === 'clabe' ? 18 : formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? 16 : undefined} required className={`text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 ${formularios[idx].errors?.cuenta_destino ? 'border-red-500' : ''}`} />
+                    {formularios[idx].errors?.cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.cuenta_destino}</span>)}
                   </div>
-                )}
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Banco destino</label>
-                  <select
-                    name="banco_destino"
-                    onChange={e => handleChange(idx, e)}
-                    className="input input-bordered text-black uppercase"
-                    defaultValue=""
-                  >
-                    <option value="" className="text-black">Selecciona banco</option>
-                      {bancoOptions.map(banco => (
-                        <option key={banco} value={banco} className="text-black">{banco}</option>
-                      ))}
-                  </select>
+                  {formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-blue-900 font-bold text-base">Tipo de tarjeta</label>
+                      <select name="tipo_tarjeta" onChange={e => handleChange(idx, e)} className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="" required>
+                        <option value="" disabled>SELECCIONA TIPO DE TARJETA</option>
+                        <option value="debito">DÉBITO</option>
+                        <option value="credito">CRÉDITO</option>
+                      </select>
+                      {formularios[idx].errors?.tipo_tarjeta && (<span className="text-red-500 text-sm">{formularios[idx].errors.tipo_tarjeta}</span>)}
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Banco destino</label>
+                    <select name="banco_destino" onChange={e => handleChange(idx, e)} className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="">
+                      <option value="" className="text-black">Selecciona banco</option>
+                      {bancoOptions.map(banco => (<option key={banco} value={banco} className="text-black">{banco}</option>))}
+                    </select>
+                  </div>
                 </div>
 
-                {/* 2. Monto */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Monto</label>
-                  <input name="monto" placeholder="Monto" type="number" onChange={e => handleChange(idx, e)} required className="input input-bordered" />
+                {/* Bloque: Datos del pago */}
+                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Monto</label>
+                    <input name="monto" placeholder="Monto" type="number" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Departamento</label>
+                    <select name="departamento" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="">
+                      <option value="" disabled>SELECCIONA UN DEPARTAMENTO</option>
+                      <option value="contabilidad">CONTABILIDAD</option>
+                      <option value="facturacion">FACTURACIÓN</option>
+                      <option value="cobranza">COBRANZA</option>
+                      <option value="vinculacion">VINCULACIÓN</option>
+                      <option value="administracion">ADMINISTRACIÓN</option>
+                      <option value="ti">TI</option>
+                      <option value="automatizaciones">AUTOMATIZACIONES</option>
+                      <option value="comercial">COMERCIAL</option>
+                      <option value="atencion a clientes">ATENCIÓN A CLIENTES</option>
+                      <option value="tesoreria">TESORERÍA</option>
+                      <option value="nomina">NÓMINA</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Fecha límite de pago</label>
+                    <input name="fecha_limite_pago" type="date" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Concepto</label>
+                    <input name="concepto" placeholder="Concepto" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Descripción del Pago</label>
+                    <input name="tipo_pago_descripcion" placeholder="Descripción del tipo de pago" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                  </div>
                 </div>
 
-                {/* 3. Departamento */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Departamento</label>
-                  <select
-                    name="departamento"
-                    onChange={e => handleChange(idx, e)}
-                    required
-                    className="input input-bordered text-black uppercase"
-                    defaultValue=""
-                  >
-                    <option value="" disabled>SELECCIONA UN DEPARTAMENTO</option>
-                    <option value="contabilidad">CONTABILIDAD</option>
-                    <option value="facturacion">FACTURACIÓN</option>
-                    <option value="cobranza">COBRANZA</option>
-                    <option value="vinculacion">VINCULACIÓN</option>
-                    <option value="administracion">ADMINISTRACIÓN</option>
-                    <option value="ti">TI</option>
-                    <option value="automatizaciones">AUTOMATIZACIONES</option>
-                    <option value="comercial">COMERCIAL</option>
-                    <option value="atencion a clientes">ATENCIÓN A CLIENTES</option>
-                    <option value="tesoreria">TESORERÍA</option>
-                    <option value="nomina">NÓMINA</option>
-                  </select>
+                {/* Bloque: Persona y empresa */}
+                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Empresa a Pagar</label>
+                    <input name="empresa_a_pagar" placeholder="Nombre de la empresa" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Nombre de la Persona *</label>
+                    <input name="nombre_persona" placeholder="Nombre completo" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                  </div>
                 </div>
 
-                {/* 4. Fecha límite de pago */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Fecha límite de pago</label>
-                  <input name="fecha_limite_pago" type="date" onChange={e => handleChange(idx, e)} required className="input input-bordered" />
+                {/* Bloque: Archivo comprobante */}
+                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Archivo comprobante</label>
+                    <input type="file" name="viatico_url" onChange={e => handleFile(idx, e)} required className="file-input file-input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 text-blue-900 bg-white placeholder-blue-700" />
+                  </div>
+                  {f.mensaje && <div className="text-center text-blue-800 font-medium mt-2">{f.mensaje}</div>}
+                  <input name="tipo_pago" value="viaticos" readOnly hidden />
                 </div>
-
-                {/* 5. Concepto */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Concepto</label>
-                  <input name="concepto" placeholder="Concepto" onChange={e => handleChange(idx, e)} required className="input input-bordered" />
-                </div>
-
-                {/* Nuevos campos */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Tipo de Pago (Descripción)</label>
-                  <input 
-                    name="tipo_pago_descripcion" 
-                    placeholder="Descripción del tipo de pago" 
-                    onChange={e => handleChange(idx, e)} 
-                    className="input input-bordered" 
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Empresa a Pagar</label>
-                  <input 
-                    name="empresa_a_pagar" 
-                    placeholder="Nombre de la empresa" 
-                    onChange={e => handleChange(idx, e)} 
-                    className="input input-bordered" 
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-blue-900 font-medium">Nombre de la Persona *</label>
-                  <input 
-                    name="nombre_persona" 
-                    placeholder="Nombre completo" 
-                    onChange={e => handleChange(idx, e)} 
-                    required
-                    className="input input-bordered" 
-                  />
-                </div>
-
-                {/* 6. Archivo comprobante */}
-                <div className="flex flex-col gap-2 md:col-span-3">
-                  <label className="text-blue-900 font-medium">Archivo comprobante</label>
-                  <input type="file" name="viatico_url" onChange={e => handleFile(idx, e)} required className="file-input file-input-bordered" />
-                </div>
-                {f.mensaje && <div className="md:col-span-3 text-center text-blue-800 font-medium mt-2">{f.mensaje}</div>}
-                <input name="tipo_pago" value="viaticos" readOnly hidden />
               </div>
             ))}
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
+            <div className="flex flex-row justify-between items-center gap-2 mt-2">
               <button
                 type="button"
-                className="btn btn-outline px-6 py-2 rounded-lg border-blue-700 text-blue-700 font-semibold hover:bg-blue-50 hover:border-blue-800 transition"
+                className="btn btn-outline px-4 py-1 rounded-lg border-blue-700 text-blue-700 text-base font-bold hover:bg-blue-100 hover:border-blue-800 transition shadow"
                 onClick={handleAgregarOtro}
               >
-                Agregar otro
+                + Agregar otro
               </button>
-              <button
-                type="submit"
-                className="btn btn-primary px-8 py-2 rounded-lg bg-blue-700 text-white font-semibold hover:bg-blue-800 transition"
-              >
-                Crear todos
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="btn btn-outline px-6 py-1 rounded-lg border-gray-400 text-gray-700 text-base font-bold hover:bg-gray-100 hover:border-gray-600 transition shadow"
+                  onClick={() => router.push('/dashboard/solicitante/mis-viaticos')}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary px-6 py-1 rounded-lg bg-blue-700 text-white text-base font-bold hover:bg-blue-800 transition shadow"
+                >
+                  Crear todos
+                </button>
+              </div>
             </div>
           </form>
         </div>

@@ -43,6 +43,13 @@ export default function SolicitanteNotifications({ open, onClose }: SolicitanteN
 
   const [openModal, setOpenModal] = useState(open);
 
+  // Permitir abrir el modal desde un evento global
+  useEffect(() => {
+    const handler = () => setOpenModal(true);
+    window.addEventListener('openSolicitanteNotifications', handler);
+    return () => window.removeEventListener('openSolicitanteNotifications', handler);
+  }, []);
+
   const getToken = () => {
     let token = undefined;
     try {
@@ -121,6 +128,8 @@ export default function SolicitanteNotifications({ open, onClose }: SolicitanteN
   const handleOpen = () => setOpenModal(true);
   const handleClose = () => {
     setOpenModal(false);
+    // Notificar al layout que debe refrescar el contador
+    window.dispatchEvent(new CustomEvent('refreshSolicitanteNotificationsCount'));
     if (onClose) onClose();
   };
 
@@ -140,22 +149,6 @@ export default function SolicitanteNotifications({ open, onClose }: SolicitanteN
         theme="light"
         className="!z-[9999]"
       />
-      <button
-        onClick={handleOpen}
-        aria-label="Ver notificaciones"
-        className={`relative w-12 h-12 flex items-center justify-center rounded-full bg-transparent transition-colors duration-200 focus:outline-none hover:bg-white/20`}
-      >
-        {unreadCount > 0 ? (
-          <BellRing className="w-7 h-7 text-white" />
-        ) : (
-          <Bell className="w-7 h-7 text-white" />
-        )}
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 font-bold shadow">
-            {unreadCount}
-          </span>
-        )}
-      </button>
       <Transition.Root show={openModal} as={Fragment}>
         <Dialog as="div" className="relative z-[60]" onClose={handleClose}>
           <Transition.Child

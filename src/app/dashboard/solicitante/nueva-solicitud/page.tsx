@@ -280,36 +280,98 @@ export default function NuevaSolicitudPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-10 max-w-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0 w-full">
-                {/* Columna izquierda: datos bancarios */}
-                <div className="flex-1 space-y-8">
-                  <div className="mb-0">
+              {/* SECCIÓN 1: INFORMACIÓN BÁSICA - 2 columnas */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Departamento */}
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">
+                    <Building className="w-4 h-4 inline mr-2" />
+                    Departamento *
+                  </label>
+                  <select
+                    name="departamento"
+                    value={formData.departamento}
+                    onChange={handleInputChange}
+                    required
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.departamento ? 'border-red-400' : ''}`}
+                  >
+                    <option value="" className="text-gray-900">Seleccionar departamento</option>
+                    {departamentoOptions.map(dept => (
+                      <option key={dept.value} value={dept.value} className="text-gray-900">
+                        {dept.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.departamento && <span className="text-red-400 text-sm mt-1 block">{errors.departamento}</span>}
+                </div>
+
+                {/* Monto */}
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">
+                    <DollarSign className="w-4 h-4 inline mr-2" />
+                    Monto *
+                  </label>
+                  <NumericFormat
+                    value={formData.monto}
+                    name="monto"
+                    thousandSeparator="," 
+                    decimalSeparator="."
+                    allowNegative={false}
+                    allowLeadingZeros={false}
+                    decimalScale={2}
+                    fixedDecimalScale
+                    placeholder="0.00"
+                    required
+                    onValueChange={({ value }) => {
+                      dispatch({ type: 'SET_FIELD', field: 'monto', value });
+                      if (!value) {
+                        setErrors((prev) => ({ ...prev, monto: 'Este campo es obligatorio' }));
+                      } else {
+                        setErrors((prev) => ({ ...prev, monto: undefined }));
+                      }
+                    }}
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
+                  />  
+                  {errors.monto && <span className="text-red-400 text-sm mt-1 block">{errors.monto}</span>}
+                </div>
+              </div>
+
+              {/* SECCIÓN 2: INFORMACIÓN BANCARIA - 3 columnas para mejor aprovechamiento */}
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Información Bancaria
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Tipo de Cuenta */}
+                  <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      <CreditCard className="w-4 h-4 inline mr-2" />
-                      Tipo de Cuenta Destino *
+                      Tipo de Cuenta *
                     </label>
                     <select
                       name="tipo_cuenta_destino"
                       value={formData.tipo_cuenta_destino}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                     >
                       <option value="CLABE" className="text-black">CLABE</option>
                       <option value="Tarjeta" className="text-black">Tarjeta</option>
                     </select>
                   </div>
+
+                  {/* Tipo de Tarjeta (condicional) */}
                   {formData.tipo_cuenta_destino === 'Tarjeta' && (
                     <div>
                       <label className="block text-base font-medium text-white/90 mb-3">
-                        Tipo de Tarjeta
+                        Tipo de Tarjeta *
                       </label>
                       <select
                         name="tipo_tarjeta"
                         value={formData.tipo_tarjeta}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                       >
                         <option value="" className="text-black">Selecciona tipo</option>
                         <option value="Débito" className="text-black">Débito</option>
@@ -317,7 +379,9 @@ export default function NuevaSolicitudPage() {
                       </select>
                     </div>
                   )}
-                  <div className="mb-0">
+
+                  {/* Banco */}
+                  <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
                       Banco (opcional)
                     </label>
@@ -325,7 +389,7 @@ export default function NuevaSolicitudPage() {
                       name="banco_destino"
                       value={formData.banco_destino}
                       onChange={handleInputChange}
-                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                     >
                       <option value="" className="text-black">Selecciona banco</option>
                       {bancoOptions.map(banco => (
@@ -333,7 +397,9 @@ export default function NuevaSolicitudPage() {
                       ))}
                     </select>
                   </div>
-                  <div className="mb-0">
+
+                  {/* Cuenta Destino - Ocupa más espacio */}
+                  <div className="md:col-span-2 lg:col-span-3">
                     <label className="block text-base font-medium text-white/90 mb-3">
                       <CreditCard className="w-4 h-4 inline mr-2" />
                       Cuenta Destino *
@@ -342,95 +408,56 @@ export default function NuevaSolicitudPage() {
                       type="text"
                       name="cuenta_destino"
                       value={formData.cuenta_destino}
-                        onChange={e => {
-                          const maxLen = cuentaConfig.maxLength;
-                          const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
-                          dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
-                          setCuentaValida(null);
-                          // Solo mostrar error si la longitud es incorrecta o el patrón no se cumple
-                          if (value.length > 0 && value.length < maxLen) {
-                            setErrors((prev) => ({ ...prev, cuenta_destino: `Debe tener exactamente ${maxLen} dígitos.` }));
-                          } else if (value.length === maxLen && !new RegExp(cuentaConfig.pattern).test(value)) {
-                            setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
-                          } else {
-                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
-                          }
-                        }}
+                      onChange={e => {
+                        const maxLen = cuentaConfig.maxLength;
+                        const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
+                        setCuentaValida(null);
+                        if (value.length > 0 && value.length < maxLen) {
+                          setErrors((prev) => ({ ...prev, cuenta_destino: `Debe tener exactamente ${maxLen} dígitos.` }));
+                        } else if (value.length === maxLen && !new RegExp(cuentaConfig.pattern).test(value)) {
+                          setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
+                        } else {
+                          setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                        }
+                      }}
                       onBlur={e => verificarCuentaDestino(e.target.value)}
                       placeholder={cuentaConfig.placeholder}
                       required
                       maxLength={cuentaConfig.maxLength}
                       inputMode="numeric"
                       autoComplete="off"
-                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.cuenta_destino ? 'border-red-400' : ''}`}
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide ${errors.cuenta_destino ? 'border-red-400' : ''}`}
                     />
-                    {checkingCuenta && (
-                      <span className="text-blue-300 text-sm ml-2">Verificando cuenta...</span>
+                    {/* Estados de validación */}
+                    <div className="mt-2 flex items-center gap-4">
+                      {checkingCuenta && (
+                        <span className="text-blue-300 text-sm flex items-center">
+                          <svg className="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                          </svg>
+                          Verificando cuenta...
+                        </span>
+                      )}
+                      {cuentaValida === false && !checkingCuenta && (
+                        <span className="text-red-400 text-sm">❌ Cuenta no válida</span>
+                      )}
+                      {cuentaValida === true && !checkingCuenta && (
+                        <span className="text-green-400 text-sm">✅ Cuenta válida</span>
+                      )}
+                    </div>
+                    {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
+                      <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
                     )}
-                    {cuentaValida === false && !checkingCuenta && (
-                      <span className="text-red-400 text-sm ml-2">Cuenta no válida o no existe</span>
-                    )}
-                    {cuentaValida === true && !checkingCuenta && (
-                      <span className="text-green-400 text-sm ml-2">Cuenta válida</span>
-                    )}
-                    {/* Solo mostrar el error si el campo tiene valor */}
-                        {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
-                          <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
-                        )}
                   </div>
                 </div>
-                {/* Columna derecha: datos de la solicitud */}
-                <div className="flex-1 space-y-8">
-                  <div className="mb-0">
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      <Building className="w-4 h-4 inline mr-2" />
-                      Departamento *
-                    </label>
-                    <select
-                      name="departamento"
-                      value={formData.departamento}
-                      onChange={handleInputChange}
-                      required
-                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.departamento ? 'border-red-400' : ''}`}
-                    >
-                      <option value="" className="text-gray-900">Seleccionar departamento</option>
-                      {departamentoOptions.map(dept => (
-                        <option key={dept.value} value={dept.value} className="text-gray-900">
-                          {dept.label}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.departamento && <span className="text-red-400 text-sm mt-1 block">{errors.departamento}</span>}
-                  </div>
-                  <div className="mb-0">
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      <DollarSign className="w-4 h-4 inline mr-2" />
-                      Monto *
-                    </label>
-                    <NumericFormat
-                      value={formData.monto}
-                      name="monto"
-                      thousandSeparator="," 
-                      decimalSeparator="."
-                      allowNegative={false}
-                      allowLeadingZeros={false}
-                      decimalScale={2}
-                      fixedDecimalScale
-                      placeholder="0.00"
-                      required
-                      onValueChange={({ value }) => {
-                        dispatch({ type: 'SET_FIELD', field: 'monto', value });
-                        if (!value) {
-                          setErrors((prev) => ({ ...prev, monto: 'Este campo es obligatorio' }));
-                        } else {
-                          setErrors((prev) => ({ ...prev, monto: undefined }));
-                        }
-                      }}
-                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
-                    />  
-                    {errors.monto && <span className="text-red-400 text-sm mt-1 block">{errors.monto}</span>}
-                  </div>
-                  <div className="mb-0">
+              </div>
+
+              {/* SECCIÓN 3: INFORMACIÓN DEL PAGO - 2 columnas */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Tipo de Pago */}
+                <div>
                   <label className="block text-base font-medium text-white/90 mb-3">
                     Tipo de Pago
                   </label>
@@ -447,57 +474,54 @@ export default function NuevaSolicitudPage() {
                       </option>
                     ))}
                   </select>
-                  {/* Mostrar descripción solo si hay tipo de pago seleccionado y no está vacío */}
-                  {formData.tipo_pago !== '' && (
-                    <div className="mt-6">
-                      <label className="block text-base font-medium text-white/90 mb-3">
-                        Descripción del tipo de pago
-                      </label>
-                      <textarea
-                        name="tipo_pago_descripcion"
-                        value={formData.tipo_pago_descripcion}
-                        onChange={handleInputChange}
-                        placeholder="Agrega una descripción para el tipo de pago..."
-                        rows={3}
-                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none text-base"
-                      />
-                    </div>
-                  )}
-                  </div>
-                  <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      <Calendar className="w-4 h-4 inline mr-2" />
-                      Fecha Límite de Pago *
-                    </label>
-                    <div className="relative w-full flex items-center">
-                      <DatePicker
-                        selected={fechaLimitePago}
-                        onChange={(date: Date | null) => {
-                          setFechaLimitePago(date);
-                          dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: date ? date.toISOString().split('T')[0] : '' });
-                          if (!date) {
-                            setErrors((prev) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
-                          } else {
-                            setErrors((prev) => ({ ...prev, fecha_limite_pago: undefined }));
-                          }
-                        }}
-                        dateFormat="yyyy-MM-dd"
-                        minDate={new Date()}
-                        placeholderText="Selecciona la fecha"
-                        className={`w-full px-5 py-4 pr-12 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.fecha_limite_pago ? 'border-red-400' : ''}`}
-                        calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg"
-                        locale={es}
-                      />
-                      <span className="absolute right-4 pointer-events-none">
-                        <Calendar className="w-5 h-5 text-white/70" />
-                      </span>
-                    </div>
-                    {errors.fecha_limite_pago && <span className="text-red-400 text-sm mt-1 block">{errors.fecha_limite_pago}</span>}
-                  </div>
                 </div>
+
+                {/* Fecha Límite */}
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    Fecha Límite de Pago *
+                  </label>
+                  <DatePicker
+                    selected={fechaLimitePago}
+                    onChange={(date: Date | null) => {
+                      setFechaLimitePago(date);
+                      dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: date ? date.toISOString().split('T')[0] : '' });
+                      if (!date) {
+                        setErrors((prev) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
+                      } else {
+                        setErrors((prev) => ({ ...prev, fecha_limite_pago: undefined }));
+                      }
+                    }}
+                    dateFormat="yyyy-MM-dd"
+                    minDate={new Date()}
+                    placeholderText="Selecciona la fecha"
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.fecha_limite_pago ? 'border-red-400' : ''}`}
+                    calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg"
+                    locale={es}
+                  />
+                  {errors.fecha_limite_pago && <span className="text-red-400 text-sm mt-1 block">{errors.fecha_limite_pago}</span>}
+                </div>
+
+                {/* Descripción del tipo de pago (condicional) - Ocupa ambas columnas */}
+                {formData.tipo_pago !== '' && (
+                  <div className="lg:col-span-2">
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Descripción del tipo de pago
+                    </label>
+                    <textarea
+                      name="tipo_pago_descripcion"
+                      value={formData.tipo_pago_descripcion}
+                      onChange={handleInputChange}
+                      placeholder="Agrega una descripción para el tipo de pago..."
+                      rows={3}
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none text-base"
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Concepto */}
+              {/* SECCIÓN 4: CONCEPTO - Ancho completo */}
               <div>
                 <label className="block text-base font-medium text-white/90 mb-3">
                   <MessageSquare className="w-4 h-4 inline mr-2" />
@@ -507,99 +531,140 @@ export default function NuevaSolicitudPage() {
                   name="concepto"
                   value={formData.concepto}
                   onChange={handleInputChange}
-                  placeholder="Describe el concepto del pago..."
+                  placeholder="Describe detalladamente el concepto del pago..."
                   required
-                  rows={5}
+                  rows={4}
                   className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none text-base ${errors.concepto ? 'border-red-400' : ''}`}
                 />
                 {errors.concepto && <span className="text-red-400 text-sm mt-1 block">{errors.concepto}</span>}
               </div>
-              {/* Empresa a pagar (opcional) */}
-              <div>
-                <label className="block text-base font-medium text-white/90 mb-3">
-                  Empresa a pagar (opcional)
-                </label>
-                <input
-                  type="text"
-                  name="empresa_a_pagar"
-                  value={formData.empresa_a_pagar}
-                  onChange={handleInputChange}
-                  placeholder="Nombre de la empresa"
-                  className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
-                />
-              </div>
-              {/* Nombre de la persona (obligatorio) */}
-              <div>
-                <label className="block text-base font-medium text-white/90 mb-3">
-                  Nombre de la persona que recibe el pago *
-                </label>
-                <input
-                  type="text"
-                  name="nombre_persona"
-                  value={formData.nombre_persona}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Nombre completo de la persona"
-                  className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.nombre_persona ? 'border-red-400' : ''}`}
-                />
-                {errors.nombre_persona && <span className="text-red-400 text-sm mt-1 block">{errors.nombre_persona}</span>}
-              </div>
 
-              {/* Archivos */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
-                    <Upload className="w-4 h-4 inline mr-2" />
-                    Factura * (PDF, Excel, JPG, PNG - Máx. 5MB)
-                  </label>
-                  <input
-                    type="file"
-                    accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, 'factura_file')}
-                    required
-                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-white/30 file:text-white hover:file:bg-white/40 text-base ${errors.factura_file ? 'border-red-400' : ''}`}
-                  />
-                  {/* Previsualización instantánea del archivo seleccionado */}
-                  {formData.factura_file && (
-                    <div className="flex items-center mt-3 p-3 bg-white/10 rounded-lg">
-                      <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                      <div className="flex flex-col">
-                        <p className="text-white/80 text-sm">
-                          {formData.factura_file.name} ({(formData.factura_file.size / 1024 / 1024).toFixed(2)} MB)
-                        </p>
-                        {/* Previsualización de imagen si es jpg/png */}
-                        {formData.factura_file.type.startsWith('image/') && (
-                          <div className="mt-2 w-32 h-32 relative">
-                            <Image
-                              src={URL.createObjectURL(formData.factura_file)}
-                              alt="Previsualización"
-                              width={128}
-                              height={128}
-                              className="object-contain rounded shadow"
-                            />
-                          </div>
-                        )}
-                        {/* Previsualización de PDF/Excel: solo icono y nombre */}
-                        {(formData.factura_file.type === 'application/pdf' || formData.factura_file.type.includes('excel')) && (
-                          <div className="mt-2 flex items-center space-x-2">
-                            <FileText className="w-8 h-8 text-white/80" />
-                            <span className="text-white/70 text-xs">Archivo listo para subir</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {errors.factura_file && <span className="text-red-400 text-sm mt-1 block">{errors.factura_file}</span>}
+              {/* SECCIÓN 5: INFORMACIÓN DEL BENEFICIARIO - 2 columnas */}
+              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <Building className="w-6 h-6 mr-3" />
+                  Información del Beneficiario
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Nombre de la persona (obligatorio) */}
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      <span className="text-red-400">*</span> Nombre de la persona
+                    </label>
+                    <input
+                      type="text"
+                      name="nombre_persona"
+                      value={formData.nombre_persona}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="Nombre completo de la persona"
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200 ${errors.nombre_persona ? 'border-red-400 shadow-red-400/25 shadow-lg' : 'hover:border-white/50'}`}
+                    />
+                    {errors.nombre_persona && <span className="text-red-400 text-sm mt-1 block">{errors.nombre_persona}</span>}
+                  </div>
+
+                  {/* Empresa (opcional) */}
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Empresa a pagar (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      name="empresa_a_pagar"
+                      value={formData.empresa_a_pagar}
+                      onChange={handleInputChange}
+                      placeholder="Nombre de la empresa"
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200 hover:border-white/50"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Botones */}
-              <div className="flex justify-end space-x-6 pt-10">
+              {/* SECCIÓN 6: DOCUMENTOS - Ancho completo con previsualización mejorada */}
+              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <Upload className="w-6 h-6 mr-3" />
+                  Documentos Requeridos
+                </h3>
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-4">
+                    <span className="text-red-400">*</span> Factura 
+                    <span className="text-white/70 text-sm ml-2">(PDF, Excel, JPG, PNG - Máx. 5MB)</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange(e, 'factura_file')}
+                      required
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-white/30 file:text-white hover:file:bg-white/40 text-base transition-all duration-200 ${errors.factura_file ? 'border-red-400 shadow-red-400/25 shadow-lg' : 'hover:border-white/50'}`}
+                    />
+                  </div>
+                  
+                  {/* Previsualización mejorada */}
+                  {formData.factura_file && (
+                    <div className="mt-6 p-6 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/20 backdrop-blur-sm">
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 rounded-full bg-green-500/20 border border-green-400/30">
+                          <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <p className="text-white font-semibold text-lg">
+                                {formData.factura_file.name}
+                              </p>
+                              <p className="text-white/70 text-sm">
+                                {formData.factura_file.type === 'application/pdf' && '📄 Documento PDF'}
+                                {formData.factura_file.type.includes('excel') && '📊 Archivo Excel'}
+                                {formData.factura_file.type.startsWith('image/') && '🖼️ Imagen'}
+                              </p>
+                            </div>
+                            <span className="text-white/80 text-sm font-medium bg-white/10 px-3 py-1 rounded-full">
+                              {(formData.factura_file.size / 1024 / 1024).toFixed(2)} MB
+                            </span>
+                          </div>
+                          
+                          {/* Previsualización según tipo */}
+                          {formData.factura_file.type.startsWith('image/') && (
+                            <div className="mt-4 w-64 h-48 relative bg-white/10 rounded-lg overflow-hidden border border-white/20">
+                              <Image
+                                src={URL.createObjectURL(formData.factura_file)}
+                                alt="Previsualización"
+                                fill
+                                className="object-contain"
+                              />
+                            </div>
+                          )}
+                          
+                          {(formData.factura_file.type === 'application/pdf' || formData.factura_file.type.includes('excel')) && (
+                            <div className="mt-4 flex items-center space-x-4 p-4 bg-white/10 rounded-lg border border-white/20">
+                              <div className="p-3 rounded-lg bg-blue-500/20 border border-blue-400/30">
+                                <FileText className="w-8 h-8 text-blue-400" />
+                              </div>
+                              <div>
+                                <p className="text-white font-semibold">Archivo listo para envío</p>
+                                <p className="text-white/70 text-sm">
+                                  {formData.factura_file.type === 'application/pdf' ? 'Documento PDF' : 'Archivo Excel'} verificado y listo
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {errors.factura_file && <span className="text-red-400 text-sm mt-2 block">{errors.factura_file}</span>}
+                </div>
+              </div>
+
+              {/* Botones mejorados */}
+              <div className="flex flex-col sm:flex-row justify-end gap-4 pt-12">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.back()}
-                  className="bg-gray-600 text-white border-gray-500 hover:bg-gray-700 px-8 py-4 text-base"
+                  onClick={() => router.push('/dashboard/solicitante/mis-solicitudes')}
+                  className="bg-gray-600/80 text-white border-gray-500 hover:bg-gray-700 hover:scale-105 px-8 py-4 text-base font-medium transition-all duration-200 backdrop-blur-sm"
                 >
                   Cancelar
                 </Button>
@@ -616,7 +681,7 @@ export default function NuevaSolicitudPage() {
                     cuentaValida === false ||
                     checkingCuenta
                   }
-                  className="bg-green-600 text-white hover:bg-green-700 shadow-lg border-0 px-8 py-4 font-medium text-base flex items-center gap-2"
+                  className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:scale-105 shadow-xl border-0 px-10 py-4 font-semibold text-base flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {loading ? (
                     <>
@@ -626,7 +691,12 @@ export default function NuevaSolicitudPage() {
                       </svg>
                       Creando solicitud...
                     </>
-                  ) : 'Crear Solicitud'}
+                  ) : (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Crear Solicitud
+                    </>
+                  )}
                 </Button>
               </div>
             </form>

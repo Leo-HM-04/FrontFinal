@@ -274,24 +274,6 @@ export default function SolicitudesPendientesPage() {
                   Total: {totalItems} solicitudes por revisar
                 </p>
               </div>
-              <div className="flex flex-col md:flex-row gap-2 md:gap-4 items-end md:items-center">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Buscar por nombre o departamento..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="pl-10 pr-4 py-2 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <Search className="absolute left-2 top-2.5 w-5 h-5 text-white/60" />
-                </div>
-                <Button
-                  onClick={openExportModal}
-                  className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25"
-                >
-                  <Download className="w-4 h-4 mr-2" /> Exportar
-                </Button>
-              </div>
             </div>
           </div>
 
