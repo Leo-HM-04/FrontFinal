@@ -14,8 +14,6 @@ import {
   exportMisViaticosExcel,
   exportMisViaticosPDF
 } from '@/utils/exportMisViaticos';
-import { handleFileDownload } from '@/utils/downloadFile';
-
 
 type Viatico = BaseViatico & {
   id_viatico: number;

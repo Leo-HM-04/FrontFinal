@@ -18,6 +18,29 @@ const nextConfig = {
     },
   }),
   
+  // Configuración para optimización de imágenes
+  images: {
+    domains: ['localhost', 'cdn-icons-png.flaticon.com'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '4000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn-icons-png.flaticon.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.githubusercontent.com',
+        pathname: '/**',
+      },
+    ],
+  },
+  
   // Agregar configuración de proxy
   async rewrites() {
     return [

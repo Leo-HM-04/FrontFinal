@@ -2,6 +2,7 @@
 import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { ViaticosService } from "@/services/viaticos.service";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { SolicitanteLayout } from "@/components/layout/SolicitanteLayout";
@@ -432,11 +433,14 @@ function EditarViaticoPageInner() {
                                       style={{ minHeight: '260px' }}
                                     />
                                   ) : (
-                                    <img
+                                    <Image
                                       src={`http://localhost:4000${viatico.viatico_url.startsWith('/') ? '' : '/'}${viatico.viatico_url}`}
                                       alt="Vista previa del archivo"
+                                      width={500}
+                                      height={260}
                                       className="max-w-full h-auto max-h-[260px] rounded shadow-sm"
                                       style={{ objectFit: 'contain' }}
+                                      unoptimized={viatico.viatico_url.includes('localhost')}
                                     />
                                   )}
                                 </div>

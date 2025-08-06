@@ -72,16 +72,8 @@ function UsuariosContent() {
   const cacheKey = `usuarios_cache_${CACHE_VERSION}`;
   const CACHE_TTL = 60000; // 1 minuto
   
-  // Función para validar cache
-  const isCacheValid = useCallback((cached: string | null) => {
-    if (!cached) return false;
-    try {
-      const { data, timestamp, version } = JSON.parse(cached);
-      return version === CACHE_VERSION && Date.now() - timestamp < CACHE_TTL && Array.isArray(data);
-    } catch {
-      return false;
-    }
-  }, []);
+  // Función para validar cache - implementada directamente en fetchUsuarios para evitar variables no utilizadas
+  // Esta función se eliminó como variable separada y se integró donde se necesita
 
   // Memoizar estadísticas para evitar recálculos
   const stats = useMemo(() => {
@@ -206,7 +198,7 @@ function UsuariosContent() {
     } finally {
       setLoading(false);
     }
-  }, [updatedFlag, router]);
+  }, [updatedFlag, router, cacheKey]);
 
   useEffect(() => {
     fetchUsuarios();
@@ -235,7 +227,7 @@ function UsuariosContent() {
     } finally {
       setDeleting(false);
     }
-  }, [selectedUser]);
+  }, [selectedUser, cacheKey]);
 
   const getRoleLabel = useCallback((role: string) => {
     const roles = {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FileCheck, Building, BadgeDollarSign, Banknote, CreditCard, CalendarDays, StickyNote, Repeat2, X, CircleCheck, CircleX, User2 } from 'lucide-react';
+import Image from 'next/image';
 
 interface RecurrenteDetalleModalProps {
   open: boolean;
@@ -189,15 +190,13 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
             {/* Banco con Logo */}
             <div className="flex items-center gap-3 p-3 rounded-lg bg-indigo-50 border border-indigo-100">
               {recurrente.banco_destino && getBancoLogo(recurrente.banco_destino) ? (
-                <img 
-                  src={getBancoLogo(recurrente.banco_destino)} 
+                <Image 
+                  src={getBancoLogo(recurrente.banco_destino) || 'https://cdn-icons-png.flaticon.com/512/2830/2830284.png'} 
                   alt={`Logo de ${recurrente.banco_destino}`}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 object-contain"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.onerror = null;
-                    target.src = 'https://cdn-icons-png.flaticon.com/512/2830/2830284.png';
-                  }}
+                  unoptimized
                 />
               ) : (
                 <Building className="w-5 h-5 text-indigo-600" />
@@ -294,16 +293,14 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
                       </div>
                     ) : (
                       <div className="flex items-center justify-center p-8 bg-white">
-                        <img 
-                          src={getFacturaUrl(recurrente.fact_recurrente)} 
+                        <Image
+                          src={getFacturaUrl(recurrente.fact_recurrente) || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik01IDh2LTNoMTR2M2gtMTR6bTAgMTJoMTR2LTloLTE0djl6bTAtMTVoMTRjLjU1MiAwIDEgLjQ0OCAxIDFzLS40NDggMS0xIDFoLTE0Yy0uNTUyIDAtMS0uNDQ4LTEtMXMuNDQ4LTEgMS0xem0wIDE2Yy0uNTUyIDAtMS0uNDQ4LTEtMXYtMTBjMC0uNTUyLjQ0OC0xIDEtMWgxNGMuNTUyIDAgMSAuNDQ4IDEgMXYxMGMwIC41NTItLjQ0OCAxLTEgMWgtMTR6IiBmaWxsPSIjOTJhNGJkIi8+PC9zdmc+'}
                           alt="Vista previa de factura"
                           className="max-h-60 object-contain"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null;
-                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik01IDh2LTNoMTR2M2gtMTR6bTAgMTJoMTR2LTloLTE0djl6bTAtMTVoMTRjLjU1MiAwIDEgLjQ0OCAxIDFzLS40NDggMS0xIDFoLTE0Yy0uNTUyIDAtMS0uNDQ4LTEtMXMuNDQ4LTEgMS0xem0wIDE2Yy0uNTUyIDAtMS0uNDQ4LTEtMXYtMTBjMC0uNTUyLjQ0OC0xIDEtMWgxNGMuNTUyIDAgMSAuNDQ4IDEgMXYxMGMwIC41NTItLjQ0OCAxLTEgMWgtMTR6IiBmaWxsPSIjOTJhNGJkIi8+PC9zdmc+';
-                            target.style.padding = '2rem';
-                          }}
+                          width={400}
+                          height={240}
+                          style={{ objectFit: 'contain' }}
+                          unoptimized
                         />
                       </div>
                     )}

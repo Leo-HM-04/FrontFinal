@@ -228,15 +228,19 @@ export default function NuevoViaticoPage() {
                         if (value.length > 0 && value.length !== 18) {
                           nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'La CLABE debe tener 18 dígitos' };
                         } else {
-                          const { cuenta_destino: _, ...otherErrors } = nuevos[idx].errors || {};
-                          nuevos[idx].errors = otherErrors;
+                          // Crear un nuevo objeto errors omitiendo la propiedad cuenta_destino
+                          const errorsObj = { ...(nuevos[idx].errors || {}) };
+                          delete errorsObj.cuenta_destino;
+                          nuevos[idx].errors = errorsObj;
                         }
                       } else if (nuevos[idx].form.tipo_cuenta_destino === 'tarjeta') {
                         if (value.length > 0 && value.length !== 16) {
                           nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de tarjeta debe tener 16 dígitos' };
                         } else {
-                          const { cuenta_destino: _, ...otherErrors } = nuevos[idx].errors || {};
-                          nuevos[idx].errors = otherErrors;
+                          // Crear un nuevo objeto errors omitiendo la propiedad cuenta_destino
+                          const errorsObj = { ...(nuevos[idx].errors || {}) };
+                          delete errorsObj.cuenta_destino;
+                          nuevos[idx].errors = errorsObj;
                         }
                       }
                       

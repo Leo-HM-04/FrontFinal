@@ -5,14 +5,13 @@ import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { Button } from '@/components/ui/Button';
-import { FileText, Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle, Clock } from 'lucide-react';
+import { FileText, Calendar, DollarSign, Building, CreditCard, MessageSquare, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { RecurrentesService } from '@/services/recurrentes.service';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
-import Image from 'next/image';
 
 // Estado inicial
 type FormState = {

@@ -7,7 +7,7 @@ import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PlantillaRecurrente } from '@/types';
 import { RecurrentesService } from '@/services/recurrentes.service';
-import { FaCheck, FaTimes, FaSearch, FaRegCalendarAlt } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaSearch  } from 'react-icons/fa';
 
 export default function AprobadorRecurrentesPage() {
 const [solicitudes, setSolicitudes] = useState<PlantillaRecurrente[]>([]);

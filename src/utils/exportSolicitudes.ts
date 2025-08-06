@@ -4,34 +4,6 @@ import 'jspdf-autotable';
 import { autoTable } from 'jspdf-autotable';
 import ExcelJS from 'exceljs';
 
-// Configuración de columnas para el resumen
-const resumenColumns = [
-    { header: 'Estado', width: 25 },
-    { header: 'Cantidad', width: 20 },
-    { header: 'Monto Total', width: 30 }
-];
-
-// Función para obtener los datos del resumen
-const obtenerResumen = (solicitudes: Solicitud[]) => {
-    const estados = ['pendiente', 'autorizada', 'rechazada', 'procesada', 'cancelada', 'revisada', 'pagada', 'vencida'];
-    const resumen = estados.map(estado => {
-        const solicitudesEstado = solicitudes.filter(s => s.estado === estado);
-        const totalMonto = solicitudesEstado.reduce((sum, s) => sum + (s.monto || 0), 0);
-        return {
-            estado: estado.toUpperCase(),
-            cantidad: solicitudesEstado.length,
-            monto: totalMonto
-        };
-    }).filter(r => r.cantidad > 0);
-
-    const totalGeneral = solicitudes.reduce((sum, s) => sum + (s.monto || 0), 0);
-    
-    return {
-        detalles: resumen,
-        total: totalGeneral
-    };
-};
-
 // Configuración de columnas
 const columns = [
     { header: 'ID', width: 15 },
