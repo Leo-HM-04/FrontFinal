@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileCheck, Building, BadgeDollarSign, Banknote, CreditCard, CalendarDays, StickyNote, Repeat2, X, CircleCheck, CircleX, User2 } from 'lucide-react';
 import Image from 'next/image';
+import '@/styles/modal.css';
 
 interface RecurrenteDetalleModalProps {
   open: boolean;
@@ -87,236 +88,314 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300"
+        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
         onClick={onClose}
       />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-up border border-blue-200">
+      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-3xl shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden border border-white/20 backdrop-blur-sm animate-slide-up">
+        {/* Contenedor con scroll interno */}
+        <div className="overflow-y-auto max-h-[90vh] modal-scroll">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white text-blue-700 border border-blue-200 rounded-full p-2 shadow-lg transition-all duration-200"
+          className="absolute top-6 right-6 z-20 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
           aria-label="Cerrar"
         >
           <X className="w-6 h-6" />
         </button>
 
-        {/* Cabecera azul con icono */}
-        <div className="bg-gradient-to-r from-blue-700 to-blue-500 rounded-t-2xl px-8 py-6 flex items-center gap-4">
-          <Repeat2 className="w-12 h-12 text-white bg-blue-400/30 rounded-full p-2 shadow" />
-          <div className="flex-1">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-1 flex items-center gap-3">
-              Plantilla #{recurrente.id}
-              <span className={`ml-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${recurrente.activo ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'}`}>
-                {recurrente.activo ? 'Activo' : 'Inactivo'}
+        {/* Header mejorado */}
+        <div className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-8 relative overflow-hidden">
+          {/* Elementos decorativos de fondo */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+          
+          <div className="relative z-10 flex items-center gap-6">
+            <div className="p-4 bg-white/20 rounded-2xl shadow-lg">
+              <Repeat2 className="w-12 h-12 text-white" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-3xl font-bold tracking-tight mb-2">
+                Plantilla Recurrente #{recurrente.id}
+              </h2>
+              <div className="flex flex-wrap gap-4 items-center text-blue-100 text-lg">
+                <span className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-lg">
+                  <User2 className="w-5 h-5" /> 
+                  {recurrente.nombre_usuario || 'Usuario no especificado'}
+                </span>
+                <span className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-lg">
+                  <Building className="w-5 h-5" /> 
+                  {recurrente.departamento}
+                </span>
+              </div>
+            </div>
+            <div className="text-right space-y-2">
+              <span className={`inline-flex items-center px-4 py-2 text-lg font-bold rounded-xl border-2 backdrop-blur-sm ${
+                recurrente.activo ? 'bg-green-100/20 text-green-300 border-green-300' : 'bg-red-100/20 text-red-300 border-red-300'
+              }`}>
+                {recurrente.activo ? 'ACTIVO' : 'INACTIVO'}
               </span>
               {recurrente.estado && (
-                <span className={`ml-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                  recurrente.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                  recurrente.estado === 'aprobada' ? 'bg-green-100 text-green-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {recurrente.estado}
-                </span>
+                <div>
+                  <span className={`inline-flex items-center px-3 py-1 text-sm font-bold rounded-lg ${
+                    recurrente.estado === 'pendiente' ? 'bg-yellow-100/20 text-yellow-300 border border-yellow-300' :
+                    recurrente.estado === 'aprobada' ? 'bg-green-100/20 text-green-300 border border-green-300' :
+                    'bg-red-100/20 text-red-300 border border-red-300'
+                  }`}>
+                    {recurrente.estado.toUpperCase()}
+                  </span>
+                </div>
               )}
-            </h2>
-            <div className="flex flex-wrap gap-4 items-center text-white/90 text-base font-medium">
-              <span className="flex items-center gap-2">
-                <User2 className="w-5 h-5" /> Usuario:
-                <span className="font-normal">{recurrente.nombre_usuario || '-'}</span>
-              </span>
-              <span className="flex items-center gap-2">
-                <Building className="w-5 h-5" /> Departamento:
-                <span className="font-normal">{recurrente.departamento}</span>
-              </span>
             </div>
           </div>
         </div>
 
-        {/* Tabla de detalles ordenada */}
-        <div className="px-8 py-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-100">
-              <BadgeDollarSign className="w-5 h-5 text-green-600" />
-              <span className="font-semibold text-blue-900">Monto:</span>
-              <span className="ml-auto text-lg font-bold text-blue-900">${parseFloat(recurrente.monto).toLocaleString('es-MX')}</span>
-            </div>
+        {/* Contenido principal mejorado */}
+        <div className="p-8 space-y-8">
+          {/* Información Principal - 3 columnas para ser más ancho */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-100">
-              <CreditCard className="w-5 h-5 text-purple-600" />
-              <span className="font-semibold text-blue-900">Cuenta Destino:</span>
-              <span className="ml-auto text-blue-900">{recurrente.cuenta_destino}</span>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-100">
-              <Banknote className="w-5 h-5 text-blue-500" />
-              <span className="font-semibold text-blue-900">Tipo de Pago:</span>
-              <span className="ml-auto capitalize text-blue-900">{recurrente.tipo_pago}</span>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-100">
-              <Repeat2 className="w-5 h-5 text-blue-400" />
-              <span className="font-semibold text-blue-900">Frecuencia:</span>
-              <span className="ml-auto capitalize text-blue-900">{recurrente.frecuencia}</span>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 border border-orange-100">
-              <CalendarDays className="w-5 h-5 text-orange-400" />
-              <span className="font-semibold text-blue-900">Siguiente Fecha:</span>
-              <span className="ml-auto text-blue-900">{formatDate(recurrente.siguiente_fecha)}</span>
-            </div>
-
-            {/* Datos de Cuenta - Nuevos campos */}
-            <div className="md:col-span-2 mt-2 mb-2">
-              <h3 className="font-semibold text-gray-700 mb-3 border-b pb-2 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-blue-600" /> Información de Cuenta
+            {/* Card de Información Financiera */}
+            <div className="xl:col-span-2 p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                <div className="p-2 bg-blue-100 rounded-xl mr-3">
+                  <BadgeDollarSign className="w-6 h-6 text-blue-700" />
+                </div>
+                Información Financiera
               </h3>
-            </div>
-
-            {/* Tipo de Cuenta */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-indigo-50 border border-indigo-100">
-              <CreditCard className="w-5 h-5 text-indigo-600" />
-              <span className="font-semibold text-blue-900">Tipo de Cuenta:</span>
-              <span className="ml-auto text-blue-900">{recurrente.tipo_cuenta_destino || 'No especificado'}</span>
-            </div>
-            
-            {/* Tipo de Tarjeta */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-indigo-50 border border-indigo-100">
-              <CreditCard className="w-5 h-5 text-indigo-600" />
-              <span className="font-semibold text-blue-900">Tipo de Tarjeta:</span>
-              <span className="ml-auto text-blue-900">{recurrente.tipo_tarjeta || 'No aplica'}</span>
-            </div>
-            
-            {/* Banco con Logo */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-indigo-50 border border-indigo-100">
-              {recurrente.banco_destino && getBancoLogo(recurrente.banco_destino) ? (
-                <Image 
-                  src={getBancoLogo(recurrente.banco_destino) || 'https://cdn-icons-png.flaticon.com/512/2830/2830284.png'} 
-                  alt={`Logo de ${recurrente.banco_destino}`}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 object-contain"
-                  unoptimized
-                />
-              ) : (
-                <Building className="w-5 h-5 text-indigo-600" />
-              )}
-              <span className="font-semibold text-blue-900">Banco:</span>
-              <span className="ml-auto text-blue-900">{recurrente.banco_destino || 'No especificado'}</span>
-            </div>
-
-            {/* Beneficiario - Nuevos campos */}
-            <div className="md:col-span-2 mt-4 mb-2">
-              <h3 className="font-semibold text-gray-700 mb-3 border-b pb-2 flex items-center gap-2">
-                <User2 className="w-5 h-5 text-teal-600" /> Información del Beneficiario
-              </h3>
-            </div>
-            
-            {/* Persona */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-teal-50 border border-teal-100">
-              <User2 className="w-5 h-5 text-teal-600" />
-              <span className="font-semibold text-blue-900">Persona:</span>
-              <span className="ml-auto text-blue-900">{recurrente.nombre_persona || 'No especificado'}</span>
-            </div>
-            
-            {/* Empresa */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-teal-50 border border-teal-100">
-              <Building className="w-5 h-5 text-teal-600" />
-              <span className="font-semibold text-blue-900">Empresa:</span>
-              <span className="ml-auto text-blue-900">{recurrente.empresa_a_pagar || 'No especificado'}</span>
-            </div>
-            
-            {/* Descripción del Pago */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-100 md:col-span-2">
-              <StickyNote className="w-5 h-5 text-amber-600" />
-              <span className="font-semibold text-blue-900">Descripción del Pago:</span>
-              <span className="ml-auto text-blue-900">{recurrente.tipo_pago_descripcion || 'Sin descripción adicional'}</span>
-            </div>
-            
-            {/* Campos adicionales que podríamos añadir según necesidades específicas */}
-            {recurrente.estado && (
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 border border-yellow-100">
-                <CalendarDays className="w-5 h-5 text-yellow-600" />
-                <span className="font-semibold text-blue-900">Estado de Aprobación:</span>
-                <span className="ml-auto capitalize text-blue-900">{recurrente.estado}</span>
+              
+              {/* Monto destacado */}
+              <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-5 rounded-2xl border border-green-300/50 mb-6 shadow-lg">
+                <span className="text-sm uppercase tracking-wider text-green-100 font-bold block mb-2">Monto Recurrente</span>
+                <p className="text-4xl font-black text-white tracking-tight">${parseFloat(recurrente.monto).toLocaleString('es-MX')}</p>
+                <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-24"></div>
               </div>
-            )}
-
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-100">
-              <CircleCheck className="w-5 h-5 text-green-600" />
-              <span className="font-semibold text-blue-900">Estado:</span>
-              <span className="ml-auto flex items-center gap-2">
-                {recurrente.activo
-                  ? <CircleCheck className="w-4 h-4 text-green-600" />
-                  : <CircleX className="w-4 h-4 text-red-500" />}
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${recurrente.activo ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'}`}>
-                  {recurrente.activo ? 'Activo' : 'Inactivo'}
-                </span>
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-100 md:col-span-2">
-              <FileCheck className="w-5 h-5 text-blue-500" />
-              <span className="font-semibold text-blue-900">Factura:</span>
-              <span className="ml-auto">
-                {recurrente.fact_recurrente
-                  ? <a href={getFacturaUrl(recurrente.fact_recurrente)} target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">Ver archivo</a>
-                  : <span className="italic text-gray-400">No adjunta</span>}
-              </span>
-            </div>
-
-            {/* Previsualización de la factura */}
-            {recurrente.fact_recurrente && (
-              <div className="md:col-span-2 mt-2">
-                <div className="border border-blue-100 rounded-lg overflow-hidden">
-                  <div className="bg-blue-50 py-2 px-4 flex items-center justify-between">
-                    <span className="font-medium text-blue-800 flex items-center gap-2">
-                      <FileCheck className="w-4 h-4" /> Previsualización del documento
-                    </span>
-                    <a 
-                      href={getFacturaUrl(recurrente.fact_recurrente)} 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-full transition-colors"
-                    >
-                      Abrir completo
-                    </a>
-                  </div>
-                  <div className="p-2 bg-gray-50">
-                    {recurrente.fact_recurrente.toLowerCase().endsWith('.pdf') ? (
-                      <div className="relative pt-[56.25%]"> {/* 16:9 aspect ratio */}
-                        <iframe 
-                          src={`${getFacturaUrl(recurrente.fact_recurrente)}#toolbar=0&navpanes=0`}
-                          className="absolute inset-0 w-full h-full border-0"
-                          title="Vista previa de factura"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center p-8 bg-white">
-                        <Image
-                          src={getFacturaUrl(recurrente.fact_recurrente) || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik01IDh2LTNoMTR2M2gtMTR6bTAgMTJoMTR2LTloLTE0djl6bTAtMTVoMTRjLjU1MiAwIDEgLjQ0OCAxIDFzLS40NDggMS0xIDFoLTE0Yy0uNTUyIDAtMS0uNDQ4LTEtMXMuNDQ4LTEgMS0xem0wIDE2Yy0uNTUyIDAtMS0uNDQ4LTEtMXYtMTBjMC0uNTUyLjQ0OC0xIDEtMWgxNGMuNTUyIDAgMSAuNDQ4IDEgMXYxMGMwIC41NTItLjQ0OCAxLTEgMWgtMTR6IiBmaWxsPSIjOTJhNGJkIi8+PC9zdmc+'}
-                          alt="Vista previa de factura"
-                          className="max-h-60 object-contain"
-                          width={400}
-                          height={240}
-                          style={{ objectFit: 'contain' }}
-                          unoptimized
-                        />
-                      </div>
-                    )}
-                  </div>
+              
+              {/* Grid de información financiera */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Cuenta Destino</span>
+                  <p className="font-mono text-blue-900 font-medium text-sm">{recurrente.cuenta_destino}</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Tipo de Pago</span>
+                  <p className="text-blue-900 font-medium text-sm capitalize">{recurrente.tipo_pago}</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Frecuencia</span>
+                  <p className="text-blue-900 font-medium text-sm capitalize">{recurrente.frecuencia}</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Próxima Fecha</span>
+                  <p className="text-blue-900 font-medium text-sm">{formatDate(recurrente.siguiente_fecha)}</p>
                 </div>
               </div>
-            )}
+            </div>
+            
+            {/* Card de Estado y Control */}
+            <div className="p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                <div className="p-2 bg-indigo-100 rounded-xl mr-3">
+                  <Repeat2 className="w-6 h-6 text-indigo-700" />
+                </div>
+                Estado y Control
+              </h3>
+              
+              {/* Estado de actividad */}
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 rounded-2xl border border-indigo-300/50 mb-6 shadow-lg">
+                <span className="text-sm uppercase tracking-wider font-bold block mb-2 text-indigo-100">Estado Actual</span>
+                <div className="flex items-center">
+                  <div className={`h-3 w-3 rounded-full mr-3 shadow-lg ${recurrente.activo ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                  <p className="font-black text-2xl text-white tracking-tight">{recurrente.activo ? 'ACTIVO' : 'INACTIVO'}</p>
+                </div>
+                <div className={`mt-2 h-1 rounded-full w-20 ${recurrente.activo ? 'bg-gradient-to-r from-green-400 to-green-300' : 'bg-gradient-to-r from-red-400 to-red-300'}`}></div>
+              </div>
+              
+              {/* Información de estado */}
+              <div className="space-y-4">
+                {recurrente.estado && (
+                  <div className="bg-indigo-50/30 rounded-xl p-4 border border-indigo-100/80 shadow-sm">
+                    <span className="text-xs uppercase tracking-wider text-indigo-700/70 block mb-2 font-medium">Estado de Aprobación</span>
+                    <p className="text-indigo-900 font-medium capitalize">{recurrente.estado}</p>
+                  </div>
+                )}
+                
+                <div className="bg-indigo-50/30 rounded-xl p-4 border border-indigo-100/80 shadow-sm">
+                  <span className="text-xs uppercase tracking-wider text-indigo-700/70 block mb-2 font-medium">Departamento</span>
+                  <p className="text-indigo-900 font-medium">{recurrente.departamento}</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="mb-2 font-semibold text-blue-900 flex items-center gap-2">
-            <StickyNote className="w-5 h-5 text-pink-500" /> Concepto:
+
+          
+          {/* Información de Cuenta y Beneficiario */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* Card de Información de Cuenta */}
+            <div className="p-6 bg-gradient-to-br from-white to-purple-50/30 border border-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                <div className="p-2 bg-purple-100 rounded-xl mr-3">
+                  <CreditCard className="w-6 h-6 text-purple-700" />
+                </div>
+                Información de Cuenta
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-purple-100">
+                  <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-2 font-medium">Tipo de Cuenta</span>
+                  <p className="text-purple-900 font-medium">{recurrente.tipo_cuenta_destino || 'No especificado'}</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-purple-100">
+                  <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-2 font-medium">Tipo de Tarjeta</span>
+                  <p className="text-purple-900 font-medium">{recurrente.tipo_tarjeta || 'No aplica'}</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-purple-100">
+                  <div className="flex items-center gap-3">
+                    {recurrente.banco_destino && getBancoLogo(recurrente.banco_destino) ? (
+                      <Image 
+                        src={getBancoLogo(recurrente.banco_destino) || 'https://cdn-icons-png.flaticon.com/512/2830/2830284.png'} 
+                        alt={`Logo de ${recurrente.banco_destino}`}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 object-contain rounded"
+                        unoptimized
+                      />
+                    ) : (
+                      <Building className="w-6 h-6 text-purple-600" />
+                    )}
+                    <div className="flex-1">
+                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Banco</span>
+                      <p className="text-purple-900 font-medium">{recurrente.banco_destino || 'No especificado'}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-purple-100">
+                  <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-2 font-medium">Descripción del Pago</span>
+                  <p className="text-purple-900 font-medium">{recurrente.tipo_pago_descripcion || 'Sin descripción adicional'}</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Card de Información del Beneficiario */}
+            <div className="p-6 bg-gradient-to-br from-white to-teal-50/30 border border-teal-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                <div className="p-2 bg-teal-100 rounded-xl mr-3">
+                  <User2 className="w-6 h-6 text-teal-700" />
+                </div>
+                Información del Beneficiario
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-teal-100">
+                  <span className="text-xs uppercase tracking-wider text-teal-700/70 block mb-2 font-medium">Persona</span>
+                  <p className="text-teal-900 font-medium">{recurrente.nombre_persona || 'No especificado'}</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-teal-100">
+                  <span className="text-xs uppercase tracking-wider text-teal-700/70 block mb-2 font-medium">Empresa</span>
+                  <p className="text-teal-900 font-medium">{recurrente.empresa_a_pagar || 'No especificado'}</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-teal-100">
+                  <span className="text-xs uppercase tracking-wider text-teal-700/70 block mb-2 font-medium">Usuario Responsable</span>
+                  <p className="text-teal-900 font-medium">{recurrente.nombre_usuario || 'No especificado'}</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="text-blue-900 bg-blue-50 rounded-lg p-4 mb-2 break-words shadow-inner border border-blue-100">
-            {recurrente.concepto}
+
+          
+          {/* Concepto y Documentos */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Concepto - 1 columna */}
+            <div className="p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                <div className="p-2 bg-green-100 rounded-xl mr-3">
+                  <StickyNote className="w-6 h-6 text-green-700" />
+                </div>
+                Concepto
+              </h3>
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200/50 shadow-inner">
+                <p className="text-gray-800 leading-relaxed text-base font-medium break-words">{recurrente.concepto}</p>
+              </div>
+            </div>
+            
+            {/* Documentos - 2 columnas */}
+            <div className="lg:col-span-2 p-6 bg-gradient-to-br from-white to-amber-50/30 border border-amber-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                <div className="p-2 bg-amber-100 rounded-xl mr-3">
+                  <FileCheck className="w-6 h-6 text-amber-700" />
+                </div>
+                Documentos Adjuntos
+              </h3>
+              
+              <div className="space-y-4">
+                {recurrente.fact_recurrente ? (
+                  <div className="bg-white p-4 rounded-xl border border-amber-200/50 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm font-medium text-amber-800 flex items-center gap-2">
+                        <FileCheck className="w-4 h-4" />
+                        Factura Adjunta
+                      </span>
+                      <a 
+                        href={getFacturaUrl(recurrente.fact_recurrente)} 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-sm font-medium"
+                      >
+                        Ver Documento Completo
+                      </a>
+                    </div>
+                    
+                    {/* Previsualización mejorada */}
+                    <div className="border border-amber-200 rounded-xl overflow-hidden shadow-inner">
+                      {recurrente.fact_recurrente.toLowerCase().endsWith('.pdf') ? (
+                        <div className="relative h-64 bg-gray-50">
+                          <iframe 
+                            src={`${getFacturaUrl(recurrente.fact_recurrente)}#toolbar=0&navpanes=0`}
+                            className="w-full h-full border-0"
+                            title="Vista previa de factura"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-amber-100/90 to-transparent p-2">
+                            <p className="text-xs text-center text-amber-800">Vista previa limitada • Haga clic en "Ver Documento Completo" para abrir el PDF completo</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center p-4 bg-white">
+                          <Image
+                            src={getFacturaUrl(recurrente.fact_recurrente) || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik01IDh2LTNoMTR2M2gtMTR6bTAgMTJoMTR2LTloLTE0djl6bTAtMTVoMTRjLjU1MiAwIDEgLjQ0OCAxIDFzLS40NDggMS0xIDFoLTE0Yy0uNTUyIDAtMS0uNDQ4LTEtMXMuNDQ4LTEgMS0xem0wIDE2Yy0uNTUyIDAtMS0uNDQ4LTEtMXYtMTBjMC0uNTUyLjQ0OC0xIDEtMWgxNGMuNTUyIDAgMSAuNDQ4IDEgMXYxMGMwIC41NTItLjQ0OCAxLTEgMWgtMTR6IiBmaWxsPSIjOTJhNGJkIi8+PC9zdmc+'}
+                            alt="Vista previa de factura"
+                            className="max-h-48 object-contain rounded-lg"
+                            width={400}
+                            height={192}
+                            style={{ objectFit: 'contain' }}
+                            unoptimized
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50/80 p-6 rounded-xl border border-gray-200 text-center">
+                    <FileCheck className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <span className="text-gray-600 font-medium block mb-1">No hay documentos adjuntos</span>
+                    <p className="text-sm text-gray-500">Esta plantilla recurrente no tiene archivos adjuntos</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
+    
   );
 };

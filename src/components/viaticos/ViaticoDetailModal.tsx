@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Viatico } from '@/services/viaticos.service';
 import { getComprobantesPorViatico } from '@/services/comprobantesViaticos.service';
 import { useAuth } from '@/contexts/AuthContext';
+import '@/styles/modal.css';
 
 interface ComprobanteViatico {
   id_comprobante: number;
@@ -88,90 +89,104 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Fondo degradado oscuro/transparente */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Fondo degradado oscuro/transparente mejorado */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-blue-900/70 backdrop-blur-sm transition-opacity duration-300"
+        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
         onClick={onClose}
       />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-slide-up border border-blue-200">
-        {/* Botón de cerrar (X) flotante */}
+      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-3xl shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden border border-white/20 backdrop-blur-sm animate-slide-up">
+        {/* Contenedor con scroll interno */}
+        <div className="overflow-y-auto max-h-[90vh] modal-scroll">
+        {/* Botón de cerrar (X) flotante mejorado */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white text-blue-700 border border-blue-200 rounded-full p-2 shadow-lg transition-all duration-200"
+          className="absolute top-6 right-6 z-20 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
           aria-label="Cerrar"
         >
-          <X className="w-5 h-5" />
+          <X className="w-6 h-6" />
         </button>
         
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-700 to-blue-400 text-white p-6 rounded-t-2xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold">
+        {/* Header mejorado */}
+        <div className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-8 relative overflow-hidden">
+          {/* Elementos decorativos de fondo */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+          
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="space-y-1">
+              <h2 className="text-3xl font-bold tracking-tight">
                 Viático #{viatico.id_viatico}
               </h2>
-              <p className="text-blue-100 mt-1">
-                Folio: <span className="font-mono text-yellow-200">{viatico.folio || '-'}</span>
+              <p className="text-blue-100 text-lg">
+                Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{viatico.folio || '-'}</span>
               </p>
-              <p className="text-blue-100 mt-1">
+              <p className="text-blue-200 mt-2">
                 {viatico.fecha_creacion ? `Creado el ${formatDate(String(viatico.fecha_creacion))}` : ''}
               </p>
             </div>
-            <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full border ${getEstadoColor(viatico.estado || '')} bg-white/20`}> 
-              {String(viatico.estado || 'pendiente').toUpperCase()}
-            </span>
+            <div className="text-right">
+              <span className={`inline-flex px-4 py-2 text-lg font-bold rounded-xl border-2 ${getEstadoColor(viatico.estado || '')} backdrop-blur-sm`}> 
+                {String(viatico.estado || 'pendiente').toUpperCase()}
+              </span>
+            </div>
           </div>
         </div>
         
-        <div className="p-6">
-          {/* Información Principal */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <Card className="p-5 bg-white/90 border border-blue-100 shadow-sm">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center">
-                <DollarSign className="w-5 h-5 mr-2 text-blue-700" />
+        <div className="p-8 space-y-8">
+          {/* Información Principal con diseño mejorado - 3 columnas para ser más ancho */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+            <Card className="xl:col-span-2 p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                <div className="p-2 bg-blue-100 rounded-xl mr-3">
+                  <DollarSign className="w-6 h-6 text-blue-700" />
+                </div>
                 Información Financiera
               </h3>
               
-              {/* Monto destacado */}
-              <div className="bg-blue-50/80 p-3 rounded-lg border border-blue-200/50 mb-4">
-                <span className="text-xs uppercase tracking-wider text-blue-700/80 font-semibold">Monto total</span>
-                <p className="text-2xl font-bold text-blue-700">{formatCurrency(Number(viatico.monto))}</p>
+              {/* Monto destacado con mejor diseño */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl border border-blue-300/50 mb-6 shadow-lg">
+                <span className="text-sm uppercase tracking-wider text-blue-100 font-bold block mb-2">Monto total</span>
+                <p className="text-4xl font-black text-white tracking-tight">{formatCurrency(Number(viatico.monto))}</p>
+                <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-24"></div>
               </div>
               
               {/* Grid principal de información */}
               <div className="grid grid-cols-2 gap-4">                
-                <div className="bg-white p-2 rounded-md">
-                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta Destino</span>
-                  <p className="font-mono text-blue-900 font-medium">{viatico.cuenta_destino}</p>
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Cuenta Destino</span>
+                  <p className="font-mono text-blue-900 font-medium text-sm">{viatico.cuenta_destino}</p>
                 </div>
                 
-                <div className="bg-white p-2 rounded-md">
-                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Fecha límite</span>
-                  <p className="text-blue-900 font-medium">{formatDate(String(viatico.fecha_limite_pago))}</p>
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Fecha límite</span>
+                  <p className="text-blue-900 font-medium text-sm">{formatDate(String(viatico.fecha_limite_pago))}</p>
                 </div>
               </div>
             </Card>
             
-            <Card className="p-5 bg-white/90 border border-blue-100 shadow-sm">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center">
-                <Building className="w-5 h-5 mr-2 text-blue-700" />
+            <Card className="p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                <div className="p-2 bg-indigo-100 rounded-xl mr-3">
+                  <Building className="w-6 h-6 text-indigo-700" />
+                </div>
                 Información Organizacional
               </h3>
               
-              {/* Estado destacado */}
-              <div className="p-3 rounded-lg border mb-4 bg-blue-50/80 border-blue-200/50">
-                <span className="text-xs uppercase tracking-wider font-semibold block mb-1 text-blue-700">Estado actual</span>
+              {/* Estado destacado con mejor diseño */}
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 rounded-2xl border border-indigo-300/50 mb-6 shadow-lg">
+                <span className="text-sm uppercase tracking-wider font-bold block mb-2 text-indigo-100">Estado actual</span>
                 <div className="flex items-center">
-                  <div className="h-2.5 w-2.5 rounded-full mr-2 bg-blue-600"></div>
-                  <p className="font-bold text-lg text-blue-700">{(viatico.estado || 'pendiente').toUpperCase()}</p>
+                  <div className="h-3 w-3 rounded-full mr-3 bg-yellow-400 shadow-lg"></div>
+                  <p className="font-black text-2xl text-white tracking-tight">{(viatico.estado || 'pendiente').toUpperCase()}</p>
                 </div>
+                <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-20"></div>
               </div>
               
               {/* Información de departamento */}
-              <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80">
-                <h4 className="text-sm font-medium text-blue-800 mb-2">Departamento</h4>
-                <p className="text-blue-900 font-medium">{viatico.departamento ? 
+              <div className="bg-indigo-50/30 rounded-xl p-4 border border-indigo-100/80 shadow-sm">
+                <h4 className="text-sm font-medium text-indigo-800 mb-2">Departamento</h4>
+                <p className="text-indigo-900 font-medium">{viatico.departamento ? 
                   viatico.departamento.toLowerCase() === "ti" ? "TI" : 
                   viatico.departamento.charAt(0).toUpperCase() + viatico.departamento.slice(1).toLowerCase() : 
                   "-"}</p>
@@ -179,21 +194,29 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
             </Card>
           </div>
           
-          {/* Concepto */}
-          <Card className="p-4 mb-6 bg-white/90 border border-blue-100">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
-              <FileText className="w-5 h-5 mr-2 text-blue-700" />
-              Concepto
-            </h3>
-            <p className="text-blue-900 leading-relaxed">{viatico.concepto}</p>
-          </Card>
-          
-          {/* Documentos */}
-          <Card className="p-4 mb-6 bg-white/90 border border-blue-100">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
-              <ExternalLink className="w-5 h-5 mr-2 text-blue-700" />
-              Documentos Adjuntos
-            </h3>
+          {/* Concepto y Documentos con diseño mejorado - más ancho */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            {/* Concepto - 1 columna */}
+            <Card className="p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                <div className="p-2 bg-green-100 rounded-xl mr-3">
+                  <FileText className="w-6 h-6 text-green-700" />
+                </div>
+                Concepto
+              </h3>
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200/50 shadow-inner">
+                <p className="text-gray-800 leading-relaxed text-base font-medium">{viatico.concepto}</p>
+              </div>
+            </Card>
+            
+            {/* Documentos - 2 columnas */}
+            <Card className="lg:col-span-2 p-6 bg-gradient-to-br from-white to-purple-50/30 border border-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                <div className="p-2 bg-purple-100 rounded-xl mr-3">
+                  <ExternalLink className="w-6 h-6 text-purple-700" />
+                </div>
+                Documentos Adjuntos
+              </h3>
             <div className="flex flex-col gap-4">
               {/* Documento de Viático */}
               {viatico.viatico_url && (() => {
@@ -329,7 +352,7 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
                                     <>Comprobante #{comprobante.id_comprobante}</>
                                   )}
                                 </p>
-                                <div className="flex items-center mt-1.5 bg-white/60 px-2 py-1 rounded-md inline-block">
+                                <div className="flex items-center mt-1.5 bg-white/60 px-2 py-1 rounded-md">
                                   <span className="text-xs text-blue-700/70 mr-1">Subido por:</span>
                                   <span className="text-xs text-blue-700 font-medium">
                                     {comprobante.nombre_usuario || `Usuario ${comprobante.id_usuario_subio || comprobante.usuario_subio}`}
@@ -341,13 +364,12 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
                                   </div>
                                 )}
                               </div>
-                              <Button
-                                variant="outline"
-                                onClick={() => window.open(comprobanteUrl, '_blank')}
-                                className="text-xs border-blue-300 text-blue-700 hover:bg-blue-50 ml-3 whitespace-nowrap"
-                              >
-                                Ver completo
-                              </Button>
+                                <Button
+                                  onClick={() => window.open(comprobanteUrl, '_blank')}
+                                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs whitespace-nowrap ml-3"
+                                >
+                                  Ver completo
+                                </Button>
                             </div>
                             
                             {/* Previsualización según el tipo de archivo */}
@@ -408,7 +430,14 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
             </div>
           </Card>
         </div>
+        </div>
+
+        {/* Footer mejorado */}
       </div>
+
     </div>
+
+  </div>
+
   );
 }
