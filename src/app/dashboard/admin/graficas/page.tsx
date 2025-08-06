@@ -1,14 +1,13 @@
 "use client";
 
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Line, Area, AreaChart } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Area, AreaChart } from "recharts";
 import { useState } from "react";
-import { useEffect as useEffectReact } from "react";
+import { useEffect } from "react";
 import { TrendingUp, TrendingDown, Users, CreditCard, Clock, CheckCircle } from "lucide-react";
+
 
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-
-import { useEffect } from "react";
 
 function mesNombre(num: number): string {
   return ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"][num - 1] || String(num);
@@ -18,22 +17,31 @@ export default function GraficasAdminPage() {
   // Componente Counter para animar números
   function Counter({ value, duration = 800, suffix = "" }: { value: number; duration?: number; suffix?: string }) {
     const [display, setDisplay] = useState(0);
-    useEffectReact(() => {
+    useEffect(() => {
       let startTime: number | null = null;
+      let animationFrame: number;
+      
       function animate(ts: number) {
         if (!startTime) startTime = ts;
         const progress = Math.min((ts - startTime) / duration, 1);
         setDisplay(Math.round(progress * value));
-        if (progress < 1) requestAnimationFrame(animate);
+        if (progress < 1) {
+          animationFrame = requestAnimationFrame(animate);
+        }
       }
-      requestAnimationFrame(animate);
-      return () => {};
+      
+      animationFrame = requestAnimationFrame(animate);
+      return () => {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+      };
     }, [value, duration]);
+    
     return <span>{display}{suffix}</span>;
   }
+  
   // Animación de entrada para tarjetas
   const [showStats, setShowStats] = useState(false);
-  useEffectReact(() => {
+  useEffect(() => {
     const timeout = setTimeout(() => setShowStats(true), 200);
     return () => clearTimeout(timeout);
   }, []);
@@ -47,8 +55,10 @@ export default function GraficasAdminPage() {
   const [loadingTendencia, setLoadingTendencia] = useState(true);
 
   // Estados para cada entidad
-  const [activeChart] = useState<string>("todos");
-  const [pagosPorMes, setPagosPorMes] = useState<{ mes: string; total: number }[]>([]);
+  const [activeChart, setActiveChart] = useState<string>("todos");
+  const [periodoSeleccionado, setPeriodoSeleccionado] = useState<string>("ultimo_mes");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pagosPorMes, setPagosPorMes] = useState<{ mes: string; total: number; crecimiento?: number }[]>([]);
   const [solicitudesPorEstado, setSolicitudesPorEstado] = useState<{ estado: string; value: number }[]>([]);
   const [usuariosPorRol, setUsuariosPorRol] = useState<{ rol: string; value: number }[]>([]);
   const [usuariosBloqueados, setUsuariosBloqueados] = useState<{ bloqueado: string; value: number }[]>([]);
@@ -59,78 +69,186 @@ export default function GraficasAdminPage() {
   const [notificacionesPorUsuario, setNotificacionesPorUsuario] = useState<{ usuario: string | number; value: number; nombre?: string }[]>([]);
   const [usuariosNombres, setUsuariosNombres] = useState<Record<string | number, string>>({});
 
-  useEffect(() => {
-    // Solicitudes
-    fetch(`http://localhost:4000/api/estadisticas/solicitudes`)
-      .then(res => res.json())
-      .then(data => {
+  // Función para cargar los datos desde el API
+  const cargarDatos = async (periodo = periodoSeleccionado) => {
+    try {
+      setIsRefreshing(true);
+      
+      // Restablecer estados de carga
+      setLoadingSolicitudes(true);
+      setLoadingUsuarios(true);
+      setLoadingRecurrentes(true);
+      setLoadingNotificaciones(true);
+      setLoadingTendencia(true);
+
+      // Solicitudes
+      try {
+        const resSolicitudes = await fetch(`http://localhost:4000/api/estadisticas/solicitudes?periodo=${periodo}`);
+        if (!resSolicitudes.ok) throw new Error('Error al cargar solicitudes');
+        const data = await resSolicitudes.json();
+        
         setSolicitudesPorEstado(
           (data.porEstado || []).map((item: { estado: string; total: number }) => ({
             estado: item.estado,
             value: item.total
           }))
         );
+        
         setPagosPorMes(
-          (data.porMes || []).map((item: { mes: number; total: number }) => ({
+          (data.porMes || []).map((item: { mes: number; total: number; crecimiento?: number }) => ({
             mes: mesNombre(item.mes),
-            total: item.total
+            total: item.total,
+            crecimiento: item.crecimiento || 0
           }))
         );
+      } catch (error) {
+        console.error("Error cargando solicitudes:", error);
+      } finally {
         setLoadingSolicitudes(false);
-      });
-    // Usuarios
-    fetch(`http://localhost:4000/api/estadisticas/usuarios`)
-      .then(res => res.json())
-      .then(data => {
-        setUsuariosPorRol((data.porRol || []).map((item: { rol: string; total: number }) => ({ rol: item.rol, value: item.total })));
-        setUsuariosBloqueados((data.bloqueados || []).map((item: { bloqueado: number; total: number }) => ({ bloqueado: item.bloqueado ? "Bloqueado" : "Activo", value: item.total })));
+      }
+
+      // Usuarios
+      try {
+        const resUsuarios = await fetch(`http://localhost:4000/api/estadisticas/usuarios?periodo=${periodo}`);
+        if (!resUsuarios.ok) throw new Error('Error al cargar usuarios');
+        const data = await resUsuarios.json();
+        
+        setUsuariosPorRol(
+          (data.porRol || []).map((item: { rol: string; total: number }) => ({ 
+            rol: item.rol, 
+            value: item.total 
+          }))
+        );
+        
+        setUsuariosBloqueados(
+          (data.bloqueados || []).map((item: { bloqueado: number; total: number }) => ({ 
+            bloqueado: item.bloqueado ? "Bloqueado" : "Activo", 
+            value: item.total 
+          }))
+        );
+      } catch (error) {
+        console.error("Error cargando usuarios:", error);
+      } finally {
         setLoadingUsuarios(false);
-      });
-    // Recurrentes
-    fetch(`http://localhost:4000/api/estadisticas/recurrentes`)
-      .then(res => res.json())
-      .then(data => {
-        setRecurrentesPorEstado((data.porEstado || []).map((item: { estado: string; total: number }) => ({ estado: item.estado, value: item.total })));
-        setRecurrentesPorFrecuencia((data.porFrecuencia || []).map((item: { frecuencia: string; total: number }) => ({ frecuencia: item.frecuencia, value: item.total })));
+      }
+
+      // Recurrentes
+      try {
+        const resRecurrentes = await fetch(`http://localhost:4000/api/estadisticas/recurrentes?periodo=${periodo}`);
+        if (!resRecurrentes.ok) throw new Error('Error al cargar recurrentes');
+        const data = await resRecurrentes.json();
+        
+        setRecurrentesPorEstado(
+          (data.porEstado || []).map((item: { estado: string; total: number }) => ({ 
+            estado: item.estado, 
+            value: item.total 
+          }))
+        );
+        
+        setRecurrentesPorFrecuencia(
+          (data.porFrecuencia || []).map((item: { frecuencia: string; total: number }) => ({ 
+            frecuencia: item.frecuencia, 
+            value: item.total 
+          }))
+        );
+      } catch (error) {
+        console.error("Error cargando recurrentes:", error);
+      } finally {
         setLoadingRecurrentes(false);
-      });
-    // Notificaciones
-    fetch(`http://localhost:4000/api/estadisticas/notificaciones`)
-      .then(res => res.json())
-      .then(data => {
-        setNotificacionesPorTipo((data.porLeida || []).map((item: { leida: number; total: number }) => ({ tipo: item.leida ? "Leída" : "No leída", value: item.total })));
+      }
+
+      // Notificaciones
+      try {
+        const resNotificaciones = await fetch(`http://localhost:4000/api/estadisticas/notificaciones?periodo=${periodo}`);
+        if (!resNotificaciones.ok) throw new Error('Error al cargar notificaciones');
+        const data = await resNotificaciones.json();
+        
+        setNotificacionesPorTipo(
+          (data.porLeida || []).map((item: { leida: number; total: number }) => ({ 
+            tipo: item.leida ? "Leída" : "No leída", 
+            value: item.total 
+          }))
+        );
+        
         // Si el backend ya manda nombres, úsalo. Si no, haz fetch de usuarios y mapea.
         if (data.porUsuario && data.porUsuario.length && data.porUsuario[0].nombre) {
-          setNotificacionesPorUsuario(data.porUsuario.map((item: { id_usuario: string | number; total: number; nombre?: string }) => ({ usuario: item.id_usuario, value: item.total, nombre: item.nombre })));
+          setNotificacionesPorUsuario(
+            data.porUsuario.map((item: { id_usuario: string | number; total: number; nombre?: string }) => ({ 
+              usuario: item.id_usuario, 
+              value: item.total, 
+              nombre: item.nombre 
+            }))
+          );
         } else {
-          setNotificacionesPorUsuario((data.porUsuario || []).map((item: { id_usuario: string | number; total: number }) => ({ usuario: item.id_usuario, value: item.total })));
+          setNotificacionesPorUsuario(
+            (data.porUsuario || []).map((item: { id_usuario: string | number; total: number }) => ({ 
+              usuario: item.id_usuario, 
+              value: item.total 
+            }))
+          );
+          
           // Intentar obtener nombres de usuario si no vienen
-          fetch('http://localhost:4000/api/usuarios')
-            .then(res => res.json())
-            .then(usuarios => {
-              const nombres: Record<string | number, string> = {};
-              (usuarios || []).forEach((u: { id: string | number; nombre: string }) => {
-                nombres[u.id] = u.nombre;
-              });
-              setUsuariosNombres(nombres);
+          try {
+            const resUsuarios = await fetch('http://localhost:4000/api/usuarios');
+            if (!resUsuarios.ok) throw new Error('Error al cargar nombres de usuarios');
+            const usuarios = await resUsuarios.json();
+            
+            const nombres: Record<string | number, string> = {};
+            (usuarios || []).forEach((u: { id: string | number; nombre: string }) => {
+              nombres[u.id] = u.nombre;
             });
+            
+            setUsuariosNombres(nombres);
+          } catch (error) {
+            console.error("Error cargando nombres de usuarios:", error);
+          }
         }
+      } catch (error) {
+        console.error("Error cargando notificaciones:", error);
+      } finally {
         setLoadingNotificaciones(false);
-      });
-    // Tendencia semanal
-    fetch(`http://localhost:4000/api/estadisticas/tendencia-semanal`)
-      .then(res => res.json())
-      .then(data => {
+      }
+
+      // Tendencia semanal
+      try {
+        const resTendencia = await fetch(`http://localhost:4000/api/estadisticas/tendencia-semanal?periodo=${periodo}`);
+        if (!resTendencia.ok) throw new Error('Error al cargar tendencia semanal');
+        const data = await resTendencia.json();
+        
         if (data.tendencia) setTendenciaSemanal(data.tendencia);
+      } catch (error) {
+        console.error("Error cargando tendencia semanal:", error);
+      } finally {
         setLoadingTendencia(false);
-      });
+      }
+      
+    } catch (error) {
+      console.error("Error general cargando datos:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    cargarDatos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 const [tendenciaSemanal, setTendenciaSemanal] = useState<{ semana: string; pagos: number; solicitudes: number }[]>([]);
 
-const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
-// const GRADIENT_BAR = "url(#barGradient)"; // Eliminado porque no se usa
-const GRADIENT_AREA = "url(#areaGradient)";
+// Paleta de colores mejorada para las gráficas
+const COLORS = ["#10b981", "#0ea5e9", "#8b5cf6", "#f59e0b", "#ef4444", "#ec4899", "#6366f1"];
+
+// Función personalizada para formato de moneda
+const formatoMoneda = (valor: number) => {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(valor);
+};
 
 
 type PagoMes = { mes: string; total: number; objetivo?: number; crecimiento?: number };
@@ -192,86 +310,260 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
             <div className="max-w-7xl mx-auto py-8 px-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-                <div>
-                    <h1 className="text-4xl font-bold text-slate-800 mb-2">Graficas</h1>
+                  <div>
+                    <h1 className="text-4xl font-bold text-slate-800 mb-2">Gráficas</h1>
                     <p className="text-slate-600">Resumen ejecutivo de pagos y solicitudes</p>
-                </div>
-                </div>
-
-                {/* Tarjetas de estadísticas */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                  {stats.map((stat, index) => (
-                    <div
-                      key={index}
-                      className={`relative rounded-2xl p-6 border border-slate-200 shadow-lg bg-gradient-to-br from-white/60 via-${stat.color}-100/40 to-white/60 backdrop-blur-md hover:scale-[1.03] transition-all duration-300 ${showStats ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} animate-fade-in`}
-                      style={{ transitionDelay: `${index * 80}ms` }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-slate-500 text-xs font-semibold tracking-wide uppercase mb-1">{stat.title}</p>
-                          <p className="text-3xl font-extrabold text-slate-800 leading-tight">
-                            {typeof stat.value === "number"
-                              ? <Counter value={stat.value} />
-                              : stat.value}
-                          </p>
-                        </div>
-                        <div className={`p-3 rounded-full shadow bg-white/80 border-2 border-${stat.color}-200 transition-transform duration-200 hover:scale-110`}>
-                          <stat.icon className={`w-7 h-7 text-${stat.color}-500`} />
-                        </div>
-                      </div>
-                      <div className="flex items-center mt-5">
-                        {stat.positive ? (
-                          <TrendingUp className="w-4 h-4 text-green-500 mr-1 animate-bounce" />
-                        ) : (
-                          <TrendingDown className="w-4 h-4 text-red-500 mr-1 animate-bounce" />
-                        )}
-                        <span className={`text-xs font-bold ${stat.positive ? 'text-green-600' : 'text-red-600'}`}>{stat.change}</span>
-                        <span className="text-slate-400 text-xs ml-2">vs mes anterior</span>
+                  </div>
+                  <div className="flex items-center space-x-4 mt-4 sm:mt-0">
+                    <div className="relative">
+                      <select
+                        value={periodoSeleccionado}
+                        onChange={(e) => {
+                          setPeriodoSeleccionado(e.target.value);
+                          cargarDatos(e.target.value);
+                        }}
+                        className="appearance-none block w-full bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="ultimo_mes">Último mes</option>
+                        <option value="ultimo_trimestre">Último trimestre</option>
+                        <option value="ultimo_semestre">Último semestre</option>
+                        <option value="ultimo_anio">Último año</option>
+                        <option value="todo">Todo el tiempo</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path>
+                        </svg>
                       </div>
                     </div>
-                  ))}
+                    <button
+                      onClick={() => cargarDatos()}
+                      disabled={isRefreshing}
+                      className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRefreshing ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
+                      <svg className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      {isRefreshing ? 'Actualizando...' : 'Actualizar datos'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tarjetas de estadísticas mejoradas */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  {stats.map((stat, index) => {
+                    // Mapa de colores para cada tipo de tarjeta
+                    const colorMap: Record<string, { bg: string, text: string, border: string, icon: string }> = {
+                      blue: {
+                        bg: "from-blue-50 to-white via-blue-50/40",
+                        text: "text-blue-800",
+                        border: "border-blue-200",
+                        icon: "text-blue-600"
+                      },
+                      green: {
+                        bg: "from-green-50 to-white via-green-50/40",
+                        text: "text-green-800",
+                        border: "border-green-200",
+                        icon: "text-green-600"
+                      },
+                      purple: {
+                        bg: "from-purple-50 to-white via-purple-50/40",
+                        text: "text-purple-800",
+                        border: "border-purple-200",
+                        icon: "text-purple-600"
+                      },
+                      orange: {
+                        bg: "from-orange-50 to-white via-orange-50/40",
+                        text: "text-orange-800",
+                        border: "border-orange-200",
+                        icon: "text-orange-600"
+                      }
+                    };
+
+                    const colors = colorMap[stat.color as keyof typeof colorMap];
+                    
+                    return (
+                      <div
+                        key={index}
+                        className={`relative rounded-2xl p-6 border ${colors.border} shadow-lg bg-gradient-to-br ${colors.bg} backdrop-blur-md hover:scale-[1.03] transition-all duration-300 ${showStats ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                        style={{ transitionDelay: `${index * 120}ms` }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-slate-500 text-xs font-semibold tracking-wide uppercase mb-1">{stat.title}</p>
+                            <p className={`text-3xl font-extrabold ${colors.text} leading-tight`}>
+                              {typeof stat.value === "number"
+                                ? <Counter value={stat.value} />
+                                : stat.value}
+                            </p>
+                          </div>
+                          <div className={`p-3 rounded-full shadow-md bg-white/90 border-2 ${colors.border} transition-all duration-300 hover:scale-110 hover:shadow-lg`}>
+                            <stat.icon className={`w-7 h-7 ${colors.icon}`} />
+                          </div>
+                        </div>
+                        <div className="flex items-center mt-5">
+                          {stat.positive ? (
+                            <TrendingUp className="w-4 h-4 text-green-500 mr-1 animate-pulse" />
+                          ) : (
+                            <TrendingDown className="w-4 h-4 text-red-500 mr-1 animate-pulse" />
+                          )}
+                          <span className={`text-xs font-bold ${stat.positive ? 'text-green-600' : 'text-red-600'}`}>{stat.change}</span>
+                          <span className="text-slate-400 text-xs ml-2">vs mes anterior</span>
+                        </div>
+                        
+                        {/* Indicador de carga */}
+                        {(index === 0 && loadingSolicitudes) || 
+                         (index === 1 && loadingSolicitudes) || 
+                         (index === 2 && loadingSolicitudes) || 
+                         (index === 3 && loadingNotificaciones) ? (
+                          <div className="absolute top-2 right-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-400 animate-ping"></div>
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Gráficas modernas y ordenadas para cada entidad */}
+                {/* Selector de categorías */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {['todos', 'solicitudes', 'usuarios', 'recurrentes', 'notificaciones', 'tendencias'].map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setActiveChart(category)}
+                      className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${
+                        activeChart === category
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-50'
+                      }`}
+                    >
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </button>
+                  ))}
+                </div>
+                
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                   {/* Solicitudes */}
-                  <div className="bg-white rounded-2xl shadow-lg p-8 border border-blue-100 hover:shadow-xl transition-shadow">
-                    <h2 className="text-xl font-bold text-blue-700 mb-4">Solicitudes por Estado</h2>
-                    {loadingSolicitudes ? (
-                      <div className="w-full h-[260px] flex items-center justify-center">
-                        <div className="w-full h-full bg-slate-100 animate-pulse rounded-xl" />
+                  {(activeChart === 'todos' || activeChart === 'solicitudes') && (
+                    <div className="bg-white rounded-2xl shadow-lg p-8 border border-blue-100 hover:shadow-xl transition-all duration-300">
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold text-blue-700">Solicitudes por Estado</h2>
+                        {loadingSolicitudes && (
+                          <div className="animate-pulse flex items-center">
+                            <div className="h-2 w-2 rounded-full bg-blue-600 mr-1"></div>
+                            <div className="h-2 w-2 rounded-full bg-blue-600 mr-1 animate-bounce"></div>
+                            <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <ResponsiveContainer width="100%" height={260}>
-                        <BarChart data={[...solicitudesPorEstado].sort((a,b)=>b.value-a.value)}>
-                          <defs>
-                            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#2563eb" stopOpacity={0.8}/>
-                              <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.7}/>
-                            </linearGradient>
-                          </defs>
-                          <XAxis dataKey="estado" tick={{ fontWeight: 700, fontSize: 13, fill: '#334155' }} />
-                          <YAxis tick={{ fontWeight: 700, fontSize: 13, fill: '#334155' }} />
-                          <Tooltip contentStyle={{ borderRadius: 12, background: '#e0e7ff', border: '1px solid #2563eb', color: '#1e293b' }} />
-                          <Bar dataKey="value" fill="url(#barGradient)" radius={[10,10,0,0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
-                  <div className="bg-white rounded-2xl shadow-lg p-8 border border-blue-100 hover:shadow-xl transition-shadow">
-                    <h2 className="text-xl font-bold text-blue-700 mb-4">Solicitudes (Pie)</h2>
-                    <ResponsiveContainer width="100%" height={260}>
-                      <PieChart>
-                        <Pie data={solicitudesPorEstado} dataKey="value" nameKey="estado" cx="50%" cy="50%" outerRadius={90} innerRadius={45} label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}>
-                          {solicitudesPorEstado.map((entry, index) => (
-                            <Cell key={`cell-solicitud-${index}`} fill={COLORS[index % COLORS.length]} stroke="#fff" strokeWidth={2} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
+                      
+                      {loadingSolicitudes ? (
+                        <div className="w-full h-[260px] flex items-center justify-center">
+                          <div className="w-full h-[200px] bg-slate-100 animate-pulse rounded-xl" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <svg className="w-12 h-12 text-blue-300 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          </div>
+                        </div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height={260}>
+                          <BarChart data={[...solicitudesPorEstado].sort((a,b)=>b.value-a.value)}>
+                            <defs>
+                              <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#2563eb" stopOpacity={0.8}/>
+                                <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.7}/>
+                              </linearGradient>
+                            </defs>
+                            <XAxis dataKey="estado" tick={{ fontWeight: 700, fontSize: 13, fill: '#334155' }} />
+                            <YAxis tick={{ fontWeight: 700, fontSize: 13, fill: '#334155' }} />
+                            <Tooltip 
+                              formatter={(value) => formatoMoneda(Number(value))}
+                              contentStyle={{ 
+                                borderRadius: 12, 
+                                background: '#e0e7ff', 
+                                border: '1px solid #2563eb', 
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                color: '#1e293b' 
+                              }} 
+                            />
+                            <Bar dataKey="value" fill="url(#barGradient)" radius={[10,10,0,0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  )}
+                  {(activeChart === 'todos' || activeChart === 'solicitudes') && (
+                    <div className="bg-white rounded-2xl shadow-lg p-8 border border-blue-100 hover:shadow-xl transition-all duration-300">
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold text-blue-700">Solicitudes por Estado (Pie)</h2>
+                        {loadingSolicitudes && (
+                          <div className="animate-pulse flex items-center">
+                            <div className="h-2 w-2 rounded-full bg-blue-600 mr-1"></div>
+                            <div className="h-2 w-2 rounded-full bg-blue-600 mr-1 animate-bounce"></div>
+                            <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {loadingSolicitudes ? (
+                        <div className="w-full h-[260px] flex items-center justify-center">
+                          <div className="w-[200px] h-[200px] bg-slate-100 animate-pulse rounded-full mx-auto" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <svg className="w-12 h-12 text-blue-300 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          </div>
+                        </div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height={260}>
+                          <PieChart>
+                            <Pie 
+                              data={solicitudesPorEstado} 
+                              dataKey="value" 
+                              nameKey="estado" 
+                              cx="50%" 
+                              cy="50%" 
+                              outerRadius={90} 
+                              innerRadius={45} 
+                              label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
+                              labelLine={true}
+                              animationDuration={1000}
+                              animationBegin={200}
+                            >
+                              {solicitudesPorEstado.map((entry, index) => (
+                                <Cell 
+                                  key={`cell-solicitud-${index}`} 
+                                  fill={COLORS[index % COLORS.length]} 
+                                  stroke="#fff" 
+                                  strokeWidth={2}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip 
+                              formatter={(value) => formatoMoneda(Number(value))}
+                              contentStyle={{ 
+                                borderRadius: 8, 
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                border: '1px solid rgba(203, 213, 225, 0.5)'
+                              }}
+                            />
+                            <Legend 
+                              layout="horizontal"
+                              verticalAlign="bottom"
+                              align="center"
+                              iconSize={10}
+                              iconType="circle"
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  )}
                   {/* Usuarios */}
                   <div className="bg-white rounded-2xl shadow-lg p-8 border border-green-100 hover:shadow-xl transition-shadow">
                     <h2 className="text-xl font-bold text-green-700 mb-4">Usuarios por Rol</h2>
@@ -439,61 +731,117 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                   </div>
                 </div>
 
-                {/* Gráfica de tendencias */}
+                {/* Gráfica de tendencias mejorada */}
                 {(activeChart === "todos" || activeChart === "tendencias") && (
-                <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
-                    <h2 className="text-xl font-bold text-slate-800 mb-4">Tendencia Semanal</h2>
+                <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-200 hover:shadow-xl transition-all duration-300">
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-xl font-bold text-slate-800">Tendencia Semanal</h2>
+                      {loadingTendencia ? (
+                        <div className="animate-pulse flex items-center">
+                          <div className="h-2 w-2 rounded-full bg-purple-600 mr-1"></div>
+                          <div className="h-2 w-2 rounded-full bg-purple-600 mr-1 animate-bounce"></div>
+                          <div className="h-2 w-2 rounded-full bg-purple-600 animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        </div>
+                      ) : (
+                        <div className="flex space-x-4">
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                            <span className="text-xs font-medium text-slate-700">Pagos</span>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                            <span className="text-xs font-medium text-slate-700">Solicitudes</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
                     {loadingTendencia ? (
-                      <div className="w-full h-[300px] flex items-center justify-center">
-                        <div className="w-full h-full bg-slate-100 animate-pulse rounded-xl" />
+                      <div className="w-full h-[300px] flex items-center justify-center relative">
+                        <div className="w-full h-[250px] bg-slate-100/70 animate-pulse rounded-xl" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <svg className="w-12 h-12 text-purple-300 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </div>
                       </div>
                     ) : (
                       <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={tendenciaSemanal} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                            <defs>
+                        <AreaChart 
+                          data={tendenciaSemanal} 
+                          margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+                        >
+                          <defs>
                             <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
                             </linearGradient>
-                            </defs>
-                            <XAxis 
+                            <linearGradient id="areaGradientGreen" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
+                            </linearGradient>
+                          </defs>
+                          <XAxis 
                             dataKey="semana" 
-                            tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }} 
-                            axisLine={false} 
-                            tickLine={false} 
-                            />
-                            <YAxis 
-                            tick={{ fontSize: 12, fontWeight: 600, fill: '#475569' }} 
-                            axisLine={false} 
-                            tickLine={false} 
-                            />
-                            <Tooltip 
+                            tick={{ fontSize: 12, fontWeight: 500, fill: '#475569' }} 
+                            axisLine={{ stroke: '#e2e8f0' }}
+                            tickLine={false}
+                          />
+                          <YAxis 
+                            tick={{ fontSize: 12, fontWeight: 500, fill: '#475569' }} 
+                            axisLine={false}
+                            tickLine={false}
+                            tickFormatter={(value) => formatoMoneda(value).replace('$', '')}
+                          />
+                          <Tooltip 
+                            formatter={(value, name) => [
+                              formatoMoneda(Number(value)), 
+                              name === 'pagos' ? 'Pagos' : 'Solicitudes'
+                            ]}
                             contentStyle={{ 
-                                borderRadius: 8, 
-                                background: '#ffffff', 
-                                border: '1px solid #e2e8f0',
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                              borderRadius: 8, 
+                              background: 'rgba(255, 255, 255, 0.97)', 
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
                             }} 
-                            />
-                            <Area 
+                            labelStyle={{
+                              fontWeight: 'bold',
+                              color: '#1e293b'
+                            }}
+                          />
+                          <Area 
                             type="monotone" 
                             dataKey="pagos" 
+                            name="Pagos"
                             stroke="#8b5cf6" 
-                            strokeWidth={2}
-                            fill={GRADIENT_AREA}
+                            strokeWidth={3}
+                            fill="url(#areaGradient)"
                             isAnimationActive={true}
-                            />
-                            <Line 
+                            animationDuration={1500}
+                            dot={{ stroke: '#8b5cf6', strokeWidth: 2, r: 4, fill: '#fff' }}
+                            activeDot={{ stroke: '#8b5cf6', strokeWidth: 2, r: 6, fill: '#fff' }}
+                          />
+                          <Area 
                             type="monotone" 
                             dataKey="solicitudes" 
+                            name="Solicitudes"
                             stroke="#10b981" 
-                            strokeWidth={2}
-                            dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                            strokeWidth={3}
+                            fill="url(#areaGradientGreen)"
                             isAnimationActive={true}
-                            />
+                            animationDuration={1500}
+                            animationBegin={300}
+                            dot={{ stroke: '#10b981', strokeWidth: 2, r: 4, fill: '#fff' }}
+                            activeDot={{ stroke: '#10b981', strokeWidth: 2, r: 6, fill: '#fff' }}
+                          />
                         </AreaChart>
                       </ResponsiveContainer>
                     )}
+                    
+                    <div className="mt-4 text-center text-xs text-slate-500">
+                      <p>Comparación entre pagos procesados y solicitudes recibidas por semana</p>
+                    </div>
                 </div>
                 )}
 

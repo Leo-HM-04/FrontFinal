@@ -1,11 +1,12 @@
 'use client';
 
-import { FaFilePdf, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaFilePdf, FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import { Clock, CheckCircle, XCircle, AlertCircle, FileText, Search } from 'lucide-react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
+import { ViaticoDetailModal } from '@/components/viaticos/ViaticoDetailModal';
 import { useEffect, useState } from 'react';
 import { ViaticosService } from '@/services/viaticos.service';
 import type { Viatico as BaseViatico } from '@/services/viaticos.service';
@@ -49,8 +50,10 @@ export default function MisViaticosPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [mensaje, setMensaje] = useState('');
-    const [showModal, setShowModal] = useState(false);
-    const [viaticoAEliminar, setViaticoAEliminar] = useState<number|null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [viaticoAEliminar, setViaticoAEliminar] = useState<number|null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedViatico, setSelectedViatico] = useState<Viatico | null>(null);
 
   const handleEliminar = async () => {
     if (!viaticoAEliminar) return;
@@ -63,6 +66,11 @@ export default function MisViaticosPage() {
     }
     setShowModal(false);
     setViaticoAEliminar(null);
+  };
+  
+  const handleOpenDetailModal = (viatico: Viatico) => {
+    setSelectedViatico(viatico);
+    setShowDetailModal(true);
   };
 
   useEffect(() => {
@@ -411,6 +419,14 @@ export default function MisViaticosPage() {
                                   <FaTrash className="w-3.5 h-3.5" />
                                 </button>
                               </>
+                            ) : String(v.estado).toLowerCase() === 'pagada' ? (
+                              <button
+                                title="Ver detalles y comprobante"
+                                className="inline-flex items-center justify-center p-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                                onClick={() => handleOpenDetailModal(v)}
+                              >
+                                <FaEye className="w-3.5 h-3.5" />
+                              </button>
                             ) : (
                               <span className="text-gray-400 text-xs font-medium">No disponible</span>
                             )}
@@ -490,6 +506,13 @@ export default function MisViaticosPage() {
               )}
             </div>
           </div>
+
+          {/* Modal de detalles de viático */}
+          <ViaticoDetailModal
+            viatico={selectedViatico}
+            isOpen={showDetailModal}
+            onClose={() => setShowDetailModal(false)}
+          />
         </div>
       </SolicitanteLayout>
     </ProtectedRoute>

@@ -73,6 +73,17 @@ export interface UpdateEstadoData {
   comentario_aprobador?: string;
 }
 
+export interface Comprobante {
+  id_comprobante: number;
+  id_solicitud: number;
+  nombre_archivo: string;
+  ruta_archivo: string;
+  fecha_subida: string;
+  usuario_subio: number;
+  comentario?: string;
+  nombre_usuario?: string;
+}
+
 export interface ApiError {
   message: string;
   code?: string;

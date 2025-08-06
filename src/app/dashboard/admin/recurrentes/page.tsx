@@ -9,11 +9,17 @@ import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, FileText } from 'lucide-react';
 import { RecurrenteViewModal } from '@/components/modals/RecurrenteViewModal';
 import { RecurrentesService } from '@/services/recurrentes.service';
 import { PlantillaRecurrente } from '@/types';
 import { toast } from 'react-hot-toast';
+import { 
+  exportRecurrentesCSV, 
+  exportRecurrentesExcel, 
+  exportRecurrentesPDF 
+} from '@/utils/exportRecurrentes';
+import { ExportModal } from '@/components/modals/ExportModal';
 
 export default function AdminRecurrentesPage() {
 
@@ -25,6 +31,8 @@ export default function AdminRecurrentesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewRecurrente, setViewRecurrente] = useState<PlantillaRecurrente | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -42,6 +50,8 @@ export default function AdminRecurrentesPage() {
     };
     fetchRecurrentes();
   }, []);
+
+  // Ya no necesitamos este efecto para el menú de exportación, ahora usamos un modal
 
 
   // FILTROS AVANZADOS
@@ -109,6 +119,55 @@ export default function AdminRecurrentesPage() {
     ? 'bg-green-100 text-green-800 border-green-300'
     : 'bg-red-100 text-red-800 border-red-300';
 
+  // Funciones de exportación
+  const handleExportPDF = async (tipo: 'activo' | 'inactivo' | 'todos' = 'todos') => {
+    try {
+      setExportLoading(true);
+      setShowExportModal(false);
+      toast.loading(`Preparando exportación PDF...`);
+      exportRecurrentesPDF(recurrentes, tipo);
+      toast.dismiss();
+      toast.success('¡PDF generado con éxito!');
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+      toast.dismiss();
+      toast.error('Error al generar PDF');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleExportExcel = async (tipo: 'activo' | 'inactivo' | 'todos' = 'todos') => {
+    try {
+      setExportLoading(true);
+      setShowExportModal(false);
+      toast.loading(`Preparando exportación Excel...`);
+      await exportRecurrentesExcel(recurrentes, tipo);
+      toast.dismiss();
+      toast.success('¡Excel generado con éxito!');
+    } catch (error) {
+      console.error('Error al exportar Excel:', error);
+      toast.dismiss();
+      toast.error('Error al generar Excel');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleExportCSV = (tipo: 'activo' | 'inactivo' | 'todos' = 'todos') => {
+    try {
+      setExportLoading(true);
+      setShowExportModal(false);
+      exportRecurrentesCSV(recurrentes, tipo);
+      toast.success('¡CSV generado con éxito!');
+    } catch (error) {
+      console.error('Error al exportar CSV:', error);
+      toast.error('Error al generar CSV');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   return (
     <ProtectedRoute requiredRoles={['admin_general']}>
       <AdminLayout>
@@ -118,6 +177,19 @@ export default function AdminRecurrentesPage() {
               <div>
                 <h2 className="text-2xl font-bold text-white font-sans">Gestión de Recurrentes</h2>
                 <p className="text-white/80">Total: {recurrentes.length} plantillas</p>
+              </div>
+              
+              {/* Botón de exportación */}
+              <div className="relative">
+                <Button
+                  onClick={() => setShowExportModal(true)}
+                  variant="primary"
+                  className="flex items-center transition-all shadow-lg hover:shadow-xl"
+                  disabled={exportLoading || loading || recurrentes.length === 0}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Exportar datos
+                </Button>
               </div>
             </div>
           </div>
@@ -230,6 +302,18 @@ export default function AdminRecurrentesPage() {
             message="¿Estás seguro de que deseas eliminar esta plantilla recurrente? Esta acción no se puede deshacer."
             itemName={selectedRecurrente ? `Plantilla #${selectedRecurrente.id_recurrente} - ${selectedRecurrente.departamento}` : undefined}
             loading={deleting}
+          />
+          
+          {/* Modal de Exportación */}
+          <ExportModal 
+            isOpen={showExportModal}
+            onClose={() => setShowExportModal(false)}
+            title="Exportar Recurrentes"
+            description="Seleccione el formato y filtro para la exportación"
+            onExportPDF={handleExportPDF}
+            onExportExcel={handleExportExcel}
+            onExportCSV={handleExportCSV}
+            isLoading={exportLoading}
           />
         </div>
       </AdminLayout>

@@ -1,8 +1,43 @@
 
 import api from '@/lib/api';
-import { Solicitud, CreateSolicitudData, UpdateEstadoData } from '@/types';
+import { Solicitud, CreateSolicitudData, UpdateEstadoData, Comprobante } from '@/types';
 
 export class SolicitudesService {
+  static async getComprobantes(id_solicitud: number, token?: string): Promise<Comprobante[]> {
+    try {
+      // Si no se proporciona token, intentamos obtenerlo del localStorage
+      if (!token) {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+          token = storedToken;
+        }
+      }
+      
+      console.log(`Obteniendo comprobantes para solicitud ${id_solicitud}. Token presente: ${!!token}`);
+      
+      const response = await api.get<Comprobante[]>(`/comprobantes/${id_solicitud}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      return response.data;
+    } catch (error) {
+      // Tipamos el error como unknown y luego verificamos sus propiedades
+      const err = error as { response?: { data: unknown; status?: number }; message?: string };
+      
+      // Log más detallado para errores específicos
+      if (err.response?.status === 401) {
+        console.error(`Error 401 (No autorizado) obteniendo comprobantes para solicitud ${id_solicitud}`);
+      } else if (err.response?.status === 403) {
+        console.error(`Error 403 (Prohibido) obteniendo comprobantes para solicitud ${id_solicitud}`);
+      } else {
+        console.error(`Error obteniendo comprobantes para solicitud ${id_solicitud}:`, 
+          err.response?.data || err.message || 'Error desconocido');
+      }
+      
+      // Re-lanzamos el error para que se maneje en el componente
+      throw error;
+    }
+  }
+
   static async subirFactura(id: number, factura: File, token: string): Promise<unknown> {
     const formData = new FormData();
     formData.append('archivo', factura); // El backend espera 'archivo'
