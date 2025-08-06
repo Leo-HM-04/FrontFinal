@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileCheck, Building, BadgeDollarSign, Banknote, CreditCard, CalendarDays, StickyNote, Repeat2, X, CircleCheck, CircleX, User2 } from 'lucide-react';
 import Image from 'next/image';
+import Cookies from 'js-cookie';
 import '@/styles/modal.css';
 
 interface RecurrenteDetalleModalProps {
@@ -28,7 +29,70 @@ interface RecurrenteDetalleModalProps {
   } | null;
 }
 
+interface ComprobanteRecurrente {
+  id: number;
+  con_recurrente: string;
+  fecha_pago: string;
+  usuario_pago: string;
+  comentario?: string;
+}
+
 export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ open, onClose, recurrente }) => {
+  const [comprobantes, setComprobantes] = useState<ComprobanteRecurrente[]>([]);
+  const [loadingComprobantes, setLoadingComprobantes] = useState(false);
+  const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
+
+  // Función para obtener comprobantes de pago
+  const fetchComprobantes = async () => {
+    if (!recurrente?.id || (recurrente.estado !== 'pagado' && recurrente.estado !== 'pagada')) return;
+    
+    console.log('🔍 Fetching comprobantes for recurrente ID:', recurrente.id);
+    console.log('🔍 Estado actual:', recurrente.estado);
+    
+    setLoadingComprobantes(true);
+    setErrorComprobantes(null);
+    
+    try {
+      const url = `http://localhost:4000/api/recurrentes/${recurrente.id}/comprobantes`;
+      console.log('🔍 URL de la petición:', url);
+      
+      // Obtener el token de autenticación de las cookies
+      const token = Cookies.get('auth_token');
+      console.log('🔍 Token encontrado:', token ? '✅ Sí' : '❌ No');
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('🔍 Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log('🔍 Datos recibidos:', data);
+      setComprobantes(data);
+    } catch (error) {
+      console.error('❌ Error fetching comprobantes:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      setErrorComprobantes(`Error al cargar los comprobantes: ${errorMessage}`);
+    } finally {
+      setLoadingComprobantes(false);
+    }
+  };
+
+  // Cargar comprobantes cuando se abre el modal y está en estado pagado
+  useEffect(() => {
+    if (open && (recurrente?.estado === 'pagado' || recurrente?.estado === 'pagada')) {
+      fetchComprobantes();
+    }
+  }, [open, recurrente?.id, recurrente?.estado]);
+
+  // Early return después de todos los hooks
   if (!open || !recurrente) return null;
 
   const formatDate = (dateString: string) => {
@@ -45,6 +109,16 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
     if (factura.startsWith('/uploads')) return `http://localhost:4000${factura}`;
     // Si es solo el nombre del archivo
     return `http://localhost:4000/uploads/RECURRENTE/${factura}`;
+  };
+
+  // Construir URL para comprobantes de pago
+  const getComprobanteUrl = (comprobante?: string) => {
+    if (!comprobante) return undefined;
+    if (/^https?:\/\//.test(comprobante)) return comprobante;
+    // Si ya empieza con /uploads, anteponer el host
+    if (comprobante.startsWith('/uploads')) return `http://localhost:4000${comprobante}`;
+    // Si es solo el nombre del archivo
+    return `http://localhost:4000/uploads/comprobante-recurrentes/${comprobante}`;
   };
   
   // Función para obtener logo del banco
@@ -392,6 +466,102 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
               </div>
             </div>
           </div>
+
+          {/* Sección de Comprobantes de Pago - Solo si está pagado */}
+          {(recurrente.estado === 'pagado' || recurrente.estado === 'pagada') && (
+            <div className="p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                <div className="p-2 bg-green-100 rounded-xl mr-3">
+                  <FileCheck className="w-6 h-6 text-green-700" />
+                </div>
+                Comprobantes de Pago
+              </h3>
+              
+              {loadingComprobantes ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                  <span className="ml-3 text-green-700">Cargando comprobantes...</span>
+                </div>
+              ) : errorComprobantes ? (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                  <span className="text-red-600 font-medium">{errorComprobantes}</span>
+                </div>
+              ) : comprobantes.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {comprobantes.map((comprobante) => (
+                    <div key={comprobante.id} className="bg-white p-4 rounded-xl border border-green-200/50 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm font-medium text-green-800 flex items-center gap-2">
+                          <FileCheck className="w-4 h-4" />
+                          Comprobante #{comprobante.id}
+                        </span>
+                        <a 
+                          href={getComprobanteUrl(comprobante.con_recurrente)} 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-lg px-3 py-1 text-xs font-medium"
+                        >
+                          Ver
+                        </a>
+                      </div>
+                      
+                      {/* Información del comprobante */}
+                      <div className="space-y-2 mb-4">
+                        <div>
+                          <span className="text-xs text-green-600 font-medium">Fecha de Pago</span>
+                          <p className="text-sm text-gray-800">{formatDate(comprobante.fecha_pago)}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-green-600 font-medium">Usuario</span>
+                          <p className="text-sm text-gray-800">{comprobante.usuario_pago}</p>
+                        </div>
+                        {comprobante.comentario && (
+                          <div>
+                            <span className="text-xs text-green-600 font-medium">Comentario</span>
+                            <p className="text-sm text-gray-800">{comprobante.comentario}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Preview del comprobante */}
+                      <div className="border border-green-200 rounded-lg overflow-hidden">
+                        {comprobante.con_recurrente.toLowerCase().endsWith('.pdf') ? (
+                          <div className="relative h-32 bg-gray-50">
+                            <iframe 
+                              src={`${getComprobanteUrl(comprobante.con_recurrente)}#toolbar=0&navpanes=0`}
+                              className="w-full h-full border-0"
+                              title={`Vista previa comprobante ${comprobante.id}`}
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-green-100/90 to-transparent p-1">
+                              <p className="text-xs text-center text-green-800">PDF Preview</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center p-2 bg-white h-32">
+                            <Image
+                              src={getComprobanteUrl(comprobante.con_recurrente) || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik01IDh2LTNoMTR2M2gtMTR6bTAgMTJoMTR2LTloLTE0djl6bTAtMTVoMTRjLjU1MiAwIDEgLjQ0OCAxIDFzLS40NDggMS0xIDFoLTE0Yy0uNTUyIDAtMS0uNDQ4LTEtMXMuNDQ4LTEgMS0xem0wIDE2Yy0uNTUyIDAtMS0uNDQ4LTEtMXYtMTBjMC0uNTUyLjQ0OC0xIDEtMWgxNGMuNTUyIDAgMSAuNDQ4IDEgMXYxMGMwIC41NTItLjQ0OCAxLTEgMWgtMTR6IiBmaWxsPSIjOTJhNGJkIi8+PC9zdmc+'}
+                              alt={`Comprobante ${comprobante.id}`}
+                              className="max-h-28 object-contain rounded"
+                              width={200}
+                              height={112}
+                              style={{ objectFit: 'contain' }}
+                              unoptimized
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-gray-50/80 p-6 rounded-xl border border-gray-200 text-center">
+                  <FileCheck className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <span className="text-gray-600 font-medium block mb-1">No hay comprobantes de pago</span>
+                  <p className="text-sm text-gray-500">Aún no se han subido comprobantes para este pago recurrente</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         </div>
       </div>
