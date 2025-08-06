@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FileCheck, Building, BadgeDollarSign, Banknote, CreditCard, CalendarDays, StickyNote, Repeat2, X, CircleCheck, CircleX, User2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FileCheck, Building, BadgeDollarSign, CreditCard, StickyNote, Repeat2, X, User2 } from 'lucide-react';
 import Image from 'next/image';
 import Cookies from 'js-cookie';
 import '@/styles/modal.css';
@@ -43,7 +43,7 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
   const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
 
   // Función para obtener comprobantes de pago
-  const fetchComprobantes = async () => {
+  const fetchComprobantes = useCallback(async () => {
     if (!recurrente?.id || (recurrente.estado !== 'pagado' && recurrente.estado !== 'pagada')) return;
     
     console.log('🔍 Fetching comprobantes for recurrente ID:', recurrente.id);
@@ -83,14 +83,14 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
     } finally {
       setLoadingComprobantes(false);
     }
-  };
+  }, [recurrente?.id, recurrente?.estado]);
 
   // Cargar comprobantes cuando se abre el modal y está en estado pagado
   useEffect(() => {
     if (open && (recurrente?.estado === 'pagado' || recurrente?.estado === 'pagada')) {
       fetchComprobantes();
     }
-  }, [open, recurrente?.id, recurrente?.estado]);
+  }, [open, recurrente?.id, recurrente?.estado, fetchComprobantes]);
 
   // Early return después de todos los hooks
   if (!open || !recurrente) return null;
@@ -438,7 +438,7 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
                             title="Vista previa de factura"
                           />
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-amber-100/90 to-transparent p-2">
-                            <p className="text-xs text-center text-amber-800">Vista previa limitada • Haga clic en "Ver Documento Completo" para abrir el PDF completo</p>
+                            <p className="text-xs text-center text-amber-800">Vista previa limitada • Haga clic en &quot;Ver Documento Completo&quot; para abrir el PDF completo</p>
                           </div>
                         </div>
                       ) : (

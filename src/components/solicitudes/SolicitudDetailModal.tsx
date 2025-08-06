@@ -375,7 +375,7 @@ return (
                     <FileText className="w-4 h-4 text-blue-700" />
                     <span className="text-blue-900 font-mono text-xs">{fileName}</span>
                   </div>
-                  <span className="text-xs text-gray-500 mt-1 block">No se puede previsualizar, haz clic en "Ver Factura" para abrir</span>
+                  <span className="text-xs text-gray-500 mt-1 block">No se puede previsualizar, haz clic en &quot;Ver Factura&quot; para abrir</span>
                 </div>
               );
             }
@@ -533,7 +533,7 @@ return (
                               style={{height: '150px'}} 
                             />
                             <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-700">
-                              Vista previa limitada • Haga clic en "Ver completo" para el PDF completo
+                              Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
                             </div>
                           </div>
                         )}
@@ -543,7 +543,7 @@ return (
                             <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
                             <div className="flex-1">
                               <p className="text-blue-800 font-medium text-sm">Archivo: {fileName}</p>
-                              <p className="text-xs text-gray-600">Haga clic en "Ver completo" para abrir el archivo</p>
+                              <p className="text-xs text-gray-600">Haga clic en &quot;Ver completo&quot; para abrir el archivo</p>
                             </div>
                           </div>
                         )}
