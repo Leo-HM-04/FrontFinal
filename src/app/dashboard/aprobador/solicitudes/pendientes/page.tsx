@@ -6,7 +6,7 @@ import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye, CheckCircle, XCircle, Download, Search } from 'lucide-react';
+import { FileText, Eye, CheckCircle, XCircle} from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
@@ -29,7 +29,7 @@ export default function SolicitudesPendientesPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [search, setSearch] = useState('');
+  //const [search, setSearch] = useState('');
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; solicitud: Solicitud | null; action: 'approve' | 'reject' | null }>({ open: false, solicitud: null, action: null });
 
   const {

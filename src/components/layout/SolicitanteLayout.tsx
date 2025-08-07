@@ -73,10 +73,11 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
       });
       const data = await res.json();
       if (Array.isArray(data)) {
-        const count = data.filter((n: any) => !n.leida).length;
+        type Notification = { leida?: boolean };
+        const count = (data as Notification[]).filter((n) => !n.leida).length;
         setUnreadCount(count);
       }
-    } catch (e) {
+    } catch {
       setUnreadCount(0);
     }
   }, []);

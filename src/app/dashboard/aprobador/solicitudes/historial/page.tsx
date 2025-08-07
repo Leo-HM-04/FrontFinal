@@ -6,7 +6,7 @@ import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye, CheckCircle, XCircle, BarChart2, UserX } from 'lucide-react';
+import { FileText, Eye, CheckCircle, XCircle} from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
@@ -105,11 +105,11 @@ export default function HistorialSolicitudesPage() {
   // Estadísticas
   const autorizadas = solicitudes.filter(s => s.estado === 'autorizada');
   const rechazadas = solicitudes.filter(s => s.estado === 'rechazada');
-  const totalAprobado = autorizadas.reduce((sum, s) => sum + s.monto, 0);
-  const totalRechazado = rechazadas.reduce((sum, s) => sum + s.monto, 0);
+  //const totalAprobado = autorizadas.reduce((sum, s) => sum + s.monto, 0);
+  //const totalRechazado = rechazadas.reduce((sum, s) => sum + s.monto, 0);
 
   // Nuevo: búsqueda rápida
-  const [search, setSearch] = useState('');
+  const [search] = useState('');
   const quickFilteredSolicitudes = filteredSolicitudes.filter(s =>
     s.usuario_nombre?.toLowerCase().includes(search.toLowerCase()) ||
     s.departamento?.toLowerCase().includes(search.toLowerCase()) ||

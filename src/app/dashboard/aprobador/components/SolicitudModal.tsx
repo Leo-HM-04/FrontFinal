@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { PlantillaRecurrente } from '@/types';
 import { FaBuilding, FaRegCalendarAlt, FaTimesCircle, FaFileAlt, FaDollarSign } from 'react-icons/fa';
 
@@ -116,10 +117,14 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({ solicitud, open,
                       );
                     } else if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext || '')) {
                       return (
-                        <img
+                        <Image
                           src={url}
                           alt="Previsualización adjunto"
+                          width={600}
+                          height={340}
                           className="object-contain max-h-[340px] w-auto mx-auto"
+                          style={{ maxHeight: 340, width: 'auto', marginLeft: 'auto', marginRight: 'auto' }}
+                          unoptimized
                         />
                       );
                     } else {

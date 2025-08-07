@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import { Filter, X, Search, Download, RefreshCw } from 'lucide-react';
 import { Button } from './Button';
-
-import DatePicker, { registerLocale } from 'react-datepicker';
+import { registerLocale } from 'react-datepicker';
 import { es } from 'date-fns/locale/es';
 import 'react-datepicker/dist/react-datepicker.css';
 registerLocale('es', es);

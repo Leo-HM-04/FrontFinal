@@ -19,16 +19,9 @@ import {
   Search,
   Download,
   Filter,
-  Calendar,
   Edit,
   Trash2,
-  TrendingUp,
-  DollarSign,
-  FileCheck,
   AlertTriangle,
-  BarChart3,
-  Info,
-  Database
 } from 'lucide-react';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { ExportModal } from '@/components/modals/ExportModal';
@@ -74,19 +67,6 @@ const DATE_OPTIONS = [
   { value: 'month', label: 'Último mes' }
 ];
 
-const EXPORT_FORMATS = [
-  { value: 'pdf', label: 'PDF', icon: FileText },
-  { value: 'excel', label: 'Excel', icon: BarChart3 },
-  { value: 'csv', label: 'CSV', icon: Database }
-];
-
-const EXPORT_PERIODS = [
-  { value: 'dia', label: 'Hoy', icon: Clock },
-  { value: 'semana', label: 'Última Semana', icon: Calendar },
-  { value: 'mes', label: 'Último Mes', icon: Calendar },
-  { value: 'año', label: 'Último Año', icon: Calendar },
-  { value: 'total', label: 'Todo el historial', icon: Database }
-];
 
 // Utilidades
 const getEstadoConfig = (estado: string) => {
@@ -169,8 +149,6 @@ export default function MisSolicitudesPage() {
   const [dateFilter, setDateFilter] = useState('');
   
   // Estados de exportación
-  const [exportFormat, setExportFormat] = useState('pdf');
-  const [exportRango, setExportRango] = useState('total');
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Calcular estadísticas

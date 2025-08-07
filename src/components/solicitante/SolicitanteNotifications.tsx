@@ -125,7 +125,7 @@ export default function SolicitanteNotifications({ open, onClose }: SolicitanteN
     setOpenModal(open);
   }, [open]);
 
-  const handleOpen = () => setOpenModal(true);
+  //const handleOpen = () => setOpenModal(true);
   const handleClose = () => {
     setOpenModal(false);
     // Notificar al layout que debe refrescar el contador

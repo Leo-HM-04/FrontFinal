@@ -10,7 +10,6 @@ import { Eye, CreditCard, AlertCircle } from 'lucide-react';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { toast } from 'react-hot-toast';
-import { exportSolicitudesToCSV, exportSolicitudesToExcel, exportSolicitudesToPDF } from '@/utils/exportUtils';
 import { getPagosPendientes, marcarPagoComoPagado, subirComprobante } from '@/services/pagosService';
 import type { Solicitud } from '../../../../../types/index';
 import { PagoDetailModal } from '@/components/pagos/PagoDetailModal';
@@ -20,7 +19,6 @@ import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal'
 export default function PagosPendientesPage() {
   const [selectedPago, setSelectedPago] = useState<Solicitud | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showExportModal, setShowExportModal] = useState(false);
   const [procesandoPago, setProcesandoPago] = useState<number | null>(null);
   const [pagosPendientes, setPagosPendientes] = useState<Solicitud[]>([]);
   const [loadingPagos, setLoadingPagos] = useState(true);
@@ -101,22 +99,6 @@ export default function PagosPendientesPage() {
     setPagoAConfirmar(null);
   };
 
-  const handleExport = (format: string) => {
-    switch(format) {
-      case 'csv':
-        exportSolicitudesToCSV(filteredPagos as Solicitud[]);
-        toast.success(`${filteredPagos.length} pagos exportados a CSV`);
-        break;
-      case 'excel':
-        exportSolicitudesToExcel(filteredPagos as Solicitud[]);
-        toast.success(`${filteredPagos.length} pagos exportados a Excel`);
-        break;
-      case 'pdf':
-        exportSolicitudesToPDF(filteredPagos as Solicitud[]);
-        toast.success(`${filteredPagos.length} pagos exportados a PDF`);
-        break;
-    }
-  };
 
   const getDepartmentColorClass = (departamento: string) => {
     const departamentosColores: Record<string, string> = {
@@ -142,9 +124,6 @@ export default function PagosPendientesPage() {
     }).format(amount);
   };
 
-  const openExportModal = () => {
-    setShowExportModal(true);
-  };
 
   const handleSubirComprobante = async (file: File) => {
     if (!comprobantePagoId) return;
@@ -155,8 +134,8 @@ export default function PagosPendientesPage() {
   return (
     <ProtectedRoute requiredRoles={['pagador_banca']}>
       <PagadorLayout>
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Header */}
+        <div className="container mx-auto px-4 py-8">
+         {/* Header */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
             <h2 className="text-2xl font-bold text-white font-sans">
               Pagos Autorizados
@@ -173,7 +152,6 @@ export default function PagosPendientesPage() {
             <AdvancedFilters
               filters={filters}
               onFiltersChange={updateFilters}
-              onExport={() => openExportModal()}
               onReset={resetFilters}
               type="pagos"
             />
@@ -287,8 +265,8 @@ export default function PagosPendientesPage() {
                                   >
                                     <Eye className="w-4 h-4 mr-1" /> Ver
                                   </Button>
-                                  <Button 
-                                    variant="primary" 
+                                  <Button
+                                    variant="primary"
                                     size="sm"
                                     onClick={() => handleProcesarPago(pago)}
                                     disabled={procesandoPago === pago.id_solicitud}
@@ -296,12 +274,13 @@ export default function PagosPendientesPage() {
                                   >
                                     {procesandoPago === pago.id_solicitud ? (
                                       <>
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                                         Procesando...
                                       </>
                                     ) : (
                                       <>
-                                        <CreditCard className="w-4 h-4 mr-1" /> Procesar
+                                        <AlertCircle className="w-5 h-5 mr-2 text-white drop-shadow" />
+                                        <span className="font-bold tracking-wide">Procesar</span>
                                       </>
                                     )}
                                   </Button>
@@ -345,15 +324,28 @@ export default function PagosPendientesPage() {
 
         {/* Modal de confirmación para procesar pago */}
         {showConfirmModal && pagoAConfirmar && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/10">
           <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70">
-            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md text-black">
-              <h3 className="text-xl font-bold mb-3">¿Confirmar procesamiento?</h3>
-              <p className="mb-4">¿Estás seguro que deseas procesar el pago #{pagoAConfirmar.id_solicitud}? Esta acción marcará la solicitud como pagada y deberás subir el comprobante en máximo <span className="text-red-600 font-bold">3 días</span>.</p>
-              <div className="flex space-x-2 justify-end">
-                <Button variant="outline" className="bg-blue-600 text-white" onClick={() => { setShowConfirmModal(false); setPagoAConfirmar(null); }}>Cancelar</Button>
-                <Button variant="primary" className="bg-green-600 text-white" onClick={confirmarProcesarPago}>Confirmar</Button>
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg text-black relative">
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center justify-center">
+                <div className="bg-yellow-300 border-4 border-yellow-400 rounded-full p-3 shadow-lg animate-bounce">
+                  <AlertCircle className="w-10 h-10 text-red-600" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-extrabold mb-4 text-center mt-6">¡Advertencia Importante!</h3>
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-4 text-yellow-900 text-base font-medium flex items-center gap-2">
+                <AlertCircle className="w-6 h-6 text-yellow-500 flex-shrink-0" />
+                <span>
+                  Vas a procesar el pago <b>#{pagoAConfirmar.id_solicitud}</b>. Esta acción es irreversible y marcará la solicitud como <b>pagada</b>.<br/>
+                  <span className="text-red-600 font-bold">Tienes 3 días</span> para subir el comprobante, de lo contrario la solicitud será reportada.
+                </span>
+              </div>
+              <div className="flex space-x-2 justify-end mt-6">
+                <Button variant="outline" className="bg-blue-600 text-white font-bold px-6 py-2 rounded-lg" onClick={() => { setShowConfirmModal(false); setPagoAConfirmar(null); }}>Cancelar</Button>
+                <Button variant="primary" className="bg-green-600 text-white font-bold px-6 py-2 rounded-lg" onClick={confirmarProcesarPago}>Confirmar</Button>
               </div>
             </div>
+          </div>
           </div>
         )}
       </PagadorLayout>

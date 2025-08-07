@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import type { Solicitud } from '@/types/index';
-import { CreditCard, FileText, Clock, User, Building, Tag, ExternalLink } from 'lucide-react';
+import { CreditCard, FileText, Building, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 
 interface PagoDetailModalProps {
@@ -45,7 +45,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
           {/* Botón cerrar flotante */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 z-20 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            className="absolute top-6 right-6 z-20 bg-white hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
             aria-label="Cerrar"
           >
             ×
@@ -95,11 +95,11 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                     </div>
                     <div className="bg-white p-2 md:p-3 rounded-md">
                       <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Departamento</span>
-                      <p className="text-blue-900 font-medium">{pago.departamento}</p>
+                      <p className="text-blue-900 font-medium">{pago.departamento ? pago.departamento.charAt(0).toUpperCase() + pago.departamento.slice(1).toLowerCase() : '-'}</p>
                     </div>
                     <div className="bg-white p-2 md:p-3 rounded-md">
                       <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de pago</span>
-                      <p className="text-blue-900 font-medium">{pago.tipo_pago || '-'}</p>
+                      <p className="text-blue-900 font-medium">{pago.tipo_pago ? pago.tipo_pago.charAt(0).toUpperCase() + pago.tipo_pago.slice(1).toLowerCase() : '-'}</p>
                     </div>
                     <div className="bg-white p-2 md:p-3 rounded-md">
                       <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta destino</span>
@@ -148,10 +148,10 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                 </div>
               </div>
             </div>
-            {/* Archivos y comprobantes + comentario alineados */}
+            {/* Archivos y comprobantes + comentario alineados y mejorados */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
               {/* Documentos Adjuntos */}
-              <div className="lg:col-span-2 p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl flex flex-col justify-between">
+              <div className="lg:col-span-3 p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl flex flex-col justify-between">
                 <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
                   <div className="p-2 bg-green-100 rounded-xl mr-3">
                     <FileText className="w-6 h-6 text-green-700" />
@@ -202,13 +202,24 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                       );
                     } else if (isPdf) {
                       return (
-                        <div className="bg-blue-50/30 p-2 md:p-3 rounded-lg border border-blue-100">
-                          <span className="text-sm text-blue-700 mb-2 block font-medium">Previsualización de factura (PDF):</span>
-                          <iframe 
-                            src={facturaUrl} 
-                            title="Factura PDF" 
-                            className="w-full rounded border border-blue-200" 
-                            style={{height: '200px'}} 
+                        <div className="bg-white p-0 md:p-0 rounded-xl border border-blue-200 shadow-lg flex flex-col items-center">
+                          <div className="w-full bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-xl px-4 py-2 border-b border-blue-100 flex items-center justify-between">
+                            <span className="text-sm text-blue-700 font-semibold flex items-center">
+                              <FileText className="w-4 h-4 mr-2 text-blue-600" />
+                              Previsualización de factura (PDF)
+                            </span>
+                            <button
+                              onClick={() => window.open(facturaUrl, '_blank')}
+                              className="ml-2 text-blue-600 hover:text-blue-800 font-medium text-xs flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-100 transition"
+                            >
+                              Abrir en nueva pestaña <ExternalLink className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <iframe
+                            src={facturaUrl}
+                            title={"Factura PDF"}
+                            className="w-full rounded-b-xl bg-white border-0"
+                            style={{ minHeight: '540px', height: '540px', maxHeight: '70vh' }}
                           />
                         </div>
                       );
@@ -220,7 +231,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                             <FileText className="w-4 h-4 text-blue-700" />
                             <span className="text-blue-900 font-mono text-xs">{fileName}</span>
                           </div>
-                          <span className="text-xs text-gray-500 mt-1 block">No se puede previsualizar, haz clic en "Ver Factura" para abrir</span>
+                          <span className="text-xs text-gray-500 mt-1 block">No se puede previsualizar, haz clic en &quot;Ver Factura&quot; para abrir</span>
                         </div>
                       );
                     }
@@ -250,48 +261,18 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                       <ExternalLink className="w-4 h-4" />
                     </button>
                   )}
-                  {/* Soporte adjunto */}
-                  {pago.soporte_url ? (
-                    <a href={pago.soporte_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">Ver Soporte</a>
-                  ) : (
-                    <span className="text-blue-400">No hay soporte adjunto</span>
-                  )}
                 </div>
               </div>
-              {/* Comentario del aprobador alineado a la derecha en desktop */}
-              {pago.comentario_aprobador && (
-                <div className="lg:col-span-1 flex flex-col justify-end">
-                  <div className="bg-yellow-50 rounded-xl p-4 md:p-5 border border-yellow-200 shadow-sm h-full flex items-center">
-                    <span className="font-semibold text-yellow-800 mr-2">Comentario del aprobador:</span>
-                    <span className="text-yellow-900">{pago.comentario_aprobador}</span>
-                  </div>
-                </div>
-              )}
             </div>
-            {/* Comentario del aprobador */}
-            {pago.comentario_aprobador && (
-              <div className="bg-yellow-50 rounded-xl p-4 md:p-5 mb-10 border border-yellow-200 shadow-sm">
-                <span className="font-semibold text-yellow-800">Comentario del aprobador:</span>
-                <span className="ml-3 text-yellow-900">{pago.comentario_aprobador}</span>
-              </div>
-            )}
             {/* Botones de Acción */}
             <div className="flex flex-wrap justify-center gap-4 md:gap-8 pt-8 border-t border-blue-100">
               <Button
-                variant="outline"
                 onClick={onClose}
-                className="border-blue-300 text-blue-700 hover:bg-blue-50 px-8 md:px-10 py-2.5 md:py-3 text-lg font-semibold"
+                className="bg-blue-600 text-white font-bold px-10 py-3 text-lg rounded-xl shadow hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all border-none"
+                style={{ boxShadow: '0 2px 8px 0 rgba(30, 64, 175, 0.10)' }}
               >
                 Cerrar
               </Button>
-              {pago.estado === 'pagada' && !pago.soporte_url && (
-                <a
-                  href={`/dashboard/pagador/pagos/subir-comprobante?id=${pago.id_solicitud}`}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 md:px-10 py-2.5 md:py-3 rounded-lg font-semibold inline-flex items-center text-lg shadow"
-                >
-                  <FileText className="w-6 h-6 mr-2" /> Subir Comprobante
-                </a>
-              )}
             </div>
           </div>
         </div>

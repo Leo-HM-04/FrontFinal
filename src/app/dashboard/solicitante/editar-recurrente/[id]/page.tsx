@@ -9,7 +9,7 @@ import { SolicitanteLayout } from "@/components/layout/SolicitanteLayout";
 import { PlantillaRecurrente } from "@/types";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { toast } from "react-hot-toast";
-import { FileText, Building, DollarSign, CreditCard, Calendar, MessageSquare, Repeat } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';

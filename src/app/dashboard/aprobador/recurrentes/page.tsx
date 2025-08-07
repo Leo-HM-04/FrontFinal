@@ -96,7 +96,7 @@ const refreshSolicitudes = async () => {
     const data = await RecurrentesService.obtenerTodas();
     setSolicitudes(data);
     setSolicitudesFiltradas(data);
-  } catch (err) {
+  } catch {
     setError('Error al refrescar solicitudes');
   } finally {
     setLoading(false);
