@@ -2,7 +2,8 @@
 
 import { Button } from '@/components/ui/Button';
 import type { Solicitud } from '@/types/index';
-import { CreditCard, FileText, Clock, User, Building, Tag } from 'lucide-react';
+import { CreditCard, FileText, Clock, User, Building, Tag, ExternalLink } from 'lucide-react';
+import Image from 'next/image';
 
 interface PagoDetailModalProps {
   isOpen: boolean;
@@ -31,172 +32,268 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] overflow-hidden flex items-center justify-center">
-      <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-fade-in"
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      {/* Fondo degradado y blur */}
+      <div
+        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
         onClick={onClose}
         aria-hidden="true"
       />
-      <div 
-        className="relative bg-white rounded-xl shadow-2xl p-8 w-full max-w-3xl m-4 z-[10000] animate-slide-up overflow-y-auto max-h-[90vh]"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
-        <button 
-          className="absolute top-5 right-5 text-gray-500 hover:text-gray-800 transition-colors" 
-          onClick={onClose}
-          aria-label="Cerrar"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        
-        {/* Header */}
-        <div className="flex items-center space-x-4 mb-6">
-          <div className="p-3 rounded-full bg-blue-100">
-            <CreditCard className="h-8 w-8 text-blue-600" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800" id="modal-title">Detalles del Pago</h2>
-            <p className="text-gray-500">ID: #{pago.id_solicitud}</p>
-          </div>
-        </div>
-
-        {/* Información de Estado */}
-        <div className="bg-blue-50 rounded-lg p-4 mb-6 border border-blue-100">
-          <div className="flex justify-between">
-            <div className="flex items-center">
-              <Tag className="w-5 h-5 text-blue-600 mr-2" />
-              <span className="font-medium text-blue-800">Estado:</span>
+      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-3xl shadow-2xl w-full max-w-6xl max-h-[92vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+        {/* Scroll interno */}
+        <div className="overflow-y-auto max-h-[92vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 px-2 md:px-6 pb-8 pt-2">
+          {/* Botón cerrar flotante */}
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-20 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            aria-label="Cerrar"
+          >
+            ×
+          </button>
+          {/* Header con gradiente y estado */}
+          <div className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white px-8 py-6 md:py-8 rounded-2xl relative overflow-hidden mb-8">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="space-y-1">
+                <h2 className="text-3xl font-bold tracking-tight">
+                  Pago #{pago.id_solicitud}
+                </h2>
+                <p className="text-blue-100 text-lg">
+                  Monto: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{formatCurrency(pago.monto)}</span>
+                </p>
+                <p className="text-blue-200 mt-2">
+                  Creado el {formatDate(pago.fecha_creacion)}
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="inline-flex px-4 py-2 text-lg font-bold rounded-xl border-2 bg-green-100 text-green-800 border-green-200 backdrop-blur-sm">
+                  {pago.estado.toUpperCase()}
+                </span>
+              </div>
             </div>
-            <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-              {pago.estado.charAt(0).toUpperCase() + pago.estado.slice(1)}
-            </span>
           </div>
-        </div>
-
-        {/* Contenido Principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
-              <User className="w-5 h-5 mr-2 text-blue-600" />
-              Información del Solicitante
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-500">Solicitante:</p>
-                <p className="font-medium text-gray-800">{typeof pago.nombre_usuario === 'string' && pago.nombre_usuario
-                  ? pago.nombre_usuario
-                  : typeof pago.usuario_nombre === 'string' && pago.usuario_nombre
-                  ? pago.usuario_nombre
-                  : '-'}</p>
+          <div className="px-0 md:px-2 space-y-8">
+            {/* Información Principal */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 mb-8">
+              <div className="xl:col-span-2">
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                  <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                    <div className="p-2 bg-blue-100 rounded-xl mr-3">
+                      <CreditCard className="w-6 h-6 text-blue-700" />
+                    </div>
+                    Información de Pago
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3">
+                    <div className="bg-white p-2 md:p-3 rounded-md">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Solicitante</span>
+                      <p className="text-blue-900 font-medium">{typeof pago.nombre_usuario === 'string' && pago.nombre_usuario
+                        ? pago.nombre_usuario
+                        : typeof pago.usuario_nombre === 'string' && pago.usuario_nombre
+                        ? pago.usuario_nombre
+                        : '-'}</p>
+                    </div>
+                    <div className="bg-white p-2 md:p-3 rounded-md">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Departamento</span>
+                      <p className="text-blue-900 font-medium">{pago.departamento}</p>
+                    </div>
+                    <div className="bg-white p-2 md:p-3 rounded-md">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de pago</span>
+                      <p className="text-blue-900 font-medium">{pago.tipo_pago || '-'}</p>
+                    </div>
+                    <div className="bg-white p-2 md:p-3 rounded-md">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta destino</span>
+                      <p className="font-mono text-blue-900 font-medium">{pago.cuenta_destino}</p>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50/30 rounded-md p-2 md:p-3 border border-blue-100/80 mb-3">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">Banco y detalles</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Banco</span>
+                        <p className="text-blue-900 font-medium">{pago.banco_destino || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de cuenta</span>
+                        <p className="text-blue-900 font-medium">{pago.tipo_cuenta_destino || '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Concepto</span>
+                    <p className="text-blue-900 p-2 md:p-3 bg-white rounded-md">{pago.concepto || '-'}</p>
+                  </div>
+                </div>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Departamento:</p>
-                <div className="flex items-center">
-                  <Building className="w-4 h-4 text-blue-600 mr-1" />
-                  <p className="font-medium text-gray-800">{pago.departamento}</p>
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                  <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                    <div className="p-2 bg-indigo-100 rounded-xl mr-3">
+                      <Building className="w-6 h-6 text-indigo-700" />
+                    </div>
+                    Información Organizacional
+                  </h3>
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 md:p-5 rounded-2xl border border-indigo-300/50 mb-6 shadow-lg">
+                    <span className="text-sm uppercase tracking-wider font-bold block mb-2 text-indigo-100">Estado actual</span>
+                    <div className="flex items-center">
+                      <div className="h-3 w-3 rounded-full mr-3 bg-green-400 shadow-lg"></div>
+                      <p className="font-black text-2xl text-white tracking-tight">{pago.estado.toUpperCase()}</p>
+                    </div>
+                    <div className="mt-2 h-1 bg-gradient-to-r from-green-400 to-green-300 rounded-full w-20"></div>
+                  </div>
+                  <div className="bg-blue-50/30 rounded-md p-2 md:p-3 border border-blue-100/80 mb-3">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">Aprobador</h4>
+                    <p className="text-blue-900 font-medium">{pago.aprobador_nombre || '-'}</p>
+                  </div>
                 </div>
               </div>
             </div>
-            
-            <h3 className="text-lg font-bold text-gray-800 mb-3 pt-2 flex items-center">
-              <Clock className="w-5 h-5 mr-2 text-blue-600" />
-              Fechas
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-500">Fecha de creación:</p>
-                <p className="font-medium text-gray-800">{formatDate(pago.fecha_creacion)}</p>
+            {/* Archivos y comprobantes + comentario alineados */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
+              {/* Documentos Adjuntos */}
+              <div className="lg:col-span-2 p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl flex flex-col justify-between">
+                <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                  <div className="p-2 bg-green-100 rounded-xl mr-3">
+                    <FileText className="w-6 h-6 text-green-700" />
+                  </div>
+                  Documentos Adjuntos
+                </h3>
+                <div className="space-y-4">
+                  {/* Previsualización de factura */}
+                  {pago.factura_url ? (() => {
+                    let facturaUrl = '';
+                    if (pago.factura_url.startsWith('http')) {
+                      facturaUrl = pago.factura_url;
+                    } else {
+                      const baseUrl = 'http://localhost:4000';
+                      const rutaArchivo = pago.factura_url.startsWith('/') 
+                        ? pago.factura_url 
+                        : `/${pago.factura_url}`;
+                      facturaUrl = `${baseUrl}${rutaArchivo}`;
+                    }
+                    const fileName = facturaUrl.split('/').pop();
+                    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(facturaUrl);
+                    const isPdf = /\.pdf$/i.test(facturaUrl);
+                    if (isImage) {
+                      return (
+                        <div className="bg-blue-50/30 p-2 md:p-3 rounded-lg border border-blue-100">
+                          <span className="text-sm text-blue-700 mb-2 flex items-center font-medium">
+                            <FileText className="w-4 h-4 mr-1.5 text-blue-600" />
+                            Previsualización de factura:
+                          </span>
+                          <div className="relative w-full h-40 group mt-2">
+                            <div className="absolute inset-0 rounded-lg bg-gradient-to-b from-blue-50 to-blue-100 animate-pulse" />
+                            <Image
+                              src={facturaUrl}
+                              alt="Factura"
+                              fill
+                              className="rounded-lg border border-blue-200 shadow-sm transition-all duration-300 hover:shadow-md object-contain bg-white/90"
+                              onLoadingComplete={(img) => {
+                                img.classList.remove('animate-pulse');
+                              }}
+                              quality={85}
+                            />
+                            <div 
+                              className="absolute inset-0 bg-blue-900/0 hover:bg-blue-900/5 transition-colors duration-300 rounded-lg cursor-zoom-in"
+                              onClick={() => window.open(facturaUrl, '_blank')}
+                            />
+                          </div>
+                        </div>
+                      );
+                    } else if (isPdf) {
+                      return (
+                        <div className="bg-blue-50/30 p-2 md:p-3 rounded-lg border border-blue-100">
+                          <span className="text-sm text-blue-700 mb-2 block font-medium">Previsualización de factura (PDF):</span>
+                          <iframe 
+                            src={facturaUrl} 
+                            title="Factura PDF" 
+                            className="w-full rounded border border-blue-200" 
+                            style={{height: '200px'}} 
+                          />
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="bg-blue-50/30 p-2 md:p-3 rounded-lg border border-blue-100">
+                          <span className="text-sm text-blue-700 mb-2 block font-medium">Archivo adjunto:</span>
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-blue-700" />
+                            <span className="text-blue-900 font-mono text-xs">{fileName}</span>
+                          </div>
+                          <span className="text-xs text-gray-500 mt-1 block">No se puede previsualizar, haz clic en "Ver Factura" para abrir</span>
+                        </div>
+                      );
+                    }
+                  })() : (
+                    <span className="text-blue-400">No hay factura adjunta</span>
+                  )}
+                  {/* Botón para ver factura */}
+                  {pago.factura_url && (
+                    <button
+                      onClick={() => {
+                        let facturaUrl = '';
+                        if (pago.factura_url.startsWith('http')) {
+                          facturaUrl = pago.factura_url;
+                        } else {
+                          const baseUrl = 'http://localhost:4000';
+                          const rutaArchivo = pago.factura_url.startsWith('/') 
+                            ? pago.factura_url 
+                            : `/${pago.factura_url}`;
+                          facturaUrl = `${baseUrl}${rutaArchivo}`;
+                        }
+                        window.open(facturaUrl, '_blank');
+                      }}
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 flex items-center gap-2"
+                    >
+                      <FileText className="w-4 h-4" />
+                      Ver Factura
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                  )}
+                  {/* Soporte adjunto */}
+                  {pago.soporte_url ? (
+                    <a href={pago.soporte_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">Ver Soporte</a>
+                  ) : (
+                    <span className="text-blue-400">No hay soporte adjunto</span>
+                  )}
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Fecha límite de pago:</p>
-                <p className="font-medium text-gray-800">{formatDate(pago.fecha_limite_pago)}</p>
-              </div>
-              {pago.fecha_revision && (
-                <div>
-                  <p className="text-sm text-gray-500">Fecha de revisión:</p>
-                  <p className="font-medium text-gray-800">{formatDate(pago.fecha_revision)}</p>
+              {/* Comentario del aprobador alineado a la derecha en desktop */}
+              {pago.comentario_aprobador && (
+                <div className="lg:col-span-1 flex flex-col justify-end">
+                  <div className="bg-yellow-50 rounded-xl p-4 md:p-5 border border-yellow-200 shadow-sm h-full flex items-center">
+                    <span className="font-semibold text-yellow-800 mr-2">Comentario del aprobador:</span>
+                    <span className="text-yellow-900">{pago.comentario_aprobador}</span>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-          
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
-              <CreditCard className="w-5 h-5 mr-2 text-blue-600" />
-              Información de Pago
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-500">Monto:</p>
-                <p className="font-bold text-xl text-green-700">{formatCurrency(pago.monto)}</p>
+            {/* Comentario del aprobador */}
+            {pago.comentario_aprobador && (
+              <div className="bg-yellow-50 rounded-xl p-4 md:p-5 mb-10 border border-yellow-200 shadow-sm">
+                <span className="font-semibold text-yellow-800">Comentario del aprobador:</span>
+                <span className="ml-3 text-yellow-900">{pago.comentario_aprobador}</span>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Concepto:</p>
-                <p className="font-medium text-gray-800">{pago.concepto}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Tipo de pago:</p>
-                <p className="font-medium text-gray-800">{pago.tipo_pago || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Cuenta destino:</p>
-                <p className="font-medium text-gray-800">{pago.cuenta_destino}</p>
-              </div>
+            )}
+            {/* Botones de Acción */}
+            <div className="flex flex-wrap justify-center gap-4 md:gap-8 pt-8 border-t border-blue-100">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="border-blue-300 text-blue-700 hover:bg-blue-50 px-8 md:px-10 py-2.5 md:py-3 text-lg font-semibold"
+              >
+                Cerrar
+              </Button>
+              {pago.estado === 'pagada' && !pago.soporte_url && (
+                <a
+                  href={`/dashboard/pagador/pagos/subir-comprobante?id=${pago.id_solicitud}`}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 md:px-10 py-2.5 md:py-3 rounded-lg font-semibold inline-flex items-center text-lg shadow"
+                >
+                  <FileText className="w-6 h-6 mr-2" /> Subir Comprobante
+                </a>
+              )}
             </div>
           </div>
-        </div>
-
-        {/* Información de Factura y Soporte */}
-        <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 mb-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
-            <FileText className="w-5 h-5 mr-2 text-blue-600" />
-            Archivos Adjuntos
-          </h3>
-          <div className="flex flex-col gap-2">
-            {pago.factura_url && (
-              <div>
-                <span className="font-medium">Factura: </span>
-                <a href={`http://localhost:4000/uploads/facturas/${pago.factura_url.split('/').pop()}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver archivo</a>
-              </div>
-            )}
-            {pago.soporte_url && (
-              <div>
-                <span className="font-medium">Soporte: </span>
-                <a href={pago.soporte_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver archivo</a>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Comentario del aprobador */}
-        {pago.comentario_aprobador && (
-          <div className="bg-yellow-50 rounded-lg p-4 mb-6 border border-yellow-100">
-            <span className="font-medium text-yellow-800">Comentario del aprobador:</span>
-            <span className="ml-2 text-yellow-900">{pago.comentario_aprobador}</span>
-          </div>
-        )}
-
-        {/* Botones de Acción */}
-        <div className="flex justify-center space-x-4 pt-4 border-t border-gray-200">
-          <Button 
-            variant="outline"
-            onClick={onClose}
-            className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6"
-          >
-            Cerrar
-          </Button>
-          {pago.estado === 'pagada' && !pago.soporte_url && (
-            <a
-              href={`/dashboard/pagador/pagos/subir-comprobante?id=${pago.id_solicitud}`}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium inline-flex items-center"
-            >
-              <FileText className="w-4 h-4 mr-2" /> Subir Comprobante
-            </a>
-          )}
         </div>
       </div>
     </div>

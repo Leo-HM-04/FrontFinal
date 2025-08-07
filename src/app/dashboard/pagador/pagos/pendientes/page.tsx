@@ -6,16 +6,16 @@ import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye, CreditCard, AlertCircle } from 'lucide-react';
+import { Eye, CreditCard, AlertCircle } from 'lucide-react';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { toast } from 'react-hot-toast';
 import { exportSolicitudesToCSV, exportSolicitudesToExcel, exportSolicitudesToPDF } from '@/utils/exportUtils';
-import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
 import { getPagosPendientes, marcarPagoComoPagado, subirComprobante } from '@/services/pagosService';
 import type { Solicitud } from '../../../../../types/index';
 import { PagoDetailModal } from '@/components/pagos/PagoDetailModal';
 import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal';
+
 
 export default function PagosPendientesPage() {
   const [selectedPago, setSelectedPago] = useState<Solicitud | null>(null);
@@ -30,12 +30,17 @@ export default function PagosPendientesPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pagoAConfirmar, setPagoAConfirmar] = useState<Solicitud | null>(null);
 
+  // Filtrar solo los pagos con estado 'autorizada'
+  const pagosAutorizados = pagosPendientes.filter(
+    (p) => p.estado && p.estado.toLowerCase() === 'autorizada'
+  );
+
   const {
     filters,
     filteredData: filteredPagos,
     resetFilters,
     updateFilters
-  } = useAdvancedFilters(pagosPendientes, 'solicitudes');
+  } = useAdvancedFilters(pagosAutorizados, 'solicitudes');
 
   const {
     currentPage,
@@ -153,41 +158,15 @@ export default function PagosPendientesPage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Header */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white font-sans">
-                  Pagos Pendientes
-                </h2>
-                <p className="text-white/80">
-                  {filteredPagos.length} pagos pendientes de procesamiento
-                </p>
-              </div>
-              <Button
-                onClick={openExportModal}
-                className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25"
-              >
-                <FileText className="w-4 h-4 mr-2" /> Exportar
-              </Button>
-            </div>
+            <h2 className="text-2xl font-bold text-white font-sans">
+              Pagos Autorizados
+            </h2>
+            <p className="text-white/80">
+              {filteredPagos.length} pagos autorizados, para procesar el pago.
+            </p>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-blue-500/20">
-                  <CreditCard className="w-8 h-8 text-blue-300" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-white/80">Total Pendiente</p>
-                  <p className="text-2xl font-bold text-white">
-                    {formatCurrency(pagosPendientes.reduce((sum: number, p: Solicitud) => sum + (p.monto || 0), 0))}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Stats Cards removido */}
 
           {/* Filters */}
           <div className="bg-white/15 rounded-xl p-4 mb-6">              
@@ -204,7 +183,7 @@ export default function PagosPendientesPage() {
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
             <div className="p-6">
               <h3 className="text-xl font-semibold text-white mb-6 font-sans">
-                Pagos Pendientes de Procesamiento
+                Pagos Autorizados de Procesamiento
               </h3>
               
               <div className="bg-white rounded-xl overflow-hidden">
@@ -282,7 +261,7 @@ export default function PagosPendientesPage() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                  Autorizada
+                                  {pago.estado ? pago.estado.charAt(0).toUpperCase() + pago.estado.slice(1) : 'Autorizada'}
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -350,13 +329,7 @@ export default function PagosPendientesPage() {
           </div>
         </div>
 
-        {/* Export Options Modal */}
-        <ExportOptionsModal
-          isOpen={showExportModal}
-          onClose={() => setShowExportModal(false)}
-          onExport={handleExport}
-          itemCount={filteredPagos.length}
-        />
+          {/* Export Options Modal removido */}
 
         {/* Pago Detail Modal */}
         <PagoDetailModal 
