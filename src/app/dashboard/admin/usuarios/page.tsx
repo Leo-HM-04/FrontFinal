@@ -252,127 +252,124 @@ function UsuariosContent() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header with Back Button */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div>
-                <h2 className="text-2xl font-bold text-white font-montserrat">
-                  Gestión de Usuarios
-                </h2>
-                <p className="text-white/80">
-                  Administra usuarios, roles y permisos del sistema
-                </p>
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-6 md:py-8">
+          {/* Header with Back Button */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-white/20">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-center space-x-4">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white font-montserrat">
+                    Gestión de Usuarios
+                  </h2>
+                  <p className="text-white/80 text-sm sm:text-base">
+                    Administra usuarios, roles y permisos del sistema
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto">
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                  <select 
+                    className="text-sm rounded-lg border-gray-300 bg-white/80 text-gray-700 px-2 py-1 w-full sm:w-auto"
+                    value={exportRange}
+                    onChange={(e) => setExportRange(e.target.value)}
+                  >
+                    <option value="total">Todo el historial</option>
+                    <option value="dia">Último día</option>
+                    <option value="semana">Última semana</option>
+                    <option value="mes">Último mes</option>
+                    <option value="año">Último año</option>
+                  </select>
+                  <Button
+                    onClick={() => handleExport('pdf', exportRange)}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    size="sm"
+                  >
+                    <FileDown className="w-4 h-4 mr-1" /> PDF
+                  </Button>
+                  <Button
+                    onClick={() => handleExport('excel', exportRange)}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    size="sm"
+                  >
+                    <FileDown className="w-4 h-4 mr-1" /> Excel
+                  </Button>
+                  <Button
+                    onClick={() => handleExport('csv', exportRange)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    size="sm"
+                  >
+                    <FileDown className="w-4 h-4 mr-1" /> CSV
+                  </Button>
+                </div>
+                <Button
+                  className="bg-white hover:bg-gray-50 font-semibold px-4 sm:px-6 py-3 rounded-xl w-full sm:w-auto"
+                  style={{color: '#3B82F6'}}
+                  onClick={() => router.push('/dashboard/admin/usuarios/create')}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Crear Usuario
+                </Button>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 flex items-center gap-2">
-                <select 
-                  className="text-sm rounded-lg border-gray-300 bg-white/80 text-gray-700 px-2 py-1"
-                  value={exportRange}
-                  onChange={(e) => setExportRange(e.target.value)}
-                >
-                  <option value="total">Todo el historial</option>
-                  <option value="dia">Último día</option>
-                  <option value="semana">Última semana</option>
-                  <option value="mes">Último mes</option>
-                  <option value="año">Último año</option>
-                </select>
-                
-                <Button
-                  onClick={() => handleExport('pdf', exportRange)}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                  size="sm"
-                >
-                  <FileDown className="w-4 h-4 mr-1" /> PDF
-                </Button>
-                
-                <Button
-                  onClick={() => handleExport('excel', exportRange)}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  size="sm"
-                >
-                  <FileDown className="w-4 h-4 mr-1" /> Excel
-                </Button>
-                
-                <Button
-                  onClick={() => handleExport('csv', exportRange)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                  size="sm"
-                >
-                  <FileDown className="w-4 h-4 mr-1" /> CSV
-                </Button>
+          </div>
+          {/* Tarjetas de estadísticas visuales */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-400 rounded-xl p-4 shadow flex items-center gap-4 min-w-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white/80 truncate">Total Usuarios</p>
+                <p className="text-2xl font-bold text-white animate-fade-in truncate">{stats.total}</p>
               </div>
-
-              <Button
-                className="bg-white hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl"
-                style={{color: '#3B82F6'}}
-                onClick={() => router.push('/dashboard/admin/usuarios/create')}
+              <Users className="w-8 h-8 text-white/80 flex-shrink-0" />
+            </div>
+            <div className="bg-gradient-to-br from-yellow-400 to-yellow-300 rounded-xl p-4 shadow flex items-center gap-4 min-w-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white/80 truncate">Nuevos (7d)</p>
+                <p className="text-2xl font-bold text-white animate-fade-in truncate">{stats.nuevos}</p>
+              </div>
+              <UserPlus className="w-8 h-8 text-white/80 flex-shrink-0" />
+            </div>
+          </div>
+          {/* Filtros y búsqueda */}
+          <div className="bg-white rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4">
+            {/* Filtros de rol: scroll horizontal en mobile, ordenado y limpio */}
+            <div className="flex flex-nowrap overflow-x-auto gap-2 items-center pb-1 -mx-2 px-2">
+              <span className="text-gray-700 font-semibold flex-shrink-0">Filtrar por Rol:</span>
+              <button
+                onClick={clearRoleFilter}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border flex-shrink-0 ${roleFilter === '' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Crear Usuario
-              </Button>
+                Todos ({stats.total})
+              </button>
+              <button
+                onClick={() => handleRoleFilterChange('solicitante')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border flex-shrink-0 ${roleFilter === 'solicitante' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+              >
+                Solicitantes ({stats.roleCount.solicitante || 0})
+              </button>
+              <button
+                onClick={() => handleRoleFilterChange('aprobador')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border flex-shrink-0 ${roleFilter === 'aprobador' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+              >
+                Aprobadores ({stats.roleCount.aprobador || 0})
+              </button>
+              <button
+                onClick={() => handleRoleFilterChange('pagador_banca')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border flex-shrink-0 ${roleFilter === 'pagador_banca' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+              >
+                Pagadores ({stats.roleCount.pagador_banca || 0})
+              </button>
+            </div>
+            {/* Búsqueda: debajo, con buen padding y borde */}
+            <div className="flex items-center gap-2 w-full">
+              <input
+                type="text"
+                placeholder="Buscar por nombre o email..."
+                className="border border-gray-300 rounded-lg px-4 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-black shadow-sm"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
             </div>
           </div>
-        </div>
-        {/* Tarjetas de estadísticas visuales */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-gradient-to-br from-blue-600 to-blue-400 rounded-xl p-4 shadow flex items-center gap-4">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-white/80">Total Usuarios</p>
-              <p className="text-2xl font-bold text-white animate-fade-in">{stats.total}</p>
-            </div>
-            <Users className="w-8 h-8 text-white/80" />
-          </div>
-          <div className="bg-gradient-to-br from-yellow-400 to-yellow-300 rounded-xl p-4 shadow flex items-center gap-4">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-white/80">Nuevos (7d)</p>
-              <p className="text-2xl font-bold text-white animate-fade-in">{stats.nuevos}</p>
-            </div>
-            <UserPlus className="w-8 h-8 text-white/80" />
-          </div>
-        </div>
-        {/* Filtros y búsqueda */}
-        <div className="bg-white rounded-xl p-4 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-gray-700 font-semibold mr-2">Filtrar por Rol:</span>
-            <button
-              onClick={clearRoleFilter}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${roleFilter === '' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
-            >
-              Todos ({stats.total})
-            </button>
-            <button
-              onClick={() => handleRoleFilterChange('solicitante')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${roleFilter === 'solicitante' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
-            >
-              Solicitantes ({stats.roleCount.solicitante || 0})
-            </button>
-            <button
-              onClick={() => handleRoleFilterChange('aprobador')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${roleFilter === 'aprobador' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
-            >
-              Aprobadores ({stats.roleCount.aprobador || 0})
-            </button>
-            <button
-              onClick={() => handleRoleFilterChange('pagador_banca')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${roleFilter === 'pagador_banca' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
-            >
-              Pagadores ({stats.roleCount.pagador_banca || 0})
-            </button>
-          </div>
-          {/* Búsqueda */}
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <input
-              type="text"
-              placeholder="Buscar por nombre o email..."
-              className="border border-gray-300 rounded-lg px-4 py-2 text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
         {/* Users Table */}
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/15">
           <div className="p-6">

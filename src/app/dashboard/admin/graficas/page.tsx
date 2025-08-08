@@ -4,8 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 import { useState } from "react";
 import { useEffect } from "react";
 import { TrendingUp, TrendingDown, Users, CreditCard, Clock, CheckCircle } from "lucide-react";
-
-
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { getAuthToken } from '@/utils/auth';

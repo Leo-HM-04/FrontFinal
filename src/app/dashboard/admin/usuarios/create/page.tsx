@@ -210,42 +210,45 @@ export default function CreateUserPage() {
                     <UserCheck className="w-4 h-4 inline mr-2" />
                     Rol del usuario
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
+                  <div className="flex flex-col gap-3 w-full">
                     <button
                       type="button"
                       onClick={() => handleRoleChange('solicitante')}
-                      className={`w-full px-3 py-2 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2 shadow-sm border-2
+                      className={`w-full px-4 py-3 rounded-xl text-base font-bold border-2 transition-all flex items-center gap-2 shadow-sm
                         ${formData.rol === 'solicitante' 
-                          ? 'bg-blue-600 text-white border-blue-600 scale-105 shadow-lg' 
-                          : 'bg-white/20 text-blue-700 border-blue-200 hover:bg-blue-50 hover:text-blue-900'}
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-lg' 
+                          : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'}
                       `}
                       title="Solicitante: Puede crear solicitudes de pago."
                     >
-                      <User className="w-5 h-5" /> Solicitante
+                      <User className={`w-6 h-6 ${formData.rol === 'solicitante' ? 'text-white' : 'text-blue-600'}`} />
+                      <span>Solicitante</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleRoleChange('aprobador')}
-                      className={`w-full px-3 py-2 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2 shadow-sm border-2
+                      className={`w-full px-4 py-3 rounded-xl text-base font-bold border-2 transition-all flex items-center gap-2 shadow-sm
                         ${formData.rol === 'aprobador' 
-                          ? 'bg-purple-600 text-white border-purple-600 scale-105 shadow-lg' 
-                          : 'bg-white/20 text-purple-700 border-purple-200 hover:bg-purple-50 hover:text-purple-900'}
+                          ? 'bg-orange-500 text-white border-orange-500 shadow-lg' 
+                          : 'bg-white text-orange-700 border-orange-300 hover:bg-orange-50'}
                       `}
                       title="Aprobador: Puede aprobar o rechazar solicitudes."
                     >
-                      <UserCheck className="w-5 h-5" /> Aprobador
+                      <UserCheck className={`w-6 h-6 ${formData.rol === 'aprobador' ? 'text-white' : 'text-orange-500'}`} />
+                      <span>Aprobador</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleRoleChange('pagador_banca')}
-                      className={`w-full px-3 py-2 rounded-lg text-base font-semibold transition-all flex items-center justify-center gap-2 shadow-sm border-2
+                      className={`w-full px-4 py-3 rounded-xl text-base font-bold border-2 transition-all flex items-center gap-2 shadow-sm
                         ${formData.rol === 'pagador_banca' 
-                          ? 'bg-green-600 text-white border-green-600 scale-105 shadow-lg' 
-                          : 'bg-white/20 text-green-700 border-green-200 hover:bg-green-50 hover:text-green-900'}
+                          ? 'bg-green-600 text-white border-green-600 shadow-lg' 
+                          : 'bg-white text-green-700 border-green-300 hover:bg-green-50'}
                       `}
                       title="Pagador: Puede ejecutar pagos aprobados."
                     >
-                      <UserCheck className="w-5 h-5" /> Pagador
+                      <UserCheck className={`w-6 h-6 ${formData.rol === 'pagador_banca' ? 'text-white' : 'text-green-600'}`} />
+                      <span>Pagador</span>
                     </button>
                   </div>
                 </div>

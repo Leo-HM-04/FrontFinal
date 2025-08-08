@@ -19,7 +19,7 @@ interface ToggleSwitchProps {
     inactive: React.ReactNode;
   };
   className?: string;
-  description?: string;
+  description?: React.ReactNode;
 }
 
 export function ToggleSwitch({

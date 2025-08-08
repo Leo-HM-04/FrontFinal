@@ -45,6 +45,10 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: '/api/estadisticas-aprobador/:path*',
+        destination: 'http://localhost:4000/api/estadisticas-aprobador/:path*',
+      },
+      {
         source: '/api/estadisticas/:path*',
         destination: 'http://localhost:4000/api/estadisticas/:path*',
       },
