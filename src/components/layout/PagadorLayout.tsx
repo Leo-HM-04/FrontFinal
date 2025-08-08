@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo, Fragment } from 'react';
+import { useState, useCallback, useEffect, useMemo, Fragment, useRef } from 'react';
 import PagadorNotifications from '@/components/pagador/PagadorNotifications';
 import { Dialog, Transition } from '@headlessui/react';
 import Image from 'next/image';
@@ -21,6 +21,31 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Guardar el último contador para detectar nuevas notificaciones
+  const prevUnreadCount = useRef<number>(0);
+
+  // Ref para el audio de notificación
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Desbloquear el audio en la primera interacción del usuario
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {});
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
 
   // Memoizar estilos de fondo para evitar recalcular en cada render
   const backgroundGradient = useMemo(
@@ -71,29 +96,39 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
     };
   }, [handleClickOutside, handleEscapeKey]);
 
-  // Cargar cantidad de notificaciones no leídas para pagador
+  // Polling para detectar nuevas notificaciones no leídas y reproducir sonido
   useEffect(() => {
     if (!user) return;
-    let token = undefined;
-    try {
-      token = localStorage.getItem('auth_token') || undefined;
-    } catch {}
-    if (!token) {
+    const fetchAndCheck = async () => {
+      let token = undefined;
       try {
-        token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+        token = localStorage.getItem('auth_token') || undefined;
       } catch {}
-    }
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones`, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : ''
+      if (!token) {
+        try {
+          token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+        } catch {}
       }
-    })
-      .then(async (res) => {
-        type Notificacion = { leida: boolean };
-        const data: Notificacion[] = await res.json();
-        setUnreadCount(Array.isArray(data) ? data.filter((n) => !n.leida).length : 0);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : ''
+        }
       });
-  }, [user, showNotifications]);
+      type Notificacion = { leida: boolean };
+      const data: Notificacion[] = await res.json();
+      const count = Array.isArray(data) ? data.filter((n) => !n.leida).length : 0;
+      setUnreadCount(count);
+      if (count > prevUnreadCount.current) {
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
+      }
+      prevUnreadCount.current = count;
+    };
+    fetchAndCheck();
+    const interval = setInterval(fetchAndCheck, 10000); // cada 10 segundos
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Manejar cierre de sesión con pantalla de transición
   const handleLogout = useCallback(async () => {
@@ -102,7 +137,10 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
   }, [logout]);
 
   return (
-    <div className="min-h-screen font-sans flex flex-col" style={backgroundGradient}>
+    <>
+      {/* Audio global para notificaciones */}
+      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <div className="min-h-screen font-sans flex flex-col" style={backgroundGradient}>
       {/* Header */}
       <header style={{background: 'transparent', borderBottom: 'none', boxShadow: 'none', padding: 0}}>
         <div className="max-w-7xl mx-auto px-4">
@@ -273,6 +311,7 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
       <main className="flex-1 p-4 min-h-[calc(100vh-4rem)]">
         {children}
       </main>
-    </div>
+      </div>
+    </>
   );
 }

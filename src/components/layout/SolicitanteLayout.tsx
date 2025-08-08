@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, Fragment } from 'react';
+import React, { useState, useCallback, useMemo, Fragment, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import SolicitanteNotifications from '@/components/solicitante/SolicitanteNotifications';
 import { useRouter } from 'next/navigation';
@@ -48,6 +48,31 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
   // Estado para el contador de notificaciones no leídas
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Guardar el último contador para detectar nuevas notificaciones
+  const prevUnreadCount = useRef<number>(0);
+
+  // Ref para el audio de notificación
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Desbloquear el audio en la primera interacción del usuario
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {});
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
+
   // Función para obtener el token
   const getToken = () => {
     let token = undefined;
@@ -89,13 +114,24 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
     return () => window.removeEventListener('refreshSolicitanteNotificationsCount', handler);
   }, [fetchUnreadCount]);
 
-  // Cargar el contador al montar el layout
-  React.useEffect(() => {
-    fetchUnreadCount();
-    // Opcional: puedes agregar un polling aquí si quieres refrescar cada cierto tiempo
-    // const interval = setInterval(fetchUnreadCount, 60000);
-    // return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+  // Cargar el contador al montar el layout y hacer polling para detectar nuevas notificaciones
+  useEffect(() => {
+    const checkAndPlay = async () => {
+      await fetchUnreadCount();
+      // Si hay más no leídas que antes, reproducir sonido
+      if (unreadCount > prevUnreadCount.current) {
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
+      }
+      prevUnreadCount.current = unreadCount;
+    };
+    checkAndPlay();
+    const interval = setInterval(checkAndPlay, 10000); // cada 10 segundos
+    return () => {
+      clearInterval(interval);
+    };
+  }, [fetchUnreadCount, unreadCount]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
@@ -138,7 +174,10 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen font-sans flex flex-col relative overflow-x-hidden" style={backgroundGradient}>
+    <>
+      {/* Audio global para notificaciones */}
+      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <div className="min-h-screen font-sans flex flex-col relative overflow-x-hidden" style={backgroundGradient}>
       {/* Header */}
       <header style={{background: 'transparent', borderBottom: 'none', boxShadow: 'none', padding: 0}}>
         <div className="max-w-7xl mx-auto px-4">
@@ -308,6 +347,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
       <main className="flex-1 p-4 min-h-[calc(100vh-4rem)]">
         {children}
       </main>
-    </div>
+      </div>
+    </>
   );
 }

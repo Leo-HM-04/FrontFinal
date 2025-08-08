@@ -41,6 +41,28 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
   const porPagina = 5;
   const prevNotiIds = useRef<Set<number>>(new Set());
 
+  // Ref para el audio de notificación
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Desbloquear el audio en la primera interacción del usuario
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {});
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
+
   const getToken = () => {
     let token = undefined;
     try {
@@ -72,10 +94,14 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
             tipo: n.tipo ?? 'info',
           }))
         : [];
-      // Toast para nuevas no leídas
+      // Toast para nuevas no leídas y reproducir sonido
       const nuevosNoLeidos = normalizadas.filter(n => !n.leida && !prevNotiIds.current.has(n.id));
       if (nuevosNoLeidos.length > 0) {
         const ultimaNotificacion = nuevosNoLeidos[0];
+        // Reproducir sonido
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
         toast(
           <div className="flex items-center gap-3">
             <span className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-400 shadow-lg shadow-blue-500/30">
@@ -150,6 +176,8 @@ export default function AprobadorNotifications({ open, onClose }: AprobadorNotif
 
   return (
     <>
+      {/* Audio global para notificaciones */}
+      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
       <ToastContainer
         position="top-right"
         autoClose={6000}

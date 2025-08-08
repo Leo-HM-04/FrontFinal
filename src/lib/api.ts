@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { toast } from 'react-hot-toast';
+import { getAuthToken } from '@/utils/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
@@ -14,7 +15,7 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('auth_token');
+    const token = getAuthToken(); // Usar función auxiliar para obtener token
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -43,8 +44,13 @@ api.interceptors.response.use(
 
     // Manejo de errores globales
     if (response?.status === 401 && !isLoginRequest) {
+      // Limpiar ambos almacenamientos para asegurar limpieza completa
       Cookies.remove('auth_token');
       Cookies.remove('user_data');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+      }
       toast.error('Sesión expirada. Por favor, inicia sesión nuevamente.');
 
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {

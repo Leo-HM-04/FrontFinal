@@ -7,7 +7,7 @@ import { Fragment } from "react";
 import { Bell, X, Check, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, Transition } from "@headlessui/react";
-
+import { getAuthToken } from "@/utils/auth";
 interface Notificacion {
   id: number;
   mensaje: string;
@@ -72,16 +72,7 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
   };
 
   const getToken = () => {
-    let token = undefined;
-    try {
-      token = localStorage.getItem('auth_token') || undefined;
-    } catch {}
-    if (!token) {
-      try {
-        token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
-      } catch {}
-    }
-    return token;
+    return getAuthToken();
   };
 
   const prevNotiIds = useRef<Set<number>>(new Set());

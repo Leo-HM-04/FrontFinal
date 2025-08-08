@@ -1,5 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+function getUserRoleFromRequest(request: NextRequest): string | null {
+  try {
+    const authCookie = request.cookies.get('auth_token');
+    if (!authCookie?.value) {
+      return null;
+    }
+
+    // Decodificar JWT sin verificar (solo para extraer el payload)
+    // En un entorno de producción deberías verificar la firma
+    const tokenParts = authCookie.value.split('.');
+    if (tokenParts.length !== 3) {
+      return null;
+    }
+
+    // Decodificar el payload (segunda parte del JWT)
+    const payload = JSON.parse(atob(tokenParts[1]));
+    return payload.rol || null;
+  } catch (error) {
+    console.error('Error parsing JWT in middleware:', error);
+    return null;
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
@@ -29,21 +52,6 @@ export function middleware(request: NextRequest) {
   }
   
   return NextResponse.next();
-}
-
-function getUserRoleFromRequest(request: NextRequest): string | null {
-  // Implementar lógica real para obtener el rol del usuario
-  // Esto podría ser desde cookies, headers, JWT token, etc.
-  
-  // Ejemplo con cookies:
-  const authCookie = request.cookies.get('auth_token');
-  if (authCookie) {
-    // Decodificar token y extraer rol
-    // Por ahora retorno un rol de ejemplo
-    return 'admin_general';
-  }
-  
-  return null;
 }
 
 export const config = {

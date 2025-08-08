@@ -38,6 +38,7 @@ export default function NuevoViaticoPage() {
   ]);
   const [mensajeGlobal, setMensajeGlobal] = useState<string>('');
   const [exito, setExito] = useState<boolean>(false);
+  const [enviando, setEnviando] = useState<boolean>(false);
   const router = useRouter();
 
   const handleChange = (idx: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -60,19 +61,18 @@ export default function NuevoViaticoPage() {
 
   const handleSubmitTodos = async (e: React.FormEvent) => {
     e.preventDefault();
+    setEnviando(true);
     const nuevos = [...formularios];
     let huboError = false;
 
     // Validar todos los formularios antes de enviar
     nuevos.forEach((f, idx) => {
       const errors: Record<string, string> = {};
-      
       // Validar archivo
       if (!f.file) {
         errors.file = 'Adjunta un archivo';
         huboError = true;
       }
-
       // Validar cuenta según el tipo
       if (f.form.tipo_cuenta_destino === 'clabe') {
         if (!f.form.cuenta_destino || f.form.cuenta_destino.length !== 18) {
@@ -89,7 +89,6 @@ export default function NuevoViaticoPage() {
           huboError = true;
         }
       }
-
       nuevos[idx].errors = errors;
     });
 
@@ -97,6 +96,7 @@ export default function NuevoViaticoPage() {
       setFormularios(nuevos);
       setMensajeGlobal('Por favor corrige los errores antes de continuar.');
       setExito(false);
+      setEnviando(false);
       return;
     }
 
@@ -131,12 +131,19 @@ export default function NuevoViaticoPage() {
     if (!huboError) {
       setMensajeGlobal('¡Todos los viáticos fueron creados exitosamente! Redirigiendo...');
       setExito(true);
+      setEnviando(false);
+      // Scroll al mensaje de éxito
+      setTimeout(() => {
+        const msg = document.getElementById('mensaje-global-exito');
+        if (msg) msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
       setTimeout(() => {
         router.push('/dashboard/solicitante/mis-viaticos');
-      }, 1800);
+      }, 700);
     } else {
       setMensajeGlobal('Hubo errores al crear algunos viáticos. Revisa los mensajes.');
       setExito(false);
+      setEnviando(false);
     }
   };
 
@@ -155,7 +162,14 @@ export default function NuevoViaticoPage() {
         <div className="max-w-screen-2xl mx-auto bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-2xl shadow-xl px-10 py-4 mt-8">
           <h1 className="text-4xl font-extrabold text-blue-900 mb-4 tracking-tight text-center drop-shadow">Nuevo Viático</h1>
           {mensajeGlobal && (
-            <div className={`mb-4 flex items-center justify-center gap-3 text-center font-bold text-lg px-6 py-3 rounded-xl shadow-lg drop-shadow-lg border-2 ${exito ? 'bg-green-50 border-green-400 text-green-800' : 'bg-red-50 border-red-400 text-red-800'}`}>
+            <div
+              id={exito ? 'mensaje-global-exito' : undefined}
+              className={`fixed left-1/2 top-24 z-[9999] -translate-x-1/2 mb-4 flex items-center justify-center gap-3 text-center font-bold text-lg px-8 py-4 rounded-2xl shadow-2xl drop-shadow-2xl border-2 transition-all duration-300
+                ${exito ? 'bg-green-50 border-green-400 text-green-800' : 'bg-red-50 border-red-400 text-red-800'}
+                ${exito ? 'animate-bounce-in' : ''}
+              `}
+              style={{ minWidth: 320, maxWidth: 600 }}
+            >
               {exito ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" /></svg>
               ) : (
@@ -323,9 +337,10 @@ export default function NuevoViaticoPage() {
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary px-6 py-1 rounded-lg bg-blue-700 text-white text-base font-bold hover:bg-blue-800 transition shadow"
+                  className={`btn btn-primary px-6 py-1 rounded-lg bg-blue-700 text-white text-base font-bold hover:bg-blue-800 transition shadow ${enviando ? 'opacity-60 pointer-events-none' : ''}`}
+                  disabled={enviando}
                 >
-                  Crear todos
+                  {enviando ? 'Creando...' : 'Crear todos'}
                 </button>
               </div>
             </div>

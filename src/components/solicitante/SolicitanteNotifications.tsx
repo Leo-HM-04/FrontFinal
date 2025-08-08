@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Fragment, useCallback } from "react";
+import { useEffect, useState, Fragment, useCallback, useRef } from "react";
 import { ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Bell, BellRing } from "lucide-react";
@@ -41,6 +41,28 @@ export default function SolicitanteNotifications({ open, onClose }: SolicitanteN
   const porPagina = 10;
 
   const [openModal, setOpenModal] = useState(open);
+
+  // Ref para el audio de notificación
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Desbloquear el audio en la primera interacción del usuario
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {});
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
 
   // Permitir abrir el modal desde un evento global
   useEffect(() => {
@@ -124,6 +146,16 @@ export default function SolicitanteNotifications({ open, onClose }: SolicitanteN
     setOpenModal(open);
   }, [open]);
 
+  // Reproducir sonido cuando llega una nueva notificación no leída
+  useEffect(() => {
+    // Solo reproducir si hay nuevas no leídas
+    if (notificaciones.length > 0 && notificaciones.some(n => !n.leida)) {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {});
+      }
+    }
+  }, [notificaciones]);
+
   //const handleOpen = () => setOpenModal(true);
   const handleClose = () => {
     setOpenModal(false);
@@ -134,6 +166,8 @@ export default function SolicitanteNotifications({ open, onClose }: SolicitanteN
 
   return (
     <>
+      {/* Audio global para notificaciones */}
+      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
       <ToastContainer
         position="top-right"
         autoClose={6000}

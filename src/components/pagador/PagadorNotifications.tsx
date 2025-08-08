@@ -38,6 +38,27 @@ export default function PagadorNotifications({ open, onClose }: PagadorNotificat
   const porPagina = 5;
   const [loadingMore, setLoadingMore] = useState(false);
   const listaRef = useRef<HTMLDivElement>(null);
+  // Ref para el audio de notificación
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Desbloquear el audio en la primera interacción del usuario
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {});
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
   // Scroll infinito: cargar más al llegar al final
 useEffect(() => {
   const handleScroll = () => {
@@ -85,6 +106,9 @@ useEffect(() => {
     return token;
   };
 
+  // Guardar ids previos para detectar nuevas no leídas
+  const prevNotiIds = useRef<Set<number>>(new Set());
+
   const fetchNotificaciones = useCallback(async () => {
     if (!user) return;
     setLoading(true);
@@ -106,6 +130,14 @@ useEffect(() => {
               tipo: n.tipo ?? 'info'
             }))
         : [];
+      // Detectar nuevas no leídas y reproducir sonido
+      const nuevosNoLeidos = normalizadas.filter(n => !n.leida && !prevNotiIds.current.has(n.id));
+      if (nuevosNoLeidos.length > 0) {
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
+      }
+      prevNotiIds.current = new Set(normalizadas.map(n => n.id));
       setNotificaciones(normalizadas);
     } finally {
       setLoading(false);
@@ -147,7 +179,11 @@ useEffect(() => {
   const notificacionesPaginadas = notificacionesFiltradas.slice(0, pagina * porPagina);
 
   return (
-    <Transition.Root show={open} as={Fragment}>
+    <>
+      {/* Asegurarse de que el audio esté cargado */}
+      {/* Audio global para notificaciones */}
+      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <Transition.Root show={open} as={Fragment}>
       <Dialog as="div" className="relative z-[60]" onClose={onClose}>
         <Transition.Child
           as={Fragment}
@@ -330,5 +366,6 @@ useEffect(() => {
         </div>
       </Dialog>
     </Transition.Root>
+    </>
   );
 }

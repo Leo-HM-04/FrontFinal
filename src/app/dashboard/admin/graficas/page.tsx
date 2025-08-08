@@ -8,6 +8,7 @@ import { TrendingUp, TrendingDown, Users, CreditCard, Clock, CheckCircle } from 
 
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { getAuthToken } from '@/utils/auth';
 
 function mesNombre(num: number): string {
   return ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"][num - 1] || String(num);
@@ -69,6 +70,17 @@ export default function GraficasAdminPage() {
   const [notificacionesPorUsuario, setNotificacionesPorUsuario] = useState<{ usuario: string | number; value: number; nombre?: string }[]>([]);
   const [usuariosNombres, setUsuariosNombres] = useState<Record<string | number, string>>({});
 
+  // Función auxiliar para hacer fetch con autorización
+  const fetchWithAuth = async (url: string) => {
+    const token = getAuthToken();
+    return await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      }
+    });
+  };
+
   // Función para cargar los datos desde el API
   const cargarDatos = async (periodo = periodoSeleccionado) => {
     try {
@@ -83,7 +95,7 @@ export default function GraficasAdminPage() {
 
       // Solicitudes
       try {
-        const resSolicitudes = await fetch(`http://localhost:4000/api/estadisticas/solicitudes?periodo=${periodo}`);
+        const resSolicitudes = await fetchWithAuth(`http://localhost:4000/api/estadisticas/solicitudes?periodo=${periodo}`);
         if (!resSolicitudes.ok) throw new Error('Error al cargar solicitudes');
         const data = await resSolicitudes.json();
         
@@ -109,7 +121,7 @@ export default function GraficasAdminPage() {
 
       // Usuarios
       try {
-        const resUsuarios = await fetch(`http://localhost:4000/api/estadisticas/usuarios?periodo=${periodo}`);
+        const resUsuarios = await fetchWithAuth(`http://localhost:4000/api/estadisticas/usuarios?periodo=${periodo}`);
         if (!resUsuarios.ok) throw new Error('Error al cargar usuarios');
         const data = await resUsuarios.json();
         
@@ -134,7 +146,7 @@ export default function GraficasAdminPage() {
 
       // Recurrentes
       try {
-        const resRecurrentes = await fetch(`http://localhost:4000/api/estadisticas/recurrentes?periodo=${periodo}`);
+        const resRecurrentes = await fetchWithAuth(`http://localhost:4000/api/estadisticas/recurrentes?periodo=${periodo}`);
         if (!resRecurrentes.ok) throw new Error('Error al cargar recurrentes');
         const data = await resRecurrentes.json();
         
@@ -159,7 +171,7 @@ export default function GraficasAdminPage() {
 
       // Notificaciones
       try {
-        const resNotificaciones = await fetch(`http://localhost:4000/api/estadisticas/notificaciones?periodo=${periodo}`);
+        const resNotificaciones = await fetchWithAuth(`http://localhost:4000/api/estadisticas/notificaciones?periodo=${periodo}`);
         if (!resNotificaciones.ok) throw new Error('Error al cargar notificaciones');
         const data = await resNotificaciones.json();
         
@@ -189,7 +201,7 @@ export default function GraficasAdminPage() {
           
           // Intentar obtener nombres de usuario si no vienen
           try {
-            const resUsuarios = await fetch('http://localhost:4000/api/usuarios');
+            const resUsuarios = await fetchWithAuth('http://localhost:4000/api/usuarios');
             if (!resUsuarios.ok) throw new Error('Error al cargar nombres de usuarios');
             const usuarios = await resUsuarios.json();
             
@@ -211,7 +223,7 @@ export default function GraficasAdminPage() {
 
       // Tendencia semanal
       try {
-        const resTendencia = await fetch(`http://localhost:4000/api/estadisticas/tendencia-semanal?periodo=${periodo}`);
+        const resTendencia = await fetchWithAuth(`http://localhost:4000/api/estadisticas/tendencia-semanal?periodo=${periodo}`);
         if (!resTendencia.ok) throw new Error('Error al cargar tendencia semanal');
         const data = await resTendencia.json();
         

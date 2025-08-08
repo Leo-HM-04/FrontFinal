@@ -41,6 +41,7 @@ function EditarViaticoPageInner() {
   const [mensaje, setMensaje] = useState("");
   const [viatico, setViatico] = useState<Viatico | null>(null);
   const [form, setForm] = useState<Partial<Viatico>>({});
+  const [actualizando, setActualizando] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -75,10 +76,10 @@ function EditarViaticoPageInner() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setActualizando(true);
 
     // Validar cuenta según el tipo
     const newErrors: Record<string, string> = {};
-    
     if (form.tipo_cuenta_destino === 'clabe') {
       if (!form.cuenta_destino || form.cuenta_destino.length !== 18) {
         newErrors.cuenta_destino = 'La CLABE debe tener 18 dígitos';
@@ -95,6 +96,7 @@ function EditarViaticoPageInner() {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setMensaje("Por favor corrige los errores antes de continuar.");
+      setActualizando(false);
       return;
     }
 
@@ -104,12 +106,17 @@ function EditarViaticoPageInner() {
         ...form,
         monto: typeof form.monto === 'string' ? Number(form.monto) : form.monto
       };
-      
       await ViaticosService.update(Number(id), formData);
       setMensaje("Viático actualizado correctamente.");
-      setTimeout(() => router.push("/dashboard/solicitante/mis-viaticos"), 1500);
+      setTimeout(() => {
+        const msg = document.getElementById('mensaje-global-exito');
+        if (msg) msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      setTimeout(() => router.push("/dashboard/solicitante/mis-viaticos"), 900);
     } catch {
       setMensaje("Error al actualizar el viático.");
+    } finally {
+      setActualizando(false);
     }
   };
 
@@ -133,8 +140,20 @@ function EditarViaticoPageInner() {
             </div>
 
             {mensaje && (
-              <div className={`mb-6 text-center font-bold text-lg ${mensaje.includes('actualizado') ? 'text-green-700' : 'text-red-700'}`}>
-                {mensaje}
+              <div
+                id={mensaje.includes('actualizado') ? 'mensaje-global-exito' : undefined}
+                className={`fixed left-1/2 top-24 z-[9999] -translate-x-1/2 mb-4 flex items-center justify-center gap-3 text-center font-bold text-lg px-8 py-4 rounded-2xl shadow-2xl drop-shadow-2xl border-2 transition-all duration-300
+                  ${mensaje.includes('actualizado') ? 'bg-green-50 border-green-400 text-green-800' : 'bg-red-50 border-red-400 text-red-800'}
+                  ${mensaje.includes('actualizado') ? 'animate-bounce-in' : ''}
+                `}
+                style={{ minWidth: 320, maxWidth: 600 }}
+              >
+                {mensaje.includes('actualizado') ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" /></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 9l-6 6M9 9l6 6" /></svg>
+                )}
+                <span>{mensaje}</span>
               </div>
             )}
             <form onSubmit={handleSubmit} encType="multipart/form-data" className="bg-white rounded-lg p-6 border border-blue-200 shadow-sm">
@@ -513,9 +532,10 @@ function EditarViaticoPageInner() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-lg bg-yellow-600 text-white font-semibold hover:bg-yellow-700 transition"
+                  className={`px-6 py-2 rounded-lg bg-yellow-600 text-white font-semibold hover:bg-yellow-700 transition ${actualizando ? 'opacity-60 pointer-events-none' : ''}`}
+                  disabled={actualizando}
                 >
-                  Guardar
+                  {actualizando ? 'Actualizando...' : 'Guardar'}
                 </button>
               </div>
             </form>

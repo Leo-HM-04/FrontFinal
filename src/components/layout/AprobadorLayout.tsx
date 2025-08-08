@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import AprobadorNotifications from "@/components/aprobador/AprobadorNotifications";
@@ -30,35 +30,69 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Cargar cantidad de notificaciones no leídas
-  const fetchUnread = useCallback(() => {
-    if (!user) return;
-    let token = undefined;
-    try {
-      token = localStorage.getItem('auth_token') || undefined;
-    } catch {}
-    if (!token) {
-      try {
-        token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
-      } catch {}
-    }
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones`, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : ''
+  // Guardar el último contador para detectar nuevas notificaciones
+  const prevUnreadCount = useRef<number>(0);
+
+  // Ref para el audio de notificación
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Desbloquear el audio en la primera interacción del usuario
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {});
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
       }
-    })
-      .then(async (res) => {
-        const data: { leida: boolean }[] = await res.json();
-        setUnreadCount(Array.isArray(data) ? data.filter((n) => !n.leida).length : 0);
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
+
+  // Polling para detectar nuevas notificaciones no leídas y reproducir sonido
+  useEffect(() => {
+    if (!user) return;
+    const fetchAndCheck = async () => {
+      let token = undefined;
+      try {
+        token = localStorage.getItem('auth_token') || undefined;
+      } catch {}
+      if (!token) {
+        try {
+          token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+        } catch {}
+      }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : ''
+        }
       });
+      const data: { leida: boolean }[] = await res.json();
+      const count = Array.isArray(data) ? data.filter((n) => !n.leida).length : 0;
+      setUnreadCount(count);
+      if (count > prevUnreadCount.current) {
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
+      }
+      prevUnreadCount.current = count;
+    };
+    fetchAndCheck();
+    const interval = setInterval(fetchAndCheck, 10000); // cada 10 segundos
+    return () => clearInterval(interval);
   }, [user]);
 
-  useEffect(() => {
-    fetchUnread();
-  }, [user, showNotifications, fetchUnread]);
-
   return (
-    <div className="min-h-screen font-sans" style={{ background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)' }}>
+    <>
+      {/* Audio global para notificaciones */}
+      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <div className="min-h-screen font-sans" style={{ background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)' }}>
       {/* Header */}
       <header style={{background: 'transparent', borderBottom: 'none', boxShadow: 'none', padding: 0}}>
         <div className="max-w-7xl mx-auto px-4">
@@ -207,6 +241,7 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
