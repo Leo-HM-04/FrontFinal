@@ -50,6 +50,7 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
   const [pagina, setPagina] = useState(1);
   const porPagina = 7;
   const [loadingMore, setLoadingMore] = useState(false); // Nuevo estado para el loader de scroll
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleMarcarTodas = async () => {
     setMarcandoTodas(true);
@@ -109,6 +110,11 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
       const nuevosNoLeidos = normalizadas.filter(n => !n.leida && !prevNotiIds.current.has(n.id));
       if (nuevosNoLeidos.length > 0) {
         const ultimaNotificacion = nuevosNoLeidos[0];
+        // Reproducir sonido de notificación
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play();
+        }
         toast(
           <div className="flex items-center gap-3">
             <span className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-400 shadow-lg shadow-blue-500/30">
@@ -191,6 +197,8 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
 
   return (
     <NotiContext.Provider value={{ refreshNotificaciones: fetchNotificaciones }}>
+      {/* Sonido de notificación */}
+      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
       <ToastContainer
         position="top-right"
         autoClose={6000}

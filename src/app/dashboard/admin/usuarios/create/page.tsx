@@ -57,8 +57,8 @@ export default function CreateUserPage() {
     if (!formData.email) {
       newErrors.email = 'El correo es requerido';
       isValid = false;
-    } else if (!/^[^@\s]+@(bechapra\.com|gmail\.com)$/.test(formData.email)) {
-      newErrors.email = 'Solo se permiten correos @bechapra.com o @gmail.com';
+    } else if (!/^[^@\s]+@(bechapra\.com|bechapra\.com\.mx)$/.test(formData.email)) {
+      newErrors.email = 'Solo se permiten correos @bechapra.com o @bechapra.com.mx';
       isValid = false;
     }
 

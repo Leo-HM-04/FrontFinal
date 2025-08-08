@@ -1,7 +1,5 @@
 'use client';
 
-
-
 import { useEffect, useState } from 'react';
 import type { Solicitud } from '@/types';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';

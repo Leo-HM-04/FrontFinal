@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -14,6 +14,7 @@ export default function UserNotifications({ token }: { token: string }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [lastShownId, setLastShownId] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -27,6 +28,11 @@ export default function UserNotifications({ token }: { token: string }) {
         // Mostrar toast solo para la última no leída
         const unread = data.filter((n: Notificacion) => !n.leida);
         if (unread.length && unread[0].id_notificacion !== lastShownId && !open) {
+          // Reproducir sonido de notificación
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play();
+          }
           toast.info(unread[0].mensaje, {
             position: "top-right",
             autoClose: 5000,
@@ -45,6 +51,8 @@ export default function UserNotifications({ token }: { token: string }) {
 
   return (
     <>
+      {/* Sonido de notificación */}
+      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
       <ToastContainer
         position="top-right"
         autoClose={5000}

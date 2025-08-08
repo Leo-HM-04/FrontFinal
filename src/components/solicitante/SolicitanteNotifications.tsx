@@ -7,7 +7,6 @@ import { Bell, BellRing } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, Transition } from "@headlessui/react";
 
-
 interface Notificacion {
   id_notificacion: number;
   mensaje: string;

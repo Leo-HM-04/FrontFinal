@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Save, AlertCircle, Lock, UserCheck, UserX, Shield } from 'lucide-react';
+import { Save, AlertCircle, Lock, UserCheck, UserX, Shield, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { UsuariosService } from '@/services/usuarios.service';
@@ -11,8 +11,8 @@ import { toast } from 'react-hot-toast';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 
-
 export default function EditUsuarioPage() {
+    const [showPassword, setShowPassword] = useState(false);
     const params = useParams();
     const router = useRouter();
     const [usuario, setUsuario] = useState<UserType | null>(null);
@@ -28,7 +28,7 @@ export default function EditUsuarioPage() {
         activo: true
     });
     const [emailTouched, setEmailTouched] = useState(false);
-    const isEmailValid = formData.email.trim().toLowerCase().endsWith('@bechapra.com');
+    const isEmailValid = /@(bechapra\.com|bechapra\.com\.mx)$/i.test(formData.email.trim());
 
     useEffect(() => {
         if (params.id) {
@@ -60,8 +60,8 @@ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!usuario) return;
 
-  if (!formData.email.trim().toLowerCase().endsWith('@bechapra.com')) {
-    toast.error('El correo debe ser @bechapra.com');
+  if (!/@(bechapra\.com|bechapra\.com\.mx)$/i.test(formData.email.trim())) {
+    toast.error('El correo debe ser @bechapra.com o @bechapra.com.mx');
     return;
   }
 
@@ -241,7 +241,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                                             />
                                             {emailTouched && !isEmailValid && (
                                                 <p className="text-red-500 text-xs mt-1 font-semibold animate-fade-in">
-                                                    El correo debe ser @bechapra.com
+                                                    El correo debe ser @bechapra.com o @bechapra.com.mx
                                                 </p>
                                             )}
                                         </div>
@@ -267,16 +267,26 @@ const handleSubmit = async (e: React.FormEvent) => {
                                                 <Lock className="w-4 h-4 inline mr-2" />
                                                 Nueva contraseña
                                             </label>
-                                            <input
-                                                type="password"
-                                                name="password"
-                                                value={formData.password}
-                                                onChange={handleInputChange}
-                                                className="w-full px-4 py-3 rounded-xl border border-white/30 bg-white/90 text-black focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all placeholder:text-gray-400 shadow-sm backdrop-blur-md"
-                                                placeholder="Dejar vacío para mantener contraseña actual"
-                                                minLength={8}
-                                                autoComplete="new-password"
-                                            />
+                                            <div className="relative">
+                                                <input
+                                                    type={showPassword ? "text" : "password"}
+                                                    name="password"
+                                                    value={formData.password}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-4 py-3 rounded-xl border border-white/30 bg-white/90 text-black focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all placeholder:text-gray-400 shadow-sm backdrop-blur-md pr-12"
+                                                    placeholder="Dejar vacío para mantener contraseña actual"
+                                                    minLength={8}
+                                                    autoComplete="new-password"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    tabIndex={-1}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 focus:outline-none"
+                                                    onClick={() => setShowPassword((v) => !v)}
+                                                >
+                                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                                </button>
+                                            </div>
                                             <p className="text-white/60 text-xs mt-1">
                                                 Solo introduzca una contraseña si desea cambiarla (mínimo 8 caracteres)
                                             </p>
