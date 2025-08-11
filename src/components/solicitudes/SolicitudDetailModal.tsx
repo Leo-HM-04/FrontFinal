@@ -390,43 +390,45 @@ return (
             )}
             
             {/* Botones de acción */}
-            <div className="flex flex-wrap gap-2">
-              {solicitud.factura_url && (
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    // Garantizar que la URL tenga el formato correcto con la barra diagonal
-                    let facturaUrl = '';
-                    if (solicitud.factura_url.startsWith('http')) {
-                      facturaUrl = solicitud.factura_url;
-                    } else {
-                      const baseUrl = 'http://localhost:4000';
-                      const rutaArchivo = solicitud.factura_url.startsWith('/') 
-                        ? solicitud.factura_url 
-                        : `/${solicitud.factura_url}`;
-                      facturaUrl = `${baseUrl}${rutaArchivo}`;
-                    }
-                    window.open(facturaUrl, '_blank');
-                  }}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Ver Factura
-                  <ExternalLink className="w-4 h-4 ml-2" />
-                </Button>
-              )}
-              {solicitud.soporte_url && (
-                <Button
-                  size="sm"
-                  onClick={() => window.open(solicitud.soporte_url, '_blank')}
-                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2"
-                >
-                  <FileText className="w-4 h-4 mr-1" />
-                  Ver Soporte
-                  <ExternalLink className="w-4 h-4 ml-1" />
-                </Button>
-              )}
-              {!solicitud.factura_url && !solicitud.soporte_url && (
+            <div className="flex w-full justify-end mt-6">
+              {(solicitud.factura_url || solicitud.soporte_url) ? (
+                <div className="flex gap-3 items-end">
+                  {solicitud.factura_url && (
+                    <Button
+                      size="lg"
+                      onClick={() => {
+                        let facturaUrl = '';
+                        if (solicitud.factura_url.startsWith('http')) {
+                          facturaUrl = solicitud.factura_url;
+                        } else {
+                          const baseUrl = 'http://localhost:4000';
+                          const rutaArchivo = solicitud.factura_url.startsWith('/') 
+                            ? solicitud.factura_url 
+                            : `/${solicitud.factura_url}`;
+                          facturaUrl = `${baseUrl}${rutaArchivo}`;
+                        }
+                        window.open(facturaUrl, '_blank');
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
+                    >
+                      <FileText className="w-5 h-5" />
+                      Ver Factura
+                      <ExternalLink className="w-5 h-5" />
+                    </Button>
+                  )}
+                  {solicitud.soporte_url && (
+                    <Button
+                      size="lg"
+                      onClick={() => window.open(solicitud.soporte_url, '_blank')}
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
+                    >
+                      <FileText className="w-5 h-5" />
+                      Ver Soporte
+                      <ExternalLink className="w-5 h-5" />
+                    </Button>
+                  )}
+                </div>
+              ) : (
                 <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">
                   No hay documentos adjuntos disponibles
                 </div>

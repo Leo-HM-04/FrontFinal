@@ -5,7 +5,7 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 // import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { User, Mail, Shield, Lock } from 'lucide-react';
+import { User, Mail, Shield } from 'lucide-react';
 import LogoBechapra from '@/components/LogoBechapra';
 import { useAuth } from '@/contexts/AuthContext';
 // import { UsuariosService, UpdateProfileData, ChangePasswordData } from '@/services/usuarios.service';
@@ -19,7 +19,6 @@ interface TabType {
 
 const tabs: TabType[] = [
   { id: 'personal', label: 'Información Personal', icon: <User className="w-4 h-4" /> },
-  { id: 'seguridad', label: 'Seguridad', icon: <Shield className="w-4 h-4" /> }
 ];
 
 export default function AdminProfilePage() {
@@ -102,18 +101,6 @@ export default function AdminProfilePage() {
     </div>
   );
 
-  const renderSecurity = () => (
-    <div className="space-y-7">
-      <h2 className="text-2xl font-extrabold text-white tracking-tight font-montserrat">Seguridad</h2>
-      <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-xl">
-        <h3 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-          <Lock className="w-5 h-5 inline text-blue-300" />
-          Cambiar Contraseña
-        </h3>
-        <div className="text-white/80 text-base font-medium">La funcionalidad para cambiar la contraseña está deshabilitada temporalmente.</div>
-      </div>
-    </div>
-  );
 
   // renderNotifications eliminado
 
@@ -121,8 +108,6 @@ export default function AdminProfilePage() {
     switch (activeTab) {
       case 'personal':
         return renderPersonalInfo();
-      case 'seguridad':
-        return renderSecurity();
       default:
         return renderPersonalInfo();
     }

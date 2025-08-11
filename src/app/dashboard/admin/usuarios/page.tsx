@@ -10,12 +10,11 @@ import { Button } from '@/components/ui/Button';
 import { Users, Plus, Trash2, Edit, User as UserIcon, Ban, CheckCircle2, UserCheck, UserPlus } from 'lucide-react';
 import { UsuariosService } from '@/services/usuarios.service';
 import { usePagination } from '@/hooks/usePagination';
-import { useAuth } from '@/contexts/AuthContext';
-import { User } from '@/types';
 import { toast } from 'react-hot-toast';
 import { Suspense } from 'react'; 
 import { exportUsuariosPDF, exportUsuariosExcel, exportUsuariosCSV } from '@/utils/exportUsuarios';
 import { FileDown } from 'lucide-react';
+import { User } from '@/types';
 
 // Skeleton loader para la tabla
 function TableSkeleton({ rows = 5 }) {
@@ -34,7 +33,6 @@ function TableSkeleton({ rows = 5 }) {
   );
 }
 
-
 function UsuariosContent() {
   const router = useRouter();
   const [usuarios, setUsuarios] = useState<User[]>([]);
@@ -44,7 +42,6 @@ function UsuariosContent() {
   const [deleting, setDeleting] = useState(false);
   const [roleFilter, setRoleFilter] = useState('');
   const [exportRange, setExportRange] = useState('total');
-  const { user } = useAuth();
 
   // Función auxiliar para exportar
   const handleExport = useCallback((format: 'pdf' | 'excel' | 'csv', range: string) => {
@@ -91,41 +88,32 @@ function UsuariosContent() {
         } 
       };
     }
-    
-    // Filtramos al admin actual para las estadísticas también
-    const filteredUsers = user?.id_usuario 
-      ? usuarios.filter(u => u.id_usuario !== parseInt(user.id_usuario.toString()))
-      : usuarios;
-
+    // Ya no filtramos al admin actual para las estadísticas
+    const filteredUsers = usuarios;
     const total = filteredUsers.length;
     const activos = filteredUsers.filter(u => !u.bloqueado).length;
     const admins = filteredUsers.filter(u => u.rol === 'admin_general').length;
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     const nuevos = filteredUsers.filter(u => new Date(u.creado_en) > weekAgo).length;
-    
     const roleCount = {
       admin_general: filteredUsers.filter(u => u.rol === 'admin_general').length,
       solicitante: filteredUsers.filter(u => u.rol === 'solicitante').length,
       aprobador: filteredUsers.filter(u => u.rol === 'aprobador').length,
       pagador_banca: filteredUsers.filter(u => u.rol === 'pagador_banca').length
     };
-
     return { total, activos, admins, nuevos, roleCount };
-  }, [usuarios, user?.id_usuario]);
+  }, [usuarios]);
 
   // Memoizar filtro por rol y filtrar el admin actual
   const filteredByRole = useMemo(() => {
-    // Primero filtramos al usuario actual (administrador)
-    const filteredUsers = user?.id_usuario 
-      ? usuarios.filter(u => u.id_usuario !== parseInt(user.id_usuario.toString()))
-      : usuarios;
-    
+    // Ya no filtramos al usuario actual (administrador)
+    const filteredUsers = usuarios;
     // Luego aplicamos el filtro por rol si existe
     return roleFilter 
       ? filteredUsers.filter(u => u.rol === roleFilter)
       : filteredUsers;
-  }, [usuarios, roleFilter, user?.id_usuario]);
+  }, [usuarios, roleFilter]);
 
 
   // Estado y lógica para búsqueda
@@ -231,6 +219,7 @@ function UsuariosContent() {
 
   const getRoleLabel = useCallback((role: string) => {
     const roles = {
+      admin_general: 'Admin General',
       solicitante: 'Solicitante',
       aprobador: 'Aprobador',
       pagador_banca: 'Pagador'
@@ -336,25 +325,31 @@ function UsuariosContent() {
               <span className="text-gray-700 font-semibold flex-shrink-0">Filtrar por Rol:</span>
               <button
                 onClick={clearRoleFilter}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border flex-shrink-0 ${roleFilter === '' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colores border flex-shrink-0 ${roleFilter === '' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
               >
                 Todos ({stats.total})
               </button>
               <button
+                onClick={() => handleRoleFilterChange('admin_general')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colores border flex-shrink-0 ${roleFilter === 'admin_general' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+              >
+                Admin General ({stats.roleCount.admin_general || 0})
+              </button>
+              <button
                 onClick={() => handleRoleFilterChange('solicitante')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border flex-shrink-0 ${roleFilter === 'solicitante' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colores border flex-shrink-0 ${roleFilter === 'solicitante' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
               >
                 Solicitantes ({stats.roleCount.solicitante || 0})
               </button>
               <button
                 onClick={() => handleRoleFilterChange('aprobador')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border flex-shrink-0 ${roleFilter === 'aprobador' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colores border flex-shrink-0 ${roleFilter === 'aprobador' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
               >
                 Aprobadores ({stats.roleCount.aprobador || 0})
               </button>
               <button
                 onClick={() => handleRoleFilterChange('pagador_banca')}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border flex-shrink-0 ${roleFilter === 'pagador_banca' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colores border flex-shrink-0 ${roleFilter === 'pagador_banca' ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
               >
                 Pagadores ({stats.roleCount.pagador_banca || 0})
               </button>
