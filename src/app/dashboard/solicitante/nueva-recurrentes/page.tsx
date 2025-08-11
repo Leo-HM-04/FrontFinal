@@ -76,7 +76,6 @@ const departamentoOptions = [
 ];
 
 const tipoPagoOptions = [
-  { value: 'viaticos', label: 'Viáticos' },
   { value: 'efectivo', label: 'Efectivo' },
   { value: 'factura', label: 'Factura' },
   { value: 'nominas', label: 'Nóminas' },
@@ -100,19 +99,34 @@ export default function NuevaRecurrentePage() {
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
 
   // Configuración dinámica para cuenta destino
-  const cuentaConfig = formData.tipo_cuenta_destino === 'Tarjeta'
-    ? {
+  let cuentaConfig;
+  if (formData.tipo_cuenta_destino === 'Tarjeta') {
+    if (formData.tipo_tarjeta === 'Cuenta') {
+      cuentaConfig = {
+        maxLength: 30, // sin límite real, pero para UX
+        minLength: 6,
+        pattern: '^\d{6,}$',
+        placeholder: 'Número de cuenta (mínimo 6 dígitos)',
+        errorMsg: 'El número de cuenta debe tener al menos 6 dígitos numéricos.'
+      };
+    } else {
+      cuentaConfig = {
         maxLength: 16,
+        minLength: 16,
         pattern: '^\d{16}$',
         placeholder: 'Número de tarjeta (16 dígitos)',
         errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
-      }
-    : {
-        maxLength: 18,
-        pattern: '^\d{18}$',
-        placeholder: 'Número de cuenta CLABE (18 dígitos)',
-        errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
       };
+    }
+  } else {
+    cuentaConfig = {
+      maxLength: 18,
+      minLength: 18,
+      pattern: '^\d{18}$',
+      placeholder: 'Número de cuenta CLABE (18 dígitos)',
+      errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
+    };
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -262,6 +276,7 @@ export default function NuevaRecurrentePage() {
                         <option value="" className="text-black">Selecciona tipo</option>
                         <option value="Débito" className="text-black">Débito</option>
                         <option value="Crédito" className="text-black">Crédito</option>
+                        <option value="Cuenta" className="text-black">Cuenta</option>
                       </select>
                       {errors.tipo_tarjeta && <span className="text-red-400 text-sm mt-1 block">{errors.tipo_tarjeta}</span>}
                     </div>
@@ -294,16 +309,26 @@ export default function NuevaRecurrentePage() {
                       name="cuenta_destino"
                       value={formData.cuenta_destino}
                       onChange={e => {
-                        const maxLen = cuentaConfig.maxLength;
-                        const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                        let value = e.target.value.replace(/[^0-9]/g, '');
+                        if (cuentaConfig.maxLength) value = value.slice(0, cuentaConfig.maxLength);
                         dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                         // Validación en tiempo real
-                        if (value.length > 0 && value.length < maxLen) {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: `Debe tener exactamente ${maxLen} dígitos.` }));
-                        } else if (value.length === maxLen && !new RegExp(cuentaConfig.pattern).test(value)) {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
+                        if (formData.tipo_cuenta_destino === 'Tarjeta' && formData.tipo_tarjeta === 'Cuenta') {
+                          if (value.length > 0 && value.length < cuentaConfig.minLength) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: `Debe tener al menos ${cuentaConfig.minLength} dígitos.` }));
+                          } else if (value.length >= cuentaConfig.minLength && !new RegExp(cuentaConfig.pattern).test(value)) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                          }
                         } else {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                          if (value.length > 0 && value.length < cuentaConfig.minLength) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: `Debe tener exactamente ${cuentaConfig.minLength} dígitos.` }));
+                          } else if (value.length === cuentaConfig.minLength && !new RegExp(cuentaConfig.pattern).test(value)) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                          }
                         }
                       }}
                       placeholder={cuentaConfig.placeholder}

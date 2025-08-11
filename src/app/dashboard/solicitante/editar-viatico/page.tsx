@@ -237,7 +237,7 @@ function EditarViaticoPageInner() {
                     </h3>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-semibold text-blue-900 mb-1">Nombre de la Persona *</label>
+                        <label className="block text-sm font-semibold text-blue-900 mb-1">Nombre de la Persona dirigida *</label>
                         <input
                           type="text"
                           className="w-full border border-blue-200 rounded-lg px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"

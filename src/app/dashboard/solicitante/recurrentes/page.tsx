@@ -61,7 +61,6 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
 };
 
 const tipoPagoOptions = [
-  { value: 'viaticos', label: 'Viáticos' },
   { value: 'efectivo', label: 'Efectivo' },
   { value: 'factura', label: 'Factura' },
   { value: 'nominas', label: 'Nóminas' },
@@ -90,19 +89,32 @@ export default function NuevaRecurrentePage() {
   const [facturaFile, setFacturaFile] = useState<File | null>(null);
 
   // Configuración dinámica para cuenta destino
-  const cuentaConfig = formData.tipo_cuenta_destino === 'Tarjeta'
-    ? {
-        maxLength: 16,
-        pattern: '^\d{16}$',
-        placeholder: 'Número de tarjeta (16 dígitos)',
-        errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
-      }
-    : {
-        maxLength: 18,
-        pattern: '^\d{18}$',
-        placeholder: 'Número de cuenta CLABE (18 dígitos)',
-        errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
-      };
+  let cuentaConfig;
+  if (formData.tipo_cuenta_destino === 'Tarjeta') {
+    cuentaConfig = {
+      maxLength: 16,
+      minLength: 16,
+      pattern: '^\\d{16}$',
+      placeholder: 'Número de tarjeta (16 dígitos)',
+      errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
+    };
+  } else if (formData.tipo_cuenta_destino === 'Cuenta') {
+    cuentaConfig = {
+      maxLength: 30, // UX, sin límite real
+      minLength: 6,
+      pattern: '^\\d{6,}$',
+      placeholder: 'Número de cuenta (mínimo 6 dígitos)',
+      errorMsg: 'El número de cuenta debe tener al menos 6 dígitos numéricos.'
+    };
+  } else {
+    cuentaConfig = {
+      maxLength: 18,
+      minLength: 18,
+      pattern: '^\\d{18}$',
+      placeholder: 'Número de cuenta CLABE (18 dígitos)',
+      errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
+    };
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -137,12 +149,20 @@ export default function NuevaRecurrentePage() {
       setLoading(false);
       return;
     }
-    if (formData.tipo_cuenta_destino === 'Tarjeta' && cuenta.length !== 16) {
-      toast.error('La tarjeta debe tener exactamente 16 dígitos.');
-      setLoading(false);
-      return;
+    if (formData.tipo_cuenta_destino === 'Tarjeta') {
+      if (cuenta.length !== 16) {
+        toast.error('La tarjeta debe tener exactamente 16 dígitos.');
+        setLoading(false);
+        return;
+      }
     }
-    
+    if (formData.tipo_cuenta_destino === 'Cuenta') {
+      if (cuenta.length < 6) {
+        toast.error('El número de cuenta debe tener al menos 6 dígitos.');
+        setLoading(false);
+        return;
+      }
+    }
     // Validación de tipo tarjeta si es necesario
     if (formData.tipo_cuenta_destino === 'Tarjeta' && !formData.tipo_tarjeta) {
       toast.error('Tipo de tarjeta es obligatorio cuando seleccionas Tarjeta');
@@ -215,6 +235,7 @@ export default function NuevaRecurrentePage() {
                 >
                   <option value="CLABE" className="text-black">CLABE</option>
                   <option value="Tarjeta" className="text-black">Tarjeta</option>
+                  <option value="Cuenta" className="text-black">Cuenta</option>
                 </select>
               </div>
 
@@ -265,8 +286,8 @@ export default function NuevaRecurrentePage() {
                   name="cuenta_destino"
                   value={formData.cuenta_destino}
                   onChange={e => {
-                    const maxLen = cuentaConfig.maxLength;
-                    const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                    let value = e.target.value.replace(/[^0-9]/g, '');
+                    if (cuentaConfig.maxLength) value = value.slice(0, cuentaConfig.maxLength);
                     dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                   }}
                   required

@@ -84,8 +84,23 @@ export default function NuevoViaticoPage() {
           errors.tipo_tarjeta = 'Selecciona el tipo de tarjeta';
           huboError = true;
         }
-        if (!f.form.cuenta_destino || f.form.cuenta_destino.length !== 16) {
-          errors.cuenta_destino = 'El número de tarjeta debe tener 16 dígitos';
+        if (!f.form.cuenta_destino) {
+          errors.cuenta_destino = 'Ingresa el número de tarjeta o cuenta';
+          huboError = true;
+        } else if (f.form.tipo_tarjeta === 'cuenta') {
+          if (f.form.cuenta_destino.length < 6) {
+            errors.cuenta_destino = 'El número de cuenta debe tener al menos 6 dígitos';
+            huboError = true;
+          }
+        } else {
+          if (f.form.cuenta_destino.length !== 16) {
+            errors.cuenta_destino = 'El número de tarjeta debe tener 16 dígitos';
+            huboError = true;
+          }
+        }
+      } else if (f.form.tipo_cuenta_destino === 'cuenta') {
+        if (!f.form.cuenta_destino || f.form.cuenta_destino.length < 6) {
+          errors.cuenta_destino = 'El número de cuenta debe tener al menos 6 dígitos';
           huboError = true;
         }
       }
@@ -198,6 +213,7 @@ export default function NuevoViaticoPage() {
                 )}
                 {/* Bloque: Datos bancarios */}
                 <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
+                  {/* ORDEN: 1. Tipo de cuenta, 2. Tipo de tarjeta (si aplica), 3. Cuenta destino, 4. Banco */}
                   <div className="flex flex-col gap-1">
                     <label className="text-blue-900 font-bold text-base">Tipo de Cuenta Destino *</label>
                     <select name="tipo_cuenta_destino" onChange={e => {
@@ -209,39 +225,13 @@ export default function NuevoViaticoPage() {
                       <option value="" disabled>Tipo de pago</option>
                       <option value="clabe">CLABE</option>
                       <option value="tarjeta">Tarjeta</option>
+                      <option value="cuenta">CUENTA</option>
                     </select>
                     {formularios[idx].errors?.tipo_cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.tipo_cuenta_destino}</span>)}
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Cuenta destino {formularios[idx].form.tipo_cuenta_destino === 'clabe' && ' (18 dígitos)'}{formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && ' (16 dígitos)'}</label>
-                    <input name="cuenta_destino" placeholder={formularios[idx].form.tipo_cuenta_destino === 'clabe' ? "CLABE (18 dígitos)" : formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? "Número de tarjeta (16 dígitos)" : "Cuenta destino"} value={formularios[idx].form.cuenta_destino || ''} onChange={e => {
-                      const value = e.target.value.replace(/\D/g, '');
-                      const nuevos = [...formularios];
-                      nuevos[idx].form = { ...nuevos[idx].form, cuenta_destino: value };
-                      if (nuevos[idx].form.tipo_cuenta_destino === 'clabe') {
-                        if (value.length > 0 && value.length !== 18) {
-                          nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'La CLABE debe tener 18 dígitos' };
-                        } else {
-                          const errorsObj = { ...(nuevos[idx].errors || {}) };
-                          delete errorsObj.cuenta_destino;
-                          nuevos[idx].errors = errorsObj;
-                        }
-                      } else if (nuevos[idx].form.tipo_cuenta_destino === 'tarjeta') {
-                        if (value.length > 0 && value.length !== 16) {
-                          nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de tarjeta debe tener 16 dígitos' };
-                        } else {
-                          const errorsObj = { ...(nuevos[idx].errors || {}) };
-                          delete errorsObj.cuenta_destino;
-                          nuevos[idx].errors = errorsObj;
-                        }
-                      }
-                      setFormularios(nuevos);
-                    }} maxLength={formularios[idx].form.tipo_cuenta_destino === 'clabe' ? 18 : formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? 16 : undefined} required className={`text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 ${formularios[idx].errors?.cuenta_destino ? 'border-red-500' : ''}`} />
-                    {formularios[idx].errors?.cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.cuenta_destino}</span>)}
-                  </div>
                   {formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && (
                     <div className="flex flex-col gap-1">
-                      <label className="text-blue-900 font-bold text-base">Tipo de tarjeta</label>
+                      <label className="text-blue-900 font-bold text-base">Tipo de Tarjeta *</label>
                       <select name="tipo_tarjeta" onChange={e => handleChange(idx, e)} className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="" required>
                         <option value="" disabled>SELECCIONA TIPO DE TARJETA</option>
                         <option value="debito">DÉBITO</option>
@@ -251,11 +241,84 @@ export default function NuevoViaticoPage() {
                     </div>
                   )}
                   <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Banco destino</label>
-                    <select name="banco_destino" onChange={e => handleChange(idx, e)} className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="">
-                      <option value="" className="text-black">Selecciona banco</option>
-                      {bancoOptions.map(banco => (<option key={banco} value={banco} className="text-black">{banco}</option>))}
+                    <label className="text-blue-900 font-bold text-base">Cuenta destino {
+                      formularios[idx].form.tipo_cuenta_destino === 'clabe' && ' (18 dígitos)'
+                    }{
+                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && formularios[idx].form.tipo_tarjeta === 'cuenta' && ' (mínimo 6 dígitos)'
+                    }{
+                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && (!formularios[idx].form.tipo_tarjeta || formularios[idx].form.tipo_tarjeta !== 'cuenta') && ' (16 dígitos)'
+                    }</label>
+                    <input name="cuenta_destino" placeholder={
+                      formularios[idx].form.tipo_cuenta_destino === 'clabe' ? "CLABE (18 dígitos)" :
+                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && formularios[idx].form.tipo_tarjeta === 'cuenta' ? "Número de cuenta (mínimo 6 dígitos)" :
+                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? "Número de tarjeta (16 dígitos)" :
+                      formularios[idx].form.tipo_cuenta_destino === 'cuenta' ? "Número de cuenta (mínimo 6 dígitos)" :
+                      "Cuenta destino"
+                    } value={formularios[idx].form.cuenta_destino || ''} onChange={e => {
+                      let value = e.target.value.replace(/\D/g, '');
+                      let maxLength = undefined;
+                      if (formularios[idx].form.tipo_cuenta_destino === 'clabe') maxLength = 18;
+                      else if (formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && formularios[idx].form.tipo_tarjeta === 'cuenta') maxLength = 30;
+                      else if (formularios[idx].form.tipo_cuenta_destino === 'tarjeta') maxLength = 16;
+                      else if (formularios[idx].form.tipo_cuenta_destino === 'cuenta') maxLength = 30;
+                      if (maxLength) value = value.slice(0, maxLength);
+                      const nuevos = [...formularios];
+                      nuevos[idx].form = { ...nuevos[idx].form, cuenta_destino: value };
+                      // Validación
+                      if (formularios[idx].form.tipo_cuenta_destino === 'clabe') {
+                        if (value.length > 0 && value.length !== 18) {
+                          nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'La CLABE debe tener 18 dígitos' };
+                        } else {
+                          const errorsObj = { ...(nuevos[idx].errors || {}) };
+                          delete errorsObj.cuenta_destino;
+                          nuevos[idx].errors = errorsObj;
+                        }
+                      } else if (formularios[idx].form.tipo_cuenta_destino === 'tarjeta') {
+                        if (formularios[idx].form.tipo_tarjeta === 'cuenta') {
+                          if (value.length > 0 && value.length < 6) {
+                            nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de cuenta debe tener al menos 6 dígitos' };
+                          } else {
+                            const errorsObj = { ...(nuevos[idx].errors || {}) };
+                            delete errorsObj.cuenta_destino;
+                            nuevos[idx].errors = errorsObj;
+                          }
+                        } else {
+                          if (value.length > 0 && value.length !== 16) {
+                            nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de tarjeta debe tener 16 dígitos' };
+                          } else {
+                            const errorsObj = { ...(nuevos[idx].errors || {}) };
+                            delete errorsObj.cuenta_destino;
+                            nuevos[idx].errors = errorsObj;
+                          }
+                        }
+                      } else if (formularios[idx].form.tipo_cuenta_destino === 'cuenta') {
+                        if (value.length > 0 && value.length < 6) {
+                          nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de cuenta debe tener al menos 6 dígitos' };
+                        } else {
+                          const errorsObj = { ...(nuevos[idx].errors || {}) };
+                          delete errorsObj.cuenta_destino;
+                          nuevos[idx].errors = errorsObj;
+                        }
+                      }
+                      setFormularios(nuevos);
+                    }} maxLength={
+                      formularios[idx].form.tipo_cuenta_destino === 'clabe' ? 18 :
+                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && formularios[idx].form.tipo_tarjeta === 'cuenta' ? 30 :
+                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? 16 :
+                      formularios[idx].form.tipo_cuenta_destino === 'cuenta' ? 30 : undefined
+                    } required className={`text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 ${formularios[idx].errors?.cuenta_destino ? 'border-red-500' : ''}`} />
+                    {formularios[idx].errors?.cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.cuenta_destino}</span>)}
+                  </div>
+                  {/* Selección de banco */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Banco Destino *</label>
+                    <select name="banco_destino" value={formularios[idx].form.banco_destino || ''} onChange={e => handleChange(idx, e)} required className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400">
+                      <option value="" disabled>Selecciona un banco</option>
+                      {bancoOptions.map(banco => (
+                        <option key={banco} value={banco}>{banco}</option>
+                      ))}
                     </select>
+                    {formularios[idx].errors?.banco_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.banco_destino}</span>)}
                   </div>
                 </div>
 
@@ -303,7 +366,7 @@ export default function NuevoViaticoPage() {
                     <input name="empresa_a_pagar" placeholder="Nombre de la empresa" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Nombre de la Persona *</label>
+                    <label className="text-blue-900 font-bold text-base">Nombre de la Persona dirigida*</label>
                     <input name="nombre_persona" placeholder="Nombre completo" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
                   </div>
                 </div>

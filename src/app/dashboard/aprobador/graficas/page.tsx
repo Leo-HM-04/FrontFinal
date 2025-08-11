@@ -29,15 +29,24 @@ interface EstadoData {
   origen?: 'solicitudes_pago' | 'solicitudes_viaticos' | 'pagos_recurrentes';
 }
 
+interface TendenciaMes {
+  mes: string;
+  total: number;
+  monto_total: number;
+  origen?: string;
+}
+
 export default function GraficasAprobador() {
   const [data, setData] = useState<EstadoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tendencia, setTendencia] = useState<TendenciaMes[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('auth_token');
+        // Resumen por estado
         const res = await fetch("http://localhost:4000/api/estadisticas-aprobador/resumen-estado", {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -46,6 +55,16 @@ export default function GraficasAprobador() {
         if (!res.ok) throw new Error("Error al obtener datos");
         const json = await res.json();
         setData(json);
+        // Tendencia mensual
+        const resTend = await fetch("http://localhost:4000/api/estadisticas-aprobador/tendencia-mensual", {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+        });
+        if (resTend.ok) {
+          const tendenciaJson = await resTend.json();
+          setTendencia(tendenciaJson);
+        }
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -140,6 +159,26 @@ export default function GraficasAprobador() {
 
   const totalSolicitudes = data.reduce((sum, item) => sum + item.total, 0);
   const totalMonto = data.reduce((sum, item) => sum + Number(item.monto_total), 0);
+
+  // Calcular variación mensual de solicitudes y monto
+  let variacionSolicitudes = 0;
+  let variacionMonto = 0;
+  if (tendencia.length > 1) {
+    // Agrupar por mes (puede haber varios orígenes por mes)
+    const meses: { [key: string]: { total: number; monto: number } } = {};
+    tendencia.forEach((item) => {
+      if (!meses[item.mes]) meses[item.mes] = { total: 0, monto: 0 };
+      meses[item.mes].total += Number(item.total);
+      meses[item.mes].monto += Number(item.monto_total);
+    });
+    const mesesKeys = Object.keys(meses).sort();
+    if (mesesKeys.length >= 2) {
+      const mesActual = meses[mesesKeys[mesesKeys.length - 1]];
+      const mesAnterior = meses[mesesKeys[mesesKeys.length - 2]];
+      variacionSolicitudes = mesAnterior.total === 0 ? 100 : ((mesActual.total - mesAnterior.total) / mesAnterior.total) * 100;
+      variacionMonto = mesAnterior.monto === 0 ? 100 : ((mesActual.monto - mesAnterior.monto) / mesAnterior.monto) * 100;
+    }
+  }
 
   // Mejorar configuración de gráfica de dona
   const doughnutData = {
@@ -404,7 +443,7 @@ export default function GraficasAprobador() {
                     <p className="text-3xl font-bold mb-1">{totalSolicitudes.toLocaleString()}</p>
                     <div className="flex items-center text-blue-200 text-sm">
                       <MdTrendingUp size={16} className="mr-1" />
-                      +12% vs mes anterior
+                      {variacionSolicitudes >= 0 ? '+' : ''}{variacionSolicitudes.toFixed(1)}% vs mes anterior
                     </div>
                   </div>
                   <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
@@ -420,7 +459,7 @@ export default function GraficasAprobador() {
                     <p className="text-3xl font-bold mb-1">${totalMonto.toLocaleString()}</p>
                     <div className="flex items-center text-green-200 text-sm">
                       <MdTrendingUp size={16} className="mr-1" />
-                      +8% vs mes anterior
+                      {variacionMonto >= 0 ? '+' : ''}{variacionMonto.toFixed(1)}% vs mes anterior
                     </div>
                   </div>
                   <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform">

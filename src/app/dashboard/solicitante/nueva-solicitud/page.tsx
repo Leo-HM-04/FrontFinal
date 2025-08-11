@@ -69,19 +69,30 @@ export default function NuevaSolicitudPage() {
 
 
   // Configuración dinámica para cuenta destino
-  const cuentaConfig = formData.tipo_cuenta_destino === 'Tarjeta'
-    ? {
-        maxLength: 16,
-        pattern: '^\d{16}$',
-        placeholder: 'Número de tarjeta (16 dígitos)',
-        errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
-      }
-    : {
-        maxLength: 18,
-        pattern: '^\d{18}$',
-        placeholder: 'Número de cuenta CLABE (18 dígitos)',
-        errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
-      };
+  let cuentaConfig;
+  if (formData.tipo_cuenta_destino === 'Tarjeta') {
+    cuentaConfig = {
+      maxLength: 16,
+      pattern: '^\d{16}$',
+      placeholder: 'Número de tarjeta (16 dígitos)',
+      errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
+    };
+  } else if (formData.tipo_cuenta_destino === 'Cuenta') {
+    cuentaConfig = {
+      maxLength: 30, // UX, sin límite real
+      minLength: 6,
+      pattern: '^\d{6,}$',
+      placeholder: 'Número de cuenta (mínimo 6 dígitos)',
+      errorMsg: 'El número de cuenta debe tener al menos 6 dígitos.'
+    };
+  } else {
+    cuentaConfig = {
+      maxLength: 18,
+      pattern: '^\d{18}$',
+      placeholder: 'Número de cuenta CLABE (18 dígitos)',
+      errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
+    };
+  }
 
   const bancoOptions = [
     "ACTINVER","AFIRME","albo","ARCUS FI","ASP INTEGRA OPC","AUTOFIN","AZTECA","BaBien","BAJIO","BANAMEX","BANCO COVALTO","BANCOMEXT","BANCOPPEL","BANCO S3","BANCREA","BANJERCITO","BANKAOOL","BANK OF AMERICA","BANK OF CHINA","BANOBRAS","BANORTE","BANREGIO","BANSI","BANXICO","BARCLAYS","BBASE","BBVA MEXICO","BMONEX","CAJA POP MEXICA","CAJA TELEFONIST","CASHI CUENTA","CB INTERCAM","CIBANCO","CI BOLSA","CITI MEXICO","CoDi Valida","COMPARTAMOS","CONSUBANCO","CREDICAPITAL","CREDICLUB","CRISTOBAL COLON","Cuenca","Dep y Pag Dig","DONDE","FINAMEX","FINCOMUN","FINCO PAY","FOMPED","FONDEADORA","FONDO (FIRA)","GBM","HEY BANCO","HIPOTECARIA FED","HSBC","ICBC","INBURSA","INDEVAL","INMOBILIARIO","INTERCAM BANCO","INVEX","JP MORGAN","KLAR","KUSPIT","LIBERTAD","MASARI","Mercado Pago W","MexPago","MIFEL","MIZUHO BANK","MONEXCB","MUFG","MULTIVA BANCO","NAFIN","NU MEXICO","NVIO","PAGATODO","Peibo","PROFUTURO","SABADELL","SANTANDER","SCOTIABANK","SHINHAN","SPIN BY OXXO","STP","TESORED","TRANSFER","UALA","UNAGRA","VALMEX","VALUE","VECTOR","VE POR MAS","VOLKSWAGEN"
@@ -355,8 +366,9 @@ export default function NuevaSolicitudPage() {
                       required
                       className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                     >
-                      <option value="CLABE" className="text-black">CLABE</option>
+                      <option value="CLABE" className="text-black">Clabe</option>
                       <option value="Tarjeta" className="text-black">Tarjeta</option>
+                      <option value="Cuenta" className="text-black">Cuenta</option>
                     </select>
                   </div>
 
@@ -409,16 +421,30 @@ export default function NuevaSolicitudPage() {
                       name="cuenta_destino"
                       value={formData.cuenta_destino}
                       onChange={e => {
-                        const maxLen = cuentaConfig.maxLength;
-                        const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                        let value = e.target.value.replace(/[^0-9]/g, '');
+                        if (formData.tipo_cuenta_destino === 'Cuenta') {
+                          value = value.slice(0, cuentaConfig.maxLength);
+                        } else {
+                          value = value.slice(0, cuentaConfig.maxLength);
+                        }
                         dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                         setCuentaValida(null);
-                        if (value.length > 0 && value.length < maxLen) {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: `Debe tener exactamente ${maxLen} dígitos.` }));
-                        } else if (value.length === maxLen && !new RegExp(cuentaConfig.pattern).test(value)) {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
+                        if (formData.tipo_cuenta_destino === 'Cuenta') {
+                          const minLen = cuentaConfig.minLength || 6;
+                          if (value.length > 0 && value.length < minLen) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                          }
                         } else {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                          const maxLen = cuentaConfig.maxLength;
+                          if (value.length > 0 && value.length < maxLen) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: `Debe tener exactamente ${maxLen} dígitos.` }));
+                          } else if (value.length === maxLen && !new RegExp(cuentaConfig.pattern).test(value)) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                          }
                         }
                       }}
                       onBlur={e => verificarCuentaDestino(e.target.value)}

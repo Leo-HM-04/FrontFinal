@@ -402,7 +402,16 @@ export default function MisViaticosPage() {
                         </td>
                         <td className="px-3 py-2.5">
                           <div className="flex items-center justify-center gap-1.5">
-                            {String(v.estado).toLowerCase() === 'pendiente' ? (
+                            {/* Botón de ver detalles disponible para todos los estados */}
+                            <button
+                              title="Ver detalles"
+                              className="inline-flex items-center justify-center p-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                              onClick={() => handleOpenDetailModal(v)}
+                            >
+                              <FaEye className="w-3.5 h-3.5" />
+                            </button>
+                            {/* Si está pendiente, también mostrar editar y eliminar */}
+                            {String(v.estado).toLowerCase() === 'pendiente' && (
                               <>
                                 <Link
                                   href={`/dashboard/solicitante/editar-viatico?id=${v.id_viatico}`}
@@ -419,16 +428,6 @@ export default function MisViaticosPage() {
                                   <FaTrash className="w-3.5 h-3.5" />
                                 </button>
                               </>
-                            ) : String(v.estado).toLowerCase() === 'pagada' ? (
-                              <button
-                                title="Ver detalles y comprobante"
-                                className="inline-flex items-center justify-center p-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
-                                onClick={() => handleOpenDetailModal(v)}
-                              >
-                                <FaEye className="w-3.5 h-3.5" />
-                              </button>
-                            ) : (
-                              <span className="text-gray-400 text-xs font-medium">No disponible</span>
                             )}
                           </div>
                             {/* Modal de confirmación para eliminar */}
