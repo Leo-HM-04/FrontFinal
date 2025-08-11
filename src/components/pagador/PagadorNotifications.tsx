@@ -251,7 +251,7 @@ export default function Notifications({ open, onClose }: NotificationsProps) {
     
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones`, 
+        `${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/notificaciones`, 
         { headers: { Authorization: token ? `Bearer ${token}` : '' } }
       );
       
@@ -296,7 +296,7 @@ export default function Notifications({ open, onClose }: NotificationsProps) {
       const unread = notifications.filter(n => !n.read);
       await Promise.all(unread.map(n =>
         fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${n.id}/marcar-leida`, 
+          `${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/notificaciones/${n.id}/marcar-leida`, 
           { 
             method: "POST",
             headers: { Authorization: token ? `Bearer ${token}` : '' }
@@ -313,7 +313,7 @@ export default function Notifications({ open, onClose }: NotificationsProps) {
   const markAsRead = async (id: number) => {
     const token = getAuthToken();
     await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/${id}/marcar-leida`, 
+      `${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/notificaciones/${id}/marcar-leida`, 
       { 
         method: "POST",
         headers: { Authorization: token ? `Bearer ${token}` : '' }

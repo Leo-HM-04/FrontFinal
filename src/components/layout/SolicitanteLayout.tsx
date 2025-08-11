@@ -91,7 +91,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
   const fetchUnreadCount = React.useCallback(async () => {
     const token = getToken();
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones/solicitante`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/notificaciones/solicitante`, {
         headers: {
           Authorization: token ? `Bearer ${token}` : ''
         }
