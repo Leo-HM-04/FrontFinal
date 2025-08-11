@@ -388,7 +388,7 @@ export default function MisViaticosPage() {
                         <td className="px-3 py-2.5 text-center">
                           {v.viatico_url ? (
                             <a
-                              href={`http://localhost:4000${v.viatico_url.startsWith('/') ? '' : '/'}${v.viatico_url}`}
+                              href={`http://46.202.177.106:4000${v.viatico_url.startsWith('/') ? '' : '/'}${v.viatico_url}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"

@@ -44,7 +44,7 @@ export const RecurrenteViewModal: React.FC<RecurrenteViewModalProps> = ({ isOpen
   const facturaFile = recurrente.fact_recurrente;
   // Si la ruta ya es absoluta (empieza con http), úsala tal cual. Si es relativa, prepende el backend
   const facturaUrl = facturaFile
-    ? (facturaFile.startsWith('http') ? facturaFile : `http://localhost:4000${facturaFile}`)
+    ? (facturaFile.startsWith('http') ? facturaFile : `http://46.202.177.106:4000${facturaFile}`)
     : null;
 
   // Handler to close modal when clicking outside the modal content

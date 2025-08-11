@@ -116,16 +116,36 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
 
   // Cargar el contador al montar el layout y hacer polling para detectar nuevas notificaciones
   useEffect(() => {
+    let hasInitialized = false;
+    
     const checkAndPlay = async () => {
-      await fetchUnreadCount();
-      // Si hay más no leídas que antes, reproducir sonido
-      if (unreadCount > prevUnreadCount.current) {
-        if (audioRef.current) {
-          audioRef.current.play().catch(() => {});
+      try {
+        await fetchUnreadCount();
+        
+        // Solo reproducir sonido si:
+        // 1. Ya se inicializó previamente (no es la primera carga)
+        // 2. El conteo actual es mayor al anterior
+        // 3. Hay al menos una notificación nueva
+        if (hasInitialized && unreadCount > prevUnreadCount.current && unreadCount > 0) {
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {
+              console.log('No se pudo reproducir el sonido de notificación');
+            });
+          }
         }
+        
+        prevUnreadCount.current = unreadCount;
+        
+        // Marcar como inicializado después del primer fetch
+        if (!hasInitialized) {
+          hasInitialized = true;
+        }
+      } catch (error) {
+        console.error('Error al verificar notificaciones:', error);
       }
-      prevUnreadCount.current = unreadCount;
     };
+    
     checkAndPlay();
     const interval = setInterval(checkAndPlay, 10000); // cada 10 segundos
     return () => {

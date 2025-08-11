@@ -9,7 +9,7 @@ export async function subirComprobanteViatico(id_viatico: number, file: File, to
     headers['Authorization'] = `Bearer ${token}`;
   }
   
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/comprobantes-viaticos/subir`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/comprobantes-viaticos/subir`, {
     method: 'POST',
     body: formData,
     headers,
@@ -37,7 +37,7 @@ export async function getComprobantesPorViatico(id_viatico: number, token?: stri
     headers['Authorization'] = `Bearer ${token}`;
   }
   
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/comprobantes-viaticos/${id_viatico}`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/comprobantes-viaticos/${id_viatico}`, {
     headers
   });
   

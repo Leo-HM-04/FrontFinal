@@ -165,7 +165,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                     if (pago.factura_url.startsWith('http')) {
                       facturaUrl = pago.factura_url;
                     } else {
-                      const baseUrl = 'http://localhost:4000';
+                      const baseUrl = 'http://46.202.177.106:4000';
                       const rutaArchivo = pago.factura_url.startsWith('/') 
                         ? pago.factura_url 
                         : `/${pago.factura_url}`;
@@ -246,7 +246,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                         if (pago.factura_url.startsWith('http')) {
                           facturaUrl = pago.factura_url;
                         } else {
-                          const baseUrl = 'http://localhost:4000';
+                          const baseUrl = 'http://46.202.177.106:4000';
                           const rutaArchivo = pago.factura_url.startsWith('/') 
                             ? pago.factura_url 
                             : `/${pago.factura_url}`;

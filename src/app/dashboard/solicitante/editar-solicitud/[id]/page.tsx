@@ -101,7 +101,7 @@ export default function EditarSolicitudPage() {
   const facturaLink = facturaUrl
     ? facturaUrl.startsWith('http')
       ? facturaUrl
-      : `http://localhost:4000/uploads/facturas/${facturaUrl.replace(/^.*[\\\/]/, '')}`
+      : `http://46.202.177.106:4000/uploads/facturas/${facturaUrl.replace(/^.*[\\\/]/, '')}`
     : null;
 
   // Opciones (puedes sincronizarlas igual que en nueva solicitud)

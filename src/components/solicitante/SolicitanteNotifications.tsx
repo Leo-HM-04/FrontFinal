@@ -58,7 +58,7 @@ type FiltroType = 'todas' | 'no_leidas';
 // CONSTANTES Y CONFIGURACIÓN
 // ========================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000";
 const ITEMS_PER_PAGE = 10;
 const NOTIFICATION_SOUND_PATH = "/assets/audio/bell-notification.mp3";
 

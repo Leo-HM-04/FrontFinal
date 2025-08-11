@@ -35,7 +35,7 @@ export const RecurrenteDetailModal: React.FC<RecurrenteDetailModalProps> = ({ re
   let fileUrl = '';
   if (recurrente && recurrente.fact_recurrente) {
     cleanFile = recurrente.fact_recurrente.replace(/^[/\\]*uploads[/\\]*recurrente[/\\]*/i, '');
-    fileUrl = `http://localhost:4000/uploads/recurrente/${cleanFile}`;
+    fileUrl = `http://46.202.177.106:4000/uploads/recurrente/${cleanFile}`;
   }
 
 

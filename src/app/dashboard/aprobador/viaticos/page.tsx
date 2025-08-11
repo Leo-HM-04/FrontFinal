@@ -73,7 +73,7 @@ const ViaticoRow: React.FC<{
       <td className="px-6 py-4 text-center">
         {v.viatico_url ? (
           <a
-            href={`http://localhost:4000/uploads/viaticos/${v.viatico_url.split('/').pop()}`}
+            href={`http://46.202.177.106:4000/uploads/viaticos/${v.viatico_url.split('/').pop()}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-blue-700 hover:underline font-semibold"

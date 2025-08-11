@@ -14,7 +14,7 @@ function VerificarEmailPageInner() {
       setEstado("error");
       return;
     }
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/usuarios/verificar-email?token=` + token)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/usuarios/verificar-email?token=` + token)
       .then(async (res) => {
         const data = await res.json();
         if (res.ok) {

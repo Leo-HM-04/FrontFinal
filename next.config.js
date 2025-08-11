@@ -20,11 +20,17 @@ const nextConfig = {
   
   // Configuración para optimización de imágenes
   images: {
-    domains: ['localhost', 'cdn-icons-png.flaticon.com'],
+    domains: ['localhost', 'cdn-icons-png.flaticon.com', '46.202.177.106'],
     remotePatterns: [
       {
         protocol: 'http',
         hostname: 'localhost',
+        port: '4000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '46.202.177.106',
         port: '4000',
         pathname: '/**',
       },
@@ -46,39 +52,59 @@ const nextConfig = {
     return [
       {
         source: '/api/estadisticas-aprobador/:path*',
-        destination: 'http://localhost:4000/api/estadisticas-aprobador/:path*',
+        destination: 'http://46.202.177.106:4000/api/estadisticas-aprobador/:path*',
       },
       {
         source: '/api/estadisticas/:path*',
-        destination: 'http://localhost:4000/api/estadisticas/:path*',
+        destination: 'http://46.202.177.106:4000/api/estadisticas/:path*',
       },
       {
         source: '/api/viaticos/mios',
-        destination: 'http://localhost:4000/viaticos/mios',
+        destination: 'http://46.202.177.106:4000/viaticos/mios',
       },
       {
         source: '/api/viaticos/:path*',
-        destination: 'http://localhost:4000/viaticos/:path*',
+        destination: 'http://46.202.177.106:4000/viaticos/:path*',
       },
     ];
   },
 
   // Headers anti-cache para desarrollo
   async headers() {
+    const headers = [];
+    
     if (isDev) {
-      return [
-        {
-          source: '/(.*)',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'no-cache, no-store, must-revalidate',
-            },
-          ],
-        },
-      ];
+      headers.push({
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      });
     }
-    return [];
+    
+    // Headers CORS para todas las rutas
+    headers.push({
+      source: '/api/(.*)',
+      headers: [
+        {
+          key: 'Access-Control-Allow-Origin',
+          value: '*',
+        },
+        {
+          key: 'Access-Control-Allow-Methods',
+          value: 'GET, POST, PUT, DELETE, OPTIONS',
+        },
+        {
+          key: 'Access-Control-Allow-Headers',
+          value: 'Content-Type, Authorization',
+        },
+      ],
+    });
+    
+    return headers;
   },
 
   // Configuración de imágenes

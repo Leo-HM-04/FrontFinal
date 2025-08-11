@@ -53,7 +53,7 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
     setErrorComprobantes(null);
     
     try {
-      const url = `http://localhost:4000/api/recurrentes/${recurrente.id}/comprobantes`;
+      const url = `http://46.202.177.106:4000/api/recurrentes/${recurrente.id}/comprobantes`;
       console.log('🔍 URL de la petición:', url);
       
       // Obtener el token de autenticación de las cookies
@@ -106,9 +106,9 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
     if (!factura) return undefined;
     if (/^https?:\/\//.test(factura)) return factura;
     // Si ya empieza con /uploads, anteponer el host
-    if (factura.startsWith('/uploads')) return `http://localhost:4000${factura}`;
+    if (factura.startsWith('/uploads')) return `http://46.202.177.106:4000${factura}`;
     // Si es solo el nombre del archivo
-    return `http://localhost:4000/uploads/RECURRENTE/${factura}`;
+    return `http://46.202.177.106:4000/uploads/RECURRENTE/${factura}`;
   };
 
   // Construir URL para comprobantes de pago
@@ -116,9 +116,9 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
     if (!comprobante) return undefined;
     if (/^https?:\/\//.test(comprobante)) return comprobante;
     // Si ya empieza con /uploads, anteponer el host
-    if (comprobante.startsWith('/uploads')) return `http://localhost:4000${comprobante}`;
+    if (comprobante.startsWith('/uploads')) return `http://46.202.177.106:4000${comprobante}`;
     // Si es solo el nombre del archivo
-    return `http://localhost:4000/uploads/comprobante-recurrentes/${comprobante}`;
+    return `http://46.202.177.106:4000/uploads/comprobante-recurrentes/${comprobante}`;
   };
   
   // Función para obtener logo del banco

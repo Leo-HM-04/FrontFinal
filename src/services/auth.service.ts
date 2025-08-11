@@ -24,25 +24,31 @@ export class AuthService {
     } catch (err: unknown) {
       // Captura el mensaje del backend si existe
       let errorMsg = 'Error de conexión';
+      let statusCode = 0;
+      
       if (typeof err === 'object' && err !== null) {
         // Check for AxiosError shape
         if ('response' in err && typeof (err as { response?: unknown }).response === 'object' && (err as { response?: unknown }).response !== null) {
-          const response = (err as { response?: { data?: { message?: string } } }).response;
-          if (
-            response &&
-            typeof response === 'object' &&
-            'data' in response &&
-            response.data &&
-            typeof response.data === 'object' &&
-            'message' in response.data &&
-            typeof response.data.message === 'string'
-          ) {
-            errorMsg = response.data.message;
+          const response = (err as { response?: { data?: { message?: string }; status?: number } }).response;
+          if (response) {
+            statusCode = response.status || 0;
+            
+            if (response.data && typeof response.data === 'object' && 'message' in response.data && typeof response.data.message === 'string') {
+              errorMsg = response.data.message;
+            } else if (statusCode === 500) {
+              errorMsg = 'Error interno del servidor. Por favor contacte al administrador.';
+            } else if (statusCode === 400) {
+              errorMsg = 'Datos de login inválidos. Verifique email y contraseña.';
+            } else if (statusCode === 401) {
+              errorMsg = 'Credenciales incorrectas.';
+            }
           }
         } else if ('message' in err && typeof (err as { message?: unknown }).message === 'string') {
           errorMsg = (err as { message: string }).message;
         }
       }
+      
+      console.error('Auth Service Error:', { error: err, statusCode, errorMsg });
       return { success: false, error: errorMsg };
     }
   }

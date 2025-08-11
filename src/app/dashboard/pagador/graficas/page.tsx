@@ -52,8 +52,8 @@ export default function PagadorGraficasPage() {
         const token = localStorage.getItem('auth_token');
         const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
         const [res1, res2] = await Promise.all([
-          fetch('http://localhost:4000/api/estadisticas-pagador-dashboard/resumen-estado', { headers }),
-          fetch('http://localhost:4000/api/estadisticas-pagador-dashboard/tendencia-mensual', { headers })
+          fetch('http://46.202.177.106:4000/api/estadisticas-pagador-dashboard/resumen-estado', { headers }),
+          fetch('http://46.202.177.106:4000/api/estadisticas-pagador-dashboard/tendencia-mensual', { headers })
         ]);
         if (!res1.ok || !res2.ok) throw new Error('Error al obtener datos');
         setResumenEstado(await res1.json());

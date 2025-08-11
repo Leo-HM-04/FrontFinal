@@ -94,7 +94,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({ solicitud, open,
                   <FaRegCalendarAlt className="text-blue-500 text-xl" /> <span>Documento Adjunto</span>
                 </div>
                 <a
-                  href={solicitud.fact_recurrente.startsWith('http') ? solicitud.fact_recurrente : `http://localhost:4000${solicitud.fact_recurrente}`}
+                  href={solicitud.fact_recurrente.startsWith('http') ? solicitud.fact_recurrente : `http://46.202.177.106:4000${solicitud.fact_recurrente}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-3 py-1 border border-blue-400 rounded-lg text-blue-700 font-medium hover:bg-blue-50 transition text-sm mb-3"
@@ -104,7 +104,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({ solicitud, open,
                 {/* Previsualización */}
                 <div className="rounded-lg border border-blue-100 bg-gray-50 flex items-center justify-center overflow-hidden min-h-[180px] max-h-[350px]">
                   {(() => {
-                    const url = solicitud.fact_recurrente.startsWith('http') ? solicitud.fact_recurrente : `http://localhost:4000${solicitud.fact_recurrente}`;
+                    const url = solicitud.fact_recurrente.startsWith('http') ? solicitud.fact_recurrente : `http://46.202.177.106:4000${solicitud.fact_recurrente}`;
                     const ext = url.split('.').pop()?.toLowerCase();
                     if (ext === 'pdf') {
                       return (

@@ -3,7 +3,7 @@
 import { PagoProcesado } from '@/utils/exportUtils';
 import { pagosProcesadosEjemplo, pagosPendientesEjemplo } from '@/hooks/usePagos';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://46.202.177.106:4000';
 
 /**
  * Obtiene los pagos procesados del servidor

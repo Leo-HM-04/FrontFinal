@@ -58,7 +58,7 @@ type FiltroType = 'todas' | 'no_leidas';
 // CONSTANTES
 // ========================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000";
 const ITEMS_PER_PAGE = 7;
 const SCROLL_THRESHOLD = 10;
 const LOAD_MORE_DELAY = 300;

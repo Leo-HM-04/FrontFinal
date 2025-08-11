@@ -233,7 +233,7 @@ export const VerComprobanteModal: React.FC<VerComprobanteModalProps> = ({
                     </div>
                   ) : isPdf ? (
                     <div className="bg-blue-50/30 p-3 rounded-lg border border-blue-100">
-                      <span className="text-sm text-blue-700 mb-2 block font-medium flex items-center gap-2">
+                      <span className="text-sm text-blue-700 mb-2 flex items-center gap-2 font-medium">
                         <FileText className="w-4 h-4 text-blue-600" />
                         Previsualización de comprobante (PDF):
                       </span>

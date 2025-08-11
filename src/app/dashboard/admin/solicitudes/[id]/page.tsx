@@ -300,7 +300,7 @@ export default function SolicitudDetailPage() {
               {solicitud?.factura_url && (
                 <div className="flex justify-center mt-6">
                   <a
-                    href={solicitud.factura_url.startsWith('http') ? solicitud.factura_url : `http://localhost:4000${solicitud.factura_url.startsWith('/') ? '' : '/'}${solicitud.factura_url}`}
+                    href={solicitud.factura_url.startsWith('http') ? solicitud.factura_url : `http://46.202.177.106:4000${solicitud.factura_url.startsWith('/') ? '' : '/'}${solicitud.factura_url}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition-colors border border-blue-400/30 gap-2 text-base"

@@ -57,7 +57,7 @@ export class ViaticosService {
     if (viatico.viatico_url.startsWith('http')) return viatico.viatico_url;
     
     // Para archivos estáticos, usar la URL base sin /api
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://46.202.177.106:4000/api';
     const serverBaseUrl = baseUrl.replace('/api', '');
     return `${serverBaseUrl}${viatico.viatico_url}`;
   }

@@ -260,7 +260,7 @@ export default function ViaticosPagadorPage() {
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
                             {v.viatico_url ? (
                               <a
-                                href={`http://localhost:4000/uploads/viaticos/${v.viatico_url.split('/').pop()}`}
+                                href={`http://46.202.177.106:4000/uploads/viaticos/${v.viatico_url.split('/').pop()}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 hover:text-blue-800 flex items-center justify-center gap-1 font-bold"

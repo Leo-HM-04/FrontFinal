@@ -224,7 +224,7 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
                 if (viatico.viatico_url.startsWith('http')) {
                   viaticoUrl = viatico.viatico_url;
                 } else {
-                  const baseUrl = 'http://localhost:4000';
+                  const baseUrl = 'http://46.202.177.106:4000';
                   const rutaArchivo = viatico.viatico_url.startsWith('/') 
                     ? viatico.viatico_url 
                     : `/${viatico.viatico_url}`;
@@ -322,7 +322,7 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
                         if (archivoPath.startsWith('http')) {
                           comprobanteUrl = archivoPath;
                         } else {
-                          const baseUrl = 'http://localhost:4000';
+                          const baseUrl = 'http://46.202.177.106:4000';
                           // Verificar si la ruta ya incluye '/uploads/comprobante-viaticos/'
                           if (archivoPath.includes('/uploads/comprobante-viaticos/')) {
                             const rutaArchivo = archivoPath.startsWith('/') ? archivoPath : `/${archivoPath}`;

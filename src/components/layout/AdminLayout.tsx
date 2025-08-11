@@ -121,23 +121,48 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   // Polling para detectar nuevas notificaciones no leídas y reproducir sonido
   useEffect(() => {
     if (!user) return;
+    
+    let hasInitialized = false;
+    
     const fetchAndCheck = async () => {
-      const token = getAuthToken();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones`, {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : ''
+      try {
+        const token = getAuthToken();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/notificaciones`, {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : ''
+          }
+        });
+        
+        if (!res.ok) return;
+        
+        const data: { leida: boolean }[] = await res.json();
+        const count = Array.isArray(data) ? data.filter((n) => !n.leida).length : 0;
+        setUnreadCount(count);
+        
+        // Solo reproducir sonido si:
+        // 1. Ya se inicializó previamente (no es la primera carga)
+        // 2. El conteo actual es mayor al anterior
+        // 3. Hay al menos una notificación nueva
+        if (hasInitialized && count > prevUnreadCount.current && count > 0) {
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {
+              console.log('No se pudo reproducir el sonido de notificación');
+            });
+          }
         }
-      });
-      const data: { leida: boolean }[] = await res.json();
-      const count = Array.isArray(data) ? data.filter((n) => !n.leida).length : 0;
-      setUnreadCount(count);
-      if (count > prevUnreadCount.current) {
-        if (audioRef.current) {
-          audioRef.current.play().catch(() => {});
+        
+        prevUnreadCount.current = count;
+        
+        // Marcar como inicializado después del primer fetch
+        if (!hasInitialized) {
+          hasInitialized = true;
         }
+      } catch (error) {
+        console.error('Error al obtener notificaciones:', error);
       }
-      prevUnreadCount.current = count;
     };
+    
     fetchAndCheck();
     const interval = setInterval(fetchAndCheck, 10000); // cada 10 segundos
     return () => clearInterval(interval);

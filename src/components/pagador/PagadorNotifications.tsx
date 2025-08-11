@@ -69,7 +69,52 @@ const FilterButton = ({
 );
 
 const formatNotificationMessage = (message: string): string => {
+  // Primero, verificar si el mensaje ya tiene formato detallado
+  if (
+    message.includes('💰') || 
+    message.includes('📄') || 
+    message.includes('✅') || 
+    message.includes('❌') || 
+    message.includes('📋') || 
+    message.includes('💸') ||
+    message.includes('<b>') ||
+    message.includes('Nueva solicitud autorizada') ||
+    message.includes('subió el comprobante') ||
+    message.includes('ha sido pagada')
+  ) {
+    // Si ya tiene formato detallado, solo limpiar HTML y devolver
+    return message.replace(/<[^>]*>/g, '').trim();
+  }
+
+  // Si es un mensaje genérico, intentar formatearlo
+  const cleanMessage = message.replace(/<[^>]*>/g, '').trim();
+  
   const patterns = [
+    // Patrones específicos para mensajes que pueden venir genéricos
+    { 
+      regex: /Un usuario realizó una acción sobre una solicitud/i, 
+      template: () => `Se realizó una acción sobre una solicitud`
+    },
+    { 
+      regex: /El usuario ([^ ]+) \(([^)]+)\) cre[oó] solicitud/i, 
+      template: (match: RegExpMatchArray) => {
+        const nombre = match[1];
+        const rol = match[2];
+        if (rol.toLowerCase().includes('solicitante')) return `El solicitante ${nombre} creó una nueva solicitud`;
+        if (rol.toLowerCase().includes('admin')) return `El administrador ${nombre} creó una nueva solicitud`;
+        return `${rol.charAt(0).toUpperCase() + rol.slice(1)} ${nombre} creó una nueva solicitud`;
+      }
+    },
+    { 
+      regex: /El usuario ([^ ]+) \(([^)]+)\) actualiz[oó] solicitud/i, 
+      template: (match: RegExpMatchArray) => {
+        const nombre = match[1];
+        const rol = match[2];
+        if (rol.toLowerCase().includes('aprobador')) return `El aprobador ${nombre} actualizó una solicitud`;
+        if (rol.toLowerCase().includes('pagador')) return `El pagador ${nombre} procesó una solicitud`;
+        return `${rol.charAt(0).toUpperCase() + rol.slice(1)} ${nombre} actualizó una solicitud`;
+      }
+    },
     { 
       regex: /cre[oó] usuario.*Nombre: ([^,\n]+),?/i, 
       template: (match: RegExpMatchArray) => `El administrador agregó un nuevo usuario: ${match[1].trim()}`
@@ -83,67 +128,34 @@ const formatNotificationMessage = (message: string): string => {
       template: (match: RegExpMatchArray) => `El administrador actualizó los datos de: ${match[1].trim()}`
     },
     { 
-      regex: /El usuario ([^ ]+) \(([^)]+)\) cre[oó] solicitud/i, 
-      template: (match: RegExpMatchArray) => {
-        const nombre = match[1];
-        const rol = match[2];
-        if (rol.toLowerCase().includes('solicitante')) return `El solicitante ${nombre} creó una solicitud`;
-        if (rol.toLowerCase().includes('admin')) return `El administrador ${nombre} creó una solicitud`;
-        return `${rol.charAt(0).toUpperCase() + rol.slice(1)} ${nombre} creó una solicitud`;
-      }
-    },
-    { 
       regex: /cre[oó] solicitud.*Nombre: ([^,\n]+),?/i, 
-      template: (match: RegExpMatchArray) => `El usuario ${match[1].trim()} creó una solicitud`
+      template: (match: RegExpMatchArray) => `El usuario ${match[1].trim()} creó una nueva solicitud`
     },
     { 
       regex: /actualiz[oó] solicitud.*Nombre: ([^,\n]+),?/i, 
       template: (match: RegExpMatchArray) => `El usuario ${match[1].trim()} actualizó una solicitud`
     },
     { 
-      regex: /elimin[oó] solicitud.*Nombre: ([^,\n]+),?/i, 
-      template: (match: RegExpMatchArray) => `El usuario ${match[1].trim()} eliminó una solicitud`
-    },
-    { 
-      regex: /cre[oó].*Nombre: ([^,\n]+),?/i, 
-      template: (match: RegExpMatchArray) => `El usuario ${match[1].trim()} realizó una acción`
-    },
-    { 
-      regex: /actualiz[oó].*Nombre: ([^,\n]+),?/i, 
-      template: (match: RegExpMatchArray) => `El usuario ${match[1].trim()} actualizó información`
-    },
-    { 
-      regex: /elimin[oó].*Nombre: ([^,\n]+),?/i, 
-      template: (match: RegExpMatchArray) => `El usuario ${match[1].trim()} fue eliminado`
-    },
-    { 
       regex: /cre[oó] solicitud/i, 
-      template: () => `Un usuario creó una solicitud`
+      template: () => `Un usuario creó una nueva solicitud`
     },
     { 
       regex: /actualiz[oó] solicitud/i, 
       template: () => `Un usuario actualizó una solicitud`
     },
     { 
-      regex: /elimin[oó] solicitud/i, 
-      template: () => `Un usuario eliminó una solicitud`
-    },
-    { 
-      regex: /usuario/i, 
-      template: () => `El administrador realizó una acción sobre un usuario`
-    },
-    { 
       regex: /solicitud/i, 
-      template: () => `Un usuario realizó una acción sobre una solicitud`
+      template: () => `Se realizó una acción sobre una solicitud`
     }
   ];
 
   for (const pattern of patterns) {
-    const match = message.match(pattern.regex);
+    const match = cleanMessage.match(pattern.regex);
     if (match) return pattern.template(match);
   }
 
-  return message;
+  // Si no coincide con ningún patrón, devolver el mensaje original limpio
+  return cleanMessage;
 };
 
 export default function Notifications({ open, onClose }: NotificationsProps) {
@@ -439,11 +451,13 @@ export default function Notifications({ open, onClose }: NotificationsProps) {
                                   )}
                                 </span>
                                 <div className="flex-1 min-w-0">
-                                  <p className={`text-sm ${
-                                    !notification.read ? 'text-blue-900 font-medium' : 'text-gray-700'
-                                  }`}>
-                                    {formatNotificationMessage(notification.message)}
-                                  </p>
+                                  <div 
+                                    className={`text-sm ${
+                                      !notification.read ? 'text-blue-900 font-medium' : 'text-gray-700'
+                                    }`}
+                                  >
+                                    {notification.message || 'Notificación sin contenido'}
+                                  </div>
                                   <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
                                     {dateStr && (
                                       <>
