@@ -20,7 +20,8 @@ const nextConfig = {
   
   // Configuración para optimización de imágenes
   images: {
-    domains: ['localhost', 'cdn-icons-png.flaticon.com', '46.202.177.106'],
+    domains: ['localhost', 'cdn-icons-png.flaticon.com', '46.202.177.106', 'bechapra.com.mx', 'www.bechapra.com.mx'],
+    unoptimized: false,
     remotePatterns: [
       {
         protocol: 'http',
@@ -32,6 +33,16 @@ const nextConfig = {
         protocol: 'http',
         hostname: '46.202.177.106',
         port: '4000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'bechapra.com.mx',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.bechapra.com.mx',
         pathname: '/**',
       },
       {
@@ -73,6 +84,10 @@ const nextConfig = {
       {
         source: '/uploads/:path*',
         destination: 'http://46.202.177.106:4000/uploads/:path*',
+      },
+      {
+        source: '/viaticos/:path*',
+        destination: 'http://46.202.177.106:4000/viaticos/:path*',
       },
     ];
   },
