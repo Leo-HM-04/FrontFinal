@@ -108,7 +108,7 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
     // Si ya empieza con /uploads, usar directamente
     if (factura.startsWith('/uploads')) return factura;
     // Si es solo el nombre del archivo
-    return `/uploads/RECURRENTE/${factura}`;
+    return `/uploads/recurrente/${factura}`;
   };
 
   // Construir URL para comprobantes de pago
