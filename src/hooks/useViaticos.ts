@@ -17,6 +17,9 @@ export type Viatico = {
   tipo_pago_descripcion?: string;
   empresa_a_pagar?: string;
   nombre_persona: string;
+  tipo_cuenta_destino?: string;
+  tipo_tarjeta?: string;
+  banco_destino?: string;
   [key: string]: string | number | boolean | undefined | null;
 };
 

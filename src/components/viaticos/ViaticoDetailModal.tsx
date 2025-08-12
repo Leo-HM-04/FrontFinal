@@ -152,11 +152,27 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
               </div>
               
               {/* Grid principal de información */}
-              <div className="grid grid-cols-2 gap-4">                
+              <div className="grid grid-cols-1 gap-4">                
                 <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
-                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Cuenta Destino</span>
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Tipo de cuenta</span>
+                  <p className="text-blue-900 font-medium text-sm">
+                    {viatico.tipo_cuenta_destino === 'tarjeta'
+                      ? `Tarjeta${viatico.tipo_tarjeta ? ' - ' + viatico.tipo_tarjeta : ''}`
+                      : viatico.tipo_cuenta_destino || 'CLABE'}
+                  </p>
+                </div>
+                
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Cuenta</span>
                   <p className="font-mono text-blue-900 font-medium text-sm">{viatico.cuenta_destino}</p>
                 </div>
+                
+                {viatico.banco_destino && (
+                  <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
+                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Banco</span>
+                    <p className="text-blue-900 font-medium text-sm">{viatico.banco_destino}</p>
+                  </div>
+                )}
                 
                 <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
                   <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Fecha límite</span>
