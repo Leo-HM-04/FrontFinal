@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-hot-toast';
 import { getAuthToken } from '@/utils/auth';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://46.202.177.106:4000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

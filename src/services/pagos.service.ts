@@ -3,7 +3,7 @@
 import { PagoProcesado } from '@/utils/exportUtils';
 import { pagosProcesadosEjemplo, pagosPendientesEjemplo } from '@/hooks/usePagos';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://46.202.177.106:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 /**
  * Obtiene los pagos procesados del servidor
@@ -11,7 +11,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://46.202.177.106:4000';
  */
 export async function getPagosProcesados(): Promise<PagoProcesado[]> {
   try {
-    const response = await fetch(`${API_URL}/api/pagos/procesados`, {
+    const response = await fetch(`${API_URL}/pagos/procesados`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ export async function getPagosProcesados(): Promise<PagoProcesado[]> {
  */
 export async function getPagosPendientes(): Promise<PagoProcesado[]> {
   try {
-    const response = await fetch(`${API_URL}/api/pagos/pendientes`, {
+    const response = await fetch(`${API_URL}/pagos/pendientes`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export async function getPagosPendientes(): Promise<PagoProcesado[]> {
  */
 export async function procesarPago(idPago: number, datos: Record<string, unknown>): Promise<Record<string, unknown>> {
   try {
-    const response = await fetch(`${API_URL}/api/pagos/${idPago}/procesar`, {
+    const response = await fetch(`${API_URL}/pagos/${idPago}/procesar`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ export async function procesarPago(idPago: number, datos: Record<string, unknown
  */
 export async function getComprobantePago(idComprobante: string): Promise<Blob | null> {
   try {
-    const response = await fetch(`${API_URL}/api/comprobantes/${idComprobante}`, {
+    const response = await fetch(`${API_URL}/comprobantes/${idComprobante}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`

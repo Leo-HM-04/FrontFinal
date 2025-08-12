@@ -110,7 +110,7 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
           token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
         } catch {}
       }
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/notificaciones`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/notificaciones`, {
         headers: {
           Authorization: token ? `Bearer ${token}` : ''
         }

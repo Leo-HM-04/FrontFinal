@@ -127,7 +127,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     const fetchAndCheck = async () => {
       try {
         const token = getAuthToken();
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/notificaciones`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/notificaciones`, {
           headers: {
             Authorization: token ? `Bearer ${token}` : ''
           }

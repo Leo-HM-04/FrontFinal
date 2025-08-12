@@ -58,7 +58,7 @@ type FiltroType = 'todas' | 'no_leidas';
 // CONSTANTES Y CONFIGURACIÓN
 // ========================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 const ITEMS_PER_PAGE = 10;
 const NOTIFICATION_SOUND_PATH = "/assets/audio/bell-notification.mp3";
 
@@ -116,7 +116,7 @@ class SolicitanteNotificationService {
   static async fetchNotifications(): Promise<Notificacion[]> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/notificaciones/solicitante`,
+        `${API_BASE_URL}/notificaciones/solicitante`,
         { headers: AuthService.getHeaders() }
       );
 
@@ -144,7 +144,7 @@ class SolicitanteNotificationService {
   static async markAsRead(notificationId: number): Promise<void> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/notificaciones/${notificationId}/marcar-leida`,
+        `${API_BASE_URL}/notificaciones/${notificationId}/marcar-leida`,
         {
           method: 'POST',
           headers: AuthService.getHeaders()

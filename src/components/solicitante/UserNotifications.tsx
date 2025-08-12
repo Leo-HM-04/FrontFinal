@@ -19,7 +19,7 @@ export default function UserNotifications({ token }: { token: string }) {
   useEffect(() => {
     if (!token) return;
     setLoading(true);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://46.202.177.106:4000"}/api/notificaciones/solicitante`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/notificaciones/solicitante`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
