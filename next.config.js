@@ -66,10 +66,6 @@ const nextConfig = {
         destination: 'http://46.202.177.106:4000/api/estadisticas-aprobador/:path*',
       },
       {
-        source: '/api/estadisticas-aprobador-dashboard/:path*',
-        destination: 'http://46.202.177.106:4000/api/estadisticas-aprobador-dashboard/:path*',
-      },
-      {
         source: '/api/estadisticas-pagador-dashboard/:path*',
         destination: 'http://46.202.177.106:4000/api/estadisticas-pagador-dashboard/:path*',
       },
