@@ -47,7 +47,7 @@ export default function GraficasAprobador() {
       try {
         const token = localStorage.getItem('auth_token');
         // Resumen por estado
-        const res = await fetch("http://46.202.177.106:4000/api/estadisticas-aprobador/resumen-estado", {
+        const res = await fetch("/api/estadisticas-aprobador/resumen-estado", {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {})
           },
@@ -56,7 +56,7 @@ export default function GraficasAprobador() {
         const json = await res.json();
         setData(json);
         // Tendencia mensual
-        const resTend = await fetch("http://46.202.177.106:4000/api/estadisticas-aprobador/tendencia-mensual", {
+        const resTend = await fetch("/api/estadisticas-aprobador/tendencia-mensual", {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {})
           },
