@@ -178,16 +178,7 @@ return (
           <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80 mb-3">
             <h4 className="text-sm font-medium text-blue-800 mb-2">Información bancaria</h4>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta</span>
-                <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta_destino}</p>
-              </div>
-              
-              <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Banco</span>
-                <p className="text-blue-900 font-medium">{solicitud.banco_destino || '-'}</p>
-              </div>
-              
+
               <div>
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de cuenta</span>
                 <p className="text-blue-900 font-medium">
@@ -195,6 +186,17 @@ return (
                     ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
                     : solicitud.tipo_cuenta_destino || '-'}
                 </p>
+              </div>
+             
+              
+              <div>
+                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Banco</span>
+                <p className="text-blue-900 font-medium">{solicitud.banco_destino || '-'}</p>
+              </div>
+              
+               <div>
+                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta</span>
+                <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta_destino}</p>
               </div>
               
               <div>
