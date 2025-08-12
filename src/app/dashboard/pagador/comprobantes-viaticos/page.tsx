@@ -204,7 +204,7 @@ export default function ComprobantesViaticosPage() {
               let src = comprobantePath;
               if (!/^https?:\/\//i.test(comprobantePath)) {
                 const fileName = comprobantePath.replace(/^.*uploads[\/\\]comprobante-viaticos[\/\\]/i, "");
-                src = `http://46.202.177.106:4000/uploads/comprobante-viaticos/${fileName}`;
+                src = `/uploads/comprobante-viaticos/${fileName}`;
               }
               window.open(src, '_blank', 'noopener,noreferrer');
               setVerComprobante({ open: false, viaticoId: null });

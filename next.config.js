@@ -70,6 +70,10 @@ const nextConfig = {
         source: '/api/viaticos/:path*',
         destination: 'http://46.202.177.106:4000/viaticos/:path*',
       },
+      {
+        source: '/uploads/:path*',
+        destination: 'http://46.202.177.106:4000/uploads/:path*',
+      },
     ];
   },
 

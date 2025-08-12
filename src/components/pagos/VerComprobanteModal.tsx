@@ -78,11 +78,10 @@ export const VerComprobanteModal: React.FC<VerComprobanteModalProps> = ({
     if (comprobante.ruta_archivo.startsWith('http')) {
       comprobanteUrl = comprobante.ruta_archivo;
     } else {
-      const baseUrl = 'http://46.202.177.106:4000';
       const rutaArchivo = comprobante.ruta_archivo.startsWith('/')
         ? comprobante.ruta_archivo
         : `/${comprobante.ruta_archivo}`;
-      comprobanteUrl = `${baseUrl}${rutaArchivo}`;
+      comprobanteUrl = rutaArchivo;
     }
   }
 

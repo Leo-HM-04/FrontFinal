@@ -319,11 +319,10 @@ return (
               if (solicitud.factura_url.startsWith('http')) {
                 facturaUrl = solicitud.factura_url;
               } else {
-                const baseUrl = 'http://46.202.177.106:4000';
                 const rutaArchivo = solicitud.factura_url.startsWith('/') 
                   ? solicitud.factura_url 
                   : `/${solicitud.factura_url}`;
-                facturaUrl = `${baseUrl}${rutaArchivo}`;
+                facturaUrl = rutaArchivo;
               }
               const fileName = facturaUrl.split('/').pop();
               const isImage = /\.(jpg|jpeg|png|gif)$/i.test(facturaUrl);
@@ -401,11 +400,10 @@ return (
                         if (solicitud.factura_url.startsWith('http')) {
                           facturaUrl = solicitud.factura_url;
                         } else {
-                          const baseUrl = 'http://46.202.177.106:4000';
                           const rutaArchivo = solicitud.factura_url.startsWith('/') 
                             ? solicitud.factura_url 
                             : `/${solicitud.factura_url}`;
-                          facturaUrl = `${baseUrl}${rutaArchivo}`;
+                          facturaUrl = rutaArchivo;
                         }
                         window.open(facturaUrl, '_blank');
                       }}
@@ -457,11 +455,10 @@ return (
                       if (comprobante.ruta_archivo.startsWith('http')) {
                         comprobanteUrl = comprobante.ruta_archivo;
                       } else {
-                        const baseUrl = 'http://46.202.177.106:4000';
                         const rutaArchivo = comprobante.ruta_archivo.startsWith('/')
                           ? comprobante.ruta_archivo
                           : `/${comprobante.ruta_archivo}`;
-                        comprobanteUrl = `${baseUrl}${rutaArchivo}`;
+                        comprobanteUrl = rutaArchivo;
                       }
                       
                       // Determinar el tipo de archivo

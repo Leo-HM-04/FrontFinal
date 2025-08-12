@@ -322,14 +322,13 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
                         if (archivoPath.startsWith('http')) {
                           comprobanteUrl = archivoPath;
                         } else {
-                          const baseUrl = 'http://46.202.177.106:4000';
                           // Verificar si la ruta ya incluye '/uploads/comprobante-viaticos/'
                           if (archivoPath.includes('/uploads/comprobante-viaticos/')) {
                             const rutaArchivo = archivoPath.startsWith('/') ? archivoPath : `/${archivoPath}`;
-                            comprobanteUrl = `${baseUrl}${rutaArchivo}`;
+                            comprobanteUrl = rutaArchivo;
                           } else {
                             // Construir la ruta completa
-                            comprobanteUrl = `${baseUrl}/uploads/comprobante-viaticos/${archivoPath.split('/').pop()}`;
+                            comprobanteUrl = `/uploads/comprobante-viaticos/${archivoPath.split('/').pop()}`;
                           }
                         }
                         
