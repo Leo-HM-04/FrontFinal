@@ -256,7 +256,7 @@ export default function NuevaRecurrentePage() {
                   name="cuenta_destino"
                   value={formData.cuenta_destino}
                   onChange={e => {
-                    let value = e.target.value.replace(/[^0-9]/g, '');
+                    const value = e.target.value.replace(/[^0-9]/g, '');
                     dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                   }}
                   required
