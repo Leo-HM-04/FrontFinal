@@ -73,36 +73,14 @@ export default function NuevoViaticoPage() {
         errors.file = 'Adjunta un archivo';
         huboError = true;
       }
-      // Validar cuenta según el tipo
-      if (f.form.tipo_cuenta_destino === 'clabe') {
-        if (!f.form.cuenta_destino || f.form.cuenta_destino.length !== 18) {
-          errors.cuenta_destino = 'La CLABE debe tener 18 dígitos';
-          huboError = true;
-        }
-      } else if (f.form.tipo_cuenta_destino === 'tarjeta') {
-        if (!f.form.tipo_tarjeta) {
-          errors.tipo_tarjeta = 'Selecciona el tipo de tarjeta';
-          huboError = true;
-        }
-        if (!f.form.cuenta_destino) {
-          errors.cuenta_destino = 'Ingresa el número de tarjeta o cuenta';
-          huboError = true;
-        } else if (f.form.tipo_tarjeta === 'cuenta') {
-          if (f.form.cuenta_destino.length < 6) {
-            errors.cuenta_destino = 'El número de cuenta debe tener al menos 6 dígitos';
-            huboError = true;
-          }
-        } else {
-          if (f.form.cuenta_destino.length !== 16) {
-            errors.cuenta_destino = 'El número de tarjeta debe tener 16 dígitos';
-            huboError = true;
-          }
-        }
-      } else if (f.form.tipo_cuenta_destino === 'cuenta') {
-        if (!f.form.cuenta_destino || f.form.cuenta_destino.length < 6) {
-          errors.cuenta_destino = 'El número de cuenta debe tener al menos 6 dígitos';
-          huboError = true;
-        }
+      // Solo validar que tenga un valor en cuenta_destino
+      if (!f.form.cuenta_destino) {
+        errors.cuenta_destino = 'Ingresa el número de cuenta, tarjeta o CLABE';
+        huboError = true;
+      }
+      if (f.form.tipo_cuenta_destino === 'tarjeta' && !f.form.tipo_tarjeta) {
+        errors.tipo_tarjeta = 'Selecciona el tipo de tarjeta';
+        huboError = true;
       }
       nuevos[idx].errors = errors;
     });
@@ -241,72 +219,21 @@ export default function NuevoViaticoPage() {
                     </div>
                   )}
                   <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Cuenta destino {
-                      formularios[idx].form.tipo_cuenta_destino === 'clabe' && ' (18 dígitos)'
-                    }{
-                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && formularios[idx].form.tipo_tarjeta === 'cuenta' && ' (mínimo 6 dígitos)'
-                    }{
-                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && (!formularios[idx].form.tipo_tarjeta || formularios[idx].form.tipo_tarjeta !== 'cuenta') && ' (16 dígitos)'
-                    }</label>
-                    <input name="cuenta_destino" placeholder={
-                      formularios[idx].form.tipo_cuenta_destino === 'clabe' ? "CLABE (18 dígitos)" :
-                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && formularios[idx].form.tipo_tarjeta === 'cuenta' ? "Número de cuenta (mínimo 6 dígitos)" :
-                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? "Número de tarjeta (16 dígitos)" :
-                      formularios[idx].form.tipo_cuenta_destino === 'cuenta' ? "Número de cuenta (mínimo 6 dígitos)" :
-                      "Cuenta destino"
-                    } value={formularios[idx].form.cuenta_destino || ''} onChange={e => {
-                      let value = e.target.value.replace(/\D/g, '');
-                      let maxLength = undefined;
-                      if (formularios[idx].form.tipo_cuenta_destino === 'clabe') maxLength = 18;
-                      else if (formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && formularios[idx].form.tipo_tarjeta === 'cuenta') maxLength = 30;
-                      else if (formularios[idx].form.tipo_cuenta_destino === 'tarjeta') maxLength = 16;
-                      else if (formularios[idx].form.tipo_cuenta_destino === 'cuenta') maxLength = 30;
-                      if (maxLength) value = value.slice(0, maxLength);
+                    <label className="text-blue-900 font-bold text-base">Cuenta destino</label>
+                    <input name="cuenta_destino" placeholder="Número de cuenta, tarjeta o CLABE" value={formularios[idx].form.cuenta_destino || ''} onChange={e => {
+                      const value = e.target.value;
                       const nuevos = [...formularios];
                       nuevos[idx].form = { ...nuevos[idx].form, cuenta_destino: value };
-                      // Validación
-                      if (formularios[idx].form.tipo_cuenta_destino === 'clabe') {
-                        if (value.length > 0 && value.length !== 18) {
-                          nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'La CLABE debe tener 18 dígitos' };
-                        } else {
-                          const errorsObj = { ...(nuevos[idx].errors || {}) };
-                          delete errorsObj.cuenta_destino;
-                          nuevos[idx].errors = errorsObj;
-                        }
-                      } else if (formularios[idx].form.tipo_cuenta_destino === 'tarjeta') {
-                        if (formularios[idx].form.tipo_tarjeta === 'cuenta') {
-                          if (value.length > 0 && value.length < 6) {
-                            nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de cuenta debe tener al menos 6 dígitos' };
-                          } else {
-                            const errorsObj = { ...(nuevos[idx].errors || {}) };
-                            delete errorsObj.cuenta_destino;
-                            nuevos[idx].errors = errorsObj;
-                          }
-                        } else {
-                          if (value.length > 0 && value.length !== 16) {
-                            nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de tarjeta debe tener 16 dígitos' };
-                          } else {
-                            const errorsObj = { ...(nuevos[idx].errors || {}) };
-                            delete errorsObj.cuenta_destino;
-                            nuevos[idx].errors = errorsObj;
-                          }
-                        }
-                      } else if (formularios[idx].form.tipo_cuenta_destino === 'cuenta') {
-                        if (value.length > 0 && value.length < 6) {
-                          nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'El número de cuenta debe tener al menos 6 dígitos' };
-                        } else {
-                          const errorsObj = { ...(nuevos[idx].errors || {}) };
-                          delete errorsObj.cuenta_destino;
-                          nuevos[idx].errors = errorsObj;
-                        }
+                      // Solo validar si está vacío
+                      if (!value) {
+                        nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'La cuenta destino es requerida' };
+                      } else {
+                        const errorsObj = { ...(nuevos[idx].errors || {}) };
+                        delete errorsObj.cuenta_destino;
+                        nuevos[idx].errors = errorsObj;
                       }
                       setFormularios(nuevos);
-                    }} maxLength={
-                      formularios[idx].form.tipo_cuenta_destino === 'clabe' ? 18 :
-                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && formularios[idx].form.tipo_tarjeta === 'cuenta' ? 30 :
-                      formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? 16 :
-                      formularios[idx].form.tipo_cuenta_destino === 'cuenta' ? 30 : undefined
-                    } required className={`text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 ${formularios[idx].errors?.cuenta_destino ? 'border-red-500' : ''}`} />
+                    }} required className={`text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 ${formularios[idx].errors?.cuenta_destino ? 'border-red-500' : ''}`} />
                     {formularios[idx].errors?.cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.cuenta_destino}</span>)}
                   </div>
                   {/* Selección de banco */}

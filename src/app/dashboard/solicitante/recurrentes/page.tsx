@@ -88,31 +88,22 @@ export default function NuevaRecurrentePage() {
   const [fechaInicio, setFechaInicio] = useState<Date | null>(null);
   const [facturaFile, setFacturaFile] = useState<File | null>(null);
 
-  // Configuración dinámica para cuenta destino
+  // Configuración dinámica para cuenta destino - SIN RESTRICCIONES DE LONGITUD
   let cuentaConfig;
   if (formData.tipo_cuenta_destino === 'Tarjeta') {
     cuentaConfig = {
-      maxLength: 16,
-      minLength: 16,
-      pattern: '^\\d{16}$',
-      placeholder: 'Número de tarjeta (16 dígitos)',
-      errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
+      placeholder: 'Número de tarjeta',
+      errorMsg: 'Ingresa un número de tarjeta válido.'
     };
   } else if (formData.tipo_cuenta_destino === 'Cuenta') {
     cuentaConfig = {
-      maxLength: 30, // UX, sin límite real
-      minLength: 6,
-      pattern: '^\\d{6,}$',
-      placeholder: 'Número de cuenta (mínimo 6 dígitos)',
-      errorMsg: 'El número de cuenta debe tener al menos 6 dígitos numéricos.'
+      placeholder: 'Número de cuenta',
+      errorMsg: 'Ingresa un número de cuenta válido.'
     };
   } else {
     cuentaConfig = {
-      maxLength: 18,
-      minLength: 18,
-      pattern: '^\\d{18}$',
-      placeholder: 'Número de cuenta CLABE (18 dígitos)',
-      errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
+      placeholder: 'Número de cuenta CLABE',
+      errorMsg: 'Ingresa un número de cuenta CLABE válido.'
     };
   }
 
@@ -142,27 +133,6 @@ export default function NuevaRecurrentePage() {
       }
     }
     
-    // Validación de cuenta destino
-    const cuenta = formData.cuenta_destino.replace(/[^0-9]/g, '');
-    if (formData.tipo_cuenta_destino === 'CLABE' && cuenta.length !== 18) {
-      toast.error('La cuenta CLABE debe tener exactamente 18 dígitos.');
-      setLoading(false);
-      return;
-    }
-    if (formData.tipo_cuenta_destino === 'Tarjeta') {
-      if (cuenta.length !== 16) {
-        toast.error('La tarjeta debe tener exactamente 16 dígitos.');
-        setLoading(false);
-        return;
-      }
-    }
-    if (formData.tipo_cuenta_destino === 'Cuenta') {
-      if (cuenta.length < 6) {
-        toast.error('El número de cuenta debe tener al menos 6 dígitos.');
-        setLoading(false);
-        return;
-      }
-    }
     // Validación de tipo tarjeta si es necesario
     if (formData.tipo_cuenta_destino === 'Tarjeta' && !formData.tipo_tarjeta) {
       toast.error('Tipo de tarjeta es obligatorio cuando seleccionas Tarjeta');
@@ -287,13 +257,11 @@ export default function NuevaRecurrentePage() {
                   value={formData.cuenta_destino}
                   onChange={e => {
                     let value = e.target.value.replace(/[^0-9]/g, '');
-                    if (cuentaConfig.maxLength) value = value.slice(0, cuentaConfig.maxLength);
                     dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                   }}
                   required
                   className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
                   placeholder={cuentaConfig.placeholder}
-                  maxLength={cuentaConfig.maxLength}
                   inputMode="numeric"
                 />
               </div>

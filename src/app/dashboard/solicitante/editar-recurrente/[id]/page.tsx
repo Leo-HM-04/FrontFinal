@@ -47,19 +47,15 @@ export default function EditarRecurrentePage() {
   const [form, setForm] = useState<Partial<PlantillaRecurrente>>({});
   const [fechaInicio, setFechaInicio] = useState<Date | null>(null);
 
-  // Configuración dinámica para cuenta destino
+  // Configuración dinámica para cuenta destino - SIN RESTRICCIONES DE LONGITUD
   const cuentaConfig = (form.tipo_cuenta_destino || 'CLABE') === 'Tarjeta'
     ? {
-        maxLength: 16,
-        pattern: '^\d{16}$',
-        placeholder: 'Número de tarjeta (16 dígitos)',
-        errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
+        placeholder: 'Número de tarjeta',
+        errorMsg: 'Ingresa un número de tarjeta válido.'
       }
     : {
-        maxLength: 18,
-        pattern: '^\d{18}$',
-        placeholder: 'Número de cuenta CLABE (18 dígitos)',
-        errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
+        placeholder: 'Número de cuenta CLABE',
+        errorMsg: 'Ingresa un número de cuenta CLABE válido.'
       };
 
   useEffect(() => {
@@ -230,10 +226,9 @@ export default function EditarRecurrentePage() {
                   <div>
                     <label className="text-blue-900 block mb-2 font-semibold">Cuenta Destino *</label>
                     <input type="text" name="cuenta_destino" value={form.cuenta_destino || ""} onChange={e => {
-                      const maxLen = cuentaConfig.maxLength;
-                      const value = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLen);
+                      const value = e.target.value.replace(/[^0-9]/g, '');
                       setForm(prev => ({ ...prev, cuenta_destino: value }));
-                    }} required placeholder={cuentaConfig.placeholder} maxLength={cuentaConfig.maxLength} inputMode="numeric" className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200" />
+                    }} required placeholder={cuentaConfig.placeholder} inputMode="numeric" className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200" />
                   </div>
                   <div>
                     <label className="text-blue-900 block mb-2 font-semibold">Tipo de Pago *</label>

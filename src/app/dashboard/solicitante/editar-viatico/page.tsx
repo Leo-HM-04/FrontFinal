@@ -78,19 +78,13 @@ function EditarViaticoPageInner() {
     e.preventDefault();
     setActualizando(true);
 
-    // Validar cuenta según el tipo
+    // Validar solo campos requeridos, sin restricciones de longitud
     const newErrors: Record<string, string> = {};
-    if (form.tipo_cuenta_destino === 'clabe') {
-      if (!form.cuenta_destino || form.cuenta_destino.length !== 18) {
-        newErrors.cuenta_destino = 'La CLABE debe tener 18 dígitos';
-      }
-    } else if (form.tipo_cuenta_destino === 'tarjeta') {
-      if (!form.tipo_tarjeta) {
-        newErrors.tipo_tarjeta = 'Selecciona el tipo de tarjeta';
-      }
-      if (!form.cuenta_destino || form.cuenta_destino.length !== 16) {
-        newErrors.cuenta_destino = 'El número de tarjeta debe tener 16 dígitos';
-      }
+    if (form.tipo_cuenta_destino === 'tarjeta' && !form.tipo_tarjeta) {
+      newErrors.tipo_tarjeta = 'Selecciona el tipo de tarjeta';
+    }
+    if (!form.cuenta_destino) {
+      newErrors.cuenta_destino = 'La cuenta destino es requerida';
     }
 
     if (Object.keys(newErrors).length > 0) {

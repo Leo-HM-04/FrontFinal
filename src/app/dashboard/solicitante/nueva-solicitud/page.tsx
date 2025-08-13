@@ -68,29 +68,22 @@ export default function NuevaSolicitudPage() {
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
 
 
-  // Configuración dinámica para cuenta destino
+  // Configuración dinámica para cuenta destino - SIN RESTRICCIONES DE LONGITUD
   let cuentaConfig;
   if (formData.tipo_cuenta_destino === 'Tarjeta') {
     cuentaConfig = {
-      maxLength: 16,
-      pattern: '^\d{16}$',
-      placeholder: 'Número de tarjeta (16 dígitos)',
-      errorMsg: 'La tarjeta debe tener exactamente 16 dígitos.'
+      placeholder: 'Número de tarjeta',
+      errorMsg: 'Ingresa un número de tarjeta válido.'
     };
   } else if (formData.tipo_cuenta_destino === 'Cuenta') {
     cuentaConfig = {
-      maxLength: 30, // UX, sin límite real
-      minLength: 6,
-      pattern: '^\d{6,}$',
-      placeholder: 'Número de cuenta (mínimo 6 dígitos)',
-      errorMsg: 'El número de cuenta debe tener al menos 6 dígitos.'
+      placeholder: 'Número de cuenta',
+      errorMsg: 'Ingresa un número de cuenta válido.'
     };
   } else {
     cuentaConfig = {
-      maxLength: 18,
-      pattern: '^\d{18}$',
-      placeholder: 'Número de cuenta CLABE (18 dígitos)',
-      errorMsg: 'La cuenta CLABE debe tener exactamente 18 dígitos.'
+      placeholder: 'Número de cuenta CLABE',
+      errorMsg: 'Ingresa un número de cuenta CLABE válido.'
     };
   }
 
@@ -123,22 +116,11 @@ export default function NuevaSolicitudPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     dispatch({ type: 'SET_FIELD', field: name as keyof FormState, value });
-    // Validación en tiempo real
+    // Validación en tiempo real - Solo verificar si está vacío
     if (!value) {
       setErrors((prev) => ({ ...prev, [name]: 'Este campo es obligatorio' }));
     } else {
-      if (name === 'cuenta_destino') {
-        const maxLen = cuentaConfig.maxLength;
-        const val = value.replace(/[^0-9]/g, '').slice(0, maxLen);
-        // Solo mostrar error si el valor tiene la longitud máxima y no cumple el patrón
-        if (val.length === maxLen && !new RegExp(cuentaConfig.pattern).test(val)) {
-          setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
-        } else {
-          setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
-        }
-      } else {
-        setErrors((prev) => ({ ...prev, [name]: undefined }));
-      }
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
@@ -421,37 +403,19 @@ export default function NuevaSolicitudPage() {
                       name="cuenta_destino"
                       value={formData.cuenta_destino}
                       onChange={e => {
-                        let value = e.target.value.replace(/[^0-9]/g, '');
-                        if (formData.tipo_cuenta_destino === 'Cuenta') {
-                          value = value.slice(0, cuentaConfig.maxLength);
-                        } else {
-                          value = value.slice(0, cuentaConfig.maxLength);
-                        }
+                        const value = e.target.value;
                         dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                         setCuentaValida(null);
-                        if (formData.tipo_cuenta_destino === 'Cuenta') {
-                          const minLen = cuentaConfig.minLength || 6;
-                          if (value.length > 0 && value.length < minLen) {
-                            setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
-                          } else {
-                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
-                          }
+                        // Solo validar si está vacío
+                        if (!value) {
+                          setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
                         } else {
-                          const maxLen = cuentaConfig.maxLength;
-                          if (value.length > 0 && value.length < maxLen) {
-                            setErrors((prev) => ({ ...prev, cuenta_destino: `Debe tener exactamente ${maxLen} dígitos.` }));
-                          } else if (value.length === maxLen && !new RegExp(cuentaConfig.pattern).test(value)) {
-                            setErrors((prev) => ({ ...prev, cuenta_destino: cuentaConfig.errorMsg }));
-                          } else {
-                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
-                          }
+                          setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
                         }
                       }}
                       onBlur={e => verificarCuentaDestino(e.target.value)}
                       placeholder={cuentaConfig.placeholder}
                       required
-                      maxLength={cuentaConfig.maxLength}
-                      inputMode="numeric"
                       autoComplete="off"
                       className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide ${errors.cuenta_destino ? 'border-red-400' : ''}`}
                     />
