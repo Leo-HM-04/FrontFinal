@@ -15,7 +15,7 @@ import { Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, Chec
 import Image from "next/image";
 import { Solicitud } from "@/types";
 import { format } from "date-fns";
-import { formatDateForAPI } from '@/utils/dateUtils';
+import { formatDateForAPI, parseUTC6Date } from '@/utils/dateUtils';
 
 type FormState = {
   departamento: string;
@@ -150,7 +150,7 @@ export default function EditarSolicitudPage() {
           banco_destino
         }});
         setFacturaUrl(data.factura_url || null);
-        setFechaLimitePago(data.fecha_limite_pago ? new Date(data.fecha_limite_pago) : null);
+        setFechaLimitePago(data.fecha_limite_pago ? parseUTC6Date(data.fecha_limite_pago) : null);
         setEstado(data.estado ?? '');
       } catch {
         toast.error('No se pudo cargar la solicitud');
@@ -262,9 +262,7 @@ export default function EditarSolicitudPage() {
         tipo_pago_descripcion: (formData.tipo_pago_descripcion !== undefined && formData.tipo_pago_descripcion !== null) ? String(formData.tipo_pago_descripcion) : '',
         empresa_a_pagar: (formData.empresa_a_pagar !== undefined && formData.empresa_a_pagar !== null) ? String(formData.empresa_a_pagar) : '',
         nombre_persona: (formData.nombre_persona !== undefined && formData.nombre_persona !== null) ? String(formData.nombre_persona) : '',
-        fecha_limite_pago: formData.fecha_limite_pago
-          ? format(new Date(formData.fecha_limite_pago), "yyyy-MM-dd")
-          : "",
+        fecha_limite_pago: fechaLimitePago ? formatDateForAPI(fechaLimitePago) : "",
         factura: formData.factura_file ?? undefined,
         tipo_cuenta_destino: formData.tipo_cuenta_destino,
         tipo_tarjeta: formData.tipo_cuenta_destino === 'Tarjeta' ? formData.tipo_tarjeta : '',
