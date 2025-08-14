@@ -28,7 +28,7 @@ const tipoPagoOptions = [
 const departamentos = [
   'contabilidad', 'facturacion', 'cobranza', 'vinculacion',
   'administracion', 'ti', 'automatizaciones', 'comercial',
-  'atencion a clientes', 'tesoreria', 'nomina'
+  'atencion a clientes', 'tesoreria', 'nomina', 'atraccion de talento'
 ];
 const frecuencias = ['diaria', 'semanal', 'quincenal', 'mensual'];
 

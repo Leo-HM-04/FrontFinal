@@ -112,7 +112,8 @@ export default function EditarSolicitudPage() {
     { value: 'comercial', label: 'Comercial' },
     { value: 'atencion a clientes', label: 'Atención a Clientes' },
     { value: 'tesoreria', label: 'Tesorería' },
-    { value: 'nomina', label: 'Nómina' }
+    { value: 'nomina', label: 'Nómina' },
+    { value: 'atraccion de talento', label: 'Atracción de Talento' }
   ];
   const tipoPagoOptions = [
     { value: 'efectivo', label: 'Efectivo' },
