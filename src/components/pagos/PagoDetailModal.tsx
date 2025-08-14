@@ -60,7 +60,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                   Pago #{pago.id_solicitud}
                 </h2>
                 <p className="text-blue-100 text-lg">
-                  Monto: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{formatCurrency(pago.monto)}</span>
+                  Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{pago.folio || '-'}</span>
                 </p>
                 <p className="text-blue-200 mt-2">
                   Creado el {formatDate(pago.fecha_creacion)}
@@ -82,9 +82,25 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                     <div className="p-2 bg-blue-100 rounded-xl mr-3">
                       <CreditCard className="w-6 h-6 text-blue-700" />
                     </div>
-                    Información de Pago
+                    Información Financiera
                   </h3>
+                  
+                  {/* Monto destacado con mejor diseño */}
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl border border-blue-300/50 mb-6 shadow-lg">
+                    <span className="text-sm uppercase tracking-wider text-blue-100 font-bold block mb-2">Monto total</span>
+                    <p className="text-4xl font-black text-white tracking-tight">{formatCurrency(pago.monto)}</p>
+                    <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-24"></div>
+                  </div>
+                  
                   <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3">
+                    <div className="bg-white p-2 md:p-3 rounded-md">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Empresa a pagar</span>
+                      <p className="text-blue-900 font-medium">{pago.empresa_a_pagar || '-'}</p>
+                    </div>
+                    <div className="bg-white p-2 md:p-3 rounded-md">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Persona que recibe</span>
+                      <p className="text-blue-900 font-medium">{pago.nombre_persona || '-'}</p>
+                    </div>
                     <div className="bg-white p-2 md:p-3 rounded-md">
                       <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Solicitante</span>
                       <p className="text-blue-900 font-medium">{typeof pago.nombre_usuario === 'string' && pago.nombre_usuario
@@ -97,31 +113,43 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                       <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Departamento</span>
                       <p className="text-blue-900 font-medium">{pago.departamento ? pago.departamento.charAt(0).toUpperCase() + pago.departamento.slice(1).toLowerCase() : '-'}</p>
                     </div>
-                    <div className="bg-white p-2 md:p-3 rounded-md">
-                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de pago</span>
-                      <p className="text-blue-900 font-medium">{pago.tipo_pago ? pago.tipo_pago.charAt(0).toUpperCase() + pago.tipo_pago.slice(1).toLowerCase() : '-'}</p>
-                    </div>
-                    <div className="bg-white p-2 md:p-3 rounded-md">
-                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta destino</span>
-                      <p className="font-mono text-blue-900 font-medium">{pago.cuenta_destino}</p>
-                    </div>
                   </div>
                   <div className="bg-blue-50/30 rounded-md p-2 md:p-3 border border-blue-100/80 mb-3">
-                    <h4 className="text-sm font-medium text-blue-800 mb-2">Banco y detalles</h4>
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">Información bancaria</h4>
                     <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de cuenta</span>
+                        <p className="text-blue-900 font-medium">
+                          {pago.tipo_cuenta_destino === 'Tarjeta'
+                            ? `Tarjeta${pago.tipo_tarjeta ? ' - ' + pago.tipo_tarjeta : ''}`
+                            : pago.tipo_cuenta_destino || '-'}
+                        </p>
+                      </div>
                       <div>
                         <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Banco</span>
                         <p className="text-blue-900 font-medium">{pago.banco_destino || '-'}</p>
                       </div>
                       <div>
-                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de cuenta</span>
-                        <p className="text-blue-900 font-medium">{pago.tipo_cuenta_destino || '-'}</p>
+                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta destino</span>
+                        <p className="font-mono text-blue-900 font-medium">{pago.cuenta_destino}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Fecha límite</span>
+                        <p className="text-blue-900 font-medium">{
+                          pago.fecha_limite_pago
+                            ? new Date(pago.fecha_limite_pago).toLocaleDateString('es-MX', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })
+                            : '-'
+                        }</p>
                       </div>
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Concepto</span>
-                    <p className="text-blue-900 p-2 md:p-3 bg-white rounded-md">{pago.concepto || '-'}</p>
+                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Descripción del tipo de pago</span>
+                    <p className="text-blue-900 p-2 md:p-3 bg-white rounded-md">{pago.tipo_pago_descripcion || '-'}</p>
                   </div>
                 </div>
               </div>
@@ -148,10 +176,23 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                 </div>
               </div>
             </div>
-            {/* Archivos y comprobantes + comentario alineados y mejorados */}
+            {/* Archivos y comprobantes + concepto alineados y mejorados */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
-              {/* Documentos Adjuntos */}
-              <div className="lg:col-span-3 p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl flex flex-col justify-between">
+              {/* Concepto - 1 columna */}
+              <div className="p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                  <div className="p-2 bg-green-100 rounded-xl mr-3">
+                    <FileText className="w-6 h-6 text-green-700" />
+                  </div>
+                  Concepto
+                </h3>
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200/50 shadow-inner">
+                  <p className="text-gray-800 leading-relaxed text-base font-medium">{pago.concepto || '-'}</p>
+                </div>
+              </div>
+              
+              {/* Documentos Adjuntos - 2 columnas */}
+              <div className="lg:col-span-2 p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl flex flex-col justify-between">
                 <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
                   <div className="p-2 bg-green-100 rounded-xl mr-3">
                     <FileText className="w-6 h-6 text-green-700" />
@@ -235,30 +276,57 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                       );
                     }
                   })() : (
-                    <span className="text-blue-400">No hay factura adjunta</span>
+                    <div className="bg-gray-50/80 p-3 rounded-lg border border-gray-200">
+                      <span className="text-sm text-gray-600 flex items-center font-medium">
+                        <FileText className="w-4 h-4 mr-1.5 text-gray-500" />
+                        No hay factura adjunta
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">Esta solicitud no tiene documentos adjuntos</p>
+                    </div>
                   )}
-                  {/* Botón para ver factura */}
-                  {pago.factura_url && (
-                    <button
-                      onClick={() => {
-                        let facturaUrl = '';
-                        if (pago.factura_url.startsWith('http')) {
-                          facturaUrl = pago.factura_url;
-                        } else {
-                          const rutaArchivo = pago.factura_url.startsWith('/') 
-                            ? pago.factura_url 
-                            : `/${pago.factura_url}`;
-                          facturaUrl = rutaArchivo;
-                        }
-                        window.open(facturaUrl, '_blank');
-                      }}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 flex items-center gap-2"
-                    >
-                      <FileText className="w-4 h-4" />
-                      Ver Factura
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
-                  )}
+                  
+                  {/* Botones de acción para documentos */}
+                  <div className="flex w-full justify-end mt-6">
+                    {(pago.factura_url || pago.soporte_url) ? (
+                      <div className="flex gap-3 items-end">
+                        {pago.factura_url && (
+                          <button
+                            onClick={() => {
+                              let facturaUrl = '';
+                              if (pago.factura_url.startsWith('http')) {
+                                facturaUrl = pago.factura_url;
+                              } else {
+                                const rutaArchivo = pago.factura_url.startsWith('/') 
+                                  ? pago.factura_url 
+                                  : `/${pago.factura_url}`;
+                                facturaUrl = rutaArchivo;
+                              }
+                              window.open(facturaUrl, '_blank');
+                            }}
+                            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 flex items-center gap-2"
+                          >
+                            <FileText className="w-4 h-4" />
+                            Ver Factura
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
+                        )}
+                        {pago.soporte_url && (
+                          <button
+                            onClick={() => window.open(pago.soporte_url, '_blank')}
+                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 flex items-center gap-2"
+                          >
+                            <FileText className="w-4 h-4" />
+                            Ver Soporte
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">
+                        No hay documentos adjuntos disponibles
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
