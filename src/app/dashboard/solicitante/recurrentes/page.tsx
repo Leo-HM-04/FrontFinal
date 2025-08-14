@@ -12,6 +12,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
+import { formatDateForAPI } from '@/utils/dateUtils';
 
 // Estado y tipos
 type FormState = {
@@ -433,7 +434,7 @@ export default function NuevaRecurrentePage() {
                     dispatch({
                       type: 'SET_FIELD',
                       field: 'siguiente_fecha',
-                      value: date ? date.toISOString().split('T')[0] : ''
+                      value: formatDateForAPI(date)
                     });
                   }}
                   dateFormat="yyyy-MM-dd"

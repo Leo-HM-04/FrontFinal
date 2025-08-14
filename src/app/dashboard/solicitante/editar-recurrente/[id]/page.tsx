@@ -14,6 +14,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
+import { formatDateForAPI } from '@/utils/dateUtils';
 
 // Opciones igual que en crear
 const tipoPagoOptions = [
@@ -90,7 +91,7 @@ export default function EditarRecurrentePage() {
   // DatePicker para siguiente_fecha
   const handleFechaChange = (date: Date | null) => {
     setFechaInicio(date);
-    setForm((prev) => ({ ...prev, siguiente_fecha: date ? date.toISOString().split('T')[0] : '' }));
+    setForm((prev) => ({ ...prev, siguiente_fecha: formatDateForAPI(date) }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

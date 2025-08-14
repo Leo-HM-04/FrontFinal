@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import type { Solicitud } from '@/types/index';
 import { CreditCard, FileText, Building, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
+import { formatDateForDisplay, formatShortDate } from '@/utils/dateUtils';
 
 interface PagoDetailModalProps {
   isOpen: boolean;
@@ -20,15 +21,6 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
       currency: 'COP',
       minimumFractionDigits: 0
     }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('es-CO', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   };
 
   return (
@@ -63,7 +55,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                   Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{pago.folio || '-'}</span>
                 </p>
                 <p className="text-blue-200 mt-2">
-                  Creado el {formatDate(pago.fecha_creacion)}
+                  Creado el {formatDateForDisplay(pago.fecha_creacion)}
                 </p>
               </div>
               <div className="text-right">
@@ -137,11 +129,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                         <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Fecha límite</span>
                         <p className="text-blue-900 font-medium">{
                           pago.fecha_limite_pago
-                            ? new Date(pago.fecha_limite_pago).toLocaleDateString('es-MX', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })
+                            ? formatDateForDisplay(pago.fecha_limite_pago)
                             : '-'
                         }</p>
                       </div>

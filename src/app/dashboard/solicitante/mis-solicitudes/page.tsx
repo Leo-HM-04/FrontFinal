@@ -30,6 +30,7 @@ import {
   exportMisSolicitudesExcel,
   exportMisSolicitudesPDF
 } from '@/utils/exportMisSolicitudes';
+import { formatDateForDisplay, formatShortDate } from '@/utils/dateUtils';
 
 // Tipos para mejor organización
 interface EstadisticasSolicitudes {
@@ -111,14 +112,6 @@ const formatCurrency = (amount: number) => {
     currency: 'COP',
     minimumFractionDigits: 0,
   }).format(amount);
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('es-CO', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
 };
 
 // Componente principal
@@ -617,11 +610,11 @@ export default function MisSolicitudesPage() {
                           
                           <td className="px-6 py-4">
                             <div className="text-sm text-gray-900">
-                              {formatDate(solicitud.fecha_creacion)}
+                              {formatShortDate(solicitud.fecha_creacion)}
                             </div>
                             {solicitud.fecha_limite_pago && (
                               <div className="text-xs text-gray-500">
-                                Límite: {formatDate(solicitud.fecha_limite_pago)}
+                                Límite: {formatShortDate(solicitud.fecha_limite_pago)}
                               </div>
                             )}
                           </td>

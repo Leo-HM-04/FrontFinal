@@ -15,6 +15,7 @@ import { Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, Chec
 import Image from "next/image";
 import { Solicitud } from "@/types";
 import { format } from "date-fns";
+import { formatDateForAPI } from '@/utils/dateUtils';
 
 type FormState = {
   departamento: string;
@@ -525,7 +526,7 @@ export default function EditarSolicitudPage() {
                     selected={fechaLimitePago}
                     onChange={(date: Date | null) => {
                       setFechaLimitePago(date);
-                      dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: date ? date.toISOString().split('T')[0] : '' });
+                      dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: formatDateForAPI(date) });
                       if (!date) {
                         setErrors((prev) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
                       } else {

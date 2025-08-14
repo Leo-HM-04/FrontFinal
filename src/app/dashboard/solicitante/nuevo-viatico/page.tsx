@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ViaticosService } from '@/services/viaticos.service';
 import { FaTrash } from 'react-icons/fa';
+import { formatDateForAPI, getCurrentUTC6Date } from '@/utils/dateUtils';
 
 // Si no existe el tipo Viatico, defínelo aquí o impórtalo desde '@/types/viatico'
 type Viatico = {
@@ -106,7 +107,7 @@ export default function NuevoViaticoPage() {
             tipo_cuenta_destino: f.form.tipo_cuenta_destino || 'clabe',
             tipo_tarjeta: f.form.tipo_tarjeta || '',
             banco_destino: f.form.banco_destino || '',
-            fecha_limite_pago: f.form.fecha_limite_pago || new Date().toISOString().split('T')[0],
+            fecha_limite_pago: f.form.fecha_limite_pago || formatDateForAPI(getCurrentUTC6Date()),
             viatico_url: f.file || undefined,
             tipo_pago_descripcion: f.form.tipo_pago_descripcion || '',
             empresa_a_pagar: f.form.empresa_a_pagar || '',

@@ -12,6 +12,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
+import { formatDateForAPI } from '@/utils/dateUtils';
 
 // Estado inicial
 type FormState = {
@@ -435,7 +436,7 @@ export default function NuevaRecurrentePage() {
                         selected={siguienteFecha}
                         onChange={(date: Date | null) => {
                           setSiguienteFecha(date);
-                          dispatch({ type: 'SET_FIELD', field: 'siguiente_fecha', value: date ? date.toISOString().split('T')[0] : '' });
+                          dispatch({ type: 'SET_FIELD', field: 'siguiente_fecha', value: formatDateForAPI(date) });
                           if (!date) {
                             setErrors((prev) => ({ ...prev, siguiente_fecha: 'Este campo es obligatorio' }));
                           } else {

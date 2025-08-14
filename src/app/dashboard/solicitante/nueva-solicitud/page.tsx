@@ -13,6 +13,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
 import Image from 'next/image';
+import { formatDateForAPI } from '@/utils/dateUtils';
 
 // Reducer para manejar el formulario
 type FormState = {
@@ -477,7 +478,7 @@ export default function NuevaSolicitudPage() {
                     selected={fechaLimitePago}
                     onChange={(date: Date | null) => {
                       setFechaLimitePago(date);
-                      dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: date ? date.toISOString().split('T')[0] : '' });
+                      dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: formatDateForAPI(date) });
                       if (!date) {
                         setErrors((prev) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
                       } else {
