@@ -74,7 +74,8 @@ const departamentoOptions = [
   { value: 'atencion a clientes', label: 'Atención a Clientes' },
   { value: 'tesoreria', label: 'Tesorería' },
   { value: 'nomina', label: 'Nómina' },
-  { value: 'atraccion de talento', label: 'Atracción de Talento' }
+  { value: 'atraccion de talento', label: 'Atracción de Talento' },
+  { value: 'direccion general', label: 'Dirección General' }
 ];
 
 const tipoPagoOptions = [

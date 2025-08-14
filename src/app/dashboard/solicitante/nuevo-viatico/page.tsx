@@ -271,7 +271,8 @@ export default function NuevoViaticoPage() {
                       <option value="atencion a clientes">ATENCIÓN A CLIENTES</option>
                       <option value="tesoreria">TESORERÍA</option>
                       <option value="nomina">NÓMINA</option>
-                      <option value="nomina">ATRACCIÓN DE TALENTO</option>
+                      <option value="atraccion de talento">ATRACCIÓN DE TALENTO</option>
+                      <option value="direccion general">DIRECCIÓN GENERAL</option>
                     </select>
                   </div>
                   <div className="flex flex-col gap-1">
