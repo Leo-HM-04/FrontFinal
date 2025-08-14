@@ -72,7 +72,7 @@ const tipoPagoOptions = [
 const departamentos = [
   'contabilidad', 'facturacion', 'cobranza', 'vinculacion',
   'administracion', 'ti', 'automatizaciones', 'comercial',
-  'atencion a clientes', 'tesoreria', 'nomina'
+  'atencion a clientes', 'tesoreria', 'nomina', 'atraccion de talento'
 ];
 
 const frecuencias = ['diario', 'semanal', 'quincenal', 'mensual'];
@@ -390,7 +390,7 @@ export default function NuevaRecurrentePage() {
                 {formData.tipo_pago !== '' && (
                   <div className="mt-4">
                     <label className="text-white/90 block mb-3 font-medium text-left">
-                      Descripción del tipo de pago
+                      Descripción del tipo de depa
                     </label>
                     <textarea
                       name="tipo_pago_descripcion"
