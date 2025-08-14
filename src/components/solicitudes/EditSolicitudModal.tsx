@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Solicitud } from '@/types';
 import { toast } from 'react-hot-toast';
+import { getCurrentUTC6Date, formatDateForDisplay } from '@/utils/dateUtils';
 
 interface EditSolicitudModalProps {
   isOpen: boolean;
@@ -106,7 +107,7 @@ export function EditSolicitudModal({ isOpen, onClose, solicitud, onSolicitudUpda
       const updatedSolicitud: Solicitud = {
         ...solicitud,
         ...formData,
-        updated_at: new Date().toISOString()
+        updated_at: getCurrentUTC6Date().toISOString()
       };
       
       onSolicitudUpdated(updatedSolicitud);
@@ -257,7 +258,7 @@ export function EditSolicitudModal({ isOpen, onClose, solicitud, onSolicitudUpda
                 {solicitud.estado.toUpperCase()}
               </span>
               <span className="text-gray-600">
-                Creada: {new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO')}
+                Creada: {formatDateForDisplay(solicitud.fecha_creacion)}
               </span>
             </div>
           </div>

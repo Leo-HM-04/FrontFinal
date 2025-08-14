@@ -71,10 +71,18 @@ export const formatDateForDisplay = (dateString: string, locale: string = 'es-MX
 /**
  * Formatea una fecha corta para mostrar en tablas
  */
-export const formatShortDate = (dateString: string, locale: string = 'es-MX'): string => {
+export const formatShortDate = (dateString: string, format: 'short' | 'dayMonth' = 'short', locale: string = 'es-MX'): string => {
   if (!dateString) return 'N/A';
   
   const date = parseUTC6Date(dateString);
+  
+  if (format === 'dayMonth') {
+    return date.toLocaleDateString(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      timeZone: 'America/Mexico_City' // UTC-6
+    });
+  }
   
   return date.toLocaleDateString(locale, {
     year: 'numeric',

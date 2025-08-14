@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Solicitud, Comprobante } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
+import { formatDateForDisplay, formatShortDate } from '@/utils/dateUtils';
 import '@/styles/modal.css';
 
 interface SolicitudDetailModalProps {
@@ -128,12 +129,7 @@ return (
             Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{solicitud.folio || '-'}</span>
           </p>
           <p className="text-blue-200 mt-2">
-            Creada el {new Date(solicitud.fecha_creacion).toLocaleDateString('es-CO', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
+            Creada el {formatDateForDisplay(solicitud.fecha_creacion)}
           </p>
         </div>
         <div className="text-right">
@@ -203,11 +199,7 @@ return (
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Fecha límite</span>
                 <p className="text-blue-900 font-medium">{
                   solicitud.fecha_limite_pago
-                    ? new Date(solicitud.fecha_limite_pago).toLocaleDateString('es-MX', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })
+                    ? formatDateForDisplay(solicitud.fecha_limite_pago)
                     : '-'
                 }</p>
               </div>
@@ -275,16 +267,12 @@ return (
             <div className="flex items-center">
               <div className="flex-shrink-0 h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center mr-3">
                 <span className="text-blue-700 text-xs">
-                  {new Date(solicitud.fecha_creacion).toLocaleDateString('es-MX', {day: '2-digit', month: '2-digit'}).replace('/', '/')}
+                  {formatShortDate(solicitud.fecha_creacion, 'dayMonth')}
                 </span>
               </div>
               <div>
                 <p className="text-xs text-blue-700/70">Fecha de creación</p>
-                <p className="text-sm font-medium text-blue-900">{new Date(solicitud.fecha_creacion).toLocaleDateString('es-MX', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}</p>
+                <p className="text-sm font-medium text-blue-900">{formatDateForDisplay(solicitud.fecha_creacion)}</p>
               </div>
             </div>
           </div>
