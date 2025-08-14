@@ -14,7 +14,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
-import { formatDateForAPI, parseUTC6Date } from '@/utils/dateUtils';
+import { formatDateForAPI, parseBackendDateForForm } from '@/utils/dateUtils';
 
 // Opciones igual que en crear
 const tipoPagoOptions = [
@@ -67,7 +67,7 @@ export default function EditarRecurrentePage() {
         setForm(data);
         // Normaliza fecha para el datepicker
         if (data.siguiente_fecha) {
-          setFechaInicio(parseUTC6Date(data.siguiente_fecha));
+          setFechaInicio(parseBackendDateForForm(data.siguiente_fecha));
         }
       } catch {
         setError("No se pudo cargar la plantilla");

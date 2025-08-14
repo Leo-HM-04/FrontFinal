@@ -14,8 +14,7 @@ import { SolicitudesService } from "@/services/solicitudes.service";
 import { Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { Solicitud } from "@/types";
-import { format } from "date-fns";
-import { formatDateForAPI, parseUTC6Date } from '@/utils/dateUtils';
+import { formatDateForAPI, parseBackendDateForForm } from '@/utils/dateUtils';
 
 type FormState = {
   departamento: string;
@@ -150,7 +149,7 @@ export default function EditarSolicitudPage() {
           banco_destino
         }});
         setFacturaUrl(data.factura_url || null);
-        setFechaLimitePago(data.fecha_limite_pago ? parseUTC6Date(data.fecha_limite_pago) : null);
+        setFechaLimitePago(data.fecha_limite_pago ? parseBackendDateForForm(data.fecha_limite_pago) : null);
         setEstado(data.estado ?? '');
       } catch {
         toast.error('No se pudo cargar la solicitud');
