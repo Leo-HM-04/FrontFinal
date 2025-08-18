@@ -45,10 +45,10 @@ export default function PagadorRecurrentesRedirect() {
 
                   <div className="pt-4">
                     <Link 
-                      href="/dashboard/pagador/solicitudes"
+                      href="/dashboard/pagador/pagos/pendientes"
                       className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
                     >
-                      <span>Ir a Solicitudes Normales</span>
+                      <span>Ir a Pagos Pendientes</span>
                       <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
