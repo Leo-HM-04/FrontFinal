@@ -61,7 +61,6 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
     { href: '/dashboard/pagador/recurrentes', label: 'Pagos Recurrentes', icon: Repeat },
     { href: '/dashboard/pagador/pagos/historial', label: 'Historial de Pagos', icon: FileText },
     { href: '/dashboard/pagador/pagos/subir-comprobante', label: 'Subir Comprobante', icon: FileText },
-    { href: '/dashboard/pagador/pagos/subir-comprobante-recurrente', label: 'Subir Comprobante Recurrente', icon: FileCheck2 },
     { href: '/dashboard/pagador/comprobantes-viaticos', label: 'Comprobantes de Viáticos', icon: FileCheck2 },
     { href: '/dashboard/pagador/graficas', label: 'Gráficas', icon: FileText },
     { href: '/dashboard/pagador/perfil', label: 'Mi Perfil', icon: User },
