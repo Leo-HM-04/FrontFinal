@@ -51,6 +51,12 @@ export class RecurrentesService {
     return response.data;
   }
 
+  // Obtener plantillas aprobadas para pagador
+  static async obtenerTodasParaPagador(): Promise<PlantillaRecurrente[]> {
+    const response = await api.get('/recurrentes/aprobadas');
+    return response.data;
+  }
+
   // Obtener todas las plantillas pendientes
   static async obtenerPendientes(): Promise<PlantillaRecurrente[]> {
     const response = await api.get('/recurrentes/pendientes');

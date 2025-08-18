@@ -32,11 +32,11 @@ export default function SubirComprobanteRecurrentePage() {
     const fetchRecurrentes = async () => {
       try {
         const data = await RecurrentesService.obtenerTodasParaPagador();
-        const pagadas = data.filter((r) => r.estado === "pagada");
-        setRecurrentes(pagadas);
-        // Consultar comprobantes para cada recurrente pagada
+        const aprobadas = data.filter((r) => r.estado === "aprobada");
+        setRecurrentes(aprobadas);
+        // Consultar comprobantes para cada recurrente aprobada
         const comprobantesObj: { [id: number]: string | null } = {};
-        pagadas.forEach((rec) => {
+        aprobadas.forEach((rec) => {
           comprobantesObj[rec.id_recurrente] = rec.com_recurrente || null;
         });
         setComprobantes(comprobantesObj);
@@ -211,13 +211,13 @@ export default function SubirComprobanteRecurrentePage() {
             onSubmit={async (file, id) => {
               try {
                 if (!id) throw new Error("No hay id de recurrente");
-                await RecurrentesService.subirComprobante(id, file);
+                await RecurrentesService.subirFactura(id, file);
                 // Recargar lista y comprobantes
                 const data = await RecurrentesService.obtenerTodasParaPagador();
-                const pagadas = data.filter((r) => r.estado === "pagada");
-                setRecurrentes(pagadas);
+                const aprobadas = data.filter((r) => r.estado === "aprobada");
+                setRecurrentes(aprobadas);
                 const comprobantesObj: { [id: number]: string | null } = {};
-                pagadas.forEach((rec) => {
+                aprobadas.forEach((rec) => {
                   comprobantesObj[rec.id_recurrente] = rec.com_recurrente || null;
                 });
                 setComprobantes(comprobantesObj);
