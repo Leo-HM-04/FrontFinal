@@ -52,7 +52,7 @@ export default function UserNotifications({ token }: { token: string }) {
   return (
     <>
       {/* Sonido de notificación */}
-      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <audio ref={audioRef} src="/assets/audio/elchido.mp3" preload="auto" />
       <ToastContainer
         position="top-right"
         autoClose={5000}

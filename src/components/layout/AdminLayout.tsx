@@ -22,6 +22,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const { user, logout } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const prevUnreadCount = useRef<number>(0);
   const pathname = usePathname();
 
@@ -122,8 +123,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     if (!user) return;
     
-    let hasInitialized = false;
-    
     const fetchAndCheck = async () => {
       try {
         const token = getAuthToken();
@@ -156,7 +155,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         
         // Marcar como inicializado después del primer fetch
         if (!hasInitialized) {
-          hasInitialized = true;
+          setHasInitialized(true);
         }
       } catch (error) {
         console.error('Error al obtener notificaciones:', error);
@@ -166,7 +165,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     fetchAndCheck();
     const interval = setInterval(fetchAndCheck, 10000); // cada 10 segundos
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, hasInitialized]);
   // Manejar cierre de sesión
   const handleLogout = useCallback(async () => {
     try {
@@ -180,7 +179,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <>
       {/* Audio global para notificaciones */}
-      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <audio ref={audioRef} src="/assets/audio/elchido.mp3" preload="auto" />
       <div className="min-h-screen font-sans flex flex-col" style={backgroundGradient}>
         {/* Header */}
         <header

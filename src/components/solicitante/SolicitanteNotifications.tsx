@@ -60,7 +60,7 @@ type FiltroType = 'todas' | 'no_leidas';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 const ITEMS_PER_PAGE = 10;
-const NOTIFICATION_SOUND_PATH = "/assets/audio/bell-notification.mp3";
+const NOTIFICATION_SOUND_PATH = "/assets/audio/elchido.mp3";
 
 // ========================================
 // CONTEXTO

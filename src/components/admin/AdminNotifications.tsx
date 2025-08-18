@@ -534,7 +534,7 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
     <NotiContext.Provider value={contextValue}>
       <audio 
         ref={audioRef} 
-        src="/assets/audio/bell-notification.mp3" 
+        src="/assets/audio/elchido.mp3" 
         preload="auto" 
         aria-hidden="true"
       />

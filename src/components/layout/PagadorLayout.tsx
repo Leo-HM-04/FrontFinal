@@ -21,6 +21,7 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Guardar el último contador para detectar nuevas notificaciones
   const prevUnreadCount = useRef<number>(0);
@@ -118,17 +119,28 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
       const data: Notificacion[] = await res.json();
       const count = Array.isArray(data) ? data.filter((n) => !n.leida).length : 0;
       setUnreadCount(count);
-      if (count > prevUnreadCount.current) {
+      
+      // Solo reproducir sonido si ya se inicializó y hay nuevas notificaciones
+      if (hasInitialized && count > prevUnreadCount.current && count > 0) {
         if (audioRef.current) {
-          audioRef.current.play().catch(() => {});
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(() => {
+            console.log('No se pudo reproducir el sonido de notificación');
+          });
         }
       }
+      
       prevUnreadCount.current = count;
+      
+      // Marcar como inicializado después del primer fetch
+      if (!hasInitialized) {
+        setHasInitialized(true);
+      }
     };
     fetchAndCheck();
     const interval = setInterval(fetchAndCheck, 10000); // cada 10 segundos
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, hasInitialized]);
 
   // Manejar cierre de sesión con pantalla de transición
   const handleLogout = useCallback(async () => {
@@ -139,7 +151,7 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
   return (
     <>
       {/* Audio global para notificaciones */}
-      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <audio ref={audioRef} src="/assets/audio/elchido.mp3" preload="auto" />
       <div className="min-h-screen font-sans flex flex-col" style={backgroundGradient}>
       {/* Header */}
       <header style={{background: 'transparent', borderBottom: 'none', boxShadow: 'none', padding: 0}}>

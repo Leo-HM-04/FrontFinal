@@ -26,6 +26,7 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -58,8 +59,6 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
   // Polling para detectar nuevas notificaciones no leídas y reproducir sonido
   useEffect(() => {
     if (!user) return;
-    
-    let hasInitialized = false;
     
     const fetchAndCheck = async () => {
       let token = undefined;
@@ -102,7 +101,7 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
         
         // Marcar como inicializado después del primer fetch
         if (!hasInitialized) {
-          hasInitialized = true;
+          setHasInitialized(true);
         }
       } catch (error) {
         console.error('Error al obtener notificaciones:', error);
@@ -112,12 +111,12 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
     fetchAndCheck();
     const interval = setInterval(fetchAndCheck, 10000); // cada 10 segundos
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, hasInitialized]);
 
   return (
     <>
       {/* Audio global para notificaciones */}
-      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <audio ref={audioRef} src="/assets/audio/elchido.mp3" preload="auto" />
       <div className="min-h-screen font-sans" style={{ background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)' }}>
       {/* Header */}
       <header style={{background: 'transparent', borderBottom: 'none', boxShadow: 'none', padding: 0}}>

@@ -240,7 +240,7 @@ export default function Notifications({ open, onClose }: NotificationsProps) {
 
   return (
     <>
-      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <audio ref={audioRef} src="/assets/audio/elchido.mp3" preload="auto" />
       
       <ToastContainer
         position="top-right"

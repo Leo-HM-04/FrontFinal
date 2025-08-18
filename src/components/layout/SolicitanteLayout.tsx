@@ -47,6 +47,7 @@ interface SolicitanteLayoutProps {
 export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
   // Estado para el contador de notificaciones no leídas
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Guardar el último contador para detectar nuevas notificaciones
   const prevUnreadCount = useRef<number>(0);
@@ -116,8 +117,6 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
 
   // Cargar el contador al montar el layout y hacer polling para detectar nuevas notificaciones
   useEffect(() => {
-    let hasInitialized = false;
-    
     const checkAndPlay = async () => {
       try {
         await fetchUnreadCount();
@@ -139,7 +138,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
         
         // Marcar como inicializado después del primer fetch
         if (!hasInitialized) {
-          hasInitialized = true;
+          setHasInitialized(true);
         }
       } catch (error) {
         console.error('Error al verificar notificaciones:', error);
@@ -151,7 +150,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
     return () => {
       clearInterval(interval);
     };
-  }, [fetchUnreadCount, unreadCount]);
+  }, [fetchUnreadCount, unreadCount, hasInitialized]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
@@ -196,7 +195,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
   return (
     <>
       {/* Audio global para notificaciones */}
-      <audio ref={audioRef} src="/assets/audio/bell-notification.mp3" preload="auto" />
+      <audio ref={audioRef} src="/assets/audio/elchido.mp3" preload="auto" />
       <div className="min-h-screen font-sans flex flex-col relative overflow-x-hidden" style={backgroundGradient}>
       {/* Header */}
       <header style={{background: 'transparent', borderBottom: 'none', boxShadow: 'none', padding: 0}}>
