@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, Fragment } from "react";
+import { useRouter } from "next/navigation";
 import { Bell, X, Check, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, Transition } from "@headlessui/react";
+import { redirectToEntity, NotificacionWithRedirect } from "@/utils/notificationRedirect";
 
 type NotificationType = 'info' | 'success' | 'warning' | 'error';
 
@@ -13,6 +15,8 @@ interface Notification {
   read: boolean;
   date: string;
   type?: NotificationType;
+  entityType?: 'solicitud' | 'viatico' | 'recurrente';
+  entityId?: number;
 }
 
 interface RawNotification {
@@ -160,6 +164,7 @@ const formatNotificationMessage = (message: string): string => {
 
 export default function Notifications({ open, onClose }: NotificationsProps) {
   const { user } = useAuth();
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
@@ -322,6 +327,37 @@ export default function Notifications({ open, onClose }: NotificationsProps) {
     await fetchNotifications();
   };
 
+  // Función para convertir notificación local al formato del servicio
+  const convertToRedirectFormat = (notification: Notification): NotificacionWithRedirect => {
+    // Extraer entidad y ID del mensaje (básico)
+    const entityMatches = notification.message.match(/(solicitud|viatico|recurrente).*?(\d+)/i);
+    
+    return {
+      id_notificacion: notification.id,
+      mensaje: notification.message,
+      leida: notification.read,
+      fecha_creacion: notification.date,
+      tipo: notification.type || 'info',
+      entidad: entityMatches?.[1]?.toLowerCase() || 'solicitud',
+      entidad_id: entityMatches?.[2] ? parseInt(entityMatches[2]) : undefined,
+      rol: 'pagador_banca',
+      accion: 'default'
+    };
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    // Marcar como leída si no lo está
+    if (!notification.read) {
+      await markAsRead(notification.id);
+    }
+    
+    // Convertir al formato esperado por el servicio
+    const redirectNotification = convertToRedirectFormat(notification);
+    
+    // Redirigir usando el servicio y cerrar el modal
+    redirectToEntity(redirectNotification, router, onClose);
+  };
+
   const filteredNotifications = notifications
     .filter(n => filter === 'all' ? true : !n.read)
     .sort((a, b) => (a.read === b.read) ? 0 : a.read ? 1 : -1);
@@ -434,9 +470,10 @@ export default function Notifications({ open, onClose }: NotificationsProps) {
                           return (
                             <div
                               key={notification.id}
-                              className={`p-4 transition-colors duration-200 hover:bg-gray-50 ${
+                              className={`p-4 transition-colors duration-200 hover:bg-gray-50 cursor-pointer ${
                                 notification.read ? '' : 'bg-blue-50/50'
                               }`}
+                              onClick={() => handleNotificationClick(notification)}
                             >
                               <div className="flex items-start gap-3">
                                 <span className={`relative flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${

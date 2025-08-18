@@ -10,22 +10,28 @@ import {
   createContext,
   useContext
 } from "react";
+import { useRouter } from "next/navigation";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Bell, BellRing, Loader2, AlertCircle, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, Transition } from "@headlessui/react";
+import { redirectToEntity, markNotificationAsRead, NotificacionWithRedirect } from "@/utils/notificationRedirect";
 
 // ========================================
 // TIPOS Y INTERFACES
 // ========================================
 
-interface Notificacion {
+interface Notificacion extends NotificacionWithRedirect {
   id_notificacion: number;
   mensaje: string;
   leida: boolean;
   fecha_creacion: string;
   tipo: NotificationType;
+  entidad?: string;
+  entidad_id?: number;
+  rol?: string;
+  accion?: string;
 }
 
 type NotificationType = 'info' | 'success' | 'warning' | 'error';
@@ -300,10 +306,12 @@ const EmptyNotificationsState = ({ filtro }: { filtro: FiltroType }) => (
 
 const NotificationItem = ({ 
   notification, 
-  onMarkAsRead 
+  onMarkAsRead,
+  onNotificationClick 
 }: { 
   notification: Notificacion;
   onMarkAsRead: (id: number) => Promise<void>;
+  onNotificationClick: (notification: Notificacion) => void;
 }) => {
   const [isMarking, setIsMarking] = useState(false);
 
@@ -331,7 +339,8 @@ const NotificationItem = ({
     };
   }, [notification.fecha_creacion]);
 
-  const handleMarkAsRead = async () => {
+  const handleMarkAsRead = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Evitar que se dispare el onClick del contenedor
     if (notification.leida || isMarking) return;
     
     setIsMarking(true);
@@ -342,14 +351,23 @@ const NotificationItem = ({
     }
   };
 
+  const handleNotificationClick = () => {
+    onNotificationClick(notification);
+  };
+
+  // Determinar si la notificación es clickeable (tiene información para redirigir)
+  const isClickable = notification.entidad && notification.entidad_id;
+
   return (
     <div
-      className={`p-4 transition-all duration-200 hover:bg-gray-50 border-l-4 ${
+      className={`p-4 transition-all duration-200 border-l-4 ${
         !notification.leida 
           ? 'bg-blue-50/50 border-l-blue-500' 
           : 'border-l-transparent'
-      }`}
+      } ${isClickable ? 'hover:bg-gray-50 cursor-pointer' : 'hover:bg-gray-25'}`}
       role="listitem"
+      onClick={isClickable ? handleNotificationClick : undefined}
+      title={isClickable ? 'Hacer clic para ir al elemento' : undefined}
     >
       <div className="flex items-start gap-3">
         <span 
@@ -403,6 +421,15 @@ const NotificationItem = ({
             )}
           </button>
         )}
+        
+        {/* Indicador visual de que es clickeable */}
+        {isClickable && (
+          <div className="ml-2 flex items-center text-blue-500">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -445,6 +472,7 @@ export default function SolicitanteNotifications({
   onClose 
 }: SolicitanteNotificationsProps) {
   useAuth();
+  const router = useRouter();
 
   // Estados
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
@@ -539,6 +567,29 @@ export default function SolicitanteNotifications({
       setMarkingAll(false);
     }
   };
+
+  // Función para manejar el clic en una notificación y redirigir
+  const handleNotificationClick = useCallback(async (notification: Notificacion) => {
+    try {
+      // Marcar como leída si no lo está
+      if (!notification.leida) {
+        await markNotificationAsRead(notification.id_notificacion);
+        await fetchNotificaciones();
+      }
+
+      // Redirigir usando el servicio centralizado
+      redirectToEntity(
+        {
+          ...notification,
+          rol: 'solicitante' // Asegurar que el rol esté establecido
+        },
+        router,
+        onClose
+      );
+    } catch (error) {
+      console.error('Error al procesar clic en notificación:', error);
+    }
+  }, [router, onClose, fetchNotificaciones]);
 
   const handleClose = () => {
     setOpenModal(false);
@@ -753,6 +804,7 @@ export default function SolicitanteNotifications({
                           key={notification.id_notificacion}
                           notification={notification}
                           onMarkAsRead={handleMarkAsRead}
+                          onNotificationClick={handleNotificationClick}
                         />
                       ))}
                     </div>

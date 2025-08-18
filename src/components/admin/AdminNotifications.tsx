@@ -9,6 +9,7 @@ import {
   useContext,
   useMemo 
 } from "react";
+import { useRouter } from "next/navigation";
 import { ToastContainer, toast, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Fragment } from "react";
@@ -16,6 +17,7 @@ import { Bell, X, Check, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, Transition } from "@headlessui/react";
 import { getAuthToken } from "@/utils/auth";
+import { redirectToEntity, NotificacionWithRedirect } from "@/utils/notificationRedirect";
 
 // ========================================
 // TIPOS Y INTERFACES
@@ -227,10 +229,12 @@ const EmptyState = ({ filtro }: { filtro: FiltroType }) => (
 
 const NotificationItem = ({ 
   notification, 
-  onMarkAsRead 
+  onMarkAsRead,
+  onClick
 }: { 
   notification: Notificacion;
   onMarkAsRead: (id: number) => Promise<void>;
+  onClick?: (notification: Notificacion) => void;
 }) => {
   const [isMarking, setIsMarking] = useState(false);
 
@@ -242,6 +246,12 @@ const NotificationItem = ({
       await onMarkAsRead(notification.id);
     } finally {
       setIsMarking(false);
+    }
+  };
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick(notification);
     }
   };
 
@@ -273,11 +283,12 @@ const NotificationItem = ({
 
   return (
     <div
-      className={`p-4 transition-all duration-200 hover:bg-gray-50 border-l-4 ${
+      className={`p-4 transition-all duration-200 hover:bg-gray-50 border-l-4 cursor-pointer ${
         !notification.leida 
           ? 'bg-blue-50/50 border-l-blue-500' 
           : 'border-l-transparent'
       }`}
+      onClick={handleClick}
       role="listitem"
     >
       <div className="flex items-start gap-3">
@@ -343,6 +354,7 @@ const NotificationItem = ({
 
 export default function AdminNotifications({ open, onClose }: AdminNotificationsProps) {
   const { user } = useAuth();
+  const router = useRouter();
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [loading, setLoading] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
@@ -434,6 +446,37 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
       console.error('Error marking notification as read:', err);
     }
   }, [fetchNotificaciones]);
+
+  // Función para convertir notificación local al formato del servicio
+  const convertToRedirectFormat = (notification: Notificacion): NotificacionWithRedirect => {
+    // Extraer entidad y ID del mensaje (básico)
+    const entityMatches = notification.mensaje.match(/(solicitud|viatico|recurrente).*?(\d+)/i);
+    
+    return {
+      id_notificacion: notification.id,
+      mensaje: notification.mensaje,
+      leida: notification.leida,
+      fecha_creacion: notification.fecha,
+      tipo: notification.tipo || 'info',
+      entidad: entityMatches?.[1]?.toLowerCase() || 'solicitud',
+      entidad_id: entityMatches?.[2] ? parseInt(entityMatches[2]) : undefined,
+      rol: 'admin_general',
+      accion: 'default'
+    };
+  };
+
+  const handleNotificationClick = async (notification: Notificacion) => {
+    // Marcar como leída si no lo está
+    if (!notification.leida) {
+      await handleMarkAsRead(notification.id);
+    }
+    
+    // Convertir al formato esperado por el servicio
+    const redirectNotification = convertToRedirectFormat(notification);
+    
+    // Redirigir usando el servicio y cerrar el modal
+    redirectToEntity(redirectNotification, router, onClose);
+  };
 
   const handleMarkAllAsRead = async () => {
     const unreadNotifications = notificaciones.filter(n => !n.leida);
@@ -674,6 +717,7 @@ export default function AdminNotifications({ open, onClose }: AdminNotifications
                           key={notification.id}
                           notification={notification}
                           onMarkAsRead={handleMarkAsRead}
+                          onClick={handleNotificationClick}
                         />
                       ))}
                       

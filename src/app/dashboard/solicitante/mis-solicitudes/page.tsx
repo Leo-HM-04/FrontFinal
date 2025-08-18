@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
@@ -30,7 +30,7 @@ import {
   exportMisSolicitudesExcel,
   exportMisSolicitudesPDF
 } from '@/utils/exportMisSolicitudes';
-import { formatDateForDisplay, formatShortDate } from '@/utils/dateUtils';
+import { formatShortDate } from '@/utils/dateUtils';
 
 // Tipos para mejor organización
 interface EstadisticasSolicitudes {
@@ -114,9 +114,10 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-// Componente principal
-export default function MisSolicitudesPage() {
+// Componente que maneja los search params
+function MisSolicitudesContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   // Estados principales
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -143,6 +144,27 @@ export default function MisSolicitudesPage() {
   
   // Estados de exportación
   const [showExportModal, setShowExportModal] = useState(false);
+
+  // Estados para highlighting de notificaciones
+  const [highlightedId, setHighlightedId] = useState<number | null>(null);
+
+  // Manejo de parámetros URL para highlighting de notificaciones
+  useEffect(() => {
+    const highlightParam = searchParams?.get('highlight');
+    if (highlightParam) {
+      const id = parseInt(highlightParam);
+      if (!isNaN(id)) {
+        setHighlightedId(id);
+        // Remover el parámetro después de un tiempo
+        setTimeout(() => {
+          setHighlightedId(null);
+          const newSearchParams = new URLSearchParams(searchParams?.toString() || '');
+          newSearchParams.delete('highlight');
+          router.replace(`${window.location.pathname}?${newSearchParams.toString()}`, { scroll: false });
+        }, 3000); // Highlight por 3 segundos
+      }
+    }
+  }, [searchParams, router]);
 
   // Calcular estadísticas
   const estadisticas: EstadisticasSolicitudes = {
@@ -567,8 +589,16 @@ export default function MisSolicitudesPage() {
                   ) : 
                     currentSolicitudes.map((solicitud) => {
                       const estadoConfig = getEstadoConfig(solicitud.estado);
+                      const isHighlighted = highlightedId === solicitud.id_solicitud;
                       return (
-                        <tr key={solicitud.id_solicitud} className="hover:bg-gray-50 transition-colors">
+                        <tr 
+                          key={solicitud.id_solicitud} 
+                          className={`hover:bg-gray-50 transition-colors ${
+                            isHighlighted 
+                              ? 'bg-blue-50 ring-2 ring-blue-300 ring-inset animate-pulse' 
+                              : ''
+                          }`}
+                        >
                           <td className="px-6 py-4">
                             <div className="font-mono text-sm font-semibold text-gray-900">
                               {solicitud.folio || '-'}
@@ -774,5 +804,14 @@ export default function MisSolicitudesPage() {
         </div>
       </SolicitanteLayout>
     </ProtectedRoute>
+  );
+}
+
+// Componente principal con Suspense
+export default function MisSolicitudesPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <MisSolicitudesContent />
+    </Suspense>
   );
 }
