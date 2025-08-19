@@ -291,7 +291,7 @@ export default function NuevaRecurrentePage() {
                     )}
                   </div>
 
-                  {/* Sección de Cuenta Adicional */}
+                  {/* SECCIÓN: CUENTA ADICIONAL (OPCIONAL) */}
                   <div className="bg-white/5 rounded-xl p-6 border border-white/10">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                       <CreditCard className="w-5 h-5 mr-2" />
