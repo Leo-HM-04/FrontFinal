@@ -293,12 +293,11 @@ export default function NuevaRecurrentePage() {
 
                   {/* Sección de Cuenta Adicional */}
                   <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                    <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                       <CreditCard className="w-5 h-5 mr-2" />
                       Cuenta Adicional (Opcional)
-                    </h4>
-                    
-                    <div className="space-y-4">
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Campo Cuenta */}
                       <div>
                         <label className="block text-base font-medium text-white/90 mb-3">
