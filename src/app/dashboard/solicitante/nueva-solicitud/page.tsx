@@ -40,8 +40,6 @@ type FormState = {
   tipo_tarjeta_2: string;
   cuenta_2: string;
   banco_cuenta_2: string;
-  monto_2: string;
-  concepto_2: string;
 };
 
 type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null | boolean };
@@ -69,9 +67,7 @@ const initialState: FormState = {
   cuenta_destino_2: '',
   tipo_tarjeta_2: '',
   cuenta_2: '',
-  banco_cuenta_2: '',
-  monto_2: '',
-  concepto_2: ''
+  banco_cuenta_2: ''
 };
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
@@ -259,9 +255,7 @@ export default function NuevaSolicitudPage() {
       cuenta_destino_2: formData.tiene_segunda_forma_pago ? formData.cuenta_destino_2 : '',
       tipo_tarjeta_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? formData.tipo_tarjeta_2 : '',
       cuenta_2: formData.tiene_segunda_forma_pago ? (formData.cuenta_2 || null) : null,
-      banco_cuenta_2: formData.tiene_segunda_forma_pago ? (formData.banco_cuenta_2 || null) : null,
-      monto_2: formData.tiene_segunda_forma_pago ? formData.monto_2 : '',
-      concepto_2: formData.tiene_segunda_forma_pago ? formData.concepto_2 : ''
+      banco_cuenta_2: formData.tiene_segunda_forma_pago ? (formData.banco_cuenta_2 || null) : null
       };
       const response = await SolicitudesService.createWithFiles(solicitudData);
       let successMsg = 'Solicitud creada exitosamente';
@@ -554,8 +548,6 @@ export default function NuevaSolicitudPage() {
                         dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta_2', value: '' });
                         dispatch({ type: 'SET_FIELD', field: 'cuenta_2', value: '' });
                         dispatch({ type: 'SET_FIELD', field: 'banco_cuenta_2', value: '' });
-                        dispatch({ type: 'SET_FIELD', field: 'monto_2', value: '' });
-                        dispatch({ type: 'SET_FIELD', field: 'concepto_2', value: '' });
                       }}
                       className="text-red-400 hover:text-red-300 text-sm"
                     >

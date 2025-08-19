@@ -152,8 +152,6 @@ export class SolicitudesService {
     tipo_tarjeta_2?: string;
     cuenta_2?: string | null;
     banco_cuenta_2?: string | null;
-    monto_2?: string | number;
-    concepto_2?: string;
   }): Promise<unknown> {
     const token = localStorage.getItem('token');
     const formData = new FormData();
@@ -182,8 +180,6 @@ export class SolicitudesService {
       formData.append('tipo_tarjeta_2', data.tipo_tarjeta_2 || '');
       formData.append('cuenta_2', data.cuenta_2 || '');
       formData.append('banco_cuenta_2', data.banco_cuenta_2 || '');
-      formData.append('monto_2', String(data.monto_2 || ''));
-      formData.append('concepto_2', data.concepto_2 || '');
     }
     
     const response = await api.post('/solicitudes', formData, {
