@@ -275,14 +275,18 @@ export default function NuevoViaticoPage() {
                   {formularios[idx].form.cuenta && formularios[idx].form.cuenta.trim() !== '' && (
                     <div className="flex flex-col gap-1">
                       <label className="text-blue-900 font-bold text-base">Banco al que pertenece *</label>
-                      <input 
+                      <select 
                         name="banco_cuenta" 
-                        placeholder="Ingresa el nombre del banco" 
                         value={formularios[idx].form.banco_cuenta || ''} 
                         onChange={e => handleChange(idx, e)} 
                         required
                         className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-green-200 focus:ring-2 focus:ring-green-400" 
-                      />
+                      >
+                        <option value="" disabled>Selecciona un banco</option>
+                        {bancoOptions.map(banco => (
+                          <option key={banco} value={banco}>{banco}</option>
+                        ))}
+                      </select>
                       {formularios[idx].errors?.banco_cuenta && (<span className="text-red-500 text-sm">{formularios[idx].errors.banco_cuenta}</span>)}
                     </div>
                   )}
