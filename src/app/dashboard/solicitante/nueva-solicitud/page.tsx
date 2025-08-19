@@ -615,47 +615,6 @@ export default function NuevaSolicitudPage() {
                       className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
                     />
                   </div>
-
-                  {/* Monto y Concepto para segunda forma de pago */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
-                        <DollarSign className="w-4 h-4 inline mr-2" />
-                        Monto *
-                      </label>
-                      <NumericFormat
-                        value={formData.monto_2}
-                        name="monto_2"
-                        thousandSeparator=","
-                        decimalSeparator="."
-                        allowNegative={false}
-                        allowLeadingZeros={false}
-                        decimalScale={2}
-                        fixedDecimalScale
-                        placeholder="0.00"
-                        onValueChange={({ value }) => {
-                          dispatch({ type: 'SET_FIELD', field: 'monto_2', value: value || '' });
-                        }}
-                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
-                        <MessageSquare className="w-4 h-4 inline mr-2" />
-                        Concepto *
-                      </label>
-                      <input
-                        type="text"
-                        name="concepto_2"
-                        value={formData.concepto_2}
-                        onChange={handleInputChange}
-                        placeholder="Describe el concepto específico"
-                        required={formData.tiene_segunda_forma_pago}
-                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
-                      />
-                    </div>
-                  </div>
                 </div>
               )}
 
