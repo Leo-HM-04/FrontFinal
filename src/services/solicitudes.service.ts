@@ -131,7 +131,7 @@ export class SolicitudesService {
   static async createWithFiles(data: {
     departamento: string;
     monto: string | number;
-    cuenta_destino: string;
+    cuenta_destino: string | null;
     concepto: string;
     tipo_pago: string;
     tipo_cuenta_destino: string;
@@ -148,7 +148,7 @@ export class SolicitudesService {
     tiene_segunda_forma_pago?: boolean;
     tipo_cuenta_destino_2?: string;
     banco_destino_2?: string;
-    cuenta_destino_2?: string;
+    cuenta_destino_2?: string | null;
     tipo_tarjeta_2?: string;
     cuenta_2?: string | null;
     banco_cuenta_2?: string | null;
@@ -157,7 +157,7 @@ export class SolicitudesService {
     const formData = new FormData();
     formData.append('departamento', data.departamento);
     formData.append('monto', String(data.monto));
-    formData.append('cuenta_destino', data.cuenta_destino);
+    formData.append('cuenta_destino', data.cuenta_destino || '');
     formData.append('concepto', data.concepto);
     formData.append('tipo_pago', data.tipo_pago);
     formData.append('fecha_limite_pago', data.fecha_limite_pago);

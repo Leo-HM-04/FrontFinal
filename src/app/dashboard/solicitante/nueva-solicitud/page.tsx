@@ -94,12 +94,20 @@ export default function NuevaSolicitudPage() {
   if (formData.tipo_cuenta_destino === 'Número de Tarjeta') {
     cuentaConfig = {
       placeholder: 'Número de tarjeta',
-      errorMsg: 'Ingresa un número de tarjeta válido.'
+      errorMsg: 'Ingresa un número de tarjeta válido.',
+      required: true
+    };
+  } else if (formData.tipo_cuenta_destino === 'Tarjeta Institucional') {
+    cuentaConfig = {
+      placeholder: 'Opcional',
+      errorMsg: '',
+      required: false
     };
   } else {
     cuentaConfig = {
       placeholder: 'Número de cuenta CLABE',
-      errorMsg: 'Ingresa un número de cuenta CLABE válido.'
+      errorMsg: 'Ingresa un número de cuenta CLABE válido.',
+      required: true
     };
   }
 
@@ -203,12 +211,17 @@ export default function NuevaSolicitudPage() {
     setLoading(true);
     const newErrors: Record<string, string> = {};
     // Validar campos requeridos
-    const requiredFields = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'fecha_limite_pago', 'factura_file', 'nombre_persona'];
+    const requiredFields = ['departamento', 'monto', 'concepto', 'fecha_limite_pago', 'factura_file', 'nombre_persona'];
     requiredFields.forEach(field => {
       if (!formData[field as keyof typeof formData]) {
         newErrors[field] = 'Este campo es obligatorio';
       }
     });
+    
+    // Validar cuenta_destino solo si no es Tarjeta Institucional
+    if (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && !formData.cuenta_destino) {
+      newErrors['cuenta_destino'] = 'Este campo es obligatorio';
+    }
     
     // Validar cuenta adicional: si se llena cuenta, banco_cuenta es obligatorio
     if (formData.cuenta && formData.cuenta.trim() !== '') {
@@ -217,10 +230,10 @@ export default function NuevaSolicitudPage() {
       }
     }
     
-    if (cuentaValida === false) {
+    if (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
       newErrors['cuenta_destino'] = 'La cuenta destino no es válida o no existe.';
     }
-    if (checkingCuenta) {
+    if (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
       newErrors['cuenta_destino'] = 'Espera a que termine la verificación de la cuenta destino.';
     }
     setErrors(newErrors);
@@ -235,7 +248,7 @@ export default function NuevaSolicitudPage() {
       const solicitudData = {
       departamento: formData.departamento,
       monto: formData.monto,
-      cuenta_destino: formData.cuenta_destino,
+      cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || null) : formData.cuenta_destino,
       concepto: formData.concepto,
       tipo_pago: formData.tipo_pago,
       tipo_pago_descripcion: formData.tipo_pago_descripcion,
@@ -252,7 +265,9 @@ export default function NuevaSolicitudPage() {
       tiene_segunda_forma_pago: formData.tiene_segunda_forma_pago,
       tipo_cuenta_destino_2: formData.tiene_segunda_forma_pago ? formData.tipo_cuenta_destino_2 : '',
       banco_destino_2: formData.tiene_segunda_forma_pago ? formData.banco_destino_2 : '',
-      cuenta_destino_2: formData.tiene_segunda_forma_pago ? formData.cuenta_destino_2 : '',
+      cuenta_destino_2: formData.tiene_segunda_forma_pago 
+        ? (formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.cuenta_destino_2 || null) : formData.cuenta_destino_2) 
+        : '',
       tipo_tarjeta_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? formData.tipo_tarjeta_2 : '',
       cuenta_2: formData.tiene_segunda_forma_pago ? (formData.cuenta_2 || null) : null,
       banco_cuenta_2: formData.tiene_segunda_forma_pago ? (formData.banco_cuenta_2 || null) : null
@@ -386,6 +401,7 @@ export default function NuevaSolicitudPage() {
                     >
                       <option value="CLABE" className="text-black">CLABE</option>
                       <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
+                      <option value="Tarjeta Institucional" className="text-black">Tarjeta Institucional</option>
                     </select>
                   </div>
 
@@ -421,16 +437,20 @@ export default function NuevaSolicitudPage() {
                         const value = e.target.value;
                         dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                         setCuentaValida(null);
-                        // Solo validar si está vacío
-                        if (!value) {
+                        // Solo validar si está vacío y es requerido
+                        if (!value && cuentaConfig.required) {
                           setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
                         } else {
                           setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
                         }
                       }}
-                      onBlur={e => verificarCuentaDestino(e.target.value)}
+                      onBlur={e => {
+                        if (e.target.value && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
+                          verificarCuentaDestino(e.target.value);
+                        }
+                      }}
                       placeholder={cuentaConfig.placeholder}
-                      required
+                      required={cuentaConfig.required}
                       autoComplete="off"
                       className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide ${errors.cuenta_destino ? 'border-red-400' : ''}`}
                     />
@@ -570,6 +590,7 @@ export default function NuevaSolicitudPage() {
                       >
                         <option value="CLABE" className="text-black">CLABE</option>
                         <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
+                        <option value="Tarjeta Institucional" className="text-black">Tarjeta Institucional</option>
                       </select>
                     </div>
 
@@ -602,8 +623,14 @@ export default function NuevaSolicitudPage() {
                       name="cuenta_destino_2"
                       value={formData.cuenta_destino_2}
                       onChange={handleInputChange}
-                      placeholder={formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? 'Número de tarjeta' : 'Número de cuenta CLABE'}
-                      required={formData.tiene_segunda_forma_pago}
+                      placeholder={
+                        formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' 
+                          ? 'Número de tarjeta' 
+                          : formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional'
+                          ? 'Opcional'
+                          : 'Número de cuenta CLABE'
+                      }
+                      required={formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional'}
                       className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
                     />
                   </div>
@@ -830,12 +857,12 @@ export default function NuevaSolicitudPage() {
                     loading ||
                     !formData.departamento ||
                     !formData.monto ||
-                    !formData.cuenta_destino ||
+                    (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && !formData.cuenta_destino) ||
                     !formData.concepto ||
                     !formData.fecha_limite_pago ||
                     !formData.factura_file ||
-                    cuentaValida === false ||
-                    checkingCuenta
+                    (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') ||
+                    (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional')
                   }
                   className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:scale-105 shadow-xl border-0 px-10 py-4 font-semibold text-base flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
