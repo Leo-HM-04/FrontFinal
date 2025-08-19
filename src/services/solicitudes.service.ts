@@ -144,6 +144,16 @@ export class SolicitudesService {
     empresa_a_pagar?: string;
     cuenta?: string | null;
     banco_cuenta?: string | null;
+    // Nuevos campos para segunda forma de pago
+    tiene_segunda_forma_pago?: boolean;
+    tipo_cuenta_destino_2?: string;
+    banco_destino_2?: string;
+    cuenta_destino_2?: string;
+    tipo_tarjeta_2?: string;
+    cuenta_2?: string | null;
+    banco_cuenta_2?: string | null;
+    monto_2?: string | number;
+    concepto_2?: string;
   }): Promise<unknown> {
     const token = localStorage.getItem('token');
     const formData = new FormData();
@@ -162,6 +172,20 @@ export class SolicitudesService {
     formData.append('empresa_a_pagar', data.empresa_a_pagar || '');
     formData.append('cuenta', data.cuenta || '');
     formData.append('banco_cuenta', data.banco_cuenta || '');
+    
+    // Agregar campos de segunda forma de pago
+    formData.append('tiene_segunda_forma_pago', String(data.tiene_segunda_forma_pago || false));
+    if (data.tiene_segunda_forma_pago) {
+      formData.append('tipo_cuenta_destino_2', data.tipo_cuenta_destino_2 || '');
+      formData.append('banco_destino_2', data.banco_destino_2 || '');
+      formData.append('cuenta_destino_2', data.cuenta_destino_2 || '');
+      formData.append('tipo_tarjeta_2', data.tipo_tarjeta_2 || '');
+      formData.append('cuenta_2', data.cuenta_2 || '');
+      formData.append('banco_cuenta_2', data.banco_cuenta_2 || '');
+      formData.append('monto_2', String(data.monto_2 || ''));
+      formData.append('concepto_2', data.concepto_2 || '');
+    }
+    
     const response = await api.post('/solicitudes', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
