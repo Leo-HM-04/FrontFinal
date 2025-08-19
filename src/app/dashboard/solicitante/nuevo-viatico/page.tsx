@@ -24,6 +24,8 @@ type Viatico = {
   tipo_pago_descripcion?: string;
   empresa_a_pagar?: string;
   nombre_persona: string;
+  cuenta: string;
+  banco_cuenta: string;
 };
 
 type FormState = {
@@ -83,6 +85,11 @@ export default function NuevoViaticoPage() {
         errors.tipo_tarjeta = 'Selecciona el tipo de tarjeta';
         huboError = true;
       }
+      // Validar campos cuenta y banco_cuenta
+      if (f.form.cuenta && f.form.cuenta.trim() !== '' && !f.form.banco_cuenta) {
+        errors.banco_cuenta = 'Especifica el banco al que pertenece la cuenta';
+        huboError = true;
+      }
       nuevos[idx].errors = errors;
     });
 
@@ -112,6 +119,8 @@ export default function NuevoViaticoPage() {
             tipo_pago_descripcion: f.form.tipo_pago_descripcion || '',
             empresa_a_pagar: f.form.empresa_a_pagar || '',
             nombre_persona: f.form.nombre_persona || '',
+            cuenta: f.form.cuenta || '',
+            banco_cuenta: f.form.banco_cuenta || '',
           };
           await ViaticosService.createWithFile(data);
           nuevos[idx].mensaje = 'Viático creado correctamente';
@@ -190,21 +199,20 @@ export default function NuevoViaticoPage() {
                     <FaTrash className="w-4 h-4" /> Eliminar
                   </button>
                 )}
-                {/* Bloque: Datos bancarios */}
+                {/* Bloque: Datos Bancarios */}
                 <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
-                  {/* ORDEN: 1. Tipo de cuenta, 2. Tipo de tarjeta (si aplica), 3. Cuenta destino, 4. Banco */}
+                  {/* ORDEN: 1. Datos bancarios, 2. Tipo de tarjeta (si aplica), 3. Cuenta destino, 4. Banco */}
                   <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Tipo de Cuenta Destino *</label>
+                    <label className="text-blue-900 font-bold text-base">Datos Bancarios *</label>
                     <select name="tipo_cuenta_destino" onChange={e => {
                       const nuevos = [...formularios];
                       nuevos[idx].form = { ...nuevos[idx].form, [e.target.name]: e.target.value, cuenta_destino: '', tipo_tarjeta: e.target.value === 'tarjeta' ? '' : undefined };
                       nuevos[idx].errors = {};
                       setFormularios(nuevos);
                     }} required className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="">
-                      <option value="" disabled>Tipo de pago</option>
+                      <option value="" disabled>Selecciona una opción</option>
                       <option value="clabe">CLABE</option>
-                      <option value="tarjeta">Tarjeta</option>
-                      <option value="cuenta">CUENTA</option>
+                      <option value="tarjeta">Número de Tarjeta</option>
                     </select>
                     {formularios[idx].errors?.tipo_cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.tipo_cuenta_destino}</span>)}
                   </div>
@@ -248,6 +256,36 @@ export default function NuevoViaticoPage() {
                     </select>
                     {formularios[idx].errors?.banco_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.banco_destino}</span>)}
                   </div>
+                </div>
+
+                {/* Bloque: Cuenta Adicional */}
+                <div className="mb-1 p-2 rounded-xl bg-green-50/60 border border-green-100 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-blue-900 font-bold text-base">Cuenta (Opcional)</label>
+                    <input 
+                      name="cuenta" 
+                      placeholder="Ingresa número de cuenta adicional" 
+                      value={formularios[idx].form.cuenta || ''} 
+                      onChange={e => handleChange(idx, e)} 
+                      className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-green-200 focus:ring-2 focus:ring-green-400" 
+                    />
+                    {formularios[idx].errors?.cuenta && (<span className="text-red-500 text-sm">{formularios[idx].errors.cuenta}</span>)}
+                  </div>
+                  
+                  {formularios[idx].form.cuenta && formularios[idx].form.cuenta.trim() !== '' && (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-blue-900 font-bold text-base">Banco al que pertenece *</label>
+                      <input 
+                        name="banco_cuenta" 
+                        placeholder="Ingresa el nombre del banco" 
+                        value={formularios[idx].form.banco_cuenta || ''} 
+                        onChange={e => handleChange(idx, e)} 
+                        required
+                        className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-green-200 focus:ring-2 focus:ring-green-400" 
+                      />
+                      {formularios[idx].errors?.banco_cuenta && (<span className="text-red-500 text-sm">{formularios[idx].errors.banco_cuenta}</span>)}
+                    </div>
+                  )}
                 </div>
 
                 {/* Bloque: Datos del pago */}

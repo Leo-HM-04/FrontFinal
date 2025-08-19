@@ -29,6 +29,8 @@ type FormState = {
   tipo_cuenta_destino: string;
   tipo_tarjeta: string;
   banco_destino: string;
+  cuenta: string;
+  banco_cuenta: string;
 };
 
 const initialState: FormState = {
@@ -44,7 +46,9 @@ const initialState: FormState = {
   siguiente_fecha: '',
   tipo_cuenta_destino: 'CLABE',
   tipo_tarjeta: '',
-  banco_destino: ''
+  banco_destino: '',
+  cuenta: '',
+  banco_cuenta: ''
 };
 
 type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string };
@@ -101,20 +105,13 @@ export default function NuevaRecurrentePage() {
   const [siguienteFecha, setSiguienteFecha] = useState<Date | null>(null);
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
 
-  // Configuración dinámica para cuenta destino - SIN RESTRICCIONES DE LONGITUD
+  // Configuración dinámica para cuenta destino
   let cuentaConfig;
-  if (formData.tipo_cuenta_destino === 'Tarjeta') {
-    if (formData.tipo_tarjeta === 'Cuenta') {
-      cuentaConfig = {
-        placeholder: 'Número de cuenta',
-        errorMsg: 'Ingresa un número de cuenta válido.'
-      };
-    } else {
-      cuentaConfig = {
-        placeholder: 'Número de tarjeta',
-        errorMsg: 'Ingresa un número de tarjeta válido.'
-      };
-    }
+  if (formData.tipo_cuenta_destino === 'Número de Tarjeta') {
+    cuentaConfig = {
+      placeholder: 'Número de tarjeta',
+      errorMsg: 'Ingresa un número de tarjeta válido.'
+    };
   } else {
     cuentaConfig = {
       placeholder: 'Número de cuenta CLABE',
@@ -155,9 +152,11 @@ export default function NuevaRecurrentePage() {
       }
     });
     
-    // Validación de tipo tarjeta si es necesario
-    if (formData.tipo_cuenta_destino === 'Tarjeta' && !formData.tipo_tarjeta) {
-      newErrors['tipo_tarjeta'] = 'Tipo de tarjeta es obligatorio cuando seleccionas Tarjeta';
+    // Validar cuenta adicional: si se llena cuenta, banco_cuenta es obligatorio
+    if (formData.cuenta && formData.cuenta.trim() !== '') {
+      if (!formData.banco_cuenta || formData.banco_cuenta.trim() === '') {
+        newErrors['banco_cuenta'] = 'Si agregas una cuenta, debes seleccionar el banco al que pertenece';
+      }
     }
 
     setErrors(newErrors);
@@ -232,7 +231,7 @@ export default function NuevaRecurrentePage() {
                   <div className="mb-0">
                     <label className="block text-base font-medium text-white/90 mb-3">
                       <CreditCard className="w-4 h-4 inline mr-2" />
-                      Tipo de Cuenta Destino *
+                      Datos Bancarios *
                     </label>
                     <select
                       name="tipo_cuenta_destino"
@@ -242,30 +241,9 @@ export default function NuevaRecurrentePage() {
                       className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                     >
                       <option value="CLABE" className="text-black">CLABE</option>
-                      <option value="Tarjeta" className="text-black">Tarjeta</option>
+                      <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
                     </select>
                   </div>
-
-                  {formData.tipo_cuenta_destino === 'Tarjeta' && (
-                    <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
-                        Tipo de Tarjeta *
-                      </label>
-                      <select
-                        name="tipo_tarjeta"
-                        value={formData.tipo_tarjeta}
-                        onChange={handleInputChange}
-                        required
-                        className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.tipo_tarjeta ? 'border-red-400' : ''}`}
-                      >
-                        <option value="" className="text-black">Selecciona tipo</option>
-                        <option value="Débito" className="text-black">Débito</option>
-                        <option value="Crédito" className="text-black">Crédito</option>
-                        <option value="Cuenta" className="text-black">Cuenta</option>
-                      </select>
-                      {errors.tipo_tarjeta && <span className="text-red-400 text-sm mt-1 block">{errors.tipo_tarjeta}</span>}
-                    </div>
-                  )}
 
                   <div className="mb-0">
                     <label className="block text-base font-medium text-white/90 mb-3">
@@ -311,6 +289,60 @@ export default function NuevaRecurrentePage() {
                     {formData.cuenta_destino && errors.cuenta_destino && (
                       <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
                     )}
+                  </div>
+
+                  {/* Sección de Cuenta Adicional */}
+                  <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                    <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                      <CreditCard className="w-5 h-5 mr-2" />
+                      Cuenta Adicional (Opcional)
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      {/* Campo Cuenta */}
+                      <div>
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          Número de Cuenta (Opcional)
+                        </label>
+                        <input
+                          type="text"
+                          name="cuenta"
+                          value={formData.cuenta}
+                          onChange={handleInputChange}
+                          placeholder="Ingresa el número de cuenta adicional"
+                          className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
+                        />
+                        <p className="text-white/60 text-xs mt-1">
+                          Campo opcional para agregar una cuenta bancaria adicional
+                        </p>
+                      </div>
+
+                      {/* Banco de la Cuenta (condicional) */}
+                      {formData.cuenta && formData.cuenta.trim() !== '' && (
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-3">
+                            Banco al que pertenece *
+                          </label>
+                          <select
+                            name="banco_cuenta"
+                            value={formData.banco_cuenta}
+                            onChange={handleInputChange}
+                            required={!!(formData.cuenta && formData.cuenta.trim() !== '')}
+                            className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                          >
+                            <option value="" className="text-black">Selecciona el banco</option>
+                            {bancoOptions.map(banco => (
+                              <option key={banco} value={banco} className="text-black">{banco}</option>
+                            ))}
+                          </select>
+                          {formData.cuenta && formData.cuenta.trim() !== '' && !formData.banco_cuenta && (
+                            <span className="text-red-400 text-sm mt-1 block">
+                              Selecciona el banco al que pertenece la cuenta
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

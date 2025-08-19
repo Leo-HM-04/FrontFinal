@@ -30,6 +30,8 @@ type FormState = {
   tipo_cuenta_destino: string;
   tipo_tarjeta: string;
   banco_destino: string;
+  cuenta: string;
+  banco_cuenta: string;
 };
 
 type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null };
@@ -47,7 +49,9 @@ const initialState: FormState = {
   factura_file: null,
   tipo_cuenta_destino: 'CLABE',
   tipo_tarjeta: '',
-  banco_destino: ''
+  banco_destino: '',
+  cuenta: '',
+  banco_cuenta: ''
 };
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
@@ -69,17 +73,12 @@ export default function NuevaSolicitudPage() {
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
 
 
-  // Configuración dinámica para cuenta destino - SIN RESTRICCIONES DE LONGITUD
+  // Configuración dinámica para cuenta destino
   let cuentaConfig;
-  if (formData.tipo_cuenta_destino === 'Tarjeta') {
+  if (formData.tipo_cuenta_destino === 'Número de Tarjeta') {
     cuentaConfig = {
       placeholder: 'Número de tarjeta',
       errorMsg: 'Ingresa un número de tarjeta válido.'
-    };
-  } else if (formData.tipo_cuenta_destino === 'Cuenta') {
-    cuentaConfig = {
-      placeholder: 'Número de cuenta',
-      errorMsg: 'Ingresa un número de cuenta válido.'
     };
   } else {
     cuentaConfig = {
@@ -194,6 +193,14 @@ export default function NuevaSolicitudPage() {
         newErrors[field] = 'Este campo es obligatorio';
       }
     });
+    
+    // Validar cuenta adicional: si se llena cuenta, banco_cuenta es obligatorio
+    if (formData.cuenta && formData.cuenta.trim() !== '') {
+      if (!formData.banco_cuenta || formData.banco_cuenta.trim() === '') {
+        newErrors['banco_cuenta'] = 'Si agregas una cuenta, debes seleccionar el banco al que pertenece';
+      }
+    }
+    
     if (cuentaValida === false) {
       newErrors['cuenta_destino'] = 'La cuenta destino no es válida o no existe.';
     }
@@ -221,8 +228,10 @@ export default function NuevaSolicitudPage() {
       fecha_limite_pago: formData.fecha_limite_pago,
       factura: formData.factura_file as File,
       tipo_cuenta_destino: formData.tipo_cuenta_destino,
-      tipo_tarjeta: formData.tipo_cuenta_destino === 'Tarjeta' ? formData.tipo_tarjeta : '',
-      banco_destino: formData.banco_destino
+      tipo_tarjeta: formData.tipo_cuenta_destino === 'Número de Tarjeta' ? formData.tipo_tarjeta : '',
+      banco_destino: formData.banco_destino,
+      cuenta: formData.cuenta || null,
+      banco_cuenta: formData.banco_cuenta || null
       };
       const response = await SolicitudesService.createWithFiles(solicitudData);
       let successMsg = 'Solicitud creada exitosamente';
@@ -339,10 +348,10 @@ export default function NuevaSolicitudPage() {
                   Información Bancaria
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Tipo de Cuenta */}
+                  {/* Datos Bancarios */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      Tipo de Cuenta *
+                      Datos Bancarios *
                     </label>
                     <select
                       name="tipo_cuenta_destino"
@@ -351,31 +360,10 @@ export default function NuevaSolicitudPage() {
                       required
                       className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                     >
-                      <option value="CLABE" className="text-black">Clabe</option>
-                      <option value="Tarjeta" className="text-black">Tarjeta</option>
-                      <option value="Cuenta" className="text-black">Cuenta</option>
+                      <option value="CLABE" className="text-black">CLABE</option>
+                      <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
                     </select>
                   </div>
-
-                  {/* Tipo de Tarjeta (condicional) */}
-                  {formData.tipo_cuenta_destino === 'Tarjeta' && (
-                    <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
-                        Tipo de Tarjeta *
-                      </label>
-                      <select
-                        name="tipo_tarjeta"
-                        value={formData.tipo_tarjeta}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
-                      >
-                        <option value="" className="text-black">Selecciona tipo</option>
-                        <option value="Débito" className="text-black">Débito</option>
-                        <option value="Crédito" className="text-black">Crédito</option>
-                      </select>
-                    </div>
-                  )}
 
                   {/* Banco */}
                   <div>
@@ -444,6 +432,59 @@ export default function NuevaSolicitudPage() {
                       <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
                     )}
                   </div>
+                </div>
+              </div>
+
+              {/* SECCIÓN 2.5: CUENTA ADICIONAL (OPCIONAL) */}
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Cuenta Adicional (Opcional)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Campo Cuenta */}
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Número de Cuenta (Opcional)
+                    </label>
+                    <input
+                      type="text"
+                      name="cuenta"
+                      value={formData.cuenta}
+                      onChange={handleInputChange}
+                      placeholder="Ingresa el número de cuenta adicional"
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
+                    />
+                    <p className="text-white/60 text-xs mt-1">
+                      Campo opcional para agregar una cuenta bancaria adicional
+                    </p>
+                  </div>
+
+                  {/* Banco de la Cuenta (condicional) */}
+                  {formData.cuenta && formData.cuenta.trim() !== '' && (
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Banco al que pertenece *
+                      </label>
+                      <select
+                        name="banco_cuenta"
+                        value={formData.banco_cuenta}
+                        onChange={handleInputChange}
+                        required={!!(formData.cuenta && formData.cuenta.trim() !== '')}
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                      >
+                        <option value="" className="text-black">Selecciona el banco</option>
+                        {bancoOptions.map(banco => (
+                          <option key={banco} value={banco} className="text-black">{banco}</option>
+                        ))}
+                      </select>
+                      {formData.cuenta && formData.cuenta.trim() !== '' && !formData.banco_cuenta && (
+                        <span className="text-red-400 text-sm mt-1 block">
+                          Selecciona el banco al que pertenece la cuenta
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
