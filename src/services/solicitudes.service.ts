@@ -142,6 +142,8 @@ export class SolicitudesService {
     nombre_persona: string;
     tipo_pago_descripcion?: string;
     empresa_a_pagar?: string;
+    cuenta?: string | null;
+    banco_cuenta?: string | null;
   }): Promise<unknown> {
     const token = localStorage.getItem('token');
     const formData = new FormData();
@@ -158,6 +160,8 @@ export class SolicitudesService {
     formData.append('nombre_persona', data.nombre_persona || '');
     formData.append('tipo_pago_descripcion', data.tipo_pago_descripcion || '');
     formData.append('empresa_a_pagar', data.empresa_a_pagar || '');
+    formData.append('cuenta', data.cuenta || '');
+    formData.append('banco_cuenta', data.banco_cuenta || '');
     const response = await api.post('/solicitudes', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -181,6 +185,8 @@ export class SolicitudesService {
     tipo_tarjeta?: string;
     banco_destino?: string;
     factura?: File | null;
+    cuenta?: string | null;
+    banco_cuenta?: string | null;
   }): Promise<unknown> {
     const token = localStorage.getItem('token');
     const formData = new FormData();
@@ -202,6 +208,8 @@ export class SolicitudesService {
     formData.append('tipo_pago_descripcion', (data.tipo_pago_descripcion !== undefined && data.tipo_pago_descripcion !== null) ? String(data.tipo_pago_descripcion) : '');
     formData.append('empresa_a_pagar', (data.empresa_a_pagar !== undefined && data.empresa_a_pagar !== null) ? String(data.empresa_a_pagar) : '');
     formData.append('nombre_persona', (data.nombre_persona !== undefined && data.nombre_persona !== null) ? String(data.nombre_persona) : '');
+    formData.append('cuenta', data.cuenta || '');
+    formData.append('banco_cuenta', data.banco_cuenta || '');
     // DEBUG: log FormData
     // for (let pair of formData.entries()) {
     //   console.log(pair[0]+ ': ' + pair[1]);
