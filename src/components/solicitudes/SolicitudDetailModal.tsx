@@ -201,7 +201,9 @@ return (
                 <p className="text-blue-900 font-medium">
                   {solicitud.tipo_cuenta_destino === 'Tarjeta'
                     ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
-                    : solicitud.tipo_cuenta_destino || '-'}
+                    : solicitud.tipo_cuenta_destino === 'Tarjeta Instituciona' 
+                      ? 'Tarjeta Institucional'  // Corregir el display
+                      : solicitud.tipo_cuenta_destino || '-'}
                 </p>
               </div>
              
@@ -227,10 +229,16 @@ return (
 
               {/* Cuenta adicional opcional */}
               {(() => {
-                const mostrarCuentaAdicional = solicitud.cuenta || solicitud.banco_cuenta;
+                // Verificar si cuenta o banco_cuenta tienen valores (no vacíos ni null)
+                const cuentaValida = solicitud.cuenta && solicitud.cuenta.trim() !== '';
+                const bancoValido = solicitud.banco_cuenta && solicitud.banco_cuenta.trim() !== '';
+                const mostrarCuentaAdicional = cuentaValida || bancoValido;
+                
                 console.log('🔍 MODAL DEBUG - Cuenta adicional:', {
                   cuenta: solicitud.cuenta,
                   banco_cuenta: solicitud.banco_cuenta,
+                  cuentaValida,
+                  bancoValido,
                   mostrarCuentaAdicional
                 });
                 return mostrarCuentaAdicional;
@@ -253,7 +261,9 @@ return (
 
           {/* Información de acceso para Tarjeta Institucional */}
           {(() => {
-            const esTarjetaInstitucional = solicitud.tipo_cuenta_destino === 'Tarjeta Institucional';
+            // Arreglar para ambos valores: "Tarjeta Institucional" y "Tarjeta Instituciona" (falta L)
+            const esTarjetaInstitucional = solicitud.tipo_cuenta_destino === 'Tarjeta Institucional' || 
+                                         solicitud.tipo_cuenta_destino === 'Tarjeta Instituciona';
             const tieneAcceso = solicitud.link_pago || solicitud.usuario_acceso || solicitud.contrasena_acceso;
             const mostrarSeccion = esTarjetaInstitucional && tieneAcceso;
             
@@ -321,7 +331,9 @@ return (
                   <p className="text-emerald-900 font-medium">
                     {solicitud.tipo_cuenta_destino_2 === 'Número de Tarjeta'
                       ? `Tarjeta${solicitud.tipo_tarjeta_2 ? ' - ' + solicitud.tipo_tarjeta_2 : ''}`
-                      : solicitud.tipo_cuenta_destino_2 || '-'}
+                      : solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona'
+                        ? 'Tarjeta Institucional'  // Corregir el display
+                        : solicitud.tipo_cuenta_destino_2 || '-'}
                   </p>
                 </div>
                 
@@ -352,7 +364,7 @@ return (
               </div>
 
               {/* Información de acceso para Tarjeta Institucional - Segunda forma */}
-              {solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' && (solicitud.link_pago_2 || solicitud.usuario_acceso_2 || solicitud.contrasena_acceso_2) && (
+              {(solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' || solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona') && (solicitud.link_pago_2 || solicitud.usuario_acceso_2 || solicitud.contrasena_acceso_2) && (
                 <div className="mt-3 bg-gradient-to-r from-purple-50/60 to-indigo-50/60 rounded p-2 border border-purple-200/40">
                   <span className="text-xs font-medium text-purple-800 mb-2 block">Información de acceso</span>
                   
