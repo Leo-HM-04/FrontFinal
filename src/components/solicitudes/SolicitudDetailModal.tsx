@@ -27,6 +27,27 @@ const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
 const [loadingComprobantes, setLoadingComprobantes] = useState<boolean>(false);
 const [error, setError] = useState<string | null>(null);
 
+// DEBUG: Log para verificar los datos de la solicitud
+if (solicitud && isOpen) {
+  console.log('🔍 MODAL DEBUG - Datos de solicitud:', {
+    id_solicitud: solicitud.id_solicitud,
+    folio: solicitud.folio,
+    tipo_cuenta_destino: solicitud.tipo_cuenta_destino,
+    tipo_tarjeta: solicitud.tipo_tarjeta,
+    banco_destino: solicitud.banco_destino,
+    cuenta: solicitud.cuenta,
+    banco_cuenta: solicitud.banco_cuenta,
+    link_pago: solicitud.link_pago,
+    usuario_acceso: solicitud.usuario_acceso,
+    contrasena_acceso: solicitud.contrasena_acceso,
+    tiene_segunda_forma_pago: solicitud.tiene_segunda_forma_pago,
+    tipo_cuenta_destino_2: solicitud.tipo_cuenta_destino_2,
+    link_pago_2: solicitud.link_pago_2,
+    usuario_acceso_2: solicitud.usuario_acceso_2,
+    contrasena_acceso_2: solicitud.contrasena_acceso_2
+  });
+}
+
 const fetchComprobantes = useCallback(async () => {
 if (!solicitud) return;
 
@@ -205,7 +226,15 @@ return (
               </div>
 
               {/* Cuenta adicional opcional */}
-              {(solicitud.cuenta || solicitud.banco_cuenta) && (
+              {(() => {
+                const mostrarCuentaAdicional = solicitud.cuenta || solicitud.banco_cuenta;
+                console.log('🔍 MODAL DEBUG - Cuenta adicional:', {
+                  cuenta: solicitud.cuenta,
+                  banco_cuenta: solicitud.banco_cuenta,
+                  mostrarCuentaAdicional
+                });
+                return mostrarCuentaAdicional;
+              })() && (
                 <div className="col-span-2 bg-white/80 p-2 rounded border border-blue-100">
                   <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta adicional</span>
                   <div className="flex gap-2 items-center">
@@ -223,7 +252,23 @@ return (
           </div>
 
           {/* Información de acceso para Tarjeta Institucional */}
-          {solicitud.tipo_tarjeta === 'Institucional' && (solicitud.link_pago || solicitud.usuario_acceso || solicitud.contrasena_acceso) && (
+          {(() => {
+            const esTarjetaInstitucional = solicitud.tipo_cuenta_destino === 'Tarjeta Institucional';
+            const tieneAcceso = solicitud.link_pago || solicitud.usuario_acceso || solicitud.contrasena_acceso;
+            const mostrarSeccion = esTarjetaInstitucional && tieneAcceso;
+            
+            console.log('🔍 MODAL DEBUG - Información de acceso primera forma:', {
+              tipo_cuenta_destino: solicitud.tipo_cuenta_destino,
+              esTarjetaInstitucional,
+              link_pago: solicitud.link_pago,
+              usuario_acceso: solicitud.usuario_acceso,
+              contrasena_acceso: !!solicitud.contrasena_acceso, // Solo mostrar si existe
+              tieneAcceso,
+              mostrarSeccion
+            });
+            
+            return mostrarSeccion;
+          })() && (
             <div className="bg-gradient-to-r from-purple-50/40 to-indigo-50/40 rounded-md p-3 border border-purple-200/60 mb-3">
               <h4 className="text-sm font-medium text-purple-800 mb-2 flex items-center">
                 <div className="w-2 h-2 bg-purple-600 rounded-full mr-2"></div>
