@@ -144,6 +144,10 @@ export class SolicitudesService {
     empresa_a_pagar?: string;
     cuenta?: string | null;
     banco_cuenta?: string | null;
+    // Campos de tarjeta institucional
+    link_pago?: string | null;
+    usuario_acceso?: string | null;
+    contrasena_acceso?: string | null;
     // Nuevos campos para segunda forma de pago
     tiene_segunda_forma_pago?: boolean;
     tipo_cuenta_destino_2?: string;
@@ -152,6 +156,10 @@ export class SolicitudesService {
     tipo_tarjeta_2?: string;
     cuenta_2?: string | null;
     banco_cuenta_2?: string | null;
+    // Campos de segunda tarjeta institucional
+    link_pago_2?: string | null;
+    usuario_acceso_2?: string | null;
+    contrasena_acceso_2?: string | null;
   }): Promise<unknown> {
     const token = localStorage.getItem('token');
     const formData = new FormData();
@@ -170,6 +178,9 @@ export class SolicitudesService {
     formData.append('empresa_a_pagar', data.empresa_a_pagar || '');
     formData.append('cuenta', data.cuenta || '');
     formData.append('banco_cuenta', data.banco_cuenta || '');
+    formData.append('link_pago', data.link_pago || '');
+    formData.append('usuario_acceso', data.usuario_acceso || '');
+    formData.append('contrasena_acceso', data.contrasena_acceso || '');
     
     // Agregar campos de segunda forma de pago
     formData.append('tiene_segunda_forma_pago', String(data.tiene_segunda_forma_pago || false));
@@ -180,6 +191,9 @@ export class SolicitudesService {
       formData.append('tipo_tarjeta_2', data.tipo_tarjeta_2 || '');
       formData.append('cuenta_2', data.cuenta_2 || '');
       formData.append('banco_cuenta_2', data.banco_cuenta_2 || '');
+      formData.append('link_pago_2', data.link_pago_2 || '');
+      formData.append('usuario_acceso_2', data.usuario_acceso_2 || '');
+      formData.append('contrasena_acceso_2', data.contrasena_acceso_2 || '');
     }
     
     const response = await api.post('/solicitudes', formData, {

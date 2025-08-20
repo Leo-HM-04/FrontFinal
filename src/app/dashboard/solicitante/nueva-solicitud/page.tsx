@@ -32,6 +32,10 @@ type FormState = {
   banco_destino: string;
   cuenta: string;
   banco_cuenta: string;
+  // Campos para tarjeta institucional
+  link_pago: string;
+  usuario_acceso: string;
+  contrasena_acceso: string;
   // Campos para segunda forma de pago
   tiene_segunda_forma_pago: boolean;
   tipo_cuenta_destino_2: string;
@@ -40,6 +44,10 @@ type FormState = {
   tipo_tarjeta_2: string;
   cuenta_2: string;
   banco_cuenta_2: string;
+  // Campos para segunda tarjeta institucional
+  link_pago_2: string;
+  usuario_acceso_2: string;
+  contrasena_acceso_2: string;
 };
 
 type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null | boolean };
@@ -60,6 +68,10 @@ const initialState: FormState = {
   banco_destino: '',
   cuenta: '',
   banco_cuenta: '',
+  // Campos para tarjeta institucional
+  link_pago: '',
+  usuario_acceso: '',
+  contrasena_acceso: '',
   // Campos para segunda forma de pago
   tiene_segunda_forma_pago: false,
   tipo_cuenta_destino_2: 'CLABE',
@@ -67,7 +79,11 @@ const initialState: FormState = {
   cuenta_destino_2: '',
   tipo_tarjeta_2: '',
   cuenta_2: '',
-  banco_cuenta_2: ''
+  banco_cuenta_2: '',
+  // Campos para segunda tarjeta institucional
+  link_pago_2: '',
+  usuario_acceso_2: '',
+  contrasena_acceso_2: ''
 };
 
 const formReducer = (state: FormState, action: FormAction): FormState => {
@@ -261,6 +277,10 @@ export default function NuevaSolicitudPage() {
       banco_destino: formData.banco_destino,
       cuenta: formData.cuenta || null,
       banco_cuenta: formData.banco_cuenta || null,
+      // Campos de tarjeta institucional
+      link_pago: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.link_pago || null : null,
+      usuario_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.usuario_acceso || null : null,
+      contrasena_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.contrasena_acceso || null : null,
       // Campos de segunda forma de pago
       tiene_segunda_forma_pago: formData.tiene_segunda_forma_pago,
       tipo_cuenta_destino_2: formData.tiene_segunda_forma_pago ? formData.tipo_cuenta_destino_2 : '',
@@ -270,7 +290,11 @@ export default function NuevaSolicitudPage() {
         : '',
       tipo_tarjeta_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? formData.tipo_tarjeta_2 : '',
       cuenta_2: formData.tiene_segunda_forma_pago ? (formData.cuenta_2 || null) : null,
-      banco_cuenta_2: formData.tiene_segunda_forma_pago ? (formData.banco_cuenta_2 || null) : null
+      banco_cuenta_2: formData.tiene_segunda_forma_pago ? (formData.banco_cuenta_2 || null) : null,
+      // Campos de segunda tarjeta institucional
+      link_pago_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.link_pago_2 || null) : null,
+      usuario_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.usuario_acceso_2 || null) : null,
+      contrasena_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.contrasena_acceso_2 || null) : null
       };
       const response = await SolicitudesService.createWithFiles(solicitudData);
       let successMsg = 'Solicitud creada exitosamente';
@@ -532,6 +556,62 @@ export default function NuevaSolicitudPage() {
                 </div>
               </div>
 
+              {/* SECCIÓN 2.4: CAMPOS DE TARJETA INSTITUCIONAL (CONDICIONAL) */}
+              {formData.tipo_cuenta_destino === 'Tarjeta Institucional' && (
+                <div className="bg-blue-600/10 rounded-xl p-6 border border-blue-600/30">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    Datos de Acceso - Tarjeta Institucional
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Link de Pago */}
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Link de Pago
+                      </label>
+                      <input
+                        type="url"
+                        name="link_pago"
+                        value={formData.link_pago}
+                        onChange={handleInputChange}
+                        placeholder="https://..."
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                      />
+                    </div>
+
+                    {/* Usuario */}
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Usuario de Acceso
+                      </label>
+                      <input
+                        type="text"
+                        name="usuario_acceso"
+                        value={formData.usuario_acceso}
+                        onChange={handleInputChange}
+                        placeholder="Usuario"
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                      />
+                    </div>
+
+                    {/* Contraseña */}
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Contraseña
+                      </label>
+                      <input
+                        type="password"
+                        name="contrasena_acceso"
+                        value={formData.contrasena_acceso}
+                        onChange={handleInputChange}
+                        placeholder="Contraseña"
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* BOTÓN PARA AGREGAR SEGUNDA FORMA DE PAGO */}
               {!formData.tiene_segunda_forma_pago && (
                 <div className="text-center">
@@ -568,6 +648,9 @@ export default function NuevaSolicitudPage() {
                         dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta_2', value: '' });
                         dispatch({ type: 'SET_FIELD', field: 'cuenta_2', value: '' });
                         dispatch({ type: 'SET_FIELD', field: 'banco_cuenta_2', value: '' });
+                        dispatch({ type: 'SET_FIELD', field: 'link_pago_2', value: '' });
+                        dispatch({ type: 'SET_FIELD', field: 'usuario_acceso_2', value: '' });
+                        dispatch({ type: 'SET_FIELD', field: 'contrasena_acceso_2', value: '' });
                       }}
                       className="text-red-400 hover:text-red-300 text-sm"
                     >
@@ -634,6 +717,62 @@ export default function NuevaSolicitudPage() {
                       className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
                     />
                   </div>
+
+                  {/* CAMPOS DE TARJETA INSTITUCIONAL PARA SEGUNDA FORMA DE PAGO */}
+                  {formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' && (
+                    <div className="bg-blue-600/10 rounded-xl p-6 border border-blue-600/30">
+                      <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                        <CreditCard className="w-5 h-5 mr-2" />
+                        Datos de Acceso - Segunda Tarjeta Institucional
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Link de Pago 2 */}
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-3">
+                            Link de Pago
+                          </label>
+                          <input
+                            type="url"
+                            name="link_pago_2"
+                            value={formData.link_pago_2}
+                            onChange={handleInputChange}
+                            placeholder="https://..."
+                            className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                          />
+                        </div>
+
+                        {/* Usuario 2 */}
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-3">
+                            Usuario de Acceso
+                          </label>
+                          <input
+                            type="text"
+                            name="usuario_acceso_2"
+                            value={formData.usuario_acceso_2}
+                            onChange={handleInputChange}
+                            placeholder="Usuario"
+                            className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                          />
+                        </div>
+
+                        {/* Contraseña 2 */}
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-3">
+                            Contraseña
+                          </label>
+                          <input
+                            type="password"
+                            name="contrasena_acceso_2"
+                            value={formData.contrasena_acceso_2}
+                            onChange={handleInputChange}
+                            placeholder="Contraseña"
+                            className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
