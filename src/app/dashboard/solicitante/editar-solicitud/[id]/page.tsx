@@ -11,7 +11,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale/es";
 import { NumericFormat } from "react-number-format";
 import { SolicitudesService } from "@/services/solicitudes.service";
-import { Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle } from "lucide-react";
+import { Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { Solicitud } from "@/types";
 import { formatDateForAPI, parseBackendDateForForm } from '@/utils/dateUtils';
@@ -30,10 +30,28 @@ type FormState = {
   tipo_cuenta_destino: string;
   tipo_tarjeta: string;
   banco_destino: string;
+  cuenta: string;
+  banco_cuenta: string;
+  // Campos para tarjeta institucional
+  link_pago: string;
+  usuario_acceso: string;
+  contrasena_acceso: string;
+  // Campos para segunda forma de pago
+  tiene_segunda_forma_pago: boolean;
+  tipo_cuenta_destino_2: string;
+  banco_destino_2: string;
+  cuenta_destino_2: string;
+  tipo_tarjeta_2: string;
+  cuenta_2: string;
+  banco_cuenta_2: string;
+  // Campos para segunda tarjeta institucional
+  link_pago_2: string;
+  usuario_acceso_2: string;
+  contrasena_acceso_2: string;
 };
 
 type FormAction =
-  | { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null }
+  | { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null | boolean }
   | { type: 'SET_ALL'; payload: Partial<FormState> };
 
 const initialState: FormState = {
@@ -49,7 +67,25 @@ const initialState: FormState = {
   factura_file: null,
   tipo_cuenta_destino: 'CLABE',
   tipo_tarjeta: '',
-  banco_destino: ''
+  banco_destino: '',
+  cuenta: '',
+  banco_cuenta: '',
+  // Campos para tarjeta institucional
+  link_pago: '',
+  usuario_acceso: '',
+  contrasena_acceso: '',
+  // Campos para segunda forma de pago
+  tiene_segunda_forma_pago: false,
+  tipo_cuenta_destino_2: 'CLABE',
+  banco_destino_2: '',
+  cuenta_destino_2: '',
+  tipo_tarjeta_2: '',
+  cuenta_2: '',
+  banco_cuenta_2: '',
+  // Campos para segunda tarjeta institucional
+  link_pago_2: '',
+  usuario_acceso_2: '',
+  contrasena_acceso_2: '',
 };
 
 const bancoOptions = [
@@ -81,6 +117,10 @@ export default function EditarSolicitudPage() {
   const [estado, setEstado] = useState<string>('');
   const [facturaUrl, setFacturaUrl] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
+  
+  // Estados para mostrar/ocultar contraseñas
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
 
   // Configuración dinámica para cuenta destino - SIN RESTRICCIONES DE LONGITUD
   const cuentaConfig = formData.tipo_cuenta_destino === 'Tarjeta'
@@ -108,6 +148,96 @@ export default function EditarSolicitudPage() {
     { value: 'vinculacion', label: 'Vinculación' },
     { value: 'administracion', label: 'Administración' },
     { value: 'ti', label: 'TI' },
+  ];
+
+  const bancoOptions = [
+    'BBVA BANCOMER',
+    'SANTANDER',
+    'BANORTE',
+    'BANAMEX',
+    'HSBC',
+    'SCOTIABANK',
+    'INBURSA',
+    'AZTECA',
+    'BAJIO',
+    'MIFEL',
+    'INVEX',
+    'BANREGIO',
+    'BANJERCITO',
+    'BANCO COPPEL',
+    'ABC CAPITAL',
+    'MULTIVA',
+    'BANCO FAMSA',
+    'BANCO AHORRO FAMSA',
+    'COMPARTAMOS',
+    'BANCO AZTECA',
+    'AFIRME',
+    'BANSEFI',
+    'BANK OF AMERICA',
+    'JPMORGAN',
+    'BANCA AFIRME',
+    'THE ROYAL BANK',
+    'CREDIT SUISSE',
+    'MUFG',
+    'VE POR MAS',
+    'PAGATODO',
+    'FORJADORES',
+    'INMOBILIARIO MEXICANO',
+    'VOLKSWAGEN',
+    'CIBANCO',
+    'BBASE',
+    'BANKAOOL',
+    'PAGATODO',
+    'FUNDACION PRODUCE',
+    'INVESTA BANK',
+    'BANCO FINTERRA',
+    'SISTEMA VALLES',
+    'REFORMA',
+    'STP',
+    'KUSPIT',
+    'BANCO S3',
+    'NVIO',
+    'BINEO',
+    'MASARI',
+    'FONDO',
+    'SPIN',
+    'PROSA',
+    'ENLACE',
+    'FINAMEX',
+    'CONSUBANCO',
+    'DINN',
+    'SABADELL',
+    'SHINHAN',
+    'MIZUHO',
+    'BANK OF CHINA',
+    'MONEXO',
+    'GBM',
+    'MASARI',
+    'VALUE',
+    'ESTRUCTURADORES',
+    'TIBER',
+    'VECTOR',
+    'B&B',
+    'ACCIONAL',
+    'SABADELL',
+    'FINAMEX',
+    'VALMEX',
+    'UNICA',
+    'AZTECA',
+    'KLAR',
+    'MERCADO PAGO',
+    'RAPPI',
+    'UALÁ',
+    'HEY BANCO',
+    'OPENBANK',
+    'NU BANK',
+    'BANCO DIGITAL',
+    'ALBO',
+    'STORI',
+    'OTRO'
+  ];
+
+  const departamentoOptionsAdicionales = [
     { value: 'automatizaciones', label: 'Automatizaciones' },
     { value: 'comercial', label: 'Comercial' },
     { value: 'atencion a clientes', label: 'Atención a Clientes' },
@@ -147,7 +277,25 @@ export default function EditarSolicitudPage() {
           factura_file: null,
           tipo_cuenta_destino,
           tipo_tarjeta,
-          banco_destino
+          banco_destino,
+          cuenta: data.cuenta || '',
+          banco_cuenta: data.banco_cuenta || '',
+          // Campos para tarjeta institucional
+          link_pago: data.link_pago || '',
+          usuario_acceso: data.usuario_acceso || '',
+          contrasena_acceso: data.contrasena_acceso || '',
+          // Campos para segunda forma de pago
+          tiene_segunda_forma_pago: Boolean(data.tiene_segunda_forma_pago),
+          tipo_cuenta_destino_2: data.tipo_cuenta_destino_2 || 'CLABE',
+          banco_destino_2: data.banco_destino_2 || '',
+          cuenta_destino_2: data.cuenta_destino_2 || '',
+          tipo_tarjeta_2: data.tipo_tarjeta_2 || '',
+          cuenta_2: data.cuenta_2 || '',
+          banco_cuenta_2: data.banco_cuenta_2 || '',
+          // Campos para segunda tarjeta institucional
+          link_pago_2: data.link_pago_2 || '',
+          usuario_acceso_2: data.usuario_acceso_2 || '',
+          contrasena_acceso_2: data.contrasena_acceso_2 || '',
         }});
         setFacturaUrl(data.factura_url || null);
         setFechaLimitePago(data.fecha_limite_pago ? parseBackendDateForForm(data.fecha_limite_pago) : null);
@@ -754,6 +902,423 @@ export default function EditarSolicitudPage() {
                   {errors.factura_file && <span className="text-red-400 text-sm mt-2 block">{errors.factura_file}</span>}
                 </div>
               </div>
+
+              {/* SECCIÓN: INFORMACIÓN BANCARIA */}
+              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <CreditCard className="w-6 h-6 mr-3" />
+                  Información Bancaria
+                </h3>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Tipo de Cuenta */}
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Tipo de Cuenta *
+                    </label>
+                    <select
+                      name="tipo_cuenta_destino"
+                      value={formData.tipo_cuenta_destino}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200"
+                    >
+                      <option value="CLABE" className="text-gray-900">CLABE</option>
+                      <option value="Número de Tarjeta" className="text-gray-900">Número de Tarjeta</option>
+                      <option value="Tarjeta Institucional" className="text-gray-900">Tarjeta Institucional</option>
+                    </select>
+                  </div>
+
+                  {/* Banco */}
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Banco *
+                    </label>
+                    <select
+                      name="banco_destino"
+                      value={formData.banco_destino}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200"
+                    >
+                      <option value="" className="text-gray-900">Selecciona un banco</option>
+                      {bancoOptions.map(banco => (
+                        <option key={banco} value={banco} className="text-gray-900">
+                          {banco}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Tipo de Tarjeta (condicional) */}
+                  {formData.tipo_cuenta_destino === 'Número de Tarjeta' && (
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Tipo de Tarjeta *
+                      </label>
+                      <select
+                        name="tipo_tarjeta"
+                        value={formData.tipo_tarjeta}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200"
+                      >
+                        <option value="" className="text-gray-900">Selecciona tipo</option>
+                        <option value="Débito" className="text-gray-900">Débito</option>
+                        <option value="Crédito" className="text-gray-900">Crédito</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Número de Cuenta/CLABE */}
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        {formData.tipo_cuenta_destino === 'CLABE' ? 'CLABE (18 dígitos)' : 
+                         formData.tipo_cuenta_destino === 'Número de Tarjeta' ? 'Número de Tarjeta (16 dígitos)' :
+                         'Número de Cuenta'} *
+                      </label>
+                      <input
+                        type="text"
+                        name="cuenta_destino"
+                        value={formData.cuenta_destino}
+                        onChange={handleInputChange}
+                        required
+                        placeholder={formData.tipo_cuenta_destino === 'CLABE' ? 'Ej: 123456789012345678' : 
+                                   formData.tipo_cuenta_destino === 'Número de Tarjeta' ? 'Ej: 1234567890123456' :
+                                   'Número de cuenta'}
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Información de acceso para Tarjeta Institucional */}
+                {formData.tipo_cuenta_destino === 'Tarjeta Institucional' && (
+                  <div className="mt-6 bg-purple-500/10 rounded-lg p-6 border border-purple-300/20">
+                    <h4 className="text-lg font-medium text-white mb-4 flex items-center">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                      Información de Acceso
+                    </h4>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      {/* Link de Pago */}
+                      <div>
+                        <label className="block text-base font-medium text-white/90 mb-2">
+                          Link de Pago
+                        </label>
+                        <input
+                          type="url"
+                          name="link_pago"
+                          value={formData.link_pago}
+                          onChange={handleInputChange}
+                          placeholder="https://portal.banco.com/pagos"
+                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 text-base transition-all duration-200"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {/* Usuario de Acceso */}
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-2">
+                            Usuario de Acceso
+                          </label>
+                          <input
+                            type="text"
+                            name="usuario_acceso"
+                            value={formData.usuario_acceso}
+                            onChange={handleInputChange}
+                            placeholder="usuario123"
+                            className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 text-base transition-all duration-200"
+                          />
+                        </div>
+
+                        {/* Contraseña de Acceso */}
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-2">
+                            Contraseña de Acceso
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={showPassword ? "text" : "password"}
+                              name="contrasena_acceso"
+                              value={formData.contrasena_acceso}
+                              onChange={handleInputChange}
+                              placeholder="Contraseña"
+                              className="w-full px-4 py-3 pr-12 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 text-base transition-all duration-200"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+                            >
+                              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* SECCIÓN: CUENTA ADICIONAL (OPCIONAL) */}
+              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <Building className="w-6 h-6 mr-3" />
+                  Cuenta Adicional (Opcional)
+                </h3>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Cuenta Adicional */}
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Número de Cuenta Adicional
+                    </label>
+                    <input
+                      type="text"
+                      name="cuenta"
+                      value={formData.cuenta}
+                      onChange={handleInputChange}
+                      placeholder="Ingresa el número de cuenta adicional"
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200"
+                    />
+                    <span className="text-white/70 text-sm mt-1 block">
+                      Campo opcional para agregar una cuenta bancaria adicional
+                    </span>
+                  </div>
+
+                  {/* Banco de Cuenta Adicional */}
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Banco de Cuenta Adicional
+                    </label>
+                    <select
+                      name="banco_cuenta"
+                      value={formData.banco_cuenta}
+                      onChange={handleInputChange}
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200"
+                    >
+                      <option value="" className="text-gray-900">Selecciona un banco (opcional)</option>
+                      {bancoOptions.map(banco => (
+                        <option key={banco} value={banco} className="text-gray-900">
+                          {banco}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* BOTÓN PARA AGREGAR SEGUNDA FORMA DE PAGO */}
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => dispatch({ type: 'SET_FIELD', field: 'tiene_segunda_forma_pago', value: !formData.tiene_segunda_forma_pago })}
+                  className={`px-8 py-4 rounded-xl font-medium text-base transition-all duration-300 flex items-center gap-3 ${
+                    formData.tiene_segunda_forma_pago
+                      ? 'bg-red-500/80 hover:bg-red-600/80 text-white'
+                      : 'bg-green-500/80 hover:bg-green-600/80 text-white'
+                  }`}
+                >
+                  <CreditCard className="w-5 h-5" />
+                  {formData.tiene_segunda_forma_pago ? 'Quitar Segunda Forma de Pago' : 'Agregar Segunda Forma de Pago'}
+                </button>
+              </div>
+
+              {/* SEGUNDA FORMA DE PAGO (CONDICIONAL) */}
+              {formData.tiene_segunda_forma_pago && (
+                <div className="bg-green-500/10 rounded-xl p-8 border border-green-300/20">
+                  <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                    <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                    Segunda Forma de Pago
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Tipo de Cuenta - Segunda Forma */}
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Tipo de Cuenta *
+                      </label>
+                      <select
+                        name="tipo_cuenta_destino_2"
+                        value={formData.tipo_cuenta_destino_2}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 text-base transition-all duration-200"
+                      >
+                        <option value="CLABE" className="text-gray-900">CLABE</option>
+                        <option value="Número de Tarjeta" className="text-gray-900">Número de Tarjeta</option>
+                        <option value="Tarjeta Institucional" className="text-gray-900">Tarjeta Institucional</option>
+                      </select>
+                    </div>
+
+                    {/* Banco - Segunda Forma */}
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Banco *
+                      </label>
+                      <select
+                        name="banco_destino_2"
+                        value={formData.banco_destino_2}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 text-base transition-all duration-200"
+                      >
+                        <option value="" className="text-gray-900">Selecciona un banco</option>
+                        {bancoOptions.map(banco => (
+                          <option key={banco} value={banco} className="text-gray-900">
+                            {banco}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Número de Cuenta - Segunda Forma */}
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        {formData.tipo_cuenta_destino_2 === 'CLABE' ? 'CLABE (18 dígitos)' : 
+                         formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? 'Número de Tarjeta (16 dígitos)' :
+                         'Número de Cuenta'} *
+                      </label>
+                      <input
+                        type="text"
+                        name="cuenta_destino_2"
+                        value={formData.cuenta_destino_2}
+                        onChange={handleInputChange}
+                        required
+                        placeholder={formData.tipo_cuenta_destino_2 === 'CLABE' ? 'Ej: 123456789012345678' : 
+                                   formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? 'Ej: 1234567890123456' :
+                                   'Número de cuenta'}
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 text-base transition-all duration-200"
+                      />
+                    </div>
+
+                    {/* Tipo de Tarjeta - Segunda Forma (condicional) */}
+                    {formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' && (
+                      <div>
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          Tipo de Tarjeta *
+                        </label>
+                        <select
+                          name="tipo_tarjeta_2"
+                          value={formData.tipo_tarjeta_2}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 text-base transition-all duration-200"
+                        >
+                          <option value="" className="text-gray-900">Selecciona tipo</option>
+                          <option value="Débito" className="text-gray-900">Débito</option>
+                          <option value="Crédito" className="text-gray-900">Crédito</option>
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Cuenta Adicional - Segunda Forma */}
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Cuenta Adicional (Opcional)
+                      </label>
+                      <input
+                        type="text"
+                        name="cuenta_2"
+                        value={formData.cuenta_2}
+                        onChange={handleInputChange}
+                        placeholder="Número de cuenta adicional"
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 text-base transition-all duration-200"
+                      />
+                    </div>
+
+                    {/* Banco Cuenta Adicional - Segunda Forma */}
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Banco Cuenta Adicional (Opcional)
+                      </label>
+                      <select
+                        name="banco_cuenta_2"
+                        value={formData.banco_cuenta_2}
+                        onChange={handleInputChange}
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 text-base transition-all duration-200"
+                      >
+                        <option value="" className="text-gray-900">Selecciona un banco (opcional)</option>
+                        {bancoOptions.map(banco => (
+                          <option key={banco} value={banco} className="text-gray-900">
+                            {banco}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Información de acceso para Tarjeta Institucional - Segunda Forma */}
+                  {formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' && (
+                    <div className="mt-6 bg-purple-500/10 rounded-lg p-6 border border-purple-300/20">
+                      <h4 className="text-lg font-medium text-white mb-4 flex items-center">
+                        <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                        Información de Acceso - Segunda Forma
+                      </h4>
+                      
+                      <div className="grid grid-cols-1 gap-4">
+                        {/* Link de Pago - Segunda Forma */}
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-2">
+                            Link de Pago
+                          </label>
+                          <input
+                            type="url"
+                            name="link_pago_2"
+                            value={formData.link_pago_2}
+                            onChange={handleInputChange}
+                            placeholder="https://portal.banco.com/pagos"
+                            className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 text-base transition-all duration-200"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          {/* Usuario de Acceso - Segunda Forma */}
+                          <div>
+                            <label className="block text-base font-medium text-white/90 mb-2">
+                              Usuario de Acceso
+                            </label>
+                            <input
+                              type="text"
+                              name="usuario_acceso_2"
+                              value={formData.usuario_acceso_2}
+                              onChange={handleInputChange}
+                              placeholder="usuario123"
+                              className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 text-base transition-all duration-200"
+                            />
+                          </div>
+
+                          {/* Contraseña de Acceso - Segunda Forma */}
+                          <div>
+                            <label className="block text-base font-medium text-white/90 mb-2">
+                              Contraseña de Acceso
+                            </label>
+                            <div className="relative">
+                              <input
+                                type={showPassword2 ? "text" : "password"}
+                                name="contrasena_acceso_2"
+                                value={formData.contrasena_acceso_2}
+                                onChange={handleInputChange}
+                                placeholder="Contraseña"
+                                className="w-full px-4 py-3 pr-12 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 text-base transition-all duration-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword2(!showPassword2)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+                              >
+                                {showPassword2 ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Botones mejorados */}
               <div className="flex flex-col sm:flex-row justify-end gap-4 pt-12">

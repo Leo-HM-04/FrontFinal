@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { X, ExternalLink, DollarSign, Building, FileText, FileCheck } from 'lucide-react';
+import { X, ExternalLink, DollarSign, Building, FileText, FileCheck, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Solicitud, Comprobante } from '@/types';
@@ -26,6 +26,10 @@ onClose
 const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
 const [loadingComprobantes, setLoadingComprobantes] = useState<boolean>(false);
 const [error, setError] = useState<string | null>(null);
+
+// Estados para mostrar/ocultar contraseñas
+const [showPassword1, setShowPassword1] = useState(false);
+const [showPassword2, setShowPassword2] = useState(false);
 
 // DEBUG: Log para verificar los datos de la solicitud
 if (solicitud && isOpen) {
@@ -303,8 +307,21 @@ return (
                   {solicitud.contrasena_acceso && (
                     <div className="bg-white/80 p-2 rounded border border-purple-100">
                       <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Contraseña de acceso</span>
-                      <p className="text-purple-900 font-medium font-mono">••••••••</p>
-                      <span className="text-xs text-purple-600 italic">Por seguridad, la contraseña está oculta</span>
+                      <div className="flex items-center gap-2">
+                        <p className="text-purple-900 font-medium font-mono flex-1">
+                          {showPassword1 ? solicitud.contrasena_acceso : '••••••••'}
+                        </p>
+                        <button
+                          onClick={() => setShowPassword1(!showPassword1)}
+                          className="text-purple-600 hover:text-purple-800 transition-colors p-1"
+                          title={showPassword1 ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        >
+                          {showPassword1 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {!showPassword1 && (
+                        <span className="text-xs text-purple-600 italic">Haz clic en el ojo para ver la contraseña</span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -386,7 +403,18 @@ return (
                     {solicitud.contrasena_acceso_2 && (
                       <div className="bg-white/90 p-2 rounded border border-purple-100">
                         <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Contraseña</span>
-                        <p className="text-purple-900 font-medium font-mono text-sm">••••••••</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-purple-900 font-medium font-mono text-sm flex-1">
+                            {showPassword2 ? solicitud.contrasena_acceso_2 : '••••••••'}
+                          </p>
+                          <button
+                            onClick={() => setShowPassword2(!showPassword2)}
+                            className="text-purple-600 hover:text-purple-800 transition-colors p-1"
+                            title={showPassword2 ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          >
+                            {showPassword2 ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
