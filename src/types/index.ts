@@ -56,6 +56,24 @@ export interface Solicitud {
   tipo_pago_descripcion?: string;
   empresa_a_pagar?: string;
   nombre_persona?: string;
+  // Campos de cuenta adicional
+  cuenta?: string;
+  banco_cuenta?: string;
+  // Campos para Tarjeta Institucional
+  link_pago?: string;
+  usuario_acceso?: string;
+  contrasena_acceso?: string;
+  link_pago_2?: string;
+  usuario_acceso_2?: string;
+  contrasena_acceso_2?: string;
+  // Campos para segunda forma de pago
+  tiene_segunda_forma_pago?: boolean;
+  tipo_cuenta_destino_2?: string;
+  banco_destino_2?: string;
+  cuenta_destino_2?: string;
+  tipo_tarjeta_2?: string;
+  cuenta_2?: string;
+  banco_cuenta_2?: string;
 }
 
 export interface CreateSolicitudData {

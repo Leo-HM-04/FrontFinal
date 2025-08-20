@@ -203,14 +203,140 @@ return (
                     : '-'
                 }</p>
               </div>
+
+              {/* Cuenta adicional opcional */}
+              {(solicitud.cuenta || solicitud.banco_cuenta) && (
+                <div className="col-span-2 bg-white/80 p-2 rounded border border-blue-100">
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta adicional</span>
+                  <div className="flex gap-2 items-center">
+                    <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta || '-'}</p>
+                    {solicitud.banco_cuenta && (
+                      <>
+                        <span className="text-blue-600">|</span>
+                        <span className="text-xs text-blue-600">Banco: {solicitud.banco_cuenta}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Información de acceso para Tarjeta Institucional */}
+          {solicitud.tipo_tarjeta === 'Institucional' && (solicitud.link_pago || solicitud.usuario_acceso || solicitud.contrasena_acceso) && (
+            <div className="bg-gradient-to-r from-purple-50/40 to-indigo-50/40 rounded-md p-3 border border-purple-200/60 mb-3">
+              <h4 className="text-sm font-medium text-purple-800 mb-2 flex items-center">
+                <div className="w-2 h-2 bg-purple-600 rounded-full mr-2"></div>
+                Información de acceso - Tarjeta Institucional
+              </h4>
+              <div className="grid grid-cols-1 gap-3">
+                {solicitud.link_pago && (
+                  <div className="bg-white/80 p-2 rounded border border-purple-100">
+                    <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Link de pago</span>
+                    <p className="text-purple-900 font-medium break-all">{solicitud.link_pago}</p>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {solicitud.usuario_acceso && (
+                    <div className="bg-white/80 p-2 rounded border border-purple-100">
+                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Usuario de acceso</span>
+                      <p className="text-purple-900 font-medium font-mono">{solicitud.usuario_acceso}</p>
+                    </div>
+                  )}
+                  
+                  {solicitud.contrasena_acceso && (
+                    <div className="bg-white/80 p-2 rounded border border-purple-100">
+                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Contraseña de acceso</span>
+                      <p className="text-purple-900 font-medium font-mono">••••••••</p>
+                      <span className="text-xs text-purple-600 italic">Por seguridad, la contraseña está oculta</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Descripción del tipo de pago */}
           <div>
             <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Descripción del tipo de pago</span>
             <p className="text-blue-900 p-2 bg-white rounded-md">{solicitud.tipo_pago_descripcion || '-'}</p>
           </div>
+
+          {/* Segunda forma de pago */}
+          {solicitud.tiene_segunda_forma_pago && (
+            <div className="bg-gradient-to-r from-emerald-50/40 to-green-50/40 rounded-md p-3 border border-emerald-200/60 mb-3">
+              <h4 className="text-sm font-medium text-emerald-800 mb-2 flex items-center">
+                <div className="w-2 h-2 bg-emerald-600 rounded-full mr-2"></div>
+                Segunda forma de pago
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/80 p-2 rounded border border-emerald-100">
+                  <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Tipo de cuenta</span>
+                  <p className="text-emerald-900 font-medium">
+                    {solicitud.tipo_cuenta_destino_2 === 'Número de Tarjeta'
+                      ? `Tarjeta${solicitud.tipo_tarjeta_2 ? ' - ' + solicitud.tipo_tarjeta_2 : ''}`
+                      : solicitud.tipo_cuenta_destino_2 || '-'}
+                  </p>
+                </div>
+                
+                <div className="bg-white/80 p-2 rounded border border-emerald-100">
+                  <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Banco</span>
+                  <p className="text-emerald-900 font-medium">{solicitud.banco_destino_2 || '-'}</p>
+                </div>
+                
+                <div className="col-span-2 bg-white/80 p-2 rounded border border-emerald-100">
+                  <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Cuenta</span>
+                  <p className="font-mono text-emerald-900 font-medium">{solicitud.cuenta_destino_2 || '-'}</p>
+                </div>
+
+                {(solicitud.cuenta_2 || solicitud.banco_cuenta_2) && (
+                  <div className="col-span-2 bg-white/80 p-2 rounded border border-emerald-100">
+                    <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Cuenta adicional</span>
+                    <div className="flex gap-2 items-center">
+                      <p className="font-mono text-emerald-900 font-medium">{solicitud.cuenta_2 || '-'}</p>
+                      {solicitud.banco_cuenta_2 && (
+                        <>
+                          <span className="text-emerald-600">|</span>
+                          <span className="text-xs text-emerald-600">Banco: {solicitud.banco_cuenta_2}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Información de acceso para Tarjeta Institucional - Segunda forma */}
+              {solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' && (solicitud.link_pago_2 || solicitud.usuario_acceso_2 || solicitud.contrasena_acceso_2) && (
+                <div className="mt-3 bg-gradient-to-r from-purple-50/60 to-indigo-50/60 rounded p-2 border border-purple-200/40">
+                  <span className="text-xs font-medium text-purple-800 mb-2 block">Información de acceso</span>
+                  
+                  {solicitud.link_pago_2 && (
+                    <div className="bg-white/90 p-2 rounded border border-purple-100 mb-2">
+                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Link de pago</span>
+                      <p className="text-purple-900 font-medium break-all text-sm">{solicitud.link_pago_2}</p>
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    {solicitud.usuario_acceso_2 && (
+                      <div className="bg-white/90 p-2 rounded border border-purple-100">
+                        <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Usuario</span>
+                        <p className="text-purple-900 font-medium font-mono text-sm">{solicitud.usuario_acceso_2}</p>
+                      </div>
+                    )}
+                    
+                    {solicitud.contrasena_acceso_2 && (
+                      <div className="bg-white/90 p-2 rounded border border-purple-100">
+                        <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Contraseña</span>
+                        <p className="text-purple-900 font-medium font-mono text-sm">••••••••</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
             </Card>
             <Card className="p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
               <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
