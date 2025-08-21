@@ -144,11 +144,15 @@ export default function NuevaSolicitudPage() {
   ];
 
   const tipoPagoOptions = [
+    { value: 'transferencia', label: 'Transferencia' },
     { value: 'efectivo', label: 'Efectivo' },
     { value: 'factura', label: 'Factura' },
     { value: 'tarjeta', label: 'Tarjeta' },
+    { value: 'tarjeta_institucional', label: 'Tarjeta Institucional' },
     { value: 'proveedores', label: 'Proveedores' },
-    { value: 'administrativos', label: 'Administrativos' }
+    { value: 'administrativos', label: 'Administrativos' },
+    { value: 'comisiones', label: 'Comisiones' },
+    { value: 'poliza_seguro', label: 'Poliza - Seguro' }
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

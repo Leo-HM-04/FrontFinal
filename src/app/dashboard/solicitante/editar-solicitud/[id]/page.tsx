@@ -30,10 +30,26 @@ type FormState = {
   tipo_cuenta_destino: string;
   tipo_tarjeta: string;
   banco_destino: string;
+  cuenta: string;
+  // Campos para tarjeta institucional
+  link_pago: string;
+  usuario_acceso: string;
+  contrasena_acceso: string;
+  // Campos para segunda forma de pago
+  tiene_segunda_forma_pago: boolean;
+  tipo_cuenta_destino_2: string;
+  banco_destino_2: string;
+  cuenta_destino_2: string;
+  tipo_tarjeta_2: string;
+  cuenta_2: string;
+  // Campos para segunda tarjeta institucional
+  link_pago_2: string;
+  usuario_acceso_2: string;
+  contrasena_acceso_2: string;
 };
 
 type FormAction =
-  | { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null }
+  | { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null | boolean }
   | { type: 'SET_ALL'; payload: Partial<FormState> };
 
 const initialState: FormState = {
@@ -49,7 +65,23 @@ const initialState: FormState = {
   factura_file: null,
   tipo_cuenta_destino: 'CLABE',
   tipo_tarjeta: '',
-  banco_destino: ''
+  banco_destino: '',
+  cuenta: '',
+  // Campos para tarjeta institucional
+  link_pago: '',
+  usuario_acceso: '',
+  contrasena_acceso: '',
+  // Campos para segunda forma de pago
+  tiene_segunda_forma_pago: false,
+  tipo_cuenta_destino_2: 'CLABE',
+  banco_destino_2: '',
+  cuenta_destino_2: '',
+  tipo_tarjeta_2: '',
+  cuenta_2: '',
+  // Campos para segunda tarjeta institucional
+  link_pago_2: '',
+  usuario_acceso_2: '',
+  contrasena_acceso_2: ''
 };
 
 const bancoOptions = [
@@ -117,11 +149,15 @@ export default function EditarSolicitudPage() {
     { value: 'direccion general', label: 'Dirección General' }
   ];
   const tipoPagoOptions = [
+    { value: 'transferencia', label: 'Transferencia' },
     { value: 'efectivo', label: 'Efectivo' },
     { value: 'factura', label: 'Factura' },
     { value: 'tarjeta', label: 'Tarjeta' },
+    { value: 'tarjeta_institucional', label: 'Tarjeta Institucional' },
     { value: 'proveedores', label: 'Proveedores' },
-    { value: 'administrativos', label: 'Administrativos' }
+    { value: 'administrativos', label: 'Administrativos' },
+    { value: 'comisiones', label: 'Comisiones' },
+    { value: 'poliza_seguro', label: 'Poliza - Seguro' }
   ];
 
   useEffect(() => {
@@ -147,7 +183,23 @@ export default function EditarSolicitudPage() {
           factura_file: null,
           tipo_cuenta_destino,
           tipo_tarjeta,
-          banco_destino
+          banco_destino,
+          cuenta: data.cuenta || '',
+          // Campos para tarjeta institucional
+          link_pago: data.link_pago || '',
+          usuario_acceso: data.usuario_acceso || '',
+          contrasena_acceso: data.contrasena_acceso || '',
+          // Campos para segunda forma de pago
+          tiene_segunda_forma_pago: data.tiene_segunda_forma_pago || false,
+          tipo_cuenta_destino_2: data.tipo_cuenta_destino_2 || 'CLABE',
+          banco_destino_2: data.banco_destino_2 || '',
+          cuenta_destino_2: data.cuenta_destino_2 || '',
+          tipo_tarjeta_2: data.tipo_tarjeta_2 || '',
+          cuenta_2: data.cuenta_2 || '',
+          // Campos para segunda tarjeta institucional
+          link_pago_2: data.link_pago_2 || '',
+          usuario_acceso_2: data.usuario_acceso_2 || '',
+          contrasena_acceso_2: data.contrasena_acceso_2 || ''
         }});
         setFacturaUrl(data.factura_url || null);
         setFechaLimitePago(data.fecha_limite_pago ? parseBackendDateForForm(data.fecha_limite_pago) : null);
@@ -168,6 +220,10 @@ export default function EditarSolicitudPage() {
     // Reset tipo_tarjeta si cambia tipo_cuenta_destino
     if (name === 'tipo_cuenta_destino' && value === 'CLABE') {
       dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta', value: '' });
+    }
+    // Reset tipo_tarjeta_2 si cambia tipo_cuenta_destino_2
+    if (name === 'tipo_cuenta_destino_2' && value === 'CLABE') {
+      dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta_2', value: '' });
     }
     // Validación en tiempo real - Solo verificar si está vacío
     if (!value) {
@@ -238,7 +294,7 @@ export default function EditarSolicitudPage() {
       return;
     }
     try {
-      const requiredFields: (keyof FormState)[] = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'fecha_limite_pago', 'tipo_cuenta_destino'];
+      const requiredFields: (keyof FormState)[] = ['departamento', 'monto', 'cuenta_destino', 'concepto', 'fecha_limite_pago', 'tipo_cuenta_destino', 'nombre_persona'];
       for (const field of requiredFields) {
         if (!formData[field]) {
           toast.error(`Por favor completa el campo: ${field}`);
@@ -246,6 +302,30 @@ export default function EditarSolicitudPage() {
           return;
         }
       }
+
+      // Validar campos de tarjeta institucional si es necesario
+      if (formData.tipo_pago === 'tarjeta_institucional') {
+        if (!formData.link_pago || !formData.usuario_acceso || !formData.contrasena_acceso) {
+          toast.error('Completa todos los campos de la tarjeta institucional');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Validar segunda forma de pago si está habilitada
+      if (formData.tiene_segunda_forma_pago) {
+        if (!formData.cuenta_destino_2) {
+          toast.error('Completa la cuenta destino de la segunda forma de pago');
+          setLoading(false);
+          return;
+        }
+        if (formData.tipo_cuenta_destino_2 === 'Tarjeta' && !formData.tipo_tarjeta_2) {
+          toast.error('Selecciona el tipo de tarjeta para la segunda forma de pago');
+          setLoading(false);
+          return;
+        }
+      }
+
       // Validación especial para concepto
       if (!formData.concepto || formData.concepto.trim().length < 3) {
         toast.error('Debes actualizar el campo concepto para poder guardar los cambios.');
@@ -266,7 +346,23 @@ export default function EditarSolicitudPage() {
         factura: formData.factura_file ?? undefined,
         tipo_cuenta_destino: formData.tipo_cuenta_destino,
         tipo_tarjeta: formData.tipo_cuenta_destino === 'Tarjeta' ? formData.tipo_tarjeta : '',
-        banco_destino: formData.banco_destino
+        banco_destino: formData.banco_destino,
+        cuenta: formData.cuenta,
+        // Campos para tarjeta institucional
+        link_pago: formData.tipo_pago === 'tarjeta_institucional' ? formData.link_pago : '',
+        usuario_acceso: formData.tipo_pago === 'tarjeta_institucional' ? formData.usuario_acceso : '',
+        contrasena_acceso: formData.tipo_pago === 'tarjeta_institucional' ? formData.contrasena_acceso : '',
+        // Campos para segunda forma de pago
+        tiene_segunda_forma_pago: formData.tiene_segunda_forma_pago,
+        tipo_cuenta_destino_2: formData.tiene_segunda_forma_pago ? formData.tipo_cuenta_destino_2 : '',
+        banco_destino_2: formData.tiene_segunda_forma_pago ? formData.banco_destino_2 : '',
+        cuenta_destino_2: formData.tiene_segunda_forma_pago ? formData.cuenta_destino_2 : '',
+        tipo_tarjeta_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta' ? formData.tipo_tarjeta_2 : '',
+        cuenta_2: formData.tiene_segunda_forma_pago ? formData.cuenta_2 : '',
+        // Campos para segunda tarjeta institucional
+        link_pago_2: formData.tiene_segunda_forma_pago ? formData.link_pago_2 : '',
+        usuario_acceso_2: formData.tiene_segunda_forma_pago ? formData.usuario_acceso_2 : '',
+        contrasena_acceso_2: formData.tiene_segunda_forma_pago ? formData.contrasena_acceso_2 : ''
       };
       await SolicitudesService.updateWithFiles(idNum!, solicitudData);
       toast.success('Solicitud actualizada exitosamente');
@@ -378,17 +474,17 @@ export default function EditarSolicitudPage() {
                 </div>
               </div>
 
-              {/* SECCIÓN 2: INFORMACIÓN BANCARIA - 3 columnas para mejor aprovechamiento */}
+              {/* SECCIÓN 2: INFORMACIÓN BANCARIA - 4 columnas para incluir cuenta */}
               <div className="bg-white/5 rounded-xl p-8 border border-white/10">
                 <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                   <CreditCard className="w-6 h-6 mr-3" />
                   Información Bancaria
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {/* Tipo de Cuenta */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* Datos Bancarios */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      Tipo de Cuenta *
+                      Datos Bancarios *
                     </label>
                     <select
                       name="tipo_cuenta_destino"
@@ -402,27 +498,7 @@ export default function EditarSolicitudPage() {
                     </select>
                   </div>
 
-                  {/* Tipo de Tarjeta (condicional) */}
-                  {formData.tipo_cuenta_destino === 'Tarjeta' && (
-                    <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
-                        Tipo de Tarjeta *
-                      </label>
-                      <select
-                        name="tipo_tarjeta"
-                        value={formData.tipo_tarjeta}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                      >
-                        <option value="" className="text-black">Selecciona tipo</option>
-                        <option value="Débito" className="text-black">Débito</option>
-                        <option value="Crédito" className="text-black">Crédito</option>
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Banco */}
+                  {/* Banco (opcional) */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
                       Banco (opcional)
@@ -440,8 +516,23 @@ export default function EditarSolicitudPage() {
                     </select>
                   </div>
 
-                  {/* Cuenta Destino - Ocupa más espacio */}
-                  <div className="md:col-span-2 lg:col-span-3">
+                  {/* Cuenta (opcional) */}
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Cuenta (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      name="cuenta"
+                      value={formData.cuenta}
+                      onChange={handleInputChange}
+                      placeholder="Número de cuenta"
+                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                    />
+                  </div>
+
+                  {/* Cuenta Destino */}
+                  <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
                       <CreditCard className="w-4 h-4 inline mr-2" />
                       Cuenta Destino *
@@ -465,31 +556,52 @@ export default function EditarSolicitudPage() {
                       placeholder={cuentaConfig.placeholder}
                       required
                       autoComplete="off"
-                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide transition-all duration-200 ${errors.cuenta_destino ? 'border-red-400 shadow-red-400/25 shadow-lg' : 'hover:border-white/50'}`}
+                      className={`w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm font-mono tracking-wide transition-all duration-200 ${errors.cuenta_destino ? 'border-red-400 shadow-red-400/25 shadow-lg' : 'hover:border-white/50'}`}
                     />
-                    {/* Estados de validación */}
-                    <div className="mt-2 flex items-center gap-4">
-                      {checkingCuenta && (
-                        <span className="text-blue-300 text-sm flex items-center">
-                          <svg className="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                          </svg>
-                          Verificando cuenta...
-                        </span>
-                      )}
-                      {cuentaValida === false && !checkingCuenta && (
-                        <span className="text-red-400 text-sm">❌ Cuenta no válida</span>
-                      )}
-                      {cuentaValida === true && !checkingCuenta && (
-                        <span className="text-green-400 text-sm">✅ Cuenta válida</span>
-                      )}
-                    </div>
-                    {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
-                      <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
-                    )}
                   </div>
                 </div>
+
+                {/* Tipo de Tarjeta (cuando se selecciona Tarjeta) */}
+                {formData.tipo_cuenta_destino === 'Tarjeta' && (
+                  <div className="mt-6">
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Tipo de Tarjeta *
+                    </label>
+                    <select
+                      name="tipo_tarjeta"
+                      value={formData.tipo_tarjeta}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50 max-w-xs"
+                    >
+                      <option value="" className="text-black">Selecciona tipo</option>
+                      <option value="Débito" className="text-black">Débito</option>
+                      <option value="Crédito" className="text-black">Crédito</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Estados de validación de cuenta destino */}
+                <div className="mt-4 flex items-center gap-4">
+                  {checkingCuenta && (
+                    <span className="text-blue-300 text-sm flex items-center">
+                      <svg className="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      </svg>
+                      Verificando cuenta...
+                    </span>
+                  )}
+                  {cuentaValida === false && !checkingCuenta && (
+                    <span className="text-red-400 text-sm">❌ Cuenta no válida</span>
+                  )}
+                  {cuentaValida === true && !checkingCuenta && (
+                    <span className="text-green-400 text-sm">✅ Cuenta válida</span>
+                  )}
+                </div>
+                {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
+                  <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
+                )}
               </div>
 
               {/* SECCIÓN 3: INFORMACIÓN DEL PAGO - 2 columnas */}
@@ -618,7 +730,192 @@ export default function EditarSolicitudPage() {
                 </div>
               </div>
 
-              {/* SECCIÓN 6: DOCUMENTOS - Ancho completo con previsualización mejorada */}
+              {/* SECCIÓN 6: INFORMACIÓN DE TARJETA INSTITUCIONAL (CONDICIONAL) */}
+              {formData.tipo_pago === 'tarjeta_institucional' && (
+                <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                  <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                    <CreditCard className="w-6 h-6 mr-3" />
+                    Información de Tarjeta Institucional
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Link de Pago *
+                      </label>
+                      <input
+                        type="url"
+                        name="link_pago"
+                        value={formData.link_pago}
+                        onChange={handleInputChange}
+                        placeholder="https://ejemplo.com/pago"
+                        required
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Usuario de Acceso *
+                      </label>
+                      <input
+                        type="text"
+                        name="usuario_acceso"
+                        value={formData.usuario_acceso}
+                        onChange={handleInputChange}
+                        placeholder="Usuario"
+                        required
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Contraseña de Acceso *
+                      </label>
+                      <input
+                        type="password"
+                        name="contrasena_acceso"
+                        value={formData.contrasena_acceso}
+                        onChange={handleInputChange}
+                        placeholder="Contraseña"
+                        required
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECCIÓN 7: SEGUNDA FORMA DE PAGO (OPCIONAL) */}
+              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <CreditCard className="w-6 h-6 mr-3" />
+                  Segunda Forma de Pago (Opcional)
+                </h3>
+                
+                <div className="mb-6">
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.tiene_segunda_forma_pago}
+                      onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'tiene_segunda_forma_pago', value: e.target.checked })}
+                      className="w-5 h-5 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="text-white/90 text-base">Agregar segunda forma de pago</span>
+                  </label>
+                </div>
+
+                {formData.tiene_segunda_forma_pago && (
+                  <div className="space-y-8 border-t border-white/10 pt-8">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold text-white">Segunda Forma de Pago</h4>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          dispatch({ type: 'SET_FIELD', field: 'tiene_segunda_forma_pago', value: false });
+                          dispatch({ type: 'SET_FIELD', field: 'tipo_cuenta_destino_2', value: 'CLABE' });
+                          dispatch({ type: 'SET_FIELD', field: 'banco_destino_2', value: '' });
+                          dispatch({ type: 'SET_FIELD', field: 'cuenta_destino_2', value: '' });
+                          dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta_2', value: '' });
+                          dispatch({ type: 'SET_FIELD', field: 'cuenta_2', value: '' });
+                          dispatch({ type: 'SET_FIELD', field: 'link_pago_2', value: '' });
+                          dispatch({ type: 'SET_FIELD', field: 'usuario_acceso_2', value: '' });
+                          dispatch({ type: 'SET_FIELD', field: 'contrasena_acceso_2', value: '' });
+                        }}
+                        className="text-red-400 hover:text-red-300 text-sm"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                    
+                    {/* Información Bancaria 2 */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                      <div>
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          Datos Bancarios *
+                        </label>
+                        <select
+                          name="tipo_cuenta_destino_2"
+                          value={formData.tipo_cuenta_destino_2}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                        >
+                          <option value="CLABE" className="text-black">CLABE</option>
+                          <option value="Tarjeta" className="text-black">Tarjeta</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          Banco (opcional)
+                        </label>
+                        <select
+                          name="banco_destino_2"
+                          value={formData.banco_destino_2}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                        >
+                          <option value="" className="text-black">Selecciona banco</option>
+                          {bancoOptions.map(banco => (
+                            <option key={banco} value={banco} className="text-black">{banco}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          Cuenta (opcional)
+                        </label>
+                        <input
+                          type="text"
+                          name="cuenta_2"
+                          value={formData.cuenta_2}
+                          onChange={handleInputChange}
+                          placeholder="Número de cuenta"
+                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                        />
+                      </div>
+
+                      <div className="md:col-span-3">
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          <CreditCard className="w-4 h-4 inline mr-2" />
+                          Cuenta Destino *
+                        </label>
+                        <input
+                          type="text"
+                          name="cuenta_destino_2"
+                          value={formData.cuenta_destino_2}
+                          onChange={handleInputChange}
+                          placeholder={formData.tipo_cuenta_destino_2 === 'Tarjeta' ? 'Número de tarjeta' : 'Número de cuenta CLABE'}
+                          required
+                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm font-mono tracking-wide transition-all duration-200 hover:border-white/50"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Tipo de Tarjeta 2 (cuando se selecciona Tarjeta) */}
+                    {formData.tipo_cuenta_destino_2 === 'Tarjeta' && (
+                      <div className="mb-6">
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          Tipo de Tarjeta *
+                        </label>
+                        <select
+                          name="tipo_tarjeta_2"
+                          value={formData.tipo_tarjeta_2}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50 max-w-xs"
+                        >
+                          <option value="" className="text-black">Selecciona tipo</option>
+                          <option value="Débito" className="text-black">Débito</option>
+                          <option value="Crédito" className="text-black">Crédito</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* SECCIÓN 8: DOCUMENTOS - Ancho completo con previsualización mejorada */}
               <div className="bg-white/5 rounded-xl p-8 border border-white/10">
                 <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                   <Upload className="w-6 h-6 mr-3" />
