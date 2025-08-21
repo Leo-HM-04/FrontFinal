@@ -840,7 +840,7 @@ export default function NuevaSolicitudPage() {
                 >
                   <option value="pago_factura" className="bg-blue-900 text-white">Pago de factura</option>
                   <option value="pago_terceros" className="bg-blue-900 text-white">Pago a terceros</option>
-                  <option value="otro" className="bg-blue-900 text-white">Otro (Solo acepta números)</option>
+                  <option value="otro" className="bg-blue-900 text-white">Otro</option>
                 </select>
 
                 {/* Campo de texto condicional para "Otro" - SOLO NÚMEROS */}
@@ -863,13 +863,6 @@ export default function NuevaSolicitudPage() {
                     required
                     className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.concepto ? 'border-red-400' : ''}`}
                   />
-                )}
-                
-                {/* Mostrar el concepto seleccionado para opciones predefinidas */}
-                {formData.tipo_concepto !== 'otro' && (
-                  <div className="w-full px-5 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white/80 text-base">
-                    {formData.tipo_concepto === 'pago_factura' ? 'Pago de factura' : 'Pago a terceros'}
-                  </div>
                 )}
                 
                 {errors.concepto && <span className="text-red-400 text-sm mt-1 block">{errors.concepto}</span>}
