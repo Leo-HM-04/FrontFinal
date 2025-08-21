@@ -11,10 +11,10 @@ const filtrarPorRango = (recurrentes: PlantillaRecurrente[], rango: string) => {
     
     switch (rango) {
         case 'dia':
-            inicio.setDate(hoy.getDate() - 1);
+            inicio.setTime(hoy.getTime() - (24 * 60 * 60 * 1000));
             break;
         case 'semana':
-            inicio.setDate(hoy.getDate() - 7);
+            inicio.setTime(hoy.getTime() - (7 * 24 * 60 * 60 * 1000));
             break;
         case 'mes':
             inicio.setMonth(hoy.getMonth() - 1);

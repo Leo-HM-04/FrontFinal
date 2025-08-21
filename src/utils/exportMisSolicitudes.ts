@@ -60,7 +60,7 @@ export function filtrarSolicitudesPorRango(solicitudes: Solicitud[], rango: 'dia
       break;
     case 'semana':
       desde = new Date(hoy);
-      desde.setDate(hoy.getDate() - 7);
+      desde.setTime(hoy.getTime() - (7 * 24 * 60 * 60 * 1000));
       break;
     case 'mes':
       desde = new Date(hoy.getFullYear(), hoy.getMonth(), 1);

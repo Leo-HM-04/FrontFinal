@@ -64,7 +64,7 @@ const fechaLegible = (fechaStr: string) => {
 function filtrarViaticosPorRango(viaticos: Viatico[], rango: string) {
   const hoy = new Date();
   const inicioSemana = new Date(hoy);
-  inicioSemana.setDate(hoy.getDate() - 7);
+  inicioSemana.setTime(hoy.getTime() - (7 * 24 * 60 * 60 * 1000));
   const inicioMes = new Date(hoy);
   inicioMes.setMonth(hoy.getMonth() - 1);
 

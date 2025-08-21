@@ -116,7 +116,7 @@ export default function MisViaticosPage() {
           });
           break;
         case 'week':
-          filterDate.setDate(today.getDate() - 7);
+          filterDate.setTime(today.getTime() - (7 * 24 * 60 * 60 * 1000));
           filtered = filtered.filter(v => new Date(v.fecha_creacion || v.fecha_limite_pago) >= filterDate);
           break;
         case 'month':

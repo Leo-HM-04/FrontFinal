@@ -5,46 +5,34 @@
 
 /**
  * Convierte una fecha del DatePicker al formato correcto para enviar al backend
- * IMPORTANTE: Agrega un día para compensar el problema de zona horaria que hace
- * que el sistema siempre registre las fechas un día antes
+ * Formato directo sin compensaciones de 24 horas
  */
 export const formatDateForAPI = (date: Date | null): string => {
   if (!date) return '';
   
-  // COMPENSACIÓN: Agregar un día para que el backend registre la fecha correcta
-  const compensatedDate = new Date(date);
-  compensatedDate.setDate(compensatedDate.getDate() + 1);
-  
-  // Usar la fecha compensada para el formato
-  const year = compensatedDate.getFullYear();
-  const month = String(compensatedDate.getMonth() + 1).padStart(2, '0');
-  const day = String(compensatedDate.getDate()).padStart(2, '0');
+  // Usar la fecha directa sin compensaciones
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
   
   return `${year}-${month}-${day}`;
 };
 
 /**
  * Convierte una cadena de fecha del backend a Date object para carga en formularios
- * IMPORTANTE: Resta un día para compensar el problema de zona horaria que hace
- * que el backend siempre registre las fechas un día adelante
+ * Formato directo sin compensaciones de 24 horas
  */
 export const parseBackendDateForForm = (dateString: string): Date => {
   if (!dateString) return new Date();
   
   // Si la fecha viene en formato ISO, parsearlo directamente
   if (dateString.includes('T')) {
-    const backendDate = new Date(dateString);
-    // COMPENSACIÓN: Restar un día para mostrar la fecha correcta en formularios
-    backendDate.setDate(backendDate.getDate() - 1);
-    return backendDate;
+    return new Date(dateString);
   }
   
-  // Si viene solo la fecha (YYYY-MM-DD), crear fecha local y compensar
+  // Si viene solo la fecha (YYYY-MM-DD), crear fecha local sin compensaciones
   const [year, month, day] = dateString.split('-').map(Number);
-  const localDate = new Date(year, month - 1, day);
-  // COMPENSACIÓN: Restar un día para mostrar la fecha correcta en formularios
-  localDate.setDate(localDate.getDate() - 1);
-  return localDate;
+  return new Date(year, month - 1, day);
 };
 
 /**

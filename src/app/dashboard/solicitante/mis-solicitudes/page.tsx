@@ -253,7 +253,7 @@ function MisSolicitudesContent() {
           });
           break;
         case 'week':
-          filterDate.setDate(today.getDate() - 7);
+          filterDate.setTime(today.getTime() - (7 * 24 * 60 * 60 * 1000));
           filtered = filtered.filter(solicitud => 
             new Date(solicitud.fecha_creacion) >= filterDate
           );
