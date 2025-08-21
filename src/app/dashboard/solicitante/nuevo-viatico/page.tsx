@@ -22,7 +22,6 @@ type Viatico = {
   viatico_url?: string;
   id_usuario?: string;
   tipo_pago_descripcion?: string;
-  empresa_a_pagar?: string;
   nombre_persona: string;
   cuenta: string;
   banco_cuenta: string;
@@ -109,7 +108,7 @@ export default function NuevoViaticoPage() {
             departamento: f.form.departamento || '',
             monto: parseFloat(f.form.monto || '0'),
             cuenta_destino: f.form.cuenta_destino || '',
-            concepto: f.form.concepto || '',
+            concepto: 'Pago a terceros', // Siempre fijo
             tipo_pago: 'viaticos',
             tipo_cuenta_destino: f.form.tipo_cuenta_destino || 'clabe',
             tipo_tarjeta: f.form.tipo_tarjeta || '',
@@ -117,7 +116,6 @@ export default function NuevoViaticoPage() {
             fecha_limite_pago: f.form.fecha_limite_pago || formatDateForAPI(getCurrentUTC6Date()),
             viatico_url: f.file || undefined,
             tipo_pago_descripcion: f.form.tipo_pago_descripcion || '',
-            empresa_a_pagar: f.form.empresa_a_pagar || '',
             nombre_persona: f.form.nombre_persona || '',
             cuenta: f.form.cuenta || '',
             banco_cuenta: f.form.banco_cuenta || '',
@@ -323,7 +321,12 @@ export default function NuevoViaticoPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-blue-900 font-bold text-base">Concepto</label>
-                    <input name="concepto" placeholder="Concepto" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                    <input 
+                      name="concepto" 
+                      value="Pago a terceros" 
+                      readOnly 
+                      className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 bg-gray-100 cursor-not-allowed" 
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-blue-900 font-bold text-base">Descripción del Pago</label>
@@ -331,12 +334,8 @@ export default function NuevoViaticoPage() {
                   </div>
                 </div>
 
-                {/* Bloque: Persona y empresa */}
-                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Empresa a Pagar</label>
-                    <input name="empresa_a_pagar" placeholder="Nombre de la empresa" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
-                  </div>
+                {/* Bloque: Persona */}
+                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
                   <div className="flex flex-col gap-1">
                     <label className="text-blue-900 font-bold text-base">Nombre de la Persona dirigida*</label>
                     <input name="nombre_persona" placeholder="Nombre completo" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
