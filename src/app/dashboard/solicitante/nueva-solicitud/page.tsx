@@ -423,7 +423,7 @@ export default function NuevaSolicitudPage() {
                   {/* Banco */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      Banco (opcional)
+                      Banco Destino (opcional)
                     </label>
                     <select
                       name="banco_destino"
@@ -838,7 +838,7 @@ export default function NuevaSolicitudPage() {
                   {/* Nombre de la persona (obligatorio) */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      <span className="text-red-400">*</span> Nombre de la persona
+                      <span className="text-red-400">*</span> Nombre del Beneficiario
                     </label>
                     <input
                       type="text"
@@ -855,7 +855,7 @@ export default function NuevaSolicitudPage() {
                   {/* Empresa (opcional) */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      Empresa a pagar (opcional)
+                      Empresa Emisora  (opcional)
                     </label>
                     <input
                       type="text"
