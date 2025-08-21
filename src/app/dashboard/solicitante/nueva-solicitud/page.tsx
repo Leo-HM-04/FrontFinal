@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useReducer } from 'react';
+import { useState, useReducer, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
@@ -21,6 +21,7 @@ type FormState = {
   monto: string;
   cuenta_destino: string;
   concepto: string;
+  tipo_concepto: string;
   tipo_pago: string;
   tipo_pago_descripcion: string;
   empresa_a_pagar: string;
@@ -55,6 +56,7 @@ const initialState: FormState = {
   monto: '',
   cuenta_destino: '',
   concepto: '',
+  tipo_concepto: 'pago_factura',
   tipo_pago: 'transferencia',
   tipo_pago_descripcion: '',
   empresa_a_pagar: '',
@@ -100,6 +102,12 @@ export default function NuevaSolicitudPage() {
   const [checkingCuenta, setCheckingCuenta] = useState(false);
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
 
+  // Limpiar concepto cuando cambie tipo_concepto de "otro" a otra opción
+  useEffect(() => {
+    if (formData.tipo_concepto !== 'otro') {
+      dispatch({ type: 'SET_FIELD', field: 'concepto', value: '' });
+    }
+  }, [formData.tipo_concepto]);
 
   // Configuración dinámica para cuenta destino
   let cuentaConfig;
@@ -227,12 +235,17 @@ export default function NuevaSolicitudPage() {
     setLoading(true);
     const newErrors: Record<string, string> = {};
     // Validar campos requeridos
-    const requiredFields = ['departamento', 'monto', 'concepto', 'fecha_limite_pago', 'factura_file', 'nombre_persona'];
+    const requiredFields = ['departamento', 'monto', 'fecha_limite_pago', 'factura_file', 'nombre_persona'];
     requiredFields.forEach(field => {
       if (!formData[field as keyof typeof formData]) {
         newErrors[field] = 'Este campo es obligatorio';
       }
     });
+    
+    // Validar concepto solo si tipo_concepto es "otro"
+    if (formData.tipo_concepto === 'otro' && !formData.concepto) {
+      newErrors.concepto = 'Este campo es obligatorio cuando seleccionas "Otro"';
+    }
     
     // Validar cuenta_destino solo si no es Tarjeta Institucional
     if (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && !formData.cuenta_destino) {
@@ -258,7 +271,8 @@ export default function NuevaSolicitudPage() {
       departamento: formData.departamento,
       monto: formData.monto,
       cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || null) : formData.cuenta_destino,
-      concepto: formData.concepto,
+      concepto: formData.tipo_concepto === 'otro' ? formData.concepto : 
+                formData.tipo_concepto === 'pago_factura' ? 'Pago de factura' : 'Pago a terceros',
       tipo_pago: formData.tipo_pago,
       tipo_pago_descripcion: formData.tipo_pago_descripcion,
       empresa_a_pagar: formData.empresa_a_pagar,
@@ -816,15 +830,48 @@ export default function NuevaSolicitudPage() {
                   <MessageSquare className="w-4 h-4 inline mr-2" />
                   Concepto *
                 </label>
-                <textarea
-                  name="concepto"
-                  value={formData.concepto}
+                
+                {/* Dropdown para tipo de concepto */}
+                <select
+                  name="tipo_concepto"
+                  value={formData.tipo_concepto}
                   onChange={handleInputChange}
-                  placeholder="Describe detalladamente el concepto del pago..."
-                  required
-                  rows={4}
-                  className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none text-base ${errors.concepto ? 'border-red-400' : ''}`}
-                />
+                  className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base mb-4"
+                >
+                  <option value="pago_factura" className="bg-blue-900 text-white">Pago de factura</option>
+                  <option value="pago_terceros" className="bg-blue-900 text-white">Pago a terceros</option>
+                  <option value="otro" className="bg-blue-900 text-white">Otro (Solo acepta números)</option>
+                </select>
+
+                {/* Campo de texto condicional para "Otro" - SOLO NÚMEROS */}
+                {formData.tipo_concepto === 'otro' && (
+                  <input
+                    type="text"
+                    name="concepto"
+                    value={formData.concepto}
+                    onChange={(e) => {
+                      // Solo permitir números
+                      const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                      handleInputChange({
+                        target: {
+                          name: 'concepto',
+                          value: numericValue
+                        }
+                      } as React.ChangeEvent<HTMLInputElement>);
+                    }}
+                    placeholder="Ingrese solo números..."
+                    required
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.concepto ? 'border-red-400' : ''}`}
+                  />
+                )}
+                
+                {/* Mostrar el concepto seleccionado para opciones predefinidas */}
+                {formData.tipo_concepto !== 'otro' && (
+                  <div className="w-full px-5 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white/80 text-base">
+                    {formData.tipo_concepto === 'pago_factura' ? 'Pago de factura' : 'Pago a terceros'}
+                  </div>
+                )}
+                
                 {errors.concepto && <span className="text-red-400 text-sm mt-1 block">{errors.concepto}</span>}
               </div>
 
@@ -964,7 +1011,7 @@ export default function NuevaSolicitudPage() {
                     !formData.departamento ||
                     !formData.monto ||
                     (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && !formData.cuenta_destino) ||
-                    !formData.concepto ||
+                    (formData.tipo_concepto === 'otro' && !formData.concepto) ||
                     !formData.fecha_limite_pago ||
                     !formData.factura_file ||
                     (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') ||
