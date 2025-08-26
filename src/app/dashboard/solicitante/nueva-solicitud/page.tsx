@@ -376,25 +376,42 @@ export default function NuevaSolicitudPage() {
       usuario_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.usuario_acceso_2 || null) : null,
       contrasena_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.contrasena_acceso_2 || null) : null
       };
+      
       const response = await SolicitudesService.createWithFiles(solicitudData);
+      console.log('✅ Solicitud principal creada, response:', response);
+      
+      // Debug: verificar archivos adicionales
+      console.log('🔍 VERIFICANDO ARCHIVOS ADICIONALES:');
+      console.log('📋 formData.archivos_adicionales:', formData.archivos_adicionales);
+      console.log('📋 Length:', formData.archivos_adicionales.length);
+      console.log('📋 formData.tipos_archivos_adicionales:', formData.tipos_archivos_adicionales);
       
       // Subir archivos adicionales si los hay
       if (formData.archivos_adicionales.length > 0) {
+        console.log('🚀 INICIANDO SUBIDA DE ARCHIVOS ADICIONALES');
+        
         try {
           // Obtener el ID de la solicitud creada
           const solicitudId = (response as { solicitud_id?: number })?.solicitud_id;
+          console.log('📋 Solicitud ID obtenido:', solicitudId);
+          
           if (solicitudId) {
+            console.log('📤 LLAMANDO a SolicitudArchivosService.subirArchivos');
             await SolicitudArchivosService.subirArchivos(
               solicitudId,
               formData.archivos_adicionales,
               formData.tipos_archivos_adicionales
             );
-            console.log('Archivos adicionales subidos exitosamente');
+            console.log('✅ Archivos adicionales subidos exitosamente');
+          } else {
+            console.error('❌ No se pudo obtener el ID de la solicitud');
           }
         } catch (archivoError) {
-          console.warn('Error al subir archivos adicionales:', archivoError);
+          console.error('❌ Error al subir archivos adicionales:', archivoError);
           // No fallar la solicitud principal por esto
         }
+      } else {
+        console.log('ℹ️ No hay archivos adicionales para subir');
       }
       
       let successMsg = 'Solicitud creada exitosamente';
