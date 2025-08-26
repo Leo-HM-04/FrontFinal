@@ -269,6 +269,9 @@ export default function NuevaSolicitudPage() {
       if (!formData.factura_file) {
         throw new Error('El archivo de factura es obligatorio.');
       }
+      
+      console.log('FormData antes de enviar:', formData);
+      
       const solicitudData = {
       departamento: formData.departamento,
       monto: formData.monto,

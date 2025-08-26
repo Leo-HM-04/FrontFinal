@@ -131,6 +131,7 @@ export class SolicitudesService {
   static async createWithFiles(data: {
     departamento: string;
     monto: string | number;
+    tipo_moneda: string;
     cuenta_destino: string | null;
     concepto: string;
     tipo_pago: string;
@@ -162,10 +163,17 @@ export class SolicitudesService {
     contrasena_acceso_2?: string | null;
   }): Promise<unknown> {
     const token = localStorage.getItem('token');
+    
+    console.log('Service data received:', data);
+    
     const formData = new FormData();
     formData.append('departamento', data.departamento);
     formData.append('monto', String(data.monto));
+    formData.append('tipo_moneda', data.tipo_moneda);
     formData.append('cuenta_destino', data.cuenta_destino || '');
+    
+    console.log('tipo_moneda value:', data.tipo_moneda);
+    console.log('FormData entries:', Array.from(formData.entries()));
     formData.append('concepto', data.concepto);
     formData.append('tipo_pago', data.tipo_pago);
     formData.append('fecha_limite_pago', data.fecha_limite_pago);
