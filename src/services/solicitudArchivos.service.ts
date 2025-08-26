@@ -47,7 +47,7 @@ export class SolicitudArchivosService {
     
     // Debug: mostrar todo el FormData
     console.log('📋 FRONTEND FormData entries:');
-    for (let pair of formData.entries()) {
+    for (const pair of formData.entries()) {
       console.log(`📋 ${pair[0]}:`, pair[1]);
     }
     
