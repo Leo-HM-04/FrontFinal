@@ -14,7 +14,7 @@ export class SolicitudArchivosService {
     solicitud_id: number, 
     archivos: File[], 
     tipos?: string[]
-  ): Promise<{ archivos: any[] }> {
+  ): Promise<{ archivos: SolicitudArchivo[] }> {
     const token = localStorage.getItem('token');
     const formData = new FormData();
     

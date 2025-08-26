@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button';
 import type { Solicitud } from '@/types/index';
 import { CreditCard, FileText, Building, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
-import { formatDateForDisplay, formatShortDate } from '@/utils/dateUtils';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 interface PagoDetailModalProps {
   isOpen: boolean;

@@ -72,6 +72,7 @@ const FilterButton = ({
   </button>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formatNotificationMessage = (message: string): string => {
   // Primero, verificar si el mensaje ya tiene formato detallado
   if (

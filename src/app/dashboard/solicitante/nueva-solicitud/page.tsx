@@ -361,7 +361,7 @@ export default function NuevaSolicitudPage() {
       if (formData.archivos_adicionales.length > 0) {
         try {
           // Obtener el ID de la solicitud creada
-          const solicitudId = (response as any)?.solicitud_id;
+          const solicitudId = (response as { solicitud_id?: number })?.solicitud_id;
           if (solicitudId) {
             await SolicitudArchivosService.subirArchivos(
               solicitudId,
