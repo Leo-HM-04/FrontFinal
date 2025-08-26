@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { Button } from '@/components/ui/Button';
-import { FileText, Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle } from 'lucide-react';
+import { FileText, Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle, X } from 'lucide-react';
 import { SolicitudesService } from '@/services/solicitudes.service';
+import { SolicitudArchivosService } from '@/services/solicitudArchivos.service';
 import { toast } from 'react-hot-toast';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -29,6 +30,8 @@ type FormState = {
   nombre_persona: string;
   fecha_limite_pago: string;
   factura_file: File | null;
+  archivos_adicionales: File[];
+  tipos_archivos_adicionales: string[];
   tipo_cuenta_destino: string;
   tipo_tarjeta: string;
   banco_destino: string;
@@ -50,7 +53,10 @@ type FormState = {
   contrasena_acceso_2: string;
 };
 
-type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null | boolean };
+type FormAction = 
+  | { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null | boolean | File[] | string[] }
+  | { type: 'ADD_ARCHIVO_ADICIONAL'; archivo: File; tipo: string }
+  | { type: 'REMOVE_ARCHIVO_ADICIONAL'; index: number };
 
 const initialState: FormState = {
   departamento: '',
@@ -65,6 +71,8 @@ const initialState: FormState = {
   nombre_persona: '',
   fecha_limite_pago: '',
   factura_file: null,
+  archivos_adicionales: [],
+  tipos_archivos_adicionales: [],
   tipo_cuenta_destino: 'CLABE',
   tipo_tarjeta: '',
   banco_destino: '',
@@ -90,6 +98,18 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
     case 'SET_FIELD':
       return { ...state, [action.field]: action.value };
+    case 'ADD_ARCHIVO_ADICIONAL':
+      return {
+        ...state,
+        archivos_adicionales: [...state.archivos_adicionales, action.archivo],
+        tipos_archivos_adicionales: [...state.tipos_archivos_adicionales, action.tipo]
+      };
+    case 'REMOVE_ARCHIVO_ADICIONAL':
+      return {
+        ...state,
+        archivos_adicionales: state.archivos_adicionales.filter((_, i) => i !== action.index),
+        tipos_archivos_adicionales: state.tipos_archivos_adicionales.filter((_, i) => i !== action.index)
+      };
     default:
       return state;
   }
@@ -214,6 +234,34 @@ export default function NuevaSolicitudPage() {
     return true;
   };
 
+  // Funciones para manejar archivos adicionales
+  const handleArchivoAdicionalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    
+    files.forEach(file => {
+      if (validateFile(file)) {
+        dispatch({ 
+          type: 'ADD_ARCHIVO_ADICIONAL', 
+          archivo: file, 
+          tipo: 'documento' 
+        });
+      }
+    });
+    
+    // Limpiar el input
+    e.target.value = '';
+  };
+
+  const removeArchivoAdicional = (index: number) => {
+    dispatch({ type: 'REMOVE_ARCHIVO_ADICIONAL', index });
+  };
+
+  const updateTipoArchivoAdicional = (index: number, tipo: string) => {
+    const nuevos_tipos = [...formData.tipos_archivos_adicionales];
+    nuevos_tipos[index] = tipo;
+    dispatch({ type: 'SET_FIELD', field: 'tipos_archivos_adicionales', value: nuevos_tipos });
+  };
+
   // Simulación de verificación de cuenta (reemplaza por tu API real si existe)
   const verificarCuentaDestino = async (cuenta: string) => {
     setCheckingCuenta(true);
@@ -308,10 +356,35 @@ export default function NuevaSolicitudPage() {
       contrasena_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.contrasena_acceso_2 || null) : null
       };
       const response = await SolicitudesService.createWithFiles(solicitudData);
+      
+      // Subir archivos adicionales si los hay
+      if (formData.archivos_adicionales.length > 0) {
+        try {
+          // Obtener el ID de la solicitud creada
+          const solicitudId = (response as any)?.solicitud_id;
+          if (solicitudId) {
+            await SolicitudArchivosService.subirArchivos(
+              solicitudId,
+              formData.archivos_adicionales,
+              formData.tipos_archivos_adicionales
+            );
+            console.log('Archivos adicionales subidos exitosamente');
+          }
+        } catch (archivoError) {
+          console.warn('Error al subir archivos adicionales:', archivoError);
+          // No fallar la solicitud principal por esto
+        }
+      }
+      
       let successMsg = 'Solicitud creada exitosamente';
       if (response && typeof response === 'object' && 'message' in response && typeof (response as { message?: string }).message === 'string') {
         successMsg = (response as { message: string }).message;
       }
+      
+      if (formData.archivos_adicionales.length > 0) {
+        successMsg += ` con ${formData.archivos_adicionales.length} archivo(s) adicional(es)`;
+      }
+      
       toast.success(successMsg);
       router.push('/dashboard/solicitante/mis-solicitudes');
     } catch (err: unknown) {
@@ -1007,6 +1080,78 @@ export default function NuevaSolicitudPage() {
                     </div>
                   )}
                   {errors.factura_file && <span className="text-red-400 text-sm mt-2 block">{errors.factura_file}</span>}
+                </div>
+
+                {/* Archivos Adicionales */}
+                <div className="mt-8 border-t border-white/10 pt-8">
+                  <label className="block text-base font-medium text-white/90 mb-4">
+                    📎 Archivos Adicionales (Opcional)
+                    <span className="text-white/70 text-sm ml-2">(PDF, Excel, JPG, PNG - Máx. 5MB c/u)</span>
+                  </label>
+                  
+                  {/* Botón para agregar archivos */}
+                  <div className="mb-6">
+                    <input
+                      type="file"
+                      id="archivos-adicionales"
+                      accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png"
+                      multiple
+                      onChange={handleArchivoAdicionalChange}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="archivos-adicionales"
+                      className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all duration-200 cursor-pointer"
+                    >
+                      <Upload className="w-5 h-5 mr-2" />
+                      Agregar Archivos
+                    </label>
+                  </div>
+
+                  {/* Lista de archivos adicionales */}
+                  {formData.archivos_adicionales.length > 0 && (
+                    <div className="space-y-4">
+                      {formData.archivos_adicionales.map((archivo, index) => (
+                        <div key={index} className="p-4 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/20 backdrop-blur-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 flex-1">
+                              <div className="p-2 rounded-full bg-blue-500/20 border border-blue-400/30">
+                                <FileText className="w-5 h-5 text-blue-400" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-white font-medium">{archivo.name}</p>
+                                <p className="text-white/70 text-sm">
+                                  {(archivo.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              </div>
+                              
+                              {/* Selector de tipo */}
+                              <select
+                                value={formData.tipos_archivos_adicionales[index] || 'documento'}
+                                onChange={(e) => updateTipoArchivoAdicional(index, e.target.value)}
+                                className="px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white text-sm"
+                              >
+                                <option value="documento" className="bg-blue-900 text-white">Documento</option>
+                                <option value="comprobante" className="bg-blue-900 text-white">Comprobante</option>
+                                <option value="contrato" className="bg-blue-900 text-white">Contrato</option>
+                                <option value="identificacion" className="bg-blue-900 text-white">Identificación</option>
+                                <option value="otro" className="bg-blue-900 text-white">Otro</option>
+                              </select>
+                            </div>
+                            
+                            {/* Botón eliminar */}
+                            <button
+                              type="button"
+                              onClick={() => removeArchivoAdicional(index)}
+                              className="ml-4 p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
