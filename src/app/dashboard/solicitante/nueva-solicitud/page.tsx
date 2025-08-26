@@ -19,6 +19,7 @@ import { formatDateForAPI } from '@/utils/dateUtils';
 type FormState = {
   departamento: string;
   monto: string;
+  tipo_moneda: string;
   cuenta_destino: string;
   concepto: string;
   tipo_concepto: string;
@@ -54,6 +55,7 @@ type FormAction = { type: 'SET_FIELD'; field: keyof FormState; value: string | F
 const initialState: FormState = {
   departamento: '',
   monto: '',
+  tipo_moneda: 'MXN',
   cuenta_destino: '',
   concepto: '',
   tipo_concepto: 'pago_factura',
@@ -270,6 +272,7 @@ export default function NuevaSolicitudPage() {
       const solicitudData = {
       departamento: formData.departamento,
       monto: formData.monto,
+      tipo_moneda: formData.tipo_moneda,
       cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || null) : formData.cuenta_destino,
       concepto: formData.tipo_concepto === 'otro' ? formData.concepto : 
                 formData.tipo_concepto === 'pago_factura' ? 'Pago de factura' : 'Pago a terceros',
@@ -406,6 +409,23 @@ export default function NuevaSolicitudPage() {
                     className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
                   />  
                   {errors.monto && <span className="text-red-400 text-sm mt-1 block">{errors.monto}</span>}
+                </div>
+
+                {/* Tipo de Moneda */}
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">
+                    <DollarSign className="w-4 h-4 inline mr-2" />
+                    Tipo de Moneda *
+                  </label>
+                  <select
+                    name="tipo_moneda"
+                    value={formData.tipo_moneda}
+                    onChange={handleInputChange}
+                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                  >
+                    <option value="MXN" className="bg-blue-900 text-white">MXN (Peso Mexicano)</option>
+                    <option value="USD" className="bg-blue-900 text-white">USD (Dólar Americano)</option>
+                  </select>
                 </div>
               </div>
 
