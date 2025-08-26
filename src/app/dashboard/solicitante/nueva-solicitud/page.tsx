@@ -320,13 +320,34 @@ export default function NuevaSolicitudPage() {
       
       console.log('FormData antes de enviar:', formData);
       
+      // Generar concepto basado en tipo_concepto
+      let conceptoGenerado: string;
+      if (formData.tipo_concepto === 'otro') {
+        conceptoGenerado = formData.concepto || 'Otro concepto';
+      } else if (formData.tipo_concepto === 'pago_factura') {
+        conceptoGenerado = 'Pago de factura';
+      } else {
+        conceptoGenerado = 'Pago a terceros';
+      }
+      
+      // Asegurar que el concepto tenga al menos 3 caracteres
+      if (conceptoGenerado.length < 3) {
+        conceptoGenerado = 'Pago de factura'; // Fallback
+      }
+      
+      console.log('🔍 Debugging concepto:', {
+        tipo_concepto: formData.tipo_concepto,
+        concepto_original: formData.concepto,
+        concepto_generado: conceptoGenerado,
+        concepto_length: conceptoGenerado.length
+      });
+      
       const solicitudData = {
       departamento: formData.departamento,
       monto: formData.monto,
       tipo_moneda: formData.tipo_moneda,
       cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || null) : formData.cuenta_destino,
-      concepto: formData.tipo_concepto === 'otro' ? formData.concepto : 
-                formData.tipo_concepto === 'pago_factura' ? 'Pago de factura' : 'Pago a terceros',
+      concepto: conceptoGenerado,
       tipo_pago: formData.tipo_pago,
       tipo_pago_descripcion: formData.tipo_pago_descripcion,
       empresa_a_pagar: formData.empresa_a_pagar,
