@@ -42,9 +42,10 @@ export class SolicitudArchivosService {
       });
       console.log('📥 FRONTEND respuesta recibida:', response.data);
       return { archivos: response.data.archivos || [] };
-    } catch (error: any) {
-      if (error.response) {
-        console.error('❌ Error al subir archivos:', error.response.data);
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        // @ts-expect-error: error.response puede existir en errores de axios
+        console.error('❌ Error al subir archivos:', error.response?.data);
       } else {
         console.error('❌ Error al subir archivos:', error);
       }
