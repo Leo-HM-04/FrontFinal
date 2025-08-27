@@ -24,25 +24,6 @@ const tabs: TabType[] = [
 export default function AdminProfilePage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('personal');
-  // Eliminado edición y loading
-
-  // const [formData, setFormData] = useState({ nombre: '', email: '', cargo: 'Administrador General' });
-
-  // useEffect eliminado: formData/setFormData ya no existen
-
-  // const [notifications, setNotifications] = useState({ solicitudesNuevas: true, solicitudesActualizadas: true, usuariosNuevos: false, reportesSemanal: true });
-
-  // Eliminado handleInputChange
-
-  // Eliminado handlePasswordChange
-
-  // const handleNotificationChange = (field: string, checked: boolean) => {
-  //   setNotifications(prev => ({ ...prev, [field]: checked }));
-  // };
-
-  // Eliminado handleSave
-
-  // Eliminado handlePasswordUpdate
 
   const renderPersonalInfo = () => (
     <div className="space-y-7">
