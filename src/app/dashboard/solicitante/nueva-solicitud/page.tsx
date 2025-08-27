@@ -379,6 +379,11 @@ export default function NuevaSolicitudPage() {
       
       const response = await SolicitudesService.createWithFiles(solicitudData);
       console.log('✅ Solicitud principal creada, response:', response);
+      console.log('🔍 DEBUGGING RESPONSE:');
+      console.log('📋 typeof response:', typeof response);
+      console.log('📋 response keys:', response ? Object.keys(response as Record<string, unknown>) : 'response is null/undefined');
+      console.log('📋 response.id_solicitud:', (response as Record<string, unknown>)?.id_solicitud);
+      console.log('📋 response data:', JSON.stringify(response, null, 2));
       
       // Debug: verificar archivos adicionales
       console.log('🔍 VERIFICANDO ARCHIVOS ADICIONALES:');
@@ -391,9 +396,16 @@ export default function NuevaSolicitudPage() {
         console.log('🚀 INICIANDO SUBIDA DE ARCHIVOS ADICIONALES');
         
         try {
-          // Obtener el ID de la solicitud creada
-          const solicitudId = (response as { id_solicitud?: number })?.id_solicitud;
-          console.log('📋 Solicitud ID obtenido:', solicitudId);
+          // Obtener el ID de la solicitud creada - con más debugging
+          let solicitudId = (response as Record<string, unknown>)?.id_solicitud as number | undefined;
+          
+          // Si no está en response directamente, verificar si está en response.data
+          if (!solicitudId && (response as Record<string, unknown>)?.data) {
+            console.log('📋 Verificando response.data:', (response as Record<string, unknown>).data);
+            solicitudId = ((response as Record<string, unknown>).data as Record<string, unknown>)?.id_solicitud as number | undefined;
+          }
+          
+          console.log('📋 Solicitud ID final obtenido:', solicitudId);
           
           if (solicitudId) {
             console.log('📤 LLAMANDO a SolicitudArchivosService.subirArchivos');
