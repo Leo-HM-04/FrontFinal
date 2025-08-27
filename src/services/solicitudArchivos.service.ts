@@ -21,10 +21,13 @@ export class SolicitudArchivosService {
     formData.append('id_solicitud', id_solicitud.toString());
     archivos.forEach((archivo, i) => {
       formData.append('archivos', archivo);
-      if (tipos && tipos[i]) {
-        formData.append('tipos', tipos[i]);
-      }
     });
+    
+    // Enviar tipos como JSON string
+    if (tipos && tipos.length > 0) {
+      formData.append('tipos', JSON.stringify(tipos));
+    }
+    
     // Log para depuración: mostrar el contenido del FormData
     for (const pair of formData.entries()) {
       if (pair[1] instanceof File) {
