@@ -392,7 +392,7 @@ export default function NuevaSolicitudPage() {
         
         try {
           // Obtener el ID de la solicitud creada
-          const solicitudId = (response as { solicitud_id?: number })?.solicitud_id;
+          const solicitudId = (response as { id_solicitud?: number })?.id_solicitud;
           console.log('📋 Solicitud ID obtenido:', solicitudId);
           
           if (solicitudId) {

@@ -2,7 +2,7 @@ import api from '@/lib/api';
 
 export interface SolicitudArchivo {
   id: number;
-  solicitud_id: number;
+  id_solicitud: number;
   archivo_url: string;
   tipo: string;
   fecha_subida: string;
@@ -11,14 +11,14 @@ export interface SolicitudArchivo {
 export class SolicitudArchivosService {
   // Subir múltiples archivos en un solo request usando la clave 'archivos'
   static async subirArchivos(
-    solicitud_id: number,
+    id_solicitud: number,
     archivos: File[],
     tipos?: string[]
   ): Promise<{ archivos: SolicitudArchivo[] }> {
     console.log('🚀 FRONTEND subirArchivos - Inicio (envío múltiple)');
     const token = localStorage.getItem('token');
     const formData = new FormData();
-    formData.append('solicitud_id', solicitud_id.toString());
+    formData.append('id_solicitud', id_solicitud.toString());
     archivos.forEach((archivo, i) => {
       formData.append('archivos', archivo);
       if (tipos && tipos[i]) {
@@ -54,10 +54,10 @@ export class SolicitudArchivosService {
   }
   
   // Obtener archivos de una solicitud
-  static async obtenerArchivos(solicitud_id: number): Promise<SolicitudArchivo[]> {
+  static async obtenerArchivos(id_solicitud: number): Promise<SolicitudArchivo[]> {
     const token = localStorage.getItem('token');
-    
-    const response = await api.get<SolicitudArchivo[]>(`/solicitud-archivos/${solicitud_id}`, {
+
+    const response = await api.get<SolicitudArchivo[]>(`/solicitud-archivos/${id_solicitud}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
