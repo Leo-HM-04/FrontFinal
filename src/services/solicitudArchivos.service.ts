@@ -9,24 +9,31 @@ export interface SolicitudArchivo {
 }
 
 export class SolicitudArchivosService {
-  // Subir múltiples archivos (uno por uno, usando la clave 'archivo')
+  // Subir múltiples archivos en un solo request usando la clave 'archivos'
   static async subirArchivos(
     solicitud_id: number,
     archivos: File[],
     tipos?: string[]
   ): Promise<{ archivos: SolicitudArchivo[] }> {
-    console.log('🚀 FRONTEND subirArchivos - Inicio');
+    console.log('🚀 FRONTEND subirArchivos - Inicio (envío múltiple)');
     const token = localStorage.getItem('token');
-    const resultados: SolicitudArchivo[] = [];
-    for (let i = 0; i < archivos.length; i++) {
-      const archivo = archivos[i];
-      const formData = new FormData();
-      formData.append('solicitud_id', solicitud_id.toString());
-      formData.append('archivo', archivo);
+    const formData = new FormData();
+    formData.append('solicitud_id', solicitud_id.toString());
+    archivos.forEach((archivo, i) => {
+      formData.append('archivos', archivo);
       if (tipos && tipos[i]) {
-        formData.append('tipo', tipos[i]);
+        formData.append('tipos', tipos[i]);
       }
-      console.log(`� Enviando archivo ${i + 1}:`, archivo.name);
+    });
+    // Log para depuración: mostrar el contenido del FormData
+    for (const pair of formData.entries()) {
+      if (pair[1] instanceof File) {
+        console.log(`📝 FormData: ${pair[0]} = [File] ${pair[1].name}`);
+      } else {
+        console.log(`📝 FormData: ${pair[0]} = ${pair[1]}`);
+      }
+    }
+    try {
       const response = await api.post('/solicitud-archivos/subir', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -34,11 +41,15 @@ export class SolicitudArchivosService {
         }
       });
       console.log('📥 FRONTEND respuesta recibida:', response.data);
-      if (response.data && response.data.archivos && response.data.archivos[0]) {
-        resultados.push(response.data.archivos[0]);
+      return { archivos: response.data.archivos || [] };
+    } catch (error: any) {
+      if (error.response) {
+        console.error('❌ Error al subir archivos:', error.response.data);
+      } else {
+        console.error('❌ Error al subir archivos:', error);
       }
+      throw error;
     }
-    return { archivos: resultados };
   }
   
   // Obtener archivos de una solicitud
