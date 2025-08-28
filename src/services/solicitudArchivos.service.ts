@@ -19,7 +19,7 @@ export class SolicitudArchivosService {
     const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('id_solicitud', id_solicitud.toString());
-    archivos.forEach((archivo, i) => {
+    archivos.forEach((archivo) => {
       formData.append('archivos', archivo);
     });
     

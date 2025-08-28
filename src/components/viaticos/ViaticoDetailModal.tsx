@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/Button';
 import type { Viatico } from '@/hooks/useViaticos';
 import { CreditCard, FileText, Building, ExternalLink, MapPin, Calendar, DollarSign, X, Upload, CheckCircle } from 'lucide-react';
 import { formatDateForDisplay } from '@/utils/dateUtils';
@@ -25,8 +24,6 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
   const [comprobantes, setComprobantes] = useState<ComprobanteViatico[]>([]);
   const [loadingComprobantes, setLoadingComprobantes] = useState(false);
   const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
-
-  if (!isOpen || !viatico) return null;
 
   // Cargar comprobantes de pago si el viático está pagado
   useEffect(() => {
@@ -54,6 +51,8 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
       fetchComprobantes();
     }
   }, [isOpen, viatico]);
+
+  if (!isOpen || !viatico) return null;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-MX', {
