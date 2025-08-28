@@ -207,7 +207,6 @@ export default function ViaticosPagadorPage() {
                           aria-label="Seleccionar todos los viáticos"
                         />
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">ID</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Folio</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Usuario</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Beneficiario</th>
@@ -215,7 +214,6 @@ export default function ViaticosPagadorPage() {
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Fecha límite de pago</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Tipo de cuenta/tarjeta</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Departamento</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Concepto</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Monto</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Cuenta Destino</th>
                       <th className="px-4 py-3 text-center text-xs font-bold text-blue-900 uppercase tracking-wide">Archivo</th>
@@ -240,9 +238,6 @@ export default function ViaticosPagadorPage() {
                               aria-label={checked ? `Deseleccionar viático ${id}` : `Seleccionar viático ${id}`}
                             />
                           </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-900">
-                            {id}
-                          </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700 font-mono">
                             {v.folio || '-'}
                           </td>
@@ -263,9 +258,6 @@ export default function ViaticosPagadorPage() {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700 capitalize">
                             {v.departamento || '-'}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700 max-w-xs truncate">
-                            {v.concepto || '-'}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-base font-extrabold text-green-700">
                             {v.monto !== undefined ? `$${Number(v.monto).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '-'}
