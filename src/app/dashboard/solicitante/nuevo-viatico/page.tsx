@@ -329,16 +329,16 @@ export default function NuevoViaticoPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Descripción del Pago</label>
-                    <input name="tipo_pago_descripcion" placeholder="Descripción del tipo de pago" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                    <label className="text-blue-900 font-bold text-base">Descripción del viático</label>
+                    <input name="tipo_pago_descripcion" placeholder="Descripción del uso o destino del viático" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
                   </div>
                 </div>
 
                 {/* Bloque: Persona */}
                 <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
                   <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Nombre de la Persona dirigida*</label>
-                    <input name="nombre_persona" placeholder="Nombre completo" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                    <label className="text-blue-900 font-bold text-base">Nombre del beneficiario *</label>
+                    <input name="nombre_persona" placeholder="Nombre completo de la persona que recibe directamente el pago" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
                   </div>
                 </div>
 
