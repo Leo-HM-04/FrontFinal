@@ -159,20 +159,13 @@ export default function HistorialPagosPage() {
                 <table className="min-w-full divide-y divide-blue-100">
                   <thead style={{backgroundColor: '#F0F4FC'}}>
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">ID</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Folio</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Solicitante</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Departamento</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Monto</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Cuenta Destino</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Concepto</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Tipo Pago</th>
-                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Tipo de Cuenta/Tarjeta</th>
-                      <th className="px-8 py-5 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Banco Destino</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Estado</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Fecha Límite</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Fecha Pago</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Aprobador</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Comentario</th>
                       <th className="px-6 py-4 text-center text-xs font-semibold text-blue-700 uppercase tracking-wider">Acción</th>
                     </tr>
                   </thead>
@@ -182,24 +175,12 @@ export default function HistorialPagosPage() {
                         key={pago.id_solicitud}
                         className={`transition-colors rounded-xl ${idx % 2 === 0 ? 'bg-blue-50' : 'bg-white'} hover:bg-blue-100`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900 font-bold">{pago.id_solicitud}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900 font-bold">{pago.folio}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.nombre_usuario || pago.usuario_nombre || '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="px-3 py-1 text-sm font-semibold rounded-xl bg-blue-200 text-blue-800 shadow">{pago.departamento ? pago.departamento.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : '-'}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.cuenta_destino}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.concepto}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.tipo_pago ? pago.tipo_pago.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.tipo_cuenta_destino ? pago.tipo_cuenta_destino : ''}{pago.tipo_tarjeta ? ` / ${pago.tipo_tarjeta}` : ''}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.banco_destino || ''}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex px-3 py-1 text-xs font-bold rounded-full bg-blue-300 text-blue-900 shadow">Pagada</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700">{pago.fecha_limite_pago ? new Date(pago.fecha_limite_pago).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700">{pago.fecha_pago ? new Date(pago.fecha_pago).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{typeof pago.aprobador_nombre === 'string' && pago.aprobador_nombre ? pago.aprobador_nombre : '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.comentario_aprobador || '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                           <div className="flex flex-col gap-1 items-center">
                             <button
