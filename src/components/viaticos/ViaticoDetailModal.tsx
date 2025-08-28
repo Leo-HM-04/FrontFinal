@@ -83,7 +83,7 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
           </button>
           
           {/* Header con gradiente y estado */}
-          <div className="bg-gradient-to-r from-purple-800 via-purple-700 to-indigo-700 text-white px-8 py-6 md:py-8 rounded-2xl relative overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white px-8 py-6 md:py-8 rounded-2xl relative overflow-hidden mb-8">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
             <div className="relative z-10 flex items-center justify-between">
@@ -91,10 +91,10 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                 <h2 className="text-3xl font-bold tracking-tight">
                   Viático #{viatico.id_viatico}
                 </h2>
-                <p className="text-purple-100 text-lg">
+                <p className="text-blue-100 text-lg">
                   Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{viatico.folio || '-'}</span>
                 </p>
-                <p className="text-purple-200 mt-2 flex items-center">
+                <p className="text-blue-200 mt-2 flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
                   Fecha límite: {viatico.fecha_limite_pago ? formatDateForDisplay(viatico.fecha_limite_pago) : '-'}
                 </p>
@@ -112,29 +112,25 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 mb-8">
               <div className="xl:col-span-2">
                 {/* Información del Beneficiario */}
-                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-purple-50/30 border border-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl mb-6">
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl mb-6">
                   <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
-                    <div className="p-2 bg-purple-100 rounded-xl mr-3">
-                      <Building className="w-6 h-6 text-purple-700" />
+                    <div className="p-2 bg-blue-100 rounded-xl mr-3">
+                      <Building className="w-6 h-6 text-blue-700" />
                     </div>
                     Información del Beneficiario
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white p-3 rounded-md border border-purple-100">
-                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Beneficiario</span>
-                      <p className="text-purple-900 font-semibold text-lg">{viatico.nombre_persona || '-'}</p>
+                    <div className="bg-white p-3 rounded-md border border-blue-100">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Beneficiario</span>
+                      <p className="text-blue-900 font-semibold text-lg">{viatico.nombre_persona || '-'}</p>
                     </div>
-                    <div className="bg-white p-3 rounded-md border border-purple-100">
-                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Empresa a pagar</span>
-                      <p className="text-purple-900 font-medium">{viatico.empresa_a_pagar || '-'}</p>
+                    <div className="bg-white p-3 rounded-md border border-blue-100">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Departamento</span>
+                      <p className="text-blue-900 font-medium capitalize">{viatico.departamento || '-'}</p>
                     </div>
-                    <div className="bg-white p-3 rounded-md border border-purple-100">
-                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Departamento</span>
-                      <p className="text-purple-900 font-medium capitalize">{viatico.departamento || '-'}</p>
-                    </div>
-                    <div className="bg-white p-3 rounded-md border border-purple-100">
-                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Tipo de pago</span>
-                      <p className="text-purple-900 font-medium">{viatico.tipo_pago || '-'}</p>
+                    <div className="bg-white p-3 rounded-md border border-blue-100 md:col-span-2">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de pago</span>
+                      <p className="text-blue-900 font-medium">{viatico.tipo_pago || '-'}</p>
                     </div>
                   </div>
                 </div>
@@ -185,15 +181,15 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
               {/* Sidebar derecho */}
               <div>
                 {/* Estado y propósito */}
-                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl mb-6">
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl mb-6">
                   <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
-                    <div className="p-2 bg-indigo-100 rounded-xl mr-3">
-                      <MapPin className="w-6 h-6 text-indigo-700" />
+                    <div className="p-2 bg-blue-100 rounded-xl mr-3">
+                      <MapPin className="w-6 h-6 text-blue-700" />
                     </div>
                     Estado y Propósito
                   </h3>
-                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 md:p-5 rounded-2xl border border-indigo-300/50 mb-6 shadow-lg">
-                    <span className="text-sm uppercase tracking-wider font-bold block mb-2 text-indigo-100">Estado actual</span>
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 md:p-5 rounded-2xl border border-blue-300/50 mb-6 shadow-lg">
+                    <span className="text-sm uppercase tracking-wider font-bold block mb-2 text-blue-100">Estado actual</span>
                     <div className="flex items-center">
                       <div className="h-3 w-3 rounded-full mr-3 bg-green-400 shadow-lg"></div>
                       <p className="font-black text-2xl text-white tracking-tight">{viatico.estado.toUpperCase()}</p>
@@ -202,29 +198,29 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                   </div>
                   
                   {/* Propósito del viático */}
-                  <div className="bg-indigo-50/30 rounded-md p-3 border border-indigo-100/80">
-                    <h4 className="text-sm font-medium text-indigo-800 mb-2">Propósito del viático</h4>
-                    <div className="bg-white p-3 rounded-md border border-indigo-100">
-                      <p className="text-indigo-900 font-medium leading-relaxed">{viatico.concepto || '-'}</p>
+                  <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">Propósito del viático</h4>
+                    <div className="bg-white p-3 rounded-md border border-blue-100">
+                      <p className="text-blue-900 font-medium leading-relaxed">{viatico.concepto || '-'}</p>
                     </div>
                   </div>
                   
                   {/* Descripción del tipo de pago */}
                   {viatico.tipo_pago_descripcion && (
-                    <div className="bg-indigo-50/30 rounded-md p-3 border border-indigo-100/80 mt-4">
-                      <h4 className="text-sm font-medium text-indigo-800 mb-2">Descripción</h4>
-                      <div className="bg-white p-3 rounded-md border border-indigo-100">
-                        <p className="text-indigo-900 font-medium">{viatico.tipo_pago_descripcion}</p>
+                    <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80 mt-4">
+                      <h4 className="text-sm font-medium text-blue-800 mb-2">Descripción</h4>
+                      <div className="bg-white p-3 rounded-md border border-blue-100">
+                        <p className="text-blue-900 font-medium">{viatico.tipo_pago_descripcion}</p>
                       </div>
                     </div>
                   )}
 
                   {/* Comentario del aprobador */}
                   {viatico.comentario_aprobador && (
-                    <div className="bg-indigo-50/30 rounded-md p-3 border border-indigo-100/80 mt-4">
-                      <h4 className="text-sm font-medium text-indigo-800 mb-2">Comentario del aprobador</h4>
-                      <div className="bg-white p-3 rounded-md border border-indigo-100">
-                        <p className="text-indigo-900 font-medium italic">{viatico.comentario_aprobador}</p>
+                    <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80 mt-4">
+                      <h4 className="text-sm font-medium text-blue-800 mb-2">Comentario del aprobador</h4>
+                      <div className="bg-white p-3 rounded-md border border-blue-100">
+                        <p className="text-blue-900 font-medium italic">{viatico.comentario_aprobador}</p>
                       </div>
                     </div>
                   )}
