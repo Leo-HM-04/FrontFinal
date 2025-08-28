@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { X, ExternalLink, DollarSign, Building, FileText, FileCheck } from 'lucide-react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Viatico } from '@/services/viaticos.service';
-import { getComprobantesPorViatico } from '@/services/comprobantesViaticos.service';
-import { useAuth } from '@/contexts/AuthContext';
-import '@/styles/modal.css';
+import type { Viatico } from '@/hooks/useViaticos';
+import { CreditCard, FileText, Building, ExternalLink, MapPin, Calendar, DollarSign, X, Upload, CheckCircle } from 'lucide-react';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 interface ComprobanteViatico {
   id_comprobante: number;
@@ -15,40 +13,38 @@ interface ComprobanteViatico {
   fecha_subida: string;
   id_usuario_subio: number;
   nombre_usuario?: string;
-  // Campos adicionales que puedan venir en la respuesta
-  usuario_subio?: number;
 }
 
 interface ViaticoDetailModalProps {
-  viatico: Viatico | null;
   isOpen: boolean;
+  viatico: Viatico | null;
   onClose: () => void;
 }
 
-export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailModalProps) {
+export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailModalProps) {
   const [comprobantes, setComprobantes] = useState<ComprobanteViatico[]>([]);
-  const [loadingComprobantes, setLoadingComprobantes] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const { token } = useAuth();
+  const [loadingComprobantes, setLoadingComprobantes] = useState(false);
+  const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
 
+  if (!isOpen || !viatico) return null;
+
+  // Cargar comprobantes de pago si el viático está pagado
   useEffect(() => {
     const fetchComprobantes = async () => {
-      if (!viatico || !isOpen || String(viatico.estado).toLowerCase() !== 'pagada') return;
+      if (!viatico || viatico.estado?.toLowerCase() !== 'pagada') return;
       
       try {
         setLoadingComprobantes(true);
-        setError(null);
-        const data = await getComprobantesPorViatico(viatico.id_viatico, token || undefined);
-        console.log('Comprobantes obtenidos (raw):', data);
+        setErrorComprobantes(null);
         
-        // Asegurar que tengamos un array
-        const comprobantesArray = Array.isArray(data) ? data : data && typeof data === 'object' ? [data] : [];
-        console.log('Comprobantes procesados:', comprobantesArray);
-        
-        setComprobantes(comprobantesArray);
-      } catch (err) {
-        console.error('Error al obtener comprobantes:', err);
-        setError('No se pudieron cargar los comprobantes de pago. Verifique su conexión e inténtelo de nuevo.');
+        const response = await fetch(`/api/comprobantes-viaticos/${viatico.id_viatico}`);
+        if (response.ok) {
+          const data = await response.json();
+          setComprobantes(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error('Error al cargar comprobantes:', error);
+        setErrorComprobantes('Error al cargar comprobantes de pago');
       } finally {
         setLoadingComprobantes(false);
       }
@@ -57,402 +53,314 @@ export function ViaticoDetailModal({ viatico, isOpen, onClose }: ViaticoDetailMo
     if (isOpen && viatico) {
       fetchComprobantes();
     }
-  }, [isOpen, viatico, token]);
-
-  if (!isOpen || !viatico) return null;
+  }, [isOpen, viatico]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
       currency: 'MXN',
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 2
     }).format(amount);
   };
 
-  const getEstadoColor = (estado: string) => {
-    const colors = {
-      pendiente: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      autorizada: 'bg-green-100 text-green-800 border-green-200',
-      rechazada: 'bg-red-100 text-red-800 border-red-200',
-      pagada: 'bg-blue-100 text-blue-800 border-blue-200'
-    };
-    return colors[estado.toLowerCase() as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-200';
-  };
-  
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Fondo degradado oscuro/transparente mejorado */}
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      {/* Fondo degradado y blur */}
       <div
         className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
         onClick={onClose}
+        aria-hidden="true"
       />
-      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-3xl shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden border border-white/20 backdrop-blur-sm animate-slide-up">
-        {/* Contenedor con scroll interno */}
-        <div className="overflow-y-auto max-h-[90vh] modal-scroll">
-        {/* Botón de cerrar (X) flotante mejorado */}
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-6 z-20 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-          aria-label="Cerrar"
-        >
-          <X className="w-6 h-6" />
-        </button>
-        
-        {/* Header mejorado */}
-        <div className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-8 relative overflow-hidden">
-          {/* Elementos decorativos de fondo */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-3xl shadow-2xl w-full max-w-6xl max-h-[92vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+        {/* Scroll interno */}
+        <div className="overflow-y-auto max-h-[92vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 px-2 md:px-6 pb-8 pt-2">
+          {/* Botón cerrar flotante */}
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-20 bg-white hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            aria-label="Cerrar"
+          >
+            <X className="w-6 h-6" />
+          </button>
           
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="space-y-1">
-              <h2 className="text-3xl font-bold tracking-tight">
-                Viático #{viatico.id_viatico}
-              </h2>
-              <p className="text-blue-100 text-lg">
-                Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{viatico.folio || '-'}</span>
-              </p>
-              <p className="text-blue-200 mt-2">
-                {viatico.fecha_creacion ? `Creado el ${formatDate(String(viatico.fecha_creacion))}` : ''}
-              </p>
-            </div>
-            <div className="text-right">
-              <span className={`inline-flex px-4 py-2 text-lg font-bold rounded-xl border-2 ${getEstadoColor(viatico.estado || '')} backdrop-blur-sm`}> 
-                {String(viatico.estado || 'pendiente').toUpperCase()}
-              </span>
+          {/* Header con gradiente y estado */}
+          <div className="bg-gradient-to-r from-purple-800 via-purple-700 to-indigo-700 text-white px-8 py-6 md:py-8 rounded-2xl relative overflow-hidden mb-8">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="space-y-1">
+                <h2 className="text-3xl font-bold tracking-tight">
+                  Viático #{viatico.id_viatico}
+                </h2>
+                <p className="text-purple-100 text-lg">
+                  Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{viatico.folio || '-'}</span>
+                </p>
+                <p className="text-purple-200 mt-2 flex items-center">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Fecha límite: {viatico.fecha_limite_pago ? formatDateForDisplay(viatico.fecha_limite_pago) : '-'}
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="inline-flex px-4 py-2 text-lg font-bold rounded-xl border-2 bg-green-100 text-green-800 border-green-200 backdrop-blur-sm">
+                  {viatico.estado.toUpperCase()}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div className="p-8 space-y-8">
-          {/* Información Principal con diseño mejorado - 3 columnas para ser más ancho */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
-            <Card className="xl:col-span-2 p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
-                <div className="p-2 bg-blue-100 rounded-xl mr-3">
-                  <DollarSign className="w-6 h-6 text-blue-700" />
-                </div>
-                Información Financiera
-              </h3>
-              
-              {/* Monto destacado con mejor diseño */}
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl border border-blue-300/50 mb-6 shadow-lg">
-                <span className="text-sm uppercase tracking-wider text-blue-100 font-bold block mb-2">Monto total</span>
-                <p className="text-4xl font-black text-white tracking-tight">{formatCurrency(Number(viatico.monto))}</p>
-                <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-24"></div>
-              </div>
-              
-              {/* Grid principal de información */}
-              <div className="grid grid-cols-1 gap-4">                
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
-                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Tipo de cuenta</span>
-                  <p className="text-blue-900 font-medium text-sm">
-                    {viatico.tipo_cuenta_destino === 'tarjeta'
-                      ? `Tarjeta${viatico.tipo_tarjeta ? ' - ' + viatico.tipo_tarjeta : ''}`
-                      : viatico.tipo_cuenta_destino || 'CLABE'}
-                  </p>
-                </div>
-                
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
-                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Cuenta</span>
-                  <p className="font-mono text-blue-900 font-medium text-sm">{viatico.cuenta_destino}</p>
-                </div>
-                
-                {viatico.banco_destino && (
-                  <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
-                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Banco</span>
-                    <p className="text-blue-900 font-medium text-sm">{viatico.banco_destino}</p>
-                  </div>
-                )}
-                
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-100">
-                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-2 font-medium">Fecha límite</span>
-                  <p className="text-blue-900 font-medium text-sm">{formatDate(String(viatico.fecha_limite_pago))}</p>
-                </div>
-              </div>
-            </Card>
-            
-            <Card className="p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
-                <div className="p-2 bg-indigo-100 rounded-xl mr-3">
-                  <Building className="w-6 h-6 text-indigo-700" />
-                </div>
-                Información Organizacional
-              </h3>
-              
-              {/* Estado destacado con mejor diseño */}
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 rounded-2xl border border-indigo-300/50 mb-6 shadow-lg">
-                <span className="text-sm uppercase tracking-wider font-bold block mb-2 text-indigo-100">Estado actual</span>
-                <div className="flex items-center">
-                  <div className="h-3 w-3 rounded-full mr-3 bg-yellow-400 shadow-lg"></div>
-                  <p className="font-black text-2xl text-white tracking-tight">{(viatico.estado || 'pendiente').toUpperCase()}</p>
-                </div>
-                <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-20"></div>
-              </div>
-              
-              {/* Información de departamento */}
-              <div className="bg-indigo-50/30 rounded-xl p-4 border border-indigo-100/80 shadow-sm">
-                <h4 className="text-sm font-medium text-indigo-800 mb-2">Departamento</h4>
-                <p className="text-indigo-900 font-medium">{viatico.departamento ? 
-                  viatico.departamento.toLowerCase() === "ti" ? "TI" : 
-                  viatico.departamento.charAt(0).toUpperCase() + viatico.departamento.slice(1).toLowerCase() : 
-                  "-"}</p>
-              </div>
-            </Card>
-          </div>
-          
-          {/* Concepto y Documentos con diseño mejorado - más ancho */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            {/* Concepto - 1 columna */}
-            <Card className="p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
-                <div className="p-2 bg-green-100 rounded-xl mr-3">
-                  <FileText className="w-6 h-6 text-green-700" />
-                </div>
-                Concepto
-              </h3>
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200/50 shadow-inner">
-                <p className="text-gray-800 leading-relaxed text-base font-medium">{viatico.concepto}</p>
-              </div>
-            </Card>
-            
-            {/* Documentos - 2 columnas */}
-            <Card className="lg:col-span-2 p-6 bg-gradient-to-br from-white to-purple-50/30 border border-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
-                <div className="p-2 bg-purple-100 rounded-xl mr-3">
-                  <ExternalLink className="w-6 h-6 text-purple-700" />
-                </div>
-                Documentos Adjuntos
-              </h3>
-            <div className="flex flex-col gap-4">
-              {/* Documento de Viático */}
-              {viatico.viatico_url && (() => {
-                let viaticoUrl = '';
-                if (viatico.viatico_url.startsWith('http')) {
-                  viaticoUrl = viatico.viatico_url;
-                } else {
-                  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || '';
-                  const rutaArchivo = viatico.viatico_url.startsWith('/') 
-                    ? viatico.viatico_url 
-                    : `/${viatico.viatico_url}`;
-                  viaticoUrl = `${baseUrl}${rutaArchivo}`;
-                }
-                const fileName = viaticoUrl.split('/').pop();
-                const isImage = /\.(jpg|jpeg|png|gif)$/i.test(viaticoUrl);
-                const isPdf = /\.pdf$/i.test(viaticoUrl);
 
-                if (isImage) {
-                  return (
-                    <div className="flex flex-col items-start w-full">
-                      <span className="text-sm text-blue-700/70 mb-2 flex items-center">
-                        <FileText className="w-4 h-4 mr-1.5 text-blue-600" />
-                        Documento de viático:
-                      </span>
-                      <div className="relative w-full h-64 group">
-                        <div className="absolute inset-0 rounded-lg bg-gradient-to-b from-blue-50 to-blue-100 animate-pulse" />
-                        <Image
-                          src={viaticoUrl}
-                          alt="Documento de viático"
-                          fill
-                          className="rounded-lg border-2 border-blue-200 shadow-lg transition-all duration-300 hover:border-blue-400 hover:shadow-xl object-contain bg-white/80 backdrop-blur-sm group-hover:scale-[1.02]"
-                          onLoadingComplete={(img) => {
-                            img.classList.remove('animate-pulse');
-                          }}
-                          quality={100}
-                          priority
-                        />
-                        <div className="absolute inset-0 bg-blue-900/0 hover:bg-blue-900/5 transition-colors duration-300 rounded-lg cursor-zoom-in"
-                             onClick={() => window.open(viaticoUrl, '_blank')}
-                        />
+          <div className="px-0 md:px-2 space-y-8">
+            {/* Información del Beneficiario y Monto */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 mb-8">
+              <div className="xl:col-span-2">
+                {/* Información del Beneficiario */}
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-purple-50/30 border border-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl mb-6">
+                  <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                    <div className="p-2 bg-purple-100 rounded-xl mr-3">
+                      <Building className="w-6 h-6 text-purple-700" />
+                    </div>
+                    Información del Beneficiario
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white p-3 rounded-md border border-purple-100">
+                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Beneficiario</span>
+                      <p className="text-purple-900 font-semibold text-lg">{viatico.nombre_persona || '-'}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-md border border-purple-100">
+                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Empresa a pagar</span>
+                      <p className="text-purple-900 font-medium">{viatico.empresa_a_pagar || '-'}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-md border border-purple-100">
+                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Departamento</span>
+                      <p className="text-purple-900 font-medium capitalize">{viatico.departamento || '-'}</p>
+                    </div>
+                    <div className="bg-white p-3 rounded-md border border-purple-100">
+                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Tipo de pago</span>
+                      <p className="text-purple-900 font-medium">{viatico.tipo_pago || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Información Financiera */}
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                  <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                    <div className="p-2 bg-green-100 rounded-xl mr-3">
+                      <DollarSign className="w-6 h-6 text-green-700" />
+                    </div>
+                    Información Financiera
+                  </h3>
+                  {/* Monto destacado */}
+                  <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-5 rounded-2xl border border-green-300/50 mb-6 shadow-lg">
+                    <span className="text-sm uppercase tracking-wider text-green-100 font-bold block mb-2">Monto total</span>
+                    <p className="text-4xl font-black text-white tracking-tight">{formatCurrency(viatico.monto)}</p>
+                    <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-24"></div>
+                  </div>
+
+                  {/* Información bancaria */}
+                  <div className="bg-green-50/30 rounded-md p-4 border border-green-100/80">
+                    <h4 className="text-sm font-medium text-green-800 mb-3 flex items-center">
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Información bancaria
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="bg-white p-3 rounded-md border border-green-100">
+                        <span className="text-xs uppercase tracking-wider text-green-700/70 block mb-1 font-medium">Tipo de cuenta</span>
+                        <p className="text-green-900 font-medium">
+                          {viatico.tipo_cuenta_destino === 'Tarjeta'
+                            ? `Tarjeta${viatico.tipo_tarjeta ? ' - ' + viatico.tipo_tarjeta : ''}`
+                            : viatico.tipo_cuenta_destino || '-'}
+                        </p>
+                      </div>
+                      <div className="bg-white p-3 rounded-md border border-green-100">
+                        <span className="text-xs uppercase tracking-wider text-green-700/70 block mb-1 font-medium">Banco destino</span>
+                        <p className="text-green-900 font-medium">{viatico.banco_destino || '-'}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-md border border-green-100 md:col-span-2">
+                        <span className="text-xs uppercase tracking-wider text-green-700/70 block mb-1 font-medium">Cuenta destino</span>
+                        <p className="font-mono text-green-900 font-medium text-lg">{viatico.cuenta_destino}</p>
                       </div>
                     </div>
-                  );
-                } else if (isPdf) {
-                  return (
-                    <div className="flex flex-col items-start w-full">
-                      <span className="text-sm text-blue-700/70 mb-1">Documento de viático (PDF):</span>
-                      <iframe src={viaticoUrl} title="Documento de viático PDF" className="w-full" style={{height: '300px', border: '1px solid #93c5fd', borderRadius: '8px'}} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar derecho */}
+              <div>
+                {/* Estado y propósito */}
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl mb-6">
+                  <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                    <div className="p-2 bg-indigo-100 rounded-xl mr-3">
+                      <MapPin className="w-6 h-6 text-indigo-700" />
                     </div>
-                  );
-                } else {
-                  return (
-                    <div className="flex flex-col items-start w-full">
-                      <span className="text-sm text-blue-700/70 mb-1">Archivo adjunto:</span>
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileText className="w-4 h-4 text-blue-700" />
-                        <span className="text-blue-900 font-mono text-xs">{fileName}</span>
-                      </div>
-                      <Button
-                        variant="outline"
-                        onClick={() => window.open(viaticoUrl, '_blank')}
-                        className="flex items-center space-x-2 border-blue-300 text-blue-700 hover:bg-blue-50"
-                      >
-                        <FileText className="w-4 h-4" />
-                        <span>Ver Documento</span>
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
+                    Estado y Propósito
+                  </h3>
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 md:p-5 rounded-2xl border border-indigo-300/50 mb-6 shadow-lg">
+                    <span className="text-sm uppercase tracking-wider font-bold block mb-2 text-indigo-100">Estado actual</span>
+                    <div className="flex items-center">
+                      <div className="h-3 w-3 rounded-full mr-3 bg-green-400 shadow-lg"></div>
+                      <p className="font-black text-2xl text-white tracking-tight">{viatico.estado.toUpperCase()}</p>
                     </div>
-                  );
-                }
-              })()}
-              
-              {/* Sección de comprobantes de pago */}
-              {viatico.estado && viatico.estado.toLowerCase() === 'pagada' && (
-                <div className="mt-4 pt-4 border-t border-blue-100">
-                  <h4 className="text-md font-semibold text-blue-800 mb-2 flex items-center">
-                    <FileCheck className="w-5 h-5 mr-2 text-blue-600" />
-                    Comprobantes de Pago
-                  </h4>
+                    <div className="mt-2 h-1 bg-gradient-to-r from-green-400 to-green-300 rounded-full w-20"></div>
+                  </div>
                   
-                  {loadingComprobantes ? (
-                    <div className="text-blue-600 text-sm">Cargando comprobantes...</div>
-                  ) : error ? (
-                    <div className="text-red-500 text-sm">{error}</div>
-                  ) : comprobantes.length === 0 ? (
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-blue-700">
-                      <div className="flex items-center mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="font-semibold">No hay comprobantes de pago disponibles</span>
-                      </div>
-                      <p className="text-sm ml-7">Este viático está marcado como pagado pero aún no se ha subido ningún comprobante de pago.</p>
+                  {/* Propósito del viático */}
+                  <div className="bg-indigo-50/30 rounded-md p-3 border border-indigo-100/80">
+                    <h4 className="text-sm font-medium text-indigo-800 mb-2">Propósito del viático</h4>
+                    <div className="bg-white p-3 rounded-md border border-indigo-100">
+                      <p className="text-indigo-900 font-medium leading-relaxed">{viatico.concepto || '-'}</p>
                     </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {comprobantes.map((comprobante) => {
-                        // Construir la URL del comprobante
-                        let comprobanteUrl = '';
-                        // Verificamos primero si tenemos el campo archivo_url, si no, podría estar en otro campo
-                        const archivoPath = comprobante.archivo_url || '';
-                        
-                        if (archivoPath.startsWith('http')) {
-                          comprobanteUrl = archivoPath;
-                        } else {
-                          // Verificar si la ruta ya incluye '/uploads/comprobante-viaticos/'
-                          if (archivoPath.includes('/uploads/comprobante-viaticos/')) {
-                            const rutaArchivo = archivoPath.startsWith('/') ? archivoPath : `/${archivoPath}`;
-                            comprobanteUrl = rutaArchivo;
-                          } else {
-                            // Construir la ruta completa
-                            comprobanteUrl = `/uploads/comprobante-viaticos/${archivoPath.split('/').pop()}`;
-                          }
-                        }
-                        
-                        console.log('URL del comprobante construida:', comprobanteUrl);
-                        
-                        // Determinar el tipo de archivo
-                        const fileName = comprobanteUrl.split('/').pop() || '';
-                        const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
-                        const isPdf = /\.pdf$/i.test(fileName);
-                        
-                        return (
-                          <div key={comprobante.id_comprobante} className="bg-blue-50/70 p-4 rounded-xl border border-blue-200/50 shadow-sm">
-                            <div className="flex justify-between items-start mb-3">
-                              <div className="flex-1">
-                                <p className="text-blue-800 font-medium flex items-center flex-wrap">
-                                  <FileCheck className="w-4 h-4 mr-1.5 text-blue-600" />
-                                  {fileName ? (
-                                    <>Comprobante: <span className="ml-1 font-mono text-xs bg-blue-50 px-1 py-0.5 rounded">{fileName}</span></>
-                                  ) : (
-                                    <>Comprobante #{comprobante.id_comprobante}</>
-                                  )}
-                                </p>
-                                <div className="flex items-center mt-1.5 bg-white/60 px-2 py-1 rounded-md">
-                                  <span className="text-xs text-blue-700/70 mr-1">Subido por:</span>
-                                  <span className="text-xs text-blue-700 font-medium">
-                                    {comprobante.nombre_usuario || `Usuario ${comprobante.id_usuario_subio || comprobante.usuario_subio}`}
-                                  </span>
-                                </div>
-                                {comprobante.fecha_subida && (
-                                  <div className="text-xs text-blue-700/70 mt-1">
-                                    Fecha: {new Date(comprobante.fecha_subida).toLocaleDateString('es-MX')} {new Date(comprobante.fecha_subida).toLocaleTimeString('es-MX')}
-                                  </div>
-                                )}
-                              </div>
-                                <Button
-                                  onClick={() => window.open(comprobanteUrl, '_blank')}
-                                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs whitespace-nowrap ml-3"
-                                >
-                                  Ver completo
-                                </Button>
-                            </div>
-                            
-                            {/* Previsualización según el tipo de archivo */}
-                            {isImage && (
-                              <div className="relative w-full h-48 group overflow-hidden rounded-lg border-2 border-blue-100 shadow-md bg-white/80">
-                                <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-blue-100 animate-pulse" />
-                                <Image
-                                  src={comprobanteUrl}
-                                  alt={`Comprobante #${comprobante.id_comprobante}`}
-                                  fill
-                                  className="object-contain bg-white/60 backdrop-blur-sm group-hover:scale-[1.02] transition-all duration-300"
-                                  onLoadingComplete={(img) => {
-                                    const parent = img.parentElement;
-                                    if (parent) {
-                                      const loadingBg = parent.querySelector('div');
-                                      if (loadingBg) loadingBg.classList.add('opacity-0');
-                                    }
-                                  }}
-                                  quality={85}
-                                />
-                                <div 
-                                  className="absolute inset-0 bg-blue-900/0 hover:bg-blue-900/5 transition-colors duration-300 rounded-lg cursor-zoom-in"
-                                  onClick={() => window.open(comprobanteUrl, '_blank')}
-                                />
-                              </div>
-                            )}
-                            
-                            {isPdf && (
-                              <div className="w-full rounded-lg border border-blue-200 overflow-hidden shadow-md">
-                                <iframe 
-                                  src={comprobanteUrl} 
-                                  title={`Comprobante #${comprobante.id_comprobante}`} 
-                                  className="w-full" 
-                                  style={{height: '200px'}} 
-                                />
-                                <div className="bg-blue-50 p-2 text-xs text-center text-blue-700">
-                                  Vista previa limitada. Haga clic en &ldquo;Ver completo&rdquo; para abrir el PDF completo.
-                                </div>
-                              </div>
-                            )}
-                            
-                            {!isImage && !isPdf && (
-                              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <FileText className="w-8 h-8 text-blue-600" />
-                                <div>
-                                  <p className="text-gray-700">No se puede previsualizar este tipo de archivo</p>
-                                  <p className="text-xs text-gray-500">Haga clic en &ldquo;Ver completo&rdquo; para abrir el archivo</p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                  </div>
+                  
+                  {/* Descripción del tipo de pago */}
+                  {viatico.tipo_pago_descripcion && (
+                    <div className="bg-indigo-50/30 rounded-md p-3 border border-indigo-100/80 mt-4">
+                      <h4 className="text-sm font-medium text-indigo-800 mb-2">Descripción</h4>
+                      <div className="bg-white p-3 rounded-md border border-indigo-100">
+                        <p className="text-indigo-900 font-medium">{viatico.tipo_pago_descripcion}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Comentario del aprobador */}
+                  {viatico.comentario_aprobador && (
+                    <div className="bg-indigo-50/30 rounded-md p-3 border border-indigo-100/80 mt-4">
+                      <h4 className="text-sm font-medium text-indigo-800 mb-2">Comentario del aprobador</h4>
+                      <div className="bg-white p-3 rounded-md border border-indigo-100">
+                        <p className="text-indigo-900 font-medium italic">{viatico.comentario_aprobador}</p>
+                      </div>
                     </div>
                   )}
                 </div>
-              )}
+
+                {/* Documentos Adjuntos */}
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-orange-50/30 border border-orange-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                  <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                    <div className="p-2 bg-orange-100 rounded-xl mr-3">
+                      <FileText className="w-6 h-6 text-orange-700" />
+                    </div>
+                    Documentos y Comprobantes
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    {/* Archivo del Solicitante */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Archivo del Solicitante
+                      </h4>
+                      {viatico.viatico_url ? (
+                        <div className="bg-white p-4 rounded-xl border border-orange-100 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="p-2 bg-orange-100 rounded-lg">
+                                <FileText className="w-5 h-5 text-orange-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">Comprobante de viático</p>
+                                <p className="text-sm text-gray-500">Subido por el solicitante</p>
+                              </div>
+                            </div>
+                            <a
+                              href={`/uploads/viaticos/${viatico.viatico_url.split('/').pop()}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors duration-200 text-sm font-medium"
+                            >
+                              <ExternalLink className="w-4 h-4 mr-1" />
+                              Ver archivo
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-center">
+                          <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-gray-500 text-sm">No hay archivo del solicitante</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Comprobantes de Pago del Pagador */}
+                    {viatico.estado?.toLowerCase() === 'pagada' && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center">
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Comprobantes de Pago
+                        </h4>
+                        
+                        {loadingComprobantes ? (
+                          <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 text-center">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                            <p className="text-blue-600 text-sm">Cargando comprobantes...</p>
+                          </div>
+                        ) : errorComprobantes ? (
+                          <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-center">
+                            <p className="text-red-600 text-sm">{errorComprobantes}</p>
+                          </div>
+                        ) : comprobantes.length > 0 ? (
+                          <div className="space-y-4">
+                            {comprobantes.map((comprobante) => (
+                              <div key={comprobante.id_comprobante} className="bg-white p-4 rounded-xl border border-green-100 shadow-sm">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-green-100 rounded-lg">
+                                      <CheckCircle className="w-5 h-5 text-green-600" />
+                                    </div>
+                                    <div>
+                                      <p className="font-medium text-gray-900">
+                                        Comprobante #{comprobante.id_comprobante}
+                                      </p>
+                                      <p className="text-sm text-gray-500">
+                                        Subido por: {comprobante.nombre_usuario || 'Pagador'}
+                                      </p>
+                                      <p className="text-xs text-gray-400">
+                                        {new Date(comprobante.fecha_subida).toLocaleDateString('es-MX')} - {new Date(comprobante.fecha_subida).toLocaleTimeString('es-MX')}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <a
+                                    href={`/uploads/comprobantes-viaticos/${comprobante.archivo_url.split('/').pop()}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
+                                  >
+                                    <ExternalLink className="w-4 h-4 mr-1" />
+                                    Ver comprobante
+                                  </a>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-center">
+                            <CheckCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-gray-500 text-sm">
+                              No hay comprobantes de pago disponibles
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              Los comprobantes se mostrarán aquí una vez que el pagador los suba
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Mensaje informativo para estados no pagados */}
+                    {viatico.estado?.toLowerCase() !== 'pagada' && (
+                      <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-blue-600" />
+                          <p className="text-blue-800 text-sm font-medium">
+                            Los comprobantes de pago aparecerán aquí una vez que el viático sea marcado como pagado
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-          </Card>
+          </div>
         </div>
-        </div>
-
-        {/* Footer mejorado */}
       </div>
-
     </div>
-
-  </div>
-
   );
 }

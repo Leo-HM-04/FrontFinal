@@ -2,9 +2,10 @@
 import { useEffect, useState } from "react";
 import { ViaticosService } from "@/services/viaticos.service";
 import type { Viatico as BaseViatico } from "@/services/viaticos.service";
-import { FileText } from "lucide-react";
+import { FileText, Eye } from "lucide-react";
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
+import { ViaticoDetailModal } from '@/components/viaticos/ViaticoDetailModal';
 
 // Extendemos la interfaz BaseViatico 
 type Viatico = BaseViatico & {
@@ -27,6 +28,16 @@ export default function ViaticosPagadorPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<string | null>(null);
   const [busquedaUsuario, setBusquedaUsuario] = useState("");
+  
+  // Estados para el modal de detalles
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedViatico, setSelectedViatico] = useState<Viatico | null>(null);
+
+  // Función para abrir el modal de detalles
+  const handleViewDetails = (viatico: Viatico) => {
+    setSelectedViatico(viatico);
+    setShowDetailModal(true);
+  };
 
   useEffect(() => {
     ViaticosService.getAll()
@@ -218,6 +229,7 @@ export default function ViaticosPagadorPage() {
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Cuenta Destino</th>
                       <th className="px-4 py-3 text-center text-xs font-bold text-blue-900 uppercase tracking-wide">Archivo</th>
                       <th className="px-4 py-3 text-center text-xs font-bold text-blue-900 uppercase tracking-wide">Estado</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-blue-900 uppercase tracking-wide">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-blue-50">
@@ -299,6 +311,16 @@ export default function ViaticosPagadorPage() {
                               </span>
                             )}
                           </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
+                            <button
+                              onClick={() => handleViewDetails(v)}
+                              className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-xs font-medium shadow-sm hover:shadow-md"
+                              title="Ver detalles del viático"
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Ver
+                            </button>
+                          </td>
                         </tr>
                       );
                     })}
@@ -308,6 +330,13 @@ export default function ViaticosPagadorPage() {
             </div>
           </div>
         </div>
+
+        {/* Modal de detalles del viático */}
+        <ViaticoDetailModal
+          isOpen={showDetailModal}
+          viatico={selectedViatico}
+          onClose={() => setShowDetailModal(false)}
+        />
       </PagadorLayout>
     </ProtectedRoute>
   );
