@@ -4,6 +4,14 @@ Aplicación web moderna para la gestión de pagos, solicitudes y administración
 
 ---
 
+## 🆕 Cambios Recientes
+
+- Actualización de opciones en el campo "Tipo de Pago" según nueva clasificación: Operativos, Fiscales legales y corporativos, Proveedores, Seguros, Dirección General y Donativos. Viáticos tiene sección especial. Nómina y Dispersiones excluidos.
+- Mejoras en el formulario de viáticos: validaciones, campos requeridos y experiencia de usuario optimizada.
+- Ajustes visuales y de validación en todos los formularios de pago y viáticos.
+
+---
+
 ## 🚀 Características Destacadas
 
 ### 🔐 Autenticación Multi-Rol
@@ -18,6 +26,7 @@ Aplicación web moderna para la gestión de pagos, solicitudes y administración
 - Resúmenes ejecutivos y métricas clave.
 - Animaciones y visualización moderna.
 - Exportación de reportes (próximamente).
+- Nueva clasificación de pagos y viáticos con formularios adaptados.
 
 ### 🎨 Interfaz de Usuario
 - Diseño responsive con Tailwind CSS.
@@ -25,6 +34,7 @@ Aplicación web moderna para la gestión de pagos, solicitudes y administración
 - Sidebar dinámico y navegación contextual.
 - Loading states y transiciones suaves.
 - Sistema de notificaciones integrado.
+- Formularios inteligentes: validaciones, campos dinámicos y experiencia mejorada para pagos y viáticos.
 
 ### 🛡️ Seguridad
 - Rutas protegidas por roles y permisos.
@@ -143,6 +153,7 @@ npm run lint     # Linting con ESLint
 ### 💰 Tesorero
 - Gestión de pagos y transacciones
 - Reportes financieros y conciliación
+- Exclusión de gestión de Nómina y Dispersiones (se administran por otros medios)
 
 ### 🎖️ Director
 - Supervisión general y aprobaciones
@@ -255,7 +266,7 @@ MIT. Ver `LICENSE` para más detalles.
 ## 📞 Soporte
 
 Para soporte técnico o consultas:
-- 📧 Email: ti@bechapra.com
+- 📧 Email: automatizaciones@bechapra.com.mx
 - 💬 Slack: #plataforma-pagos
 
 ---
