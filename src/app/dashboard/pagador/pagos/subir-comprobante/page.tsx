@@ -179,7 +179,7 @@ export default function HistorialPagosPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="px-3 py-1 text-sm font-semibold rounded-xl bg-blue-200 text-blue-800 shadow">{pago.departamento ? pago.departamento.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : '-'}</span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.monto}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.tipo_pago ? pago.tipo_pago.charAt(0).toUpperCase() + pago.tipo_pago.slice(1).replace(/_/g, ' ') : '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900 font-semibold">{pago.estado ? pago.estado.charAt(0).toUpperCase() + pago.estado.slice(1) : '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
