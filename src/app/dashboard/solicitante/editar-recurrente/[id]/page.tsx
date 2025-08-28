@@ -244,7 +244,7 @@ export default function EditarRecurrentePage() {
                   {(form.tipo_pago || '') !== '' && (
                     <div>
                       <label className="text-blue-900 block mb-2 font-semibold">Descripción del tipo de pago</label>
-                      <textarea name="tipo_pago_descripcion" value={form.tipo_pago_descripcion || ""} onChange={handleInputChange} placeholder="Agrega una descripción para el tipo de pago..." rows={2} className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200 resize-none" />
+                      <textarea name="tipo_pago_descripcion" value={form.tipo_pago_descripcion || ""} onChange={handleInputChange} placeholder="Agrega una breve descripción que identifique el pago" rows={2} className="w-full px-4 py-3 bg-blue-50 text-blue-900 rounded-lg border border-blue-200 resize-none" />
                     </div>
                   )}
                   <div>

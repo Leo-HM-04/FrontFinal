@@ -398,7 +398,7 @@ export default function NuevaRecurrentePage() {
                       name="tipo_pago_descripcion"
                       value={formData.tipo_pago_descripcion}
                       onChange={handleInputChange}
-                      placeholder="Agrega una descripción para el tipo de pago..."
+                      placeholder="Agrega una breve descripción que identifique el pago"
                       rows={2}
                       className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left resize-none"
                     />
