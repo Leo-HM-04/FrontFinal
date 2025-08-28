@@ -266,7 +266,7 @@ MIT. Ver `LICENSE` para más detalles.
 ## 📞 Soporte
 
 Para soporte técnico o consultas:
-- 📧 Email: automatizacones@bechapra.com.mx
+- 📧 Email: automatizaciones@bechapra.com.mx
 - 💬 Slack: #plataforma-pagos
 
 ---
