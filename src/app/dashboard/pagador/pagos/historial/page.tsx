@@ -133,6 +133,7 @@ export default function HistorialPagosPage() {
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">ID</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Solicitante</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Beneficiario</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Departamento</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Monto</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Cuenta Destino</th>
@@ -156,6 +157,7 @@ export default function HistorialPagosPage() {
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900 font-bold">#{pago.id_solicitud}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.usuario_nombre ? pago.usuario_nombre : (pago.nombre_usuario ? pago.nombre_usuario : '-')}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.nombre_persona ? pago.nombre_persona : '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="px-3 py-1 text-xs font-bold rounded-lg shadow-sm" style={{background: 'linear-gradient(90deg, #e0e7ff 0%, #bae6fd 100%)', color: '#2563eb'}}>{pago.departamento || '-'}</span>
                         </td>
