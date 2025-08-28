@@ -576,7 +576,7 @@ export default function NuevaSolicitudPage() {
                     >
                       <option value="CLABE" className="text-black">CLABE</option>
                       <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
-                      <option value="Tarjeta Institucional" className="text-black">Tarjeta Institucional</option>
+                      <option value="Tarjeta Institucional" className="text-black">Pago con tarjeta corporativa</option>
                     </select>
                   </div>
 
@@ -590,6 +590,7 @@ export default function NuevaSolicitudPage() {
                       value={formData.banco_destino}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                      disabled={formData.tipo_cuenta_destino === 'Tarjeta Institucional'}
                     >
                       <option value="" className="text-black">Selecciona banco</option>
                       {bancoOptions.map(banco => (
@@ -610,6 +611,7 @@ export default function NuevaSolicitudPage() {
                       onChange={handleInputChange}
                       placeholder="Número de cuenta"
                       className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm font-mono tracking-wide"
+                      disabled={formData.tipo_cuenta_destino === 'Tarjeta Institucional'}
                     />
                   </div>
 
@@ -643,6 +645,7 @@ export default function NuevaSolicitudPage() {
                       required={cuentaConfig.required}
                       autoComplete="off"
                       className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide ${errors.cuenta_destino ? 'border-red-400' : ''}`}
+                      disabled={formData.tipo_cuenta_destino === 'Tarjeta Institucional'}
                     />
                     {/* Estados de validación */}
                     <div className="mt-2 flex items-center gap-4">
@@ -1032,7 +1035,7 @@ export default function NuevaSolicitudPage() {
                       value={formData.nombre_persona}
                       onChange={handleInputChange}
                       required
-                      placeholder="Nombre completo de la persona"
+                      placeholder="Nombre completo de la persona física o moral que recibe directamente el pago"
                       className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200 ${errors.nombre_persona ? 'border-red-400 shadow-red-400/25 shadow-lg' : 'hover:border-white/50'}`}
                     />
                     {errors.nombre_persona && <span className="text-red-400 text-sm mt-1 block">{errors.nombre_persona}</span>}
@@ -1048,7 +1051,7 @@ export default function NuevaSolicitudPage() {
                       name="empresa_a_pagar"
                       value={formData.empresa_a_pagar}
                       onChange={handleInputChange}
-                      placeholder="Nombre de la empresa"
+                      placeholder="Empresa desde la cual se efectuará el pago"
                       className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200 hover:border-white/50"
                     />
                   </div>
