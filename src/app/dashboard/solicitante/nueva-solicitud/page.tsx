@@ -580,95 +580,98 @@ export default function NuevaSolicitudPage() {
                     </select>
                   </div>
 
-                  {/* Banco */}
-                  <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      Banco Destino (opcional)
-                    </label>
-                    <select
-                      name="banco_destino"
-                      value={formData.banco_destino}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
-                      disabled={formData.tipo_cuenta_destino === 'Tarjeta Institucional'}
-                    >
-                      <option value="" className="text-black">Selecciona banco</option>
-                      {bancoOptions.map(banco => (
-                        <option key={banco} value={banco} className="text-black">{banco}</option>
-                      ))}
-                    </select>
-                  </div>
+                  {/* Banco - Solo mostrar si NO es Tarjeta Institucional */}
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Banco Destino (opcional)
+                      </label>
+                      <select
+                        name="banco_destino"
+                        value={formData.banco_destino}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                      >
+                        <option value="" className="text-black">Selecciona banco</option>
+                        {bancoOptions.map(banco => (
+                          <option key={banco} value={banco} className="text-black">{banco}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
-                  {/* Cuenta (opcional) */}
-                  <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      Cuenta (opcional)
-                    </label>
-                    <input
-                      type="text"
-                      name="cuenta"
-                      value={formData.cuenta}
-                      onChange={handleInputChange}
-                      placeholder="Número de cuenta"
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm font-mono tracking-wide"
-                      disabled={formData.tipo_cuenta_destino === 'Tarjeta Institucional'}
-                    />
-                  </div>
+                  {/* Cuenta (opcional) - Solo mostrar si NO es Tarjeta Institucional */}
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Cuenta (opcional)
+                      </label>
+                      <input
+                        type="text"
+                        name="cuenta"
+                        value={formData.cuenta}
+                        onChange={handleInputChange}
+                        placeholder="Número de cuenta"
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm font-mono tracking-wide"
+                      />
+                    </div>
+                  )}
 
-                  {/* Cuenta Destino - Ocupa más espacio */}
-                  <div className="md:col-span-2 lg:col-span-4">
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      <CreditCard className="w-4 h-4 inline mr-2" />
-                      Cuenta Destino *
-                    </label>
-                    <input
-                      type="text"
-                      name="cuenta_destino"
-                      value={formData.cuenta_destino}
-                      onChange={e => {
-                        const value = e.target.value;
-                        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
-                        setCuentaValida(null);
-                        // Solo validar si está vacío y es requerido
-                        if (!value && cuentaConfig.required) {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
-                        } else {
-                          setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
-                        }
-                      }}
-                      onBlur={e => {
-                        if (e.target.value && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
-                          verificarCuentaDestino(e.target.value);
-                        }
-                      }}
-                      placeholder={cuentaConfig.placeholder}
-                      required={cuentaConfig.required}
-                      autoComplete="off"
-                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide ${errors.cuenta_destino ? 'border-red-400' : ''}`}
-                      disabled={formData.tipo_cuenta_destino === 'Tarjeta Institucional'}
-                    />
-                    {/* Estados de validación */}
-                    <div className="mt-2 flex items-center gap-4">
-                      {checkingCuenta && (
-                        <span className="text-blue-300 text-sm flex items-center">
-                          <svg className="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                          </svg>
-                          Verificando cuenta...
-                        </span>
-                      )}
-                      {cuentaValida === false && !checkingCuenta && (
-                        <span className="text-red-400 text-sm">❌ Cuenta no válida</span>
-                      )}
-                      {cuentaValida === true && !checkingCuenta && (
-                        <span className="text-green-400 text-sm">✅ Cuenta válida</span>
+                  {/* Cuenta Destino - Solo mostrar si NO es Tarjeta Institucional */}
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
+                    <div className="md:col-span-2 lg:col-span-4">
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        <CreditCard className="w-4 h-4 inline mr-2" />
+                        Cuenta Destino *
+                      </label>
+                      <input
+                        type="text"
+                        name="cuenta_destino"
+                        value={formData.cuenta_destino}
+                        onChange={e => {
+                          const value = e.target.value;
+                          dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
+                          setCuentaValida(null);
+                          // Solo validar si está vacío y es requerido
+                          if (!value && cuentaConfig.required) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                          }
+                        }}
+                        onBlur={e => {
+                          if (e.target.value && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
+                            verificarCuentaDestino(e.target.value);
+                          }
+                        }}
+                        placeholder={cuentaConfig.placeholder}
+                        required={cuentaConfig.required}
+                        autoComplete="off"
+                        className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide ${errors.cuenta_destino ? 'border-red-400' : ''}`}
+                      />
+                      {/* Estados de validación */}
+                      <div className="mt-2 flex items-center gap-4">
+                        {checkingCuenta && (
+                          <span className="text-blue-300 text-sm flex items-center">
+                            <svg className="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                            </svg>
+                            Verificando cuenta...
+                          </span>
+                        )}
+                        {cuentaValida === false && !checkingCuenta && (
+                          <span className="text-red-400 text-sm">❌ Cuenta no válida</span>
+                        )}
+                        {cuentaValida === true && !checkingCuenta && (
+                          <span className="text-green-400 text-sm">✅ Cuenta válida</span>
+                        )}
+                      </div>
+                      {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
+                        <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
                       )}
                     </div>
-                    {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
-                      <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -792,61 +795,66 @@ export default function NuevaSolicitudPage() {
                       </select>
                     </div>
 
-                    <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
-                        Banco (opcional)
-                      </label>
-                      <select
-                        name="banco_destino_2"
-                        value={formData.banco_destino_2}
-                        onChange={handleInputChange}
-                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
-                      >
-                        <option value="" className="text-black">Selecciona banco</option>
-                        {bancoOptions.map(banco => (
-                          <option key={banco} value={banco} className="text-black">{banco}</option>
-                        ))}
-                      </select>
-                    </div>
+                    {/* Banco 2 - Solo mostrar si NO es Tarjeta Institucional */}
+                    {formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional' && (
+                      <div>
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          Banco (opcional)
+                        </label>
+                        <select
+                          name="banco_destino_2"
+                          value={formData.banco_destino_2}
+                          onChange={handleInputChange}
+                          className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                        >
+                          <option value="" className="text-black">Selecciona banco</option>
+                          {bancoOptions.map(banco => (
+                            <option key={banco} value={banco} className="text-black">{banco}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
-                    {/* Cuenta 2 (opcional) */}
-                    <div>
+                    {/* Cuenta 2 (opcional) - Solo mostrar si NO es Tarjeta Institucional */}
+                    {formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional' && (
+                      <div>
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          Cuenta (opcional)
+                        </label>
+                        <input
+                          type="text"
+                          name="cuenta_2"
+                          value={formData.cuenta_2}
+                          onChange={handleInputChange}
+                          placeholder="Número de cuenta"
+                          className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cuenta Destino 2 - Solo mostrar si NO es Tarjeta Institucional */}
+                  {formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional' && (
+                    <div className="mb-6">
                       <label className="block text-base font-medium text-white/90 mb-3">
-                        Cuenta (opcional)
+                        <CreditCard className="w-4 h-4 inline mr-2" />
+                        Cuenta Destino *
                       </label>
                       <input
                         type="text"
-                        name="cuenta_2"
-                        value={formData.cuenta_2}
+                        name="cuenta_destino_2"
+                        value={formData.cuenta_destino_2}
                         onChange={handleInputChange}
-                        placeholder="Número de cuenta"
+                        placeholder={
+                          formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' 
+                            ? 'Número de tarjeta' 
+                            : 'Número de cuenta CLABE'
+                        }
+                        required={formData.tiene_segunda_forma_pago}
                         className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
                       />
                     </div>
-                  </div>
-
-                  {/* Cuenta Destino 2 */}
-                  <div className="mb-6">
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      <CreditCard className="w-4 h-4 inline mr-2" />
-                      Cuenta Destino *
-                    </label>
-                    <input
-                      type="text"
-                      name="cuenta_destino_2"
-                      value={formData.cuenta_destino_2}
-                      onChange={handleInputChange}
-                      placeholder={
-                        formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' 
-                          ? 'Número de tarjeta' 
-                          : formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional'
-                          ? 'Opcional'
-                          : 'Número de cuenta CLABE'
-                      }
-                      required={formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional'}
-                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
-                    />
-                  </div>
+                  )}
 
                   {/* CAMPOS DE TARJETA INSTITUCIONAL PARA SEGUNDA FORMA DE PAGO */}
                   {formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' && (
