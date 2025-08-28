@@ -24,6 +24,7 @@ type FormState = {
   cuenta_destino: string;
   concepto: string;
   tipo_concepto: string;
+  referencia: string; // Nuevo campo para referencia
   tipo_pago: string;
   tipo_pago_descripcion: string;
   empresa_a_pagar: string;
@@ -65,6 +66,7 @@ const initialState: FormState = {
   cuenta_destino: '',
   concepto: '',
   tipo_concepto: 'pago_factura',
+  referencia: '', // Nuevo campo para referencia
   tipo_pago: 'transferencia',
   tipo_pago_descripcion: '',
   empresa_a_pagar: '',
@@ -124,10 +126,13 @@ export default function NuevaSolicitudPage() {
   const [checkingCuenta, setCheckingCuenta] = useState(false);
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
 
-  // Limpiar concepto cuando cambie tipo_concepto de "otro" a otra opción
+  // Limpiar campos cuando cambie tipo_concepto
   useEffect(() => {
     if (formData.tipo_concepto !== 'otro') {
       dispatch({ type: 'SET_FIELD', field: 'concepto', value: '' });
+    }
+    if (formData.tipo_concepto !== 'referencia') {
+      dispatch({ type: 'SET_FIELD', field: 'referencia', value: '' });
     }
   }, [formData.tipo_concepto]);
 
@@ -294,6 +299,11 @@ export default function NuevaSolicitudPage() {
       newErrors.concepto = 'Este campo es obligatorio cuando seleccionas "Otro"';
     }
     
+    // Validar referencia solo si tipo_concepto es "referencia"
+    if (formData.tipo_concepto === 'referencia' && !formData.referencia) {
+      newErrors.referencia = 'Este campo es obligatorio cuando seleccionas "Referencia"';
+    }
+    
     // Validar cuenta_destino solo si no es Tarjeta Institucional
     if (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && !formData.cuenta_destino) {
       newErrors['cuenta_destino'] = 'Este campo es obligatorio';
@@ -323,6 +333,10 @@ export default function NuevaSolicitudPage() {
         conceptoGenerado = formData.concepto || 'Otro concepto';
       } else if (formData.tipo_concepto === 'pago_factura') {
         conceptoGenerado = 'Pago de factura';
+      } else if (formData.tipo_concepto === 'donativo') {
+        conceptoGenerado = 'Donativo';
+      } else if (formData.tipo_concepto === 'referencia') {
+        conceptoGenerado = `Referencia: ${formData.referencia || 'Sin especificar'}`;
       } else {
         conceptoGenerado = 'Pago a terceros';
       }
@@ -994,6 +1008,8 @@ export default function NuevaSolicitudPage() {
                 >
                   <option value="pago_factura" className="bg-blue-900 text-white">Pago de factura</option>
                   <option value="pago_terceros" className="bg-blue-900 text-white">Pago a terceros</option>
+                  <option value="donativo" className="bg-blue-900 text-white">Donativo</option>
+                  <option value="referencia" className="bg-blue-900 text-white">Referencia</option>
                   <option value="otro" className="bg-blue-900 text-white">Otro</option>
                 </select>
 
@@ -1017,6 +1033,28 @@ export default function NuevaSolicitudPage() {
                     required
                     className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.concepto ? 'border-red-400' : ''}`}
                   />
+                )}
+
+                {/* Campo de referencia condicional para "Referencia" */}
+                {formData.tipo_concepto === 'referencia' && (
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Referencia *
+                    </label>
+                    <input
+                      type="text"
+                      name="referencia"
+                      value={formData.referencia}
+                      onChange={handleInputChange}
+                      placeholder="Ingrese el código o identificador de referencia..."
+                      required
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.referencia ? 'border-red-400' : ''}`}
+                    />
+                    <p className="text-white/60 text-sm mt-2">
+                      Esta referencia corresponde a códigos o identificadores específicos que deben incluirse en el concepto para acreditar correctamente el pago.
+                    </p>
+                    {errors.referencia && <span className="text-red-400 text-sm mt-1 block">{errors.referencia}</span>}
+                  </div>
                 )}
                 
                 {errors.concepto && <span className="text-red-400 text-sm mt-1 block">{errors.concepto}</span>}
