@@ -15,7 +15,6 @@ import type { Solicitud } from '../../../../../types/index';
 import { PagoDetailModal } from '@/components/pagos/PagoDetailModal';
 import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal';
 
-
 export default function PagosPendientesPage() {
   const [selectedPago, setSelectedPago] = useState<Solicitud | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -188,7 +187,7 @@ export default function PagosPendientesPage() {
                         <thead style={{backgroundColor: '#F0F4FC'}}>
                           <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              ID
+                              Folio
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Solicitante
@@ -205,8 +204,6 @@ export default function PagosPendientesPage() {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Estado
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Cuenta/Tarjeta</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Banco Destino</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aprobador</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Acciones
@@ -217,7 +214,7 @@ export default function PagosPendientesPage() {
                           {paginatedPagos.map((pago: Solicitud) => (
                             <tr key={pago.id_solicitud} className="hover:bg-gray-50 transition-colors">
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                #{pago.id_solicitud}
+                                {pago.folio}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {typeof pago.nombre_usuario === 'string' && pago.nombre_usuario
@@ -241,13 +238,6 @@ export default function PagosPendientesPage() {
                                 <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                                   {pago.estado ? pago.estado.charAt(0).toUpperCase() + pago.estado.slice(1) : 'Autorizada'}
                                 </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {pago.tipo_cuenta_destino ? pago.tipo_cuenta_destino : ''}
-                                {pago.tipo_tarjeta ? ` / ${pago.tipo_tarjeta}` : ''}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {pago.banco_destino || ''}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {typeof pago.aprobador_nombre === 'string' && pago.aprobador_nombre
