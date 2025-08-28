@@ -1044,7 +1044,7 @@ export default function NuevaSolicitudPage() {
                   {/* Empresa (opcional) */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      Empresa Emisora  (opcional)
+                      Se paga por: (opcional)
                     </label>
                     <input
                       type="text"
