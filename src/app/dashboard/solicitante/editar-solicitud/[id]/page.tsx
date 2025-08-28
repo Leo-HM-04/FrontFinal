@@ -157,7 +157,11 @@ export default function EditarSolicitudPage() {
     { value: 'proveedores', label: 'Proveedores' },
     { value: 'administrativos', label: 'Administrativos' },
     { value: 'comisiones', label: 'Comisiones' },
-    { value: 'poliza_seguro', label: 'Poliza - Seguro' }
+    { value: 'poliza_seguro', label: 'Poliza - Seguro' },
+    { value: 'Dirección General', label: 'Dirección General' },
+    { value: 'Donativos', label: 'Donativos' },
+    { value: 'Operativos', label: 'Operativos' },
+    { value: 'Fiscales legales y corporativos', label: 'Fiscales legales y corporativos' }
   ];
 
   useEffect(() => {

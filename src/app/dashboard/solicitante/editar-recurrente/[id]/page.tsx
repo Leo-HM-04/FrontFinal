@@ -18,13 +18,19 @@ import { formatDateForAPI, parseBackendDateForForm } from '@/utils/dateUtils';
 
 // Opciones igual que en crear
 const tipoPagoOptions = [
-  { value: 'viaticos', label: 'Viáticos' },
+  { value: 'transferencia', label: 'Transferencia' },
   { value: 'efectivo', label: 'Efectivo' },
   { value: 'factura', label: 'Factura' },
-  { value: 'nominas', label: 'Nóminas' },
   { value: 'tarjeta', label: 'Tarjeta' },
+  { value: 'tarjeta_institucional', label: 'Tarjeta Institucional' },
   { value: 'proveedores', label: 'Proveedores' },
-  { value: 'administrativos', label: 'Administrativos' }
+  { value: 'administrativos', label: 'Administrativos' },
+  { value: 'comisiones', label: 'Comisiones' },
+  { value: 'poliza_seguro', label: 'Poliza - Seguro' },
+  { value: 'Dirección General', label: 'Dirección General' },
+  { value: 'Donativos', label: 'Donativos' },
+  { value: 'Operativos', label: 'Operativos' },
+  { value: 'Fiscales legales y corporativos', label: 'Fiscales legales y corporativos' }
 ];
 const departamentos = [
   'contabilidad', 'facturacion', 'cobranza', 'vinculacion',

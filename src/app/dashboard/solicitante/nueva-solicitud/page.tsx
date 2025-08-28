@@ -182,7 +182,11 @@ export default function NuevaSolicitudPage() {
     { value: 'proveedores', label: 'Proveedores' },
     { value: 'administrativos', label: 'Administrativos' },
     { value: 'comisiones', label: 'Comisiones' },
-    { value: 'poliza_seguro', label: 'Poliza - Seguro' }
+    { value: 'poliza_seguro', label: 'Poliza - Seguro' },
+    { value: 'Dirección General', label: 'Dirección General' },
+    { value: 'Donativos', label: 'Donativos' },
+    { value: 'Operativos', label: 'Operativos' },
+    { value: 'Fiscales legales y corporativos', label: 'Fiscales legales y corporativos' }
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -576,7 +580,7 @@ export default function NuevaSolicitudPage() {
                     >
                       <option value="CLABE" className="text-black">CLABE</option>
                       <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
-                      <option value="Tarjeta Institucional" className="text-black">Pago con tarjeta corporativa</option>
+                      <option value="Tarjeta Institucional" className="text-black">Pago con Tarjeta Corporativa</option>
                     </select>
                   </div>
 
@@ -791,7 +795,7 @@ export default function NuevaSolicitudPage() {
                       >
                         <option value="CLABE" className="text-black">CLABE</option>
                         <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
-                        <option value="Tarjeta Institucional" className="text-black">Tarjeta Institucional</option>
+                        <option value="Tarjeta Institucional" className="text-black">Pago con Tarjeta Corporativa</option>
                       </select>
                     </div>
 
