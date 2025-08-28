@@ -159,13 +159,12 @@ export default function HistorialPagosPage() {
                 <table className="min-w-full divide-y divide-blue-100">
                   <thead style={{backgroundColor: '#F0F4FC'}}>
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Folio</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Folio del pago</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Solicitante</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Departamento</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Monto</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Tipo Pago</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Estado</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Fecha Pago</th>
                       <th className="px-6 py-4 text-center text-xs font-semibold text-blue-700 uppercase tracking-wider">Acción</th>
                     </tr>
                   </thead>
@@ -181,6 +180,8 @@ export default function HistorialPagosPage() {
                           <span className="px-3 py-1 text-sm font-semibold rounded-xl bg-blue-200 text-blue-800 shadow">{pago.departamento ? pago.departamento.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : '-'}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.tipo_pago ? pago.tipo_pago.charAt(0).toUpperCase() + pago.tipo_pago.slice(1).replace(/_/g, ' ') : '-'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900 font-semibold">{pago.estado ? pago.estado.charAt(0).toUpperCase() + pago.estado.slice(1) : '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                           <div className="flex flex-col gap-1 items-center">
                             <button
