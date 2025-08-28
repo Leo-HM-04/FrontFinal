@@ -66,9 +66,23 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
             </div>
           </div>
           <div className="px-0 md:px-2 space-y-8">
-            {/* Información Principal */}
+            {/* Concepto y descripción del tipo de pago al inicio */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 mb-8">
               <div className="xl:col-span-2">
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl mb-6">
+                  <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                    <div className="p-2 bg-green-100 rounded-xl mr-3">
+                      <FileText className="w-6 h-6 text-green-700" />
+                    </div>
+                    Concepto
+                  </h3>
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200/50 shadow-inner mb-4">
+                    <p className="text-gray-800 leading-relaxed text-base font-medium">{pago.concepto || '-'}</p>
+                  </div>
+                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Descripción del tipo de pago</span>
+                  <p className="text-blue-900 p-2 md:p-3 bg-white rounded-md">{pago.tipo_pago_descripcion || '-'}</p>
+                </div>
+                {/* Información Financiera */}
                 <div className="p-5 md:p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                   <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
                     <div className="p-2 bg-blue-100 rounded-xl mr-3">
@@ -76,21 +90,19 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                     </div>
                     Información Financiera
                   </h3>
-                  
                   {/* Monto destacado con mejor diseño */}
                   <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl border border-blue-300/50 mb-6 shadow-lg">
                     <span className="text-sm uppercase tracking-wider text-blue-100 font-bold block mb-2">Monto total</span>
                     <p className="text-4xl font-black text-white tracking-tight">{formatCurrency(pago.monto)}</p>
                     <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-24"></div>
                   </div>
-                  
                   <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3">
                     <div className="bg-white p-2 md:p-3 rounded-md">
-                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Empresa a pagar</span>
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Se paga por</span>
                       <p className="text-blue-900 font-medium">{pago.empresa_a_pagar || '-'}</p>
                     </div>
                     <div className="bg-white p-2 md:p-3 rounded-md">
-                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Persona que recibe</span>
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Nombre del beneficiario</span>
                       <p className="text-blue-900 font-medium">{pago.nombre_persona || '-'}</p>
                     </div>
                     <div className="bg-white p-2 md:p-3 rounded-md">
@@ -134,10 +146,13 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                         }</p>
                       </div>
                     </div>
-                  </div>
-                  <div>
-                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Descripción del tipo de pago</span>
-                    <p className="text-blue-900 p-2 md:p-3 bg-white rounded-md">{pago.tipo_pago_descripcion || '-'}</p>
+                    {/* Sección: Tipo de Pago */}
+                    <div className="mt-4">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de Pago</span>
+                      <p className="text-blue-900 font-semibold bg-blue-50 rounded px-3 py-2 inline-block">
+                        {pago.tipo_pago ? pago.tipo_pago.charAt(0).toUpperCase() + pago.tipo_pago.slice(1).replace(/_/g, ' ') : '-'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -164,20 +179,6 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                 </div>
               </div>
             </div>
-            {/* Archivos y comprobantes + concepto alineados y mejorados */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
-              {/* Concepto - 1 columna */}
-              <div className="p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-                <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
-                  <div className="p-2 bg-green-100 rounded-xl mr-3">
-                    <FileText className="w-6 h-6 text-green-700" />
-                  </div>
-                  Concepto
-                </h3>
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200/50 shadow-inner">
-                  <p className="text-gray-800 leading-relaxed text-base font-medium">{pago.concepto || '-'}</p>
-                </div>
-              </div>
               
               {/* Documentos Adjuntos - 2 columnas */}
               <div className="lg:col-span-2 p-5 md:p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl flex flex-col justify-between">
@@ -331,6 +332,5 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
           </div>
         </div>
       </div>
-    </div>
   );
 }
