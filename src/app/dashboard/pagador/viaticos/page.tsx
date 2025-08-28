@@ -210,6 +210,10 @@ export default function ViaticosPagadorPage() {
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">ID</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Folio</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Usuario</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Beneficiario</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Banco</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Fecha límite de pago</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Tipo de cuenta/tarjeta</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Departamento</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Concepto</th>
                       <th className="px-4 py-3 text-left text-xs font-bold text-blue-900 uppercase tracking-wide">Monto</th>
@@ -244,6 +248,18 @@ export default function ViaticosPagadorPage() {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-800">
                             {v.usuario_nombre || '-'}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-800">
+                            {v.nombre_persona || '-'}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700">
+                            {v.banco_destino || '-'}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700">
+                            {v.fecha_limite_pago ? new Date(v.fecha_limite_pago).toLocaleDateString('es-MX') : '-'}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700">
+                            {v.tipo_cuenta_destino ? v.tipo_cuenta_destino : ''}{v.tipo_tarjeta ? ` / ${v.tipo_tarjeta}` : ''}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700 capitalize">
                             {v.departamento || '-'}
