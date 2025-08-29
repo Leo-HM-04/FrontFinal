@@ -58,15 +58,25 @@ export class SolicitudArchivosService {
   
   // Obtener archivos de una solicitud
   static async obtenerArchivos(id_solicitud: number): Promise<SolicitudArchivo[]> {
+    console.log('🔍 [DEBUG] SolicitudArchivosService.obtenerArchivos - ID:', id_solicitud);
     const token = localStorage.getItem('token');
+    console.log('🔑 [DEBUG] Token disponible:', !!token);
 
-    const response = await api.get<SolicitudArchivo[]>(`/solicitud-archivos/${id_solicitud}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    
-    return response.data;
+    try {
+      console.log('📡 [DEBUG] Haciendo petición a:', `/solicitud-archivos/${id_solicitud}`);
+      const response = await api.get<SolicitudArchivo[]>(`/solicitud-archivos/${id_solicitud}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      console.log('✅ [DEBUG] Respuesta exitosa:', response.status);
+      console.log('📄 [DEBUG] Datos recibidos:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ [DEBUG] Error en obtenerArchivos:', error);
+      throw error;
+    }
   }
   
   // Eliminar un archivo

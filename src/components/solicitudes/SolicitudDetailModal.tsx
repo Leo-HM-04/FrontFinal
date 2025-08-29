@@ -33,13 +33,17 @@ const [errorArchivos, setErrorArchivos] = useState<string | null>(null);
 // Obtener archivos de solicitud_archivos
 const fetchArchivos = useCallback(async () => {
   if (!solicitud) return;
+  console.log('🔍 [DEBUG] Iniciando fetchArchivos para solicitud:', solicitud.id_solicitud);
   setLoadingArchivos(true);
   setErrorArchivos(null);
   try {
+    console.log('📡 [DEBUG] Llamando a SolicitudArchivosService.obtenerArchivos...');
     const data = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
+    console.log('📁 [DEBUG] Archivos obtenidos:', data);
+    console.log('📊 [DEBUG] Cantidad de archivos:', data.length);
     setArchivos(data);
   } catch (error) {
-    console.error('Error al cargar archivos:', error);
+    console.error('❌ [DEBUG] Error al cargar archivos:', error);
     setErrorArchivos('No se pudieron cargar los archivos adjuntos.');
   } finally {
     setLoadingArchivos(false);
@@ -118,9 +122,12 @@ setLoadingComprobantes(false);
 
 
 useEffect(() => {
+  console.log('🔄 [DEBUG] useEffect ejecutado - isOpen:', isOpen, 'solicitud:', solicitud?.id_solicitud);
   if (isOpen && solicitud) {
+    console.log('✅ [DEBUG] Condiciones cumplidas, llamando fetchArchivos...');
     fetchArchivos();
     if (solicitud.estado === 'pagada') {
+      console.log('💳 [DEBUG] Solicitud pagada, llamando fetchComprobantes...');
       fetchComprobantes();
     }
   }
@@ -545,13 +552,21 @@ return (
                 <FileText className="w-5 h-5 mr-2 text-blue-600" />
                 Archivos adjuntos de la solicitud
               </h4>
-              {loadingArchivos ? (
-                <div className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Cargando archivos...</div>
-              ) : errorArchivos ? (
-                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorArchivos}</div>
-              ) : archivos.length === 0 ? (
-                <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">No hay archivos adjuntos disponibles</div>
-              ) : (
+              {(() => {
+                console.log('🖼️ [DEBUG] Renderizando sección de archivos');
+                console.log('📊 [DEBUG] loadingArchivos:', loadingArchivos);
+                console.log('❌ [DEBUG] errorArchivos:', errorArchivos);
+                console.log('📁 [DEBUG] archivos.length:', archivos.length);
+                console.log('📄 [DEBUG] archivos completos:', archivos);
+                
+                if (loadingArchivos) {
+                  return <div className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Cargando archivos...</div>;
+                } else if (errorArchivos) {
+                  return <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorArchivos}</div>;
+                } else if (archivos.length === 0) {
+                  return <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">No hay archivos adjuntos disponibles</div>;
+                } else {
+                  return (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {archivos.map((archivo) => {
                     // Usar ruta relativa que funciona con el proxy de Next.js
@@ -595,7 +610,9 @@ return (
                     );
                   })}
                 </div>
-              )}
+                  );
+                }
+              })()}
             </div>
               // Usar ruta relativa para la factura
               let facturaUrl = '';
