@@ -36,9 +36,12 @@ const fetchArchivos = useCallback(async () => {
   setLoadingArchivos(true);
   setErrorArchivos(null);
   try {
+    console.log('🔍 Cargando archivos para solicitud:', solicitud.id_solicitud);
     const data = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
+    console.log('📁 Archivos obtenidos:', data);
     setArchivos(data);
-  } catch {
+  } catch (error) {
+    console.error('❌ Error al cargar archivos:', error);
     setErrorArchivos('No se pudieron cargar los archivos adjuntos.');
   } finally {
     setLoadingArchivos(false);
@@ -553,7 +556,21 @@ return (
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {archivos.map((archivo) => {
-                    const url = archivo.archivo_url.startsWith('http') ? archivo.archivo_url : `${archivo.archivo_url.startsWith('/') ? '' : '/'}${archivo.archivo_url}`;
+                    // Construir la URL completa
+                    let url = '';
+                    if (archivo.archivo_url.startsWith('http')) {
+                      url = archivo.archivo_url;
+                    } else {
+                      // Construir URL completa con el dominio
+                      const rutaArchivo = archivo.archivo_url.startsWith('/') 
+                        ? archivo.archivo_url 
+                        : `/${archivo.archivo_url}`;
+                      url = `https://bechapra.com.mx${rutaArchivo}`;
+                    }
+                    console.log('🔗 URL construida para archivo:', { 
+                      original: archivo.archivo_url, 
+                      construida: url 
+                    });
                     const fileName = url.split('/').pop() || '';
                     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
@@ -587,7 +604,7 @@ return (
                 </div>
               )}
             </div>
-              // Garantizar que la URL tenga el formato correcto con la barra diagonal
+              // Construir la URL completa para la factura
               let facturaUrl = '';
               if (solicitud.factura_url.startsWith('http')) {
                 facturaUrl = solicitud.factura_url;
@@ -595,7 +612,7 @@ return (
                 const rutaArchivo = solicitud.factura_url.startsWith('/') 
                   ? solicitud.factura_url 
                   : `/${solicitud.factura_url}`;
-                facturaUrl = rutaArchivo;
+                facturaUrl = `https://bechapra.com.mx${rutaArchivo}`;
               }
               const fileName = facturaUrl.split('/').pop();
               const isImage = /\.(jpg|jpeg|png|gif)$/i.test(facturaUrl);
@@ -676,7 +693,7 @@ return (
                           const rutaArchivo = solicitud.factura_url.startsWith('/') 
                             ? solicitud.factura_url 
                             : `/${solicitud.factura_url}`;
-                          facturaUrl = rutaArchivo;
+                          facturaUrl = `https://bechapra.com.mx${rutaArchivo}`;
                         }
                         window.open(facturaUrl, '_blank');
                       }}
@@ -690,7 +707,19 @@ return (
                   {solicitud.soporte_url && (
                     <Button
                       size="lg"
-                      onClick={() => window.open(solicitud.soporte_url, '_blank')}
+                      onClick={() => {
+                        if (!solicitud.soporte_url) return;
+                        let soporteUrl = '';
+                        if (solicitud.soporte_url.startsWith('http')) {
+                          soporteUrl = solicitud.soporte_url;
+                        } else {
+                          const rutaArchivo = solicitud.soporte_url.startsWith('/')
+                            ? solicitud.soporte_url
+                            : `/${solicitud.soporte_url}`;
+                          soporteUrl = `https://bechapra.com.mx${rutaArchivo}`;
+                        }
+                        window.open(soporteUrl, '_blank');
+                      }}
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
                     >
                       <FileText className="w-5 h-5" />
@@ -723,7 +752,7 @@ return (
               ) : (
                 <div className="space-y-4">
                     {comprobantes.map((comprobante) => {
-                      // Construir la URL del comprobante
+                      // Construir la URL completa del comprobante
                       let comprobanteUrl = '';
                       if (comprobante.ruta_archivo.startsWith('http')) {
                         comprobanteUrl = comprobante.ruta_archivo;
@@ -731,7 +760,7 @@ return (
                         const rutaArchivo = comprobante.ruta_archivo.startsWith('/')
                           ? comprobante.ruta_archivo
                           : `/${comprobante.ruta_archivo}`;
-                        comprobanteUrl = rutaArchivo;
+                        comprobanteUrl = `https://bechapra.com.mx${rutaArchivo}`;
                       }
                       
                       // Determinar el tipo de archivo
