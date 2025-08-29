@@ -1,132 +1,346 @@
 "use client";
-import { motion } from "framer-motion";
+
+import React, { useState, useEffect } from 'react';
+import { Mail, Phone, ArrowRight, CheckCircle, Globe, Shield, Zap, Copy } from 'lucide-react';
+import Image from 'next/image';
 
 export default function HomeAnimado() {
+  const [copied, setCopied] = useState(false);
+  const email = "automatizaciones@bechapra.com.mx";
+  const handleCopy = () => {
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  
+  // Redirigir a /home si hay token en la URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('token')) {
+        window.location.href = '/home';
+      }
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-blue-950 relative overflow-hidden">
-      {/* Fondo animado */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none z-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.2 }}
-      >
-        <motion.div
-          className="absolute left-1/2 top-1/3 w-[600px] h-[600px] bg-blue-700 opacity-30 rounded-full blur-3xl -translate-x-1/2"
-          animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.35, 0.2] }}
-          transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute right-10 bottom-10 w-80 h-80 bg-blue-400 opacity-20 rounded-full blur-2xl"
-          animate={{ scale: [1, 1.08, 1], opacity: [0.15, 0.25, 0.15] }}
-          transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
-        />
-      </motion.div>
-      <motion.main
-        className="relative z-10 w-full max-w-3xl flex flex-col md:flex-row items-center gap-10 bg-blue-950/80 rounded-3xl shadow-2xl border border-blue-800 p-10 md:p-16"
-        initial={{ y: 60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-      >
-        {/* Avatar y datos de usuario de prueba */}
-        <motion.section
-          className="flex flex-col items-center md:items-start w-full md:w-1/3"
-          initial={{ x: -40, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-        >
-          <motion.div
-            className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-700 border-4 border-blue-200 shadow-lg mb-4 flex items-center justify-center"
-            whileHover={{ scale: 1.07, rotate: 2 }}
-            transition={{ type: "spring", stiffness: 200 }}
-          >
-            <span className="text-5xl text-white font-bold select-none">🐾</span>
-          </motion.div>
-          <div className="text-center md:text-left">
-            <motion.h2
-              className="text-xl font-semibold text-white"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden font-sans">
+      {/* Fondo decorativo mejorado con capas y profundidad */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Capa principal de formas */}
+        <div className="absolute -top-64 -right-64 w-96 h-96 bg-gradient-to-br from-blue-100/40 to-indigo-100/60 rounded-full opacity-70 blur-3xl animate-drift-slow"></div>
+        <div className="absolute top-1/3 -left-48 w-80 h-80 bg-gradient-to-tr from-blue-200/30 to-slate-200/40 rounded-full opacity-60 blur-2xl animate-drift-reverse"></div>
+        <div className="absolute bottom-32 right-1/3 w-40 h-40 bg-gradient-to-bl from-indigo-200/50 to-blue-300/40 rounded-full opacity-50 blur-xl animate-float-gentle"></div>
+        
+        {/* Capa secundaria para mayor profundidad */}
+        <div className="absolute top-20 left-1/4 w-24 h-24 bg-blue-200/20 rounded-full blur-lg animate-pulse-soft"></div>
+        <div className="absolute bottom-1/4 left-1/5 w-16 h-16 bg-indigo-300/25 rounded-full blur-md animate-drift-tiny"></div>
+      </div>
+
+      {/* Header institucional premium: nav pill destacado a la izquierda, logo limpio a la derecha */}
+      <header className="relative w-full flex items-center justify-between px-4 md:px-12 py-6 md:py-4 bg-white/96 z-50 border-b-4 border-blue-700 shadow-sm min-h-[84px]">
+        <nav className="relative flex items-center order-2 xl:order-1 flex-1 justify-center">
+          <div className="nav-pill mt-2 md:mt-0 flex items-center gap-3 md:gap-4 px-2 md:px-3 py-2 md:py-3 rounded-full bg-white/92 shadow-2xl border border-blue-100/60 mx-auto max-w-[1100px] w-full md:w-auto">
+            <a
+              href="https://www.bechapra.com.mx/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-item nav-cta group flex items-center gap-3 font-extrabold text-blue-800 px-4 md:px-6 py-2 md:py-3 rounded-full transition-all duration-200 text-lg md:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200"
+              aria-current="page"
+              style={{letterSpacing: '0.01em'}}
             >
-              Braxton v1.0
-            </motion.h2>
-            <p className="text-blue-200 text-sm mt-1">Panel de pruebas UI</p>
-            <div className="flex gap-2 mt-3 justify-center md:justify-start">
-              <span className="bg-blue-800 text-blue-200 px-2 py-1 rounded text-xs">Dark Theme</span>
-              <span className="bg-blue-800 text-blue-200 px-2 py-1 rounded text-xs">Responsive</span>
+              <span className="icon-wrap inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-sm">
+                <ArrowRight className="icon text-blue-700" size={18} />
+              </span>
+              <span>Sistema de Solicitudes y Gestión de Pagos</span>
+            </a>
+
+            <div className="nav-item-disabled relative px-4 md:px-5 py-2 md:py-3 rounded-full text-blue-500/90 text-lg md:text-xl">
+              <span className="font-bold">Sistema de Reportes</span>
+              <span className="absolute -top-3 right-3 text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium">Próximamente</span>
+            </div>
+
+            <div className="nav-item-disabled relative px-4 md:px-5 py-2 md:py-3 rounded-full text-blue-400/80 text-lg md:text-xl">
+              <span className="font-bold">Sistema de Innovación</span>
+              <span className="absolute -top-3 right-3 text-xs bg-blue-400 text-white px-2 py-0.5 rounded-full font-medium">Próximamente</span>
             </div>
           </div>
-        </motion.section>
-        {/* Panel principal */}
-        <motion.section
-          className="flex-1 w-full flex flex-col items-center md:items-start"
-          initial={{ x: 40, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-        >
-          <motion.h1
-            className="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            Bright Portfolio <span className="text-blue-400">Template</span>
-          </motion.h1>
-          <motion.p
-            className="text-blue-200 text-lg mb-8 max-w-xl"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-          >
-            Ejemplo de home profesional inspirado en portafolios modernos. Animaciones, tema oscuro y diseño responsivo.
-          </motion.p>
-          <motion.ul
-            className="space-y-4 w-full max-w-xs"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.18, delayChildren: 1.2 } }
-            }}
-          >
-            {["Solicitudes", "Recurrentes", "Pagos"].map((txt, i) => (
-              <motion.li
-                key={txt}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 0.6, y: 0 }
-                }}
-                whileHover={{ scale: 1.04, opacity: 0.8 }}
-                className={
-                  `block px-6 py-3 rounded-lg font-semibold text-lg shadow text-center cursor-not-allowed select-none ` +
-                  (i === 0 ? 'bg-blue-700/60 text-white' : i === 1 ? 'bg-blue-600/60 text-white' : 'bg-blue-500/60 text-white')
-                }
-              >
-                {txt}
-              </motion.li>
-            ))}
-          </motion.ul>
-          <motion.div
-            className="flex gap-4 mt-10"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.7 }}
-          >
-            <span className="bg-blue-800 text-blue-200 px-3 py-1 rounded-full text-xs font-mono">Next.js</span>
-            <span className="bg-blue-800 text-blue-200 px-3 py-1 rounded-full text-xs font-mono">Tailwind</span>
-            <span className="bg-blue-800 text-blue-200 px-3 py-1 rounded-full text-xs font-mono">TypeScript</span>
-          </motion.div>
-          <motion.p
-            className="text-blue-400 text-xs mt-8 text-center md:text-left"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2 }}
-          >
-            Solo visible en <span className="font-semibold">/home</span>
-          </motion.p>
-        </motion.section>
-      </motion.main>
+        </nav>
+
+        <div className="flex items-center order-1 xl:order-2 ml-2 md:ml-8">
+          <Image 
+            src="/assets/images/bechapra-logo.png" 
+            alt="Logo BECHAPRA" 
+            width={128} 
+            height={128} 
+            className="object-contain select-none drop-shadow-md w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32"
+            priority 
+          />
+        </div>
+      </header>
+
+      {/* Sección principal con mejor responsive y espaciado */}
+      <main className="relative flex-1 flex flex-col xl:flex-row items-center justify-between px-6 md:px-12 lg:px-16 xl:px-20 py-8 md:py-12 lg:py-16 xl:py-20 gap-12 xl:gap-16">
+        
+        {/* Contenido de texto con mejor jerarquía visual */}
+        <div className="w-full xl:w-1/2 z-20 order-2 xl:order-1">
+          <div className="space-y-8 lg:space-y-12">
+            
+            {/* Título principal formal de bienvenida y panel de accesos, versión premium y solo azul */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 animate-fade-in">
+                <Shield className="text-blue-700 drop-shadow-md" size={38} />
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-slate-800 leading-tight tracking-tight drop-shadow-md">
+                  Bienvenido a <span className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 bg-clip-text text-transparent drop-shadow-lg">BECHAPRA</span>
+                </h1>
+              </div>
+              <div className="inline-block px-6 py-3 rounded-xl bg-gradient-to-r from-blue-50 via-white to-blue-100 border border-blue-100 shadow-md animate-fade-in delay-200">
+                <p className="text-blue-800 text-lg lg:text-xl xl:text-2xl font-semibold tracking-wide">
+                  Panel de accesos exclusivo para personal autorizado
+                </p>
+                <p className="text-blue-500 text-base lg:text-lg mt-1">
+                  Seleccione el sistema al que desea ingresar. Acceso restringido únicamente a colaboradores de BECHAPRA.
+                </p>
+                <div className="mt-4 flex flex-col gap-2 text-blue-700 text-base lg:text-lg">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="text-blue-500" size={18} />
+                    <span>Acceso seguro y validado para el personal de BECHAPRA.</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="text-blue-600" size={18} />
+                    <span>Confidencialidad y protección de la información institucional.</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="text-blue-400" size={18} />
+                    <span>
+                      Soporte personalizado: 
+                      <a
+                        href={`mailto:${email}?subject=Soporte%20BECHAPRA&body=Hola%2C%20necesito%20ayuda%20con%20el%20acceso%20a%20los%20sistemas.`}
+                        className="underline hover:text-blue-900 transition-colors"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {email}
+                      </a>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Ilustración 3D mejorada con mejor responsive y profundidad visual */}
+        <div className="w-full xl:w-1/2 flex justify-center items-center relative order-1 xl:order-2">
+          <div className="relative w-full max-w-md lg:max-w-lg xl:max-w-xl h-80 md:h-96 lg:h-[28rem] flex items-center justify-center perspective-[1200px]">
+            
+            {/* Plataforma principal con sombras y profundidad mejoradas */}
+            <div className="relative z-10 transform-gpu rotate-x-[12deg] rotate-y-[12deg] transition-all duration-1000 ease-[cubic-bezier(.4,0,.2,1)]">
+              
+                {/* Dispositivo central con gradientes más sofisticados */}
+                <div className="w-72 lg:w-80 xl:w-96 h-44 lg:h-48 xl:h-56 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-3xl shadow-2xl relative overflow-hidden transform-gpu transition-all duration-700 ease-[cubic-bezier(.4,0,.2,1)] group border-2 border-blue-200/60">
+                {/* Pantalla interna con efecto glassmorphism premium */}
+                <div className="absolute inset-4 bg-gradient-to-br from-blue-100/80 via-white/70 to-blue-200/80 rounded-2xl backdrop-blur-xl border border-blue-200/80 shadow-inner ring-2 ring-blue-100/40">
+                    <div className="w-full h-full bg-gradient-to-tr from-transparent via-white/30 to-transparent relative overflow-hidden">
+                    {/* Icono central con animación suave y glow */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="p-6 bg-white/50 rounded-2xl backdrop-blur-lg shadow-lg ring-2 ring-blue-200/40">
+                        <Globe className="text-blue-700 drop-shadow-[0_0_16px_rgba(37,99,235,0.25)]" size={56} />
+                        </div>
+                    </div>
+                    {/* Partículas flotantes dentro de la pantalla */}
+                    <div className="absolute top-4 left-4 w-2 h-2 bg-blue-400/70 rounded-full animate-ping"></div>
+                    <div className="absolute bottom-6 right-6 w-1.5 h-1.5 bg-blue-300/70 rounded-full animate-ping animation-delay-1000"></div>
+                    <div className="absolute top-1/3 right-8 w-1 h-1 bg-blue-200/70 rounded-full animate-pulse"></div>
+                    </div>
+                </div>
+                {/* Efecto de resplandor premium */}
+                <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/40 via-blue-500/50 to-blue-600/40 rounded-3xl opacity-80 blur-2xl transition-opacity duration-1000 ease-[cubic-bezier(.4,0,.2,1)] -z-10"></div>
+                </div>
+
+              {/* Elementos flotantes con paleta unificada y animaciones más suaves */}
+              <div className="absolute -top-6 -left-6 w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl shadow-xl animate-float-smooth transform-gpu transition-transform duration-700 ease-[cubic-bezier(.4,0,.2,1)]">
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-white/40 rounded-lg backdrop-blur-sm"></div>
+                </div>
+              </div>
+              <div className="absolute -top-2 -right-10 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl shadow-xl animate-float-smooth animation-delay-500 transform-gpu transition-transform duration-700 ease-[cubic-bezier(.4,0,.2,1)]">
+                <div className="w-full h-full flex items-center justify-center">
+                  <CheckCircle className="text-white" size={28} />
+                </div>
+              </div>
+              <div className="absolute -bottom-4 -left-12 w-20 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-xl animate-float-smooth animation-delay-1000 transform-gpu transition-transform duration-700 ease-[cubic-bezier(.4,0,.2,1)]">
+                <div className="w-full h-full flex items-center justify-center">
+                  <Zap className="text-white" size={24} />
+                </div>
+              </div>
+              <div className="absolute -bottom-6 -right-6 w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full shadow-xl animate-float-smooth animation-delay-700 transform-gpu transition-transform duration-700 ease-[cubic-bezier(.4,0,.2,1)]">
+                <div className="w-full h-full flex items-center justify-center">
+                  <Shield className="text-white" size={20} />
+                </div>
+              </div>
+
+              {/* Cubos pequeños con sombras mejoradas */}
+              <div className="absolute top-12 -left-16 w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg shadow-lg animate-bounce-gentle transform-gpu"></div>
+              <div className="absolute bottom-8 -right-16 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg animate-bounce-gentle animation-delay-1500 transform-gpu"></div>
+              <div className="absolute top-4 right-20 w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-500 rounded shadow-lg animate-pulse-soft transform-gpu"></div>
+            </div>
+
+            {/* Líneas de conexión con gradientes suaves */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewBox="0 0 400 400">
+              <defs>
+                <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="#6366f1" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="#2563eb" stopOpacity="0.8" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                  <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              
+              <path d="M200 200 L120 120" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="8,4" className="animate-dash-smooth" filter="url(#glow)" />
+              <path d="M200 200 L300 140" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="8,4" className="animate-dash-smooth animation-delay-300" filter="url(#glow)" />
+              <path d="M200 200 L140 280" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="8,4" className="animate-dash-smooth animation-delay-600" filter="url(#glow)" />
+              <path d="M200 200 L280 300" stroke="url(#connectionGradient)" strokeWidth="2" strokeDasharray="8,4" className="animate-dash-smooth animation-delay-900" filter="url(#glow)" />
+            </svg>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer premium institucional, azul, con mejor contraste e iconografía */}
+      <footer className="relative w-full flex justify-center py-7 bg-gradient-to-t from-blue-50 via-white/60 to-transparent border-t-2 border-blue-200/60 backdrop-blur-md shadow-inner z-40">
+        <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6 w-full max-w-4xl px-4 justify-between">
+          <span className="text-blue-500 text-xs md:text-sm font-medium text-center md:text-left select-none">
+            © {new Date().getFullYear()} BECHAPRA. Todos los derechos reservados.
+          </span>
+        </div>
+      </footer>
+
+      {/* Estilos CSS mejorados con animaciones más suaves */}
+  <style jsx global>{`
+        /* Animaciones de entrada más naturales */
+        @keyframes slide-up {
+          0% { 
+            opacity: 0; 
+            transform: translateY(40px) scale(0.98); 
+          }
+          100% { 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+          }
+        }
+        
+        /* Animaciones de fondo más sutiles */
+        @keyframes drift-slow {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          33% { transform: translate(20px, -20px) rotate(2deg); }
+          66% { transform: translate(-15px, 15px) rotate(-1deg); }
+        }
+        
+        @keyframes drift-reverse {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(-25px, 20px) rotate(-2deg); }
+        }
+        
+        @keyframes drift-tiny {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(8px, -8px); }
+        }
+        
+        /* Animaciones de elementos flotantes más suaves */
+        @keyframes float-gentle {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-8px) scale(1.02); }
+        }
+        
+        @keyframes float-smooth {
+          0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+          33% { transform: translateY(-8px) translateX(2px) rotate(1deg); }
+          66% { transform: translateY(-4px) translateX(-2px) rotate(-0.5deg); }
+        }
+        
+        @keyframes bounce-gentle {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-6px) scale(1.05); }
+        }
+        
+        @keyframes pulse-soft {
+          0%, 100% { opacity: 0.6; transform: scale(1); }
+          50% { opacity: 0.9; transform: scale(1.1); }
+        }
+        
+        @keyframes dash-smooth {
+          0% { stroke-dashoffset: 0; opacity: 0.8; }
+          50% { opacity: 1; }
+          100% { stroke-dashoffset: 24; opacity: 0.8; }
+        }
+        
+        /* Clases de animación */
+        .animate-slide-up { animation: slide-up 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .animate-drift-slow { animation: drift-slow 20s ease-in-out infinite; }
+        .animate-drift-reverse { animation: drift-reverse 25s ease-in-out infinite reverse; }
+        .animate-drift-tiny { animation: drift-tiny 15s ease-in-out infinite; }
+        .animate-float-gentle { animation: float-gentle 4s ease-in-out infinite; }
+        .animate-float-smooth { animation: float-smooth 6s ease-in-out infinite; }
+        .animate-bounce-gentle { animation: bounce-gentle 5s ease-in-out infinite; }
+        .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+        .animate-dash-smooth { animation: dash-smooth 3s linear infinite; }
+        
+        /* Delays para animaciones escalonadas */
+        .animation-delay-200 { animation-delay: 0.2s; }
+        .animation-delay-300 { animation-delay: 0.3s; }
+        .animation-delay-400 { animation-delay: 0.4s; }
+        .animation-delay-500 { animation-delay: 0.5s; }
+        .animation-delay-600 { animation-delay: 0.6s; }
+        .animation-delay-700 { animation-delay: 0.7s; }
+        .animation-delay-900 { animation-delay: 0.9s; }
+        .animation-delay-1000 { animation-delay: 1s; }
+        .animation-delay-1500 { animation-delay: 1.5s; }
+        
+        /* Utilidades 3D */
+        .perspective-\[1200px\] { perspective: 1200px; }
+        .transform-gpu { transform-style: preserve-3d; }
+        .rotate-x-\[15deg\] { transform: rotateX(15deg); }
+        .rotate-y-\[15deg\] { transform: rotateY(15deg); }
+        .rotate-x-\[12deg\] { transform: rotateX(12deg); }
+        .rotate-y-\[12deg\] { transform: rotateY(12deg); }
+        
+        /* Tipografía mejorada */
+        .font-sans { 
+          font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; 
+          font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+        }
+        
+        /* Sombras personalizadas */
+        .shadow-3xl {
+          box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+  /* Header/nav pill styles */
+  .nav-pill { transition: box-shadow 200ms ease, transform 200ms ease; }
+  .nav-pill:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -18px rgba(59,130,246,0.45); }
+  .nav-pill { transform-origin: left center; }
+  .nav-pill { margin-top: 6px; }
+  .nav-item { background: transparent; }
+  .nav-item:hover { background: linear-gradient(90deg, #1565d8 0%, #1e3a8a 100%); color: white; transform: translateY(-1px); }
+  .nav-cta { background: linear-gradient(90deg, #e6f0ff 0%, #ffffff 100%); }
+  .nav-cta:hover { transform: scale(1.03); box-shadow: 0 20px 45px -20px rgba(30,64,175,0.35); }
+  .nav-cta .icon { transition: transform 220ms cubic-bezier(.2,.9,.3,1); }
+  .nav-cta:hover .icon { transform: translateX(6px) rotate(6deg); color: white; }
+  .nav-cta .icon-wrap { transition: background 180ms ease, transform 220ms ease; }
+  .nav-cta:hover .icon-wrap { transform: translateX(4px); background: linear-gradient(90deg,#ffffff 0%, #dbeafe 100%); }
+  .nav-item-disabled { opacity: 0.9; background: transparent; }
+  @media (max-width: 768px) {
+  .nav-pill { gap: 8px; padding: 8px; margin-top: 0; box-shadow: 0 10px 30px -12px rgba(59,130,246,0.25); }
+  .nav-item span { display: none; }
+  .nav-item-disabled span.font-bold { display: none; }
+  .nav-pill { max-width: 96vw; }
+  }
+      `}</style>
     </div>
   );
 }
