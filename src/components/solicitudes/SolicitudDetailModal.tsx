@@ -33,17 +33,13 @@ const [errorArchivos, setErrorArchivos] = useState<string | null>(null);
 // Obtener archivos de solicitud_archivos
 const fetchArchivos = useCallback(async () => {
   if (!solicitud) return;
-  console.log('🔍 [DEBUG] Iniciando fetchArchivos para solicitud:', solicitud.id_solicitud);
   setLoadingArchivos(true);
   setErrorArchivos(null);
   try {
-    console.log('📡 [DEBUG] Llamando a SolicitudArchivosService.obtenerArchivos...');
     const data = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
-    console.log('📁 [DEBUG] Archivos obtenidos:', data);
-    console.log('📊 [DEBUG] Cantidad de archivos:', data.length);
     setArchivos(data);
   } catch (error) {
-    console.error('❌ [DEBUG] Error al cargar archivos:', error);
+    console.error('Error al cargar archivos:', error);
     setErrorArchivos('No se pudieron cargar los archivos adjuntos.');
   } finally {
     setLoadingArchivos(false);
@@ -75,6 +71,22 @@ if (solicitud && isOpen) {
     contrasena_acceso_2: solicitud.contrasena_acceso_2
   });
 }
+
+// Helper function para construir URLs correctas en desarrollo y producción
+const buildFileUrl = (fileUrl: string) => {
+  if (fileUrl.startsWith('http')) {
+    return fileUrl;
+  }
+  
+  // En producción, usar el dominio completo
+  if (process.env.NODE_ENV === 'production') {
+    const cleanUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+    return `https://bechapra.com.mx${cleanUrl}`;
+  }
+  
+  // En desarrollo, usar ruta relativa para el proxy
+  return fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+};
 
 const fetchComprobantes = useCallback(async () => {
 if (!solicitud) return;
@@ -122,12 +134,9 @@ setLoadingComprobantes(false);
 
 
 useEffect(() => {
-  console.log('🔄 [DEBUG] useEffect ejecutado - isOpen:', isOpen, 'solicitud:', solicitud?.id_solicitud);
   if (isOpen && solicitud) {
-    console.log('✅ [DEBUG] Condiciones cumplidas, llamando fetchArchivos...');
     fetchArchivos();
     if (solicitud.estado === 'pagada') {
-      console.log('💳 [DEBUG] Solicitud pagada, llamando fetchComprobantes...');
       fetchComprobantes();
     }
   }
@@ -552,33 +561,16 @@ return (
                 <FileText className="w-5 h-5 mr-2 text-blue-600" />
                 Archivos adjuntos de la solicitud
               </h4>
-              {(() => {
-                console.log('🖼️ [DEBUG] Renderizando sección de archivos');
-                console.log('📊 [DEBUG] loadingArchivos:', loadingArchivos);
-                console.log('❌ [DEBUG] errorArchivos:', errorArchivos);
-                console.log('📁 [DEBUG] archivos.length:', archivos.length);
-                console.log('📄 [DEBUG] archivos completos:', archivos);
-                
-                if (loadingArchivos) {
-                  return <div className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Cargando archivos...</div>;
-                } else if (errorArchivos) {
-                  return <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorArchivos}</div>;
-                } else if (archivos.length === 0) {
-                  return <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">No hay archivos adjuntos disponibles</div>;
-                } else {
-                  return (
+              {loadingArchivos ? (
+                <div className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Cargando archivos...</div>
+              ) : errorArchivos ? (
+                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorArchivos}</div>
+              ) : archivos.length === 0 ? (
+                <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">No hay archivos adjuntos disponibles</div>
+              ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {archivos.map((archivo) => {
-                    // Usar ruta relativa que funciona con el proxy de Next.js
-                    let url = '';
-                    if (archivo.archivo_url.startsWith('http')) {
-                      url = archivo.archivo_url;
-                    } else {
-                      // Usar ruta relativa para que funcione con el proxy
-                      url = archivo.archivo_url.startsWith('/') 
-                        ? archivo.archivo_url 
-                        : `/${archivo.archivo_url}`;
-                    }
+                    const url = buildFileUrl(archivo.archivo_url);
                     const fileName = url.split('/').pop() || '';
                     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
@@ -610,19 +602,10 @@ return (
                     );
                   })}
                 </div>
-                  );
-                }
-              })()}
+              )}
             </div>
-              // Usar ruta relativa para la factura
-              let facturaUrl = '';
-              if (solicitud.factura_url.startsWith('http')) {
-                facturaUrl = solicitud.factura_url;
-              } else {
-                facturaUrl = solicitud.factura_url.startsWith('/') 
-                  ? solicitud.factura_url 
-                  : `/${solicitud.factura_url}`;
-              }
+              // Usar helper para construir URL de factura
+              const facturaUrl = buildFileUrl(solicitud.factura_url);
               const fileName = facturaUrl.split('/').pop();
               const isImage = /\.(jpg|jpeg|png|gif)$/i.test(facturaUrl);
               const isPdf = /\.pdf$/i.test(facturaUrl);
@@ -695,14 +678,7 @@ return (
                     <Button
                       size="lg"
                       onClick={() => {
-                        let facturaUrl = '';
-                        if (solicitud.factura_url.startsWith('http')) {
-                          facturaUrl = solicitud.factura_url;
-                        } else {
-                          facturaUrl = solicitud.factura_url.startsWith('/') 
-                            ? solicitud.factura_url 
-                            : `/${solicitud.factura_url}`;
-                        }
+                        const facturaUrl = buildFileUrl(solicitud.factura_url);
                         window.open(facturaUrl, '_blank');
                       }}
                       className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
@@ -717,14 +693,7 @@ return (
                       size="lg"
                       onClick={() => {
                         if (!solicitud.soporte_url) return;
-                        let soporteUrl = '';
-                        if (solicitud.soporte_url.startsWith('http')) {
-                          soporteUrl = solicitud.soporte_url;
-                        } else {
-                          soporteUrl = solicitud.soporte_url.startsWith('/')
-                            ? solicitud.soporte_url
-                            : `/${solicitud.soporte_url}`;
-                        }
+                        const soporteUrl = buildFileUrl(solicitud.soporte_url);
                         window.open(soporteUrl, '_blank');
                       }}
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
@@ -759,15 +728,7 @@ return (
               ) : (
                 <div className="space-y-4">
                     {comprobantes.map((comprobante) => {
-                      // Usar ruta relativa del comprobante
-                      let comprobanteUrl = '';
-                      if (comprobante.ruta_archivo.startsWith('http')) {
-                        comprobanteUrl = comprobante.ruta_archivo;
-                      } else {
-                        comprobanteUrl = comprobante.ruta_archivo.startsWith('/')
-                          ? comprobante.ruta_archivo
-                          : `/${comprobante.ruta_archivo}`;
-                      }
+                      const comprobanteUrl = buildFileUrl(comprobante.ruta_archivo);
                       
                       // Determinar el tipo de archivo
                       const fileName = comprobante.nombre_archivo || comprobanteUrl.split('/').pop() || '';
