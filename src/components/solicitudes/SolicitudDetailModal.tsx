@@ -36,12 +36,10 @@ const fetchArchivos = useCallback(async () => {
   setLoadingArchivos(true);
   setErrorArchivos(null);
   try {
-    console.log('🔍 Cargando archivos para solicitud:', solicitud.id_solicitud);
     const data = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
-    console.log('📁 Archivos obtenidos:', data);
     setArchivos(data);
   } catch (error) {
-    console.error('❌ Error al cargar archivos:', error);
+    console.error('Error al cargar archivos:', error);
     setErrorArchivos('No se pudieron cargar los archivos adjuntos.');
   } finally {
     setLoadingArchivos(false);
@@ -556,21 +554,16 @@ return (
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {archivos.map((archivo) => {
-                    // Construir la URL completa
+                    // Usar ruta relativa que funciona con el proxy de Next.js
                     let url = '';
                     if (archivo.archivo_url.startsWith('http')) {
                       url = archivo.archivo_url;
                     } else {
-                      // Construir URL completa con el dominio
-                      const rutaArchivo = archivo.archivo_url.startsWith('/') 
+                      // Usar ruta relativa para que funcione con el proxy
+                      url = archivo.archivo_url.startsWith('/') 
                         ? archivo.archivo_url 
                         : `/${archivo.archivo_url}`;
-                      url = `https://bechapra.com.mx${rutaArchivo}`;
                     }
-                    console.log('🔗 URL construida para archivo:', { 
-                      original: archivo.archivo_url, 
-                      construida: url 
-                    });
                     const fileName = url.split('/').pop() || '';
                     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
@@ -604,15 +597,14 @@ return (
                 </div>
               )}
             </div>
-              // Construir la URL completa para la factura
+              // Usar ruta relativa para la factura
               let facturaUrl = '';
               if (solicitud.factura_url.startsWith('http')) {
                 facturaUrl = solicitud.factura_url;
               } else {
-                const rutaArchivo = solicitud.factura_url.startsWith('/') 
+                facturaUrl = solicitud.factura_url.startsWith('/') 
                   ? solicitud.factura_url 
                   : `/${solicitud.factura_url}`;
-                facturaUrl = `https://bechapra.com.mx${rutaArchivo}`;
               }
               const fileName = facturaUrl.split('/').pop();
               const isImage = /\.(jpg|jpeg|png|gif)$/i.test(facturaUrl);
@@ -690,10 +682,9 @@ return (
                         if (solicitud.factura_url.startsWith('http')) {
                           facturaUrl = solicitud.factura_url;
                         } else {
-                          const rutaArchivo = solicitud.factura_url.startsWith('/') 
+                          facturaUrl = solicitud.factura_url.startsWith('/') 
                             ? solicitud.factura_url 
                             : `/${solicitud.factura_url}`;
-                          facturaUrl = `https://bechapra.com.mx${rutaArchivo}`;
                         }
                         window.open(facturaUrl, '_blank');
                       }}
@@ -713,10 +704,9 @@ return (
                         if (solicitud.soporte_url.startsWith('http')) {
                           soporteUrl = solicitud.soporte_url;
                         } else {
-                          const rutaArchivo = solicitud.soporte_url.startsWith('/')
+                          soporteUrl = solicitud.soporte_url.startsWith('/')
                             ? solicitud.soporte_url
                             : `/${solicitud.soporte_url}`;
-                          soporteUrl = `https://bechapra.com.mx${rutaArchivo}`;
                         }
                         window.open(soporteUrl, '_blank');
                       }}
@@ -752,15 +742,14 @@ return (
               ) : (
                 <div className="space-y-4">
                     {comprobantes.map((comprobante) => {
-                      // Construir la URL completa del comprobante
+                      // Usar ruta relativa del comprobante
                       let comprobanteUrl = '';
                       if (comprobante.ruta_archivo.startsWith('http')) {
                         comprobanteUrl = comprobante.ruta_archivo;
                       } else {
-                        const rutaArchivo = comprobante.ruta_archivo.startsWith('/')
+                        comprobanteUrl = comprobante.ruta_archivo.startsWith('/')
                           ? comprobante.ruta_archivo
                           : `/${comprobante.ruta_archivo}`;
-                        comprobanteUrl = `https://bechapra.com.mx${rutaArchivo}`;
                       }
                       
                       // Determinar el tipo de archivo
