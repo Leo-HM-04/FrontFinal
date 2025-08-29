@@ -35,7 +35,7 @@ type Viatico = BaseViatico & {
 function EditarViaticoPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  const id = searchParams ? searchParams.get("id") : null;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [mensaje, setMensaje] = useState("");

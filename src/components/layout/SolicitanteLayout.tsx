@@ -297,14 +297,14 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
               {/* Navegación */}
               <nav className="flex-1 flex flex-col gap-1 px-4 py-4 overflow-y-auto bg-white rounded-xl mx-4 mb-4 shadow">
                 {navItems.map((item) => {
-                  const isActive = pathname === item.href || (item.href !== '/dashboard/solicitante/perfil' && pathname.startsWith(item.href));
+                  const isActive = pathname === item.href || (item.href !== '/dashboard/solicitante/perfil' && pathname && pathname.startsWith(item.href));
                   return (
                     <SidebarLink
                       key={item.href}
                       href={item.href}
                       label={item.label}
                       icon={item.icon}
-                      active={isActive}
+                      active={!!isActive}
                       onClick={closeMenu}
                     />
                   );

@@ -16,11 +16,11 @@ export default function UsuarioDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (params.id) {
-        fetchUsuario(params.id as string);
-        }
-    }, [params.id]);
+  useEffect(() => {
+    if (params && params.id) {
+      fetchUsuario(params.id as string);
+    }
+  }, [params]);
 
     const fetchUsuario = async (id: string) => {
         try {
@@ -98,7 +98,11 @@ export default function UsuarioDetailPage() {
                 <Button
                   className="bg-white hover:bg-gray-50 font-semibold px-6 py-3 rounded-xl"
                   style={{color: '#3B82F6'}}
-                  onClick={() => router.push(`/dashboard/admin/usuarios/${params.id}/edit`)}
+                  onClick={() => {
+                    if (params && params.id) {
+                      router.push(`/dashboard/admin/usuarios/${params.id}/edit`);
+                    }
+                  }}
                 >
                   Editar Usuario
                 </Button>

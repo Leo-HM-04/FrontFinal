@@ -137,7 +137,7 @@ function UsuariosContent() {
   } = usePagination({ data: filteredBySearch, initialItemsPerPage: 5 });
 
   const searchParams = useSearchParams();
-  const updatedFlag = searchParams.get('updated'); // también puedes usar 'created' o 'deleted' luego
+  const updatedFlag = searchParams ? searchParams.get('updated') : null; // también puedes usar 'created' o 'deleted' luego
 
   const fetchUsuarios = useCallback(async () => {
     try {

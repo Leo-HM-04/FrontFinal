@@ -18,10 +18,10 @@ export default function SolicitudDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (params.id) {
+    if (params && params.id) {
       fetchSolicitud(params.id as string);
     }
-  }, [params.id]);
+  }, [params]);
 
   const fetchSolicitud = async (id: string) => {
     try {

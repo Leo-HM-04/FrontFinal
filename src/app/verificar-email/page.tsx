@@ -1,14 +1,14 @@
 "use client";
-import { useEffect, useState, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-function VerificarEmailPageInner() {
+function VerificarEmailComponent() {
   const searchParams = useSearchParams();
   const [mensaje, setMensaje] = useState("Verificando...");
   const [estado, setEstado] = useState<"verificando"|"ok"|"error">("verificando");
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    const token = searchParams ? searchParams.get("token") : null;
     if (!token) {
       setMensaje("Token no proporcionado.");
       setEstado("error");
@@ -44,7 +44,7 @@ function VerificarEmailPageInner() {
 export default function VerificarEmailPage() {
   return (
     <Suspense fallback={<div>Cargando...</div>}>
-      <VerificarEmailPageInner />
+      <VerificarEmailComponent />
     </Suspense>
   );
 }

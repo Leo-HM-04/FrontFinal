@@ -186,7 +186,7 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
                 { href: '/dashboard/aprobador/graficas', label: 'Graficas', icon: FileText },
                 { href: '/dashboard/aprobador/perfil', label: 'Mi Perfil', icon: User },
               ].map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href);
+                const isActive = pathname === item.href || (pathname && pathname.startsWith(item.href));
                 return (
                   <Link
                     key={item.href}

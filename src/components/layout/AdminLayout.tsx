@@ -286,7 +286,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 {/* Navegación */}
                 <nav className="flex-1 flex flex-col gap-1 px-4 py-4 overflow-y-auto bg-white rounded-xl mx-4 mb-4 shadow">
                   {navItems.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(item.href);
+                    const isActive = pathname === item.href || (pathname && pathname.startsWith(item.href));
                     return (
                       <Link
                         key={item.href}

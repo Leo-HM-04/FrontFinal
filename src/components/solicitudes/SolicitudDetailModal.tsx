@@ -38,7 +38,7 @@ const fetchArchivos = useCallback(async () => {
   try {
     const data = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
     setArchivos(data);
-  } catch (error) {
+  } catch {
     setErrorArchivos('No se pudieron cargar los archivos adjuntos.');
   } finally {
     setLoadingArchivos(false);
@@ -306,44 +306,44 @@ return (
             
             return mostrarSeccion;
           })() && (
-            <div className="bg-gradient-to-r from-purple-50/40 to-indigo-50/40 rounded-md p-3 border border-purple-200/60 mb-3">
-              <h4 className="text-sm font-medium text-purple-800 mb-2 flex items-center">
-                <div className="w-2 h-2 bg-purple-600 rounded-full mr-2"></div>
+            <div className="bg-gradient-to-r from-blue-50/40 to-indigo-50/40 rounded-md p-3 border border-blue-200/60 mb-3">
+              <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
+                <div className="w-2 h-2 bg-blue-600 rounded-full mr-2"></div>
                 Información de acceso - Tarjeta Institucional
               </h4>
               <div className="grid grid-cols-1 gap-3">
                 {solicitud.link_pago && (
-                  <div className="bg-white/80 p-2 rounded border border-purple-100">
-                    <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Link de pago</span>
-                    <p className="text-purple-900 font-medium break-all">{solicitud.link_pago}</p>
+                  <div className="bg-white/80 p-2 rounded border border-blue-100">
+                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Link de pago</span>
+                    <p className="text-blue-900 font-medium break-all">{solicitud.link_pago}</p>
                   </div>
                 )}
                 
                 <div className="grid grid-cols-2 gap-3">
                   {solicitud.usuario_acceso && (
-                    <div className="bg-white/80 p-2 rounded border border-purple-100">
-                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Usuario de acceso</span>
-                      <p className="text-purple-900 font-medium font-mono">{solicitud.usuario_acceso}</p>
+                    <div className="bg-white/80 p-2 rounded border border-blue-100">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Usuario de acceso</span>
+                      <p className="text-blue-900 font-medium font-mono">{solicitud.usuario_acceso}</p>
                     </div>
                   )}
                   
                   {solicitud.contrasena_acceso && (
-                    <div className="bg-white/80 p-2 rounded border border-purple-100">
-                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Contraseña de acceso</span>
+                    <div className="bg-white/80 p-2 rounded border border-blue-100">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Contraseña de acceso</span>
                       <div className="flex items-center gap-2">
-                        <p className="text-purple-900 font-medium font-mono flex-1">
+                        <p className="text-blue-900 font-medium font-mono flex-1">
                           {showPassword1 ? solicitud.contrasena_acceso : '••••••••'}
                         </p>
                         <button
                           onClick={() => setShowPassword1(!showPassword1)}
-                          className="text-purple-600 hover:text-purple-800 transition-colors p-1"
+                          className="text-blue-600 hover:text-blue-800 transition-colors p-1"
                           title={showPassword1 ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                         >
                           {showPassword1 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
                       {!showPassword1 && (
-                        <span className="text-xs text-purple-600 italic">Haz clic en el ojo para ver la contraseña</span>
+                        <span className="text-xs text-blue-600 italic">Haz clic en el ojo para ver la contraseña</span>
                       )}
                     </div>
                   )}
@@ -405,34 +405,34 @@ return (
 
               {/* Información de acceso para Tarjeta Institucional - Segunda forma */}
               {(solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' || solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona') && (solicitud.link_pago_2 || solicitud.usuario_acceso_2 || solicitud.contrasena_acceso_2) && (
-                <div className="mt-3 bg-gradient-to-r from-purple-50/60 to-indigo-50/60 rounded p-2 border border-purple-200/40">
-                  <span className="text-xs font-medium text-purple-800 mb-2 block">Información de acceso</span>
-                  
+                <div className="mt-3 bg-gradient-to-r from-blue-50/60 to-indigo-50/60 rounded p-2 border border-blue-200/40">
+                  <span className="text-xs font-medium text-blue-800 mb-2 block">Información de acceso</span>
+
                   {solicitud.link_pago_2 && (
-                    <div className="bg-white/90 p-2 rounded border border-purple-100 mb-2">
-                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Link de pago</span>
-                      <p className="text-purple-900 font-medium break-all text-sm">{solicitud.link_pago_2}</p>
+                    <div className="bg-white/90 p-2 rounded border border-blue-100 mb-2">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Link de pago</span>
+                      <p className="text-blue-900 font-medium break-all text-sm">{solicitud.link_pago_2}</p>
                     </div>
                   )}
                   
                   <div className="grid grid-cols-2 gap-2">
                     {solicitud.usuario_acceso_2 && (
-                      <div className="bg-white/90 p-2 rounded border border-purple-100">
-                        <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Usuario</span>
-                        <p className="text-purple-900 font-medium font-mono text-sm">{solicitud.usuario_acceso_2}</p>
+                      <div className="bg-white/90 p-2 rounded border border-blue-100">
+                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Usuario</span>
+                        <p className="text-blue-900 font-medium font-mono text-sm">{solicitud.usuario_acceso_2}</p>
                       </div>
                     )}
                     
                     {solicitud.contrasena_acceso_2 && (
-                      <div className="bg-white/90 p-2 rounded border border-purple-100">
-                        <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Contraseña</span>
+                      <div className="bg-white/90 p-2 rounded border border-blue-100">
+                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Contraseña</span>
                         <div className="flex items-center gap-2">
-                          <p className="text-purple-900 font-medium font-mono text-sm flex-1">
+                          <p className="text-blue-900 font-medium font-mono text-sm flex-1">
                             {showPassword2 ? solicitud.contrasena_acceso_2 : '••••••••'}
                           </p>
                           <button
                             onClick={() => setShowPassword2(!showPassword2)}
-                            className="text-purple-600 hover:text-purple-800 transition-colors p-1"
+                            className="text-blue-600 hover:text-blue-800 transition-colors p-1"
                             title={showPassword2 ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                           >
                             {showPassword2 ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
@@ -528,10 +528,10 @@ return (
             </Card>
             
             {/* Documentos - 2 columnas */}
-            <Card className="lg:col-span-2 p-6 bg-gradient-to-br from-white to-purple-50/30 border border-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+            <Card className="lg:col-span-2 p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
               <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
-                <div className="p-2 bg-purple-100 rounded-xl mr-3">
-                  <ExternalLink className="w-6 h-6 text-purple-700" />
+                <div className="p-2 bg-blue-100 rounded-xl mr-3">
+                  <ExternalLink className="w-6 h-6 text-blue-700" />
                 </div>
                 Documentos Adjuntos
               </h3>
@@ -540,12 +540,12 @@ return (
             {solicitud.factura_url ? (() => {
             {/* Archivos de solicitud_archivos */}
             <div className="mt-6">
-              <h4 className="text-md font-semibold text-purple-800 mb-3 flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-purple-600" />
+              <h4 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
+                <FileText className="w-5 h-5 mr-2 text-blue-600" />
                 Archivos adjuntos de la solicitud
               </h4>
               {loadingArchivos ? (
-                <div className="text-purple-600 text-sm bg-purple-50 p-3 rounded-lg">Cargando archivos...</div>
+                <div className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Cargando archivos...</div>
               ) : errorArchivos ? (
                 <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorArchivos}</div>
               ) : archivos.length === 0 ? (
@@ -558,26 +558,26 @@ return (
                     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
                     return (
-                      <div key={archivo.id} className="bg-purple-50/50 p-4 rounded-lg border border-purple-200/50 shadow-sm">
+                      <div key={archivo.id} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs text-purple-800 font-semibold">{archivo.tipo || 'Archivo'}</span>
-                          <Button size="sm" onClick={() => window.open(url, '_blank')} className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl rounded-xl px-4 py-2 ml-3">Ver completo</Button>
+                          <span className="text-xs text-blue-800 font-semibold">{archivo.tipo || 'Archivo'}</span>
+                          <Button size="sm" onClick={() => window.open(url, '_blank')} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl rounded-xl px-4 py-2 ml-3">Ver completo</Button>
                         </div>
                         {isImage ? (
-                          <div className="relative w-full h-32 group overflow-hidden rounded border border-purple-200 shadow-sm bg-white/90">
+                          <div className="relative w-full h-32 group overflow-hidden rounded border border-blue-200 shadow-sm bg-white/90">
                             <Image src={url} alt={fileName} fill className="object-contain bg-white/80 transition-all duration-300 group-hover:scale-[1.02]" quality={80} />
                           </div>
                         ) : isPdf ? (
-                          <div className="w-full rounded border border-purple-200 overflow-hidden shadow-sm bg-white">
+                          <div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
                             <iframe src={url} title={fileName} className="w-full" style={{height: '100px'}} />
-                            <div className="bg-purple-50/80 p-2 text-xs text-center text-purple-700">Vista previa limitada • Haga clic en "Ver completo" para el PDF completo</div>
+                            <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-600">Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo</div>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-purple-200">
-                            <FileText className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                          <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+                            <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
                             <div className="flex-1">
-                              <p className="text-purple-800 font-medium text-sm">Archivo: {fileName}</p>
-                              <p className="text-xs text-gray-600">Haga clic en "Ver completo" para abrir el archivo</p>
+                              <p className="text-blue-600 font-medium text-sm">Archivo: {fileName}</p>
+                              <p className="text-xs text-gray-600">Haga clic en &quot;Ver completo&quot; para abrir el archivo</p>
                             </div>
                           </div>
                         )}
@@ -764,7 +764,7 @@ return (
                                   console.error('URL del comprobante no disponible');
                                 }
                               }}
-                              className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3"
+                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3"
                               disabled={!comprobanteUrl}
                             >
                               Ver completo

@@ -31,10 +31,10 @@ export default function EditUsuarioPage() {
     const isEmailValid = /@(bechapra\.com|bechapra\.com\.mx)$/i.test(formData.email.trim());
 
     useEffect(() => {
-        if (params.id) {
+        if (params && params.id) {
             fetchUsuario(params.id as string);
         }
-    }, [params.id]);
+    }, [params]);
 
     const fetchUsuario = async (id: string) => {
         try {
