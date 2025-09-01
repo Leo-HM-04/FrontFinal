@@ -1,59 +1,48 @@
 'use client';
 
-import { useState, useEffect, useCallback, useReducer } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { SolicitudesService } from '@/services/solicitudes.service';
-import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
+import { useState, useReducer, useEffect, useMemo } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import DatePicker from 'react-datepicker';
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
+import { Button } from '@/components/ui/Button';
+import { FileText, Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle, X, Trash2 } from 'lucide-react';
+import { SolicitudesService } from '@/services/solicitudes.service';
+import { SolicitudArchivosService } from '@/services/solicitudArchivos.service';
+import { toast } from 'react-hot-toast';
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
 import Image from 'next/image';
-import { 
-  FileText, 
-  Upload, 
-  Save, 
-  Calendar, 
-  Building2, 
-  User, 
-  CreditCard, 
-  CheckCircle, 
-  X,
-  ArrowLeft,
-  AlertTriangle
-} from 'lucide-react';
+import { formatDateForAPI } from '@/utils/dateUtils';
 
-// Tipos expandidos para incluir todos los campos del formulario de crear
-interface FormState {
-  // Campos básicos
+type FormState = {
   departamento: string;
   monto: string;
-  moneda: string;
-  tipo_moneda: 'MXN' | 'USD';
-  concepto: string;
-  tipo_concepto: 'producto' | 'servicio' | 'otro';
-  fecha_limite_pago: Date | null;
-  nombre_persona: string;
-  
-  // Campos del formulario de crear que no estaban en editar
-  referencia: string;
-  
-  // Información bancaria principal
-  tipo_pago: 'cuenta' | 'tarjeta_institucional';
-  tipo_cuenta_destino: 'CLABE' | 'Tarjeta';
-  banco_destino: string;
+  tipo_moneda: string;
   cuenta_destino: string;
+  concepto: string;
+  tipo_concepto: string;
+  referencia: string;
+  tipo_pago: string;
+  tipo_pago_descripcion: string;
+  empresa_a_pagar: string;
+  nombre_persona: string;
+  fecha_limite_pago: string;
+  factura_file: File | null;            // NUEVA factura (opcional en edición)
+  archivos_adicionales: File[];         // NUEVOS archivos
+  tipos_archivos_adicionales: string[]; // Tipos para nuevos archivos
+  tipo_cuenta_destino: string;
   tipo_tarjeta: string;
+  banco_destino: string;
   cuenta: string;
-  
-  // Campos específicos de tarjeta institucional
+  // Tarjeta institucional
   link_pago: string;
   usuario_acceso: string;
   contrasena_acceso: string;
-  
   // Segunda forma de pago
   tiene_segunda_forma_pago: boolean;
-  tipo_cuenta_destino_2: 'CLABE' | 'Tarjeta';
+  tipo_cuenta_destino_2: string;
   banco_destino_2: string;
   cuenta_destino_2: string;
   tipo_tarjeta_2: string;
@@ -61,86 +50,32 @@ interface FormState {
   link_pago_2: string;
   usuario_acceso_2: string;
   contrasena_acceso_2: string;
-  
-  // Archivos
-  factura_file: File | null;
-  archivos_adicionales: File[];
-  tipos_archivos_adicionales: string[];
-  
-  // Observaciones
-  observaciones: string;
-}
+};
 
-// Tipos para las acciones del reducer
-type FormAction = 
-  | { type: 'SET_FIELD'; field: keyof FormState; value: string | number | boolean | Date | File | null }
-  | { type: 'SET_MULTIPLE_FIELDS'; fields: Partial<FormState> }
-  | { type: 'RESET_SEGUNDA_FORMA_PAGO' }
-  | { type: 'ADD_ARCHIVO_ADICIONAL'; file: File }
-  | { type: 'REMOVE_ARCHIVO_ADICIONAL'; index: number }
-  | { type: 'UPDATE_TIPO_ARCHIVO_ADICIONAL'; index: number; tipo: string };
+type FormAction =
+  | { type: 'SET_FIELD'; field: keyof FormState; value: string | File | null | boolean | File[] | string[] }
+  | { type: 'ADD_ARCHIVO_ADICIONAL'; archivo: File; tipo: string }
+  | { type: 'REMOVE_ARCHIVO_ADICIONAL'; index: number };
 
-// Reducer para manejar el estado del formulario
-function formReducer(state: FormState, action: FormAction): FormState {
-  switch (action.type) {
-    case 'SET_FIELD':
-      return { ...state, [action.field]: action.value };
-    case 'SET_MULTIPLE_FIELDS':
-      return { ...state, ...action.fields };
-    case 'RESET_SEGUNDA_FORMA_PAGO':
-      return {
-        ...state,
-        tiene_segunda_forma_pago: false,
-        tipo_cuenta_destino_2: 'CLABE',
-        banco_destino_2: '',
-        cuenta_destino_2: '',
-        tipo_tarjeta_2: '',
-        cuenta_2: '',
-        link_pago_2: '',
-        usuario_acceso_2: '',
-        contrasena_acceso_2: ''
-      };
-    case 'ADD_ARCHIVO_ADICIONAL':
-      return {
-        ...state,
-        archivos_adicionales: [...state.archivos_adicionales, action.file],
-        tipos_archivos_adicionales: [...state.tipos_archivos_adicionales, 'documento']
-      };
-    case 'REMOVE_ARCHIVO_ADICIONAL':
-      const newArchivos = state.archivos_adicionales.filter((_, index) => index !== action.index);
-      const newTipos = state.tipos_archivos_adicionales.filter((_, index) => index !== action.index);
-      return {
-        ...state,
-        archivos_adicionales: newArchivos,
-        tipos_archivos_adicionales: newTipos
-      };
-    case 'UPDATE_TIPO_ARCHIVO_ADICIONAL':
-      const updatedTipos = [...state.tipos_archivos_adicionales];
-      updatedTipos[action.index] = action.tipo;
-      return {
-        ...state,
-        tipos_archivos_adicionales: updatedTipos
-      };
-    default:
-      return state;
-  }
-}
-
-const initialFormState: FormState = {
+const initialState: FormState = {
   departamento: '',
   monto: '',
-  moneda: '',
   tipo_moneda: 'MXN',
-  concepto: '',
-  tipo_concepto: 'producto',
-  fecha_limite_pago: null,
-  nombre_persona: '',
-  referencia: '',
-  tipo_pago: 'cuenta',
-  tipo_cuenta_destino: 'CLABE',
-  banco_destino: '',
   cuenta_destino: '',
+  concepto: '',
+  tipo_concepto: 'pago_factura',
+  referencia: '',
+  tipo_pago: 'transferencia',
+  tipo_pago_descripcion: '',
+  empresa_a_pagar: '',
+  nombre_persona: '',
+  fecha_limite_pago: '',
+  factura_file: null,
+  archivos_adicionales: [],
+  tipos_archivos_adicionales: [],
+  tipo_cuenta_destino: 'CLABE',
   tipo_tarjeta: '',
+  banco_destino: '',
   cuenta: '',
   link_pago: '',
   usuario_acceso: '',
@@ -153,194 +88,282 @@ const initialFormState: FormState = {
   cuenta_2: '',
   link_pago_2: '',
   usuario_acceso_2: '',
-  contrasena_acceso_2: '',
-  factura_file: null,
-  archivos_adicionales: [],
-  tipos_archivos_adicionales: [],
-  observaciones: ''
+  contrasena_acceso_2: ''
 };
 
-interface ArchivoExistente {
-  id: number;
-  archivo_url: string;
-  tipo: string;
-  nombre_archivo?: string;
-}
+const formReducer = (state: FormState, action: FormAction): FormState => {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return { ...state, [action.field]: action.value as any };
+    case 'ADD_ARCHIVO_ADICIONAL':
+      return {
+        ...state,
+        archivos_adicionales: [...state.archivos_adicionales, action.archivo],
+        tipos_archivos_adicionales: [...state.tipos_archivos_adicionales, action.tipo]
+      };
+    case 'REMOVE_ARCHIVO_ADICIONAL':
+      return {
+        ...state,
+        archivos_adicionales: state.archivos_adicionales.filter((_, i) => i !== action.index),
+        tipos_archivos_adicionales: state.tipos_archivos_adicionales.filter((_, i) => i !== action.index)
+      };
+    default:
+      return state;
+  }
+};
 
-// Tipos para errores de validación
-interface FormErrors {
-  factura_file?: string;
-  [key: string]: string | undefined;
-}
+type ArchivoExistente = {
+  id: number;
+  nombre: string;
+  tipo: string;      // 'factura' | 'documento' | 'comprobante' | etc.
+  size?: number;
+  mime?: string;
+  url?: string;
+};
 
 export default function EditarSolicitudPage() {
-  const params = useParams();
   const router = useRouter();
-  const [formData, dispatch] = useReducer(formReducer, initialFormState);
-  const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [cuentaValida, setCuentaValida] = useState<boolean | null>(null);
-  const [checkingCuenta, setCheckingCuenta] = useState(false);
-  const [facturaUrl, setFacturaUrl] = useState<string | null>(null);
-  const [facturaLink, setFacturaLink] = useState<string | null>(null);
-  const [archivosExistentes, setArchivosExistentes] = useState<ArchivoExistente[]>([]);
+  const params = useParams<{ id: string }>();
+  const solicitudId = useMemo(() => Number(params?.id), [params]);
 
-  // Opciones para departamentos y bancos
-  const departamentosOptions = [
-    'Tecnologías de la Información',
-    'Recursos Humanos',
-    'Contabilidad',
-    'Operaciones',
-    'Ventas',
-    'Marketing',
-    'Administración',
-    'Logística',
-    'Compras',
-    'Mantenimiento'
-  ];
+  const [loading, setLoading] = useState(false);
+  const [loadingInicial, setLoadingInicial] = useState(true);
+
+  const [formData, dispatch] = useReducer(formReducer, initialState);
+  const [fechaLimitePago, setFechaLimitePago] = useState<Date | null>(null);
+
+  const [cuentaValida, setCuentaValida] = useState<null | boolean>(null);
+  const [checkingCuenta, setCheckingCuenta] = useState(false);
+  const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
+
+  // Archivos existentes en el servidor
+  const [facturaExistente, setFacturaExistente] = useState<ArchivoExistente | null>(null);
+  const [archivosExistentes, setArchivosExistentes] = useState<ArchivoExistente[]>([]);
+  const [archivosAEliminar, setArchivosAEliminar] = useState<number[]>([]);
+
+  // Limpiar campos según tipo_concepto
+  useEffect(() => {
+    if (formData.tipo_concepto !== 'otro') {
+      dispatch({ type: 'SET_FIELD', field: 'concepto', value: '' });
+    }
+    if (formData.tipo_concepto !== 'referencia') {
+      dispatch({ type: 'SET_FIELD', field: 'referencia', value: '' });
+    }
+  }, [formData.tipo_concepto]);
+
+  // Configuración dinámica para cuenta destino
+  let cuentaConfig;
+  if (formData.tipo_cuenta_destino === 'Número de Tarjeta') {
+    cuentaConfig = { placeholder: 'Número de tarjeta', errorMsg: 'Ingresa un número de tarjeta válido.', required: true };
+  } else if (formData.tipo_cuenta_destino === 'Tarjeta Institucional') {
+    cuentaConfig = { placeholder: 'Opcional', errorMsg: '', required: false };
+  } else {
+    cuentaConfig = { placeholder: 'Número de cuenta CLABE', errorMsg: 'Ingresa un número de cuenta CLABE válido.', required: true };
+  }
 
   const bancoOptions = [
-    'BBVA México',
-    'Banamex',
-    'Santander',
-    'Banorte',
-    'HSBC',
-    'Scotiabank',
-    'Inbursa',
-    'Azteca',
-    'Afirme',
-    'BanBajío',
-    'Banco del Bajío',
-    'Banco Multiva',
-    'Banco Autofin',
-    'Banco Compartamos',
-    'Hey Banco',
-    'Nu México',
-    'Klar',
-    'Otro'
+    "ACTINVER","AFIRME","albo","ARCUS FI","ASP INTEGRA OPC","AUTOFIN","AZTECA","BaBien","BAJIO","BANAMEX","BANCO COVALTO","BANCOMEXT","BANCOPPEL","BANCO S3","BANCREA","BANJERCITO","BANKAOOL","BANK OF AMERICA","BANK OF CHINA","BANOBRAS","BANORTE","BANREGIO","BANSI","BANXICO","BARCLAYS","BBASE","BBVA MEXICO","BMONEX","CAJA POP MEXICA","CAJA TELEFONIST","CASHI CUENTA","CB INTERCAM","CIBANCO","CI BOLSA","CITI MEXICO","CoDi Valida","COMPARTAMOS","CONSUBANCO","CREDICAPITAL","CREDICLUB","CRISTOBAL COLON","Cuenca","Dep y Pag Dig","DONDE","FINAMEX","FINCOMUN","FINCO PAY","FOMPED","FONDEADORA","FONDO (FIRA)","GBM","HEY BANCO","HIPOTECARIA FED","HSBC","ICBC","INBURSA","INDEVAL","INMOBILIARIO","INTERCAM BANCO","INVEX","JP MORGAN","KLAR","KUSPIT","LIBERTAD","MASARI","Mercado Pago W","MexPago","MIFEL","MIZUHO BANK","MONEXCB","MUFG","MULTIVA BANCO","NAFIN","NU MEXICO","NVIO","PAGATODO","Peibo","PROFUTURO","SABADELL","SANTANDER","SCOTIABANK","SHINHAN","SPIN BY OXXO","STP","TESORED","TRANSFER","UALA","UNAGRA","VALMEX","VALUE","VECTOR","VE POR MAS","VOLKSWAGEN"
   ];
 
-  // Cargar datos de la solicitud
-  useEffect(() => {
-    const cargarSolicitud = async () => {
-      if (!params?.id) return;
-      
-      try {
-        setLoadingData(true);
-        const solicitudData = await SolicitudesService.getById(Number(params.id));
-        
-        // Mapear datos de la respuesta al estado del formulario (solo campos existentes)
-        dispatch({ 
-          type: 'SET_MULTIPLE_FIELDS', 
-          fields: {
-            departamento: solicitudData.departamento || '',
-            monto: solicitudData.monto?.toString() || '',
-            concepto: solicitudData.concepto || '',
-            fecha_limite_pago: solicitudData.fecha_limite_pago ? new Date(solicitudData.fecha_limite_pago) : null,
-            nombre_persona: solicitudData.nombre_persona || '',
-            tipo_cuenta_destino: (solicitudData.tipo_cuenta_destino as 'CLABE' | 'Tarjeta') || 'CLABE',
-            banco_destino: solicitudData.banco_destino || '',
-            cuenta_destino: solicitudData.cuenta_destino || '',
-            tipo_tarjeta: solicitudData.tipo_tarjeta || '',
-            cuenta: solicitudData.cuenta || '',
-            tiene_segunda_forma_pago: Boolean(solicitudData.cuenta_destino_2),
-            tipo_cuenta_destino_2: (solicitudData.tipo_cuenta_destino_2 as 'CLABE' | 'Tarjeta') || 'CLABE',
-            banco_destino_2: solicitudData.banco_destino_2 || '',
-            cuenta_destino_2: solicitudData.cuenta_destino_2 || '',
-            tipo_tarjeta_2: solicitudData.tipo_tarjeta_2 || '',
-            cuenta_2: solicitudData.cuenta_2 || ''
-          }
-        });
+  const departamentoOptions = [
+    { value: 'contabilidad', label: 'Contabilidad' },
+    { value: 'facturacion', label: 'Facturación' },
+    { value: 'cobranza', label: 'Cobranza' },
+    { value: 'vinculacion', label: 'Vinculación' },
+    { value: 'administracion', label: 'Administración' },
+    { value: 'ti', label: 'TI' },
+    { value: 'automatizaciones', label: 'Automatizaciones' },
+    { value: 'comercial', label: 'Comercial' },
+    { value: 'atencion a clientes', label: 'Atención a Clientes' },
+    { value: 'tesoreria', label: 'Tesorería' },
+    { value: 'nomina', label: 'Nómina' },
+    { value: 'atraccion de talento', label: 'Atracción de Talento' },
+    { value: 'direccion general', label: 'Dirección General' }
+  ];
 
-        // Configurar URL de factura
-        if (solicitudData.factura_url) {
-          setFacturaUrl(solicitudData.factura_url);
-          setFacturaLink(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/uploads/${solicitudData.factura_url}`);
+  const tipoPagoOptions = [
+    { value: 'proveedores', label: 'Proveedores' },
+    { value: 'poliza_seguro', label: 'Poliza - Seguro' },
+    { value: 'Dirección General', label: 'Dirección General' },
+    { value: 'Donativos', label: 'Donativos' },
+    { value: 'Operativos', label: 'Operativos' },
+    { value: 'Fiscales legales y corporativos', label: 'Fiscales legales y corporativos' }
+  ];
+
+  // ---------- CARGA INICIAL ----------
+  useEffect(() => {
+    const cargar = async () => {
+      if (!solicitudId || Number.isNaN(solicitudId)) {
+        toast.error('ID de solicitud inválido.');
+        router.push('/dashboard/solicitante/mis-solicitudes');
+        return;
+      }
+      try {
+        setLoadingInicial(true);
+
+        // 1) Trae la solicitud (ajusta el método si tu service usa otro nombre)
+        // @ts-ignore
+        const solicitudData = await (SolicitudesService.getById?.(solicitudId) ?? (SolicitudesService as any).get?.(solicitudId));
+        if (!solicitudData) throw new Error('No se encontró la solicitud.');
+
+        // Usar directamente la respuesta
+        const s: any = solicitudData;
+
+        // Derivar tipo_concepto si no viene explícito
+        let tipo_concepto = s.tipo_concepto || 'pago_factura';
+        let referencia = '';
+        let concepto = s.concepto || '';
+        if (!s.tipo_concepto && typeof s.concepto === 'string') {
+          if (/^Referencia\s*:/.test(s.concepto)) {
+            tipo_concepto = 'referencia';
+            referencia = s.concepto.split(':')[1]?.trim() ?? '';
+          } else if (s.concepto?.toLowerCase().includes('donativo')) {
+            tipo_concepto = 'donativo';
+          } else if (s.concepto?.toLowerCase().includes('pago de factura')) {
+            tipo_concepto = 'pago_factura';
+          } else {
+            tipo_concepto = 'pago_terceros'; // fallback
+          }
         }
-      } catch (error) {
-        console.error('Error al cargar solicitud:', error);
+
+        // Fecha
+        const fechaStr: string = s.fecha_limite_pago || s.fecha || '';
+        const fecha = fechaStr ? new Date(fechaStr) : null;
+
+        // Poblar estado
+        dispatch({ type: 'SET_FIELD', field: 'departamento', value: s.departamento ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'monto', value: String(s.monto ?? '') });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_moneda', value: s.tipo_moneda ?? 'MXN' });
+        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value: s.cuenta_destino ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'concepto', value: concepto ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_concepto', value: tipo_concepto });
+        dispatch({ type: 'SET_FIELD', field: 'referencia', value: referencia });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_pago', value: s.tipo_pago ?? 'transferencia' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_pago_descripcion', value: s.tipo_pago_descripcion ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'empresa_a_pagar', value: s.empresa_a_pagar ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'nombre_persona', value: s.nombre_persona ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: fecha ? formatDateForAPI(fecha) : '' });
+
+        setFechaLimitePago(fecha);
+
+        // Bancarios
+        dispatch({ type: 'SET_FIELD', field: 'tipo_cuenta_destino', value: s.tipo_cuenta_destino ?? 'CLABE' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta', value: s.tipo_tarjeta ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'banco_destino', value: s.banco_destino ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'cuenta', value: s.cuenta ?? '' });
+
+        // Tarjeta institucional
+        dispatch({ type: 'SET_FIELD', field: 'link_pago', value: s.link_pago ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'usuario_acceso', value: s.usuario_acceso ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'contrasena_acceso', value: s.contrasena_acceso ?? '' });
+
+        // Segunda forma de pago
+        const tiene2 = Boolean(s.tiene_segunda_forma_pago);
+        dispatch({ type: 'SET_FIELD', field: 'tiene_segunda_forma_pago', value: tiene2 });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_cuenta_destino_2', value: s.tipo_cuenta_destino_2 ?? 'CLABE' });
+        dispatch({ type: 'SET_FIELD', field: 'banco_destino_2', value: s.banco_destino_2 ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino_2', value: s.cuenta_destino_2 ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta_2', value: s.tipo_tarjeta_2 ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'cuenta_2', value: s.cuenta_2 ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'link_pago_2', value: s.link_pago_2 ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'usuario_acceso_2', value: s.usuario_acceso_2 ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'contrasena_acceso_2', value: s.contrasena_acceso_2 ?? '' });
+
+        // Validación inicial de cuenta (si viene poblada)
+        setCuentaValida(!!(s.cuenta_destino && String(s.cuenta_destino).length >= 8));
+
+        // 2) Archivos existentes (ajusta el método si difiere)
+        try {
+          // @ts-ignore
+          const archivosResp = await (SolicitudArchivosService.getBySolicitudId?.(solicitudId) ??
+                                      (SolicitudArchivosService as any).listar?.(solicitudId));
+          const lista = Array.isArray(archivosResp) ? archivosResp : (archivosResp?.data ?? []);
+          // Separa factura de otros
+          const factura = lista.find((a: any) => a.tipo === 'factura') ?? null;
+          const otros = lista.filter((a: any) => a.tipo !== 'factura');
+          setFacturaExistente(factura ? {
+            id: Number(factura.id ?? factura.id_archivo ?? 0),
+            nombre: factura.nombre ?? factura.filename ?? 'factura',
+            tipo: 'factura',
+            size: factura.size,
+            mime: factura.mime,
+            url: factura.url
+          } : null);
+          setArchivosExistentes(
+            (otros || []).map((a: any) => ({
+              id: Number(a.id ?? a.id_archivo ?? 0),
+              nombre: a.nombre ?? a.filename ?? 'archivo',
+              tipo: a.tipo ?? 'documento',
+              size: a.size,
+              mime: a.mime,
+              url: a.url
+            }))
+          );
+        } catch {
+          // silencioso, no rompe la vista si falla listar
+        }
+
+      } catch (e: any) {
+        console.error(e);
+        toast.error(e?.message || 'No se pudo cargar la solicitud.');
+        router.push('/dashboard/solicitante/mis-solicitudes');
       } finally {
-        setLoadingData(false);
+        setLoadingInicial(false);
       }
     };
+    cargar();
+  }, [solicitudId, router]);
 
-    if (params?.id) {
-      cargarSolicitud();
-    }
-  }, [params?.id]);
-
-  // Validaciones
-  const validateCuenta = useCallback(async (cuenta: string, tipo: string) => {
-    if (!cuenta) {
-      setCuentaValida(null);
-      return;
-    }
-
-    setCheckingCuenta(true);
-    
-    try {
-      // Validación básica de formato
-      if (tipo === 'CLABE') {
-        if (cuenta.length === 18 && /^\d+$/.test(cuenta)) {
-          setCuentaValida(true);
-        } else {
-          setCuentaValida(false);
-        }
-      } else if (tipo === 'Tarjeta') {
-        if (cuenta.length >= 13 && cuenta.length <= 19 && /^\d+$/.test(cuenta)) {
-          setCuentaValida(true);
-        } else {
-          setCuentaValida(false);
-        }
-      }
-    } catch {
-      setCuentaValida(false);
-    } finally {
-      setCheckingCuenta(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (formData.cuenta_destino) {
-      validateCuenta(formData.cuenta_destino, formData.tipo_cuenta_destino);
-    }
-  }, [formData.cuenta_destino, formData.tipo_cuenta_destino, validateCuenta]);
-
-  // Manejadores de eventos
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     dispatch({ type: 'SET_FIELD', field: name as keyof FormState, value });
+    if (!value) setErrors((p) => ({ ...p, [name]: 'Este campo es obligatorio' }));
+    else setErrors((p) => ({ ...p, [name]: undefined }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validar tamaño (5MB max)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, [field]: 'El archivo debe ser menor a 5MB' });
-        return;
-      }
-      
-      // Validar tipo
-      const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'image/jpeg', 'image/jpg', 'image/png'];
-      if (!allowedTypes.includes(file.type)) {
-        setErrors({ ...errors, [field]: 'Tipo de archivo no permitido' });
-        return;
-      }
+  const validateFile = (file: File) => {
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'image/jpeg',
+      'image/png',
+      'image/jpg'
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Tipo de archivo no permitido. Solo PDF, Excel, JPG y PNG.');
+      return false;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('El archivo es demasiado grande. Máx. 5MB.');
+      return false;
+    }
+    return true;
+  };
 
-      dispatch({ type: 'SET_FIELD', field: field as keyof FormState, value: file });
-      setErrors({ ...errors, [field]: '' });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof FormState) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      if (!validateFile(file)) {
+        setErrors((prev) => ({ ...prev, [fieldName]: 'Archivo no válido' }));
+        return;
+      }
+      dispatch({ type: 'SET_FIELD', field: fieldName, value: file });
+      setErrors((prev) => ({ ...prev, [fieldName]: undefined }));
+    } else {
+      // En edición NO es obligatorio tener factura_file si ya existe una
+      if (!facturaExistente) setErrors((prev) => ({ ...prev, [fieldName]: 'Este campo es obligatorio' }));
     }
   };
 
   const handleArchivoAdicionalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     files.forEach(file => {
-      if (file.size <= 5 * 1024 * 1024) {
-        dispatch({ type: 'ADD_ARCHIVO_ADICIONAL', file });
+      if (validateFile(file)) {
+        dispatch({ type: 'ADD_ARCHIVO_ADICIONAL', archivo: file, tipo: 'documento' });
       }
     });
+    e.target.value = '';
   };
 
   const removeArchivoAdicional = (index: number) => {
@@ -348,61 +371,210 @@ export default function EditarSolicitudPage() {
   };
 
   const updateTipoArchivoAdicional = (index: number, tipo: string) => {
-    dispatch({ type: 'UPDATE_TIPO_ARCHIVO_ADICIONAL', index, tipo });
+    const nuevos_tipos = [...formData.tipos_archivos_adicionales];
+    nuevos_tipos[index] = tipo;
+    dispatch({ type: 'SET_FIELD', field: 'tipos_archivos_adicionales', value: nuevos_tipos });
   };
 
-  const removeArchivoExistente = async (archivoId: number) => {
+  const toggleEliminarExistente = (archivoId: number) => {
+    setArchivosAEliminar((prev) =>
+      prev.includes(archivoId) ? prev.filter(id => id !== archivoId) : [...prev, archivoId]
+    );
+  };
+
+  // Simulación de verificación de cuenta
+  const verificarCuentaDestino = async (cuenta: string) => {
+    setCheckingCuenta(true);
+    setCuentaValida(null);
     try {
-      // Placeholder para cuando esté disponible el servicio
-      console.log('Eliminar archivo:', archivoId);
-      setArchivosExistentes(prev => prev.filter(archivo => archivo.id !== archivoId));
-    } catch (error) {
-      console.error('Error al eliminar archivo:', error);
+      await new Promise(r => setTimeout(r, 700));
+      setCuentaValida(cuenta.length >= 8);
+    } catch {
+      setCuentaValida(false);
+    } finally {
+      setCheckingCuenta(false);
     }
   };
 
-  // Envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!params?.id) return;
-    
+    if (!solicitudId) return;
+
     setLoading(true);
+    const newErrors: Record<string, string> = {};
+
+    const requiredFields: (keyof FormState)[] = ['departamento', 'monto', 'fecha_limite_pago', 'nombre_persona'];
+    requiredFields.forEach((f) => {
+      if (!formData[f]) newErrors[f] = 'Este campo es obligatorio';
+    });
+
+    if (formData.tipo_concepto === 'otro' && !formData.concepto) {
+      newErrors.concepto = 'Este campo es obligatorio cuando seleccionas "Otro"';
+    }
+    if (formData.tipo_concepto === 'referencia' && !formData.referencia) {
+      newErrors.referencia = 'Este campo es obligatorio cuando seleccionas "Referencia"';
+    }
+    if (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && !formData.cuenta_destino) {
+      newErrors['cuenta_destino'] = 'Este campo es obligatorio';
+    }
+    if (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
+      newErrors['cuenta_destino'] = 'La cuenta destino no es válida o no existe.';
+    }
+    if (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
+      newErrors['cuenta_destino'] = 'Espera a que termine la verificación de la cuenta destino.';
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      // Preparar datos para actualizar (solo campos que soporta el backend actual)
-      const updateData = {
+      // Concepto generado (mantiene tu lógica)
+      let conceptoGenerado: string;
+      if (formData.tipo_concepto === 'otro') conceptoGenerado = formData.concepto || 'Otro concepto';
+      else if (formData.tipo_concepto === 'pago_factura') conceptoGenerado = 'Pago de factura';
+      else if (formData.tipo_concepto === 'donativo') conceptoGenerado = 'Donativo';
+      else if (formData.tipo_concepto === 'referencia') conceptoGenerado = `Referencia: ${formData.referencia || 'Sin especificar'}`;
+      else conceptoGenerado = 'Pago a terceros';
+      if (conceptoGenerado.length < 3) conceptoGenerado = 'Pago de factura';
+
+      const payload = {
         departamento: formData.departamento,
-        monto: parseFloat(formData.monto),
-        cuenta_destino: formData.cuenta_destino,
-        concepto: formData.concepto,
+        monto: formData.monto,
+        tipo_moneda: formData.tipo_moneda,
+        cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || null) : formData.cuenta_destino,
+        concepto: conceptoGenerado,
         tipo_pago: formData.tipo_pago,
-        fecha_limite_pago: formData.fecha_limite_pago?.toISOString().split('T')[0] || '',
+        tipo_pago_descripcion: formData.tipo_pago_descripcion,
+        empresa_a_pagar: formData.empresa_a_pagar,
         nombre_persona: formData.nombre_persona,
+        fecha_limite_pago: formData.fecha_limite_pago,
+        // factura: solo si el usuario subió una nueva
+        factura: formData.factura_file as File | null,
         tipo_cuenta_destino: formData.tipo_cuenta_destino,
+        tipo_tarjeta: formData.tipo_cuenta_destino === 'Número de Tarjeta' ? formData.tipo_tarjeta : '',
         banco_destino: formData.banco_destino,
-        tipo_tarjeta: formData.tipo_tarjeta,
-        cuenta: formData.cuenta
+        cuenta: formData.cuenta || null,
+        link_pago: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.link_pago || null : null,
+        usuario_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.usuario_acceso || null : null,
+        contrasena_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.contrasena_acceso || null : null,
+        // Segunda forma
+        tiene_segunda_forma_pago: formData.tiene_segunda_forma_pago,
+        tipo_cuenta_destino_2: formData.tiene_segunda_forma_pago ? formData.tipo_cuenta_destino_2 : '',
+        banco_destino_2: formData.tiene_segunda_forma_pago ? formData.banco_destino_2 : '',
+        cuenta_destino_2: formData.tiene_segunda_forma_pago
+          ? (formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.cuenta_destino_2 || null) : formData.cuenta_destino_2)
+          : '',
+        tipo_tarjeta_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? formData.tipo_tarjeta_2 : '',
+        cuenta_2: formData.tiene_segunda_forma_pago ? (formData.cuenta_2 || null) : null,
+        link_pago_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.link_pago_2 || null) : null,
+        usuario_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.usuario_acceso_2 || null) : null,
+        contrasena_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.contrasena_acceso_2 || null) : null,
       };
 
-      // Usar update regular en lugar de updateWithFiles por ahora
-      await SolicitudesService.update(Number(params.id), updateData);
+      // 1) Actualiza campos y, si se subió, la factura
+      let response: any = null;
+      // @ts-ignore (deja ambas opciones para que puedas ajustar tu service)
+      if ((SolicitudesService as any).updateWithFiles) {
+        // @ts-ignore
+        response = await (SolicitudesService as any).updateWithFiles(solicitudId, payload);
+      } else if ((SolicitudesService as any).update) {
+        // @ts-ignore
+        response = await (SolicitudesService as any).update(solicitudId, payload);
+      } else if ((SolicitudesService as any).put) {
+        // @ts-ignore
+        response = await (SolicitudesService as any).put(solicitudId, payload);
+      } else {
+        // Fallback: intenta un fetch manual si usas un API REST
+        const form = new FormData();
+        Object.entries(payload).forEach(([k, v]) => {
+          if (k === 'factura') {
+            if (v instanceof File) form.append('factura', v);
+          } else if (v !== undefined && v !== null) {
+            form.append(k, String(v));
+          }
+        });
+        const res = await fetch(`/api/solicitudes/${solicitudId}`, { method: 'PUT', body: form as any });
+        if (!res.ok) throw new Error('Error al actualizar la solicitud.');
+        response = await res.json();
+      }
 
+      // 2) Elimina archivos existentes marcados
+      for (const idArchivo of archivosAEliminar) {
+        try {
+          // @ts-ignore
+          if (SolicitudArchivosService.eliminarArchivo) {
+            // @ts-ignore
+            await SolicitudArchivosService.eliminarArchivo(idArchivo);
+          } else {
+            // Fallback REST
+            await fetch(`/api/solicitudes/${solicitudId}/archivos/${idArchivo}`, { method: 'DELETE' });
+          }
+        } catch (err) {
+          console.error('Error al eliminar archivo', idArchivo, err);
+        }
+      }
+
+      // 3) Sube nuevos archivos adicionales
+      if (formData.archivos_adicionales.length > 0) {
+        try {
+          // @ts-ignore
+          if (SolicitudArchivosService.subirArchivos) {
+            // @ts-ignore
+            await SolicitudArchivosService.subirArchivos(
+              solicitudId,
+              formData.archivos_adicionales,
+              formData.tipos_archivos_adicionales
+            );
+          } else {
+            // Fallback REST
+            const up = new FormData();
+            formData.archivos_adicionales.forEach((f, i) => {
+              up.append('archivos', f);
+              up.append(`tipos[${i}]`, formData.tipos_archivos_adicionales[i] || 'documento');
+            });
+            await fetch(`/api/solicitudes/${solicitudId}/archivos`, { method: 'POST', body: up as any });
+          }
+        } catch (e) {
+          console.error('Error al subir archivos adicionales', e);
+          // No romper si falla la carga de adicionales
+        }
+      }
+
+      toast.success('Solicitud actualizada correctamente');
       router.push('/dashboard/solicitante/mis-solicitudes');
-    } catch (error) {
-      console.error('Error al actualizar solicitud:', error);
+    } catch (err: any) {
+      console.error(err);
+      let errorMessage = 'Error al actualizar la solicitud';
+      if (err?.response?.data?.details && Array.isArray(err.response.data.details)) {
+        errorMessage = err.response.data.details.map((d: any) => d.message).join(' | ');
+      } else {
+        errorMessage = err?.response?.data?.message || err?.message || errorMessage;
+      }
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loadingData) {
+  if (loadingInicial) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute requiredRoles={['solicitante']}>
         <SolicitanteLayout>
-          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6">
-            <div className="max-w-6xl mx-auto">
-              <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+          <div className="max-w-7xl mx-auto px-8 py-12 md:py-16">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-white/20">
+              <div className="h-6 w-64 bg-white/20 rounded mb-3" />
+              <div className="h-4 w-96 bg-white/10 rounded" />
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
+              <div className="h-5 w-72 bg-white/10 rounded mb-6" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="h-12 bg-white/10 rounded" />
+                <div className="h-12 bg-white/10 rounded" />
+                <div className="h-12 bg-white/10 rounded" />
+                <div className="h-12 bg-white/10 rounded" />
               </div>
             </div>
           </div>
@@ -412,449 +584,330 @@ export default function EditarSolicitudPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6">
-          <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="mb-8 text-center">
-              <div className="flex items-center justify-center mb-4">
-                <button
-                  onClick={() => router.push('/dashboard/solicitante/mis-solicitudes')}
-                  className="absolute left-0 p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all duration-200"
-                >
-                  <ArrowLeft className="w-6 h-6" />
-                </button>
-                <h1 className="text-4xl font-bold text-white">Editar Solicitud</h1>
+        <div className="max-w-7xl mx-auto px-8 py-12 md:py-16">
+          {/* Header */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-white/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-white font-montserrat mb-1">Editar Solicitud de Pago</h1>
+                  <p className="text-white/80 text-lg">Actualiza la información de tu solicitud</p>
+                </div>
               </div>
-              <p className="text-xl text-white/80">Actualiza la información de tu solicitud de pago</p>
+            </div>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
+            <div className="flex items-center space-x-4 mb-12">
+              <div className="p-4 rounded-full bg-white/20">
+                <FileText className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-1">Solicitud #{solicitudId}</h2>
+                <p className="text-white/80 text-base">Edita los campos necesarios y guarda los cambios</p>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-10 max-w-full">
               {/* SECCIÓN 1: INFORMACIÓN BÁSICA */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
-                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
-                  <Building2 className="w-6 h-6 mr-3" />
-                  Información Básica
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      🏢 Departamento *
-                    </label>
-                    <select
-                      name="departamento"
-                      value={formData.departamento}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                    >
-                      <option value="" className="text-black">Selecciona departamento</option>
-                      {departamentosOptions.map(dept => (
-                        <option key={dept} value={dept} className="text-black">{dept}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      💰 Monto y Moneda *
-                    </label>
-                    <div className="flex gap-3">
-                      <div className="flex-1">
-                        <NumericFormat
-                          name="monto"
-                          value={formData.monto}
-                          onValueChange={(values) => {
-                            dispatch({ type: 'SET_FIELD', field: 'monto', value: values.value });
-                          }}
-                          thousandSeparator=","
-                          decimalSeparator="."
-                          prefix={formData.tipo_moneda === 'USD' ? '$' : '$'}
-                          placeholder="0.00"
-                          allowNegative={false}
-                          decimalScale={2}
-                          required
-                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm font-semibold transition-all duration-200 hover:border-white/50"
-                        />
-                      </div>
-                      <select
-                        name="tipo_moneda"
-                        value={formData.tipo_moneda}
-                        onChange={handleInputChange}
-                        className="px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                      >
-                        <option value="MXN" className="text-black">MXN</option>
-                        <option value="USD" className="text-black">USD</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      📋 Tipo de Concepto *
-                    </label>
-                    <select
-                      name="tipo_concepto"
-                      value={formData.tipo_concepto}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                    >
-                      <option value="producto" className="text-black">Producto</option>
-                      <option value="servicio" className="text-black">Servicio</option>
-                      <option value="otro" className="text-black">Otro</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      📝 Referencia (Opcional)
-                    </label>
-                    <input
-                      type="text"
-                      name="referencia"
-                      value={formData.referencia}
-                      onChange={handleInputChange}
-                      placeholder="Número de referencia o identificador"
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECCIÓN 2: CONCEPTO Y FECHAS */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
-                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
-                  <Calendar className="w-6 h-6 mr-3" />
-                  Concepto y Fechas
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      📄 Concepto *
-                    </label>
-                    <textarea
-                      name="concepto"
-                      value={formData.concepto}
-                      onChange={handleInputChange}
-                      placeholder={
-                        formData.tipo_concepto === 'producto' 
-                          ? "Describe el producto que se va a adquirir..."
-                          : formData.tipo_concepto === 'servicio'
-                          ? "Describe el servicio que se va a contratar..."
-                          : "Describe el concepto del pago..."
-                      }
-                      required
-                      rows={4}
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50 resize-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      📅 Fecha Límite de Pago *
-                    </label>
-                    <div className="relative">
-                      <DatePicker
-                        selected={formData.fecha_limite_pago}
-                        onChange={(date) => dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: date })}
-                        dateFormat="dd/MM/yyyy"
-                        minDate={new Date()}
-                        placeholderText="Selecciona fecha límite"
-                        required
-                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                      />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/60 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* SECCIÓN 3: BENEFICIARIO */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
-                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
-                  <User className="w-6 h-6 mr-3" />
-                  Información del Beneficiario
-                </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Departamento */}
                 <div>
                   <label className="block text-base font-medium text-white/90 mb-3">
-                    👤 Nombre Completo *
+                    <Building className="w-4 h-4 inline mr-2" />
+                    Departamento *
                   </label>
-                  <input
-                    type="text"
-                    name="nombre_persona"
-                    value={formData.nombre_persona}
+                  <select
+                    name="departamento"
+                    value={formData.departamento}
                     onChange={handleInputChange}
-                    placeholder="Nombre completo del beneficiario"
                     required
-                    className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.departamento ? 'border-red-400' : ''}`}
+                  >
+                    <option value="" className="text-gray-900">Seleccionar departamento</option>
+                    {departamentoOptions.map(dept => (
+                      <option key={dept.value} value={dept.value} className="text-gray-900">
+                        {dept.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.departamento && <span className="text-red-400 text-sm mt-1 block">{errors.departamento}</span>}
+                </div>
+
+                {/* Monto */}
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">
+                    <DollarSign className="w-4 h-4 inline mr-2" />
+                    Monto *
+                  </label>
+                  <NumericFormat
+                    value={formData.monto}
+                    name="monto"
+                    thousandSeparator=","
+                    decimalSeparator="."
+                    allowNegative={false}
+                    allowLeadingZeros={false}
+                    decimalScale={2}
+                    fixedDecimalScale
+                    placeholder="0.00"
+                    required
+                    onValueChange={({ value }) => {
+                      dispatch({ type: 'SET_FIELD', field: 'monto', value });
+                      if (!value) setErrors((prev) => ({ ...prev, monto: 'Este campo es obligatorio' }));
+                      else setErrors((prev) => ({ ...prev, monto: undefined }));
+                    }}
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
                   />
+                  {errors.monto && <span className="text-red-400 text-sm mt-1 block">{errors.monto}</span>}
+                </div>
+
+                {/* Tipo de Moneda */}
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">
+                    <DollarSign className="w-4 h-4 inline mr-2" />
+                    Tipo de Moneda *
+                  </label>
+                  <select
+                    name="tipo_moneda"
+                    value={formData.tipo_moneda}
+                    onChange={handleInputChange}
+                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                  >
+                    <option value="MXN" className="bg-blue-900 text-white">MXN (Peso Mexicano)</option>
+                    <option value="USD" className="bg-blue-900 text-white">USD (Dólar Americano)</option>
+                  </select>
                 </div>
               </div>
 
-              {/* SECCIÓN 4: INFORMACIÓN BANCARIA */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
-                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
-                  <CreditCard className="w-6 h-6 mr-3" />
+              {/* SECCIÓN 2: INFORMACIÓN BANCARIA */}
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <CreditCard className="w-5 h-5 mr-2" />
                   Información Bancaria
                 </h3>
-                
-                <div className="mb-6">
-                  <label className="block text-base font-medium text-white/90 mb-4">
-                    💳 Tipo de Pago *
-                  </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label className="flex items-center p-4 bg-white/10 rounded-lg border border-white/20 cursor-pointer hover:bg-white/15 transition-all duration-200">
-                      <input
-                        type="radio"
-                        name="tipo_pago"
-                        value="cuenta"
-                        checked={formData.tipo_pago === 'cuenta'}
-                        onChange={handleInputChange}
-                        className="w-4 h-4 text-blue-600 bg-white/20 border-white/30 focus:ring-blue-500 focus:ring-2"
-                      />
-                      <span className="ml-3 text-white/90">💳 Cuenta Bancaria/Tarjeta</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Datos Bancarios *
                     </label>
-                    <label className="flex items-center p-4 bg-white/10 rounded-lg border border-white/20 cursor-pointer hover:bg-white/15 transition-all duration-200">
-                      <input
-                        type="radio"
-                        name="tipo_pago"
-                        value="tarjeta_institucional"
-                        checked={formData.tipo_pago === 'tarjeta_institucional'}
-                        onChange={handleInputChange}
-                        className="w-4 h-4 text-blue-600 bg-white/20 border-white/30 focus:ring-blue-500 focus:ring-2"
-                      />
-                      <span className="ml-3 text-white/90">🏢 Tarjeta Institucional</span>
-                    </label>
+                    <select
+                      name="tipo_cuenta_destino"
+                      value={formData.tipo_cuenta_destino}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                    >
+                      <option value="CLABE" className="text-black">CLABE</option>
+                      <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
+                      <option value="Tarjeta Institucional" className="text-black">Pago con Tarjeta Corporativa</option>
+                    </select>
                   </div>
-                </div>
 
-                {formData.tipo_pago === 'cuenta' && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div>
-                        <label className="block text-base font-medium text-white/90 mb-3">
-                          Datos Bancarios *
-                        </label>
-                        <select
-                          name="tipo_cuenta_destino"
-                          value={formData.tipo_cuenta_destino}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                        >
-                          <option value="CLABE" className="text-black">CLABE</option>
-                          <option value="Tarjeta" className="text-black">Tarjeta</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-base font-medium text-white/90 mb-3">
-                          Banco (opcional)
-                        </label>
-                        <select
-                          name="banco_destino"
-                          value={formData.banco_destino}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                        >
-                          <option value="" className="text-black">Selecciona banco</option>
-                          {bancoOptions.map(banco => (
-                            <option key={banco} value={banco} className="text-black">{banco}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-base font-medium text-white/90 mb-3">
-                          Cuenta (opcional)
-                        </label>
-                        <input
-                          type="text"
-                          name="cuenta"
-                          value={formData.cuenta}
-                          onChange={handleInputChange}
-                          placeholder="Número de cuenta"
-                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                        />
-                      </div>
-                    </div>
-
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
                     <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Banco Destino (opcional)
+                      </label>
+                      <select
+                        name="banco_destino"
+                        value={formData.banco_destino}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                      >
+                        <option value="" className="text-black">Selecciona banco</option>
+                        {bancoOptions.map(banco => (
+                          <option key={banco} value={banco} className="text-black">{banco}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        Cuenta (opcional)
+                      </label>
+                      <input
+                        type="text"
+                        name="cuenta"
+                        value={formData.cuenta}
+                        onChange={handleInputChange}
+                        placeholder="Número de cuenta"
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm font-mono tracking-wide"
+                      />
+                    </div>
+                  )}
+
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
+                    <div className="md:col-span-2 lg:col-span-4">
                       <label className="block text-base font-medium text-white/90 mb-3">
                         <CreditCard className="w-4 h-4 inline mr-2" />
                         Cuenta Destino *
                       </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          name="cuenta_destino"
-                          value={formData.cuenta_destino}
-                          onChange={handleInputChange}
-                          placeholder={formData.tipo_cuenta_destino === 'Tarjeta' ? 'Número de tarjeta' : 'Número de cuenta CLABE'}
-                          required
-                          className={`w-full px-4 py-3 bg-white/20 backdrop-blur-sm border rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm font-mono tracking-wide transition-all duration-200 ${
-                            cuentaValida === false 
-                              ? 'border-red-400 focus:ring-red-400' 
-                              : cuentaValida === true 
-                              ? 'border-green-400 focus:ring-green-400' 
-                              : 'border-white/30 hover:border-white/50'
-                          }`}
-                        />
-                        
+                      <input
+                        type="text"
+                        name="cuenta_destino"
+                        value={formData.cuenta_destino}
+                        onChange={e => {
+                          const value = e.target.value;
+                          dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
+                          setCuentaValida(null);
+                          if (!value && cuentaConfig.required) {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
+                          } else {
+                            setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                          }
+                        }}
+                        onBlur={e => {
+                          if (e.target.value && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
+                            verificarCuentaDestino(e.target.value);
+                          }
+                        }}
+                        placeholder={cuentaConfig.placeholder}
+                        required={cuentaConfig.required}
+                        autoComplete="off"
+                        className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide ${errors.cuenta_destino ? 'border-red-400' : ''}`}
+                      />
+                      <div className="mt-2 flex items-center gap-4">
                         {checkingCuenta && (
-                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                          </div>
+                          <span className="text-blue-300 text-sm flex items-center">
+                            <svg className="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                            </svg>
+                            Verificando cuenta...
+                          </span>
                         )}
-                        
-                        {!checkingCuenta && cuentaValida === true && (
-                          <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-400" />
+                        {cuentaValida === false && !checkingCuenta && (
+                          <span className="text-red-400 text-sm">❌ Cuenta no válida</span>
                         )}
-                        
-                        {!checkingCuenta && cuentaValida === false && (
-                          <AlertTriangle className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-red-400" />
+                        {cuentaValida === true && !checkingCuenta && (
+                          <span className="text-green-400 text-sm">✅ Cuenta válida</span>
                         )}
                       </div>
-                      
-                      {cuentaValida === false && (
-                        <p className="text-red-400 text-sm mt-2">
-                          {formData.tipo_cuenta_destino === 'CLABE' 
-                            ? 'La CLABE debe tener exactamente 18 dígitos'
-                            : 'El número de tarjeta debe tener entre 13 y 19 dígitos'
-                          }
-                        </p>
+                      {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
+                        <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
                       )}
                     </div>
+                  )}
+                </div>
+              </div>
 
-                    {formData.tipo_cuenta_destino === 'Tarjeta' && (
-                      <div>
-                        <label className="block text-base font-medium text-white/90 mb-3">
-                          Tipo de Tarjeta *
-                        </label>
-                        <select
-                          name="tipo_tarjeta"
-                          value={formData.tipo_tarjeta}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50 max-w-xs"
-                        >
-                          <option value="" className="text-black">Selecciona tipo</option>
-                          <option value="Débito" className="text-black">Débito</option>
-                          <option value="Crédito" className="text-black">Crédito</option>
-                        </select>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {formData.tipo_pago === 'tarjeta_institucional' && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* TARJETA INSTITUCIONAL */}
+              {formData.tipo_cuenta_destino === 'Tarjeta Institucional' && (
+                <div className="bg-blue-600/10 rounded-xl p-6 border border-blue-600/30">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    Datos de Acceso - Tarjeta Institucional
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
                       <label className="block text-base font-medium text-white/90 mb-3">
-                        Link de Pago *
+                        Link de Pago
                       </label>
                       <input
                         type="url"
                         name="link_pago"
                         value={formData.link_pago}
                         onChange={handleInputChange}
-                        placeholder="https://ejemplo.com/pago"
-                        required
-                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                        placeholder="https://..."
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                       />
                     </div>
                     <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
-                        Usuario de Acceso *
-                      </label>
+                      <label className="block text-base font-medium text-white/90 mb-3">Usuario de Acceso</label>
                       <input
                         type="text"
                         name="usuario_acceso"
                         value={formData.usuario_acceso}
                         onChange={handleInputChange}
                         placeholder="Usuario"
-                        required
-                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                       />
                     </div>
                     <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
-                        Contraseña de Acceso *
-                      </label>
+                      <label className="block text-base font-medium text-white/90 mb-3">Contraseña</label>
                       <input
                         type="password"
                         name="contrasena_acceso"
                         value={formData.contrasena_acceso}
                         onChange={handleInputChange}
                         placeholder="Contraseña"
-                        required
-                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                       />
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* SECCIÓN 5: SEGUNDA FORMA DE PAGO */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
-                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
-                  <CreditCard className="w-6 h-6 mr-3" />
-                  Segunda Forma de Pago (Opcional)
-                </h3>
-                
-                <div className="mb-6">
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.tiene_segunda_forma_pago}
-                      onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'tiene_segunda_forma_pago', value: e.target.checked })}
-                      className="w-5 h-5 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500 focus:ring-2"
-                    />
-                    <span className="text-white/90 text-base">Agregar segunda forma de pago</span>
-                  </label>
                 </div>
+              )}
 
-                {formData.tiene_segunda_forma_pago && (
-                  <div className="space-y-8 border-t border-white/10 pt-8">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-lg font-semibold text-white">Segunda Forma de Pago</h4>
-                      <button
-                        type="button"
-                        onClick={() => dispatch({ type: 'RESET_SEGUNDA_FORMA_PAGO' })}
-                        className="text-red-400 hover:text-red-300 text-sm"
+              {/* BOTÓN AGREGAR SEGUNDA FORMA */}
+              {!formData.tiene_segunda_forma_pago && (
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => dispatch({ type: 'SET_FIELD', field: 'tiene_segunda_forma_pago', value: true })}
+                    className="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200"
+                  >
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    Agregar Segunda Forma de Pago
+                  </button>
+                  <p className="text-white/60 text-sm mt-2">Opcional: Divide el pago en dos formas diferentes</p>
+                </div>
+              )}
+
+              {/* SEGUNDA FORMA DE PAGO */}
+              {formData.tiene_segunda_forma_pago && (
+                <div className="bg-green-600/10 rounded-xl p-6 border border-green-600/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white flex items-center">
+                      <CreditCard className="w-5 h-5 mr-2" />
+                      Segunda Forma de Pago
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        dispatch({ type: 'SET_FIELD', field: 'tiene_segunda_forma_pago', value: false });
+                        dispatch({ type: 'SET_FIELD', field: 'tipo_cuenta_destino_2', value: 'CLABE' });
+                        dispatch({ type: 'SET_FIELD', field: 'banco_destino_2', value: '' });
+                        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino_2', value: '' });
+                        dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta_2', value: '' });
+                        dispatch({ type: 'SET_FIELD', field: 'cuenta_2', value: '' });
+                        dispatch({ type: 'SET_FIELD', field: 'link_pago_2', value: '' });
+                        dispatch({ type: 'SET_FIELD', field: 'usuario_acceso_2', value: '' });
+                        dispatch({ type: 'SET_FIELD', field: 'contrasena_acceso_2', value: '' });
+                      }}
+                      className="text-red-400 hover:text-red-300 text-sm"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">Datos Bancarios *</label>
+                      <select
+                        name="tipo_cuenta_destino_2"
+                        value={formData.tipo_cuenta_destino_2}
+                        onChange={handleInputChange}
+                        required={formData.tiene_segunda_forma_pago}
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                       >
-                        Eliminar
-                      </button>
+                        <option value="CLABE" className="text-black">CLABE</option>
+                        <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
+                        <option value="Tarjeta Institucional" className="text-black">Pago con Tarjeta Corporativa</option>
+                      </select>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                      <div>
-                        <label className="block text-base font-medium text-white/90 mb-3">
-                          Datos Bancarios *
-                        </label>
-                        <select
-                          name="tipo_cuenta_destino_2"
-                          value={formData.tipo_cuenta_destino_2}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
-                        >
-                          <option value="CLABE" className="text-black">CLABE</option>
-                          <option value="Tarjeta" className="text-black">Tarjeta</option>
-                        </select>
-                      </div>
 
+                    {formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional' && (
                       <div>
-                        <label className="block text-base font-medium text-white/90 mb-3">
-                          Banco (opcional)
-                        </label>
+                        <label className="block text-base font-medium text-white/90 mb-3">Banco (opcional)</label>
                         <select
                           name="banco_destino_2"
                           value={formData.banco_destino_2}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                          className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                         >
                           <option value="" className="text-black">Selecciona banco</option>
                           {bancoOptions.map(banco => (
@@ -862,23 +915,25 @@ export default function EditarSolicitudPage() {
                           ))}
                         </select>
                       </div>
+                    )}
 
+                    {formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional' && (
                       <div>
-                        <label className="block text-base font-medium text-white/90 mb-3">
-                          Cuenta (opcional)
-                        </label>
+                        <label className="block text-base font-medium text-white/90 mb-3">Cuenta (opcional)</label>
                         <input
                           type="text"
                           name="cuenta_2"
                           value={formData.cuenta_2}
                           onChange={handleInputChange}
                           placeholder="Número de cuenta"
-                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50"
+                          className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
                         />
                       </div>
-                    </div>
+                    )}
+                  </div>
 
-                    <div>
+                  {formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional' && (
+                    <div className="mb-6">
                       <label className="block text-base font-medium text-white/90 mb-3">
                         <CreditCard className="w-4 h-4 inline mr-2" />
                         Cuenta Destino *
@@ -888,32 +943,210 @@ export default function EditarSolicitudPage() {
                         name="cuenta_destino_2"
                         value={formData.cuenta_destino_2}
                         onChange={handleInputChange}
-                        placeholder={formData.tipo_cuenta_destino_2 === 'Tarjeta' ? 'Número de tarjeta' : 'Número de cuenta CLABE'}
-                        required
-                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm font-mono tracking-wide transition-all duration-200 hover:border-white/50"
+                        placeholder={formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? 'Número de tarjeta' : 'Número de cuenta CLABE'}
+                        required={formData.tiene_segunda_forma_pago}
+                        className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
                       />
                     </div>
+                  )}
 
-                    {formData.tipo_cuenta_destino_2 === 'Tarjeta' && (
-                      <div>
-                        <label className="block text-base font-medium text-white/90 mb-3">
-                          Tipo de Tarjeta *
-                        </label>
-                        <select
-                          name="tipo_tarjeta_2"
-                          value={formData.tipo_tarjeta_2}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50 max-w-xs"
-                        >
-                          <option value="" className="text-black">Selecciona tipo</option>
-                          <option value="Débito" className="text-black">Débito</option>
-                          <option value="Crédito" className="text-black">Crédito</option>
-                        </select>
+                  {formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' && (
+                    <div className="bg-blue-600/10 rounded-xl p-6 border border-blue-600/30">
+                      <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                        <CreditCard className="w-5 h-5 mr-2" />
+                        Datos de Acceso - Segunda Tarjeta Institucional
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-3">
+                            Link de Pago
+                          </label>
+                          <input
+                            type="url"
+                            name="link_pago_2"
+                            value={formData.link_pago_2}
+                            onChange={handleInputChange}
+                            placeholder="https://..."
+                            className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-3">Usuario de Acceso</label>
+                          <input
+                            type="text"
+                            name="usuario_acceso_2"
+                            value={formData.usuario_acceso_2}
+                            onChange={handleInputChange}
+                            placeholder="Usuario"
+                            className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-base font-medium text-white/90 mb-3">Contraseña</label>
+                          <input
+                            type="password"
+                            name="contrasena_acceso_2"
+                            value={formData.contrasena_acceso_2}
+                            onChange={handleInputChange}
+                            placeholder="Contraseña"
+                            className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                          />
+                        </div>
                       </div>
-                    )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SECCIÓN 3: TIPO DE PAGO + FECHA */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">Tipo de Pago</label>
+                  <select
+                    name="tipo_pago"
+                    value={formData.tipo_pago}
+                    onChange={handleInputChange}
+                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                  >
+                    <option value="" className="text-gray-900">Selecciona tipo de pago</option>
+                    {tipoPagoOptions.map(tipo => (
+                      <option key={tipo.value} value={tipo.value} className="text-gray-900">
+                        {tipo.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-base font-medium text-white/90 mb-3">
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    Fecha Límite de Pago *
+                  </label>
+                  <DatePicker
+                    selected={fechaLimitePago}
+                    onChange={(date: Date | null) => {
+                      setFechaLimitePago(date);
+                      dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: formatDateForAPI(date) });
+                      if (!date) setErrors((prev) => ({ ...prev, fecha_limite_pago: 'Este campo es obligatorio' }));
+                      else setErrors((prev) => ({ ...prev, fecha_limite_pago: undefined }));
+                    }}
+                    dateFormat="yyyy-MM-dd"
+                    minDate={new Date()}
+                    placeholderText="Selecciona la fecha"
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.fecha_limite_pago ? 'border-red-400' : ''}`}
+                    calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg"
+                    locale={es}
+                  />
+                  {errors.fecha_limite_pago && <span className="text-red-400 text-sm mt-1 block">{errors.fecha_limite_pago}</span>}
+                </div>
+
+                {formData.tipo_pago !== '' && (
+                  <div className="lg:col-span-2">
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      Descripción del tipo de pago
+                    </label>
+                    <textarea
+                      name="tipo_pago_descripcion"
+                      value={formData.tipo_pago_descripcion}
+                      onChange={handleInputChange}
+                      placeholder="Agrega una breve descripción que identifique el pago"
+                      rows={3}
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 resize-none text-base"
+                    />
                   </div>
                 )}
+              </div>
+
+              {/* SECCIÓN 4: CONCEPTO */}
+              <div>
+                <label className="block text-base font-medium text-white/90 mb-3">
+                  <MessageSquare className="w-4 h-4 inline mr-2" />
+                  Concepto *
+                </label>
+
+                <select
+                  name="tipo_concepto"
+                  value={formData.tipo_concepto}
+                  onChange={handleInputChange}
+                  className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base mb-4"
+                >
+                  <option value="pago_factura" className="bg-blue-900 text-white">Pago de factura</option>
+                  <option value="pago_terceros" className="bg-blue-900 text-white">Pago a terceros</option>
+                  <option value="donativo" className="bg-blue-900 text-white">Donativo</option>
+                  <option value="referencia" className="bg-blue-900 text-white">Referencia</option>
+                  <option value="otro" className="bg-blue-900 text-white">Otro</option>
+                </select>
+
+                {formData.tipo_concepto === 'otro' && (
+                  <input
+                    type="text"
+                    name="concepto"
+                    value={formData.concepto}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                      handleInputChange({ target: { name: 'concepto', value: numericValue } } as any);
+                    }}
+                    placeholder="Ingrese solo números..."
+                    required
+                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.concepto ? 'border-red-400' : ''}`}
+                  />
+                )}
+
+                {formData.tipo_concepto === 'referencia' && (
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">Referencia *</label>
+                    <input
+                      type="text"
+                      name="referencia"
+                      value={formData.referencia}
+                      onChange={handleInputChange}
+                      placeholder="Ingrese el código o identificador de referencia..."
+                      required
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.referencia ? 'border-red-400' : ''}`}
+                    />
+                    <p className="text-white/60 text-sm mt-2">
+                      Esta referencia corresponde a códigos o identificadores específicos que deben incluirse en el concepto.
+                    </p>
+                    {errors.referencia && <span className="text-red-400 text-sm mt-1 block">{errors.referencia}</span>}
+                  </div>
+                )}
+                {errors.concepto && <span className="text-red-400 text-sm mt-1 block">{errors.concepto}</span>}
+              </div>
+
+              {/* SECCIÓN 5: BENEFICIARIO */}
+              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+                  <Building className="w-6 h-6 mr-3" />
+                  Información del Beneficiario
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">
+                      <span className="text-red-400">*</span> Nombre del Beneficiario
+                    </label>
+                    <input
+                      type="text"
+                      name="nombre_persona"
+                      value={formData.nombre_persona}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="Nombre completo de la persona física o moral"
+                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200 ${errors.nombre_persona ? 'border-red-400 shadow-red-400/25 shadow-lg' : 'hover:border-white/50'}`}
+                    />
+                    {errors.nombre_persona && <span className="text-red-400 text-sm mt-1 block">{errors.nombre_persona}</span>}
+                  </div>
+                  <div>
+                    <label className="block text-base font-medium text-white/90 mb-3">Se paga por: (opcional)</label>
+                    <input
+                      type="text"
+                      name="empresa_a_pagar"
+                      value={formData.empresa_a_pagar}
+                      onChange={handleInputChange}
+                      placeholder="Empresa desde la cual se efectuará el pago"
+                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200 hover:border-white/50"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* SECCIÓN 6: DOCUMENTOS */}
@@ -922,22 +1155,40 @@ export default function EditarSolicitudPage() {
                   <Upload className="w-6 h-6 mr-3" />
                   Documentos
                 </h3>
-                <div>
+
+                {/* Factura (existente + reemplazo opcional) */}
+                <div className="mb-8">
                   <label className="block text-base font-medium text-white/90 mb-4">
-                    Factura (opcional - solo si deseas cambiarla)
-                    <span className="text-white/70 text-sm ml-2">(PDF, Excel, JPG, PNG - Máx. 5MB)</span>
+                    Factura (si no subes una nueva, se mantiene la actual)
                   </label>
-                  <div className="relative">
+
+                  {facturaExistente && !formData.factura_file && (
+                    <div className="p-4 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/20 backdrop-blur-sm flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-green-500/20 border border-green-400/30">
+                          <CheckCircle className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-white font-semibold">{facturaExistente.nombre}</p>
+                          <p className="text-white/70 text-sm">Factura actual</p>
+                        </div>
+                      </div>
+                      {/* Si quieres permitir eliminar la factura actual, agrega un flujo específico en tu API */}
+                    </div>
+                  )}
+
+                  <div className="relative mt-4">
                     <input
                       type="file"
                       accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png"
                       onChange={(e) => handleFileChange(e, 'factura_file')}
+                      // En edición no es requerido
                       className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-white/30 file:text-white hover:file:bg-white/40 text-base transition-all duration-200 ${errors.factura_file ? 'border-red-400 shadow-red-400/25 shadow-lg' : 'hover:border-white/50'}`}
                     />
                   </div>
-                  
-                  {/* Previsualización de nueva factura */}
-                  {formData.factura_file ? (
+
+                  {/* Previsualización de NUEVA factura */}
+                  {formData.factura_file && (
                     <div className="mt-6 p-6 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/20 backdrop-blur-sm">
                       <div className="flex items-start gap-4">
                         <div className="p-2 rounded-full bg-green-500/20 border border-green-400/30">
@@ -946,9 +1197,7 @@ export default function EditarSolicitudPage() {
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-3">
                             <div>
-                              <p className="text-white font-semibold text-lg">
-                                {formData.factura_file.name}
-                              </p>
+                              <p className="text-white font-semibold text-lg">{formData.factura_file.name}</p>
                               <p className="text-white/70 text-sm">
                                 {formData.factura_file.type === 'application/pdf' && '📄 Documento PDF'}
                                 {formData.factura_file.type.includes('excel') && '📊 Archivo Excel'}
@@ -959,65 +1208,57 @@ export default function EditarSolicitudPage() {
                               {(formData.factura_file.size / 1024 / 1024).toFixed(2)} MB
                             </span>
                           </div>
-                          
                           {formData.factura_file.type.startsWith('image/') && (
                             <div className="mt-4 w-64 h-48 relative bg-white/10 rounded-lg overflow-hidden border border-white/20">
-                              <Image
-                                src={URL.createObjectURL(formData.factura_file)}
-                                alt="Previsualización"
-                                fill
-                                className="object-contain"
-                              />
+                              <Image src={URL.createObjectURL(formData.factura_file)} alt="Previsualización" fill className="object-contain" />
                             </div>
                           )}
                         </div>
                       </div>
                     </div>
-                  ) : facturaUrl ? (
-                    <div className="mt-6 p-6 bg-gradient-to-r from-blue-500/10 to-blue-600/5 rounded-xl border border-blue-400/20 backdrop-blur-sm">
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 rounded-full bg-blue-500/20 border border-blue-400/30">
-                          <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="mb-3">
-                            <p className="text-white font-semibold text-lg">Factura actual</p>
-                            <p className="text-blue-300 text-sm">Archivo existente en el sistema</p>
-                          </div>
-                          
-                          {(() => {
-                            const ext = facturaUrl.split('.').pop()?.toLowerCase();
-                            if (["png", "jpg", "jpeg"].includes(ext || "")) {
-                              return (
-                                <div className="mt-4 w-64 h-48 relative bg-white/10 rounded-lg overflow-hidden border border-blue-400/20">
-                                  <Image
-                                    src={facturaLink!}
-                                    alt="Factura actual"
-                                    fill
-                                    className="object-contain"
-                                  />
-                                </div>
-                              );
-                            }
-                            return (
-                              <a href={facturaLink!} target="_blank" rel="noopener noreferrer" className="text-blue-300 underline text-sm block mt-3">Ver factura actual</a>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
+                  )}
                   {errors.factura_file && <span className="text-red-400 text-sm mt-2 block">{errors.factura_file}</span>}
                 </div>
 
-                {/* Archivos Adicionales */}
-                <div className="mt-8 border-t border-white/10 pt-8">
+                {/* Archivos Adicionales EXISTENTES */}
+                {archivosExistentes.length > 0 && (
+                  <div className="mb-8">
+                    <p className="text-white/90 font-medium mb-3">Archivos adicionales existentes</p>
+                    <div className="space-y-3">
+                      {archivosExistentes.map((a) => {
+                        const marcado = archivosAEliminar.includes(a.id);
+                        return (
+                          <div key={a.id} className={`p-4 rounded-lg border flex items-center justify-between ${marcado ? 'border-red-400/40 bg-red-500/10' : 'border-white/20 bg-white/5'}`}>
+                            <div className="flex items-center gap-3">
+                              <FileText className="w-5 h-5 text-white/80" />
+                              <div>
+                                <p className="text-white font-medium">{a.nombre}</p>
+                                <p className="text-white/60 text-xs">{a.tipo}</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleEliminarExistente(a.id)}
+                              className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${marcado ? 'bg-white/20 text-white' : 'bg-red-600/80 text-white hover:bg-red-700'}`}
+                              title={marcado ? 'Desmarcar eliminación' : 'Marcar para eliminar'}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              {marcado ? 'Desmarcar' : 'Eliminar'}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Archivos Adicionales NUEVOS */}
+                <div className="border-t border-white/10 pt-8">
                   <label className="block text-base font-medium text-white/90 mb-4">
-                    📎 Archivos Adicionales (Opcional)
+                    📎 Agregar nuevos archivos (opcional)
                     <span className="text-white/70 text-sm ml-2">(PDF, Excel, JPG, PNG - Máx. 5MB c/u)</span>
                   </label>
-                  
-                  {/* Botón para agregar archivos */}
+
                   <div className="mb-6">
                     <input
                       type="file"
@@ -1036,39 +1277,6 @@ export default function EditarSolicitudPage() {
                     </label>
                   </div>
 
-                  {/* Lista de archivos existentes */}
-                  {archivosExistentes.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-white font-semibold mb-4">Archivos existentes:</h4>
-                      <div className="space-y-4">
-                        {archivosExistentes.map((archivo, index) => (
-                          <div key={index} className="p-4 bg-gradient-to-r from-blue-500/10 to-blue-600/5 rounded-xl border border-blue-400/20 backdrop-blur-sm">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4 flex-1">
-                                <div className="p-2 rounded-full bg-blue-500/20 border border-blue-400/30">
-                                  <FileText className="w-5 h-5 text-blue-400" />
-                                </div>
-                                <div className="flex-1">
-                                  <p className="text-white font-medium">{archivo.archivo_url.split('/').pop()}</p>
-                                  <p className="text-blue-300 text-sm">Tipo: {archivo.tipo}</p>
-                                </div>
-                              </div>
-                              
-                              <button
-                                type="button"
-                                onClick={() => removeArchivoExistente(archivo.id)}
-                                className="ml-4 p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                              >
-                                <X className="w-5 h-5" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Lista de archivos adicionales nuevos */}
                   {formData.archivos_adicionales.length > 0 && (
                     <div className="space-y-4">
                       {formData.archivos_adicionales.map((archivo, index) => (
@@ -1084,7 +1292,6 @@ export default function EditarSolicitudPage() {
                                   {(archivo.size / 1024 / 1024).toFixed(2)} MB
                                 </p>
                               </div>
-                              
                               <select
                                 value={formData.tipos_archivos_adicionales[index] || 'documento'}
                                 onChange={(e) => updateTipoArchivoAdicional(index, e.target.value)}
@@ -1097,7 +1304,6 @@ export default function EditarSolicitudPage() {
                                 <option value="otro" className="bg-blue-900 text-white">Otro</option>
                               </select>
                             </div>
-                            
                             <button
                               type="button"
                               onClick={() => removeArchivoAdicional(index)}
@@ -1113,40 +1319,45 @@ export default function EditarSolicitudPage() {
                 </div>
               </div>
 
-              {/* SECCIÓN 7: OBSERVACIONES */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
-                <label className="block text-base font-medium text-white/90 mb-3">
-                  💬 Observaciones (Opcional)
-                </label>
-                <textarea
-                  name="observaciones"
-                  value={formData.observaciones}
-                  onChange={handleInputChange}
-                  placeholder="Información adicional sobre la solicitud..."
-                  rows={4}
-                  className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm transition-all duration-200 hover:border-white/50 resize-none"
-                />
-              </div>
-
-              {/* BOTÓN DE ENVÍO */}
-              <div className="flex justify-center pt-8">
-                <button
+              {/* BOTONES */}
+              <div className="flex flex-col sm:flex-row justify-end gap-4 pt-12">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push('/dashboard/solicitante/mis-solicitudes')}
+                  className="bg-gray-600/80 text-white border-gray-500 hover:bg-gray-700 hover:scale-105 px-8 py-4 text-base font-medium transition-all duration-200 backdrop-blur-sm"
+                >
+                  Cancelar
+                </Button>
+                <Button
                   type="submit"
-                  disabled={loading}
-                  className="px-12 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  disabled={
+                    loading ||
+                    !formData.departamento ||
+                    !formData.monto ||
+                    (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && !formData.cuenta_destino) ||
+                    (formData.tipo_concepto === 'otro' && !formData.concepto) ||
+                    !formData.fecha_limite_pago ||
+                    (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') ||
+                    (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional')
+                  }
+                  className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:scale-105 shadow-xl border-0 px-10 py-4 font-semibold text-base flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {loading ? (
                     <>
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                      Actualizando...
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      </svg>
+                      Guardando cambios...
                     </>
                   ) : (
                     <>
-                      <Save className="w-6 h-6 mr-3" />
-                      Actualizar Solicitud
+                      <CheckCircle className="w-5 h-5" />
+                      Guardar Cambios
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
