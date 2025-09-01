@@ -540,55 +540,6 @@ return (
           <div className="space-y-4">
             {/* Previsualización de factura */}
             {solicitud.factura_url ? (() => {
-            {/* Archivos de solicitud_archivos */}
-            <div className="mt-6">
-              <h4 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                Archivos adjuntos de la solicitud
-              </h4>
-              {loadingArchivos ? (
-                <div className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Cargando archivos...</div>
-              ) : errorArchivos ? (
-                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorArchivos}</div>
-              ) : archivos.length === 0 ? (
-                <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">No hay archivos adjuntos disponibles</div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {archivos.map((archivo) => {
-                    const url = archivo.archivo_url.startsWith('http') ? archivo.archivo_url : `${archivo.archivo_url.startsWith('/') ? '' : '/'}${archivo.archivo_url}`;
-                    const fileName = url.split('/').pop() || '';
-                    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
-                    const isPdf = /\.pdf$/i.test(fileName);
-                    return (
-                      <div key={archivo.id} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs text-blue-800 font-semibold">{archivo.tipo || 'Archivo'}</span>
-                          <Button size="sm" onClick={() => window.open(url, '_blank')} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl rounded-xl px-4 py-2 ml-3">Ver completo</Button>
-                        </div>
-                        {isImage ? (
-                          <div className="relative w-full h-32 group overflow-hidden rounded border border-blue-200 shadow-sm bg-white/90">
-                            <Image src={url} alt={fileName} fill className="object-contain bg-white/80 transition-all duration-300 group-hover:scale-[1.02]" quality={80} />
-                          </div>
-                        ) : isPdf ? (
-                          <div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
-                            <iframe src={url} title={fileName} className="w-full" style={{height: '100px'}} />
-                            <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-600">Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo</div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
-                            <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                            <div className="flex-1">
-                              <p className="text-blue-600 font-medium text-sm">Archivo: {fileName}</p>
-                              <p className="text-xs text-gray-600">Haga clic en &quot;Ver completo&quot; para abrir el archivo</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
               // Garantizar que la URL tenga el formato correcto con la barra diagonal
               let facturaUrl = '';
               if (solicitud.factura_url.startsWith('http')) {
@@ -662,6 +613,56 @@ return (
                 <p className="text-xs text-gray-500 mt-1">Esta solicitud no tiene documentos adjuntos</p>
               </div>
             )}
+
+            {/* Archivos de solicitud_archivos */}
+            <div className="mt-6">
+              <h4 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
+                <FileText className="w-5 h-5 mr-2 text-blue-600" />
+                Archivos adjuntos de la solicitud
+              </h4>
+              {loadingArchivos ? (
+                <div className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Cargando archivos...</div>
+              ) : errorArchivos ? (
+                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorArchivos}</div>
+              ) : archivos.length === 0 ? (
+                <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">No hay archivos adjuntos disponibles</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {archivos.map((archivo) => {
+                    const url = archivo.archivo_url.startsWith('http') ? archivo.archivo_url : `${archivo.archivo_url.startsWith('/') ? '' : '/'}${archivo.archivo_url}`;
+                    const fileName = url.split('/').pop() || '';
+                    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+                    const isPdf = /\.pdf$/i.test(fileName);
+                    return (
+                      <div key={archivo.id} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs text-blue-800 font-semibold">{archivo.tipo || 'Archivo'}</span>
+                          <Button size="sm" onClick={() => window.open(url, '_blank')} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl rounded-xl px-4 py-2 ml-3">Ver completo</Button>
+                        </div>
+                        {isImage ? (
+                          <div className="relative w-full h-32 group overflow-hidden rounded border border-blue-200 shadow-sm bg-white/90">
+                            <Image src={url} alt={fileName} fill className="object-contain bg-white/80 transition-all duration-300 group-hover:scale-[1.02]" quality={80} />
+                          </div>
+                        ) : isPdf ? (
+                          <div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
+                            <iframe src={url} title={fileName} className="w-full" style={{height: '100px'}} />
+                            <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-600">Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo</div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+                            <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                            <div className="flex-1">
+                              <p className="text-blue-600 font-medium text-sm">Archivo: {fileName}</p>
+                              <p className="text-xs text-gray-600">Haga clic en &quot;Ver completo&quot; para abrir el archivo</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
             
             {/* Botones de acción */}
             <div className="flex w-full justify-end mt-6">
