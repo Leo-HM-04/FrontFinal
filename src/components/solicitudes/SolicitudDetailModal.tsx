@@ -37,9 +37,11 @@ const fetchArchivos = useCallback(async () => {
   setErrorArchivos(null);
   try {
     const data = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
+    console.log('🔍 Archivos recibidos desde backend:', data);
     setArchivos(data);
-  } catch {
+  } catch (e) {
     setErrorArchivos('No se pudieron cargar los archivos adjuntos.');
+    console.error('❌ Error al obtener archivos adjuntos:', e);
   } finally {
     setLoadingArchivos(false);
   }
