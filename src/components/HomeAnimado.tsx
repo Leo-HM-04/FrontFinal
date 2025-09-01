@@ -1,17 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Mail, Phone, ArrowRight, CheckCircle, Globe, Shield, Zap, Copy } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Mail, ArrowRight, CheckCircle, Globe, Shield, Zap } from 'lucide-react';
 import Image from 'next/image';
 
 export default function HomeAnimado() {
-  const [copied, setCopied] = useState(false);
   const email = "automatizaciones@bechapra.com.mx";
-  const handleCopy = () => {
-    navigator.clipboard.writeText(email);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
   
   // Redirigir a /home si hay token en la URL
   useEffect(() => {
