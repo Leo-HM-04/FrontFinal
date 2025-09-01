@@ -38,8 +38,7 @@ const fetchArchivos = useCallback(async () => {
   try {
     const data = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
     setArchivos(data);
-  } catch (error) {
-    console.error('Error al cargar archivos:', error);
+  } catch {
     setErrorArchivos('No se pudieron cargar los archivos adjuntos.');
   } finally {
     setLoadingArchivos(false);
@@ -71,22 +70,6 @@ if (solicitud && isOpen) {
     contrasena_acceso_2: solicitud.contrasena_acceso_2
   });
 }
-
-// Helper function para construir URLs correctas en desarrollo y producción
-const buildFileUrl = (fileUrl: string) => {
-  if (fileUrl.startsWith('http')) {
-    return fileUrl;
-  }
-  
-  // En producción, usar el dominio completo
-  if (process.env.NODE_ENV === 'production') {
-    const cleanUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
-    return `https://bechapra.com.mx${cleanUrl}`;
-  }
-  
-  // En desarrollo, usar ruta relativa para el proxy
-  return fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
-};
 
 const fetchComprobantes = useCallback(async () => {
 if (!solicitud) return;
@@ -570,7 +553,7 @@ return (
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {archivos.map((archivo) => {
-                    const url = buildFileUrl(archivo.archivo_url);
+                    const url = archivo.archivo_url.startsWith('http') ? archivo.archivo_url : `${archivo.archivo_url.startsWith('/') ? '' : '/'}${archivo.archivo_url}`;
                     const fileName = url.split('/').pop() || '';
                     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
@@ -604,8 +587,16 @@ return (
                 </div>
               )}
             </div>
-              // Usar helper para construir URL de factura
-              const facturaUrl = buildFileUrl(solicitud.factura_url);
+              // Garantizar que la URL tenga el formato correcto con la barra diagonal
+              let facturaUrl = '';
+              if (solicitud.factura_url.startsWith('http')) {
+                facturaUrl = solicitud.factura_url;
+              } else {
+                const rutaArchivo = solicitud.factura_url.startsWith('/') 
+                  ? solicitud.factura_url 
+                  : `/${solicitud.factura_url}`;
+                facturaUrl = rutaArchivo;
+              }
               const fileName = facturaUrl.split('/').pop();
               const isImage = /\.(jpg|jpeg|png|gif)$/i.test(facturaUrl);
               const isPdf = /\.pdf$/i.test(facturaUrl);
@@ -678,7 +669,15 @@ return (
                     <Button
                       size="lg"
                       onClick={() => {
-                        const facturaUrl = buildFileUrl(solicitud.factura_url);
+                        let facturaUrl = '';
+                        if (solicitud.factura_url.startsWith('http')) {
+                          facturaUrl = solicitud.factura_url;
+                        } else {
+                          const rutaArchivo = solicitud.factura_url.startsWith('/') 
+                            ? solicitud.factura_url 
+                            : `/${solicitud.factura_url}`;
+                          facturaUrl = rutaArchivo;
+                        }
                         window.open(facturaUrl, '_blank');
                       }}
                       className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
@@ -691,11 +690,7 @@ return (
                   {solicitud.soporte_url && (
                     <Button
                       size="lg"
-                      onClick={() => {
-                        if (!solicitud.soporte_url) return;
-                        const soporteUrl = buildFileUrl(solicitud.soporte_url);
-                        window.open(soporteUrl, '_blank');
-                      }}
+                      onClick={() => window.open(solicitud.soporte_url, '_blank')}
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
                     >
                       <FileText className="w-5 h-5" />
@@ -728,7 +723,16 @@ return (
               ) : (
                 <div className="space-y-4">
                     {comprobantes.map((comprobante) => {
-                      const comprobanteUrl = buildFileUrl(comprobante.ruta_archivo);
+                      // Construir la URL del comprobante
+                      let comprobanteUrl = '';
+                      if (comprobante.ruta_archivo.startsWith('http')) {
+                        comprobanteUrl = comprobante.ruta_archivo;
+                      } else {
+                        const rutaArchivo = comprobante.ruta_archivo.startsWith('/')
+                          ? comprobante.ruta_archivo
+                          : `/${comprobante.ruta_archivo}`;
+                        comprobanteUrl = rutaArchivo;
+                      }
                       
                       // Determinar el tipo de archivo
                       const fileName = comprobante.nombre_archivo || comprobanteUrl.split('/').pop() || '';
