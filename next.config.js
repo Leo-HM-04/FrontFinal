@@ -74,20 +74,12 @@ const nextConfig = {
         destination: 'http://46.202.177.106:4000/api/estadisticas/:path*',
       },
       {
-        source: '/api/solicitud-archivos/:path*',
-        destination: 'http://46.202.177.106:4000/api/solicitud-archivos/:path*',
-      },
-      {
         source: '/api/viaticos/mios',
         destination: 'http://46.202.177.106:4000/viaticos/mios',
       },
       {
         source: '/api/viaticos/:path*',
         destination: 'http://46.202.177.106:4000/viaticos/:path*',
-      },
-      {
-        source: '/api/:path*',
-        destination: 'http://46.202.177.106:4000/api/:path*',
       },
       {
         source: '/uploads/:path*',
