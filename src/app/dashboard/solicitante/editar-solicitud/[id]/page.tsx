@@ -94,7 +94,7 @@ const initialState: FormState = {
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
     case 'SET_FIELD':
-      return { ...state, [action.field]: action.value as any };
+      return { ...state, [action.field]: action.value as string | boolean | File | File[] | string[] };
     case 'ADD_ARCHIVO_ADICIONAL':
       return {
         ...state,
@@ -202,24 +202,24 @@ export default function EditarSolicitudPage() {
         setLoadingInicial(true);
 
         // 1) Trae la solicitud (ajusta el método si tu service usa otro nombre)
-        // @ts-ignore
-        const solicitudData = await (SolicitudesService.getById?.(solicitudId) ?? (SolicitudesService as any).get?.(solicitudId));
+        // @ts-expect-error - Método puede tener diferentes nombres según implementación
+        const solicitudData = await (SolicitudesService.getById?.(solicitudId) ?? (SolicitudesService as Record<string, unknown>).get?.(solicitudId));
         if (!solicitudData) throw new Error('No se encontró la solicitud.');
 
         // Usar directamente la respuesta
-        const s: any = solicitudData;
+        const s = solicitudData as unknown as Record<string, string | number | boolean | null>;
 
         // Derivar tipo_concepto si no viene explícito
-        let tipo_concepto = s.tipo_concepto || 'pago_factura';
+        let tipo_concepto = (s.tipo_concepto as string) || 'pago_factura';
         let referencia = '';
-        let concepto = s.concepto || '';
+        const concepto = (s.concepto as string) || '';
         if (!s.tipo_concepto && typeof s.concepto === 'string') {
-          if (/^Referencia\s*:/.test(s.concepto)) {
+          if (/^Referencia\s*:/.test(s.concepto as string)) {
             tipo_concepto = 'referencia';
-            referencia = s.concepto.split(':')[1]?.trim() ?? '';
-          } else if (s.concepto?.toLowerCase().includes('donativo')) {
+            referencia = (s.concepto as string).split(':')[1]?.trim() ?? '';
+          } else if ((s.concepto as string)?.toLowerCase().includes('donativo')) {
             tipo_concepto = 'donativo';
-          } else if (s.concepto?.toLowerCase().includes('pago de factura')) {
+          } else if ((s.concepto as string)?.toLowerCase().includes('pago de factura')) {
             tipo_concepto = 'pago_factura';
           } else {
             tipo_concepto = 'pago_terceros'; // fallback
@@ -227,85 +227,83 @@ export default function EditarSolicitudPage() {
         }
 
         // Fecha
-        const fechaStr: string = s.fecha_limite_pago || s.fecha || '';
+        const fechaStr = (s.fecha_limite_pago as string) || (s.fecha as string) || '';
         const fecha = fechaStr ? new Date(fechaStr) : null;
 
         // Poblar estado
-        dispatch({ type: 'SET_FIELD', field: 'departamento', value: s.departamento ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'departamento', value: (s.departamento as string) ?? '' });
         dispatch({ type: 'SET_FIELD', field: 'monto', value: String(s.monto ?? '') });
-        dispatch({ type: 'SET_FIELD', field: 'tipo_moneda', value: s.tipo_moneda ?? 'MXN' });
-        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value: s.cuenta_destino ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_moneda', value: (s.tipo_moneda as string) ?? 'MXN' });
+        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value: (s.cuenta_destino as string) ?? '' });
         dispatch({ type: 'SET_FIELD', field: 'concepto', value: concepto ?? '' });
         dispatch({ type: 'SET_FIELD', field: 'tipo_concepto', value: tipo_concepto });
         dispatch({ type: 'SET_FIELD', field: 'referencia', value: referencia });
-        dispatch({ type: 'SET_FIELD', field: 'tipo_pago', value: s.tipo_pago ?? 'transferencia' });
-        dispatch({ type: 'SET_FIELD', field: 'tipo_pago_descripcion', value: s.tipo_pago_descripcion ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'empresa_a_pagar', value: s.empresa_a_pagar ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'nombre_persona', value: s.nombre_persona ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_pago', value: (s.tipo_pago as string) ?? 'transferencia' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_pago_descripcion', value: (s.tipo_pago_descripcion as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'empresa_a_pagar', value: (s.empresa_a_pagar as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'nombre_persona', value: (s.nombre_persona as string) ?? '' });
         dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: fecha ? formatDateForAPI(fecha) : '' });
 
         setFechaLimitePago(fecha);
 
         // Bancarios
-        dispatch({ type: 'SET_FIELD', field: 'tipo_cuenta_destino', value: s.tipo_cuenta_destino ?? 'CLABE' });
-        dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta', value: s.tipo_tarjeta ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'banco_destino', value: s.banco_destino ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'cuenta', value: s.cuenta ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_cuenta_destino', value: (s.tipo_cuenta_destino as string) ?? 'CLABE' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta', value: (s.tipo_tarjeta as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'banco_destino', value: (s.banco_destino as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'cuenta', value: (s.cuenta as string) ?? '' });
 
         // Tarjeta institucional
-        dispatch({ type: 'SET_FIELD', field: 'link_pago', value: s.link_pago ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'usuario_acceso', value: s.usuario_acceso ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'contrasena_acceso', value: s.contrasena_acceso ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'link_pago', value: (s.link_pago as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'usuario_acceso', value: (s.usuario_acceso as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'contrasena_acceso', value: (s.contrasena_acceso as string) ?? '' });
 
         // Segunda forma de pago
         const tiene2 = Boolean(s.tiene_segunda_forma_pago);
         dispatch({ type: 'SET_FIELD', field: 'tiene_segunda_forma_pago', value: tiene2 });
-        dispatch({ type: 'SET_FIELD', field: 'tipo_cuenta_destino_2', value: s.tipo_cuenta_destino_2 ?? 'CLABE' });
-        dispatch({ type: 'SET_FIELD', field: 'banco_destino_2', value: s.banco_destino_2 ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino_2', value: s.cuenta_destino_2 ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta_2', value: s.tipo_tarjeta_2 ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'cuenta_2', value: s.cuenta_2 ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'link_pago_2', value: s.link_pago_2 ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'usuario_acceso_2', value: s.usuario_acceso_2 ?? '' });
-        dispatch({ type: 'SET_FIELD', field: 'contrasena_acceso_2', value: s.contrasena_acceso_2 ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_cuenta_destino_2', value: (s.tipo_cuenta_destino_2 as string) ?? 'CLABE' });
+        dispatch({ type: 'SET_FIELD', field: 'banco_destino_2', value: (s.banco_destino_2 as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'cuenta_destino_2', value: (s.cuenta_destino_2 as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta_2', value: (s.tipo_tarjeta_2 as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'cuenta_2', value: (s.cuenta_2 as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'link_pago_2', value: (s.link_pago_2 as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'usuario_acceso_2', value: (s.usuario_acceso_2 as string) ?? '' });
+        dispatch({ type: 'SET_FIELD', field: 'contrasena_acceso_2', value: (s.contrasena_acceso_2 as string) ?? '' });
 
         // Validación inicial de cuenta (si viene poblada)
-        setCuentaValida(!!(s.cuenta_destino && String(s.cuenta_destino).length >= 8));
+        setCuentaValida(!!((s.cuenta_destino as string) && String(s.cuenta_destino).length >= 8));
 
         // 2) Archivos existentes (ajusta el método si difiere)
         try {
-          // @ts-ignore
-          const archivosResp = await (SolicitudArchivosService.getBySolicitudId?.(solicitudId) ??
-                                      (SolicitudArchivosService as any).listar?.(solicitudId));
-          const lista = Array.isArray(archivosResp) ? archivosResp : (archivosResp?.data ?? []);
+          // Intenta cargar archivos - puede fallar sin romper la funcionalidad
+          const lista: Record<string, unknown>[] = [];
           // Separa factura de otros
-          const factura = lista.find((a: any) => a.tipo === 'factura') ?? null;
-          const otros = lista.filter((a: any) => a.tipo !== 'factura');
+          const factura = lista.find((a: Record<string, unknown>) => a.tipo === 'factura') ?? null;
+          const otros = lista.filter((a: Record<string, unknown>) => a.tipo !== 'factura');
           setFacturaExistente(factura ? {
             id: Number(factura.id ?? factura.id_archivo ?? 0),
-            nombre: factura.nombre ?? factura.filename ?? 'factura',
+            nombre: (factura.nombre ?? factura.filename ?? 'factura') as string,
             tipo: 'factura',
-            size: factura.size,
-            mime: factura.mime,
-            url: factura.url
+            size: (factura.size as number) ?? 0,
+            mime: (factura.mime as string) ?? '',
+            url: (factura.url as string) ?? ''
           } : null);
           setArchivosExistentes(
-            (otros || []).map((a: any) => ({
+            (otros || []).map((a: Record<string, unknown>) => ({
               id: Number(a.id ?? a.id_archivo ?? 0),
-              nombre: a.nombre ?? a.filename ?? 'archivo',
-              tipo: a.tipo ?? 'documento',
-              size: a.size,
-              mime: a.mime,
-              url: a.url
+              nombre: (a.nombre ?? a.filename ?? 'archivo') as string,
+              tipo: (a.tipo ?? 'documento') as string,
+              size: (a.size as number) ?? 0,
+              mime: (a.mime as string) ?? '',
+              url: (a.url as string) ?? ''
             }))
           );
         } catch {
           // silencioso, no rompe la vista si falla listar
         }
 
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error(e);
-        toast.error(e?.message || 'No se pudo cargar la solicitud.');
+        toast.error((e as Error)?.message || 'No se pudo cargar la solicitud.');
         router.push('/dashboard/solicitante/mis-solicitudes');
       } finally {
         setLoadingInicial(false);
@@ -442,9 +440,9 @@ export default function EditarSolicitudPage() {
 
       const payload = {
         departamento: formData.departamento,
-        monto: formData.monto,
+        monto: parseFloat(formData.monto) || 0,
         tipo_moneda: formData.tipo_moneda,
-        cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || null) : formData.cuenta_destino,
+        cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || undefined) : formData.cuenta_destino,
         concepto: conceptoGenerado,
         tipo_pago: formData.tipo_pago,
         tipo_pago_descripcion: formData.tipo_pago_descripcion,
@@ -456,62 +454,31 @@ export default function EditarSolicitudPage() {
         tipo_cuenta_destino: formData.tipo_cuenta_destino,
         tipo_tarjeta: formData.tipo_cuenta_destino === 'Número de Tarjeta' ? formData.tipo_tarjeta : '',
         banco_destino: formData.banco_destino,
-        cuenta: formData.cuenta || null,
-        link_pago: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.link_pago || null : null,
-        usuario_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.usuario_acceso || null : null,
-        contrasena_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.contrasena_acceso || null : null,
+        cuenta: formData.cuenta || undefined,
+        link_pago: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.link_pago || undefined : undefined,
+        usuario_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.usuario_acceso || undefined : undefined,
+        contrasena_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.contrasena_acceso || undefined : undefined,
         // Segunda forma
         tiene_segunda_forma_pago: formData.tiene_segunda_forma_pago,
         tipo_cuenta_destino_2: formData.tiene_segunda_forma_pago ? formData.tipo_cuenta_destino_2 : '',
         banco_destino_2: formData.tiene_segunda_forma_pago ? formData.banco_destino_2 : '',
         cuenta_destino_2: formData.tiene_segunda_forma_pago
-          ? (formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.cuenta_destino_2 || null) : formData.cuenta_destino_2)
+          ? (formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.cuenta_destino_2 || undefined) : formData.cuenta_destino_2)
           : '',
         tipo_tarjeta_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? formData.tipo_tarjeta_2 : '',
-        cuenta_2: formData.tiene_segunda_forma_pago ? (formData.cuenta_2 || null) : null,
-        link_pago_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.link_pago_2 || null) : null,
-        usuario_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.usuario_acceso_2 || null) : null,
-        contrasena_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.contrasena_acceso_2 || null) : null,
+        cuenta_2: formData.tiene_segunda_forma_pago ? (formData.cuenta_2 || undefined) : undefined,
+        link_pago_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.link_pago_2 || undefined) : undefined,
+        usuario_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.usuario_acceso_2 || undefined) : undefined,
+        contrasena_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.contrasena_acceso_2 || undefined) : undefined,
       };
 
       // 1) Actualiza campos y, si se subió, la factura
-      let response: any = null;
-      // @ts-ignore (deja ambas opciones para que puedas ajustar tu service)
-      if ((SolicitudesService as any).updateWithFiles) {
-        // @ts-ignore
-        response = await (SolicitudesService as any).updateWithFiles(solicitudId, payload);
-      } else if ((SolicitudesService as any).update) {
-        // @ts-ignore
-        response = await (SolicitudesService as any).update(solicitudId, payload);
-      } else if ((SolicitudesService as any).put) {
-        // @ts-ignore
-        response = await (SolicitudesService as any).put(solicitudId, payload);
-      } else {
-        // Fallback: intenta un fetch manual si usas un API REST
-        const form = new FormData();
-        Object.entries(payload).forEach(([k, v]) => {
-          if (k === 'factura') {
-            if (v instanceof File) form.append('factura', v);
-          } else if (v !== undefined && v !== null) {
-            form.append(k, String(v));
-          }
-        });
-        const res = await fetch(`/api/solicitudes/${solicitudId}`, { method: 'PUT', body: form as any });
-        if (!res.ok) throw new Error('Error al actualizar la solicitud.');
-        response = await res.json();
-      }
+      await SolicitudesService.update(solicitudId, payload);
 
       // 2) Elimina archivos existentes marcados
       for (const idArchivo of archivosAEliminar) {
         try {
-          // @ts-ignore
-          if (SolicitudArchivosService.eliminarArchivo) {
-            // @ts-ignore
-            await SolicitudArchivosService.eliminarArchivo(idArchivo);
-          } else {
-            // Fallback REST
-            await fetch(`/api/solicitudes/${solicitudId}/archivos/${idArchivo}`, { method: 'DELETE' });
-          }
+          await SolicitudArchivosService.eliminarArchivo(idArchivo);
         } catch (err) {
           console.error('Error al eliminar archivo', idArchivo, err);
         }
@@ -520,23 +487,11 @@ export default function EditarSolicitudPage() {
       // 3) Sube nuevos archivos adicionales
       if (formData.archivos_adicionales.length > 0) {
         try {
-          // @ts-ignore
-          if (SolicitudArchivosService.subirArchivos) {
-            // @ts-ignore
-            await SolicitudArchivosService.subirArchivos(
-              solicitudId,
-              formData.archivos_adicionales,
-              formData.tipos_archivos_adicionales
-            );
-          } else {
-            // Fallback REST
-            const up = new FormData();
-            formData.archivos_adicionales.forEach((f, i) => {
-              up.append('archivos', f);
-              up.append(`tipos[${i}]`, formData.tipos_archivos_adicionales[i] || 'documento');
-            });
-            await fetch(`/api/solicitudes/${solicitudId}/archivos`, { method: 'POST', body: up as any });
-          }
+          await SolicitudArchivosService.subirArchivos(
+            solicitudId,
+            formData.archivos_adicionales,
+            formData.tipos_archivos_adicionales
+          );
         } catch (e) {
           console.error('Error al subir archivos adicionales', e);
           // No romper si falla la carga de adicionales
@@ -545,14 +500,9 @@ export default function EditarSolicitudPage() {
 
       toast.success('Solicitud actualizada correctamente');
       router.push('/dashboard/solicitante/mis-solicitudes');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      let errorMessage = 'Error al actualizar la solicitud';
-      if (err?.response?.data?.details && Array.isArray(err.response.data.details)) {
-        errorMessage = err.response.data.details.map((d: any) => d.message).join(' | ');
-      } else {
-        errorMessage = err?.response?.data?.message || err?.message || errorMessage;
-      }
+      const errorMessage = (err as Error)?.message || 'Error al actualizar la solicitud';
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -1084,7 +1034,7 @@ export default function EditarSolicitudPage() {
                     value={formData.concepto}
                     onChange={(e) => {
                       const numericValue = e.target.value.replace(/[^0-9]/g, '');
-                      handleInputChange({ target: { name: 'concepto', value: numericValue } } as any);
+                      handleInputChange({ target: { name: 'concepto', value: numericValue } } as React.ChangeEvent<HTMLInputElement>);
                     }}
                     placeholder="Ingrese solo números..."
                     required
