@@ -449,8 +449,6 @@ export default function EditarSolicitudPage() {
         empresa_a_pagar: formData.empresa_a_pagar,
         nombre_persona: formData.nombre_persona,
         fecha_limite_pago: formData.fecha_limite_pago,
-        // factura: solo si el usuario subió una nueva
-        factura: formData.factura_file as File | null,
         tipo_cuenta_destino: formData.tipo_cuenta_destino,
         tipo_tarjeta: formData.tipo_cuenta_destino === 'Número de Tarjeta' ? formData.tipo_tarjeta : '',
         banco_destino: formData.banco_destino,
@@ -472,8 +470,24 @@ export default function EditarSolicitudPage() {
         contrasena_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.contrasena_acceso_2 || undefined) : undefined,
       };
 
-      // 1) Actualiza campos y, si se subió, la factura
+      // Debug: verificar estructura del payload
+      console.log('Payload a enviar:', JSON.stringify(payload, null, 2));
+
+      // 1) Actualiza campos (sin archivo)
       await SolicitudesService.update(solicitudId, payload);
+
+      // 1.5) Si hay nueva factura, subirla por separado
+      if (formData.factura_file) {
+        try {
+          const token = localStorage.getItem('token');
+          if (token) {
+            await SolicitudesService.subirFactura(solicitudId, formData.factura_file, token);
+          }
+        } catch (facturaError) {
+          console.error('Error al subir nueva factura:', facturaError);
+          // No fallar toda la operación por esto
+        }
+      }
 
       // 2) Elimina archivos existentes marcados
       for (const idArchivo of archivosAEliminar) {
