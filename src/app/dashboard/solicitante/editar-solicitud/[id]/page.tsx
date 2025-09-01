@@ -155,7 +155,7 @@ export default function EditarSolicitudPage() {
   let cuentaConfig;
   if (formData.tipo_cuenta_destino === 'Número de Tarjeta') {
     cuentaConfig = { placeholder: 'Número de tarjeta', errorMsg: 'Ingresa un número de tarjeta válido.', required: true };
-  } else if (formData.tipo_cuenta_destino === 'Tarjeta Institucional') {
+  } else if (formData.tipo_cuenta_destino === 'Tarjeta Institucional' || formData.tipo_cuenta_destino === 'Tarjeta Instituciona') {
     cuentaConfig = { placeholder: 'Opcional', errorMsg: '', required: false };
   } else {
     cuentaConfig = { placeholder: 'Número de cuenta CLABE', errorMsg: 'Ingresa un número de cuenta CLABE válido.', required: true };
@@ -412,13 +412,13 @@ export default function EditarSolicitudPage() {
     if (formData.tipo_concepto === 'referencia' && !formData.referencia) {
       newErrors.referencia = 'Este campo es obligatorio cuando seleccionas "Referencia"';
     }
-    if (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && !formData.cuenta_destino) {
+    if (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona' && !formData.cuenta_destino) {
       newErrors['cuenta_destino'] = 'Este campo es obligatorio';
     }
-    if (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
+    if (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona') {
       newErrors['cuenta_destino'] = 'La cuenta destino no es válida o no existe.';
     }
-    if (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
+    if (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona') {
       newErrors['cuenta_destino'] = 'Espera a que termine la verificación de la cuenta destino.';
     }
 
@@ -464,14 +464,14 @@ export default function EditarSolicitudPage() {
       };
 
       // Agregar campos específicos de tarjeta institucional para forma de pago 1
-      if (formData.tipo_cuenta_destino === 'Tarjeta Institucional') {
+      if (formData.tipo_cuenta_destino === 'Tarjeta Institucional' || formData.tipo_cuenta_destino === 'Tarjeta Instituciona') {
         payload.link_pago = formData.link_pago || '';
         payload.usuario_acceso = formData.usuario_acceso || '';
         payload.contrasena_acceso = formData.contrasena_acceso || '';
       }
 
       // Agregar campos específicos de tarjeta institucional para forma de pago 2
-      if (formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional') {
+      if (formData.tiene_segunda_forma_pago && (formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' || formData.tipo_cuenta_destino_2 === 'Tarjeta Instituciona')) {
         payload.link_pago_2 = formData.link_pago_2 || '';
         payload.usuario_acceso_2 = formData.usuario_acceso_2 || '';
         payload.contrasena_acceso_2 = formData.contrasena_acceso_2 || '';
@@ -479,9 +479,20 @@ export default function EditarSolicitudPage() {
 
       // Debug: verificar estructura del payload
       console.log('Payload a enviar:', JSON.stringify(payload, null, 2));
+      console.log('Solicitud ID:', solicitudId);
 
       // 1) Actualiza campos (sin archivo)
-      await SolicitudesService.update(solicitudId, payload);
+      try {
+        await SolicitudesService.update(solicitudId, payload);
+      } catch (updateError: unknown) {
+        console.error('Error completo:', updateError);
+        if (updateError && typeof updateError === 'object' && 'response' in updateError) {
+          const axiosError = updateError as { response?: { data?: unknown; status?: number } };
+          console.error('Error del servidor:', axiosError.response?.data);
+          console.error('Status:', axiosError.response?.status);
+        }
+        throw updateError; // Re-lanzar para que se maneje abajo
+      }
 
       // 1.5) Si hay nueva factura, subirla por separado
       if (formData.factura_file) {
@@ -676,7 +687,7 @@ export default function EditarSolicitudPage() {
                     </select>
                   </div>
 
-                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona' && (
                     <div>
                       <label className="block text-base font-medium text-white/90 mb-3">
                         Banco Destino (opcional)
@@ -695,7 +706,7 @@ export default function EditarSolicitudPage() {
                     </div>
                   )}
 
-                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona' && (
                     <div>
                       <label className="block text-base font-medium text-white/90 mb-3">
                         Cuenta (opcional)
@@ -711,7 +722,7 @@ export default function EditarSolicitudPage() {
                     </div>
                   )}
 
-                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
+                  {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona' && (
                     <div className="md:col-span-2 lg:col-span-4">
                       <label className="block text-base font-medium text-white/90 mb-3">
                         <CreditCard className="w-4 h-4 inline mr-2" />
@@ -732,7 +743,7 @@ export default function EditarSolicitudPage() {
                           }
                         }}
                         onBlur={e => {
-                          if (e.target.value && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
+                          if (e.target.value && formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona') {
                             verificarCuentaDestino(e.target.value);
                           }
                         }}
