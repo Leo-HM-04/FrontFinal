@@ -438,37 +438,44 @@ export default function EditarSolicitudPage() {
       else conceptoGenerado = 'Pago a terceros';
       if (conceptoGenerado.length < 3) conceptoGenerado = 'Pago de factura';
 
-      const payload = {
+      // Crear payload limpio sin campos undefined
+      const payload: Record<string, unknown> = {
         departamento: formData.departamento,
         monto: parseFloat(formData.monto) || 0,
         tipo_moneda: formData.tipo_moneda,
-        cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || undefined) : formData.cuenta_destino,
         concepto: conceptoGenerado,
         tipo_pago: formData.tipo_pago,
-        tipo_pago_descripcion: formData.tipo_pago_descripcion,
-        empresa_a_pagar: formData.empresa_a_pagar,
+        tipo_pago_descripcion: formData.tipo_pago_descripcion || '',
+        empresa_a_pagar: formData.empresa_a_pagar || '',
         nombre_persona: formData.nombre_persona,
         fecha_limite_pago: formData.fecha_limite_pago,
         tipo_cuenta_destino: formData.tipo_cuenta_destino,
-        tipo_tarjeta: formData.tipo_cuenta_destino === 'Número de Tarjeta' ? formData.tipo_tarjeta : '',
-        banco_destino: formData.banco_destino,
-        cuenta: formData.cuenta || undefined,
-        link_pago: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.link_pago || undefined : undefined,
-        usuario_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.usuario_acceso || undefined : undefined,
-        contrasena_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.contrasena_acceso || undefined : undefined,
+        tipo_tarjeta: formData.tipo_cuenta_destino === 'Número de Tarjeta' ? (formData.tipo_tarjeta || '') : '',
+        banco_destino: formData.banco_destino || '',
+        cuenta: formData.cuenta || '',
+        cuenta_destino: formData.cuenta_destino || '',
         // Segunda forma
         tiene_segunda_forma_pago: formData.tiene_segunda_forma_pago,
         tipo_cuenta_destino_2: formData.tiene_segunda_forma_pago ? formData.tipo_cuenta_destino_2 : '',
-        banco_destino_2: formData.tiene_segunda_forma_pago ? formData.banco_destino_2 : '',
-        cuenta_destino_2: formData.tiene_segunda_forma_pago
-          ? (formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.cuenta_destino_2 || undefined) : formData.cuenta_destino_2)
-          : '',
-        tipo_tarjeta_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? formData.tipo_tarjeta_2 : '',
-        cuenta_2: formData.tiene_segunda_forma_pago ? (formData.cuenta_2 || undefined) : undefined,
-        link_pago_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.link_pago_2 || undefined) : undefined,
-        usuario_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.usuario_acceso_2 || undefined) : undefined,
-        contrasena_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.contrasena_acceso_2 || undefined) : undefined,
+        banco_destino_2: formData.tiene_segunda_forma_pago ? (formData.banco_destino_2 || '') : '',
+        cuenta_destino_2: formData.tiene_segunda_forma_pago ? (formData.cuenta_destino_2 || '') : '',
+        tipo_tarjeta_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? (formData.tipo_tarjeta_2 || '') : '',
+        cuenta_2: formData.tiene_segunda_forma_pago ? (formData.cuenta_2 || '') : '',
       };
+
+      // Agregar campos específicos de tarjeta institucional para forma de pago 1
+      if (formData.tipo_cuenta_destino === 'Tarjeta Institucional') {
+        payload.link_pago = formData.link_pago || '';
+        payload.usuario_acceso = formData.usuario_acceso || '';
+        payload.contrasena_acceso = formData.contrasena_acceso || '';
+      }
+
+      // Agregar campos específicos de tarjeta institucional para forma de pago 2
+      if (formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional') {
+        payload.link_pago_2 = formData.link_pago_2 || '';
+        payload.usuario_acceso_2 = formData.usuario_acceso_2 || '';
+        payload.contrasena_acceso_2 = formData.contrasena_acceso_2 || '';
+      }
 
       // Debug: verificar estructura del payload
       console.log('Payload a enviar:', JSON.stringify(payload, null, 2));
