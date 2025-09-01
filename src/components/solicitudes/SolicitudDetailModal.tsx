@@ -469,21 +469,19 @@ return (
           {/* Información de departamento y solicitante */}
           <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80 mb-3">
             <h4 className="text-sm font-medium text-blue-800 mb-2">Equipo y personal</h4>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              <div className="mb-2 sm:mb-0">
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Departamento</span>
-                <p className="text-blue-900 font-medium">{solicitud.departamento ? solicitud.departamento.charAt(0).toUpperCase() + solicitud.departamento.slice(1) : '-'}</p>
+                <p className="text-blue-900 font-medium break-words">{solicitud.departamento ? solicitud.departamento.charAt(0).toUpperCase() + solicitud.departamento.slice(1) : '-'}</p>
               </div>
-              
-              <div>
+              <div className="mb-2 sm:mb-0">
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Solicitante</span>
-                <p className="text-blue-900 font-medium">{solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}</p>
+                <p className="text-blue-900 font-medium break-words">{solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}</p>
               </div>
-              
               {solicitud.aprobador_nombre && (
-                <div className="col-span-2">
+                <div className="col-span-1 sm:col-span-2">
                   <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Aprobado por</span>
-                  <p className="text-blue-900 font-medium">{solicitud.aprobador_nombre}</p>
+                  <p className="text-blue-900 font-medium break-words">{solicitud.aprobador_nombre}</p>
                 </div>
               )}
             </div>
