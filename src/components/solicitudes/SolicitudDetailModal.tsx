@@ -147,15 +147,15 @@ return colors[estado as keyof typeof colors] || 'bg-gray-100 text-gray-800 borde
 };
 
 return (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
   {/* Fondo degradado oscuro/transparente mejorado */}
   <div
     className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
     onClick={onClose}
   />
-  <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-3xl shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+  <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-7xl max-h-[98vh] sm:max-h-[90vh] overflow-hidden border border-white/20 backdrop-blur-sm">
     {/* Contenedor con scroll interno */}
-    <div className="overflow-y-auto max-h-[90vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400">
+    <div className="overflow-y-auto max-h-[98vh] sm:max-h-[90vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400">
     {/* Botón de cerrar (X) flotante mejorado */}
     <button
       onClick={onClose}
@@ -189,9 +189,9 @@ return (
         </div>
       </div>
     </div>
-      <div className="p-8 space-y-8">
+  <div className="p-2 sm:p-8 space-y-8">
         {/* Información Principal con diseño mejorado */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+  <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-8 mb-8">
           <Card className="xl:col-span-2 p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
             <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
               <div className="p-2 bg-blue-100 rounded-xl mr-3">
@@ -208,7 +208,7 @@ return (
             </div>
           
           {/* Grid principal de información */}
-          <div className="grid grid-cols-2 gap-4 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
             <div className="bg-white p-2 rounded-md">
               <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Empresa a pagar</span>
               <p className="text-blue-900 font-medium">{solicitud.empresa_a_pagar || '-'}</p>
@@ -515,7 +515,7 @@ return (
         </Card>
       </div>
           {/* Concepto y Documentos con diseño mejorado */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mb-8">
             {/* Concepto - 1 columna */}
             <Card className="p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
               <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
@@ -627,7 +627,7 @@ return (
               ) : archivos.length === 0 ? (
                 <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">No hay archivos adjuntos disponibles</div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {archivos.map((archivo) => {
                     const url = archivo.archivo_url.startsWith('http') ? archivo.archivo_url : `${archivo.archivo_url.startsWith('/') ? '' : '/'}${archivo.archivo_url}`;
                     const fileName = url.split('/').pop() || '';
