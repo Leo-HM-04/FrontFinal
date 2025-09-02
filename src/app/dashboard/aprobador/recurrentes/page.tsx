@@ -253,36 +253,35 @@ return (
               <span className="text-sm text-gray-500 font-medium">Orden: Pendientes → Rechazadas → Aprobadas</span>
             </div>
             <div className="overflow-x-auto bg-white">
-              <table className="min-w-full border-separate border-spacing-0">
+              <table className="min-w-full">
                 <thead>
-                  <tr>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">ID</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Folio</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Usuario</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Departamento</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Monto</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Cuenta</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Frecuencia</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Estado</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Siguiente fecha</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Aprobador</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Pagador</th>
-                    <th className="px-6 py-4 bg-white text-left text-xs font-bold text-gray-700 uppercase border-b border-gray-200">Detalle</th>
+                  <tr className="bg-gray-50">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 first:rounded-tl-lg">Folio</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Usuario</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Departamento</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Monto</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Cuenta</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Frecuencia</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Estado</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Siguiente fecha</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Aprobador</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Pagador</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 last:rounded-tr-lg">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white">
                   {loading ? (
                     <tr>
-                      <td colSpan={12} className="py-10 text-center">
+                      <td colSpan={11} className="py-8 text-center">
                         <div className="flex flex-col items-center justify-center">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
-                          <p className="text-blue-600">Cargando solicitudes...</p>
+                          <p className="text-blue-600 text-sm">Cargando solicitudes...</p>
                         </div>
                       </td>
                     </tr>
                   ) : solicitudesFiltradas.length === 0 ? (
                     <tr>
-                      <td colSpan={12} className="py-10 text-center text-gray-500">
+                      <td colSpan={11} className="py-8 text-center text-gray-500 text-sm">
                         No se encontraron solicitudes que coincidan con los filtros aplicados.
                       </td>
                     </tr>
@@ -290,63 +289,64 @@ return (
                     solicitudesFiltradas
                       .slice((paginaActual - 1) * elementosPorPagina, paginaActual * elementosPorPagina)
                       .map((s) => (
-                        <tr key={s.id_recurrente} className="group hover:bg-blue-50 transition-colors border-b border-gray-200">
-                          <td className="px-5 py-3 text-base text-gray-800 align-middle border-r border-gray-100 font-semibold">{s.id_recurrente}</td>
-                          <td className="px-5 py-3 text-base font-bold text-blue-700 align-middle border-r border-gray-100 underline cursor-pointer hover:text-blue-900">
+                        <tr key={s.id_recurrente} className="group hover:bg-blue-50/50 transition-colors border-b border-gray-100">
+                          <td className="px-4 py-3 text-sm font-medium text-blue-600 hover:text-blue-800">
                             {s.folio ? (
-                              <span>{s.folio}</span>
+                              <span className="cursor-pointer">{s.folio}</span>
                             ) : '-'}
                           </td>
-                          <td className="px-5 py-3 text-base text-gray-800 align-middle border-r border-gray-100">{s.nombre_usuario || '-'}</td>
-                          <td className="px-5 py-3 text-base text-gray-700 align-middle border-r border-gray-100">
-                            <span className="bg-gray-100 px-3 py-1 rounded-full text-xs font-semibold border border-gray-200">{s.departamento}</span>
+                          <td className="px-4 py-3 text-sm text-gray-700">{s.nombre_usuario || '-'}</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              {s.departamento}
+                            </span>
                           </td>
-                          <td className="px-5 py-3 text-base font-semibold text-gray-700 align-middle border-r border-gray-100">
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
                             ${s.monto.toLocaleString('es-MX', {minimumFractionDigits:2})}
                           </td>
-                          <td className="px-5 py-3 text-base text-gray-800 align-middle border-r border-gray-100">{s.cuenta_destino}</td>
-                          <td className="px-5 py-3 text-base text-gray-700 align-middle border-r border-gray-100">{s.frecuencia}</td>
-                          <td className="px-5 py-3 align-middle border-r border-gray-100">
+                          <td className="px-4 py-3 text-sm text-gray-600">{s.cuenta_destino}</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                              {s.frecuencia}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
                             {(() => {
                               const estado = (s.estado || '').toLowerCase();
                               if (estado === 'pendiente') {
                                 return (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" fill="#3b82f6"/><circle cx="12" cy="12" r="4" fill="#fff"/></svg>
-                                    Pendiente
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
+                                    ● Pendiente
                                   </span>
                                 );
                               } else if (estado === 'aprobada' || estado === 'aprobado') {
                                 return (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold bg-green-50 text-green-700 border border-green-200">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" fill="#22c55e"/><path d="M9 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                    Aprobada
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
+                                    ✓ Aprobada
                                   </span>
                                 );
                               } else if (estado === 'rechazada' || estado === 'rechazado') {
                                 return (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold bg-red-50 text-red-700 border border-red-200">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" fill="#ef4444"/><path d="M9 9l6 6m0-6l-6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
-                                    Rechazada
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+                                    ✕ Rechazada
                                   </span>
                                 );
                               } else if (estado === 'pagada' || estado === 'pagado') {
                                 return (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold bg-yellow-50 text-yellow-700 border border-yellow-200">
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" fill="#fde68a"/><path d="M9 12l2 2 4-4" stroke="#f59e42" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                    Pagada
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-800">
+                                    ✓ Pagada
                                   </span>
                                 );
                               } else {
                                 return (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-700 border border-gray-200">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                     {s.estado || '-'}
                                   </span>
                                 );
                               }
                             })()}
                           </td>
-                          <td className="px-5 py-3 text-sm text-gray-800 align-middle border-r border-gray-100">
+                          <td className="px-4 py-3 text-sm text-gray-600">
                             {s.siguiente_fecha ? (
                               <span title={new Date(s.siguiente_fecha).toLocaleString('es-MX')}>
                                 {new Date(s.siguiente_fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -355,38 +355,41 @@ return (
                               <span className="text-gray-400">-</span>
                             )}
                           </td>
-                          <td className="px-5 py-3 text-sm text-gray-800 align-middle border-r border-gray-100">{s.nombre_aprobador || '-'}</td>
-                          <td className="px-5 py-3 text-sm text-gray-800 align-middle border-r border-gray-100">{s.nombre_pagador || '-'}</td>
-                          <td className="px-5 py-3 align-middle">
-                            <div className="flex gap-2 items-center">
+                          <td className="px-4 py-3 text-sm text-gray-600">{s.nombre_aprobador || '-'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{s.nombre_pagador || '-'}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex justify-center gap-1.5">
                               <button
-                                className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-blue-500 bg-white text-blue-600 hover:bg-blue-100 hover:border-blue-700 transition"
+                                className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                 onClick={() => { setSolicitudSeleccionada(s); setModalOpen(true); }}
                                 title="Ver detalles"
                               >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#3b82f6" strokeWidth="2" fill="#fff"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="#3b82f6" strokeWidth="2"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke="#3b82f6" strokeWidth="2"/></svg>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
                               </button>
                               {s.estado === 'pendiente' && (
                                 <>
                                   <button
-                                    className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-green-500 bg-white text-green-600 hover:bg-green-100 hover:border-green-700 transition disabled:opacity-50"
+                                    className="p-1 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
                                     disabled={accionEnCurso === s.id_recurrente}
                                     onClick={() => setConfirmarAccion({ tipo: 'aprobar', id: s.id_recurrente })}
                                     title="Aprobar"
                                   >
                                     {accionEnCurso === s.id_recurrente ? (
-                                      <div className="animate-spin h-4 w-4 border-2 border-green-600 rounded-full border-t-transparent"></div>
+                                      <div className="animate-spin h-5 w-5 border-2 border-current rounded-full border-t-transparent"></div>
                                     ) : (
-                                      <FaCheck size={16} />
+                                      <FaCheck className="w-5 h-5" />
                                     )}
                                   </button>
                                   <button
-                                    className="inline-flex items-center justify-center w-8 h-8 rounded-full border-2 border-red-500 bg-white text-red-600 hover:bg-red-100 hover:border-red-700 transition disabled:opacity-50"
+                                    className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                                     disabled={accionEnCurso === s.id_recurrente}
                                     onClick={() => setConfirmarAccion({ tipo: 'rechazar', id: s.id_recurrente })}
                                     title="Rechazar"
                                   >
-                                    <FaTimes size={16} />
+                                    <FaTimes className="w-5 h-5" />
                                   </button>
                                 </>
                               )}
@@ -482,26 +485,25 @@ return (
               </table>
             </div>
           
-          {/* Paginador - Fuera de la tabla como solicitado */}
+          {/* Paginador simplificado */}
           {!loading && solicitudesFiltradas.length > 0 && (
-            <div className="flex items-center justify-between py-4 px-8 bg-white rounded-b-2xl border-t border-gray-200">
-              <div className="text-base text-gray-600">
-                Mostrando {Math.min(solicitudesFiltradas.length, (paginaActual - 1) * elementosPorPagina + 1)} a {Math.min(paginaActual * elementosPorPagina, solicitudesFiltradas.length)} de {solicitudesFiltradas.length} resultados
+            <div className="flex items-center justify-between py-3 px-4 border-t border-gray-200 bg-white">
+              <div className="text-sm text-gray-700">
+                Mostrando <span className="font-medium">{(paginaActual - 1) * elementosPorPagina + 1}</span> a <span className="font-medium">{Math.min(paginaActual * elementosPorPagina, solicitudesFiltradas.length)}</span> de <span className="font-medium">{solicitudesFiltradas.length}</span> resultados
               </div>
-              <div className="flex space-x-1">
+              <nav className="flex gap-1">
                 <button 
                   onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))} 
                   disabled={paginaActual === 1}
-                  className={`px-4 py-2 rounded-md font-semibold ${paginaActual === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white border border-gray-300 text-gray-700 hover:bg-blue-50'}`}
+                  className={`px-2 py-1 text-sm rounded ${paginaActual === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'}`}
                 >
                   Anterior
                 </button>
-                {/* Números de página */}
                 {Array.from({ length: Math.ceil(solicitudesFiltradas.length / elementosPorPagina) }).map((_, i) => (
                   <button 
                     key={i + 1}
                     onClick={() => setPaginaActual(i + 1)}
-                    className={`px-4 py-2 rounded-md font-semibold ${paginaActual === i + 1 ? 'bg-blue-600 text-white border border-blue-600' : 'bg-white border border-gray-300 text-gray-700 hover:bg-blue-50'}`}
+                    className={`px-3 py-1 text-sm rounded-md ${paginaActual === i + 1 ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
                   >
                     {i + 1}
                   </button>
@@ -509,11 +511,11 @@ return (
                 <button 
                   onClick={() => setPaginaActual(prev => Math.min(prev + 1, Math.ceil(solicitudesFiltradas.length / elementosPorPagina)))}
                   disabled={paginaActual === Math.ceil(solicitudesFiltradas.length / elementosPorPagina)}
-                  className={`px-4 py-2 rounded-md font-semibold ${paginaActual === Math.ceil(solicitudesFiltradas.length / elementosPorPagina) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white border border-gray-300 text-gray-700 hover:bg-blue-50'}`}
+                  className={`px-2 py-1 text-sm rounded ${paginaActual === Math.ceil(solicitudesFiltradas.length / elementosPorPagina) ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'}`}
                 >
                   Siguiente
                 </button>
-              </div>
+              </nav>
             </div>
           )}
             </div>
