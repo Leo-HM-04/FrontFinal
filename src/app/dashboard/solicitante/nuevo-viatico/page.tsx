@@ -317,7 +317,14 @@ export default function NuevoViaticoPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-blue-900 font-bold text-base">Fecha límite de pago</label>
-                    <input name="fecha_limite_pago" type="date" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                    <input
+                      name="fecha_limite_pago"
+                      type="date"
+                      onChange={e => handleChange(idx, e)}
+                      required
+                      className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400"
+                      onFocus={e => e.target.showPicker && e.target.showPicker()}
+                    />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-blue-900 font-bold text-base">Concepto</label>
