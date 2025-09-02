@@ -152,78 +152,108 @@ return (
     <AprobadorLayout>
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* HEADER Y CARDS DE RESUMEN */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <h1 className="text-3xl font-extrabold text-white">Solicitudes Recurrentes</h1>
-            <p className="text-white/90 text-lg">Total: {solicitudes.length} solicitudes</p>
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-8 mb-8 shadow-xl">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+            <div className="flex-1">
+              <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Solicitudes Recurrentes</h1>
+              <p className="text-blue-100 text-lg font-medium">
+                Gestiona y monitorea todas las solicitudes recurrentes del sistema
+              </p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
+              <p className="text-white/90 text-lg font-semibold">Total: <span className="text-white">{solicitudes.length}</span> solicitudes</p>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-4 mb-6">
-            <div className="flex-1 min-w-[160px] bg-white/30 rounded-xl shadow p-3 flex items-center gap-3">
-              <div className="bg-white/60 rounded-full p-2 flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#3b82f6" opacity=".15"/><rect x="7" y="7" width="10" height="10" rx="2" fill="#3b82f6" opacity=".25"/><rect x="10" y="10" width="4" height="4" rx="1" fill="#3b82f6"/></svg>
-              </div>
-              <div>
-                <div className="text-base font-bold text-white">{solicitudes.length}</div>
-                <div className="text-white/80 text-xs font-medium">Total Procesadas</div>
-              </div>
-            </div>
-            <div className="flex-1 min-w-[160px] bg-white/30 rounded-xl shadow p-3 flex items-center gap-3">
-              <div className="bg-white/60 rounded-full p-2 flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#22c55e" opacity=".15"/><path d="M9 12l2 2 4-4" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </div>
-              <div>
-                <div className="text-base font-bold text-white">{solicitudes.filter(s => s.estado === 'aprobada').length}</div>
-                <div className="text-white/80 text-xs font-medium">Aprobadas</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="bg-blue-500/20 rounded-xl p-3">
+                  <svg className="w-8 h-8 text-blue-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-4xl font-black text-white mb-1">{solicitudes.length}</p>
+                  <p className="text-blue-100 font-medium">Total Procesadas</p>
+                </div>
               </div>
             </div>
-            <div className="flex-1 min-w-[160px] bg-white/30 rounded-xl shadow p-3 flex items-center gap-3">
-              <div className="bg-white/60 rounded-full p-2 flex items-center justify-center">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ef4444" opacity=".15"/><path d="M15 9l-6 6m0-6l6 6" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/></svg>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="bg-green-500/20 rounded-xl p-3">
+                  <svg className="w-8 h-8 text-green-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-4xl font-black text-white mb-1">{solicitudes.filter(s => s.estado === 'aprobada').length}</p>
+                  <p className="text-blue-100 font-medium">Aprobadas</p>
+                </div>
               </div>
-              <div>
-                <div className="text-base font-bold text-white">{solicitudes.filter(s => s.estado === 'rechazada').length}</div>
-                <div className="text-white/80 text-xs font-medium">Rechazadas</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="flex items-start gap-4">
+                <div className="bg-red-500/20 rounded-xl p-3">
+                  <svg className="w-8 h-8 text-red-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-4xl font-black text-white mb-1">{solicitudes.filter(s => s.estado === 'rechazada').length}</p>
+                  <p className="text-blue-100 font-medium">Rechazadas</p>
+                </div>
               </div>
             </div>
           </div>
           {/* BUSCADOR Y FILTROS */}
-          <div className="bg-white/30 rounded-xl shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
-            <div className="flex flex-row gap-2 items-center w-full md:w-auto">
-              <div className="relative flex-grow max-w-xs">
-                <input
-                  type="text"
-                  className="bg-white shadow px-10 pr-4 py-2 rounded-lg w-full text-base text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200"
-                  placeholder="Buscar por nombre, departamento, cuenta..."
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                />
-                <FaSearch className="absolute left-3 top-2.5 text-blue-400" size={16} />
+          <div className="bg-white rounded-2xl shadow-lg p-6 mt-8">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              <div className="flex-1">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FaSearch className="text-gray-400" size={16} />
+                  </div>
+                  <input
+                    type="text"
+                    className="block w-full pl-11 pr-4 py-3 border-0 ring-1 ring-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 transition-shadow bg-gray-50/50"
+                    placeholder="Buscar por nombre, departamento, cuenta..."
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <label className="text-white text-sm font-semibold">Estado:</label>
-                <select 
-                  className="bg-white shadow px-3 py-2 rounded-lg text-sm text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200"
-                  value={filtroEstado}
-                  onChange={(e) => setFiltroEstado(e.target.value)}
-                >
-                  <option value="todos">Todos</option>
-                  <option value="pendiente">Pendientes</option>
-                  <option value="rechazada">Rechazadas</option>
-                  <option value="aprobada">Aprobadas</option>
-                  <option value="pagada">Pagadas</option>
-                </select>
+              
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <label className="text-gray-700 font-medium">Estado:</label>
+                  <select 
+                    className="bg-gray-50/50 border-0 ring-1 ring-gray-200 rounded-xl py-3 pl-4 pr-10 text-gray-900 focus:ring-2 focus:ring-blue-500 transition-shadow"
+                    value={filtroEstado}
+                    onChange={(e) => setFiltroEstado(e.target.value)}
+                  >
+                    <option value="todos">Todos los estados</option>
+                    <option value="pendiente">Pendientes</option>
+                    <option value="rechazada">Rechazadas</option>
+                    <option value="aprobada">Aprobadas</option>
+                    <option value="pagada">Pagadas</option>
+                  </select>
+                </div>
+                
+                {(busqueda || filtroEstado !== 'todos') && (
+                  <button 
+                    className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                    onClick={() => {
+                      setBusqueda('');
+                      setFiltroEstado('todos');
+                    }}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Limpiar filtros
+                  </button>
+                )}
               </div>
-              {(busqueda || filtroEstado !== 'todos') && (
-                <button 
-                  className="bg-white shadow px-3 py-2 rounded-lg text-sm text-blue-700 font-semibold hover:bg-blue-50 border border-blue-200 focus:outline-none ml-2"
-                  onClick={() => {
-                    setBusqueda('');
-                    setFiltroEstado('todos');
-                  }}
-                >
-                  Limpiar
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -247,29 +277,62 @@ return (
           )}
 
           {/* Tabla con el mismo diseño que historial */}
-          <div className="bg-white rounded-t-2xl shadow-lg overflow-hidden">
-            <div className="px-8 pt-7 pb-4 flex items-center justify-between bg-white rounded-t-2xl border-b border-gray-200">
-              <h2 className="text-2xl font-extrabold text-blue-900 tracking-tight">Solicitudes Procesadas</h2>
-              <span className="text-sm text-gray-500 font-medium">Orden: Pendientes → Rechazadas → Aprobadas</span>
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mt-6">
+            <div className="px-8 py-6 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Solicitudes Procesadas</h2>
+                <p className="text-sm text-gray-500 mt-1">Gestiona las solicitudes recurrentes del sistema</p>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-800">
+                  Pendientes
+                </span>
+                <span className="text-gray-300">→</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-800">
+                  Rechazadas
+                </span>
+                <span className="text-gray-300">→</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-800">
+                  Aprobadas
+                </span>
+              </div>
             </div>
-            <div className="overflow-x-auto bg-white">
-              <table className="min-w-full">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
                 <thead>
                   <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 first:rounded-tl-lg">Folio</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Usuario</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Departamento</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Monto</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Cuenta</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Frecuencia</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Estado</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Siguiente fecha</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Aprobador</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-600">Pagador</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 last:rounded-tr-lg">Acciones</th>
+                    <th className="group px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider first:rounded-tl-lg">
+                      <div className="flex items-center gap-2">
+                        Folio
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                          </svg>
+                        </div>
+                      </div>
+                    </th>
+                    <th className="group px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        Usuario
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                          </svg>
+                        </div>
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Departamento</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Monto</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Cuenta</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Frecuencia</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Siguiente fecha</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Aprobador</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pagador</th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider last:rounded-tr-lg">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white">
+                <tbody className="bg-white divide-y divide-gray-200">
                   {loading ? (
                     <tr>
                       <td colSpan={11} className="py-8 text-center">
@@ -289,78 +352,123 @@ return (
                     solicitudesFiltradas
                       .slice((paginaActual - 1) * elementosPorPagina, paginaActual * elementosPorPagina)
                       .map((s) => (
-                        <tr key={s.id_recurrente} className="group hover:bg-blue-50/50 transition-colors border-b border-gray-100">
-                          <td className="px-4 py-3 text-sm font-medium text-blue-600 hover:text-blue-800">
-                            {s.folio ? (
-                              <span className="cursor-pointer">{s.folio}</span>
-                            ) : '-'}
+                        <tr key={s.id_recurrente} className="group hover:bg-gray-50/50 transition-all duration-200">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                {s.folio ? (
+                                  <span className="cursor-pointer hover:underline">{s.folio}</span>
+                                ) : '-'}
+                              </div>
+                            </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-700">{s.nombre_usuario || '-'}</td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 font-medium">{s.nombre_usuario || '-'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-purple-50 text-purple-700 ring-1 ring-purple-700/10">
                               {s.departamento}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                            ${s.monto.toLocaleString('es-MX', {minimumFractionDigits:2})}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              ${s.monto.toLocaleString('es-MX', {minimumFractionDigits:2})}
+                            </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-600">{s.cuenta_destino}</td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-600">{s.cuenta_destino}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-blue-700/10">
                               {s.frecuencia}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-6 py-4 whitespace-nowrap">
                             {(() => {
                               const estado = (s.estado || '').toLowerCase();
                               if (estado === 'pendiente') {
                                 return (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
-                                    ● Pendiente
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-yellow-50 text-yellow-700 ring-1 ring-yellow-700/10">
+                                    <svg className="w-1.5 h-1.5 fill-current" viewBox="0 0 6 6">
+                                      <circle cx="3" cy="3" r="3"/>
+                                    </svg>
+                                    Pendiente
                                   </span>
                                 );
                               } else if (estado === 'aprobada' || estado === 'aprobado') {
                                 return (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
-                                    ✓ Aprobada
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-green-50 text-green-700 ring-1 ring-green-700/10">
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Aprobada
                                   </span>
                                 );
                               } else if (estado === 'rechazada' || estado === 'rechazado') {
                                 return (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
-                                    ✕ Rechazada
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-red-50 text-red-700 ring-1 ring-red-700/10">
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Rechazada
                                   </span>
                                 );
                               } else if (estado === 'pagada' || estado === 'pagado') {
                                 return (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-800">
-                                    ✓ Pagada
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-green-50 text-green-700 ring-1 ring-green-700/10">
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Pagada
                                   </span>
                                 );
                               } else {
                                 return (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                  <span className="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-gray-50 text-gray-700 ring-1 ring-gray-700/10">
                                     {s.estado || '-'}
                                   </span>
                                 );
                               }
                             })()}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-600">
+                          <td className="px-6 py-4 whitespace-nowrap">
                             {s.siguiente_fecha ? (
-                              <span title={new Date(s.siguiente_fecha).toLocaleString('es-MX')}>
-                                {new Date(s.siguiente_fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span className="text-sm text-gray-600" title={new Date(s.siguiente_fecha).toLocaleString('es-MX')}>
+                                  {new Date(s.siguiente_fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                </span>
+                              </div>
                             ) : (
-                              <span className="text-gray-400">-</span>
+                              <span className="text-sm text-gray-400">-</span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-600">{s.nombre_aprobador || '-'}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600">{s.nombre_pagador || '-'}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex justify-center gap-1.5">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex-shrink-0">
+                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                              </div>
+                              <div className="text-sm text-gray-600">{s.nombre_aprobador || '-'}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex-shrink-0">
+                                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                                </svg>
+                              </div>
+                              <div className="text-sm text-gray-600">{s.nombre_pagador || '-'}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex items-center justify-center gap-2">
                               <button
-                                className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                className="inline-flex items-center p-1.5 text-gray-500 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-lg transition-all duration-200"
                                 onClick={() => { setSolicitudSeleccionada(s); setModalOpen(true); }}
                                 title="Ver detalles"
                               >
@@ -372,10 +480,10 @@ return (
                               {s.estado === 'pendiente' && (
                                 <>
                                   <button
-                                    className="p-1 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
+                                    className="inline-flex items-center p-1.5 text-gray-500 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-lg transition-all duration-200 disabled:opacity-50"
                                     disabled={accionEnCurso === s.id_recurrente}
                                     onClick={() => setConfirmarAccion({ tipo: 'aprobar', id: s.id_recurrente })}
-                                    title="Aprobar"
+                                    title="Aprobar solicitud"
                                   >
                                     {accionEnCurso === s.id_recurrente ? (
                                       <div className="animate-spin h-5 w-5 border-2 border-current rounded-full border-t-transparent"></div>
@@ -384,10 +492,10 @@ return (
                                     )}
                                   </button>
                                   <button
-                                    className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                    className="inline-flex items-center p-1.5 text-gray-500 hover:text-red-600 bg-gray-50 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:opacity-50"
                                     disabled={accionEnCurso === s.id_recurrente}
                                     onClick={() => setConfirmarAccion({ tipo: 'rechazar', id: s.id_recurrente })}
-                                    title="Rechazar"
+                                    title="Rechazar solicitud"
                                   >
                                     <FaTimes className="w-5 h-5" />
                                   </button>
@@ -485,37 +593,85 @@ return (
               </table>
             </div>
           
-          {/* Paginador simplificado */}
+          {/* Paginador mejorado */}
           {!loading && solicitudesFiltradas.length > 0 && (
-            <div className="flex items-center justify-between py-3 px-4 border-t border-gray-200 bg-white">
-              <div className="text-sm text-gray-700">
-                Mostrando <span className="font-medium">{(paginaActual - 1) * elementosPorPagina + 1}</span> a <span className="font-medium">{Math.min(paginaActual * elementosPorPagina, solicitudesFiltradas.length)}</span> de <span className="font-medium">{solicitudesFiltradas.length}</span> resultados
-              </div>
-              <nav className="flex gap-1">
-                <button 
-                  onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))} 
-                  disabled={paginaActual === 1}
-                  className={`px-2 py-1 text-sm rounded ${paginaActual === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'}`}
-                >
-                  Anterior
-                </button>
-                {Array.from({ length: Math.ceil(solicitudesFiltradas.length / elementosPorPagina) }).map((_, i) => (
+            <div className="bg-white border-t border-gray-200">
+              <div className="px-8 py-4 sm:flex sm:items-center sm:justify-between">
+                <div className="text-sm text-gray-700 font-medium">
+                  <span className="hidden sm:inline">Mostrando </span>
+                  <span className="font-semibold text-gray-900">{(paginaActual - 1) * elementosPorPagina + 1}</span>
+                  <span className="hidden sm:inline"> a </span>
+                  <span className="sm:hidden">-</span>
+                  <span className="font-semibold text-gray-900">{Math.min(paginaActual * elementosPorPagina, solicitudesFiltradas.length)}</span>
+                  <span className="hidden sm:inline"> de </span>
+                  <span className="sm:hidden">/</span>
+                  <span className="font-semibold text-gray-900">{solicitudesFiltradas.length}</span>
+                  <span className="hidden sm:inline"> resultados</span>
+                </div>
+                <nav className="flex items-center gap-2 mt-3 sm:mt-0" aria-label="Pagination">
                   <button 
-                    key={i + 1}
-                    onClick={() => setPaginaActual(i + 1)}
-                    className={`px-3 py-1 text-sm rounded-md ${paginaActual === i + 1 ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+                    onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))} 
+                    disabled={paginaActual === 1}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                      paginaActual === 1 
+                        ? 'text-gray-400 bg-gray-50 cursor-not-allowed' 
+                        : 'text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                    }`}
                   >
-                    {i + 1}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>Anterior</span>
                   </button>
-                ))}
-                <button 
-                  onClick={() => setPaginaActual(prev => Math.min(prev + 1, Math.ceil(solicitudesFiltradas.length / elementosPorPagina)))}
-                  disabled={paginaActual === Math.ceil(solicitudesFiltradas.length / elementosPorPagina)}
-                  className={`px-2 py-1 text-sm rounded ${paginaActual === Math.ceil(solicitudesFiltradas.length / elementosPorPagina) ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'}`}
-                >
-                  Siguiente
-                </button>
-              </nav>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.ceil(solicitudesFiltradas.length / elementosPorPagina) }).map((_, i) => {
+                      // Solo mostrar 5 páginas alrededor de la página actual
+                      if (
+                        i === 0 || // Primera página
+                        i === Math.ceil(solicitudesFiltradas.length / elementosPorPagina) - 1 || // Última página
+                        (i >= paginaActual - 2 && i <= paginaActual + 2) // 2 páginas antes y después de la actual
+                      ) {
+                        return (
+                          <button 
+                            key={i + 1}
+                            onClick={() => setPaginaActual(i + 1)}
+                            className={`inline-flex items-center justify-center min-w-[2.25rem] h-9 px-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                              paginaActual === i + 1
+                                ? 'bg-blue-50 text-blue-600 ring-1 ring-blue-600'
+                                : 'text-gray-700 hover:bg-gray-100'
+                            }`}
+                            aria-current={paginaActual === i + 1 ? 'page' : undefined}
+                          >
+                            {i + 1}
+                          </button>
+                        );
+                      } else if (
+                        (i === 1 && paginaActual - 2 > 1) || 
+                        (i === Math.ceil(solicitudesFiltradas.length / elementosPorPagina) - 2 && paginaActual + 2 < Math.ceil(solicitudesFiltradas.length / elementosPorPagina) - 1)
+                      ) {
+                        return <span key={i} className="px-2 text-gray-400">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  <button 
+                    onClick={() => setPaginaActual(prev => Math.min(prev + 1, Math.ceil(solicitudesFiltradas.length / elementosPorPagina)))}
+                    disabled={paginaActual === Math.ceil(solicitudesFiltradas.length / elementosPorPagina)}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                      paginaActual === Math.ceil(solicitudesFiltradas.length / elementosPorPagina)
+                        ? 'text-gray-400 bg-gray-50 cursor-not-allowed'
+                        : 'text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                    }`}
+                  >
+                    <span>Siguiente</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </nav>
+              </div>
             </div>
           )}
             </div>
