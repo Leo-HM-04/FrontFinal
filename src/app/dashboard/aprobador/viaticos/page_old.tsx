@@ -11,12 +11,13 @@ import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { Solicitud } from '@/types';
-import { formatCurrency, formatDate, normalizeViatico } from '@/utils/viaticos';
+import { formatCurrency, formatDate, getDepartmentColorClass, normalizeViatico } from '@/utils/viaticos';
+import { UrgencyBadge } from '@/components/viaticos/UrgencyBadge';
 
 const SkeletonRow: React.FC = () => (
   <tr className="animate-pulse">
     {Array.from({ length: 11 }).map((_, i) => (
-      <td key={i} className="h-8 bg-gray-100 rounded" />
+      <td key={i} className="h-8 bg-blue-100/40 rounded" />
     ))}
   </tr>
 );
@@ -140,6 +141,7 @@ const useSelectAllByUsuario = (viaticosPorUsuario: Record<string, Solicitud[]>, 
   }, [viaticosPorUsuario, selectedViaticos, setSelectedViaticos]);
 };
 
+
 import { useUserPagination } from '@/hooks/useUserPagination';
 import api from '@/lib/api';
 
@@ -149,11 +151,14 @@ const Viaticos: React.FC = () => {
   const { viaticos = [], loading, error, refetch } = useViaticos();
   const tresDiasDespues = useMemo(() => new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000), []);
 
+  // Selección múltiple para checklist (persistente entre modos y páginas)
   const [selectedViaticos, setSelectedViaticos] = React.useState<number[]>([]);
   const toggleViatico = useCallback((id: number) => {
     setSelectedViaticos(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   }, []);
 
+  // Ordenar y normalizar viaticos
+  // Filtrar solo viáticos pendientes antes de ordenar y normalizar
   const viaticosOrdenados = useMemo(() =>
     viaticos
       .filter(v => v.estado === 'pendiente')
@@ -173,6 +178,7 @@ const Viaticos: React.FC = () => {
 
   const viaticosForFilter: Solicitud[] = viaticosOrdenados;
 
+  // FILTROS AVANZADOS
   const {
     filters,
     filteredData: filteredViaticos,
@@ -180,6 +186,7 @@ const Viaticos: React.FC = () => {
     updateFilters
   } = useAdvancedFilters(viaticosForFilter, 'solicitudes');
 
+  // Agrupar viáticos filtrados por id_usuario (clave: id_usuario)
   const viaticosPorUsuario = useMemo(() => {
     if (!Array.isArray(filteredViaticos)) return {};
     return filteredViaticos.reduce((acc: Record<string, Solicitud[]>, v: Solicitud) => {
@@ -190,11 +197,16 @@ const Viaticos: React.FC = () => {
     }, {});
   }, [filteredViaticos]);
 
+  // PAGINACIÓN GLOBAL (sobre todos los viáticos filtrados)
+  // Aquí usamos usePagination pero no usamos sus valores de retorno actualmente
   usePagination({ data: filteredViaticos, initialItemsPerPage: DEFAULT_ITEMS_PER_PAGE });
 
+  // Paginación local por usuario (hook reutilizable)
   const userIds = useMemo(() => Object.keys(viaticosPorUsuario), [viaticosPorUsuario]);
   const userPagination = useUserPagination(userIds, DEFAULT_ITEMS_PER_PAGE);
 
+
+  // Selección masiva por usuario (persistente y global)
   const selectAllByUsuario = useSelectAllByUsuario(
     viaticosPorUsuario,
     selectedViaticos,
@@ -202,14 +214,19 @@ const Viaticos: React.FC = () => {
   );
   const hasSelection = selectedViaticos.length > 0;
 
+  // Estado para controlar qué usuario está expandido (acordeón)
   const [usuarioExpandido, setUsuarioExpandido] = React.useState<string | null>(null);
 
+
+  // Estado para feedback de acciones masivas
   const [accionCargando, setAccionCargando] = useState<'aprobar' | 'rechazar' | null>(null);
   const [mensajeAccion, setMensajeAccion] = useState<string | null>(null);
   const [errorAccion, setErrorAccion] = useState<string | null>(null);
 
+  // Estado para confirmaciones modales
   const [modalConfirm, setModalConfirm] = useState<null | 'aprobar' | 'rechazar'>(null);
 
+  // Función para aprobar lote de viáticos seleccionados (con confirmación)
   const aprobarSeleccionados = async () => {
     setModalConfirm(null);
     setAccionCargando('aprobar');
@@ -221,7 +238,7 @@ const Viaticos: React.FC = () => {
       });
       setMensajeAccion(response.data.message || 'Viáticos aprobados correctamente');
       setSelectedViaticos([]);
-      if (typeof refetch === 'function') refetch();
+      if (typeof refetch === 'function') refetch(); // Recargar viáticos
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setErrorAccion(err.response?.data?.error || 'Error al aprobar viáticos');
@@ -233,6 +250,7 @@ const Viaticos: React.FC = () => {
     }
   };
 
+  // Función para rechazar lote de viáticos seleccionados (con confirmación)
   const rechazarSeleccionados = async () => {
     setModalConfirm(null);
     setAccionCargando('rechazar');
@@ -244,7 +262,7 @@ const Viaticos: React.FC = () => {
       });
       setMensajeAccion(response.data.message || 'Viáticos rechazados correctamente');
       setSelectedViaticos([]);
-      if (typeof refetch === 'function') refetch();
+      if (typeof refetch === 'function') refetch(); // Recargar viáticos
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setErrorAccion(err.response?.data?.error || 'Error al rechazar viáticos');
@@ -256,6 +274,7 @@ const Viaticos: React.FC = () => {
     }
   };
 
+  // Renderizado: acordeón, solo muestra la tabla del usuario seleccionado
   return (
     <ProtectedRoute requiredRoles={['aprobador']}>
       <AprobadorLayout>
@@ -325,6 +344,7 @@ const Viaticos: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            {/* FILTROS AVANZADOS */}
             <div className="border-b border-gray-200">
               <AdvancedFilters
                 filters={filters}
@@ -333,34 +353,45 @@ const Viaticos: React.FC = () => {
                 type="solicitudes"
               />
             </div>
-            
-            <div className="overflow-x-auto">
+            < className="overflow-x-auto">
+              {/* Barra fija de acciones masivas */}
+              {/* Barra de acciones masivas: aprobar/rechazar */}
               {hasSelection && (
                 <div className="fixed left-0 right-0 bottom-0 z-40 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6 flex items-center gap-8 shadow-2xl animate-fade-in justify-center border-t-4 border-blue-400">
                   <span className="font-extrabold text-lg tracking-wide drop-shadow-lg">
                     Seleccionados: <span className="text-yellow-300 text-2xl font-black animate-pulse">{selectedViaticos.length}</span>
                   </span>
+                  {/* Botón Aprobar */}
                   <button
                     className="flex items-center gap-2 bg-gradient-to-br from-green-500 via-green-600 to-green-700 hover:from-green-600 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-extrabold text-xl shadow-xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 disabled:opacity-60 border-2 border-white/30"
+                    aria-label={`Aprobar ${selectedViaticos.length} viáticos`}
                     onClick={() => setModalConfirm('aprobar')}
                     disabled={accionCargando === 'aprobar'}
                   >
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="inline align-middle"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                     {accionCargando === 'aprobar' ? 'Aprobando...' : 'Aprobar'}
                   </button>
+                  {/* Botón Rechazar */}
                   <button
                     className="flex items-center gap-2 bg-gradient-to-br from-red-500 via-red-600 to-red-700 hover:from-red-600 hover:to-red-800 text-white px-8 py-4 rounded-2xl font-extrabold text-xl shadow-xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300 disabled:opacity-60 border-2 border-white/30"
+                    aria-label={`Rechazar ${selectedViaticos.length} viáticos`}
                     onClick={() => setModalConfirm('rechazar')}
                     disabled={accionCargando === 'rechazar'}
                   >
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="inline align-middle"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     {accionCargando === 'rechazar' ? 'Rechazando...' : 'Rechazar'}
                   </button>
-                  {mensajeAccion && <span className="ml-6 text-green-200 font-extrabold text-lg animate-fade-in drop-shadow-lg">{mensajeAccion}</span>}
-                  {errorAccion && <span className="ml-6 text-red-200 font-extrabold text-lg animate-fade-in drop-shadow-lg">{errorAccion}</span>}
+                  {/* Mensaje de éxito o error */}
+                  {mensajeAccion && (
+                    <span className="ml-6 text-green-200 font-extrabold text-lg animate-fade-in drop-shadow-lg">{mensajeAccion}</span>
+                  )}
+                  {errorAccion && (
+                    <span className="ml-6 text-red-200 font-extrabold text-lg animate-fade-in drop-shadow-lg">{errorAccion}</span>
+                  )}
                 </div>
               )}
 
+              {/* Modal de confirmación para aprobar/rechazar lote */}
               {modalConfirm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                   <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full flex flex-col items-center animate-fade-in">
@@ -374,6 +405,7 @@ const Viaticos: React.FC = () => {
                       <button
                         className="px-4 py-2 rounded font-semibold bg-blue-200 hover:bg-blue-300 text-blue-900 transition"
                         onClick={() => setModalConfirm(null)}
+                        aria-label="Cancelar confirmación"
                       >
                         Cancelar
                       </button>
@@ -382,6 +414,7 @@ const Viaticos: React.FC = () => {
                           ? 'px-4 py-2 rounded font-semibold bg-green-500 hover:bg-green-600 text-white transition'
                           : 'px-4 py-2 rounded font-semibold bg-red-500 hover:bg-red-600 text-white transition'}
                         onClick={modalConfirm === 'aprobar' ? aprobarSeleccionados : rechazarSeleccionados}
+                        aria-label={modalConfirm === 'aprobar' ? 'Confirmar aprobar' : 'Confirmar rechazar'}
                         autoFocus
                       >
                         {modalConfirm === 'aprobar' ? 'Sí, aprobar' : 'Sí, rechazar'}
@@ -390,7 +423,6 @@ const Viaticos: React.FC = () => {
                   </div>
                 </div>
               )}
-
               {loading ? (
                 <table className="min-w-[950px] w-full border-collapse text-xs md:text-sm">
                   <tbody>
@@ -407,6 +439,7 @@ const Viaticos: React.FC = () => {
                     <div className="text-center py-8 text-gray-500">No hay viáticos para mostrar.</div>
                   ) : (
                     <div className="space-y-6">
+                      {/* Renderiza todos los encabezados de usuario como botones de acordeón */}
                       {userIds.map((userId) => {
                         const viaticosUsuario = viaticosPorUsuario[userId] || [];
                         const currentPage = userPagination.getPage(userId);
@@ -418,17 +451,18 @@ const Viaticos: React.FC = () => {
                         const pageViaticos = viaticosUsuario.slice(startIdx, endIdx);
                         const usuarioNombre = viaticosUsuario[0]?.usuario_nombre || `Usuario ${userId}`;
                         const isOpen = usuarioExpandido === userId;
-                        
                         return (
                           <div key={userId} className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300">
+                            {/* Encabezado clickable para expandir/colapsar */}
                             <button
                               className={`w-full flex items-center gap-3 px-6 py-4 hover:bg-gray-50/80 focus:outline-none focus:bg-gray-50/80 transition-all duration-200 ${isOpen ? 'border-b border-gray-200' : ''}`}
                               aria-expanded={isOpen}
+                              aria-controls={`tabla-usuario-${userId}`}
                               onClick={() => setUsuarioExpandido(isOpen ? null : userId)}
                             >
                               <div className="flex-1 flex items-center gap-3">
                                 <div className={`p-2 rounded-lg ${isOpen ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>
-                                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
                                   </svg>
                                 </div>
@@ -448,15 +482,14 @@ const Viaticos: React.FC = () => {
                                 </svg>
                               </div>
                             </button>
-
+                            {/* Contenido del acordeón: solo visible si está expandido */}
                             {isOpen && (
-                              <div className="overflow-x-auto transition-all duration-300">
+                              <div id={`tabla-usuario-${userId}`} className="overflow-x-auto transition-all duration-300">
                                 <div className="px-6 py-2 text-blue-900 text-sm font-semibold">
                                   {totalItems === 0
                                     ? 'No hay viáticos para este usuario.'
                                     : `Mostrando ${totalItems === 0 ? 0 : startIdx + 1}–${endIdx} de ${totalItems} viáticos`}
                                 </div>
-                                
                                 {pageViaticos.length === 0 ? (
                                   <div className="flex flex-col items-center justify-center py-12">
                                     <svg className="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -472,6 +505,7 @@ const Viaticos: React.FC = () => {
                                           <th className="px-4 py-3 first:rounded-tl-lg">
                                             <input
                                               type="checkbox"
+                                              aria-label={`Seleccionar todos los viáticos de ${usuarioNombre}`}
                                               className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                               checked={pageViaticos.length > 0 && pageViaticos.every(v => selectedViaticos.includes(v.id_solicitud))}
                                               onChange={() => selectAllByUsuario(userId)}
@@ -497,33 +531,31 @@ const Viaticos: React.FC = () => {
                                         </tr>
                                       </thead>
                                       <tbody className="bg-white divide-y divide-gray-200">
-                                        {pageViaticos.map((v) => (
-                                          <ViaticoRow
-                                            key={`${userId}-${v.id_solicitud}`}
-                                            v={v}
-                                            isSelected={selectedViaticos.includes(v.id_solicitud)}
-                                            onToggle={toggleViatico}
-                                            tresDiasDespues={tresDiasDespues}
-                                          />
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
+                                      {pageViaticos.map((v) => (
+                                        <ViaticoRow
+                                          key={`${userId}-${v.id_solicitud}`}
+                                          v={v}
+                                          isSelected={selectedViaticos.includes(v.id_solicitud)}
+                                          onToggle={toggleViatico}
+                                          tresDiasDespues={tresDiasDespues}
+                                        />
+                                      ))}
+                                    </tbody>
+                                  </table>
                                 )}
-
+                                {/* Paginador local por usuario */}
                                 {totalPages > 1 && (
                                   <div className="flex justify-end px-6 py-4">
-                                    <nav>
-                                      <ul className="flex items-center gap-1 bg-white/80 rounded-xl shadow border border-gray-200 px-2 py-1">
+                                    <nav aria-label={`Paginador de ${usuarioNombre}`}> 
+                                      <ul className="flex items-center gap-1 bg-white/80 rounded-xl shadow border border-blue-200 px-2 py-1">
                                         <li>
                                           <button
                                             className="transition-all duration-150 px-3 py-2 rounded-full text-blue-600 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
                                             onClick={() => userPagination.setPage(userId, Math.max(1, currentPage - 1))}
                                             disabled={currentPage === 1}
+                                            aria-label="Página anterior"
                                           >
-                                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                            </svg>
+                                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="inline align-middle"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                                           </button>
                                         </li>
                                         {Array.from({ length: totalPages }).map((_, idx) => (
@@ -533,6 +565,7 @@ const Viaticos: React.FC = () => {
                                                 ? 'bg-gradient-to-tr from-blue-600 to-blue-400 text-white border-blue-600 shadow-lg scale-105'
                                                 : 'bg-white text-blue-700 border-transparent hover:border-blue-400 hover:bg-blue-50'}`}
                                               onClick={() => userPagination.setPage(userId, idx + 1)}
+                                              aria-current={currentPage === idx + 1 ? 'page' : undefined}
                                             >
                                               {idx + 1}
                                             </button>
@@ -543,10 +576,9 @@ const Viaticos: React.FC = () => {
                                             className="transition-all duration-150 px-3 py-2 rounded-full text-blue-600 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
                                             onClick={() => userPagination.setPage(userId, Math.min(totalPages, currentPage + 1))}
                                             disabled={currentPage === totalPages}
+                                            aria-label="Página siguiente"
                                           >
-                                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                            </svg>
+                                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="inline align-middle"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                           </button>
                                         </li>
                                       </ul>
@@ -564,9 +596,9 @@ const Viaticos: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
-      </AprobadorLayout>
-    </ProtectedRoute>
+        </AprobadorLayout>
+      </ProtectedRoute>
+    </>
   );
 };
 
