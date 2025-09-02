@@ -283,64 +283,113 @@ export default function NuevoViaticoPage() {
                       }
                       setFormularios(nuevos);
                     }} required className={`text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-blue-300 focus:ring-4 focus:ring-blue-400/50 focus:border-blue-500 shadow-sm hover:shadow-md transition-all ${formularios[idx].errors?.cuenta_destino ? 'border-red-400 focus:border-red-500' : ''}`} />
-                    {formularios[idx].errors?.cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.cuenta_destino}</span>)}
+                    {formularios[idx].errors?.cuenta_destino && (<span className="text-red-600 text-sm font-medium bg-red-50 px-2 py-1 rounded">{formularios[idx].errors.cuenta_destino}</span>)}
                   </div>
                   {/* Selección de banco */}
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Banco Destino *</label>
-                    <select name="banco_destino" value={formularios[idx].form.banco_destino || ''} onChange={e => handleChange(idx, e)} required className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-blue-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                      Banco Destino *
+                    </label>
+                    <select name="banco_destino" value={formularios[idx].form.banco_destino || ''} onChange={e => handleChange(idx, e)} required className="input input-bordered text-black uppercase text-lg px-4 py-3 rounded-xl border-2 border-blue-300 focus:ring-4 focus:ring-blue-400/50 focus:border-blue-500 shadow-sm hover:shadow-md transition-all">
                       <option value="" disabled>Selecciona un banco</option>
                       {bancoOptions.map(banco => (
                         <option key={banco} value={banco}>{banco}</option>
                       ))}
                     </select>
-                    {formularios[idx].errors?.banco_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.banco_destino}</span>)}
+                    {formularios[idx].errors?.banco_destino && (<span className="text-red-600 text-sm font-medium bg-red-50 px-2 py-1 rounded">{formularios[idx].errors.banco_destino}</span>)}
                   </div>
                 </div>
 
-                {/* Bloque: Cuenta Adicional */}
-                <div className="mb-1 p-2 rounded-xl bg-green-50/60 border border-green-100 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Cuenta (Opcional)</label>
+                {/* Sección: Cuenta Adicional */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-green-800 flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </div>
+                    Cuenta Adicional (Opcional)
+                  </h3>
+                  <div className="h-1 w-32 bg-gradient-to-r from-green-600 to-green-400 rounded-full mb-6"></div>
+                </div>
+                
+                <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 shadow-inner grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-green-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Cuenta Adicional
+                    </label>
                     <input 
                       name="cuenta" 
                       placeholder="Ingresa número de cuenta adicional" 
                       value={formularios[idx].form.cuenta || ''} 
                       onChange={e => handleChange(idx, e)} 
-                      className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-green-200 focus:ring-2 focus:ring-green-400" 
+                      className="text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-green-300 focus:ring-4 focus:ring-green-400/50 focus:border-green-500 shadow-sm hover:shadow-md transition-all" 
                     />
-                    {formularios[idx].errors?.cuenta && (<span className="text-red-500 text-sm">{formularios[idx].errors.cuenta}</span>)}
+                    {formularios[idx].errors?.cuenta && (<span className="text-red-600 text-sm font-medium bg-red-50 px-2 py-1 rounded">{formularios[idx].errors.cuenta}</span>)}
                   </div>
                   
                   {formularios[idx].form.cuenta && formularios[idx].form.cuenta.trim() !== '' && (
-                    <div className="flex flex-col gap-1">
-                      <label className="text-blue-900 font-bold text-base">Banco al que pertenece *</label>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-green-900 font-bold text-lg flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Banco de la Cuenta *
+                      </label>
                       <select 
                         name="banco_cuenta" 
                         value={formularios[idx].form.banco_cuenta || ''} 
                         onChange={e => handleChange(idx, e)} 
                         required
-                        className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-green-200 focus:ring-2 focus:ring-green-400" 
+                        className="text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-green-300 focus:ring-4 focus:ring-green-400/50 focus:border-green-500 shadow-sm hover:shadow-md transition-all" 
                       >
                         <option value="" disabled>Selecciona un banco</option>
                         {bancoOptions.map(banco => (
                           <option key={banco} value={banco}>{banco}</option>
                         ))}
                       </select>
-                      {formularios[idx].errors?.banco_cuenta && (<span className="text-red-500 text-sm">{formularios[idx].errors.banco_cuenta}</span>)}
+                      {formularios[idx].errors?.banco_cuenta && (<span className="text-red-600 text-sm font-medium bg-red-50 px-2 py-1 rounded">{formularios[idx].errors.banco_cuenta}</span>)}
                     </div>
                   )}
                 </div>
 
-                {/* Bloque: Datos del pago */}
-                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Monto</label>
-                    <input name="monto" placeholder="Monto" type="number" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                {/* Sección: Datos del Pago */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-purple-800 flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                    Información del Pago
+                  </h3>
+                  <div className="h-1 w-32 bg-gradient-to-r from-purple-600 to-purple-400 rounded-full mb-6"></div>
+                </div>
+                
+                <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 shadow-inner grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-purple-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                      Monto *
+                    </label>
+                    <input name="monto" placeholder="Monto del viático" type="number" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-purple-300 focus:ring-4 focus:ring-purple-400/50 focus:border-purple-500 shadow-sm hover:shadow-md transition-all" />
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Departamento</label>
-                    <select name="departamento" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-purple-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                      Departamento *
+                    </label>
+                    <select name="departamento" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-purple-300 focus:ring-4 focus:ring-purple-400/50 focus:border-purple-500 shadow-sm hover:shadow-md transition-all" defaultValue="">
                       <option value="" disabled>SELECCIONA UN DEPARTAMENTO</option>
                       <option value="contabilidad">CONTABILIDAD</option>
                       <option value="facturacion">FACTURACIÓN</option>
@@ -357,22 +406,27 @@ export default function NuevoViaticoPage() {
                       <option value="direccion general">DIRECCIÓN GENERAL</option>
                     </select>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Fecha límite de pago</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-purple-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4M3 21V11a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM8 15h8" />
+                      </svg>
+                      Fecha Límite de Pago *
+                    </label>
                     <div className="relative flex items-center">
                       <input
                         name="fecha_limite_pago"
                         type="date"
                         onChange={e => handleChange(idx, e)}
                         required
-                        className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 pr-10"
+                        className="text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-purple-300 focus:ring-4 focus:ring-purple-400/50 focus:border-purple-500 shadow-sm hover:shadow-md transition-all pr-12"
                         onFocus={e => e.target.showPicker && e.target.showPicker()}
-                        style={{ minWidth: 180 }}
+                        style={{ minWidth: 220 }}
                       />
                       <button
                         type="button"
                         tabIndex={-1}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-800"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-600 hover:text-purple-800 transition-colors"
                         onClick={e => {
                           const input = (e.currentTarget.parentElement?.querySelector('input[type="date"]') as HTMLInputElement);
                           if (input && input.showPicker) input.showPicker();
@@ -380,66 +434,152 @@ export default function NuevoViaticoPage() {
                         }}
                         aria-label="Abrir calendario"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="2" fill="#e0e7ff"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 2v4M16 2v4M3 10h18" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <rect x="3" y="4" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="2" fill="#f3e8ff"/>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 2v4M16 2v4M3 10h18" />
+                        </svg>
                       </button>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Concepto</label>
+                </div>
+
+                {/* Sección: Detalles Adicionales */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-indigo-800 flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    Detalles Adicionales
+                  </h3>
+                  <div className="h-1 w-32 bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full mb-6"></div>
+                </div>
+                
+                <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 shadow-inner grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-indigo-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Concepto
+                    </label>
                     <input 
                       name="concepto" 
                       value="Pago a terceros" 
                       readOnly 
-                      className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 bg-gray-100 cursor-not-allowed" 
+                      className="text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-gray-300 bg-gray-100 cursor-not-allowed shadow-sm" 
                     />
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Descripción del viático</label>
-                    <input name="tipo_pago_descripcion" placeholder="Descripción del uso o destino del viático" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                  <div className="flex flex-col gap-2">
+                    <label className="text-indigo-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Descripción del Viático
+                    </label>
+                    <input name="tipo_pago_descripcion" placeholder="Descripción del uso o destino del viático" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-indigo-300 focus:ring-4 focus:ring-indigo-400/50 focus:border-indigo-500 shadow-sm hover:shadow-md transition-all" />
                   </div>
                 </div>
 
-                {/* Bloque: Persona */}
-                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Nombre del beneficiario *</label>
-                    <input name="nombre_persona" placeholder="Nombre completo de la persona que recibe directamente el pago" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                {/* Sección: Beneficiario */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-orange-800 flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    Datos del Beneficiario
+                  </h3>
+                  <div className="h-1 w-32 bg-gradient-to-r from-orange-600 to-orange-400 rounded-full mb-6"></div>
+                </div>
+                
+                <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 shadow-inner">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-orange-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Nombre del Beneficiario *
+                    </label>
+                    <input name="nombre_persona" placeholder="Nombre completo de la persona que recibe directamente el pago" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-orange-300 focus:ring-4 focus:ring-orange-400/50 focus:border-orange-500 shadow-sm hover:shadow-md transition-all" />
                   </div>
                 </div>
 
-                {/* Bloque: Archivo comprobante */}
-                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Archivo comprobante</label>
-                    <input type="file" name="viatico_url" onChange={e => handleFile(idx, e)} required className="file-input file-input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 text-blue-900 bg-white placeholder-blue-700" />
+                {/* Sección: Archivo Comprobante */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-red-800 flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                    </div>
+                    Archivo Comprobante
+                  </h3>
+                  <div className="h-1 w-32 bg-gradient-to-r from-red-600 to-red-400 rounded-full mb-6"></div>
+                </div>
+                
+                <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 shadow-inner">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-red-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                      Archivo Comprobante *
+                    </label>
+                    <input type="file" name="viatico_url" onChange={e => handleFile(idx, e)} required className="file-input file-input-bordered text-lg px-4 py-3 rounded-xl border-2 border-red-300 focus:ring-4 focus:ring-red-400/50 focus:border-red-500 text-red-900 bg-white placeholder-red-700 shadow-sm hover:shadow-md transition-all" />
                   </div>
-                  {f.mensaje && <div className="text-center text-blue-800 font-medium mt-2">{f.mensaje}</div>}
+                  {f.mensaje && <div className="text-center text-red-800 font-medium mt-3 p-2 bg-red-50 rounded-lg">{f.mensaje}</div>}
                   <input name="tipo_pago" value="viaticos" readOnly hidden />
                 </div>
               </div>
             ))}
-            <div className="flex flex-row justify-between items-center gap-2 mt-2">
+            
+            {/* Botones de acción mejorados */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 mt-12 pt-8 border-t-2 border-blue-200">
               <button
                 type="button"
-                className="btn btn-outline px-4 py-1 rounded-lg border-blue-700 text-blue-700 text-base font-bold hover:bg-blue-100 hover:border-blue-800 transition shadow"
+                className="flex items-center gap-3 px-8 py-4 rounded-2xl border-2 border-blue-600 text-blue-700 text-lg font-bold hover:bg-blue-50 hover:border-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 onClick={handleAgregarOtro}
               >
-                + Agregar otro
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Agregar Otro Viático
               </button>
-              <div className="flex gap-2">
+              <div className="flex gap-4">
                 <button
                   type="button"
-                  className="btn btn-outline px-6 py-1 rounded-lg border-gray-400 text-gray-700 text-base font-bold hover:bg-gray-100 hover:border-gray-600 transition shadow"
+                  className="flex items-center gap-2 px-8 py-4 rounded-2xl border-2 border-gray-400 text-gray-700 text-lg font-bold hover:bg-gray-50 hover:border-gray-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   onClick={() => router.push('/dashboard/solicitante/mis-viaticos')}
                 >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className={`btn btn-primary px-6 py-1 rounded-lg bg-blue-700 text-white text-base font-bold hover:bg-blue-800 transition shadow ${enviando ? 'opacity-60 pointer-events-none' : ''}`}
+                  className={`flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${enviando ? 'opacity-60 pointer-events-none animate-pulse' : ''}`}
                   disabled={enviando}
                 >
-                  {enviando ? 'Creando...' : 'Crear todos'}
+                  {enviando ? (
+                    <>
+                      <svg className="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creando...
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Crear Todos los Viáticos
+                    </>
+                  )}
                 </button>
               </div>
             </div>
