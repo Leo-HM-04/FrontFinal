@@ -149,7 +149,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
     };
     
     checkAndPlay();
-    const interval = setInterval(checkAndPlay, 10000); // cada 10 segundos
+    const interval = setInterval(checkAndPlay, 3000); // cada 3 segundos para respuesta más rápida
     return () => {
       clearInterval(interval);
     };
