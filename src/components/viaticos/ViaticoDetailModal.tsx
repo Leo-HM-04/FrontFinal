@@ -206,16 +206,6 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                       </div>
                     </div>
                   )}
-
-                  {/* Comentario del aprobador */}
-                  {viatico.comentario_aprobador && (
-                    <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80 mt-4">
-                      <h4 className="text-sm font-medium text-blue-800 mb-2">Comentario del aprobador</h4>
-                      <div className="bg-white p-3 rounded-md border border-blue-100">
-                        <p className="text-blue-900 font-medium italic">{viatico.comentario_aprobador}</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
