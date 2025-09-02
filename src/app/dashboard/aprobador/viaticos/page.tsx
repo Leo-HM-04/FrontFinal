@@ -79,7 +79,10 @@ const ViaticoRow: React.FC<{
       </td>
       <td className="px-4 py-3">
         <span className="text-sm font-semibold text-gray-900">
-          {formatCurrency(v.monto)}
+          ${v.monto ? v.monto.toLocaleString('es-MX', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }) : '0.00'}
         </span>
       </td>
       <td className="px-4 py-3">
@@ -261,62 +264,68 @@ const Viaticos: React.FC = () => {
       <AprobadorLayout>
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-4 mb-6 shadow-xl">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-white mb-1 tracking-tight">Viáticos Pendientes</h1>
                 <p className="text-blue-100 text-sm">
                   Gestiona y aprueba las solicitudes de viáticos pendientes
                 </p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20 lg:flex-shrink-0">
                 <p className="text-white/90 text-sm font-medium">
                   Total: <span className="text-white font-semibold">{viaticos.length}</span> viáticos
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 hover:bg-white/20 transition-all duration-300">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
                 <div className="flex items-center gap-3">
-                  <div className="bg-blue-500/20 rounded-lg p-2">
-                    <svg className="w-5 h-5 text-blue-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="bg-red-500/20 rounded-lg p-2 flex-shrink-0">
+                    <svg className="w-5 h-5 text-red-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-2xl font-bold text-white">
                       {viaticos.filter(v => new Date(v.fecha_limite_pago) < tresDiasDespues).length}
                     </p>
-                    <p className="text-blue-100 text-sm">Urgentes</p>
+                    <p className="text-red-100 text-sm">Urgentes</p>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
                 <div className="flex items-center gap-3">
-                  <div className="bg-green-500/20 rounded-lg p-2">
+                  <div className="bg-green-500/20 rounded-lg p-2 flex-shrink-0">
                     <svg className="w-5 h-5 text-green-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-2xl font-bold text-white">{viaticos.length}</p>
                     <p className="text-blue-100 text-sm">Total Pendientes</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                <div className="flex items-center gap-3">
-                  <div className="bg-yellow-500/20 rounded-lg p-2">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="flex items-start gap-3">
+                  <div className="bg-yellow-500/20 rounded-lg p-2 flex-shrink-0">
                     <svg className="w-5 h-5 text-yellow-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-white">
-                      ${viaticos.reduce((sum, v) => sum + (v.monto || 0), 0).toLocaleString('es-MX', {minimumFractionDigits: 2})}
-                    </p>
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="text-base font-bold text-white truncate" title={`$${viaticos.reduce((sum, v) => sum + (v.monto || 0), 0).toLocaleString('es-MX', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}`}>
+                      ${viaticos.reduce((sum, v) => sum + (v.monto || 0), 0).toLocaleString('es-MX', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}
+                    </div>
                     <p className="text-blue-100 text-sm">Total en Viáticos</p>
                   </div>
                 </div>
