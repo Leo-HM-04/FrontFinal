@@ -366,9 +366,12 @@ return (
                             <div className="text-sm text-gray-900 font-medium">{s.nombre_usuario || '-'}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-purple-50 text-purple-700 ring-1 ring-purple-700/10">
-                              {s.departamento}
-                            </span>
+                            <div className="text-sm text-gray-900">
+                              {s.departamento?.split(' ').map(word => 
+                                word.toLowerCase() === 'ti' ? 'TI' : 
+                                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                              ).join(' ')}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
@@ -379,9 +382,9 @@ return (
                             <div className="text-sm text-gray-600">{s.cuenta_destino}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-blue-700/10">
-                              {s.frecuencia}
-                            </span>
+                            <div className="text-sm text-gray-900">
+                              {s.frecuencia?.charAt(0).toUpperCase() + s.frecuencia?.slice(1).toLowerCase()}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             {(() => {
