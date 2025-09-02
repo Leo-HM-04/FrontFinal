@@ -160,8 +160,16 @@ export default function NuevoViaticoPage() {
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="max-w-screen-2xl mx-auto bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-2xl shadow-xl px-10 py-4 mt-8">
-          <h1 className="text-4xl font-extrabold text-blue-900 mb-4 tracking-tight text-center drop-shadow">Nuevo Viático</h1>
+        <div className="max-w-screen-2xl mx-auto bg-gradient-to-br from-blue-50 via-white to-blue-100 rounded-3xl shadow-2xl px-12 py-8 mt-8 border border-blue-200/50">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-full mb-4 shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+              </svg>
+            </div>
+            <h1 className="text-5xl font-extrabold text-blue-900 mb-2 tracking-tight drop-shadow-sm">Nuevo Viático</h1>
+            <p className="text-blue-700 text-lg font-medium">Crea uno o múltiples viáticos de forma rápida y sencilla</p>
+          </div>
           {mensajeGlobal && (
             <div
               id={exito ? 'mensaje-global-exito' : undefined}
@@ -183,50 +191,84 @@ export default function NuevoViaticoPage() {
             {formularios.map((f, idx) => (
               <div
                 key={idx}
-                className="relative mb-4 border border-blue-200 bg-white/95 rounded-xl shadow-lg px-6 pt-2 pb-2"
+                className="relative mb-8 border-2 border-blue-200 bg-gradient-to-br from-white via-blue-50/30 to-white rounded-2xl shadow-xl px-8 pt-6 pb-6 hover:shadow-2xl transition-all duration-300"
               >
-                {/* Identificador del formulario */}
-                <div className="absolute -top-4 left-6 bg-blue-700 text-white text-base font-bold px-4 py-1 rounded-full shadow-lg select-none">Viático {idx + 1}</div>
+                {/* Identificador del formulario mejorado */}
+                <div className="absolute -top-5 left-8 bg-gradient-to-r from-blue-700 to-blue-600 text-white text-lg font-bold px-6 py-2 rounded-full shadow-xl border-2 border-white">
+                  <span className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Viático {idx + 1}
+                  </span>
+                </div>
                 {formularios.length > 1 && (
                   <button
                     type="button"
                     title="Eliminar este formulario"
                     onClick={() => handleEliminar(idx)}
-                    className="text-red-700 absolute top-3 right-6 z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 font-semibold text-sm shadow transition"
+                    className="text-red-600 absolute top-4 right-6 z-10 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-300 font-semibold text-base shadow-md hover:shadow-lg transition-all duration-200"
                   >
                     <FaTrash className="w-4 h-4" /> Eliminar
                   </button>
                 )}
-                {/* Bloque: Datos Bancarios */}
-                <div className="mb-1 p-2 rounded-xl bg-blue-50/60 border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
+                
+                {/* Título de sección mejorado */}
+                <div className="mt-4 mb-6">
+                  <h3 className="text-2xl font-bold text-blue-900 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                    </div>
+                    Datos Bancarios
+                  </h3>
+                  <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full mt-2"></div>
+                </div>
+                <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-inner grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
                   {/* ORDEN: 1. Datos bancarios, 2. Tipo de tarjeta (si aplica), 3. Cuenta destino, 4. Banco */}
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Datos Bancarios *</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-blue-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Tipo de Cuenta *
+                    </label>
                     <select name="tipo_cuenta_destino" onChange={e => {
                       const nuevos = [...formularios];
                       nuevos[idx].form = { ...nuevos[idx].form, [e.target.name]: e.target.value, cuenta_destino: '', tipo_tarjeta: e.target.value === 'tarjeta' ? '' : undefined };
                       nuevos[idx].errors = {};
                       setFormularios(nuevos);
-                    }} required className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="">
+                    }} required className="input input-bordered text-black uppercase text-lg px-4 py-3 rounded-xl border-2 border-blue-300 focus:ring-4 focus:ring-blue-400/50 focus:border-blue-500 shadow-sm hover:shadow-md transition-all" defaultValue="">
                       <option value="" disabled>Selecciona una opción</option>
                       <option value="clabe">CLABE</option>
                       <option value="tarjeta">Número de Tarjeta</option>
                     </select>
-                    {formularios[idx].errors?.tipo_cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.tipo_cuenta_destino}</span>)}
+                    {formularios[idx].errors?.tipo_cuenta_destino && (<span className="text-red-600 text-sm font-medium bg-red-50 px-2 py-1 rounded">{formularios[idx].errors.tipo_cuenta_destino}</span>)}
                   </div>
                   {formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && (
-                    <div className="flex flex-col gap-1">
-                      <label className="text-blue-900 font-bold text-base">Tipo de Tarjeta *</label>
-                      <select name="tipo_tarjeta" onChange={e => handleChange(idx, e)} className="input input-bordered text-black uppercase text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400" defaultValue="" required>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-blue-900 font-bold text-lg flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        Tipo de Tarjeta *
+                      </label>
+                      <select name="tipo_tarjeta" onChange={e => handleChange(idx, e)} className="input input-bordered text-black uppercase text-lg px-4 py-3 rounded-xl border-2 border-blue-300 focus:ring-4 focus:ring-blue-400/50 focus:border-blue-500 shadow-sm hover:shadow-md transition-all" defaultValue="" required>
                         <option value="" disabled>SELECCIONA TIPO DE TARJETA</option>
                         <option value="debito">DÉBITO</option>
                         <option value="credito">CRÉDITO</option>
                       </select>
-                      {formularios[idx].errors?.tipo_tarjeta && (<span className="text-red-500 text-sm">{formularios[idx].errors.tipo_tarjeta}</span>)}
+                      {formularios[idx].errors?.tipo_tarjeta && (<span className="text-red-600 text-sm font-medium bg-red-50 px-2 py-1 rounded">{formularios[idx].errors.tipo_tarjeta}</span>)}
                     </div>
                   )}
-                  <div className="flex flex-col gap-1">
-                    <label className="text-blue-900 font-bold text-base">Cuenta destino</label>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-blue-900 font-bold text-lg flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Cuenta Destino *
+                    </label>
                     <input name="cuenta_destino" placeholder="Número de cuenta, tarjeta o CLABE" value={formularios[idx].form.cuenta_destino || ''} onChange={e => {
                       const value = e.target.value;
                       const nuevos = [...formularios];
@@ -240,7 +282,7 @@ export default function NuevoViaticoPage() {
                         nuevos[idx].errors = errorsObj;
                       }
                       setFormularios(nuevos);
-                    }} required className={`text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 ${formularios[idx].errors?.cuenta_destino ? 'border-red-500' : ''}`} />
+                    }} required className={`text-black input input-bordered text-lg px-4 py-3 rounded-xl border-2 border-blue-300 focus:ring-4 focus:ring-blue-400/50 focus:border-blue-500 shadow-sm hover:shadow-md transition-all ${formularios[idx].errors?.cuenta_destino ? 'border-red-400 focus:border-red-500' : ''}`} />
                     {formularios[idx].errors?.cuenta_destino && (<span className="text-red-500 text-sm">{formularios[idx].errors.cuenta_destino}</span>)}
                   </div>
                   {/* Selección de banco */}
@@ -317,14 +359,30 @@ export default function NuevoViaticoPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-blue-900 font-bold text-base">Fecha límite de pago</label>
-                    <input
-                      name="fecha_limite_pago"
-                      type="date"
-                      onChange={e => handleChange(idx, e)}
-                      required
-                      className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400"
-                      onFocus={e => e.target.showPicker && e.target.showPicker()}
-                    />
+                    <div className="relative flex items-center">
+                      <input
+                        name="fecha_limite_pago"
+                        type="date"
+                        onChange={e => handleChange(idx, e)}
+                        required
+                        className="text-black input input-bordered text-base px-3 py-2 rounded-lg border-2 border-blue-200 focus:ring-2 focus:ring-blue-400 pr-10"
+                        onFocus={e => e.target.showPicker && e.target.showPicker()}
+                        style={{ minWidth: 180 }}
+                      />
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-800"
+                        onClick={e => {
+                          const input = (e.currentTarget.parentElement?.querySelector('input[type="date"]') as HTMLInputElement);
+                          if (input && input.showPicker) input.showPicker();
+                          input?.focus();
+                        }}
+                        aria-label="Abrir calendario"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="2" fill="#e0e7ff"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 2v4M16 2v4M3 10h18" /></svg>
+                      </button>
+                    </div>
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-blue-900 font-bold text-base">Concepto</label>
