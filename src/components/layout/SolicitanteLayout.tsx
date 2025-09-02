@@ -94,7 +94,9 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/notificaciones/solicitante`, {
         headers: {
-          Authorization: token ? `Bearer ${token}` : ''
+          Authorization: token ? `Bearer ${token}` : '',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         }
       });
       const data = await res.json();
