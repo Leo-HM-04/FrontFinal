@@ -152,55 +152,55 @@ return (
     <AprobadorLayout>
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* HEADER Y CARDS DE RESUMEN */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-8 mb-8 shadow-xl">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-4 mb-6 shadow-xl">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
             <div className="flex-1">
-              <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Solicitudes Recurrentes</h1>
-              <p className="text-blue-100 text-lg font-medium">
+              <h1 className="text-2xl font-bold text-white mb-1 tracking-tight">Solicitudes Recurrentes</h1>
+              <p className="text-blue-100 text-sm">
                 Gestiona y monitorea todas las solicitudes recurrentes del sistema
               </p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-              <p className="text-white/90 text-lg font-semibold">Total: <span className="text-white">{solicitudes.length}</span> solicitudes</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+              <p className="text-white/90 text-sm font-medium">Total: <span className="text-white font-semibold">{solicitudes.length}</span> solicitudes</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <div className="flex items-start gap-4">
-                <div className="bg-blue-500/20 rounded-xl p-3">
-                  <svg className="w-8 h-8 text-blue-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-500/20 rounded-lg p-2">
+                  <svg className="w-5 h-5 text-blue-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="text-4xl font-black text-white mb-1">{solicitudes.length}</p>
-                  <p className="text-blue-100 font-medium">Total Procesadas</p>
+                <div>
+                  <p className="text-2xl font-bold text-white">{solicitudes.length}</p>
+                  <p className="text-blue-100 text-sm">Total Procesadas</p>
                 </div>
               </div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <div className="flex items-start gap-4">
-                <div className="bg-green-500/20 rounded-xl p-3">
-                  <svg className="w-8 h-8 text-green-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="flex items-center gap-3">
+                <div className="bg-green-500/20 rounded-lg p-2">
+                  <svg className="w-5 h-5 text-green-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="text-4xl font-black text-white mb-1">{solicitudes.filter(s => s.estado === 'aprobada').length}</p>
-                  <p className="text-blue-100 font-medium">Aprobadas</p>
+                <div>
+                  <p className="text-2xl font-bold text-white">{solicitudes.filter(s => s.estado === 'aprobada').length}</p>
+                  <p className="text-blue-100 text-sm">Aprobadas</p>
                 </div>
               </div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <div className="flex items-start gap-4">
-                <div className="bg-red-500/20 rounded-xl p-3">
-                  <svg className="w-8 h-8 text-red-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-500/20 rounded-lg p-2">
+                  <svg className="w-5 h-5 text-red-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="text-4xl font-black text-white mb-1">{solicitudes.filter(s => s.estado === 'rechazada').length}</p>
-                  <p className="text-blue-100 font-medium">Rechazadas</p>
+                <div>
+                  <p className="text-2xl font-bold text-white">{solicitudes.filter(s => s.estado === 'rechazada').length}</p>
+                  <p className="text-blue-100 text-sm">Rechazadas</p>
                 </div>
               </div>
             </div>
