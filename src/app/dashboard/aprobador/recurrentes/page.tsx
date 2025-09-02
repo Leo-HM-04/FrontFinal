@@ -151,61 +151,62 @@ return (
   <ProtectedRoute requiredRoles={['aprobador']}>
     <AprobadorLayout>
       <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* HEADER Y CARDS DE RESUMEN */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <h1 className="text-3xl font-extrabold text-white mb-2">Solicitudes Recurrentes</h1>
-              <p className="text-white/90 mb-2 text-lg">Total: {solicitudes.length} solicitudes</p>
-            </div>
-            <div className="flex flex-wrap gap-6 mb-6">
-              <div className="flex-1 min-w-[180px] bg-white/30 rounded-xl shadow p-4 flex items-center gap-4">
-                <div className="bg-white/60 rounded-full p-3 flex items-center justify-center">
-                  <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#3b82f6" opacity=".15"/><rect x="7" y="7" width="10" height="10" rx="2" fill="#3b82f6" opacity=".25"/><rect x="10" y="10" width="4" height="4" rx="1" fill="#3b82f6"/></svg>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-white">{solicitudes.length}</div>
-                  <div className="text-white/80 text-sm font-medium">Total Procesadas</div>
-                </div>
+        {/* HEADER Y CARDS DE RESUMEN */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <h1 className="text-3xl font-extrabold text-white">Solicitudes Recurrentes</h1>
+            <p className="text-white/90 text-lg">Total: {solicitudes.length} solicitudes</p>
+          </div>
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex-1 min-w-[160px] bg-white/30 rounded-xl shadow p-3 flex items-center gap-3">
+              <div className="bg-white/60 rounded-full p-2 flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#3b82f6" opacity=".15"/><rect x="7" y="7" width="10" height="10" rx="2" fill="#3b82f6" opacity=".25"/><rect x="10" y="10" width="4" height="4" rx="1" fill="#3b82f6"/></svg>
               </div>
-              <div className="flex-1 min-w-[180px] bg-white/30 rounded-xl shadow p-4 flex items-center gap-4">
-                <div className="bg-white/60 rounded-full p-3 flex items-center justify-center">
-                  <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#22c55e" opacity=".15"/><path d="M9 12l2 2 4-4" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-white">{solicitudes.filter(s => s.estado === 'aprobada').length}</div>
-                  <div className="text-white/80 text-sm font-medium">Aprobadas</div>
-                </div>
-              </div>
-              <div className="flex-1 min-w-[180px] bg-white/30 rounded-xl shadow p-4 flex items-center gap-4">
-                <div className="bg-white/60 rounded-full p-3 flex items-center justify-center">
-                  <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ef4444" opacity=".15"/><path d="M15 9l-6 6m0-6l6 6" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/></svg>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-white">{solicitudes.filter(s => s.estado === 'rechazada').length}</div>
-                  <div className="text-white/80 text-sm font-medium">Rechazadas</div>
-                </div>
+              <div>
+                <div className="text-base font-bold text-white">{solicitudes.length}</div>
+                <div className="text-white/80 text-xs font-medium">Total Procesadas</div>
               </div>
             </div>
-            {/* BUSCADOR Y FILTROS */}
-            <div className="bg-white/30 rounded-xl shadow p-4 flex flex-wrap items-center gap-4 mb-2">
-              <div className="relative flex-grow max-w-lg">
+            <div className="flex-1 min-w-[160px] bg-white/30 rounded-xl shadow p-3 flex items-center gap-3">
+              <div className="bg-white/60 rounded-full p-2 flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#22c55e" opacity=".15"/><path d="M9 12l2 2 4-4" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+              <div>
+                <div className="text-base font-bold text-white">{solicitudes.filter(s => s.estado === 'aprobada').length}</div>
+                <div className="text-white/80 text-xs font-medium">Aprobadas</div>
+              </div>
+            </div>
+            <div className="flex-1 min-w-[160px] bg-white/30 rounded-xl shadow p-3 flex items-center gap-3">
+              <div className="bg-white/60 rounded-full p-2 flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ef4444" opacity=".15"/><path d="M15 9l-6 6m0-6l6 6" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/></svg>
+              </div>
+              <div>
+                <div className="text-base font-bold text-white">{solicitudes.filter(s => s.estado === 'rechazada').length}</div>
+                <div className="text-white/80 text-xs font-medium">Rechazadas</div>
+              </div>
+            </div>
+          </div>
+          {/* BUSCADOR Y FILTROS */}
+          <div className="bg-white/30 rounded-xl shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
+            <div className="flex flex-row gap-2 items-center w-full md:w-auto">
+              <div className="relative flex-grow max-w-xs">
                 <input
                   type="text"
-                  className="bg-white shadow px-12 pr-4 py-3 rounded-lg w-full text-base text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200"
+                  className="bg-white shadow px-10 pr-4 py-2 rounded-lg w-full text-base text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200"
                   placeholder="Buscar por nombre, departamento, cuenta..."
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                 />
-                <FaSearch className="absolute left-4 top-3 text-blue-400" size={18} />
+                <FaSearch className="absolute left-3 top-2.5 text-blue-400" size={16} />
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-white text-base font-semibold">Estado:</label>
+                <label className="text-white text-sm font-semibold">Estado:</label>
                 <select 
-                  className="bg-white shadow px-4 py-3 rounded-lg text-base text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200"
+                  className="bg-white shadow px-3 py-2 rounded-lg text-sm text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200"
                   value={filtroEstado}
                   onChange={(e) => setFiltroEstado(e.target.value)}
                 >
-                  <option value="todos">Todos los estados</option>
+                  <option value="todos">Todos</option>
                   <option value="pendiente">Pendientes</option>
                   <option value="rechazada">Rechazadas</option>
                   <option value="aprobada">Aprobadas</option>
@@ -214,17 +215,18 @@ return (
               </div>
               {(busqueda || filtroEstado !== 'todos') && (
                 <button 
-                  className="bg-white shadow px-4 py-3 rounded-lg text-base text-blue-700 font-semibold hover:bg-blue-50 border border-blue-200 focus:outline-none"
+                  className="bg-white shadow px-3 py-2 rounded-lg text-sm text-blue-700 font-semibold hover:bg-blue-50 border border-blue-200 focus:outline-none ml-2"
                   onClick={() => {
                     setBusqueda('');
                     setFiltroEstado('todos');
                   }}
                 >
-                  Limpiar filtros
+                  Limpiar
                 </button>
               )}
             </div>
           </div>
+        </div>
           
           {mensaje && (
             <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded shadow">
