@@ -39,7 +39,7 @@ export default function HistorialSolicitudesPage() {
     itemsPerPage,
     goToPage,
     changeItemsPerPage,
-  } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 10 });
+  } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 5 });
 
   const handleViewDetail = (solicitud: Solicitud) => {
     setSelectedSolicitud(solicitud);
@@ -91,9 +91,9 @@ export default function HistorialSolicitudesPage() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-CO', {
+    return new Intl.NumberFormat('es-Mx', {
       style: 'currency',
-      currency: 'COP',
+      currency: 'MXN',
       minimumFractionDigits: 0
     }).format(amount);
   };
