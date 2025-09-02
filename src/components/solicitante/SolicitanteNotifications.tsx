@@ -499,13 +499,16 @@ export default function SolicitanteNotifications({
     try {
       const nuevasNotificaciones = await SolicitanteNotificationService.fetchNotifications();
       
-      // Detectar nuevas notificaciones
-      const currentUnreadCount = nuevasNotificaciones.filter(n => !n.leida).length;
-      if (currentUnreadCount > prevUnreadCount.current && prevUnreadCount.current > 0) {
-        playSound();
-        showNewNotificationToast();
+      // Solo detectar nuevas notificaciones cuando el modal NO está abierto
+      // para evitar sonar cuando el usuario está revisando las notificaciones
+      if (!openModal) {
+        const currentUnreadCount = nuevasNotificaciones.filter(n => !n.leida).length;
+        if (currentUnreadCount > prevUnreadCount.current && prevUnreadCount.current > 0) {
+          playSound();
+          showNewNotificationToast();
+        }
+        prevUnreadCount.current = currentUnreadCount;
       }
-      prevUnreadCount.current = currentUnreadCount;
       
       setNotificaciones(nuevasNotificaciones);
     } catch (err) {
@@ -514,7 +517,7 @@ export default function SolicitanteNotifications({
     } finally {
       setLoading(false);
     }
-  }, [playSound]);
+  }, [playSound, openModal]);
 
   const showNewNotificationToast = () => {
     toast(

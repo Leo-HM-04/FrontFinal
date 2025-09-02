@@ -101,12 +101,30 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
       if (Array.isArray(data)) {
         type Notification = { leida?: boolean };
         const count = (data as Notification[]).filter((n) => !n.leida).length;
+        
+        // Solo reproducir sonido si:
+        // 1. Ya se inicializó previamente (no es la primera carga)
+        // 2. El conteo actual es mayor al anterior
+        // 3. Hay al menos una notificación nueva
+        if (hasInitialized && count > prevUnreadCount.current && count > 0) {
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {
+              console.log('No se pudo reproducir el sonido de notificación');
+            });
+          }
+        }
+        
+        prevUnreadCount.current = count;
         setUnreadCount(count);
+        
+        return count;
       }
     } catch {
       setUnreadCount(0);
+      return 0;
     }
-  }, []);
+  }, [hasInitialized]);
 
   // Refrescar el contador cuando se cierre el modal de notificaciones
   React.useEffect(() => {
@@ -120,21 +138,6 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
     const checkAndPlay = async () => {
       try {
         await fetchUnreadCount();
-        
-        // Solo reproducir sonido si:
-        // 1. Ya se inicializó previamente (no es la primera carga)
-        // 2. El conteo actual es mayor al anterior
-        // 3. Hay al menos una notificación nueva
-        if (hasInitialized && unreadCount > prevUnreadCount.current && unreadCount > 0) {
-          if (audioRef.current) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(() => {
-              console.log('No se pudo reproducir el sonido de notificación');
-            });
-          }
-        }
-        
-        prevUnreadCount.current = unreadCount;
         
         // Marcar como inicializado después del primer fetch
         if (!hasInitialized) {
@@ -150,7 +153,7 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
     return () => {
       clearInterval(interval);
     };
-  }, [fetchUnreadCount, unreadCount, hasInitialized]);
+  }, [fetchUnreadCount, hasInitialized]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, logout } = useAuth();
