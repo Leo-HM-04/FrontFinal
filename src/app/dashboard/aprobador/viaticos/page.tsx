@@ -8,8 +8,7 @@ import { useViaticos } from '@/hooks/useViaticos';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { usePagination } from '@/hooks/usePagination';
-import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
-import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
+
 import { Solicitud } from '@/types';
 import { formatCurrency, formatDate, normalizeViatico } from '@/utils/viaticos';
 
@@ -176,12 +175,7 @@ const Viaticos: React.FC = () => {
 
   const viaticosForFilter: Solicitud[] = viaticosOrdenados;
 
-  const {
-    filters,
-    filteredData: filteredViaticos,
-    resetFilters,
-    updateFilters
-  } = useAdvancedFilters(viaticosForFilter, 'solicitudes');
+  const filteredViaticos = viaticosForFilter;
 
   const viaticosPorUsuario = useMemo(() => {
     if (!Array.isArray(filteredViaticos)) return {};
@@ -308,38 +302,10 @@ const Viaticos: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                <div className="flex items-center gap-3">
-                  <div className="bg-yellow-500/20 rounded-lg p-2 flex-shrink-0">
-                    <svg className="w-5 h-5 text-yellow-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-2xl font-bold text-white">
-                      ${viaticos.reduce((sum, v) => sum + (v.monto || 0), 0).toLocaleString('es-MX', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      })}
-                    </p>
-                    <p className="text-yellow-100 text-sm">Total en Viáticos</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="border-b border-gray-200">
-              <AdvancedFilters
-                filters={filters}
-                onFiltersChange={updateFilters}
-                onReset={resetFilters}
-                type="solicitudes"
-              />
-            </div>
-            
             <div className="overflow-x-auto">
               {hasSelection && (
                 <div className="fixed left-0 right-0 bottom-0 z-40 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6 flex items-center gap-8 shadow-2xl animate-fade-in justify-center border-t-4 border-blue-400">
