@@ -226,127 +226,69 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                   )}
                 </div>
 
-                {/* Documentos Adjuntos */}
-                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-orange-50/30 border border-orange-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                {/* Documentos Adjuntos - Mejorado */}
+                <div className="p-5 md:p-6 bg-gradient-to-br from-white to-orange-50/30 border border-orange-200/50 shadow-lg rounded-2xl">
                   <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
                     <div className="p-2 bg-orange-100 rounded-xl mr-3">
                       <FileText className="w-6 h-6 text-orange-700" />
                     </div>
                     Documentos y Comprobantes
                   </h3>
-                  
-                  <div className="space-y-6">
+                  <div className="grid grid-cols-1 gap-4">
                     {/* Archivo del Solicitante */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center">
-                        <Upload className="w-4 h-4 mr-2" />
-                        Archivo del Solicitante
-                      </h4>
+                    <div className="bg-white p-4 rounded-xl border border-orange-100 shadow-sm flex flex-col items-center">
+                      <FileText className="w-10 h-10 text-orange-600 mb-2" />
+                      <div className="text-xs text-center truncate w-full mb-2">
+                        {viatico.viatico_url ? viatico.viatico_url.split('/').pop() : 'Sin archivo'}
+                      </div>
                       {viatico.viatico_url ? (
-                        <div className="bg-white p-4 rounded-xl border border-orange-100 shadow-sm">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 bg-orange-100 rounded-lg">
-                                <FileText className="w-5 h-5 text-orange-600" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900">Comprobante de viático</p>
-                                <p className="text-sm text-gray-500">Subido por el solicitante</p>
-                              </div>
-                            </div>
-                            <a
-                              href={`/uploads/viaticos/${viatico.viatico_url.split('/').pop()}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors duration-200 text-sm font-medium"
-                            >
-                              <ExternalLink className="w-4 h-4 mr-1" />
-                              Ver archivo
-                            </a>
-                          </div>
-                        </div>
+                        <a
+                          href={`/uploads/viaticos/${viatico.viatico_url.split('/').pop()}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors duration-200 text-sm font-medium"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          Ver archivo
+                        </a>
                       ) : (
-                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-center">
-                          <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                          <p className="text-gray-500 text-sm">No hay archivo del solicitante</p>
-                        </div>
+                        <span className="text-gray-500 text-sm">No hay archivo del solicitante</span>
                       )}
                     </div>
-
                     {/* Comprobantes de Pago del Pagador */}
-                    {viatico.estado?.toLowerCase() === 'pagada' && (
-                      <div>
-                        <h4 className="text-sm font-semibold text-green-800 mb-3 flex items-center">
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Comprobantes de Pago
-                        </h4>
-                        
-                        {loadingComprobantes ? (
-                          <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 text-center">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                            <p className="text-blue-600 text-sm">Cargando comprobantes...</p>
+                    {viatico.estado?.toLowerCase() === 'pagada' && comprobantes.length > 0 && (
+                      comprobantes.map((comprobante) => (
+                        <div key={comprobante.id_comprobante} className="bg-white p-4 rounded-xl border border-green-100 shadow-sm flex flex-col items-center">
+                          <CheckCircle className="w-10 h-10 text-green-600 mb-2" />
+                          <div className="text-xs text-center truncate w-full mb-2">
+                            {comprobante.archivo_url ? comprobante.archivo_url.split('/').pop() : 'Sin archivo'}
                           </div>
-                        ) : errorComprobantes ? (
-                          <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-center">
-                            <p className="text-red-600 text-sm">{errorComprobantes}</p>
-                          </div>
-                        ) : comprobantes.length > 0 ? (
-                          <div className="space-y-4">
-                            {comprobantes.map((comprobante) => (
-                              <div key={comprobante.id_comprobante} className="bg-white p-4 rounded-xl border border-green-100 shadow-sm">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-green-100 rounded-lg">
-                                      <CheckCircle className="w-5 h-5 text-green-600" />
-                                    </div>
-                                    <div>
-                                      <p className="font-medium text-gray-900">
-                                        Comprobante #{comprobante.id_comprobante}
-                                      </p>
-                                      <p className="text-sm text-gray-500">
-                                        Subido por: {comprobante.nombre_usuario || 'Pagador'}
-                                      </p>
-                                      <p className="text-xs text-gray-400">
-                                        {new Date(comprobante.fecha_subida).toLocaleDateString('es-MX')} - {new Date(comprobante.fecha_subida).toLocaleTimeString('es-MX')}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <a
-                                    href={`/uploads/comprobantes-viaticos/${comprobante.archivo_url.split('/').pop()}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
-                                  >
-                                    <ExternalLink className="w-4 h-4 mr-1" />
-                                    Ver comprobante
-                                  </a>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-center">
-                            <CheckCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <p className="text-gray-500 text-sm">
-                              No hay comprobantes de pago disponibles
-                            </p>
-                            <p className="text-xs text-gray-400 mt-1">
-                              Los comprobantes se mostrarán aquí una vez que el pagador los suba
-                            </p>
-                          </div>
-                        )}
+                          <a
+                            href={`/uploads/comprobantes-viaticos/${comprobante.archivo_url.split('/').pop()}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
+                          >
+                            <ExternalLink className="w-4 h-4 mr-1" />
+                            Ver comprobante
+                          </a>
+                        </div>
+                      ))
+                    )}
+                    {/* Mensaje si no hay comprobantes */}
+                    {viatico.estado?.toLowerCase() === 'pagada' && comprobantes.length === 0 && (
+                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-center">
+                        <CheckCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">No hay comprobantes de pago disponibles</p>
                       </div>
                     )}
-
                     {/* Mensaje informativo para estados no pagados */}
                     {viatico.estado?.toLowerCase() !== 'pagada' && (
-                      <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4 text-blue-600" />
-                          <p className="text-blue-800 text-sm font-medium">
-                            Los comprobantes de pago aparecerán aquí una vez que el viático sea marcado como pagado
-                          </p>
-                        </div>
+                      <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 text-center">
+                        <Calendar className="w-4 h-4 text-blue-600 mx-auto mb-2" />
+                        <p className="text-blue-800 text-sm font-medium">
+                          Los comprobantes de pago aparecerán aquí una vez que el viático sea marcado como pagado
+                        </p>
                       </div>
                     )}
                   </div>
