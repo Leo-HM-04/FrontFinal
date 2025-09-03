@@ -178,7 +178,9 @@ export default function EditarSolicitudPage() {
     { value: 'tesoreria', label: 'Tesorería' },
     { value: 'nomina', label: 'Nómina' },
     { value: 'atraccion de talento', label: 'Atracción de Talento' },
-    { value: 'direccion general', label: 'Dirección General' }
+    { value: 'direccion general', label: 'Dirección General' },
+    { value: 'sistemas', label: 'Sistemas' },
+    { value: 'asuntos corporativos', label: 'Asuntos Corporativos' }
   ];
 
   const tipoPagoOptions = [

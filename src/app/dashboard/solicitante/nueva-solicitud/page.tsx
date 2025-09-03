@@ -188,6 +188,7 @@ export default function NuevaSolicitudPage() {
   ];
 
   const departamentoOptions = [
+    { value: 'sistemas', label: 'Sistemas' },
     { value: 'contabilidad', label: 'Contabilidad' },
     { value: 'facturacion', label: 'Facturación' },
     { value: 'cobranza', label: 'Cobranza' },
@@ -200,7 +201,8 @@ export default function NuevaSolicitudPage() {
     { value: 'tesoreria', label: 'Tesorería' },
     { value: 'nomina', label: 'Nómina' },
     { value: 'atraccion de talento', label: 'Atracción de Talento' },
-    { value: 'direccion general', label: 'Dirección General' }
+    { value: 'direccion general', label: 'Dirección General' },
+    { value: 'asuntos corporativos', label: 'Asuntos Corporativos' }
   ];
 
   const tipoPagoOptions = [
