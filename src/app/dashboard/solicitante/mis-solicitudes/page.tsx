@@ -22,6 +22,8 @@ import {
   Edit,
   Trash2,
   AlertTriangle,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { ExportModal } from '@/components/modals/ExportModal';
@@ -114,6 +116,19 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
+// Función para formatear la hora de envío
+const formatTime = (dateString: string) => {
+  return new Date(dateString).toLocaleTimeString('es-MX', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
+// Tipos para el ordenamiento
+type SortField = 'monto' | 'estado' | 'fecha' | 'hora';
+type SortOrder = 'asc' | 'desc';
+
 // Componente que maneja los search params
 function MisSolicitudesContent() {
   const router = useRouter();
@@ -147,6 +162,10 @@ function MisSolicitudesContent() {
 
   // Estados para highlighting de notificaciones
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
+
+  // Estados para ordenamiento
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   // Manejo de parámetros URL para highlighting de notificaciones
   useEffect(() => {
@@ -271,8 +290,47 @@ function MisSolicitudesContent() {
     setCurrentPage(1);
   }, [solicitudes, searchTerm, statusFilter, dateFilter]);
 
+  // Función para manejar el ordenamiento
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
+    }
+  };
+
   // Ordenar solicitudes
   const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
+    // Si hay ordenamiento activo, aplicarlo primero
+    if (sortField && sortOrder) {
+      let comparison = 0;
+      
+      switch (sortField) {
+        case 'monto':
+          comparison = (a.monto || 0) - (b.monto || 0);
+          break;
+        case 'estado':
+          const estadoA = (a.estado || '').toLowerCase();
+          const estadoB = (b.estado || '').toLowerCase();
+          const ordenA = ESTADO_ORDEN[estadoA as keyof typeof ESTADO_ORDEN] ?? 99;
+          const ordenB = ESTADO_ORDEN[estadoB as keyof typeof ESTADO_ORDEN] ?? 99;
+          comparison = ordenA - ordenB;
+          break;
+        case 'fecha':
+          comparison = new Date(a.fecha_creacion).getTime() - new Date(b.fecha_creacion).getTime();
+          break;
+        case 'hora':
+          comparison = new Date(a.fecha_creacion).getTime() - new Date(b.fecha_creacion).getTime();
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    }
+    
+    // Ordenamiento por defecto (por estado y fecha)
     const estadoA = (a.estado || '').toLowerCase();
     const estadoB = (b.estado || '').toLowerCase();
     const ordenA = ESTADO_ORDEN[estadoA as keyof typeof ESTADO_ORDEN] ?? 99;
@@ -350,6 +408,48 @@ function MisSolicitudesContent() {
     setSearchTerm('');
     setStatusFilter('');
     setDateFilter('');
+  };
+
+  // Componente para encabezados con ordenamiento
+  const SortableHeader = ({ 
+    field, 
+    children, 
+    className = "px-6 py-4 text-left text-sm font-semibold text-gray-900" 
+  }: { 
+    field?: SortField; 
+    children: React.ReactNode; 
+    className?: string;
+  }) => {
+    if (!field) {
+      return <th className={className}>{children}</th>;
+    }
+
+    return (
+      <th 
+        className={`${className} cursor-pointer hover:bg-gray-100 transition-colors select-none`}
+        onClick={() => handleSort(field)}
+      >
+        <div className="flex items-center gap-2">
+          {children}
+          <div className="flex flex-col">
+            <ChevronUp 
+              className={`w-3 h-3 ${
+                sortField === field && sortOrder === 'asc' 
+                  ? 'text-blue-600' 
+                  : 'text-gray-400'
+              }`} 
+            />
+            <ChevronDown 
+              className={`w-3 h-3 -mt-1 ${
+                sortField === field && sortOrder === 'desc' 
+                  ? 'text-blue-600' 
+                  : 'text-gray-400'
+              }`} 
+            />
+          </div>
+        </div>
+      </th>
+    );
   };
 
   // Componente de estadísticas
@@ -545,19 +645,20 @@ function MisSolicitudesContent() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Folio</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Concepto</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Monto</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Cuenta</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Estado</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Fecha</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Acciones</th>
+                    <SortableHeader>Folio</SortableHeader>
+                    <SortableHeader field="hora">Hora de envío</SortableHeader>
+                    <SortableHeader>Concepto</SortableHeader>
+                    <SortableHeader field="monto">Monto</SortableHeader>
+                    <SortableHeader>Cuenta</SortableHeader>
+                    <SortableHeader field="estado">Estado</SortableHeader>
+                    <SortableHeader field="fecha">Fecha</SortableHeader>
+                    <SortableHeader className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Acciones</SortableHeader>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {currentSolicitudes.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-6 py-16 text-center">
+                      <td colSpan={8} className="px-6 py-16 text-center">
                         <div className="flex flex-col items-center">
                           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                             <FileText className="w-8 h-8 text-gray-400" />
@@ -602,6 +703,15 @@ function MisSolicitudesContent() {
                           <td className="px-6 py-4">
                             <div className="font-mono text-sm font-semibold text-gray-900">
                               {solicitud.folio || '-'}
+                            </div>
+                          </td>
+                          
+                          <td className="px-6 py-4">
+                            <div className="text-sm font-semibold text-gray-900">
+                              {formatTime(solicitud.fecha_creacion)}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {formatShortDate(solicitud.fecha_creacion)}
                             </div>
                           </td>
                           
@@ -698,34 +808,46 @@ function MisSolicitudesContent() {
 
             {/* Paginación mejorada */}
             {totalPages > 1 && (
-              <div className="border-t border-gray-100 px-6 py-4">
+              <div className="border-t border-gray-200 bg-gray-50 px-6 py-5">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-700">
-                    Mostrando <span className="font-medium">{filteredSolicitudes.length === 0 ? 0 : startIndex + 1}</span> a{' '}
-                    <span className="font-medium">{endIndex}</span> de{' '}
-                    <span className="font-medium">{filteredSolicitudes.length}</span> resultados
+                  <div className="text-sm text-gray-600">
+                    Mostrando <span className="font-semibold text-gray-900">{filteredSolicitudes.length === 0 ? 0 : startIndex + 1}</span> a{' '}
+                    <span className="font-semibold text-gray-900">{endIndex}</span> de{' '}
+                    <span className="font-semibold text-gray-900">{filteredSolicitudes.length}</span> resultados
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <Button
+                  <div className="flex items-center gap-3">
+                    {/* Botón Primera */}
+                    <button
                       onClick={() => setCurrentPage(1)}
                       disabled={currentPage === 1}
-                      variant="outline"
-                      size="sm"
-                      className="px-3 py-1.5 text-sm"
+                      className={`
+                        px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200
+                        ${currentPage === 1
+                          ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
+                        }
+                      `}
                     >
-                      Primera
-                    </Button>
-                    <Button
+                      ⏮ Primera
+                    </button>
+                    
+                    {/* Botón Anterior */}
+                    <button
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      variant="outline"
-                      size="sm"
-                      className="px-3 py-1.5 text-sm"
+                      className={`
+                        px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200
+                        ${currentPage === 1
+                          ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
+                        }
+                      `}
                     >
-                      Anterior
-                    </Button>
+                      ← Anterior
+                    </button>
                     
+                    {/* Números de página */}
                     <div className="flex items-center gap-1">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                         const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
@@ -733,11 +855,13 @@ function MisSolicitudesContent() {
                           <button
                             key={pageNum}
                             onClick={() => setCurrentPage(pageNum)}
-                            className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${
-                              pageNum === currentPage
-                                ? 'bg-blue-600 text-white'
-                                : 'text-gray-700 hover:bg-gray-100'
-                            }`}
+                            className={`
+                              px-4 py-2 text-sm font-semibold rounded-lg border transition-all duration-200 min-w-[44px]
+                              ${pageNum === currentPage
+                                ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105' 
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
+                              }
+                            `}
                           >
                             {pageNum}
                           </button>
@@ -745,24 +869,35 @@ function MisSolicitudesContent() {
                       })}
                     </div>
                     
-                    <Button
+                    {/* Botón Siguiente */}
+                    <button
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
-                      variant="outline"
-                      size="sm"
-                      className="px-3 py-1.5 text-sm"
+                      className={`
+                        px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200
+                        ${currentPage === totalPages
+                          ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
+                        }
+                      `}
                     >
-                      Siguiente
-                    </Button>
-                    <Button
+                      Siguiente →
+                    </button>
+                    
+                    {/* Botón Última */}
+                    <button
                       onClick={() => setCurrentPage(totalPages)}
                       disabled={currentPage === totalPages}
-                      variant="outline"
-                      size="sm"
-                      className="px-3 py-1.5 text-sm"
+                      className={`
+                        px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200
+                        ${currentPage === totalPages
+                          ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
+                        }
+                      `}
                     >
-                      Última
-                    </Button>
+                      Última ⏭
+                    </button>
                   </div>
                 </div>
               </div>
