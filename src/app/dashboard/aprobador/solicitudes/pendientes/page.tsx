@@ -404,7 +404,6 @@ export default function SolicitudesPendientesPage() {
                   <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                     <tr>
                       <th className="px-1 py-2"><input type="checkbox" checked={selectedViaticos.length === viaticos.length && viaticos.length > 0} onChange={toggleAllViaticos} /></th>
-                      <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">ID</th>
                       <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Folio</th>
                       <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Usuario</th>
                       <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">TIPO DE PAGO</th>
@@ -436,7 +435,6 @@ export default function SolicitudesPendientesPage() {
                               onChange={() => toggleViatico(s.id_solicitud)}
                             />
                           </td>
-                          <td className="px-4 py-3 font-mono text-black text-sm">{s.id_solicitud}</td>
                           <td className="px-4 py-3 text-black text-sm">{s.folio || '-'}</td>
                           <td className="px-4 py-3 text-black text-sm">{s.usuario_nombre || `Usuario ${s.id_usuario}`}</td>
                           <td className="px-4 py-3 text-black text-sm">
@@ -497,7 +495,6 @@ export default function SolicitudesPendientesPage() {
                         <table className="min-w-max w-full divide-y divide-gray-200 text-xs md:text-sm">
                           <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
-                              <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">ID</th>
                               <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Folio</th>
                               <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Usuario</th>
                               <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">TIPO DE PAGO</th>
@@ -524,7 +521,6 @@ export default function SolicitudesPendientesPage() {
                               }
                               return (
                                 <tr key={s.id_solicitud} className="border-b last:border-b-0 hover:bg-blue-50 transition-colors group">
-                                  <td className="px-4 py-3 font-mono text-black text-sm">{s.id_solicitud}</td>
                                   <td className="px-4 py-3 text-black text-sm">{s.folio || '-'}</td>
                                   <td className="px-4 py-3 text-black text-sm">{s.usuario_nombre || `Usuario ${s.id_usuario}`}</td>
                                   <td className="px-4 py-3 text-black text-sm">
