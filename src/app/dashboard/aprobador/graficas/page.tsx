@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
-import { MdAssignment, MdAttachMoney, MdBarChart, MdPieChart, MdStackedBarChart, MdErrorOutline, MdInsertChartOutlined, MdTrendingUp, MdAnalytics } from "react-icons/md";
+import { MdAssignment, MdAttachMoney, MdBarChart, MdPieChart, MdStackedBarChart, MdErrorOutline, MdInsertChartOutlined, MdAnalytics } from "react-icons/md";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -277,15 +277,8 @@ export default function GraficasAprobador() {
     },
     animation: {
       animateRotate: true,
-      duration: 2200,
-      easing: 'easeInOutQuart' as const,
-      delay(ctx: { type: string; dataIndex: number }) {
-        return ctx.type === 'data' ? ctx.dataIndex * 120 : 0;
-      },
-    },
-    hover: {
-      mode: 'nearest' as const,
-      animationDuration: 400,
+      duration: 800,
+      easing: 'easeOutQuart' as const
     }
   };
 
@@ -382,26 +375,64 @@ export default function GraficasAprobador() {
       }
     },
     animation: {
-      duration: 2200,
-      easing: 'easeInOutQuart' as const,
-      delay(ctx: { type: string; dataIndex: number }) {
-        return ctx.type === 'data' ? ctx.dataIndex * 120 : 0;
-      },
-    },
-    hover: {
-      mode: 'nearest' as const,
-      animationDuration: 400,
+      duration: 800,
+      easing: 'easeOutQuart' as const
     }
   };
 
   const getStatusIcon = (estado: string) => {
     switch (estado.toLowerCase()) {
-      case 'autorizada': case 'autorizado': return '✅';
-      case 'pagada': case 'pagado': return '💰';
-      case 'rechazada': case 'rechazado': return '❌';
-      case 'pendiente': return '⏳';
-      case 'en_proceso': return '🔄';
-      default: return '📋';
+      case 'autorizada': 
+      case 'autorizado': 
+        return (
+          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        );
+      case 'pagada': 
+      case 'pagado': 
+        return (
+          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+            </svg>
+          </div>
+        );
+      case 'rechazada': 
+      case 'rechazado': 
+        return (
+          <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+        );
+      case 'pendiente': 
+        return (
+          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        );
+      case 'en_proceso': 
+        return (
+          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+        );
+      default: 
+        return (
+          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+        );
     }
   };
 
@@ -431,224 +462,237 @@ export default function GraficasAprobador() {
       `}</style>
       <ProtectedRoute>
         <AprobadorLayout>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-6 px-4">
-          <div className="max-w-7xl mx-auto">
-
-            {/* Cards de estadísticas mejoradas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="group bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-blue-100 text-sm font-medium mb-1">Total Solicitudes</p>
-                    <p className="text-3xl font-bold mb-1">{totalSolicitudes.toLocaleString()}</p>
-                    <div className="flex items-center text-blue-200 text-sm">
-                      <MdTrendingUp size={16} className="mr-1" />
-                      {variacionSolicitudes >= 0 ? '+' : ''}{variacionSolicitudes.toFixed(1)}% vs mes anterior
-                    </div>
-                  </div>
-                  <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
-                    <MdAssignment size={28} />
-                  </div>
-                </div>
-              </div>
+          <div className="min-h-screen bg-gray-50 py-8 px-6">
+            <div className="max-w-7xl mx-auto">
               
-              <div className="group bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-green-100 text-sm font-medium mb-1">Monto Total</p>
-                    <p className="text-3xl font-bold mb-1">${totalMonto.toLocaleString()}</p>
-                    <div className="flex items-center text-green-200 text-sm">
-                      <MdTrendingUp size={16} className="mr-1" />
-                      {variacionMonto >= 0 ? '+' : ''}{variacionMonto.toFixed(1)}% vs mes anterior
-                    </div>
-                  </div>
-                  <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
-                    <MdAttachMoney size={28} />
-                  </div>
-                </div>
+              {/* Header Section */}
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel de Estadísticas</h1>
+                <p className="text-gray-600">Resumen ejecutivo de solicitudes y montos</p>
               </div>
 
-              <div className="group bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-100 text-sm font-medium mb-1">Estados Activos</p>
-                    <p className="text-3xl font-bold mb-1">{data.length}</p>
-                    <p className="text-purple-200 text-sm">Categorías en proceso</p>
-                  </div>
-                  <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
-                    <MdBarChart size={28} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Gráficas principales mejoradas */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Gráfica de dona mejorada */}
-              <div className="group">
-                <div className="bg-white rounded-2xl p-4 md:p-8 shadow-lg border border-blue-100 hover:shadow-2xl transition-all duration-400 hover:scale-[1.02] relative overflow-hidden flex flex-col h-full">
-                  <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-sky-400 to-indigo-500 rounded-t-2xl" />
-                  <div className="flex items-center justify-between mb-4 md:mb-8">
+              {/* Cards de estadísticas - Diseño corporativo */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <h2 className="text-lg md:text-2xl font-extrabold text-blue-900 mb-1 md:mb-2 tracking-tight">Distribución por Estado</h2>
-                      <p className="text-blue-700/80 font-medium text-xs md:text-base">Cantidad y porcentaje de solicitudes</p>
+                      <p className="text-gray-500 text-sm font-medium">Total Solicitudes</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">{totalSolicitudes.toLocaleString()}</p>
+                      <div className="flex items-center mt-2">
+                        <span className={`text-sm ${variacionSolicitudes >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {variacionSolicitudes >= 0 ? '+' : ''}{variacionSolicitudes.toFixed(1)}%
+                        </span>
+                        <span className="text-gray-500 text-sm ml-1">vs mes anterior</span>
+                      </div>
                     </div>
-                    <div className="w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md border-2 border-white">
-                      <MdPieChart className="text-white drop-shadow" size={24} />
+                    <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                      <MdAssignment size={24} className="text-blue-600" />
                     </div>
                   </div>
-                  <div className="relative flex-1 flex items-center justify-center min-h-[200px] md:min-h-[320px]">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Doughnut data={doughnutData} options={doughnutOptions} />
+                </div>
+                
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-500 text-sm font-medium">Monto Total</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">${totalMonto.toLocaleString()}</p>
+                      <div className="flex items-center mt-2">
+                        <span className={`text-sm ${variacionMonto >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {variacionMonto >= 0 ? '+' : ''}{variacionMonto.toFixed(1)}%
+                        </span>
+                        <span className="text-gray-500 text-sm ml-1">vs mes anterior</span>
+                      </div>
                     </div>
-                    {/* Texto central destacado */}
+                    <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                      <MdAttachMoney size={24} className="text-green-600" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-500 text-sm font-medium">Estados Activos</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">{data.length}</p>
+                      <p className="text-gray-500 text-sm mt-2">Categorías en proceso</p>
+                    </div>
+                    <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
+                      <MdBarChart size={24} className="text-purple-600" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Gráficas principales */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* Gráfica de dona */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">Distribución por Estado</h2>
+                      <p className="text-gray-600 text-sm">Cantidad y porcentaje de solicitudes</p>
+                    </div>
+                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                      <MdPieChart size={20} className="text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="relative h-80 flex items-center justify-center">
+                    <Doughnut data={doughnutData} options={doughnutOptions} />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-center bg-white/95 rounded-full p-4 md:p-8 shadow-xl border-2 border-blue-100 backdrop-blur-sm">
-                        <div className="text-2xl md:text-4xl font-extrabold text-blue-900 drop-shadow-lg">{totalSolicitudes}</div>
-                        <div className="text-xs md:text-base text-blue-700/80 font-semibold">Total</div>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-gray-900">{totalSolicitudes}</div>
+                        <div className="text-sm text-gray-600">Total</div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Gráfica de barras mejorada */}
-              <div className="group">
-                <div className="bg-white rounded-2xl p-4 md:p-8 shadow-lg border border-green-100 hover:shadow-2xl transition-all duration-400 hover:scale-[1.02] relative overflow-hidden flex flex-col h-full">
-                  <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-green-500 via-emerald-400 to-emerald-500 rounded-t-2xl" />
-                  <div className="flex items-center justify-between mb-4 md:mb-8">
+                {/* Gráfica de barras */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-lg md:text-2xl font-extrabold text-emerald-900 mb-1 md:mb-2 tracking-tight">Monto por Estado</h2>
-                      <p className="text-emerald-700/80 font-medium text-xs md:text-base">Valores monetarios totales</p>
+                      <h2 className="text-xl font-bold text-gray-900">Monto por Estado</h2>
+                      <p className="text-gray-600 text-sm">Valores monetarios totales</p>
                     </div>
-                    <div className="w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br from-green-400 to-emerald-400 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md border-2 border-white">
-                      <MdStackedBarChart className="text-white drop-shadow" size={24} />
-                    </div>
-                  </div>
-                  <div className="relative flex-1 flex items-center justify-center min-h-[220px] md:min-h-[340px]">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Bar data={barData} options={barOptions} />
+                    <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                      <MdStackedBarChart size={20} className="text-green-600" />
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Panel de insights mejorado */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 shadow-lg border border-blue-100">
-                <div className="flex items-center mb-6">
-                  <div className="bg-blue-500 p-3 rounded-xl mr-4">
-                    <MdAnalytics className="text-white" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-800">Insights Ejecutivos</h3>
-                    <p className="text-gray-600 text-sm">Análisis automatizado</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="bg-white/60 rounded-xl p-4">
-                    <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      🎯 <span>Rendimiento Actual</span>
-                    </h4>
-                    <p className="text-sm text-gray-700">
-                      {data.length > 0 && (
-                        <>
-                          Estado predominante: <strong>{data.sort((a, b) => b.total - a.total)[0].estado}</strong> con {data.sort((a, b) => b.total - a.total)[0].total} solicitudes 
-                          ({((data.sort((a, b) => b.total - a.total)[0].total / totalSolicitudes) * 100).toFixed(1)}% del total).
-                        </>
-                      )}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white/60 rounded-xl p-4">
-                    <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      💰 <span>Análisis Financiero</span>
-                    </h4>
-                    <p className="text-sm text-gray-700">
-                      Monto promedio por solicitud: <strong>${Math.round(totalMonto / totalSolicitudes).toLocaleString()}</strong>
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white/60 rounded-xl p-4">
-                    <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      ⚡ <span>Recomendaciones</span>
-                    </h4>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• Priorizar revisión de montos altos</li>
-                      <li>• Optimizar tiempos de aprobación</li>
-                      <li>• Implementar alertas tempranas</li>
-                    </ul>
+                  <div className="relative h-80">
+                    <Bar data={barData} options={barOptions} />
                   </div>
                 </div>
               </div>
 
-              {/* Detalle por estado completamente rediseñado */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/50">
-                <h3 className="text-xl font-bold text-gray-800 mb-6">Detalle por Estado</h3>
-                
-                <div className="space-y-4">
-                  {data.map((item, index) => {
-                    const percentage = ((item.total / totalSolicitudes) * 100).toFixed(1);
-                    const color = colorPalette[index % colorPalette.length];
-                    const avgPerRequest = Math.round(Number(item.monto_total) / item.total);
+              {/* Panel de insights y detalle */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center mb-6">
+                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
+                      <MdAnalytics size={20} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Insights Ejecutivos</h3>
+                      <p className="text-gray-600 text-sm">Análisis automatizado</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                        </div>
+                        <h4 className="font-semibold text-gray-900">Rendimiento Actual</h4>
+                      </div>
+                      <p className="text-sm text-gray-700">
+                        {data.length > 0 && (
+                          <>
+                            Estado predominante: <span className="font-medium">{data.sort((a, b) => b.total - a.total)[0].estado}</span> con {data.sort((a, b) => b.total - a.total)[0].total} solicitudes 
+                            ({((data.sort((a, b) => b.total - a.total)[0].total / totalSolicitudes) * 100).toFixed(1)}% del total).
+                          </>
+                        )}
+                      </p>
+                    </div>
                     
-                    return (
-                      <div key={item.estado} className="bg-gradient-to-r from-white to-gray-50/50 rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{getStatusIcon(item.estado)}</span>
-                            <div>
-                              <h4 className="text-lg font-semibold text-gray-800 capitalize">{item.estado}</h4>
-                              <p className="text-sm text-gray-600">{percentage}% del total</p>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                          <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                          </svg>
+                        </div>
+                        <h4 className="font-semibold text-gray-900">Análisis Financiero</h4>
+                      </div>
+                      <p className="text-sm text-gray-700">
+                        Monto promedio por solicitud: <span className="font-medium">${Math.round(totalMonto / totalSolicitudes).toLocaleString()}</span>
+                      </p>
+                    </div>
+                    
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center">
+                          <svg className="w-4 h-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                        </div>
+                        <h4 className="font-semibold text-gray-900">Recomendaciones</h4>
+                      </div>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li>• Priorizar revisión de montos altos</li>
+                        <li>• Optimizar tiempos de aprobación</li>
+                        <li>• Implementar alertas tempranas</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detalle por estado */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-bold text-gray-900 mb-6">Detalle por Estado</h3>
+                  
+                  <div className="space-y-4">
+                    {data.map((item, index) => {
+                      const percentage = ((item.total / totalSolicitudes) * 100).toFixed(1);
+                      const color = colorPalette[index % colorPalette.length];
+                      const avgPerRequest = Math.round(Number(item.monto_total) / item.total);
+                      
+                      return (
+                        <div key={item.estado} className="border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              {getStatusIcon(item.estado)}
+                              <div>
+                                <h4 className="font-semibold text-gray-900 capitalize">{item.estado}</h4>
+                                <p className="text-sm text-gray-600">{percentage}% del total</p>
+                              </div>
                             </div>
-                          </div>
-                          <div 
-                            className="w-6 h-6 rounded-full shadow-md" 
-                            style={{ backgroundColor: color.bg }}
-                          ></div>
-                        </div>
-                        
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="bg-white/70 rounded-lg p-3 text-center">
-                            <p className="text-lg font-bold text-gray-800">{item.total}</p>
-                            <p className="text-xs text-gray-600">Solicitudes</p>
-                          </div>
-                          <div className="bg-white/70 rounded-lg p-3 text-center">
-                            <p className="text-lg font-bold text-gray-800">${Number(item.monto_total).toLocaleString()}</p>
-                            <p className="text-xs text-gray-600">Monto Total</p>
-                          </div>
-                          <div className="bg-white/70 rounded-lg p-3 text-center">
-                            <p className="text-lg font-bold text-gray-800">${avgPerRequest.toLocaleString()}</p>
-                            <p className="text-xs text-gray-600">Promedio</p>
-                          </div>
-                        </div>
-                        
-                        {/* Barra de progreso visual */}
-                        <div className="mt-4">
-                          <div className="flex justify-between text-xs text-gray-500 mb-2">
-                            <span>Distribución</span>
-                            <span>{percentage}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
                             <div 
-                              className="h-2 rounded-full transition-all duration-700" 
-                              style={{ 
-                                width: `${percentage}%`, 
-                                background: color.gradient 
-                              }}
+                              className="w-4 h-4 rounded-full" 
+                              style={{ backgroundColor: color.bg }}
                             ></div>
                           </div>
+                          
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="bg-gray-50 rounded-lg p-3 text-center">
+                              <p className="text-lg font-bold text-gray-900">{item.total}</p>
+                              <p className="text-xs text-gray-600">Solicitudes</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-3 text-center">
+                              <p className="text-lg font-bold text-gray-900">${Number(item.monto_total).toLocaleString()}</p>
+                              <p className="text-xs text-gray-600">Monto Total</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-3 text-center">
+                              <p className="text-lg font-bold text-gray-900">${avgPerRequest.toLocaleString()}</p>
+                              <p className="text-xs text-gray-600">Promedio</p>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-3">
+                            <div className="flex justify-between text-xs text-gray-500 mb-1">
+                              <span>Distribución</span>
+                              <span>{percentage}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="h-2 rounded-full" 
+                                style={{ 
+                                  width: `${percentage}%`, 
+                                  backgroundColor: color.bg 
+                                }}
+                              ></div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
       </AprobadorLayout>
     </ProtectedRoute>
     </>
