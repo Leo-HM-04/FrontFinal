@@ -465,6 +465,17 @@ return (
                 </div>
                 <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-20"></div>
               </div>
+              
+              {/* Concepto - Ubicado entre estado y equipo */}
+              <div className="bg-gradient-to-r from-green-50/40 to-emerald-50/40 rounded-md p-4 border border-green-200/60 mb-4">
+                <h4 className="text-sm font-medium text-green-800 mb-2 flex items-center">
+                  <div className="w-2 h-2 bg-green-600 rounded-full mr-2"></div>
+                  Concepto
+                </h4>
+                <div className="bg-white/80 p-3 rounded border border-green-100">
+                  <p className="text-gray-800 leading-relaxed text-sm font-medium">{solicitud.concepto}</p>
+                </div>
+              </div>
           
           {/* Información de departamento y solicitante */}
           <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80 mb-3">
@@ -513,22 +524,9 @@ return (
         </Card>
       </div>
           {/* Concepto y Documentos con diseño mejorado */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 mb-8">
-            {/* Concepto - 1 columna */}
-            <Card className="p-6 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
-                <div className="p-2 bg-green-100 rounded-xl mr-3">
-                  <FileText className="w-6 h-6 text-green-700" />
-                </div>
-                Concepto
-              </h3>
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200/50 shadow-inner">
-                <p className="text-gray-800 leading-relaxed text-base font-medium">{solicitud.concepto}</p>
-              </div>
-            </Card>
-            
-            {/* Documentos - 2 columnas */}
-            <Card className="lg:col-span-2 p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+          <div className="space-y-6 mb-8">
+            {/* Documentos - Sección expandida */}
+            <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
               <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
                 <div className="p-2 bg-blue-100 rounded-xl mr-3">
                   <ExternalLink className="w-6 h-6 text-blue-700" />
