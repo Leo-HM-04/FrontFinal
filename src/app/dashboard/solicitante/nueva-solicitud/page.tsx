@@ -188,7 +188,6 @@ export default function NuevaSolicitudPage() {
   ];
 
   const departamentoOptions = [
-    { value: 'sistemas', label: 'Sistemas' },
     { value: 'contabilidad', label: 'Contabilidad' },
     { value: 'facturacion', label: 'Facturación' },
     { value: 'cobranza', label: 'Cobranza' },

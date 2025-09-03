@@ -133,12 +133,6 @@ class SolicitanteNotificationService {
 
       const data: NotificacionRaw[] = await response.json();
       
-      console.log('🔍 Frontend recibió datos:', {
-        dataLength: data?.length,
-        firstItem: data?.[0],
-        isArray: Array.isArray(data)
-      });
-      
       return Array.isArray(data)
         ? data.map((n) => ({
             id_notificacion: n.id_notificacion || n.id || 0,
@@ -321,14 +315,6 @@ const NotificationItem = ({
   onNotificationClick: (notification: Notificacion) => void;
 }) => {
   const [isMarking, setIsMarking] = useState(false);
-
-  // Log para debug
-  console.log('🔍 Renderizando NotificationItem:', {
-    id: notification.id_notificacion,
-    mensaje: notification.mensaje.substring(0, 30) + '...',
-    leida: notification.leida,
-    fecha: notification.fecha_creacion
-  });
 
   const { fechaStr, horaStr } = useMemo(() => {
     const fechaObj = notification.fecha_creacion 
@@ -514,12 +500,6 @@ export default function SolicitanteNotifications({
     try {
       const nuevasNotificaciones = await SolicitanteNotificationService.fetchNotifications();
       
-      console.log('🔍 Notificaciones obtenidas:', {
-        count: nuevasNotificaciones.length,
-        first: nuevasNotificaciones[0],
-        unread: nuevasNotificaciones.filter(n => !n.leida).length
-      });
-      
       // Solo detectar nuevas notificaciones cuando el modal NO está abierto
       // para evitar sonar cuando el usuario está revisando las notificaciones
       if (!openModal) {
@@ -665,18 +645,10 @@ export default function SolicitanteNotifications({
     [notificaciones, filtro]
   );
 
-  const notificacionesPaginadas = useMemo(() => {
-    const result = notificacionesFiltradas.slice(0, pagina * ITEMS_PER_PAGE);
-    console.log('🔍 Notificaciones paginadas:', {
-      total: notificaciones.length,
-      filtradas: notificacionesFiltradas.length,
-      paginadas: result.length,
-      pagina,
-      itemsPerPage: ITEMS_PER_PAGE,
-      filtro
-    });
-    return result;
-  }, [notificacionesFiltradas, pagina, notificaciones.length, filtro]);
+  const notificacionesPaginadas = useMemo(
+    () => notificacionesFiltradas.slice(0, pagina * ITEMS_PER_PAGE),
+    [notificacionesFiltradas, pagina]
+  );
 
   const hasMoreNotifications = notificacionesFiltradas.length > pagina * ITEMS_PER_PAGE;
 
