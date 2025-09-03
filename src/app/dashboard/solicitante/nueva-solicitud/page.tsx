@@ -125,6 +125,7 @@ export default function NuevaSolicitudPage() {
   const [cuentaValida, setCuentaValida] = useState<null | boolean>(null);
   const [checkingCuenta, setCheckingCuenta] = useState(false);
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
   // Limpiar campos cuando cambie tipo_concepto
   useEffect(() => {
@@ -135,6 +136,30 @@ export default function NuevaSolicitudPage() {
       dispatch({ type: 'SET_FIELD', field: 'referencia', value: '' });
     }
   }, [formData.tipo_concepto]);
+
+  // Función para obtener estilos de campo con errores más visuales
+  const getFieldStyles = (fieldName: string, baseStyles: string) => {
+    const hasError = errors[fieldName];
+    const isEmptyRequired = isFormSubmitted && !formData[fieldName as keyof FormState];
+    
+    if (hasError || isEmptyRequired) {
+      return `${baseStyles} border-red-500 bg-red-50/10 ring-2 ring-red-500/30 shadow-lg shadow-red-500/25 animate-pulse`;
+    }
+    
+    return `${baseStyles} hover:border-white/50 focus:border-white/70`;
+  };
+
+  // Función para obtener estilos de labels con campos requeridos
+  const getLabelStyles = (fieldName: string, required: boolean = false) => {
+    const hasError = errors[fieldName];
+    const isEmptyRequired = isFormSubmitted && required && !formData[fieldName as keyof FormState];
+    
+    if (hasError || isEmptyRequired) {
+      return "block text-base font-bold text-red-400 mb-3 animate-pulse";
+    }
+    
+    return "block text-base font-medium text-white/90 mb-3";
+  };
 
   // Configuración dinámica para cuenta destino
   let cuentaConfig;
@@ -190,10 +215,9 @@ export default function NuevaSolicitudPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     dispatch({ type: 'SET_FIELD', field: name as keyof FormState, value });
-    // Validación en tiempo real - Solo verificar si está vacío
-    if (!value) {
-      setErrors((prev) => ({ ...prev, [name]: 'Este campo es obligatorio' }));
-    } else {
+    
+    // Limpiar error en tiempo real cuando el usuario empieza a escribir
+    if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
@@ -285,6 +309,7 @@ export default function NuevaSolicitudPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setIsFormSubmitted(true);
     const newErrors: Record<string, string> = {};
     // Validar campos requeridos
     const requiredFields = ['departamento', 'monto', 'fecha_limite_pago', 'factura_file', 'nombre_persona'];
@@ -316,10 +341,36 @@ export default function NuevaSolicitudPage() {
       newErrors['cuenta_destino'] = 'Espera a que termine la verificación de la cuenta destino.';
     }
     setErrors(newErrors);
+    
     if (Object.keys(newErrors).length > 0) {
       setLoading(false);
+      
+      // Scroll al primer campo con error con animación suave
+      setTimeout(() => {
+        const firstErrorField = document.querySelector('.animate-pulse');
+        if (firstErrorField) {
+          firstErrorField.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 100);
+      
+      // Toast con información más visual
+      toast.error(
+        `❌ Faltan ${Object.keys(newErrors).length} campo(s) obligatorio(s)`,
+        {
+          duration: 4000,
+          style: {
+            background: '#dc2626',
+            color: 'white',
+            fontWeight: 'bold'
+          }
+        }
+      );
       return;
     }
+    
     try {
       if (!formData.factura_file) {
         throw new Error('El archivo de factura es obligatorio.');
@@ -492,12 +543,50 @@ export default function NuevaSolicitudPage() {
               </div>
             </div>
 
+            {/* BANNER DE ERRORES */}
+            {isFormSubmitted && Object.keys(errors).length > 0 && (
+              <div className="bg-red-500/20 border-2 border-red-500/50 rounded-xl p-6 mb-8 backdrop-blur-sm animate-pulse">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <span className="text-4xl animate-bounce">⚠️</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-red-400 font-bold text-lg mb-2">
+                      ¡Atención! Hay {Object.keys(errors).length} campo(s) que requieren tu atención
+                    </h3>
+                    <p className="text-red-300 text-sm mb-3">
+                      Por favor, revisa y completa los siguientes campos obligatorios:
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {Object.entries(errors).map(([field, message]) => (
+                        <div key={field} className="flex items-center space-x-2 text-red-300 text-sm">
+                          <span className="text-red-400">•</span>
+                          <span className="font-semibold capitalize">
+                            {field.replace('_', ' ')}: 
+                          </span>
+                          <span>{message}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsFormSubmitted(false)}
+                    className="text-red-400 hover:text-red-300 transition-colors"
+                    title="Ocultar este mensaje"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-10 max-w-full">
               {/* SECCIÓN 1: INFORMACIÓN BÁSICA - 2 columnas */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Departamento */}
                 <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
+                  <label className={getLabelStyles('departamento', true)}>
                     <Building className="w-4 h-4 inline mr-2" />
                     Departamento *
                   </label>
@@ -506,7 +595,7 @@ export default function NuevaSolicitudPage() {
                     value={formData.departamento}
                     onChange={handleInputChange}
                     required
-                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.departamento ? 'border-red-400' : ''}`}
+                    className={getFieldStyles('departamento', 'w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200')}
                   >
                     <option value="" className="text-gray-900">Seleccionar departamento</option>
                     {departamentoOptions.map(dept => (
@@ -515,12 +604,17 @@ export default function NuevaSolicitudPage() {
                       </option>
                     ))}
                   </select>
-                  {errors.departamento && <span className="text-red-400 text-sm mt-1 block">{errors.departamento}</span>}
+                  {errors.departamento && (
+                    <div className="mt-2 flex items-center space-x-2 animate-bounce">
+                      <span className="text-red-400 text-2xl">⚠️</span>
+                      <span className="text-red-400 text-sm font-bold">{errors.departamento}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Monto */}
                 <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
+                  <label className={getLabelStyles('monto', true)}>
                     <DollarSign className="w-4 h-4 inline mr-2" />
                     Monto *
                   </label>
@@ -537,15 +631,19 @@ export default function NuevaSolicitudPage() {
                     required
                     onValueChange={({ value }) => {
                       dispatch({ type: 'SET_FIELD', field: 'monto', value });
-                      if (!value) {
-                        setErrors((prev) => ({ ...prev, monto: 'Este campo es obligatorio' }));
-                      } else {
+                      // Limpiar error cuando el usuario empieza a escribir
+                      if (errors.monto) {
                         setErrors((prev) => ({ ...prev, monto: undefined }));
                       }
                     }}
-                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
+                    className={getFieldStyles('monto', 'w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200')}
                   />  
-                  {errors.monto && <span className="text-red-400 text-sm mt-1 block">{errors.monto}</span>}
+                  {errors.monto && (
+                    <div className="mt-2 flex items-center space-x-2 animate-bounce">
+                      <span className="text-red-400 text-2xl">💰</span>
+                      <span className="text-red-400 text-sm font-bold">{errors.monto}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Tipo de Moneda */}
@@ -573,10 +671,10 @@ export default function NuevaSolicitudPage() {
                   Información Bancaria
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {/* Datos Bancarios */}
+                  {/* “Información Bancaria” */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      Datos Bancarios *
+                      “Información Bancaria” *
                     </label>
                     <select
                       name="tipo_cuenta_destino"
@@ -658,7 +756,7 @@ export default function NuevaSolicitudPage() {
                         placeholder={cuentaConfig.placeholder}
                         required={cuentaConfig.required}
                         autoComplete="off"
-                        className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide ${errors.cuenta_destino ? 'border-red-400' : ''}`}
+                        className={getFieldStyles('cuenta_destino', 'w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide transition-all duration-200')}
                       />
                       {/* Estados de validación */}
                       <div className="mt-2 flex items-center gap-4">
@@ -679,7 +777,10 @@ export default function NuevaSolicitudPage() {
                         )}
                       </div>
                       {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
-                        <span className="text-red-400 text-sm mt-1 block">{errors.cuenta_destino}</span>
+                        <div className="mt-2 flex items-center space-x-2 animate-bounce">
+                          <span className="text-red-400 text-2xl">🏦</span>
+                          <span className="text-red-400 text-sm font-bold">{errors.cuenta_destino}</span>
+                        </div>
                       )}
                     </div>
                   )}
@@ -967,11 +1068,16 @@ export default function NuevaSolicitudPage() {
                     dateFormat="yyyy-MM-dd"
                     minDate={new Date()}
                     placeholderText="Selecciona la fecha"
-                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.fecha_limite_pago ? 'border-red-400' : ''}`}
+                    className={getFieldStyles('fecha_limite_pago', 'w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200')}
                     calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg"
                     locale={es}
                   />
-                  {errors.fecha_limite_pago && <span className="text-red-400 text-sm mt-1 block">{errors.fecha_limite_pago}</span>}
+                  {errors.fecha_limite_pago && (
+                    <div className="mt-2 flex items-center space-x-2 animate-bounce">
+                      <span className="text-red-400 text-2xl">📅</span>
+                      <span className="text-red-400 text-sm font-bold">{errors.fecha_limite_pago}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Descripción del tipo de pago (condicional) - Ocupa ambas columnas */}
@@ -1069,7 +1175,7 @@ export default function NuevaSolicitudPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Nombre de la persona (obligatorio) */}
                   <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
+                    <label className={getLabelStyles('nombre_persona', true)}>
                       <span className="text-red-400">*</span> Nombre del Beneficiario
                     </label>
                     <input
@@ -1079,9 +1185,14 @@ export default function NuevaSolicitudPage() {
                       onChange={handleInputChange}
                       required
                       placeholder="Nombre completo de la persona física o moral que recibe directamente el pago"
-                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200 ${errors.nombre_persona ? 'border-red-400 shadow-red-400/25 shadow-lg' : 'hover:border-white/50'}`}
+                      className={getFieldStyles('nombre_persona', 'w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base transition-all duration-200')}
                     />
-                    {errors.nombre_persona && <span className="text-red-400 text-sm mt-1 block">{errors.nombre_persona}</span>}
+                    {errors.nombre_persona && (
+                      <div className="mt-2 flex items-center space-x-2 animate-bounce">
+                        <span className="text-red-400 text-2xl">👤</span>
+                        <span className="text-red-400 text-sm font-bold">{errors.nombre_persona}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Empresa (opcional) */}
@@ -1108,7 +1219,7 @@ export default function NuevaSolicitudPage() {
                   Documentos Requeridos
                 </h3>
                 <div>
-                  <label className="block text-base font-medium text-white/90 mb-4">
+                  <label className={getLabelStyles('factura_file', true)}>
                     <span className="text-red-400">*</span> Factura 
                     <span className="text-white/70 text-sm ml-2">(PDF, Excel, JPG, PNG - Máx. 5MB)</span>
                   </label>
@@ -1118,9 +1229,16 @@ export default function NuevaSolicitudPage() {
                       accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png"
                       onChange={(e) => handleFileChange(e, 'factura_file')}
                       required
-                      className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-white/30 file:text-white hover:file:bg-white/40 text-base transition-all duration-200 ${errors.factura_file ? 'border-red-400 shadow-red-400/25 shadow-lg' : 'hover:border-white/50'}`}
+                      className={getFieldStyles('factura_file', 'w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-white/30 file:text-white hover:file:bg-white/40 text-base transition-all duration-200')}
                     />
                   </div>
+                  
+                  {errors.factura_file && (
+                    <div className="mt-2 flex items-center space-x-2 animate-bounce">
+                      <span className="text-red-400 text-2xl">📄</span>
+                      <span className="text-red-400 text-sm font-bold">{errors.factura_file}</span>
+                    </div>
+                  )}
                   
                   {/* Previsualización mejorada */}
                   {formData.factura_file && (
