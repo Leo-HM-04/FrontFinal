@@ -322,6 +322,14 @@ const NotificationItem = ({
 }) => {
   const [isMarking, setIsMarking] = useState(false);
 
+  // Log para debug
+  console.log('🔍 Renderizando NotificationItem:', {
+    id: notification.id_notificacion,
+    mensaje: notification.mensaje.substring(0, 30) + '...',
+    leida: notification.leida,
+    fecha: notification.fecha_creacion
+  });
+
   const { fechaStr, horaStr } = useMemo(() => {
     const fechaObj = notification.fecha_creacion 
       ? new Date(notification.fecha_creacion) 
