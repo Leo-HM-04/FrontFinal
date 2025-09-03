@@ -292,3 +292,34 @@ html, body {
 NOTA: Muchas utilidades personalizadas pueden migrarse a clases de Tailwind para aprovechar el tree-shaking y la personalización.
 Si decides migrar, elimina las clases personalizadas redundantes.
 */
+
+/* Animaciones para la nueva barra flotante de aprobación */
+@keyframes slide-up {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}

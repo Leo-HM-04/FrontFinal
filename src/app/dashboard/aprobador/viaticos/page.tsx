@@ -10,7 +10,7 @@ import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { usePagination } from '@/hooks/usePagination';
 
 import { Solicitud } from '@/types';
-import { formatCurrency, formatDate, normalizeViatico } from '@/utils/viaticos';
+import { formatDate, normalizeViatico } from '@/utils/viaticos';
 
 const SkeletonRow: React.FC = () => (
   <tr className="animate-pulse">
@@ -308,28 +308,94 @@ const Viaticos: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               {hasSelection && (
-                <div className="fixed left-0 right-0 bottom-0 z-40 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white px-8 py-6 flex items-center gap-8 shadow-2xl animate-fade-in justify-center border-t-4 border-blue-400">
-                  <span className="font-extrabold text-lg tracking-wide drop-shadow-lg">
-                    Seleccionados: <span className="text-yellow-300 text-2xl font-black animate-pulse">{selectedViaticos.length}</span>
-                  </span>
-                  <button
-                    className="flex items-center gap-2 bg-gradient-to-br from-green-500 via-green-600 to-green-700 hover:from-green-600 hover:to-green-800 text-white px-8 py-4 rounded-2xl font-extrabold text-xl shadow-xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 disabled:opacity-60 border-2 border-white/30"
-                    onClick={() => setModalConfirm('aprobar')}
-                    disabled={accionCargando === 'aprobar'}
-                  >
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                    {accionCargando === 'aprobar' ? 'Aprobando...' : 'Aprobar'}
-                  </button>
-                  <button
-                    className="flex items-center gap-2 bg-gradient-to-br from-red-500 via-red-600 to-red-700 hover:from-red-600 hover:to-red-800 text-white px-8 py-4 rounded-2xl font-extrabold text-xl shadow-xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300 disabled:opacity-60 border-2 border-white/30"
-                    onClick={() => setModalConfirm('rechazar')}
-                    disabled={accionCargando === 'rechazar'}
-                  >
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    {accionCargando === 'rechazar' ? 'Rechazando...' : 'Rechazar'}
-                  </button>
-                  {mensajeAccion && <span className="ml-6 text-green-200 font-extrabold text-lg animate-fade-in drop-shadow-lg">{mensajeAccion}</span>}
-                  {errorAccion && <span className="ml-6 text-red-200 font-extrabold text-lg animate-fade-in drop-shadow-lg">{errorAccion}</span>}
+                <div className="fixed left-1/2 bottom-8 transform -translate-x-1/2 z-50 animate-slide-up">
+                  <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/20 p-6 min-w-[400px]">
+                    <div className="flex items-center justify-between gap-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900 text-sm">
+                            {selectedViaticos.length} viático{selectedViaticos.length !== 1 ? 's' : ''} seleccionado{selectedViaticos.length !== 1 ? 's' : ''}
+                          </p>
+                          <p className="text-xs text-gray-500">¿Qué acción deseas realizar?</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <button
+                          className="group relative overflow-hidden bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                          onClick={() => setModalConfirm('aprobar')}
+                          disabled={accionCargando === 'aprobar'}
+                        >
+                          <div className="absolute inset-0 bg-white/20 translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+                          <div className="relative flex items-center gap-2">
+                            {accionCargando === 'aprobar' ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <span>Aprobando...</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>Aprobar</span>
+                              </>
+                            )}
+                          </div>
+                        </button>
+                        
+                        <button
+                          className="group relative overflow-hidden bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                          onClick={() => setModalConfirm('rechazar')}
+                          disabled={accionCargando === 'rechazar'}
+                        >
+                          <div className="absolute inset-0 bg-white/20 translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+                          <div className="relative flex items-center gap-2">
+                            {accionCargando === 'rechazar' ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <span>Rechazando...</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span>Rechazar</span>
+                              </>
+                            )}
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Mensajes de feedback */}
+                    {(mensajeAccion || errorAccion) && (
+                      <div className="mt-4 p-3 rounded-xl border-l-4 animate-fade-in">
+                        {mensajeAccion && (
+                          <div className="border-green-500 bg-green-50 text-green-700 flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm font-medium">{mensajeAccion}</span>
+                          </div>
+                        )}
+                        {errorAccion && (
+                          <div className="border-red-500 bg-red-50 text-red-700 flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm font-medium">{errorAccion}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
