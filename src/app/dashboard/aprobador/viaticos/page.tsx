@@ -308,49 +308,62 @@ const Viaticos: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               {hasSelection && (
-                <div className="fixed left-1/2 bottom-8 transform -translate-x-1/2 z-50 animate-slide-up">
-                  <div className="relative bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-100 p-6 min-w-[480px] max-w-[600px] overflow-hidden">
+                <div className="fixed top-6 right-6 z-50 animate-slide-in-right">
+                  <div className="relative bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-100 p-5 w-80 overflow-hidden">
                     {/* Subtle gradient background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30 rounded-2xl"></div>
                     
                     {/* Content */}
                     <div className="relative z-10">
-                      {/* Clean header */}
-                      <div className="flex items-center gap-4 mb-5">
-                        <div className="relative">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm">
-                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                      {/* Header with close button */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm">
+                              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-md">
+                              <span className="text-white text-xs font-bold">{selectedViaticos.length}</span>
+                            </div>
                           </div>
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-md">
-                            <span className="text-white text-xs font-bold">{selectedViaticos.length}</span>
+                          <div>
+                            <h3 className="text-sm font-bold text-gray-900">Aprobación</h3>
+                            <p className="text-xs text-gray-600">
+                              {selectedViaticos.length} seleccionado{selectedViaticos.length !== 1 ? 's' : ''}
+                            </p>
                           </div>
                         </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-900">Aprobación de Viáticos</h3>
-                          <p className="text-sm text-gray-600">
-                            {selectedViaticos.length} elemento{selectedViaticos.length !== 1 ? 's' : ''} seleccionado{selectedViaticos.length !== 1 ? 's' : ''} para revisión
-                          </p>
-                        </div>
+                        
+                        {/* Close button */}
+                        <button
+                          onClick={() => setSelectedViaticos([])}
+                          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                          aria-label="Cerrar panel de aprobación"
+                        >
+                          <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
                       </div>
 
-                      {/* Action buttons - Modern and clean */}
-                      <div className="flex gap-3">
+                      {/* Action buttons - Compact */}
+                      <div className="space-y-2">
                         <button
-                          className="group relative flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-green-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                          className="group relative w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-green-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                           onClick={() => setModalConfirm('aprobar')}
                           disabled={accionCargando === 'aprobar'}
                         >
-                          <div className="flex items-center justify-center gap-3">
+                          <div className="flex items-center justify-center gap-2">
                             {accionCargando === 'aprobar' ? (
                               <>
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                 <span>Procesando...</span>
                               </>
                             ) : (
                               <>
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                                 </svg>
                                 <span>Aprobar Selección</span>
@@ -358,23 +371,23 @@ const Viaticos: React.FC = () => {
                             )}
                           </div>
                           {/* Subtle hover effect */}
-                          <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </button>
                         
                         <button
-                          className="group relative flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-red-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                          className="group relative w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-red-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                           onClick={() => setModalConfirm('rechazar')}
                           disabled={accionCargando === 'rechazar'}
                         >
-                          <div className="flex items-center justify-center gap-3">
+                          <div className="flex items-center justify-center gap-2">
                             {accionCargando === 'rechazar' ? (
                               <>
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                 <span>Procesando...</span>
                               </>
                             ) : (
                               <>
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                                 <span>Rechazar Selección</span>
@@ -382,52 +395,50 @@ const Viaticos: React.FC = () => {
                             )}
                           </div>
                           {/* Subtle hover effect */}
-                          <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </button>
                       </div>
 
                       {/* Clean feedback messages */}
                       {(mensajeAccion || errorAccion) && (
-                        <div className="mt-5 animate-fade-in">
+                        <div className="mt-3 animate-fade-in">
                           {mensajeAccion && (
-                            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
-                              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
                               </div>
                               <div>
-                                <h4 className="font-semibold text-green-800 text-sm">Operación exitosa</h4>
-                                <p className="text-green-700 text-sm">{mensajeAccion}</p>
+                                <p className="text-green-700 text-xs font-medium">Operación exitosa</p>
                               </div>
                             </div>
                           )}
                           {errorAccion && (
-                            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-                              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
                               <div>
-                                <h4 className="font-semibold text-red-800 text-sm">Error en la operación</h4>
-                                <p className="text-red-700 text-sm">{errorAccion}</p>
+                                <p className="text-red-700 text-xs font-medium">Error en la operación</p>
                               </div>
                             </div>
                           )}
                         </div>
                       )}
 
-                      {/* Optional: Quick stats */}
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
+                      {/* Quick stats footer */}
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
                           <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                            <span>Seleccionados: {selectedViaticos.length}</span>
+                            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                            <span>{selectedViaticos.length} elementos</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                            <span>Aprobación requerida</span>
+                            <div className="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
+                            <span>Pendiente</span>
                           </div>
                         </div>
                       </div>
