@@ -130,227 +130,6 @@ const formatTime = (dateString: string) => {
 type SortField = 'monto' | 'estado' | 'fecha' | 'hora';
 type SortOrder = 'asc' | 'desc';
 
-// Componente de búsqueda que NO pierde el focus
-const FocusStableSearchInput = memo(React.forwardRef<{ clear: () => void }, { 
-  onSearchChange: (value: string) => void;
-}>(({ onSearchChange }, ref) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const currentValueRef = useRef<string>('');
-
-  const clearInternal = useCallback(() => {
-    if (inputRef.current) {
-      inputRef.current.value = '';
-      currentValueRef.current = '';
-    }
-  }, []);
-
-  React.useImperativeHandle(ref, () => ({
-    clear: clearInternal
-  }), [clearInternal]);
-
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    currentValueRef.current = value;
-
-    // Limpiar el timeout anterior
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    // Establecer un nuevo timeout
-    debounceTimeoutRef.current = setTimeout(() => {
-      onSearchChange(value);
-    }, 300);
-  }, [onSearchChange]);
-
-  const handleClear = useCallback(() => {
-    if (inputRef.current) {
-      inputRef.current.value = '';
-      currentValueRef.current = '';
-      inputRef.current.focus();
-    }
-    onSearchChange('');
-  }, [onSearchChange]);
-
-  // Limpiar timeout al desmontar
-  useEffect(() => {
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  return (
-    <div className="flex-1">
-      <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          ref={inputRef}
-          type="text"
-          onChange={handleChange}
-          placeholder="Buscar por folio, concepto..."
-          className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-          autoComplete="off"
-          spellCheck="false"
-          defaultValue=""
-        />
-        <button
-          onClick={handleClear}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-          aria-label="Limpiar búsqueda"
-          style={{ display: 'block' }}
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
-    </div>
-  );
-}));
-
-FocusStableSearchInput.displayName = 'FocusStableSearchInput';
-
-// Componente alternativo con input no controlado como respaldo
-const UncontrolledSearchInput = memo(({ 
-  onSearchChange, 
-  inputRef 
-}: { 
-  onSearchChange: (value: string) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-}) => {
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const wasFocusedRef = useRef(false);
-
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    wasFocusedRef.current = document.activeElement === e.target;
-
-    // Limpiar el timeout anterior
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    // Establecer un nuevo timeout
-    debounceTimeoutRef.current = setTimeout(() => {
-      onSearchChange(value);
-      
-      // Restaurar el focus después del debounce si estaba enfocado
-      if (wasFocusedRef.current && inputRef?.current) {
-        setTimeout(() => {
-          if (inputRef.current && document.body.contains(inputRef.current)) {
-            inputRef.current.focus();
-            // Posicionar el cursor al final del texto
-            const length = inputRef.current.value.length;
-            inputRef.current.setSelectionRange(length, length);
-          }
-        }, 10);
-      }
-    }, 300); // Tiempo de debounce
-  }, [onSearchChange, inputRef]);
-
-  // Limpiar timeout al desmontar
-  useEffect(() => {
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  return (
-    <div className="flex-1">
-      <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          ref={inputRef}
-          type="text"
-          onChange={handleChange}
-          placeholder="Buscar por folio, concepto..."
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-          autoComplete="off"
-        />
-      </div>
-    </div>
-  );
-});
-
-UncontrolledSearchInput.displayName = 'UncontrolledSearchInput';
-
-// Componente memoizado para el input de búsqueda con estado local
-const SearchInput = memo(({ 
-  initialValue, 
-  onSearchChange, 
-  inputRef 
-}: { 
-  initialValue: string; 
-  onSearchChange: (value: string) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-}) => {
-  const [localValue, setLocalValue] = useState(initialValue);
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isUserTypingRef = useRef(false);
-
-  // Sincronizar el valor local cuando cambie el valor inicial desde el padre
-  // pero solo si el usuario no está escribiendo activamente
-  useEffect(() => {
-    if (!isUserTypingRef.current) {
-      setLocalValue(initialValue);
-    }
-  }, [initialValue]);
-
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocalValue(value);
-    isUserTypingRef.current = true;
-
-    // Limpiar el timeout anterior
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    // Establecer un nuevo timeout
-    debounceTimeoutRef.current = setTimeout(() => {
-      onSearchChange(value);
-      isUserTypingRef.current = false;
-    }, 300); // 300ms de debounce
-  }, [onSearchChange]);
-
-  // Limpiar timeout al desmontar
-  useEffect(() => {
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  return (
-    <div className="flex-1">
-      <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          ref={inputRef}
-          type="text"
-          value={localValue}
-          onChange={handleChange}
-          placeholder="Buscar por folio, concepto..."
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-          autoComplete="off"
-        />
-      </div>
-    </div>
-  );
-}, (prevProps, nextProps) => {
-  // Comparación personalizada para evitar re-renders innecesarios
-  return prevProps.initialValue === nextProps.initialValue;
-});
-
-SearchInput.displayName = 'SearchInput';
-
 // Componente que maneja los search params
 function MisSolicitudesContent() {
   const router = useRouter();
@@ -362,21 +141,22 @@ function MisSolicitudesContent() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [timeoutError, setTimeoutError] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  
+  // Estados de filtros
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [filteredSolicitudes, setFilteredSolicitudes] = useState<Solicitud[]>([]);
   
   // Estados de modales
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [solicitudAEliminar, setSolicitudAEliminar] = useState<Solicitud | null>(null);
-  const [deleting, setDeleting] = useState(false);
   
   // Estados de paginación
   const [currentPage, setCurrentPage] = useState(1);
-  
-  // Estados de filtros
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
   
   // Usar deferred value para que la búsqueda no bloquee la UI
   const deferredSearchTerm = useDeferredValue(searchTerm);
@@ -464,29 +244,23 @@ function MisSolicitudesContent() {
     };
   }, []);
 
-  // Filtrar solicitudes con useMemo para evitar re-renderizados
-  const filteredSolicitudes = useMemo(() => {
+  // Filtrado exactamente como en viáticos
+  useEffect(() => {
     let filtered = [...solicitudes];
-
-    if (deferredSearchTerm) {
-      filtered = filtered.filter(solicitud => 
-        solicitud.concepto?.toLowerCase().includes(deferredSearchTerm.toLowerCase()) ||
-        solicitud.departamento?.toLowerCase().includes(deferredSearchTerm.toLowerCase()) ||
-        solicitud.cuenta_destino?.toLowerCase().includes(deferredSearchTerm.toLowerCase()) ||
-        solicitud.folio?.toLowerCase().includes(deferredSearchTerm.toLowerCase())
+    if (searchTerm) {
+      filtered = filtered.filter(solicitud =>
+        solicitud.concepto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        solicitud.departamento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        solicitud.cuenta_destino?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        solicitud.folio?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (statusFilter) {
-      filtered = filtered.filter(solicitud => 
-        solicitud.estado?.toLowerCase() === statusFilter.toLowerCase()
-      );
+      filtered = filtered.filter(solicitud => solicitud.estado?.toLowerCase() === statusFilter.toLowerCase());
     }
-
     if (dateFilter) {
       const today = new Date();
       const filterDate = new Date(today);
-      
       switch (dateFilter) {
         case 'today':
           filterDate.setHours(0, 0, 0, 0);
@@ -498,26 +272,17 @@ function MisSolicitudesContent() {
           break;
         case 'week':
           filterDate.setTime(today.getTime() - (7 * 24 * 60 * 60 * 1000));
-          filtered = filtered.filter(solicitud => 
-            new Date(solicitud.fecha_creacion) >= filterDate
-          );
+          filtered = filtered.filter(solicitud => new Date(solicitud.fecha_creacion) >= filterDate);
           break;
         case 'month':
           filterDate.setMonth(today.getMonth() - 1);
-          filtered = filtered.filter(solicitud => 
-            new Date(solicitud.fecha_creacion) >= filterDate
-          );
+          filtered = filtered.filter(solicitud => new Date(solicitud.fecha_creacion) >= filterDate);
           break;
       }
     }
-
-    return filtered;
-  }, [solicitudes, deferredSearchTerm, statusFilter, dateFilter]);
-
-  // Efecto para resetear página cuando cambien los filtros
-  useEffect(() => {
+    setFilteredSolicitudes(filtered);
     setCurrentPage(1);
-  }, [deferredSearchTerm, statusFilter, dateFilter]);
+  }, [solicitudes, searchTerm, statusFilter, dateFilter]);
 
   // Función para manejar el ordenamiento
   const handleSort = (field: SortField) => {
@@ -636,14 +401,8 @@ function MisSolicitudesContent() {
     setSearchTerm('');
     setStatusFilter('');
     setDateFilter('');
-    // Limpiar también el estado interno del componente de búsqueda
-    optimizedSearchRef.current?.clear();
   };
 
-  // Callback optimizado para el input de búsqueda
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
-  }, []);
 
   // Componente para encabezados con ordenamiento
   const SortableHeader = ({ 
@@ -744,28 +503,22 @@ function MisSolicitudesContent() {
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
-          {/* Solución Optimizada: Input que preserva focus */}
-          <FocusStableSearchInput 
-            key="focus-stable-search"
-            ref={optimizedSearchRef}
-            onSearchChange={handleSearchChange}
-          />
-          
-          {/* Alternativas (descomenta si necesitas probar otras) */}
-          {/*
-          <UncontrolledSearchInput 
-            key="uncontrolled-search-input"
-            onSearchChange={handleSearchChange}
-            inputRef={searchInputRef}
-          />
-          
-          <SearchInput 
-            key="search-input"
-            initialValue={searchTerm}
-            onSearchChange={handleSearchChange}
-            inputRef={searchInputRef}
-          />
-          */}
+          {/* Input simple como en viáticos - SIN debounce */}
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por folio, concepto..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                autoComplete="off"
+                spellCheck="false"
+              />
+            </div>
+          </div>
 
           <div className="flex-1">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
