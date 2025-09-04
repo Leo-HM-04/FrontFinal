@@ -310,29 +310,19 @@ export default function MisViaticosPage() {
               </span>
               <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Viáticos</h1>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/dashboard/solicitante/nuevo-viatico"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-              >
-                <FaPlus className="w-4 h-4" />
-                Nueva Solicitud
-              </Link>
-              
-              {/* Botón para abrir modal de exportación */}
-              <Button
-                onClick={() => setIsExportModalOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-              >
-                <FaFilePdf className="w-4 h-4" />
-                Exportar
-              </Button>
-            </div>
           </div>
           {/* Filtros */}
           <div className="mb-8">
             <div className="bg-white rounded-xl p-6 border border-blue-200 shadow-md">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="inline-flex items-center justify-center rounded-full bg-blue-100 p-2">
+                  <Search className="text-blue-600 w-5 h-5" />
+                </div>
+                <h2 className="text-lg font-semibold text-blue-900">Filtros</h2>
+                <span className="text-sm text-blue-600">Refina tu búsqueda de viáticos</span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 w-5 h-5" />
                   <input
@@ -365,6 +355,37 @@ export default function MisViaticosPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <button
+                  className="px-4 py-2 rounded-lg border border-blue-200 bg-white text-blue-600 hover:bg-blue-50 transition-colors text-sm font-medium"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('');
+                    setDateFilter('');
+                  }}
+                >
+                  Limpiar Filtros
+                </button>
+                
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href="/dashboard/solicitante/nuevo-viatico"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <FaPlus className="w-4 h-4" />
+                    Nueva Solicitud
+                  </Link>
+                  
+                  <Button
+                    onClick={() => setIsExportModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <FaFilePdf className="w-4 h-4" />
+                    Exportar
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
