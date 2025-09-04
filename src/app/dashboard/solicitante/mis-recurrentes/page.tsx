@@ -286,7 +286,7 @@ export default function MisRecurrentesPage() {
                                 </Button>
                                 <Button
                                     onClick={() => setExportModalOpen(true)}
-                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white hover:bg-gray-50 text-blue-600 border border-blue-200 font-medium shadow-lg transition-all"
+                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 font-medium shadow-lg transition-all"
                                 >
                                     <FileText className="w-5 h-5" />
                                     Exportar
@@ -295,50 +295,50 @@ export default function MisRecurrentesPage() {
                         </div>
                     </div>
 
-                    <div className="bg-white/15 backdrop-blur-sm rounded-xl border border-white/20 overflow-x-auto shadow-xl">
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto shadow-xl">
                         <table className="w-full min-w-[1200px]">
-                            <thead className="bg-white/10">
+                            <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-24">Folio</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-32">Usuario</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-40">Departamento</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-28">Monto</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-36">Cuenta Destino</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-48">Concepto</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-28">Tipo Pago</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-28">Frecuencia</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-28">Estado</th>
-                                    <th className="px-4 py-4 text-center text-sm font-semibold text-white w-28">Activa</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-32">Siguiente Fecha</th>
-                                    <th className="px-4 py-4 text-center text-sm font-semibold text-white w-40">Acciones</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-24">Folio</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-32">Usuario</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-40">Departamento</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-28">Monto</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-36">Cuenta Destino</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-48">Concepto</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-28">Tipo Pago</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-28">Frecuencia</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-28">Estado</th>
+                                    <th className="px-4 py-4 text-center text-sm font-semibold text-gray-900 w-28">Activa</th>
+                                    <th className="px-4 py-4 text-left text-sm font-semibold text-gray-900 w-32">Siguiente Fecha</th>
+                                    <th className="px-4 py-4 text-center text-sm font-semibold text-gray-900 w-40">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/10">
+                            <tbody className="divide-y divide-gray-200">
                                 {loading ? ( // Muestra un mensaje de carga
                                     <tr>
-                                        <td colSpan={11} className="px-6 py-12 text-center text-white/80">
+                                        <td colSpan={11} className="px-6 py-12 text-center text-gray-500">
                                             Cargando plantillas...
                                         </td>
                                     </tr>
                                 ) : currentRecurrentes.length === 0 ? (
                                     <tr>
-                                        <td colSpan={11} className="px-6 py-12 text-center text-white/80">
-                                            <FileText className="w-12 h-12 mx-auto mb-4 text-white/40" />
+                                        <td colSpan={11} className="px-6 py-12 text-center text-gray-500">
+                                            <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                                             <p className="text-lg">No tienes plantillas para el filtro seleccionado.</p>
-                                            <p className="text-sm text-white/60 mt-1">Intenta con otro estado o crea una nueva plantilla.</p>
+                                            <p className="text-sm text-gray-400 mt-1">Intenta con otro estado o crea una nueva plantilla.</p>
                                         </td>
                                     </tr>
                                 ) : (
                                     currentRecurrentes.map((p) => (
-                                        <tr key={p.id_recurrente} className="hover:bg-white/10 transition-colors">
-                                            <td className="px-4 py-3 text-white font-mono text-sm">{p.folio || '-'}</td>
-                                            <td className="px-4 py-3 text-white text-sm truncate">{p.nombre_usuario ? p.nombre_usuario : p.id_usuario}</td>
-                                            <td className="px-4 py-3 text-white text-sm truncate">{p.departamento.charAt(0).toUpperCase() + p.departamento.slice(1)}</td>
-                                            <td className="px-4 py-3 text-white font-medium text-sm">{p.monto}</td>
-                                            <td className="px-4 py-3 text-white text-sm truncate">{p.cuenta_destino}</td>
-                                            <td className="px-4 py-3 text-white text-sm truncate max-w-[200px]">{p.concepto}</td>
-                                            <td className="px-8 py-5 text-white">{p.tipo_pago.charAt(0).toUpperCase() + p.tipo_pago.slice(1)}</td>
-                                            <td className="px-8 py-5 text-white capitalize">{p.frecuencia}</td>
+                                        <tr key={p.id_recurrente} className="hover:bg-gray-50 transition-colors">
+                                            <td className="px-4 py-3 text-gray-900 font-mono text-sm">{p.folio || '-'}</td>
+                                            <td className="px-4 py-3 text-gray-900 text-sm truncate">{p.nombre_usuario ? p.nombre_usuario : p.id_usuario}</td>
+                                            <td className="px-4 py-3 text-gray-900 text-sm truncate">{p.departamento.charAt(0).toUpperCase() + p.departamento.slice(1)}</td>
+                                            <td className="px-4 py-3 text-gray-900 font-medium text-sm">{p.monto}</td>
+                                            <td className="px-4 py-3 text-gray-900 text-sm truncate">{p.cuenta_destino}</td>
+                                            <td className="px-4 py-3 text-gray-900 text-sm truncate max-w-[200px]">{p.concepto}</td>
+                                            <td className="px-8 py-5 text-gray-900">{p.tipo_pago.charAt(0).toUpperCase() + p.tipo_pago.slice(1)}</td>
+                                            <td className="px-8 py-5 text-gray-900 capitalize">{p.frecuencia}</td>
                                             <td className="px-8 py-5">
                                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(p.estado)}`}>
                                                     {getEstadoIcon(p.estado)}
@@ -369,14 +369,14 @@ export default function MisRecurrentesPage() {
                                                     </span>
                                                 </span>
                                             </td>
-                                            <td className="px-8 py-5 text-white text-sm">{formatDate(p.siguiente_fecha)}</td>
+                                            <td className="px-8 py-5 text-gray-900 text-sm">{formatDate(p.siguiente_fecha)}</td>
                                             <td className="px-8 py-5 text-center">
                                                 <div className="flex justify-center gap-2">
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() => { setRecurrenteDetalle(p); setDetalleModalOpen(true); }}
-                                                        className="bg-white/15 backdrop-blur-sm text-white border border-white/30 hover:bg-white/25 transition-all duration-300"
+                                                        className="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-all duration-300"
                                                     >
                                                         <Eye className="w-4 h-4 mr-1" /> Ver
                                                     </Button>
@@ -384,11 +384,11 @@ export default function MisRecurrentesPage() {
                                                         <>
                                                             <Button
                                                                 onClick={() => router.push(`/dashboard/solicitante/editar-recurrente/${p.id_recurrente}`)}
-                                                                className="bg-yellow-500/20 text-yellow-200 border border-yellow-400/40 hover:bg-yellow-500/40"
+                                                                className="bg-yellow-50 text-yellow-600 border border-yellow-200 hover:bg-yellow-100"
                                                             >Editar</Button>
                                                             <Button
                                                                 onClick={() => { setRecurrenteAEliminar(p); setDeleteModalOpen(true); }}
-                                                                className="bg-red-500/20 text-red-200 border border-red-400/40 hover:bg-red-500/40"
+                                                                className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
                                                             >Eliminar</Button>
                                                         </>
                                                     )}
@@ -401,9 +401,9 @@ export default function MisRecurrentesPage() {
                         </table>
                     </div>
                     {totalPages > 1 && (
-                        <div className="flex justify-between items-center px-6 py-4 border-t border-white/10 bg-gradient-to-r from-blue-900/30 to-blue-700/20 mt-2">
-                            <div className="text-white/90 text-base font-medium">
-                                Mostrando <span className="font-bold text-blue-200">{filteredRecurrentes.length === 0 ? 0 : startIndex + 1}-{endIndex}</span> de <span className="font-bold text-blue-200">{filteredRecurrentes.length}</span>
+                        <div className="flex justify-between items-center px-6 py-4 border-t border-gray-200 bg-white mt-2 rounded-b-xl">
+                            <div className="text-gray-700 text-base font-medium">
+                                Mostrando <span className="font-bold text-blue-600">{filteredRecurrentes.length === 0 ? 0 : startIndex + 1}-{endIndex}</span> de <span className="font-bold text-blue-600">{filteredRecurrentes.length}</span>
                             </div>
                             <Pagination
                                 currentPage={currentPage}

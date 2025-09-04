@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense, useRef, useCallback, useMemo, memo, startTransition, useDeferredValue } from 'react';
+import React, { useState, useEffect, Suspense, useRef, useCallback, useMemo, memo, useDeferredValue } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
@@ -381,8 +381,7 @@ function MisSolicitudesContent() {
   // Usar deferred value para que la búsqueda no bloquee la UI
   const deferredSearchTerm = useDeferredValue(searchTerm);
   
-  // Ref para el input de búsqueda
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  // Ref para optimized search
   const optimizedSearchRef = useRef<{ clear: () => void }>(null);
   
   // Estados de exportación
