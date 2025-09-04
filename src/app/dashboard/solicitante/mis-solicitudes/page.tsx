@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
@@ -156,6 +156,9 @@ function MisSolicitudesContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  
+  // Ref para el input de búsqueda
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   // Estados de exportación
   const [showExportModal, setShowExportModal] = useState(false);
@@ -410,6 +413,11 @@ function MisSolicitudesContent() {
     setDateFilter('');
   };
 
+  // Callback optimizado para el input de búsqueda
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
   // Componente para encabezados con ordenamiento
   const SortableHeader = ({ 
     field, 
@@ -514,9 +522,10 @@ function MisSolicitudesContent() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
+                ref={searchInputRef}
                 type="text"
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
                 placeholder="Buscar por folio, concepto..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
               />

@@ -43,6 +43,15 @@ export default function NuevoViaticoPage() {
   const [enviando, setEnviando] = useState<boolean>(false);
   const router = useRouter();
 
+  // Función para obtener la fecha actual en formato YYYY-MM-DD
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleChange = (idx: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const nuevos = [...formularios];
     nuevos[idx].form = { ...nuevos[idx].form, [e.target.name]: e.target.value };
@@ -328,6 +337,7 @@ export default function NuevoViaticoPage() {
                       <input
                         name="fecha_limite_pago"
                         type="date"
+                        min={getTodayDate()}
                         onChange={e => handleChange(idx, e)}
                         required
                         className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400"
