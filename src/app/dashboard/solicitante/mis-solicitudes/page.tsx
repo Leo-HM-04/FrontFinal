@@ -130,16 +130,19 @@ const formatTime = (dateString: string) => {
 type SortField = 'monto' | 'estado' | 'fecha' | 'hora';
 type SortOrder = 'asc' | 'desc';
 
-// Componente de búsqueda optimizado para preservar focus
-const OptimizedSearchInput = memo(React.forwardRef<{ clear: () => void }, { 
+// Componente de búsqueda que NO pierde el focus
+const FocusStableSearchInput = memo(React.forwardRef<{ clear: () => void }, { 
   onSearchChange: (value: string) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-}>(({ onSearchChange, inputRef }, ref) => {
+}>(({ onSearchChange }, ref) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [internalValue, setInternalValue] = useState('');
+  const currentValueRef = useRef<string>('');
 
   const clearInternal = useCallback(() => {
-    setInternalValue('');
+    if (inputRef.current) {
+      inputRef.current.value = '';
+      currentValueRef.current = '';
+    }
   }, []);
 
   React.useImperativeHandle(ref, () => ({
@@ -148,7 +151,7 @@ const OptimizedSearchInput = memo(React.forwardRef<{ clear: () => void }, {
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setInternalValue(value);
+    currentValueRef.current = value;
 
     // Limpiar el timeout anterior
     if (debounceTimeoutRef.current) {
@@ -157,22 +160,18 @@ const OptimizedSearchInput = memo(React.forwardRef<{ clear: () => void }, {
 
     // Establecer un nuevo timeout
     debounceTimeoutRef.current = setTimeout(() => {
-      startTransition(() => {
-        onSearchChange(value);
-      });
+      onSearchChange(value);
     }, 300);
   }, [onSearchChange]);
 
   const handleClear = useCallback(() => {
-    setInternalValue('');
-    startTransition(() => {
-      onSearchChange('');
-    });
-    // Mantener el focus después de limpiar
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
-  }, [onSearchChange, inputRef]);
+    if (inputRef.current) {
+      inputRef.current.value = '';
+      currentValueRef.current = '';
+      inputRef.current.focus();
+    }
+    onSearchChange('');
+  }, [onSearchChange]);
 
   // Limpiar timeout al desmontar
   useEffect(() => {
@@ -191,28 +190,27 @@ const OptimizedSearchInput = memo(React.forwardRef<{ clear: () => void }, {
         <input
           ref={inputRef}
           type="text"
-          value={internalValue}
           onChange={handleChange}
           placeholder="Buscar por folio, concepto..."
           className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
           autoComplete="off"
           spellCheck="false"
+          defaultValue=""
         />
-        {internalValue && (
-          <button
-            onClick={handleClear}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-            aria-label="Limpiar búsqueda"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        )}
+        <button
+          onClick={handleClear}
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+          aria-label="Limpiar búsqueda"
+          style={{ display: 'block' }}
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
     </div>
   );
 }));
 
-OptimizedSearchInput.displayName = 'OptimizedSearchInput';
+FocusStableSearchInput.displayName = 'FocusStableSearchInput';
 
 // Componente alternativo con input no controlado como respaldo
 const UncontrolledSearchInput = memo(({ 
@@ -645,9 +643,7 @@ function MisSolicitudesContent() {
 
   // Callback optimizado para el input de búsqueda
   const handleSearchChange = useCallback((value: string) => {
-    startTransition(() => {
-      setSearchTerm(value);
-    });
+    setSearchTerm(value);
   }, []);
 
   // Componente para encabezados con ordenamiento
@@ -750,11 +746,10 @@ function MisSolicitudesContent() {
 
         <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
           {/* Solución Optimizada: Input que preserva focus */}
-          <OptimizedSearchInput 
-            key="optimized-search"
+          <FocusStableSearchInput 
+            key="focus-stable-search"
             ref={optimizedSearchRef}
             onSearchChange={handleSearchChange}
-            inputRef={searchInputRef}
           />
           
           {/* Alternativas (descomenta si necesitas probar otras) */}
