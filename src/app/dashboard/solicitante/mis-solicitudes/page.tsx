@@ -150,7 +150,7 @@ const UncontrolledSearchInput = memo(({
     // Establecer un nuevo timeout
     debounceTimeoutRef.current = setTimeout(() => {
       onSearchChange(value);
-    }, 300); // 300ms de debounce
+    }, 200); // Tiempo de debounce más corto para mejor responsividad
   }, [onSearchChange]);
 
   // Limpiar timeout al desmontar
@@ -173,6 +173,7 @@ const UncontrolledSearchInput = memo(({
           onChange={handleChange}
           placeholder="Buscar por folio, concepto..."
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+          autoComplete="off"
         />
       </div>
     </div>
@@ -193,15 +194,20 @@ const SearchInput = memo(({
 }) => {
   const [localValue, setLocalValue] = useState(initialValue);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isUserTypingRef = useRef(false);
 
   // Sincronizar el valor local cuando cambie el valor inicial desde el padre
+  // pero solo si el usuario no está escribiendo activamente
   useEffect(() => {
-    setLocalValue(initialValue);
+    if (!isUserTypingRef.current) {
+      setLocalValue(initialValue);
+    }
   }, [initialValue]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setLocalValue(value);
+    isUserTypingRef.current = true;
 
     // Limpiar el timeout anterior
     if (debounceTimeoutRef.current) {
@@ -211,6 +217,7 @@ const SearchInput = memo(({
     // Establecer un nuevo timeout
     debounceTimeoutRef.current = setTimeout(() => {
       onSearchChange(value);
+      isUserTypingRef.current = false;
     }, 300); // 300ms de debounce
   }, [onSearchChange]);
 
@@ -235,10 +242,14 @@ const SearchInput = memo(({
           onChange={handleChange}
           placeholder="Buscar por folio, concepto..."
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+          autoComplete="off"
         />
       </div>
     </div>
   );
+}, (prevProps, nextProps) => {
+  // Comparación personalizada para evitar re-renders innecesarios
+  return prevProps.initialValue === nextProps.initialValue;
 });
 
 SearchInput.displayName = 'SearchInput';
@@ -631,18 +642,18 @@ function MisSolicitudesContent() {
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
-          {/* Solución 1: SearchInput con estado local y debounce */}
-          <SearchInput 
-            key="search-input"
-            initialValue={searchTerm}
+          {/* Solución 2: Input no controlado (mejor para mantener focus) */}
+          <UncontrolledSearchInput 
+            key="uncontrolled-search-input"
             onSearchChange={handleSearchChange}
             inputRef={searchInputRef}
           />
           
-          {/* Solución 2: Input no controlado (descomenta si la primera no funciona) */}
+          {/* Solución 1: SearchInput con estado local y debounce (descomenta si prefieres esta) */}
           {/*
-          <UncontrolledSearchInput 
-            key="uncontrolled-search-input"
+          <SearchInput 
+            key="search-input"
+            initialValue={searchTerm}
             onSearchChange={handleSearchChange}
             inputRef={searchInputRef}
           />
