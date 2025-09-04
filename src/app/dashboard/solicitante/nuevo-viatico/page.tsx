@@ -89,6 +89,25 @@ export default function NuevoViaticoPage() {
         errors.cuenta_destino = 'Ingresa el número de cuenta, tarjeta o CLABE';
         huboError = true;
       }
+      
+      // Validar dígitos de CLABE (18 dígitos exactos)
+      if (f.form.tipo_cuenta_destino === 'clabe' && f.form.cuenta_destino) {
+        const clabePattern = /^\d{18}$/;
+        if (!clabePattern.test(f.form.cuenta_destino)) {
+          errors.cuenta_destino = 'La CLABE debe tener exactamente 18 dígitos';
+          huboError = true;
+        }
+      }
+
+      // Validar dígitos de Número de Tarjeta (máximo 16 dígitos)
+      if (f.form.tipo_cuenta_destino === 'tarjeta' && f.form.cuenta_destino) {
+        const tarjetaPattern = /^\d{1,16}$/;
+        if (!tarjetaPattern.test(f.form.cuenta_destino)) {
+          errors.cuenta_destino = 'El número de tarjeta debe tener máximo 16 dígitos';
+          huboError = true;
+        }
+      }
+      
       if (f.form.tipo_cuenta_destino === 'tarjeta' && !f.form.tipo_tarjeta) {
         errors.tipo_tarjeta = 'Selecciona el tipo de tarjeta';
         huboError = true;
@@ -154,6 +173,49 @@ export default function NuevoViaticoPage() {
       setMensajeGlobal('Hubo errores al crear algunos viáticos. Revisa los mensajes.');
       setExito(false);
       setEnviando(false);
+      
+      // Scroll al primer campo con error de dígitos y mostrar toast
+      setTimeout(() => {
+        // Buscar errores de dígitos específicamente
+        const digitErrors = formularios.filter((f, idx) => {
+          const error = f.errors?.cuenta_destino;
+          return error && (error.includes('dígitos') || error.includes('CLABE'));
+        });
+        
+        if (digitErrors.length > 0) {
+          // Encontrar el índice del primer error de dígitos
+          const errorIndex = formularios.findIndex((f) => {
+            const error = f.errors?.cuenta_destino;
+            return error && (error.includes('dígitos') || error.includes('CLABE'));
+          });
+          
+          if (errorIndex >= 0) {
+            const targetField = document.querySelector(`input[name="cuenta_destino"]:nth-of-type(${errorIndex + 1})`);
+            if (targetField) {
+              targetField.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+              (targetField as HTMLElement).focus();
+              
+              // Mostrar toast con el mensaje de error
+              const errorMessage = formularios[errorIndex].errors?.cuenta_destino;
+              if (errorMessage) {
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
+                toast.textContent = `Viático ${errorIndex + 1}: ${errorMessage}`;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                  if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                  }
+                }, 4000);
+              }
+            }
+          }
+        }
+      }, 100);
     }
   };
 
@@ -245,19 +307,73 @@ export default function NuevoViaticoPage() {
                     
                     <div className="flex flex-col gap-1">
                       <label className="text-blue-900 font-medium text-sm">Cuenta Destino *</label>
-                      <input name="cuenta_destino" placeholder="Número de cuenta o CLABE" value={formularios[idx].form.cuenta_destino || ''} onChange={e => {
+                      <input 
+                        name="cuenta_destino" 
+                        placeholder={formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? 'Número de tarjeta' : 'Número de cuenta CLABE'} 
+                        value={formularios[idx].form.cuenta_destino || ''} 
+                        pattern={
+                          formularios[idx].form.tipo_cuenta_destino === 'clabe' ? '[0-9]{18}' : 
+                          formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? '[0-9]{1,16}' : 
+                          undefined
+                        }
+                        maxLength={
+                          formularios[idx].form.tipo_cuenta_destino === 'clabe' ? 18 : 
+                          formularios[idx].form.tipo_cuenta_destino === 'tarjeta' ? 16 : 
+                          undefined
+                        }
+                        onChange={e => {
                         const value = e.target.value;
                         const nuevos = [...formularios];
                         nuevos[idx].form = { ...nuevos[idx].form, cuenta_destino: value };
+                        
+                        // Validar en tiempo real según el tipo de cuenta
                         if (!value) {
                           nuevos[idx].errors = { ...nuevos[idx].errors, cuenta_destino: 'Campo requerido' };
                         } else {
                           const errorsObj = { ...(nuevos[idx].errors || {}) };
-                          delete errorsObj.cuenta_destino;
+                          
+                          // Validar dígitos según el tipo
+                          if (formularios[idx].form.tipo_cuenta_destino === 'clabe') {
+                            const clabePattern = /^\d{18}$/;
+                            if (!clabePattern.test(value) && value.length <= 18) {
+                              delete errorsObj.cuenta_destino;
+                            } else if (!clabePattern.test(value) && value.length > 18) {
+                              errorsObj.cuenta_destino = 'La CLABE debe tener exactamente 18 dígitos';
+                            }
+                          } else if (formularios[idx].form.tipo_cuenta_destino === 'tarjeta') {
+                            const tarjetaPattern = /^\d{1,16}$/;
+                            if (!tarjetaPattern.test(value)) {
+                              errorsObj.cuenta_destino = 'El número de tarjeta debe tener máximo 16 dígitos';
+                            } else {
+                              delete errorsObj.cuenta_destino;
+                            }
+                          } else {
+                            delete errorsObj.cuenta_destino;
+                          }
+                          
                           nuevos[idx].errors = errorsObj;
                         }
                         setFormularios(nuevos);
-                      }} required className={`text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400 ${formularios[idx].errors?.cuenta_destino ? 'border-red-400' : ''}`} />
+                      }} required className={`text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400 font-mono ${formularios[idx].errors?.cuenta_destino ? 'border-red-400' : ''}`} />
+                      
+                      {/* Texto de ayuda para requisitos de dígitos */}
+                      {formularios[idx].form.tipo_cuenta_destino && (
+                        <div className="mt-1">
+                          {formularios[idx].form.tipo_cuenta_destino === 'clabe' && (
+                            <p className="text-blue-600 text-xs flex items-center">
+                              <span className="mr-1">💡</span>
+                              La CLABE debe tener exactamente 18 dígitos
+                            </p>
+                          )}
+                          {formularios[idx].form.tipo_cuenta_destino === 'tarjeta' && (
+                            <p className="text-blue-600 text-xs flex items-center">
+                              <span className="mr-1">💳</span>
+                              El número de tarjeta debe tener máximo 16 dígitos
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      
                       {formularios[idx].errors?.cuenta_destino && (<span className="text-red-600 text-xs">{formularios[idx].errors.cuenta_destino}</span>)}
                     </div>
                     
