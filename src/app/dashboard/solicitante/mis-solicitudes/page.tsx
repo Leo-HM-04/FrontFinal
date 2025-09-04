@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
+import { useState, useEffect, Suspense, useRef, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
@@ -136,7 +136,6 @@ function MisSolicitudesContent() {
   
   // Estados principales
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
-  const [filteredSolicitudes, setFilteredSolicitudes] = useState<Solicitud[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -218,7 +217,6 @@ function MisSolicitudesContent() {
             new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime()
           );
           setSolicitudes(sorted);
-          setFilteredSolicitudes(sorted);
           setError('');
         }
       } catch (error) {
@@ -226,7 +224,6 @@ function MisSolicitudesContent() {
           console.error('Error al cargar solicitudes:', error);
           setError('Error al cargar las solicitudes');
           setSolicitudes([]);
-          setFilteredSolicitudes([]);
         }
       } finally {
         if (isMounted) {
@@ -242,8 +239,8 @@ function MisSolicitudesContent() {
     };
   }, []);
 
-  // Filtrar solicitudes
-  useEffect(() => {
+  // Filtrar solicitudes con useMemo para evitar re-renderizados
+  const filteredSolicitudes = useMemo(() => {
     let filtered = [...solicitudes];
 
     if (searchTerm) {
@@ -289,9 +286,13 @@ function MisSolicitudesContent() {
       }
     }
 
-    setFilteredSolicitudes(filtered);
-    setCurrentPage(1);
+    return filtered;
   }, [solicitudes, searchTerm, statusFilter, dateFilter]);
+
+  // Efecto para resetear página cuando cambien los filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, dateFilter]);
 
   // Función para manejar el ordenamiento
   const handleSort = (field: SortField) => {
@@ -388,7 +389,6 @@ function MisSolicitudesContent() {
       await SolicitudesService.deleteSolicitante(solicitudAEliminar.id_solicitud);
       const updatedSolicitudes = solicitudes.filter(s => s.id_solicitud !== solicitudAEliminar.id_solicitud);
       setSolicitudes(updatedSolicitudes);
-      setFilteredSolicitudes(prev => prev.filter(s => s.id_solicitud !== solicitudAEliminar.id_solicitud));
       setDeleteModalOpen(false);
       setSolicitudAEliminar(null);
       setError('');
