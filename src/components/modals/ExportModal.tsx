@@ -1,5 +1,5 @@
-import React from 'react';
-import { X } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, FileText, Table, Database, Download, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface ExportModalProps {
@@ -23,203 +23,237 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onExportCSV,
   isLoading = false,
 }) => {
+  const [selectedFilter, setSelectedFilter] = useState<'todos' | 'activo' | 'inactivo'>('todos');
+
   if (!isOpen) return null;
+
+  const exportOptions = [
+    {
+      id: 'pdf',
+      name: 'PDF',
+      description: 'Documento PDF profesional',
+      detail: 'Ideal para impresión y presentaciones oficiales',
+      icon: FileText,
+      color: 'blue',
+      bgColor: 'bg-blue-50',
+      iconBg: 'bg-blue-500',
+      textColor: 'text-blue-900',
+      subtextColor: 'text-blue-700',
+      onClick: () => onExportPDF(selectedFilter)
+    },
+    {
+      id: 'excel',
+      name: 'Excel',
+      description: 'Hoja de cálculo editable',
+      detail: 'Perfecto para análisis de datos y reportes',
+      icon: Table,
+      color: 'green',
+      bgColor: 'bg-green-50',
+      iconBg: 'bg-green-500',
+      textColor: 'text-green-900',
+      subtextColor: 'text-green-700',
+      onClick: () => onExportExcel(selectedFilter)
+    },
+    {
+      id: 'csv',
+      name: 'CSV',
+      description: 'Valores separados por comas',
+      detail: 'Compatible con cualquier sistema o software',
+      icon: Database,
+      color: 'orange',
+      bgColor: 'bg-orange-50',
+      iconBg: 'bg-orange-500',
+      textColor: 'text-orange-900',
+      subtextColor: 'text-orange-700',
+      onClick: () => onExportCSV(selectedFilter)
+    }
+  ];
+
+  const filterOptions = [
+    { 
+      value: 'todos' as const, 
+      label: 'Todos los registros', 
+      description: 'Incluye todos los elementos disponibles',
+      icon: '📋'
+    },
+    { 
+      value: 'activo' as const, 
+      label: 'Solo activos', 
+      description: 'Únicamente elementos activos',
+      icon: '✅'
+    },
+    { 
+      value: 'inactivo' as const, 
+      label: 'Solo inactivos', 
+      description: 'Únicamente elementos inactivos',
+      icon: '❌'
+    }
+  ];
 
   return (
     <>
       {/* Overlay */}
       <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[999]" 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999]" 
         onClick={onClose}
       />
       
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center z-[1000] p-4">
         <div 
-          className="bg-white rounded-xl shadow-2xl w-full max-w-2xl transform transition-all animate-fade-in overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl transform transition-all animate-fade-in overflow-hidden max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 flex justify-between items-center">
-            <div>
-              <h3 className="text-xl font-bold">{title}</h3>
-              {description && <p className="text-sm text-blue-100 mt-1">{description}</p>}
+          <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white p-6">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <Download className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold">{title}</h3>
+                  {description && (
+                    <p className="text-slate-200 mt-1 text-sm">{description}</p>
+                  )}
+                </div>
+              </div>
+              <button 
+                onClick={onClose}
+                className="text-white/80 hover:text-white p-2 rounded-full hover:bg-white/20 transition-colors"
+                disabled={isLoading}
+              >
+                <X size={20} />
+              </button>
             </div>
-            <button 
-              onClick={onClose}
-              className="text-white/80 hover:text-white p-1 rounded-full hover:bg-blue-700/50 transition-colors"
-            >
-              <X size={20} />
-            </button>
           </div>
           
           {/* Content */}
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
-              {/* PDF Card */}
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 flex items-center gap-3">
-                  <div className="bg-blue-700 text-white p-2 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <path d="M9 15v-2h6v2"></path>
-                      <path d="M12 19v-6"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-blue-900">Documento PDF</h4>
-                    <p className="text-xs text-blue-700">Formato ideal para imprimir</p>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-sm text-gray-600 mb-3">Exportar como documento PDF con formato profesional y tablas organizadas.</p>
-                  <div className="space-y-2">
-                    <Button
-                      onClick={() => onExportPDF('todos')}
-                      variant="primary"
-                      disabled={isLoading}
-                      className="w-full text-sm"
-                    >
-                      Todos los registros
-                    </Button>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        onClick={() => onExportPDF('activo')}
-                        variant="outline"
-                        disabled={isLoading}
-                        className="text-sm bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                      >
-                        Solo activos
-                      </Button>
-                      <Button
-                        onClick={() => onExportPDF('inactivo')}
-                        variant="outline"
-                        disabled={isLoading}
-                        className="text-sm bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
-                      >
-                        Solo inactivos
-                      </Button>
+          <div className="p-8">
+            {/* Filter Selection Section */}
+            <div className="mb-8">
+              <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <span className="text-blue-500">📊</span>
+                Seleccionar datos a exportar
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {filterOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSelectedFilter(option.value)}
+                    disabled={isLoading}
+                    className={`
+                      p-4 rounded-xl border-2 transition-all duration-200 text-left
+                      ${selectedFilter === option.value 
+                        ? 'border-blue-500 bg-blue-50 shadow-md' 
+                        : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-25'
+                      }
+                      ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                    `}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{option.icon}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900">{option.label}</span>
+                          {selectedFilter === option.value && (
+                            <Check className="w-4 h-4 text-blue-500" />
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">{option.description}</p>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </button>
+                ))}
               </div>
-              
-              {/* Excel Card */}
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 flex items-center gap-3">
-                  <div className="bg-green-700 text-white p-2 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <path d="M8 13H10"></path>
-                      <path d="M8 17H16"></path>
-                      <path d="M14 13H16"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-green-900">Excel</h4>
-                    <p className="text-xs text-green-700">Hoja de cálculo editable</p>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-sm text-gray-600 mb-3">Exportar como archivo Excel con formato y fórmulas para análisis de datos.</p>
-                  <div className="space-y-2">
-                    <Button
-                      onClick={() => onExportExcel('todos')}
-                      variant="primary"
-                      disabled={isLoading}
-                      className="w-full text-sm bg-green-600 hover:bg-green-700"
-                    >
-                      Todos los registros
-                    </Button>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        onClick={() => onExportExcel('activo')}
-                        variant="outline"
-                        disabled={isLoading}
-                        className="text-sm bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                      >
-                        Solo activos
-                      </Button>
-                      <Button
-                        onClick={() => onExportExcel('inactivo')}
-                        variant="outline"
-                        disabled={isLoading}
-                        className="text-sm bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
-                      >
-                        Solo inactivos
-                      </Button>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-gray-200 my-8"></div>
+
+            {/* Export Format Selection */}
+            <div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <span className="text-green-500">📁</span>
+                Seleccionar formato de exportación
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {exportOptions.map((option) => {
+                  const IconComponent = option.icon;
+                  return (
+                    <div key={option.id} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                      {/* Card Header */}
+                      <div className={`${option.bgColor} p-5`}>
+                        <div className="flex items-center gap-4">
+                          <div className={`${option.iconBg} text-white p-3 rounded-xl shadow-md`}>
+                            <IconComponent className="w-6 h-6" />
+                          </div>
+                          <div className="flex-1">
+                            <h5 className={`font-bold text-lg ${option.textColor}`}>
+                              {option.name}
+                            </h5>
+                            <p className={`text-sm ${option.subtextColor} mt-1`}>
+                              {option.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Card Body */}
+                      <div className="p-5">
+                        <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                          {option.detail}
+                        </p>
+                        
+                        <Button
+                          onClick={option.onClick}
+                          disabled={isLoading}
+                          className={`
+                            w-full font-semibold py-3 px-4 rounded-lg transition-all duration-200
+                            ${option.color === 'blue' ? 'bg-blue-600 hover:bg-blue-700 text-white' :
+                              option.color === 'green' ? 'bg-green-600 hover:bg-green-700 text-white' :
+                              'bg-orange-600 hover:bg-orange-700 text-white'}
+                            ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md transform hover:-translate-y-0.5'}
+                          `}
+                        >
+                          {isLoading ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                              <span>Exportando...</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center gap-2">
+                              <Download className="w-4 h-4" />
+                              <span>Exportar {option.name}</span>
+                            </div>
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* CSV Card */}
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 flex items-center gap-3">
-                  <div className="bg-amber-600 text-white p-2 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-amber-900">CSV</h4>
-                    <p className="text-xs text-amber-700">Compatible con cualquier sistema</p>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-sm text-gray-600 mb-3">Exportar como archivo CSV (valores separados por comas) para máxima compatibilidad.</p>
-                  <div className="space-y-2">
-                    <Button
-                      onClick={() => onExportCSV('todos')}
-                      variant="primary"
-                      disabled={isLoading}
-                      className="w-full text-sm bg-amber-600 hover:bg-amber-700"
-                    >
-                      Todos los registros
-                    </Button>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        onClick={() => onExportCSV('activo')}
-                        variant="outline"
-                        disabled={isLoading}
-                        className="text-sm bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
-                      >
-                        Solo activos
-                      </Button>
-                      <Button
-                        onClick={() => onExportCSV('inactivo')}
-                        variant="outline"
-                        disabled={isLoading}
-                        className="text-sm bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
-                      >
-                        Solo inactivos
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
             </div>
           </div>
           
           {/* Footer */}
-          <div className="border-t border-gray-200 bg-gray-50 p-4 flex justify-between items-center">
-            <p className="text-xs text-gray-500">
-              Los archivos exportados contienen toda la información disponible en la tabla
-            </p>
-            <Button
-              onClick={onClose}
-              variant="outline"
-              disabled={isLoading}
-              className="text-sm"
-            >
-              Cerrar
-            </Button>
+          <div className="border-t border-gray-200 bg-gray-50 p-6">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span className="text-blue-500">ℹ️</span>
+                <span>Los archivos exportados incluirán toda la información disponible según el filtro seleccionado</span>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  onClick={onClose}
+                  variant="outline"
+                  disabled={isLoading}
+                  className="px-6 py-2"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
