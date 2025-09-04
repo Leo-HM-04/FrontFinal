@@ -310,21 +310,21 @@ export default function MisViaticosPage() {
               </span>
               <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Viáticos</h1>
             </div>
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/dashboard/solicitante/nuevo-viatico"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 text-white font-bold shadow-lg transition-all text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
-                <FaPlus className="w-5 h-5" />
-                Crear viático
+                <FaPlus className="w-4 h-4" />
+                Nueva Solicitud
               </Link>
               
               {/* Botón para abrir modal de exportación */}
               <Button
                 onClick={() => setIsExportModalOpen(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-bold shadow-lg transition-all text-lg focus:outline-none focus:ring-2 focus:ring-green-300"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
-                <FaFilePdf className="w-5 h-5" />
+                <FaFilePdf className="w-4 h-4" />
                 Exportar
               </Button>
             </div>
