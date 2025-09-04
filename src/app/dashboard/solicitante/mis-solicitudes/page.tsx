@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, useRef, useCallback, useMemo, memo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
@@ -128,6 +128,36 @@ const formatTime = (dateString: string) => {
 // Tipos para el ordenamiento
 type SortField = 'monto' | 'estado' | 'fecha' | 'hora';
 type SortOrder = 'asc' | 'desc';
+
+// Componente memoizado para el input de búsqueda
+const SearchInput = memo(({ 
+  searchTerm, 
+  onSearchChange, 
+  inputRef 
+}: { 
+  searchTerm: string; 
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}) => {
+  return (
+    <div className="flex-1">
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          ref={inputRef}
+          type="text"
+          value={searchTerm}
+          onChange={onSearchChange}
+          placeholder="Buscar por folio, concepto..."
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+        />
+      </div>
+    </div>
+  );
+});
+
+SearchInput.displayName = 'SearchInput';
 
 // Componente que maneja los search params
 function MisSolicitudesContent() {
@@ -294,20 +324,6 @@ function MisSolicitudesContent() {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, dateFilter]);
 
-  // Efecto para mantener el foco en el input de búsqueda
-  useEffect(() => {
-    // Solo mantener el foco si el input existe y el usuario está escribiendo
-    if (searchInputRef.current && document.activeElement === searchInputRef.current) {
-      const cursorPosition = searchInputRef.current.selectionStart;
-      setTimeout(() => {
-        if (searchInputRef.current) {
-          searchInputRef.current.focus();
-          searchInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
-        }
-      }, 0);
-    }
-  }, [searchTerm]);
-
   // Función para manejar el ordenamiento
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -432,14 +448,23 @@ function MisSolicitudesContent() {
     const value = e.target.value;
     const cursorPosition = e.target.selectionStart;
     
+    // Guardamos si el input tenía foco antes del cambio
+    const hadFocus = document.activeElement === searchInputRef.current;
+    
     setSearchTerm(value);
     
-    // Preservar la posición del cursor después del cambio de estado
-    setTimeout(() => {
-      if (searchInputRef.current) {
-        searchInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
-      }
-    }, 0);
+    // Si tenía foco, lo restauramos inmediatamente
+    if (hadFocus && searchInputRef.current) {
+      // Usamos requestAnimationFrame para asegurar que el DOM se actualice
+      requestAnimationFrame(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+          if (cursorPosition !== null) {
+            searchInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+          }
+        }
+      });
+    }
   }, []);
 
   // Componente para encabezados con ordenamiento
@@ -541,20 +566,12 @@ function MisSolicitudesContent() {
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
-          <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                placeholder="Buscar por folio, concepto..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-              />
-            </div>
-          </div>
+          <SearchInput 
+            key="search-input"
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            inputRef={searchInputRef}
+          />
 
           <div className="flex-1">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
