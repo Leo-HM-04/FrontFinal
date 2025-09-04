@@ -421,7 +421,6 @@ export default function MisViaticosPage() {
               <table className="min-w-full divide-y divide-blue-200">
                 <thead className="bg-gradient-to-r from-blue-50 to-blue-100/50">
                   <tr>
-                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-16">ID</th>
                     <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-28">Folio</th>
                     <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-40">Departamento</th>
                     <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Concepto</th>
@@ -436,7 +435,7 @@ export default function MisViaticosPage() {
                 <tbody className="divide-y divide-blue-100">
                   {currentViaticos.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center text-blue-900/80">
+                      <td colSpan={7} className="px-6 py-12 text-center text-blue-900/80">
                         <FileText className="w-12 h-12 mx-auto mb-4 text-blue-300" />
                         <p className="text-lg font-semibold">No tienes viáticos aún</p>
                         <p className="text-sm text-blue-500 mt-1">
@@ -449,7 +448,6 @@ export default function MisViaticosPage() {
                   ) :
                     currentViaticos.map((v: Viatico) => (
                       <tr key={v.id_viatico} className="hover:bg-blue-50/70 transition-colors">
-                        <td className="px-3 py-2.5 text-blue-900 font-medium text-sm">{v.id_viatico}</td>
                         <td className="px-3 py-2.5">
                           <span className="font-mono text-xs text-blue-800 bg-blue-50 px-2 py-0.5 rounded">{v.folio || '-'}</span>
                         </td>
