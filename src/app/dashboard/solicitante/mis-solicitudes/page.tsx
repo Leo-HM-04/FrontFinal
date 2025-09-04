@@ -294,6 +294,20 @@ function MisSolicitudesContent() {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, dateFilter]);
 
+  // Efecto para mantener el foco en el input de búsqueda
+  useEffect(() => {
+    // Solo mantener el foco si el input existe y el usuario está escribiendo
+    if (searchInputRef.current && document.activeElement === searchInputRef.current) {
+      const cursorPosition = searchInputRef.current.selectionStart;
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+          searchInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+        }
+      }, 0);
+    }
+  }, [searchTerm]);
+
   // Función para manejar el ordenamiento
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -415,7 +429,17 @@ function MisSolicitudesContent() {
 
   // Callback optimizado para el input de búsqueda
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    const value = e.target.value;
+    const cursorPosition = e.target.selectionStart;
+    
+    setSearchTerm(value);
+    
+    // Preservar la posición del cursor después del cambio de estado
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+      }
+    }, 0);
   }, []);
 
   // Componente para encabezados con ordenamiento
