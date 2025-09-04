@@ -217,6 +217,16 @@ export default function NuevaSolicitudPage() {
     const { name, value } = e.target;
     dispatch({ type: 'SET_FIELD', field: name as keyof FormState, value });
     
+    // Limpiar tipo_tarjeta cuando se cambie tipo_cuenta_destino
+    if (name === 'tipo_cuenta_destino' && value !== 'Número de Tarjeta') {
+      dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta', value: '' });
+    }
+    
+    // Limpiar tipo_tarjeta_2 cuando se cambie tipo_cuenta_destino_2
+    if (name === 'tipo_cuenta_destino_2' && value !== 'Número de Tarjeta') {
+      dispatch({ type: 'SET_FIELD', field: 'tipo_tarjeta_2', value: '' });
+    }
+    
     // Limpiar error en tiempo real cuando el usuario empieza a escribir
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
@@ -341,6 +351,17 @@ export default function NuevaSolicitudPage() {
     if (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') {
       newErrors['cuenta_destino'] = 'Espera a que termine la verificación de la cuenta destino.';
     }
+
+    // Validar tipo de tarjeta cuando se selecciona "Número de Tarjeta"
+    if (formData.tipo_cuenta_destino === 'Número de Tarjeta' && !formData.tipo_tarjeta) {
+      newErrors.tipo_tarjeta = 'Selecciona el tipo de tarjeta';
+    }
+
+    // Validar tipo de tarjeta para la segunda forma de pago
+    if (formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' && !formData.tipo_tarjeta_2) {
+      newErrors.tipo_tarjeta_2 = 'Selecciona el tipo de tarjeta';
+    }
+
     setErrors(newErrors);
     
     if (Object.keys(newErrors).length > 0) {
@@ -690,6 +711,30 @@ export default function NuevaSolicitudPage() {
                     </select>
                   </div>
 
+                  {/* Tipo de Tarjeta - Solo mostrar cuando se selecciona "Número de Tarjeta" */}
+                  {formData.tipo_cuenta_destino === 'Número de Tarjeta' && (
+                    <div>
+                      <label className="block text-base font-medium text-white/90 mb-3">
+                        <CreditCard className="w-4 h-4 inline mr-2" />
+                        Tipo de Tarjeta *
+                      </label>
+                      <select
+                        name="tipo_tarjeta"
+                        value={formData.tipo_tarjeta}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                      >
+                        <option value="" className="text-black">Selecciona el tipo</option>
+                        <option value="debito" className="text-black">Débito</option>
+                        <option value="credito" className="text-black">Crédito</option>
+                      </select>
+                      {errors.tipo_tarjeta && (
+                        <p className="text-red-400 text-sm mt-1">{errors.tipo_tarjeta}</p>
+                      )}
+                    </div>
+                  )}
+
                   {/* Banco - Solo mostrar si NO es Tarjeta Institucional */}
                   {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && (
                     <div>
@@ -907,6 +952,30 @@ export default function NuevaSolicitudPage() {
                         <option value="Tarjeta Institucional" className="text-black">Pago con Tarjeta Corporativa</option>
                       </select>
                     </div>
+
+                    {/* Tipo de Tarjeta 2 - Solo mostrar cuando se selecciona "Número de Tarjeta" */}
+                    {formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' && (
+                      <div>
+                        <label className="block text-base font-medium text-white/90 mb-3">
+                          <CreditCard className="w-4 h-4 inline mr-2" />
+                          Tipo de Tarjeta *
+                        </label>
+                        <select
+                          name="tipo_tarjeta_2"
+                          value={formData.tipo_tarjeta_2}
+                          onChange={handleInputChange}
+                          required={formData.tiene_segunda_forma_pago}
+                          className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                        >
+                          <option value="" className="text-black">Selecciona el tipo</option>
+                          <option value="debito" className="text-black">Débito</option>
+                          <option value="credito" className="text-black">Crédito</option>
+                        </select>
+                        {errors.tipo_tarjeta_2 && (
+                          <p className="text-red-400 text-sm mt-1">{errors.tipo_tarjeta_2}</p>
+                        )}
+                      </div>
+                    )}
 
                     {/* Banco 2 - Solo mostrar si NO es Tarjeta Institucional */}
                     {formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional' && (
