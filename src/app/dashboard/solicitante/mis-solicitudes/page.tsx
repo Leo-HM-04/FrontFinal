@@ -129,16 +129,39 @@ const formatTime = (dateString: string) => {
 type SortField = 'monto' | 'estado' | 'fecha' | 'hora';
 type SortOrder = 'asc' | 'desc';
 
-// Componente memoizado para el input de búsqueda
-const SearchInput = memo(({ 
-  searchTerm, 
+// Componente alternativo con input no controlado como respaldo
+const UncontrolledSearchInput = memo(({ 
   onSearchChange, 
   inputRef 
 }: { 
-  searchTerm: string; 
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchChange: (value: string) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
 }) => {
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // Limpiar el timeout anterior
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    // Establecer un nuevo timeout
+    debounceTimeoutRef.current = setTimeout(() => {
+      onSearchChange(value);
+    }, 300); // 300ms de debounce
+  }, [onSearchChange]);
+
+  // Limpiar timeout al desmontar
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="flex-1">
       <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
@@ -147,8 +170,69 @@ const SearchInput = memo(({
         <input
           ref={inputRef}
           type="text"
-          value={searchTerm}
-          onChange={onSearchChange}
+          onChange={handleChange}
+          placeholder="Buscar por folio, concepto..."
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+        />
+      </div>
+    </div>
+  );
+});
+
+UncontrolledSearchInput.displayName = 'UncontrolledSearchInput';
+
+// Componente memoizado para el input de búsqueda con estado local
+const SearchInput = memo(({ 
+  initialValue, 
+  onSearchChange, 
+  inputRef 
+}: { 
+  initialValue: string; 
+  onSearchChange: (value: string) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}) => {
+  const [localValue, setLocalValue] = useState(initialValue);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Sincronizar el valor local cuando cambie el valor inicial desde el padre
+  useEffect(() => {
+    setLocalValue(initialValue);
+  }, [initialValue]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocalValue(value);
+
+    // Limpiar el timeout anterior
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    // Establecer un nuevo timeout
+    debounceTimeoutRef.current = setTimeout(() => {
+      onSearchChange(value);
+    }, 300); // 300ms de debounce
+  }, [onSearchChange]);
+
+  // Limpiar timeout al desmontar
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="flex-1">
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          ref={inputRef}
+          type="text"
+          value={localValue}
+          onChange={handleChange}
           placeholder="Buscar por folio, concepto..."
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
         />
@@ -444,27 +528,8 @@ function MisSolicitudesContent() {
   };
 
   // Callback optimizado para el input de búsqueda
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const cursorPosition = e.target.selectionStart;
-    
-    // Guardamos si el input tenía foco antes del cambio
-    const hadFocus = document.activeElement === searchInputRef.current;
-    
+  const handleSearchChange = useCallback((value: string) => {
     setSearchTerm(value);
-    
-    // Si tenía foco, lo restauramos inmediatamente
-    if (hadFocus && searchInputRef.current) {
-      // Usamos requestAnimationFrame para asegurar que el DOM se actualice
-      requestAnimationFrame(() => {
-        if (searchInputRef.current) {
-          searchInputRef.current.focus();
-          if (cursorPosition !== null) {
-            searchInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
-          }
-        }
-      });
-    }
   }, []);
 
   // Componente para encabezados con ordenamiento
@@ -566,12 +631,22 @@ function MisSolicitudesContent() {
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
+          {/* Solución 1: SearchInput con estado local y debounce */}
           <SearchInput 
             key="search-input"
-            searchTerm={searchTerm}
+            initialValue={searchTerm}
             onSearchChange={handleSearchChange}
             inputRef={searchInputRef}
           />
+          
+          {/* Solución 2: Input no controlado (descomenta si la primera no funciona) */}
+          {/*
+          <UncontrolledSearchInput 
+            key="uncontrolled-search-input"
+            onSearchChange={handleSearchChange}
+            inputRef={searchInputRef}
+          />
+          */}
 
           <div className="flex-1">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
