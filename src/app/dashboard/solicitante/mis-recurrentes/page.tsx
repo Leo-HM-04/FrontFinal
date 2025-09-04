@@ -133,16 +133,6 @@ export default function MisRecurrentesPage() {
     };
 
     // Obtener listas únicas para selects
-    const departamentos = useMemo(() => {
-        const set = new Set<string>();
-        recurrentes.forEach(p => { if (p.departamento) set.add(p.departamento); });
-        return Array.from(set);
-    }, [recurrentes]);
-    const tiposPago = useMemo(() => {
-        const set = new Set<string>();
-        recurrentes.forEach(p => { if (p.tipo_pago) set.add(p.tipo_pago); });
-        return Array.from(set);
-    }, [recurrentes]);
     const frecuencias = useMemo(() => {
         const set = new Set<string>();
         recurrentes.forEach(p => { if (p.frecuencia) set.add(p.frecuencia); });
@@ -204,124 +194,103 @@ export default function MisRecurrentesPage() {
         <ProtectedRoute requiredRoles={['solicitante']}>
             <SolicitanteLayout>
                 <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-6">
-                        <div className="flex items-center gap-3">
-                            <span className="inline-flex items-center justify-center rounded-full bg-blue-100 p-2 shadow-sm">
-                                <FileText className="text-blue-600 w-7 h-7" />
-                            </span>
-                            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Recurrentes</h1>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-4">
-                            <Button
-                                onClick={() => router.push('/dashboard/solicitante/recurrentes')}
-                                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 text-white font-bold shadow-lg transition-all text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            >
-                                <Plus className="w-5 h-5" /> Nueva Plantilla
-                            </Button>
-                            {/* Botón para abrir el modal de exportación */}
-                            <Button
-                                onClick={() => setExportModalOpen(true)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg inline-flex items-center gap-2 transition-all duration-200 border border-white/10"
-                            >
-                                <FileText className="w-4 h-4" />
-                                <span>Exportar</span>
-                            </Button>
-                        </div>
+                    <div className="flex items-center gap-3 mb-6">
+                        <span className="inline-flex items-center justify-center rounded-full bg-blue-100 p-2 shadow-sm">
+                            <FileText className="text-blue-600 w-7 h-7" />
+                        </span>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Recurrentes</h1>
                     </div>
 
                     {error && <div className="bg-red-100 text-red-800 border border-red-300 p-4 rounded mb-4">{error}</div>}
                     {success && <div className="bg-green-100 text-green-800 border border-green-300 p-4 rounded mb-4">{success}</div>}
 
-                    {/* Controles de Filtro Visual Mejorada */}
-                    <div className="mb-8 p-6 bg-gradient-to-br from-blue-900/60 to-blue-700/40 rounded-2xl border border-white/20 shadow-lg">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
-                            <div className="flex flex-col">
-                                <label className="text-white/90 text-sm font-semibold mb-2">Estado</label>
-                                <select
-                                    value={filtroEstado}
-                                    onChange={(e) => setFiltroEstado(e.target.value)}
-                                    className="px-3 py-2 rounded-lg bg-white text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-                                >
-                                    <option value="todas">Todas</option>
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="aprobada">Aprobada</option>
-                                    <option value="rechazada">Rechazada</option>
-                                </select>
+                    {/* Filtros compactos como en la imagen de referencia */}
+                    <div className="bg-white rounded-xl p-4 mb-8 shadow-lg">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="bg-blue-100 p-2 rounded-lg">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
                             </div>
-                            <div className="flex flex-col">
-                                <label className="text-white/90 text-sm font-semibold mb-2">Departamento</label>
-                                <select
-                                    value={filtroDepartamento}
-                                    onChange={(e) => setFiltroDepartamento(e.target.value)}
-                                    className="px-3 py-2 rounded-lg bg-white text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-                                >
-                                    <option value="todos">Todos</option>
-                                    {departamentos.map(dep => (
-                                        <option key={dep} value={dep}>
-                                            {dep.charAt(0).toUpperCase() + dep.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="flex flex-col">
-                                <label className="text-white/90 text-sm font-semibold mb-2">Tipo de Pago</label>
-                                <select
-                                    value={filtroTipoPago}
-                                    onChange={(e) => setFiltroTipoPago(e.target.value)}
-                                    className="px-3 py-2 rounded-lg bg-white text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-                                >
-                                    <option value="todos">Todos</option>
-                                    {tiposPago.map(tp => (
-                                        <option key={tp} value={tp}>
-                                            {tp.charAt(0).toUpperCase() + tp.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="flex flex-col">
-                                <label className="text-white/90 text-sm font-semibold mb-2">Frecuencia</label>
-                                <select
-                                    value={filtroFrecuencia}
-                                    onChange={(e) => setFiltroFrecuencia(e.target.value)}
-                                    className="px-3 py-2 rounded-lg bg-white text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-                                >
-                                    <option value="todas">Todas</option>
-                                    {frecuencias.map(f => (
-                                        <option key={f} value={f}>
-                                            {f.charAt(0).toUpperCase() + f.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            <span className="text-xl font-semibold text-gray-900">Filtros</span>
+                            <span className="text-blue-500 text-sm">Refina tu búsqueda de recurrentes</span>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="flex flex-col">
-                                <label className="text-white/90 text-sm font-semibold mb-2">Siguiente Fecha</label>
-                                <div className="flex gap-2">
+                        
+                        <div className="flex flex-wrap items-center gap-4">
+                            {/* Búsqueda */}
+                            <div className="flex-1 min-w-[300px]">
+                                <div className="relative">
+                                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
                                     <input
-                                        type="date"
-                                        value={filtroFechaInicio}
-                                        onChange={e => setFiltroFechaInicio(e.target.value)}
-                                        className="px-3 py-2 rounded-lg bg-white text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-                                    />
-                                    <span className="text-white/70 self-center">a</span>
-                                    <input
-                                        type="date"
-                                        value={filtroFechaFin}
-                                        onChange={e => setFiltroFechaFin(e.target.value)}
-                                        className="px-3 py-2 rounded-lg bg-white text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                                        type="text"
+                                        placeholder="Buscar por concepto, departamento, usuario..."
+                                        value={filtroBusqueda}
+                                        onChange={e => setFiltroBusqueda(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                                     />
                                 </div>
                             </div>
-                            <div className="flex flex-col">
-                                <label className="text-white/90 text-sm font-semibold mb-2">Buscar por Concepto o Usuario</label>
-                                <input
-                                    type="text"
-                                    placeholder="Concepto o Usuario"
-                                    value={filtroBusqueda}
-                                    onChange={e => setFiltroBusqueda(e.target.value)}
-                                    className="px-3 py-2 rounded-lg bg-white text-black border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-white/60 transition-all"
-                                />
+
+                            {/* Estado */}
+                            <select
+                                value={filtroEstado}
+                                onChange={(e) => setFiltroEstado(e.target.value)}
+                                className="px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]"
+                            >
+                                <option value="todas">Todos los estados</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="aprobada">Aprobada</option>
+                                <option value="rechazada">Rechazada</option>
+                            </select>
+
+                            {/* Fechas */}
+                            <select
+                                value={filtroFrecuencia}
+                                onChange={(e) => setFiltroFrecuencia(e.target.value)}
+                                className="px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[140px]"
+                            >
+                                <option value="todas">Todas las frecuencias</option>
+                                {frecuencias.map(f => (
+                                    <option key={f} value={f}>
+                                        {f.charAt(0).toUpperCase() + f.slice(1)}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {/* Limpiar filtros */}
+                            <button
+                                onClick={() => {
+                                    setFiltroEstado('todas');
+                                    setFiltroDepartamento('todos');
+                                    setFiltroTipoPago('todos');
+                                    setFiltroFrecuencia('todas');
+                                    setFiltroFechaInicio('');
+                                    setFiltroFechaFin('');
+                                    setFiltroBusqueda('');
+                                }}
+                                className="px-4 py-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            >
+                                Limpiar Filtros
+                            </button>
+
+                            {/* Botones de acción */}
+                            <div className="flex gap-3 ml-auto">
+                                <Button
+                                    onClick={() => router.push('/dashboard/solicitante/recurrentes')}
+                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg transition-all"
+                                >
+                                    <Plus className="w-5 h-5" />
+                                    Nueva Solicitud
+                                </Button>
+                                <Button
+                                    onClick={() => setExportModalOpen(true)}
+                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white hover:bg-gray-50 text-blue-600 border border-blue-200 font-medium shadow-lg transition-all"
+                                >
+                                    <FileText className="w-5 h-5" />
+                                    Exportar
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -331,7 +300,6 @@ export default function MisRecurrentesPage() {
                             <thead className="bg-white/10">
                                 <tr>
                                     <th className="px-4 py-4 text-left text-sm font-semibold text-white w-24">Folio</th>
-                                    <th className="px-4 py-4 text-left text-sm font-semibold text-white w-16">ID</th>
                                     <th className="px-4 py-4 text-left text-sm font-semibold text-white w-32">Usuario</th>
                                     <th className="px-4 py-4 text-left text-sm font-semibold text-white w-40">Departamento</th>
                                     <th className="px-4 py-4 text-left text-sm font-semibold text-white w-28">Monto</th>
@@ -364,7 +332,6 @@ export default function MisRecurrentesPage() {
                                     currentRecurrentes.map((p) => (
                                         <tr key={p.id_recurrente} className="hover:bg-white/10 transition-colors">
                                             <td className="px-4 py-3 text-white font-mono text-sm">{p.folio || '-'}</td>
-                                            <td className="px-4 py-3 text-white text-sm">{p.id_recurrente}</td>
                                             <td className="px-4 py-3 text-white text-sm truncate">{p.nombre_usuario ? p.nombre_usuario : p.id_usuario}</td>
                                             <td className="px-4 py-3 text-white text-sm truncate">{p.departamento.charAt(0).toUpperCase() + p.departamento.slice(1)}</td>
                                             <td className="px-4 py-3 text-white font-medium text-sm">{p.monto}</td>
