@@ -7,7 +7,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { ViaticoDetailModal } from '@/components/viaticos/ViaticoDetailModal';
-import { ExportModal } from '@/components/modals/ExportModal';
+import { ExportViaticoModal } from '@/components/modals/ExportViaticoModal';
 import { useEffect, useState } from 'react';
 import { ViaticosService } from '@/services/viaticos.service';
 import type { Viatico as BaseViatico } from '@/services/viaticos.service';
@@ -60,7 +60,7 @@ export default function MisViaticosPage() {
   };
 
   // Funciones de exportación para el modal
-  const handleExportPDF = async (filter: 'todos' | 'activo' | 'inactivo') => {
+  const handleExportPDF = async (filter: 'todos' | 'activo' | 'inactivo', period: string) => {
     setIsExporting(true);
     try {
       let viaticosToExport = filteredViaticos;
@@ -77,9 +77,9 @@ export default function MisViaticosPage() {
       }
 
       // Aplicar filtro de período
-      viaticosToExport = filterViaticosByPeriod(viaticosToExport, selectedPeriod);
+      viaticosToExport = filterViaticosByPeriod(viaticosToExport, period);
       
-      exportMisViaticosPDF(viaticosToExport, selectedPeriod);
+      exportMisViaticosPDF(viaticosToExport, period);
     } catch (error) {
       console.error('Error exportando PDF:', error);
     } finally {
@@ -87,7 +87,7 @@ export default function MisViaticosPage() {
     }
   };
 
-  const handleExportExcel = async (filter: 'todos' | 'activo' | 'inactivo') => {
+  const handleExportExcel = async (filter: 'todos' | 'activo' | 'inactivo', period: string) => {
     setIsExporting(true);
     try {
       let viaticosToExport = filteredViaticos;
@@ -104,9 +104,9 @@ export default function MisViaticosPage() {
       }
 
       // Aplicar filtro de período
-      viaticosToExport = filterViaticosByPeriod(viaticosToExport, selectedPeriod);
+      viaticosToExport = filterViaticosByPeriod(viaticosToExport, period);
       
-      exportMisViaticosExcel(viaticosToExport, selectedPeriod);
+      exportMisViaticosExcel(viaticosToExport, period);
     } catch (error) {
       console.error('Error exportando Excel:', error);
     } finally {
@@ -114,7 +114,7 @@ export default function MisViaticosPage() {
     }
   };
 
-  const handleExportCSV = async (filter: 'todos' | 'activo' | 'inactivo') => {
+  const handleExportCSV = async (filter: 'todos' | 'activo' | 'inactivo', period: string) => {
     setIsExporting(true);
     try {
       let viaticosToExport = filteredViaticos;
@@ -131,9 +131,9 @@ export default function MisViaticosPage() {
       }
 
       // Aplicar filtro de período
-      viaticosToExport = filterViaticosByPeriod(viaticosToExport, selectedPeriod);
+      viaticosToExport = filterViaticosByPeriod(viaticosToExport, period);
       
-      exportMisViaticosCSV(viaticosToExport, selectedPeriod);
+      exportMisViaticosCSV(viaticosToExport, period);
     } catch (error) {
       console.error('Error exportando CSV:', error);
     } finally {
@@ -604,22 +604,17 @@ export default function MisViaticosPage() {
             onClose={() => setShowDetailModal(false)}
           />
 
-          {/* Modal de exportación */}
-          <ExportModal
+          {/* Modal de exportación específico para viáticos */}
+          <ExportViaticoModal
             isOpen={isExportModalOpen}
             onClose={() => setIsExportModalOpen(false)}
             title="Exportar Mis Viáticos"
-            description={`Selecciona el formato y filtro deseado. Período: ${
-              selectedPeriod === 'dia' ? 'Último día' :
-              selectedPeriod === 'semana' ? 'Última semana' :
-              selectedPeriod === 'mes' ? 'Último mes' :
-              selectedPeriod === 'año' ? 'Último año' :
-              'Todo el historial'
-            }`}
+            description="Selecciona el filtro y formato deseado para exportar tus viáticos"
             onExportPDF={handleExportPDF}
             onExportExcel={handleExportExcel}
             onExportCSV={handleExportCSV}
             isLoading={isExporting}
+            selectedPeriod={selectedPeriod}
           />
         </div>
       </SolicitanteLayout>
