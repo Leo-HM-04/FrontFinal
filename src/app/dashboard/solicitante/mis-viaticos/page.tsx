@@ -319,31 +319,13 @@ export default function MisViaticosPage() {
                 Crear viático
               </Link>
               
-              {/* Selector de período para exportación */}
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20 shadow-xl">
-                <div className="flex items-center gap-2 px-2">
-                  <span className="text-white/80 text-sm font-medium">Período:</span>
-                  <select
-                    value={selectedPeriod}
-                    onChange={e => setSelectedPeriod(e.target.value)}
-                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
-                  >
-                    <option value="dia" className="text-black">Último día</option>
-                    <option value="semana" className="text-black">Última semana</option>
-                    <option value="mes" className="text-black">Último mes</option>
-                    <option value="año" className="text-black">Último año</option>
-                    <option value="total" className="text-black">Todo el historial</option>
-                  </select>
-                </div>
-              </div>
-              
               {/* Botón para abrir modal de exportación */}
               <Button
                 onClick={() => setIsExportModalOpen(true)}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-bold shadow-lg transition-all text-lg focus:outline-none focus:ring-2 focus:ring-green-300"
               >
                 <FaFilePdf className="w-5 h-5" />
-                Exportar Datos
+                Exportar
               </Button>
             </div>
           </div>
