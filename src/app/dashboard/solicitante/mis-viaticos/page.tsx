@@ -7,6 +7,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { ViaticoDetailModal } from '@/components/viaticos/ViaticoDetailModal';
+import { ExportModal } from '@/components/modals/ExportModal';
 import { useEffect, useState } from 'react';
 import { ViaticosService } from '@/services/viaticos.service';
 import type { Viatico as BaseViatico } from '@/services/viaticos.service';
@@ -25,18 +26,79 @@ type Viatico = BaseViatico & {
 
 export default function MisViaticosPage() {
   // Estados para exportación
-  const [exportFormat, setExportFormat] = useState('pdf');
-  const [exportRango, setExportRango] = useState('total');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-  // Función para manejar la exportación
-  const handleExport = () => {
-    const viaticosExport = filteredViaticos;
-    if (exportFormat === 'pdf') {
-      exportMisViaticosPDF(viaticosExport, exportRango);
-    } else if (exportFormat === 'excel') {
-      exportMisViaticosExcel(viaticosExport, exportRango);
-    } else if (exportFormat === 'csv') {
-      exportMisViaticosCSV(viaticosExport, exportRango);
+  // Funciones de exportación para el modal
+  const handleExportPDF = async (filter: 'todos' | 'activo' | 'inactivo') => {
+    setIsExporting(true);
+    try {
+      let viaticosToExport = filteredViaticos;
+      
+      // Aplicar filtro específico
+      if (filter === 'activo') {
+        viaticosToExport = filteredViaticos.filter(v => 
+          ['autorizada', 'pagada'].includes((v.estado || '').toLowerCase())
+        );
+      } else if (filter === 'inactivo') {
+        viaticosToExport = filteredViaticos.filter(v => 
+          ['pendiente', 'rechazada'].includes((v.estado || '').toLowerCase())
+        );
+      }
+      
+      exportMisViaticosPDF(viaticosToExport, 'total');
+    } catch (error) {
+      console.error('Error exportando PDF:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportExcel = async (filter: 'todos' | 'activo' | 'inactivo') => {
+    setIsExporting(true);
+    try {
+      let viaticosToExport = filteredViaticos;
+      
+      // Aplicar filtro específico
+      if (filter === 'activo') {
+        viaticosToExport = filteredViaticos.filter(v => 
+          ['autorizada', 'pagada'].includes((v.estado || '').toLowerCase())
+        );
+      } else if (filter === 'inactivo') {
+        viaticosToExport = filteredViaticos.filter(v => 
+          ['pendiente', 'rechazada'].includes((v.estado || '').toLowerCase())
+        );
+      }
+      
+      exportMisViaticosExcel(viaticosToExport, 'total');
+    } catch (error) {
+      console.error('Error exportando Excel:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportCSV = async (filter: 'todos' | 'activo' | 'inactivo') => {
+    setIsExporting(true);
+    try {
+      let viaticosToExport = filteredViaticos;
+      
+      // Aplicar filtro específico
+      if (filter === 'activo') {
+        viaticosToExport = filteredViaticos.filter(v => 
+          ['autorizada', 'pagada'].includes((v.estado || '').toLowerCase())
+        );
+      } else if (filter === 'inactivo') {
+        viaticosToExport = filteredViaticos.filter(v => 
+          ['pendiente', 'rechazada'].includes((v.estado || '').toLowerCase())
+        );
+      }
+      
+      exportMisViaticosCSV(viaticosToExport, 'total');
+    } catch (error) {
+      console.error('Error exportando CSV:', error);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -218,42 +280,14 @@ export default function MisViaticosPage() {
                 Crear viático
               </Link>
               
-              {/* Controles de exportación */}
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20 shadow-xl">
-                <div className="flex items-center gap-2 px-2">
-                  <span className="text-white/80 text-sm font-medium">Exportar como:</span>
-                  <select
-                    value={exportFormat}
-                    onChange={e => setExportFormat(e.target.value)}
-                    className="text-bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
-                  >
-                    <option value="pdf" className="text-black">PDF</option>
-                    <option value="excel" className="text-black">Excel</option>
-                    <option value="csv" className="text-black">CSV</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-2 px-2 border-l border-white/10">
-                  <span className="text-white/80 text-sm font-medium">Período:</span>
-                  <select
-                    value={exportRango}
-                    onChange={e => setExportRango(e.target.value)}
-                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
-                  >
-                    <option value="dia" className="text-black">Último día</option>
-                    <option value="semana" className="text-black">Última semana</option>
-                    <option value="mes" className="text-black">Último mes</option>
-                    <option value="año" className="text-black">Último año</option>
-                    <option value="total" className="text-black">Todo el historial</option>
-                  </select>
-                </div>
-                <Button
-                  onClick={handleExport}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg inline-flex items-center gap-2 transition-all duration-200 border border-white/10"
-                >
-                  <FaFilePdf className="w-4 h-4" />
-                  <span>Exportar</span>
-                </Button>
-              </div>
+              {/* Botón para abrir modal de exportación */}
+              <Button
+                onClick={() => setIsExportModalOpen(true)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-bold shadow-lg transition-all text-lg focus:outline-none focus:ring-2 focus:ring-green-300"
+              >
+                <FaFilePdf className="w-5 h-5" />
+                Exportar Datos
+              </Button>
             </div>
           </div>
           {/* Filtros */}
@@ -511,6 +545,18 @@ export default function MisViaticosPage() {
             viatico={selectedViatico}
             isOpen={showDetailModal}
             onClose={() => setShowDetailModal(false)}
+          />
+
+          {/* Modal de exportación */}
+          <ExportModal
+            isOpen={isExportModalOpen}
+            onClose={() => setIsExportModalOpen(false)}
+            title="Exportar Mis Viáticos"
+            description="Selecciona el formato y filtro deseado para exportar tus viáticos"
+            onExportPDF={handleExportPDF}
+            onExportExcel={handleExportExcel}
+            onExportCSV={handleExportCSV}
+            isLoading={isExporting}
           />
         </div>
       </SolicitanteLayout>
