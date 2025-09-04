@@ -36,7 +36,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       setTimeout(() => {
         setDownloadingFormat(null);
       }, 2000);
-    } catch (error) {
+    } catch {
       setDownloadingFormat(null);
     }
   };
