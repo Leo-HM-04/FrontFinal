@@ -1,4 +1,6 @@
+
 'use client';
+import { ExportRecurrenteModal } from '@/components/modals/ExportRecurrenteModal';
 
 import { useEffect, useState, useMemo } from 'react'; // Agregamos useMemo
 import { useRouter } from 'next/navigation';
@@ -57,21 +59,9 @@ const getEstadoIcon = (estado: string) => {
 };
 
 export default function MisRecurrentesPage() {
-    // Estados para exportación
-    const [exportFormat, setExportFormat] = useState('pdf');
+    // Estados para exportación modal
+    const [exportModalOpen, setExportModalOpen] = useState(false);
     const [exportRango, setExportRango] = useState('total');
-
-    // Función para manejar la exportación
-    const handleExport = () => {
-        const recurrentesExport = filteredRecurrentes;
-        if (exportFormat === 'pdf') {
-            exportMisRecurrentesPDF(recurrentesExport, exportRango);
-        } else if (exportFormat === 'excel') {
-            exportMisRecurrentesExcel(recurrentesExport, exportRango);
-        } else if (exportFormat === 'csv') {
-            exportMisRecurrentesCSV(recurrentesExport, exportRango);
-        }
-    };
 
     const [detalleModalOpen, setDetalleModalOpen] = useState(false);
     const [recurrenteDetalle, setRecurrenteDetalle] = useState<PlantillaRecurrente | null>(null);
@@ -228,43 +218,14 @@ export default function MisRecurrentesPage() {
                             >
                                 <Plus className="w-5 h-5" /> Nueva Plantilla
                             </Button>
-                            
-                            {/* Controles de exportación */}
-                            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20 shadow-xl">
-                                <div className="flex items-center gap-2 px-2">
-                                    <span className="text-white/80 text-sm font-medium">Exportar como:</span>
-                                    <select
-                                        value={exportFormat}
-                                        onChange={e => setExportFormat(e.target.value)}
-                                        className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
-                                    >
-                                        <option value="pdf">PDF</option>
-                                        <option value="excel">Excel</option>
-                                        <option value="csv">CSV</option>
-                                    </select>
-                                </div>
-                                <div className="flex items-center gap-2 px-2 border-l border-white/10">
-                                    <span className="text-white/80 text-sm font-medium">Período:</span>
-                                    <select
-                                        value={exportRango}
-                                        onChange={e => setExportRango(e.target.value)}
-                                        className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
-                                    >
-                                        <option value="dia">Último día</option>
-                                        <option value="semana">Última semana</option>
-                                        <option value="mes">Último mes</option>
-                                        <option value="año">Último año</option>
-                                        <option value="total">Todo el historial</option>
-                                    </select>
-                                </div>
-                                <Button
-                                    onClick={handleExport}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg inline-flex items-center gap-2 transition-all duration-200 border border-white/10"
-                                >
-                                    <FileText className="w-4 h-4" />
-                                    <span>Exportar</span>
-                                </Button>
-                            </div>
+                            {/* Botón para abrir el modal de exportación */}
+                            <Button
+                                onClick={() => setExportModalOpen(true)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg inline-flex items-center gap-2 transition-all duration-200 border border-white/10"
+                            >
+                                <FileText className="w-4 h-4" />
+                                <span>Exportar</span>
+                            </Button>
                         </div>
                     </div>
 
@@ -544,6 +505,18 @@ export default function MisRecurrentesPage() {
                                 }
                                 : null
                         }
+                    />
+                    {/* Modal de exportación recurrentes */}
+                    <ExportRecurrenteModal
+                        isOpen={exportModalOpen}
+                        onClose={() => setExportModalOpen(false)}
+                        title="Exportar recurrentes"
+                        description="Descarga tus plantillas recurrentes en el formato y período que prefieras."
+                        onExportPDF={(filter, period) => exportMisRecurrentesPDF(filteredRecurrentes, period)}
+                        onExportExcel={(filter, period) => exportMisRecurrentesExcel(filteredRecurrentes, period)}
+                        onExportCSV={(filter, period) => exportMisRecurrentesCSV(filteredRecurrentes, period)}
+                        selectedPeriod={exportRango}
+                        onPeriodChange={setExportRango}
                     />
                 </div>
             </SolicitanteLayout>

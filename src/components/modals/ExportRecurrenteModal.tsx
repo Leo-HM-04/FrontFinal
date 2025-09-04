@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, FileText, Table, Database, Download, Check, Loader2, BarChart3, Filter, Calendar } from 'lucide-react';
+import { X, FileText, Table, Database, Download, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface ExportRecurrenteModalProps {
@@ -94,13 +94,7 @@ export const ExportRecurrenteModal: React.FC<ExportRecurrenteModalProps> = ({
     }
   ];
 
-  const filterOptions = [
-    { value: 'dia', label: 'Último día', description: 'Recurrentes del último día', icon: Calendar, count: 'Período: Último día' },
-    { value: 'semana', label: 'Última semana', description: 'Recurrentes de la última semana', icon: Calendar, count: 'Período: Última semana' },
-    { value: 'mes', label: 'Último mes', description: 'Recurrentes del último mes', icon: Calendar, count: 'Período: Último mes' },
-    { value: 'año', label: 'Último año', description: 'Recurrentes del último año', icon: Calendar, count: 'Período: Último año' },
-    { value: 'total', label: 'Todo el historial', description: 'Todos los recurrentes disponibles', icon: Calendar, count: 'Período: Todo el historial' }
-  ];
+  // filterOptions removed (not used) to avoid lint warnings
 
   const getPeriodLabel = () => {
     switch (selectedPeriod) {
