@@ -28,6 +28,36 @@ export default function MisViaticosPage() {
   // Estados para exportación
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState('total');
+
+  // Función para filtrar viáticos por período
+  const filterViaticosByPeriod = (viaticos: Viatico[], period: string) => {
+    if (period === 'total') return viaticos;
+
+    const today = new Date();
+    const filterDate = new Date(today);
+
+    switch (period) {
+      case 'dia':
+        filterDate.setHours(0, 0, 0, 0);
+        return viaticos.filter(v => {
+          const vDate = new Date(v.fecha_creacion || v.fecha_limite_pago);
+          vDate.setHours(0, 0, 0, 0);
+          return vDate.getTime() === filterDate.getTime();
+        });
+      case 'semana':
+        filterDate.setTime(today.getTime() - (7 * 24 * 60 * 60 * 1000));
+        return viaticos.filter(v => new Date(v.fecha_creacion || v.fecha_limite_pago) >= filterDate);
+      case 'mes':
+        filterDate.setMonth(today.getMonth() - 1);
+        return viaticos.filter(v => new Date(v.fecha_creacion || v.fecha_limite_pago) >= filterDate);
+      case 'año':
+        filterDate.setFullYear(today.getFullYear() - 1);
+        return viaticos.filter(v => new Date(v.fecha_creacion || v.fecha_limite_pago) >= filterDate);
+      default:
+        return viaticos;
+    }
+  };
 
   // Funciones de exportación para el modal
   const handleExportPDF = async (filter: 'todos' | 'activo' | 'inactivo') => {
@@ -45,8 +75,11 @@ export default function MisViaticosPage() {
           ['pendiente', 'rechazada'].includes((v.estado || '').toLowerCase())
         );
       }
+
+      // Aplicar filtro de período
+      viaticosToExport = filterViaticosByPeriod(viaticosToExport, selectedPeriod);
       
-      exportMisViaticosPDF(viaticosToExport, 'total');
+      exportMisViaticosPDF(viaticosToExport, selectedPeriod);
     } catch (error) {
       console.error('Error exportando PDF:', error);
     } finally {
@@ -69,8 +102,11 @@ export default function MisViaticosPage() {
           ['pendiente', 'rechazada'].includes((v.estado || '').toLowerCase())
         );
       }
+
+      // Aplicar filtro de período
+      viaticosToExport = filterViaticosByPeriod(viaticosToExport, selectedPeriod);
       
-      exportMisViaticosExcel(viaticosToExport, 'total');
+      exportMisViaticosExcel(viaticosToExport, selectedPeriod);
     } catch (error) {
       console.error('Error exportando Excel:', error);
     } finally {
@@ -93,8 +129,11 @@ export default function MisViaticosPage() {
           ['pendiente', 'rechazada'].includes((v.estado || '').toLowerCase())
         );
       }
+
+      // Aplicar filtro de período
+      viaticosToExport = filterViaticosByPeriod(viaticosToExport, selectedPeriod);
       
-      exportMisViaticosCSV(viaticosToExport, 'total');
+      exportMisViaticosCSV(viaticosToExport, selectedPeriod);
     } catch (error) {
       console.error('Error exportando CSV:', error);
     } finally {
@@ -279,6 +318,24 @@ export default function MisViaticosPage() {
                 <FaPlus className="w-5 h-5" />
                 Crear viático
               </Link>
+              
+              {/* Selector de período para exportación */}
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20 shadow-xl">
+                <div className="flex items-center gap-2 px-2">
+                  <span className="text-white/80 text-sm font-medium">Período:</span>
+                  <select
+                    value={selectedPeriod}
+                    onChange={e => setSelectedPeriod(e.target.value)}
+                    className="bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm transition-all"
+                  >
+                    <option value="dia" className="text-black">Último día</option>
+                    <option value="semana" className="text-black">Última semana</option>
+                    <option value="mes" className="text-black">Último mes</option>
+                    <option value="año" className="text-black">Último año</option>
+                    <option value="total" className="text-black">Todo el historial</option>
+                  </select>
+                </div>
+              </div>
               
               {/* Botón para abrir modal de exportación */}
               <Button
@@ -552,7 +609,13 @@ export default function MisViaticosPage() {
             isOpen={isExportModalOpen}
             onClose={() => setIsExportModalOpen(false)}
             title="Exportar Mis Viáticos"
-            description="Selecciona el formato y filtro deseado para exportar tus viáticos"
+            description={`Selecciona el formato y filtro deseado. Período: ${
+              selectedPeriod === 'dia' ? 'Último día' :
+              selectedPeriod === 'semana' ? 'Última semana' :
+              selectedPeriod === 'mes' ? 'Último mes' :
+              selectedPeriod === 'año' ? 'Último año' :
+              'Todo el historial'
+            }`}
             onExportPDF={handleExportPDF}
             onExportExcel={handleExportExcel}
             onExportCSV={handleExportCSV}

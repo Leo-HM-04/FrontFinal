@@ -98,21 +98,21 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       label: 'Todos los registros', 
       description: 'Incluye todos los elementos disponibles',
       icon: Archive,
-      count: '1,247 elementos'
+      count: 'Todos los elementos'
     },
     { 
       value: 'activo' as const, 
       label: 'Solo activos', 
       description: 'Únicamente elementos activos',
       icon: Check,
-      count: '892 elementos'
+      count: 'Elementos activos'
     },
     { 
       value: 'inactivo' as const, 
       label: 'Solo inactivos', 
       description: 'Únicamente elementos inactivos',
       icon: X,
-      count: '355 elementos'
+      count: 'Elementos inactivos'
     }
   ];
 
