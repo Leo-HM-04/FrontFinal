@@ -147,6 +147,7 @@ function MisSolicitudesContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [filteredSolicitudes, setFilteredSolicitudes] = useState<Solicitud[]>([]);
   
   // Estados de modales
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
@@ -237,29 +238,23 @@ function MisSolicitudesContent() {
     };
   }, []);
 
-  // Filtrar solicitudes con useMemo para evitar re-renderizados
-  const filteredSolicitudes = useMemo(() => {
+  // Filtrado exactamente como en viáticos
+  useEffect(() => {
     let filtered = [...solicitudes];
-
     if (searchTerm) {
-      filtered = filtered.filter(solicitud => 
+      filtered = filtered.filter(solicitud =>
         solicitud.concepto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         solicitud.departamento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         solicitud.cuenta_destino?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         solicitud.folio?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (statusFilter) {
-      filtered = filtered.filter(solicitud => 
-        solicitud.estado?.toLowerCase() === statusFilter.toLowerCase()
-      );
+      filtered = filtered.filter(solicitud => solicitud.estado?.toLowerCase() === statusFilter.toLowerCase());
     }
-
     if (dateFilter) {
       const today = new Date();
       const filterDate = new Date(today);
-      
       switch (dateFilter) {
         case 'today':
           filterDate.setHours(0, 0, 0, 0);
@@ -271,26 +266,17 @@ function MisSolicitudesContent() {
           break;
         case 'week':
           filterDate.setTime(today.getTime() - (7 * 24 * 60 * 60 * 1000));
-          filtered = filtered.filter(solicitud => 
-            new Date(solicitud.fecha_creacion) >= filterDate
-          );
+          filtered = filtered.filter(solicitud => new Date(solicitud.fecha_creacion) >= filterDate);
           break;
         case 'month':
           filterDate.setMonth(today.getMonth() - 1);
-          filtered = filtered.filter(solicitud => 
-            new Date(solicitud.fecha_creacion) >= filterDate
-          );
+          filtered = filtered.filter(solicitud => new Date(solicitud.fecha_creacion) >= filterDate);
           break;
       }
     }
-
-    return filtered;
-  }, [solicitudes, searchTerm, statusFilter, dateFilter]);
-
-  // Efecto para resetear página cuando cambien los filtros
-  useEffect(() => {
+    setFilteredSolicitudes(filtered);
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, dateFilter]);
+  }, [solicitudes, searchTerm, statusFilter, dateFilter]);
 
   // Función para manejar el ordenamiento
   const handleSort = (field: SortField) => {
