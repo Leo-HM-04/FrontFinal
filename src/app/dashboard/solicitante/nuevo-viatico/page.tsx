@@ -264,6 +264,38 @@ export default function NuevoViaticoPage() {
                     </div>
                   </div>
                   
+                  {/* Cuenta adicional (opcional) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-green-800 font-medium text-sm">Cuenta Adicional (opcional)</label>
+                      <input 
+                        name="cuenta" 
+                        placeholder="Cuenta adicional" 
+                        value={formularios[idx].form.cuenta || ''} 
+                        onChange={e => handleChange(idx, e)} 
+                        className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-green-400" 
+                      />
+                    </div>
+                    
+                    {formularios[idx].form.cuenta && formularios[idx].form.cuenta.trim() !== '' && (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-green-800 font-medium text-sm">Banco de la Cuenta *</label>
+                        <select 
+                          name="banco_cuenta" 
+                          value={formularios[idx].form.banco_cuenta || ''} 
+                          onChange={e => handleChange(idx, e)} 
+                          required
+                          className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-green-400" 
+                        >
+                          <option value="" disabled>Selecciona banco</option>
+                          {bancoOptions.map(banco => (
+                            <option key={banco} value={banco}>{banco}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                  
                   {/* Segunda fila: Datos del pago */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1">
@@ -312,41 +344,9 @@ export default function NuevoViaticoPage() {
                     </div>
                     
                     <div className="flex flex-col gap-1">
-                      <label className="text-blue-900 font-medium text-sm">Descripción (opcional)</label>
-                      <input name="tipo_pago_descripcion" placeholder="Descripción del viático" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400" />
+                      <label className="text-blue-900 font-medium text-sm">Descripción del viático (opcional)</label>
+                      <input name="tipo_pago_descripcion" placeholder="Descripción del uso o destino del viático" onChange={e => handleChange(idx, e)} className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400" />
                     </div>
-                  </div>
-                  
-                  {/* Cuenta adicional (opcional) */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-green-800 font-medium text-sm">Cuenta Adicional (opcional)</label>
-                      <input 
-                        name="cuenta" 
-                        placeholder="Cuenta adicional" 
-                        value={formularios[idx].form.cuenta || ''} 
-                        onChange={e => handleChange(idx, e)} 
-                        className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-green-400" 
-                      />
-                    </div>
-                    
-                    {formularios[idx].form.cuenta && formularios[idx].form.cuenta.trim() !== '' && (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-green-800 font-medium text-sm">Banco de la Cuenta *</label>
-                        <select 
-                          name="banco_cuenta" 
-                          value={formularios[idx].form.banco_cuenta || ''} 
-                          onChange={e => handleChange(idx, e)} 
-                          required
-                          className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-green-400" 
-                        >
-                          <option value="" disabled>Selecciona banco</option>
-                          {bancoOptions.map(banco => (
-                            <option key={banco} value={banco}>{banco}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
                   </div>
                   
                   {/* Archivo */}
