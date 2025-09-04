@@ -177,7 +177,7 @@ export default function NuevoViaticoPage() {
       // Scroll al primer campo con error de dígitos y mostrar toast
       setTimeout(() => {
         // Buscar errores de dígitos específicamente
-        const digitErrors = formularios.filter((f, idx) => {
+        const digitErrors = formularios.filter((f) => {
           const error = f.errors?.cuenta_destino;
           return error && (error.includes('dígitos') || error.includes('CLABE'));
         });
