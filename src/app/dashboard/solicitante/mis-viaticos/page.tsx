@@ -609,12 +609,13 @@ export default function MisViaticosPage() {
             isOpen={isExportModalOpen}
             onClose={() => setIsExportModalOpen(false)}
             title="Exportar Mis Viáticos"
-            description="Selecciona el filtro y formato deseado para exportar tus viáticos"
+            description="Selecciona el período y formato deseado para exportar tus viáticos"
             onExportPDF={handleExportPDF}
             onExportExcel={handleExportExcel}
             onExportCSV={handleExportCSV}
             isLoading={isExporting}
             selectedPeriod={selectedPeriod}
+            onPeriodChange={setSelectedPeriod}
           />
         </div>
       </SolicitanteLayout>

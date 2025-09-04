@@ -12,6 +12,7 @@ interface ExportViaticoModalProps {
   onExportCSV: (filter: 'todos' | 'activo' | 'inactivo', period: string) => void;
   isLoading?: boolean;
   selectedPeriod: string;
+  onPeriodChange: (period: string) => void;
 }
 
 export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
@@ -24,8 +25,8 @@ export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
   onExportCSV,
   isLoading = false,
   selectedPeriod,
+  onPeriodChange,
 }) => {
-  const [selectedFilter, setSelectedFilter] = useState<'todos' | 'activo' | 'inactivo'>('todos');
   const [downloadingFormat, setDownloadingFormat] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -58,7 +59,7 @@ export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
       borderColor: 'border-blue-200',
       hoverColor: 'hover:border-blue-300 hover:bg-blue-25',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      onClick: () => handleExport('pdf', () => onExportPDF(selectedFilter, selectedPeriod))
+      onClick: () => handleExport('pdf', () => onExportPDF('todos', selectedPeriod))
     },
     {
       id: 'excel',
@@ -74,7 +75,7 @@ export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
       borderColor: 'border-green-200',
       hoverColor: 'hover:border-green-300 hover:bg-green-25',
       buttonColor: 'bg-green-600 hover:bg-green-700',
-      onClick: () => handleExport('excel', () => onExportExcel(selectedFilter, selectedPeriod))
+      onClick: () => handleExport('excel', () => onExportExcel('todos', selectedPeriod))
     },
     {
       id: 'csv',
@@ -90,31 +91,45 @@ export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
       borderColor: 'border-orange-200',
       hoverColor: 'hover:border-orange-300 hover:bg-orange-25',
       buttonColor: 'bg-orange-600 hover:bg-orange-700',
-      onClick: () => handleExport('csv', () => onExportCSV(selectedFilter, selectedPeriod))
+      onClick: () => handleExport('csv', () => onExportCSV('todos', selectedPeriod))
     }
   ];
 
   const filterOptions = [
     { 
-      value: 'todos' as const, 
-      label: 'Todos los viáticos', 
-      description: 'Incluye todos los viáticos disponibles',
+      value: 'dia' as const, 
+      label: 'Último día', 
+      description: 'Viáticos del último día',
       icon: Calendar,
-      count: 'Todos los elementos'
+      count: 'Período: Último día'
     },
     { 
-      value: 'activo' as const, 
-      label: 'Solo autorizados/pagados', 
-      description: 'Únicamente viáticos autorizados y pagados',
-      icon: Check,
-      count: 'Elementos activos'
+      value: 'semana' as const, 
+      label: 'Última semana', 
+      description: 'Viáticos de la última semana',
+      icon: Calendar,
+      count: 'Período: Última semana'
     },
     { 
-      value: 'inactivo' as const, 
-      label: 'Solo pendientes/rechazados', 
-      description: 'Únicamente viáticos pendientes y rechazados',
-      icon: X,
-      count: 'Elementos inactivos'
+      value: 'mes' as const, 
+      label: 'Último mes', 
+      description: 'Viáticos del último mes',
+      icon: Calendar,
+      count: 'Período: Último mes'
+    },
+    { 
+      value: 'año' as const, 
+      label: 'Último año', 
+      description: 'Viáticos del último año',
+      icon: Calendar,
+      count: 'Período: Último año'
+    },
+    { 
+      value: 'total' as const, 
+      label: 'Todo el historial', 
+      description: 'Todos los viáticos disponibles',
+      icon: Calendar,
+      count: 'Período: Todo el historial'
     }
   ];
 
@@ -179,7 +194,7 @@ export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
                   <Filter className="w-5 h-5 text-blue-600" />
                 </div>
                 <h4 className="text-xl font-semibold text-gray-900">
-                  Seleccionar viáticos a exportar
+                  Seleccionar período de exportación
                 </h4>
               </div>
               
@@ -189,11 +204,11 @@ export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
                   return (
                     <button
                       key={option.value}
-                      onClick={() => setSelectedFilter(option.value)}
+                      onClick={() => onPeriodChange(option.value)}
                       disabled={isLoading || downloadingFormat !== null}
                       className={`
                         relative p-5 rounded-xl border-2 transition-all duration-300 text-left overflow-hidden
-                        ${selectedFilter === option.value 
+                        ${selectedPeriod === option.value 
                           ? 'border-blue-500 bg-blue-50 shadow-lg transform scale-[1.02]' 
                           : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-25 hover:shadow-md'
                         }
@@ -201,7 +216,7 @@ export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
                       `}
                     >
                       {/* Selection indicator */}
-                      {selectedFilter === option.value && (
+                      {selectedPeriod === option.value && (
                         <div className="absolute top-3 right-3">
                           <div className="bg-blue-500 rounded-full p-1">
                             <Check className="w-3 h-3 text-white" />
@@ -212,7 +227,7 @@ export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
                       <div className="flex items-start gap-4">
                         <div className={`
                           p-3 rounded-xl transition-colors
-                          ${selectedFilter === option.value 
+                          ${selectedPeriod === option.value 
                             ? 'bg-blue-500 text-white' 
                             : 'bg-gray-100 text-gray-600'
                           }
@@ -228,7 +243,7 @@ export const ExportViaticoModal: React.FC<ExportViaticoModalProps> = ({
                           </p>
                           <div className="mt-2">
                             <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-xs font-medium text-blue-700">
-                              {getPeriodLabel()}
+                              {option.count}
                             </span>
                           </div>
                         </div>
