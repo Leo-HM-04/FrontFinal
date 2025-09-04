@@ -267,10 +267,10 @@ export default function NuevoViaticoPage() {
                   {/* Cuenta adicional (opcional) */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
                     <div className="flex flex-col gap-1">
-                      <label className="text-green-800 font-medium text-sm">Cuenta Adicional (opcional)</label>
+                      <label className="text-green-800 font-medium text-sm">No. De Cuenta  (opcional)</label>
                       <input 
                         name="cuenta" 
-                        placeholder="Cuenta adicional" 
+                        placeholder="No. De Cuenta" 
                         value={formularios[idx].form.cuenta || ''} 
                         onChange={e => handleChange(idx, e)} 
                         className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-green-200 focus:ring-2 focus:ring-green-400" 
