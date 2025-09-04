@@ -228,10 +228,10 @@ return (
               <div>
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de cuenta</span>
                 <p className="text-blue-900 font-medium">
-                  {solicitud.tipo_cuenta_destino === 'Tarjeta'
-                    ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
-                    : solicitud.tipo_cuenta_destino === 'Tarjeta Instituciona' 
-                      ? 'Tarjeta Institucional'  // Corregir el display
+                  {solicitud.tipo_cuenta_destino === 'Número de Tarjeta'
+                    ? `Número de Tarjeta${solicitud.tipo_tarjeta ? ' - ' + (solicitud.tipo_tarjeta === 'debito' ? 'Débito' : solicitud.tipo_tarjeta === 'credito' ? 'Crédito' : solicitud.tipo_tarjeta) : ''}`
+                    : solicitud.tipo_cuenta_destino === 'Tarjeta Institucional' || solicitud.tipo_cuenta_destino === 'Tarjeta Instituciona'
+                      ? 'Tarjeta Institucional'
                       : solicitud.tipo_cuenta_destino || '-'}
                 </p>
               </div>
@@ -372,9 +372,9 @@ return (
                   <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Tipo de cuenta</span>
                   <p className="text-emerald-900 font-medium">
                     {solicitud.tipo_cuenta_destino_2 === 'Número de Tarjeta'
-                      ? `Tarjeta${solicitud.tipo_tarjeta_2 ? ' - ' + solicitud.tipo_tarjeta_2 : ''}`
-                      : solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona'
-                        ? 'Tarjeta Institucional'  // Corregir el display
+                      ? `Número de Tarjeta${solicitud.tipo_tarjeta_2 ? ' - ' + (solicitud.tipo_tarjeta_2 === 'debito' ? 'Débito' : solicitud.tipo_tarjeta_2 === 'credito' ? 'Crédito' : solicitud.tipo_tarjeta_2) : ''}`
+                      : solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' || solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona'
+                        ? 'Tarjeta Institucional'
                         : solicitud.tipo_cuenta_destino_2 || '-'}
                   </p>
                 </div>
