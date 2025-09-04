@@ -401,12 +401,52 @@ export default function NuevaSolicitudPage() {
       
       // Scroll al primer campo con error con animación suave
       setTimeout(() => {
-        const firstErrorField = document.querySelector('.animate-pulse');
-        if (firstErrorField) {
-          firstErrorField.scrollIntoView({ 
+        // Buscar específicamente campos de cuenta con errores de dígitos
+        const errorFields = Object.keys(newErrors);
+        let targetField = null;
+        
+        // Priorizar errores de validación de dígitos
+        const digitErrorFields = errorFields.filter(field => 
+          (field === 'cuenta_destino' || field === 'cuenta_destino_2') &&
+          (newErrors[field]?.includes('dígitos') || newErrors[field]?.includes('CLABE'))
+        );
+        
+        if (digitErrorFields.length > 0) {
+          // Buscar el campo específico con error de dígitos
+          targetField = document.querySelector(`input[name="${digitErrorFields[0]}"]`);
+        } else {
+          // Buscar cualquier campo con error
+          targetField = document.querySelector('.animate-pulse') || 
+                       document.querySelector(`input[name="${errorFields[0]}"]`) ||
+                       document.querySelector(`select[name="${errorFields[0]}"]`);
+        }
+        
+        if (targetField) {
+          targetField.scrollIntoView({ 
             behavior: 'smooth', 
             block: 'center' 
           });
+          
+          // Resaltar el campo con error
+          (targetField as HTMLElement).focus();
+          
+          // Mostrar mensaje específico para errores de dígitos
+          if (digitErrorFields.length > 0) {
+            const fieldName = digitErrorFields[0];
+            const errorMessage = newErrors[fieldName];
+            
+            // Crear toast temporal con el mensaje de error
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
+            toast.textContent = `Error: ${errorMessage}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+              if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+              }
+            }, 4000);
+          }
         }
       }, 100);
       
@@ -883,6 +923,25 @@ export default function NuevaSolicitudPage() {
                           <span className="text-green-400 text-sm">✅ Cuenta válida</span>
                         )}
                       </div>
+                      
+                      {/* Texto de ayuda para requisitos de dígitos */}
+                      {formData.tipo_cuenta_destino && (
+                        <div className="mt-2">
+                          {formData.tipo_cuenta_destino === 'CLABE' && (
+                            <p className="text-white/60 text-sm flex items-center">
+                              <span className="mr-2">💡</span>
+                              La CLABE debe tener exactamente 18 dígitos
+                            </p>
+                          )}
+                          {formData.tipo_cuenta_destino === 'Número de Tarjeta' && (
+                            <p className="text-white/60 text-sm flex items-center">
+                              <span className="mr-2">💳</span>
+                              El número de tarjeta debe tener máximo 16 dígitos
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      
                       {formData.cuenta_destino && errors.cuenta_destino && cuentaValida !== true && (
                         <div className="mt-2 flex items-center space-x-2 animate-bounce">
                           <span className="text-red-400 text-2xl">🏦</span>
@@ -1132,6 +1191,31 @@ export default function NuevaSolicitudPage() {
                         required={formData.tiene_segunda_forma_pago}
                         className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
                       />
+                      
+                      {/* Texto de ayuda para requisitos de dígitos */}
+                      {formData.tipo_cuenta_destino_2 && (
+                        <div className="mt-2">
+                          {formData.tipo_cuenta_destino_2 === 'CLABE' && (
+                            <p className="text-white/60 text-sm flex items-center">
+                              <span className="mr-2">💡</span>
+                              La CLABE debe tener exactamente 18 dígitos
+                            </p>
+                          )}
+                          {formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' && (
+                            <p className="text-white/60 text-sm flex items-center">
+                              <span className="mr-2">💳</span>
+                              El número de tarjeta debe tener máximo 16 dígitos
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      
+                      {errors.cuenta_destino_2 && (
+                        <div className="mt-2 flex items-center space-x-2 animate-bounce">
+                          <span className="text-red-400 text-2xl">🏦</span>
+                          <span className="text-red-400 text-sm font-bold">{errors.cuenta_destino_2}</span>
+                        </div>
+                      )}
                     </div>
                   )}
 
