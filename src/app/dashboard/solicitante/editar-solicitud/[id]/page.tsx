@@ -444,6 +444,38 @@ export default function EditarSolicitudPage() {
       newErrors.tipo_tarjeta_2 = 'Selecciona el tipo de tarjeta';
     }
 
+    // Validar dígitos de CLABE (18 dígitos exactos)
+    if (formData.tipo_cuenta_destino === 'CLABE' && formData.cuenta_destino) {
+      const clabePattern = /^\d{18}$/;
+      if (!clabePattern.test(formData.cuenta_destino)) {
+        newErrors.cuenta_destino = 'La CLABE debe tener exactamente 18 dígitos';
+      }
+    }
+
+    // Validar dígitos de Número de Tarjeta (máximo 16 dígitos)
+    if (formData.tipo_cuenta_destino === 'Número de Tarjeta' && formData.cuenta_destino) {
+      const tarjetaPattern = /^\d{1,16}$/;
+      if (!tarjetaPattern.test(formData.cuenta_destino)) {
+        newErrors.cuenta_destino = 'El número de tarjeta debe tener máximo 16 dígitos';
+      }
+    }
+
+    // Validar dígitos de CLABE para segunda forma de pago (18 dígitos exactos)
+    if (formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'CLABE' && formData.cuenta_destino_2) {
+      const clabePattern = /^\d{18}$/;
+      if (!clabePattern.test(formData.cuenta_destino_2)) {
+        newErrors.cuenta_destino_2 = 'La CLABE debe tener exactamente 18 dígitos';
+      }
+    }
+
+    // Validar dígitos de Número de Tarjeta para segunda forma de pago (máximo 16 dígitos)
+    if (formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' && formData.cuenta_destino_2) {
+      const tarjetaPattern = /^\d{1,16}$/;
+      if (!tarjetaPattern.test(formData.cuenta_destino_2)) {
+        newErrors.cuenta_destino_2 = 'El número de tarjeta debe tener máximo 16 dígitos';
+      }
+    }
+
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       setLoading(false);
@@ -782,12 +814,42 @@ export default function EditarSolicitudPage() {
                           const value = e.target.value;
                           dispatch({ type: 'SET_FIELD', field: 'cuenta_destino', value });
                           setCuentaValida(null);
-                          if (!value && cuentaConfig.required) {
+                          
+                          // Validar en tiempo real según el tipo de cuenta
+                          if (value) {
+                            if (formData.tipo_cuenta_destino === 'CLABE') {
+                              const clabePattern = /^\d{18}$/;
+                              if (!clabePattern.test(value) && value.length <= 18) {
+                                setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                              } else if (!clabePattern.test(value) && value.length > 18) {
+                                setErrors((prev) => ({ ...prev, cuenta_destino: 'La CLABE debe tener exactamente 18 dígitos' }));
+                              }
+                            } else if (formData.tipo_cuenta_destino === 'Número de Tarjeta') {
+                              const tarjetaPattern = /^\d{1,16}$/;
+                              if (!tarjetaPattern.test(value)) {
+                                setErrors((prev) => ({ ...prev, cuenta_destino: 'El número de tarjeta debe tener máximo 16 dígitos' }));
+                              } else {
+                                setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                              }
+                            } else {
+                              setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
+                            }
+                          } else if (!value && cuentaConfig.required) {
                             setErrors((prev) => ({ ...prev, cuenta_destino: 'Este campo es obligatorio' }));
                           } else {
                             setErrors((prev) => ({ ...prev, cuenta_destino: undefined }));
                           }
                         }}
+                        pattern={
+                          formData.tipo_cuenta_destino === 'CLABE' ? '[0-9]{18}' : 
+                          formData.tipo_cuenta_destino === 'Número de Tarjeta' ? '[0-9]{1,16}' : 
+                          undefined
+                        }
+                        maxLength={
+                          formData.tipo_cuenta_destino === 'CLABE' ? 18 : 
+                          formData.tipo_cuenta_destino === 'Número de Tarjeta' ? 16 : 
+                          undefined
+                        }
                         onBlur={e => {
                           if (e.target.value && formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona') {
                             verificarCuentaDestino(e.target.value);
@@ -994,7 +1056,43 @@ export default function EditarSolicitudPage() {
                         type="text"
                         name="cuenta_destino_2"
                         value={formData.cuenta_destino_2}
-                        onChange={handleInputChange}
+                        onChange={e => {
+                          const { name, value } = e.target;
+                          dispatch({ type: 'SET_FIELD', field: name as keyof FormState, value });
+                          
+                          // Validar en tiempo real según el tipo de cuenta
+                          if (value) {
+                            if (formData.tipo_cuenta_destino_2 === 'CLABE') {
+                              const clabePattern = /^\d{18}$/;
+                              if (!clabePattern.test(value) && value.length <= 18) {
+                                setErrors((prev) => ({ ...prev, cuenta_destino_2: undefined }));
+                              } else if (!clabePattern.test(value) && value.length > 18) {
+                                setErrors((prev) => ({ ...prev, cuenta_destino_2: 'La CLABE debe tener exactamente 18 dígitos' }));
+                              }
+                            } else if (formData.tipo_cuenta_destino_2 === 'Número de Tarjeta') {
+                              const tarjetaPattern = /^\d{1,16}$/;
+                              if (!tarjetaPattern.test(value)) {
+                                setErrors((prev) => ({ ...prev, cuenta_destino_2: 'El número de tarjeta debe tener máximo 16 dígitos' }));
+                              } else {
+                                setErrors((prev) => ({ ...prev, cuenta_destino_2: undefined }));
+                              }
+                            } else {
+                              setErrors((prev) => ({ ...prev, cuenta_destino_2: undefined }));
+                            }
+                          } else {
+                            setErrors((prev) => ({ ...prev, cuenta_destino_2: undefined }));
+                          }
+                        }}
+                        pattern={
+                          formData.tipo_cuenta_destino_2 === 'CLABE' ? '[0-9]{18}' : 
+                          formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? '[0-9]{1,16}' : 
+                          undefined
+                        }
+                        maxLength={
+                          formData.tipo_cuenta_destino_2 === 'CLABE' ? 18 : 
+                          formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? 16 : 
+                          undefined
+                        }
                         placeholder={formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? 'Número de tarjeta' : 'Número de cuenta CLABE'}
                         required={formData.tiene_segunda_forma_pago}
                         className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
