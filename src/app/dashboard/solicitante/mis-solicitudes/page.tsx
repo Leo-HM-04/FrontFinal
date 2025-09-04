@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense, useRef, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, Suspense, useRef, useCallback, useMemo, memo, startTransition, useDeferredValue } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   ChevronUp,
   ChevronDown,
+  X,
 } from 'lucide-react';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { ExportModal } from '@/components/modals/ExportModal';
@@ -129,6 +130,90 @@ const formatTime = (dateString: string) => {
 type SortField = 'monto' | 'estado' | 'fecha' | 'hora';
 type SortOrder = 'asc' | 'desc';
 
+// Componente de búsqueda optimizado para preservar focus
+const OptimizedSearchInput = memo(React.forwardRef<{ clear: () => void }, { 
+  onSearchChange: (value: string) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}>(({ onSearchChange, inputRef }, ref) => {
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [internalValue, setInternalValue] = useState('');
+
+  const clearInternal = useCallback(() => {
+    setInternalValue('');
+  }, []);
+
+  React.useImperativeHandle(ref, () => ({
+    clear: clearInternal
+  }), [clearInternal]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInternalValue(value);
+
+    // Limpiar el timeout anterior
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    // Establecer un nuevo timeout
+    debounceTimeoutRef.current = setTimeout(() => {
+      startTransition(() => {
+        onSearchChange(value);
+      });
+    }, 300);
+  }, [onSearchChange]);
+
+  const handleClear = useCallback(() => {
+    setInternalValue('');
+    startTransition(() => {
+      onSearchChange('');
+    });
+    // Mantener el focus después de limpiar
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  }, [onSearchChange, inputRef]);
+
+  // Limpiar timeout al desmontar
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="flex-1">
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Buscar</label>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          ref={inputRef}
+          type="text"
+          value={internalValue}
+          onChange={handleChange}
+          placeholder="Buscar por folio, concepto..."
+          className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+          autoComplete="off"
+          spellCheck="false"
+        />
+        {internalValue && (
+          <button
+            onClick={handleClear}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+            aria-label="Limpiar búsqueda"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}));
+
+OptimizedSearchInput.displayName = 'OptimizedSearchInput';
+
 // Componente alternativo con input no controlado como respaldo
 const UncontrolledSearchInput = memo(({ 
   onSearchChange, 
@@ -138,9 +223,11 @@ const UncontrolledSearchInput = memo(({
   inputRef: React.RefObject<HTMLInputElement | null>;
 }) => {
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const wasFocusedRef = useRef(false);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    wasFocusedRef.current = document.activeElement === e.target;
 
     // Limpiar el timeout anterior
     if (debounceTimeoutRef.current) {
@@ -150,8 +237,20 @@ const UncontrolledSearchInput = memo(({
     // Establecer un nuevo timeout
     debounceTimeoutRef.current = setTimeout(() => {
       onSearchChange(value);
-    }, 200); // Tiempo de debounce más corto para mejor responsividad
-  }, [onSearchChange]);
+      
+      // Restaurar el focus después del debounce si estaba enfocado
+      if (wasFocusedRef.current && inputRef?.current) {
+        setTimeout(() => {
+          if (inputRef.current && document.body.contains(inputRef.current)) {
+            inputRef.current.focus();
+            // Posicionar el cursor al final del texto
+            const length = inputRef.current.value.length;
+            inputRef.current.setSelectionRange(length, length);
+          }
+        }, 10);
+      }
+    }, 300); // Tiempo de debounce
+  }, [onSearchChange, inputRef]);
 
   // Limpiar timeout al desmontar
   useEffect(() => {
@@ -281,8 +380,12 @@ function MisSolicitudesContent() {
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   
+  // Usar deferred value para que la búsqueda no bloquee la UI
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  
   // Ref para el input de búsqueda
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const optimizedSearchRef = useRef<{ clear: () => void }>(null);
   
   // Estados de exportación
   const [showExportModal, setShowExportModal] = useState(false);
@@ -368,12 +471,12 @@ function MisSolicitudesContent() {
   const filteredSolicitudes = useMemo(() => {
     let filtered = [...solicitudes];
 
-    if (searchTerm) {
+    if (deferredSearchTerm) {
       filtered = filtered.filter(solicitud => 
-        solicitud.concepto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        solicitud.departamento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        solicitud.cuenta_destino?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        solicitud.folio?.toLowerCase().includes(searchTerm.toLowerCase())
+        solicitud.concepto?.toLowerCase().includes(deferredSearchTerm.toLowerCase()) ||
+        solicitud.departamento?.toLowerCase().includes(deferredSearchTerm.toLowerCase()) ||
+        solicitud.cuenta_destino?.toLowerCase().includes(deferredSearchTerm.toLowerCase()) ||
+        solicitud.folio?.toLowerCase().includes(deferredSearchTerm.toLowerCase())
       );
     }
 
@@ -412,12 +515,12 @@ function MisSolicitudesContent() {
     }
 
     return filtered;
-  }, [solicitudes, searchTerm, statusFilter, dateFilter]);
+  }, [solicitudes, deferredSearchTerm, statusFilter, dateFilter]);
 
   // Efecto para resetear página cuando cambien los filtros
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, dateFilter]);
+  }, [deferredSearchTerm, statusFilter, dateFilter]);
 
   // Función para manejar el ordenamiento
   const handleSort = (field: SortField) => {
@@ -536,11 +639,15 @@ function MisSolicitudesContent() {
     setSearchTerm('');
     setStatusFilter('');
     setDateFilter('');
+    // Limpiar también el estado interno del componente de búsqueda
+    optimizedSearchRef.current?.clear();
   };
 
   // Callback optimizado para el input de búsqueda
   const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
+    startTransition(() => {
+      setSearchTerm(value);
+    });
   }, []);
 
   // Componente para encabezados con ordenamiento
@@ -642,15 +749,22 @@ function MisSolicitudesContent() {
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
-          {/* Solución 2: Input no controlado (mejor para mantener focus) */}
+          {/* Solución Optimizada: Input que preserva focus */}
+          <OptimizedSearchInput 
+            key="optimized-search"
+            ref={optimizedSearchRef}
+            onSearchChange={handleSearchChange}
+            inputRef={searchInputRef}
+          />
+          
+          {/* Alternativas (descomenta si necesitas probar otras) */}
+          {/*
           <UncontrolledSearchInput 
             key="uncontrolled-search-input"
             onSearchChange={handleSearchChange}
             inputRef={searchInputRef}
           />
           
-          {/* Solución 1: SearchInput con estado local y debounce (descomenta si prefieres esta) */}
-          {/*
           <SearchInput 
             key="search-input"
             initialValue={searchTerm}
