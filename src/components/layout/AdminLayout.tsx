@@ -181,10 +181,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       {/* Audio global para notificaciones */}
       <audio ref={audioRef} src="/assets/audio/elchido.mp3" preload="auto" />
       <div className="min-h-screen font-sans flex flex-col" style={backgroundGradient}>
-        {/* Header */}
+        {/* Header Fixed */}
         <header
+          className="fixed top-0 left-0 right-0 z-40"
           style={{
-            background: 'transparent',
+            background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)',
             borderBottom: 'none',
             boxShadow: 'none',
             padding: 0,
@@ -386,7 +387,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </AnimatePresence>
 
         {/* Contenido principal */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-h-[calc(100vh-4rem)]">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pt-20 min-h-[calc(100vh-4rem)]">{children}</main>
       </div>
     </>
   );

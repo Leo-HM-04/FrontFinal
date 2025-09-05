@@ -118,8 +118,8 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
       {/* Audio global para notificaciones */}
       <audio ref={audioRef} src="/assets/audio/elchido.mp3" preload="auto" />
       <div className="min-h-screen font-sans" style={{ background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)' }}>
-      {/* Header */}
-      <header style={{background: 'transparent', borderBottom: 'none', boxShadow: 'none', padding: 0}}>
+      {/* Header Fixed */}
+      <header className="fixed top-0 left-0 right-0 z-40" style={{background: 'linear-gradient(135deg, #0057D9 0%, #004AB7 100%)', borderBottom: 'none', boxShadow: 'none', padding: 0}}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <button
@@ -231,7 +231,7 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
       <AprobadorNotifications open={showNotifications} onClose={() => setShowNotifications(false)} />
 
       {/* Main Content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pt-20">{children}</main>
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
