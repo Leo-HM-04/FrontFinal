@@ -50,40 +50,41 @@ export function Pagination({
 
   // Mostrar siempre la paginación, incluso si solo hay una página
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 p-4 bg-white border-t border-gray-200 shadow-sm rounded-b-xl">
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-6 bg-white border-t border-gray-200 rounded-b-xl">
       {/* Información de registros */}
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-700 font-medium">
         Mostrando {startItem} a {endItem} de {totalItems} registros
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
 
         {/* Controles de paginación */}
-        <div className="flex items-center gap-1 w-full justify-center">
+        <div className="flex items-center gap-2 w-full justify-center">
           <Button
             variant="outline"
             size="sm"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-2 rounded-full border-none text-blue-600 hover:bg-blue-500 disabled:text-gray-400"
+            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-blue-600 text-white border-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
+            Anterior
           </Button>
 
-          <div className="flex items-center gap-1 mx-2">
+          <div className="flex items-center gap-2 mx-4">
             {getVisiblePages().map((page, index) => (
               <React.Fragment key={index}>
                 {page === '...' ? (
-                  <span className="px-2 py-1 text-gray-400">...</span>
+                  <span className="px-3 py-2 text-gray-500 font-medium">...</span>
                 ) : (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onPageChange(page as number)}
-                    className={`w-9 h-9 flex items-center justify-center rounded-full border-2 transition-all duration-150 font-bold shadow-md ${
+                    className={`min-w-[40px] h-10 flex items-center justify-center rounded-lg border-2 transition-all duration-200 font-semibold ${
                       currentPage === page 
-                        ? '!bg-blue-600 !text-white !border-blue-600 !shadow-lg !scale-110' 
-                        : 'text-blue-600 border-blue-200 hover:bg-blue-100 hover:border-blue-400'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-lg scale-105' 
+                        : 'bg-white text-blue-600 border-blue-300 hover:bg-blue-50 hover:border-blue-500 shadow-sm hover:shadow-md'
                     }`}
                   >
                     {page}
@@ -98,9 +99,10 @@ export function Pagination({
             size="sm"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-2 rounded-full border-none text-blue-600 hover:bg-blue-100 disabled:text-gray-400"
+            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-blue-600 text-white border-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
           >
-            <ChevronRight className="w-5 h-5" />
+            Siguiente
+            <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       </div>
