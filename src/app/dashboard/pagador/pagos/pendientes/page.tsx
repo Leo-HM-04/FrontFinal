@@ -47,7 +47,7 @@ export default function PagosPendientesPage() {
     paginatedData: paginatedPagos,
     goToPage,
     changeItemsPerPage,
-  } = usePagination({ data: filteredPagos, initialItemsPerPage: 10 });
+  } = usePagination({ data: filteredPagos, initialItemsPerPage: 5 });
 
   useEffect(() => {
     setLoadingPagos(true);
