@@ -44,6 +44,9 @@ interface NotificacionRaw {
   fecha?: string;
   fecha_creacion?: string;
   tipo?: NotificationType;
+  entidad?: string;
+  entidad_id?: number;
+  accion?: string;
 }
 
 interface SolicitanteNotificationsProps {
@@ -134,12 +137,16 @@ class SolicitanteNotificationService {
       const data: NotificacionRaw[] = await response.json();
       
       return Array.isArray(data)
-        ? data.map((n) => ({
+        ? data.map((n: NotificacionRaw) => ({
             id_notificacion: n.id_notificacion || n.id || 0,
             mensaje: n.mensaje,
             leida: !!n.leida,
             fecha_creacion: n.fecha_creacion || n.fecha || new Date().toISOString(),
             tipo: n.tipo || 'info' as NotificationType,
+            entidad: n.entidad || undefined,
+            entidad_id: n.entidad_id || undefined,
+            rol: 'solicitante',
+            accion: n.accion || undefined,
           }))
         : [];
     } catch (error) {
