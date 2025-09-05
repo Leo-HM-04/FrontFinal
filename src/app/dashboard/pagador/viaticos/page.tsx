@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { ViaticosService } from "@/services/viaticos.service";
 import type { Viatico as BaseViatico } from "@/services/viaticos.service";
-import { FileText, Eye, Search, CheckSquare, Square, AlertCircle, Check, X } from "lucide-react";
+import { FileText, Eye, CheckSquare, Square, AlertCircle, Check, X } from "lucide-react";
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { ViaticoDetailModal } from '@/components/viaticos/ViaticoDetailModal';
@@ -85,10 +85,9 @@ export default function ViaticosPagadorPage() {
   const [processing, setProcessing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   
-  // Estados de filtrado y búsqueda
-  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState<string>('todos');
-  const [busquedaUsuario, setBusquedaUsuario] = useState("");
-  const [busquedaGeneral, setBusquedaGeneral] = useState("");
+  // Estados de filtrado y búsqueda (simplificado)
+  const usuarioSeleccionado = 'todos';
+  const busquedaGeneral = "";
   
   // Estados del modal
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -121,43 +120,16 @@ export default function ViaticosPagadorPage() {
     loadViaticos();
   }, [loadViaticos]);
 
-  // Usuarios únicos memoizados
-  const usuariosUnicos = useMemo(() => {
-    return Array.from(new Set(viaticos.map(v => v.usuario_nombre || 'Sin usuario')));
-  }, [viaticos]);
+  // Usuarios únicos memoizados (no utilizado en UI actual)
+  // const usuariosUnicos = useMemo(() => {
+  //   return Array.from(new Set(viaticos.map(v => v.usuario_nombre || 'Sin usuario')));
+  // }, [viaticos]);
 
-  // Usuarios filtrados por búsqueda
-  const usuariosFiltrados = useMemo(() => {
-    if (!busquedaUsuario.trim()) return usuariosUnicos;
-    return usuariosUnicos.filter(u => 
-      u.toLowerCase().includes(busquedaUsuario.trim().toLowerCase())
-    );
-  }, [usuariosUnicos, busquedaUsuario]);
-
-  // Viáticos filtrados
+  // Viáticos filtrados (simplificado - sin filtros de UI)
   const viaticosFiltrados = useMemo(() => {
-    let filtered = viaticos;
-
-    // Filtrar por usuario
-    if (usuarioSeleccionado !== 'todos') {
-      filtered = filtered.filter(v => 
-        (v.usuario_nombre || 'Sin usuario') === usuarioSeleccionado
-      );
-    }
-
-    // Filtrar por búsqueda general
-    if (busquedaGeneral.trim()) {
-      const searchTerm = busquedaGeneral.trim().toLowerCase();
-      filtered = filtered.filter(v =>
-        (v.folio?.toString() || '').toLowerCase().includes(searchTerm) ||
-        (v.nombre_persona || '').toLowerCase().includes(searchTerm) ||
-        (v.banco_destino || '').toLowerCase().includes(searchTerm) ||
-        (v.departamento || '').toLowerCase().includes(searchTerm)
-      );
-    }
-
-    return filtered;
-  }, [viaticos, usuarioSeleccionado, busquedaGeneral]);
+    // Solo retornar viáticos autorizados listos para pagar
+    return viaticos.filter(v => v.estado?.toLowerCase() === 'autorizada');
+  }, [viaticos]);
 
   // Estadísticas memoizadas
   const stats = useMemo(() => {
@@ -256,7 +228,7 @@ export default function ViaticosPagadorPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="bg-gradient-to-br from-green-600 to-green-800 rounded-2xl p-4 mb-6 shadow-xl">
+          <div className="bg-gradient-to-br from-blue-600 to-blue-600 rounded-2xl p-4 mb-6 shadow-xl">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-white mb-1 tracking-tight">Viáticos Autorizados</h1>
