@@ -393,17 +393,31 @@ function MisSolicitudesContent() {
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  // Manejo de parámetros URL para highlighting
+  // Manejo de parámetros URL para highlighting y modal
   useEffect(() => {
     const highlightParam = searchParams?.get('highlight');
+    const openModalParam = searchParams?.get('openModal');
+    
     if (highlightParam) {
       const id = parseInt(highlightParam);
       if (!isNaN(id)) {
         setHighlightedId(id);
+        
+        // Si también viene openModal=true, abrir el modal automáticamente
+        if (openModalParam === 'true') {
+          // Buscar la solicitud y abrir su modal
+          const targetSolicitud = solicitudes.find(s => s.id_solicitud === id);
+          if (targetSolicitud) {
+            setSelectedSolicitud(targetSolicitud);
+            setIsDetailModalOpen(true);
+          }
+        }
+        
         setTimeout(() => {
           setHighlightedId(null);
           const newSearchParams = new URLSearchParams(searchParams?.toString() || '');
           newSearchParams.delete('highlight');
+          newSearchParams.delete('openModal');
           router.replace(
             `${window.location.pathname}?${newSearchParams.toString()}`,
             { scroll: false }
@@ -411,7 +425,7 @@ function MisSolicitudesContent() {
         }, 3000);
       }
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, solicitudes]);
 
   // Cargar solicitudes
   useEffect(() => {

@@ -2,8 +2,8 @@
 'use client';
 import { ExportRecurrenteModal } from '@/components/modals/ExportRecurrenteModal';
 
-import { useEffect, useState, useMemo } from 'react'; // Agregamos useMemo
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useMemo, Suspense } from 'react'; // Agregamos useMemo
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { RecurrentesService } from '@/services/recurrentes.service';
 import { PlantillaRecurrente } from '@/types';
@@ -59,6 +59,14 @@ const getEstadoIcon = (estado: string) => {
 };
 
 export default function MisRecurrentesPage() {
+    return (
+        <Suspense fallback={<div>Cargando...</div>}>
+            <MisRecurrentesContent />
+        </Suspense>
+    );
+}
+
+function MisRecurrentesContent() {
     // Estados para exportación modal
     const [exportModalOpen, setExportModalOpen] = useState(false);
     const [exportRango, setExportRango] = useState('total');
@@ -88,6 +96,10 @@ export default function MisRecurrentesPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
+    // Estados para highlighting desde notificaciones
+    const [highlightedId, setHighlightedId] = useState<number | null>(null);
+    const searchParams = useSearchParams();
+
     useEffect(() => {
         const fetchRecurrentes = async () => {
             try {
@@ -103,6 +115,34 @@ export default function MisRecurrentesPage() {
         };
         fetchRecurrentes();
     }, []);
+
+    // Manejo de parámetros URL para highlighting
+    useEffect(() => {
+        const highlightParam = searchParams?.get('highlight');
+        if (highlightParam) {
+            const id = parseInt(highlightParam);
+            if (!isNaN(id)) {
+                setHighlightedId(id);
+                
+                // Buscar la plantilla recurrente y abrir modal si es necesario
+                const targetRecurrente = recurrentes.find(r => r.id_recurrente === id);
+                if (targetRecurrente) {
+                    setRecurrenteDetalle(targetRecurrente);
+                    setDetalleModalOpen(true);
+                }
+                
+                setTimeout(() => {
+                    setHighlightedId(null);
+                    const newSearchParams = new URLSearchParams(searchParams?.toString() || '');
+                    newSearchParams.delete('highlight');
+                    router.replace(
+                        `${window.location.pathname}?${newSearchParams.toString()}`,
+                        { scroll: false }
+                    );
+                }, 3000);
+            }
+        }
+    }, [searchParams, router, recurrentes]);
 
     const handleDelete = async () => {
         if (!recurrenteAEliminar) return;
@@ -329,8 +369,17 @@ export default function MisRecurrentesPage() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    currentRecurrentes.map((p) => (
-                                        <tr key={p.id_recurrente} className="hover:bg-gray-50 transition-colors">
+                                    currentRecurrentes.map((p) => {
+                                        const isHighlighted = highlightedId === p.id_recurrente;
+                                        return (
+                                            <tr 
+                                                key={p.id_recurrente} 
+                                                className={`hover:bg-gray-50 transition-colors ${
+                                                    isHighlighted 
+                                                        ? 'bg-yellow-100 border-2 border-yellow-400 animate-pulse' 
+                                                        : ''
+                                                }`}
+                                            >
                                             <td className="px-4 py-3 text-gray-900 font-mono text-sm">{p.folio || '-'}</td>
                                             <td className="px-4 py-3 text-gray-900 text-sm truncate">{p.nombre_usuario ? p.nombre_usuario : p.id_usuario}</td>
                                             <td className="px-4 py-3 text-gray-900 text-sm truncate">{p.departamento.charAt(0).toUpperCase() + p.departamento.slice(1)}</td>
@@ -395,7 +444,8 @@ export default function MisRecurrentesPage() {
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>
