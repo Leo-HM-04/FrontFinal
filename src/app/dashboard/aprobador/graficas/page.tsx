@@ -147,14 +147,14 @@ export default function GraficasAprobador() {
     );
   }
 
-  // Colores modernos mejorados
+  // Paleta de colores corporativa mejorada
   const colorPalette = [
-    { bg: "#3b82f6", hover: "#2563eb", gradient: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)" },
-    { bg: "#10b981", hover: "#059669", gradient: "linear-gradient(135deg, #10b981 0%, #047857 100%)" },
-    { bg: "#f59e0b", hover: "#d97706", gradient: "linear-gradient(135deg, #f59e0b 0%, #b45309 100%)" },
-    { bg: "#ef4444", hover: "#dc2626", gradient: "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)" },
-    { bg: "#8b5cf6", hover: "#7c3aed", gradient: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)" },
-    { bg: "#06b6d4", hover: "#0891b2", gradient: "linear-gradient(135deg, #06b6d4 0%, #0e7490 100%)" }
+    { bg: "#1e40af", hover: "#1d4ed8", gradient: "linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%)" },
+    { bg: "#059669", hover: "#047857", gradient: "linear-gradient(135deg, #059669 0%, #047857 100%)" },
+    { bg: "#d97706", hover: "#b45309", gradient: "linear-gradient(135deg, #d97706 0%, #b45309 100%)" },
+    { bg: "#dc2626", hover: "#b91c1c", gradient: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)" },
+    { bg: "#7c3aed", hover: "#6d28d9", gradient: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)" },
+    { bg: "#0891b2", hover: "#0e7490", gradient: "linear-gradient(135deg, #0891b2 0%, #0e7490 100%)" }
   ];
 
   const totalSolicitudes = data.reduce((sum, item) => sum + item.total, 0);
@@ -180,7 +180,7 @@ export default function GraficasAprobador() {
     }
   }
 
-  // Mejorar configuración de gráfica de dona
+  // Configuración mejorada de gráfica de dona
   const doughnutData = {
     labels: data.map(d => d.estado.charAt(0).toUpperCase() + d.estado.slice(1)),
     datasets: [
@@ -188,10 +188,12 @@ export default function GraficasAprobador() {
         label: "Solicitudes",
         data: data.map(d => d.total),
         backgroundColor: data.map((_, i) => colorPalette[i % colorPalette.length].bg),
-        borderWidth: 3,
+        borderWidth: 4,
         borderColor: '#ffffff',
-        hoverOffset: 12,
-        cutout: "60%",
+        hoverOffset: 15,
+        cutout: "65%",
+        hoverBorderWidth: 6,
+        hoverBackgroundColor: data.map((_, i) => colorPalette[i % colorPalette.length].hover),
       }
     ]
   };
@@ -230,13 +232,14 @@ export default function GraficasAprobador() {
         position: 'bottom' as const,
         labels: {
           color: '#374151',
-          font: { size: 14, weight: "bold" as const },
-          padding: 20,
+          font: { size: 15, weight: "bold" as const, family: 'Inter, system-ui, sans-serif' },
+          padding: 25,
           usePointStyle: true,
           pointStyle: 'circle',
+          boxWidth: 12,
+          boxHeight: 12,
           generateLabels: (chart: Chart<"doughnut">) => {
             const data = chart.data;
-            // Chart.js types labels as unknown[] | undefined
             const labels = Array.isArray(data.labels) ? data.labels.map(l => String(l)) : [];
             const bgColors = Array.isArray(data.datasets[0]?.backgroundColor)
               ? (data.datasets[0].backgroundColor as string[])
@@ -244,7 +247,7 @@ export default function GraficasAprobador() {
             return labels.map((label, i) => ({
               text: `${label} (${data.datasets[0]?.data[i] ?? 0})`,
               fillStyle: bgColors[i] ?? '#ccc',
-              strokeStyle: bgColors[i] ?? '#ccc',
+              strokeStyle: 'transparent',
               pointStyle: "circle" as const,
             }));
           },
@@ -282,7 +285,7 @@ export default function GraficasAprobador() {
     }
   };
 
-  // Mejorar configuración de gráfica de barras
+  // Configuración mejorada de gráfica de barras
   const barData = {
     labels: data.map(d => d.estado.charAt(0).toUpperCase() + d.estado.slice(1)),
     datasets: [
@@ -291,14 +294,19 @@ export default function GraficasAprobador() {
         data: data.map(d => Number(d.monto_total)),
         backgroundColor: data.map((_, i) => colorPalette[i % colorPalette.length].bg),
         borderRadius: {
-          topLeft: 12,
-          topRight: 12,
+          topLeft: 16,
+          topRight: 16,
           bottomLeft: 0,
           bottomRight: 0
         },
         borderSkipped: false,
-        maxBarThickness: 80,
-        borderWidth: 0
+        maxBarThickness: 70,
+        borderWidth: 0,
+        hoverBackgroundColor: data.map((_, i) => colorPalette[i % colorPalette.length].hover),
+        shadowOffsetX: 0,
+        shadowOffsetY: 4,
+        shadowBlur: 8,
+        shadowColor: 'rgba(0, 0, 0, 0.1)'
       }
     ]
   };
@@ -355,23 +363,28 @@ export default function GraficasAprobador() {
     scales: {
       x: {
         ticks: { 
-          color: '#6b7280', 
-          font: { size: 13, weight: "bold" as const } 
+          color: '#4b5563', 
+          font: { size: 14, weight: "bold" as const, family: 'Inter, system-ui, sans-serif' },
+          maxRotation: 0,
+          padding: 10
         },
         grid: { display: false },
         border: { display: false }
       },
       y: {
         ticks: { 
-          color: '#6b7280', 
-          font: { size: 13, weight: "bold" as const },
-          callback: (value: number | string) => `$${Number(value).toLocaleString()}`
+          color: '#4b5563', 
+          font: { size: 13, weight: "bold" as const, family: 'Inter, system-ui, sans-serif' },
+          callback: (value: number | string) => `$${Number(value).toLocaleString()}`,
+          padding: 15
         },
         grid: { 
-          color: 'rgba(156, 163, 175, 0.2)',
-          drawBorder: false
+          color: 'rgba(156, 163, 175, 0.1)',
+          drawBorder: false,
+          lineWidth: 1
         },
-        border: { display: false }
+        border: { display: false },
+        beginAtZero: true
       }
     },
     animation: {
@@ -446,9 +459,11 @@ export default function GraficasAprobador() {
       <style>{`
         .chartjs-tooltip {
           z-index: 9999 !important;
+          font-family: 'Inter', system-ui, sans-serif !important;
         }
         .chartjs-datalabel {
           z-index: 9999 !important;
+          font-family: 'Inter', system-ui, sans-serif !important;
         }
         .chartjs-size-monitor, .chartjs-size-monitor-expand, .chartjs-size-monitor-shrink {
           z-index: auto !important;
@@ -458,229 +473,280 @@ export default function GraficasAprobador() {
         }
         canvas {
           z-index: 1 !important;
+          filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
+        }
+        /* Mejorar animaciones de hover en las gráficas */
+        .chart-container {
+          transition: all 0.3s ease;
+        }
+        .chart-container:hover {
+          transform: translateY(-2px);
         }
       `}</style>
       <ProtectedRoute>
         <AprobadorLayout>
-          <div className="min-h-screen bg-gray-50 py-8 px-6">
+          <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20 py-10 px-6">
             <div className="max-w-7xl mx-auto">
               
               {/* Header Section */}
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel de Estadísticas</h1>
-                <p className="text-gray-600">Resumen ejecutivo de solicitudes y montos</p>
+              <div className="mb-12">
+                <div className="text-center max-w-3xl mx-auto">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-4">
+                    Panel de Estadísticas Ejecutivas
+                  </h1>
+                  <p className="text-lg text-gray-600 leading-relaxed">
+                    Dashboard integral con insights de rendimiento y análisis de solicitudes
+                  </p>
+                </div>
               </div>
 
-              {/* Cards de estadísticas - Diseño corporativo */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-500 text-sm font-medium">Total Solicitudes</p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">{totalSolicitudes.toLocaleString()}</p>
-                      <div className="flex items-center mt-2">
-                        <span className={`text-sm ${variacionSolicitudes >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {variacionSolicitudes >= 0 ? '+' : ''}{variacionSolicitudes.toFixed(1)}%
-                        </span>
-                        <span className="text-gray-500 text-sm ml-1">vs mes anterior</span>
+              {/* Cards de estadísticas - Diseño corporativo mejorado */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div className="group relative bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <MdAssignment size={28} className="text-white" />
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${variacionSolicitudes >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {variacionSolicitudes >= 0 ? '+' : ''}{variacionSolicitudes.toFixed(1)}%
                       </div>
                     </div>
-                    <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                      <MdAssignment size={24} className="text-blue-600" />
+                    <div>
+                      <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide mb-2">Total Solicitudes</p>
+                      <p className="text-3xl font-bold text-gray-900 mb-2">{totalSolicitudes.toLocaleString()}</p>
+                      <p className="text-gray-500 text-sm">vs mes anterior</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-500 text-sm font-medium">Monto Total</p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">${totalMonto.toLocaleString()}</p>
-                      <div className="flex items-center mt-2">
-                        <span className={`text-sm ${variacionMonto >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {variacionMonto >= 0 ? '+' : ''}{variacionMonto.toFixed(1)}%
-                        </span>
-                        <span className="text-gray-500 text-sm ml-1">vs mes anterior</span>
+                <div className="group relative bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <MdAttachMoney size={28} className="text-white" />
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${variacionMonto >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {variacionMonto >= 0 ? '+' : ''}{variacionMonto.toFixed(1)}%
                       </div>
                     </div>
-                    <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-                      <MdAttachMoney size={24} className="text-green-600" />
+                    <div>
+                      <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide mb-2">Monto Total</p>
+                      <p className="text-3xl font-bold text-gray-900 mb-2">${totalMonto.toLocaleString()}</p>
+                      <p className="text-gray-500 text-sm">vs mes anterior</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-gray-500 text-sm font-medium">Estados Activos</p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">{data.length}</p>
-                      <p className="text-gray-500 text-sm mt-2">Categorías en proceso</p>
+                <div className="group relative bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <MdBarChart size={28} className="text-white" />
+                      </div>
+                      <div className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                        Activo
+                      </div>
                     </div>
-                    <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                      <MdBarChart size={24} className="text-purple-600" />
+                    <div>
+                      <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide mb-2">Estados Activos</p>
+                      <p className="text-3xl font-bold text-gray-900 mb-2">{data.length}</p>
+                      <p className="text-gray-500 text-sm">Categorías en proceso</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Gráficas principales */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Gráficas principales - Diseño mejorado */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-12">
                 {/* Gráfica de dona */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">Distribución por Estado</h2>
-                      <p className="text-gray-600 text-sm">Cantidad y porcentaje de solicitudes</p>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Distribución por Estado</h2>
+                      <p className="text-gray-600">Análisis de solicitudes por categoría</p>
                     </div>
-                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                      <MdPieChart size={20} className="text-blue-600" />
+                    <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <MdPieChart size={24} className="text-white" />
                     </div>
                   </div>
-                  <div className="relative h-80 flex items-center justify-center">
+                  <div className="relative h-96 flex items-center justify-center chart-container">
                     <Doughnut data={doughnutData} options={doughnutOptions} />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-gray-900">{totalSolicitudes}</div>
-                        <div className="text-sm text-gray-600">Total</div>
+                      <div className="text-center bg-white/95 rounded-2xl px-6 py-4 shadow-xl backdrop-blur-md border border-white/50">
+                        <div className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
+                          {totalSolicitudes}
+                        </div>
+                        <div className="text-sm text-gray-600 font-semibold">Total Solicitudes</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Gráfica de barras */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">Monto por Estado</h2>
-                      <p className="text-gray-600 text-sm">Valores monetarios totales</p>
+                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Valores por Estado</h2>
+                      <p className="text-gray-600">Distribución monetaria por categoría</p>
                     </div>
-                    <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                      <MdStackedBarChart size={20} className="text-green-600" />
+                    <div className="w-14 h-14 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <MdStackedBarChart size={24} className="text-white" />
                     </div>
                   </div>
-                  <div className="relative h-80">
+                  <div className="relative h-96 chart-container">
                     <Bar data={barData} options={barOptions} />
                   </div>
                 </div>
               </div>
 
               {/* Panel de insights y detalle */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <div className="flex items-center mb-6">
-                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
-                      <MdAnalytics size={20} className="text-blue-600" />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+                  <div className="flex items-center mb-8">
+                    <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                      <MdAnalytics size={24} className="text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">Insights Ejecutivos</h3>
-                      <p className="text-gray-600 text-sm">Análisis automatizado</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Insights Ejecutivos</h3>
+                      <p className="text-gray-600">Análisis inteligente y automatizado</p>
                     </div>
                   </div>
                   
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="space-y-6">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
                         </div>
-                        <h4 className="font-semibold text-gray-900">Rendimiento Actual</h4>
+                        <h4 className="text-lg font-bold text-gray-900">Rendimiento Actual</h4>
                       </div>
-                      <p className="text-sm text-gray-700">
+                      <p className="text-gray-700 leading-relaxed">
                         {data.length > 0 && (
                           <>
-                            Estado predominante: <span className="font-medium">{data.sort((a, b) => b.total - a.total)[0].estado}</span> con {data.sort((a, b) => b.total - a.total)[0].total} solicitudes 
-                            ({((data.sort((a, b) => b.total - a.total)[0].total / totalSolicitudes) * 100).toFixed(1)}% del total).
+                            Estado predominante: <span className="font-bold text-blue-700">{data.sort((a, b) => b.total - a.total)[0].estado}</span> con <span className="font-bold">{data.sort((a, b) => b.total - a.total)[0].total} solicitudes</span>
+                            <br />
+                            <span className="text-sm text-gray-600">
+                              Representa el {((data.sort((a, b) => b.total - a.total)[0].total / totalSolicitudes) * 100).toFixed(1)}% del volumen total
+                            </span>
                           </>
                         )}
                       </p>
                     </div>
                     
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                          <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-6 border border-emerald-100">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
+                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                           </svg>
                         </div>
-                        <h4 className="font-semibold text-gray-900">Análisis Financiero</h4>
+                        <h4 className="text-lg font-bold text-gray-900">Análisis Financiero</h4>
                       </div>
-                      <p className="text-sm text-gray-700">
-                        Monto promedio por solicitud: <span className="font-medium">${Math.round(totalMonto / totalSolicitudes).toLocaleString()}</span>
+                      <p className="text-gray-700 leading-relaxed">
+                        Monto promedio por solicitud: <span className="font-bold text-emerald-700 text-xl">${Math.round(totalMonto / totalSolicitudes).toLocaleString()}</span>
+                        <br />
+                        <span className="text-sm text-gray-600">Valor medio de procesamiento por transacción</span>
                       </p>
                     </div>
                     
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center">
-                          <svg className="w-4 h-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                           </svg>
                         </div>
-                        <h4 className="font-semibold text-gray-900">Recomendaciones</h4>
+                        <h4 className="text-lg font-bold text-gray-900">Recomendaciones Estratégicas</h4>
                       </div>
-                      <ul className="text-sm text-gray-700 space-y-1">
-                        <li>• Priorizar revisión de montos altos</li>
-                        <li>• Optimizar tiempos de aprobación</li>
-                        <li>• Implementar alertas tempranas</li>
-                      </ul>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                          <span className="text-gray-700">Priorizar revisión de montos altos</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                          <span className="text-gray-700">Optimizar tiempos de aprobación</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                          <span className="text-gray-700">Implementar alertas tempranas</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Detalle por estado */}
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                  <h3 className="text-lg font-bold text-gray-900 mb-6">Detalle por Estado</h3>
+                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+                  <div className="flex items-center mb-8">
+                    <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                      <MdPieChart size={24} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Detalle por Estado</h3>
+                      <p className="text-gray-600">Análisis detallado de cada categoría</p>
+                    </div>
+                  </div>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {data.map((item, index) => {
                       const percentage = ((item.total / totalSolicitudes) * 100).toFixed(1);
                       const color = colorPalette[index % colorPalette.length];
                       const avgPerRequest = Math.round(Number(item.monto_total) / item.total);
                       
                       return (
-                        <div key={item.estado} className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
+                        <div key={item.estado} className="group border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-gray-300 bg-gradient-to-r from-gray-50/50 to-white">
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-4">
                               {getStatusIcon(item.estado)}
                               <div>
-                                <h4 className="font-semibold text-gray-900 capitalize">{item.estado}</h4>
-                                <p className="text-sm text-gray-600">{percentage}% del total</p>
+                                <h4 className="text-xl font-bold text-gray-900 capitalize mb-1">{item.estado}</h4>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-gray-600">{percentage}% del total</span>
+                                  <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                  <span className="text-sm text-gray-600">{item.total} solicitudes</span>
+                                </div>
                               </div>
                             </div>
                             <div 
-                              className="w-4 h-4 rounded-full" 
+                              className="w-6 h-6 rounded-full shadow-lg ring-2 ring-white" 
                               style={{ backgroundColor: color.bg }}
                             ></div>
                           </div>
                           
-                          <div className="grid grid-cols-3 gap-3">
-                            <div className="bg-gray-50 rounded-lg p-3 text-center">
-                              <p className="text-lg font-bold text-gray-900">{item.total}</p>
-                              <p className="text-xs text-gray-600">Solicitudes</p>
+                          <div className="grid grid-cols-3 gap-4 mb-6">
+                            <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+                              <p className="text-2xl font-bold text-gray-900 mb-1">{item.total}</p>
+                              <p className="text-sm text-gray-600 font-medium">Solicitudes</p>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-3 text-center">
-                              <p className="text-lg font-bold text-gray-900">${Number(item.monto_total).toLocaleString()}</p>
-                              <p className="text-xs text-gray-600">Monto Total</p>
+                            <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+                              <p className="text-2xl font-bold text-emerald-600 mb-1">${Number(item.monto_total).toLocaleString()}</p>
+                              <p className="text-sm text-gray-600 font-medium">Monto Total</p>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-3 text-center">
-                              <p className="text-lg font-bold text-gray-900">${avgPerRequest.toLocaleString()}</p>
-                              <p className="text-xs text-gray-600">Promedio</p>
+                            <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+                              <p className="text-2xl font-bold text-blue-600 mb-1">${avgPerRequest.toLocaleString()}</p>
+                              <p className="text-sm text-gray-600 font-medium">Promedio</p>
                             </div>
                           </div>
                           
-                          <div className="mt-3">
-                            <div className="flex justify-between text-xs text-gray-500 mb-1">
-                              <span>Distribución</span>
-                              <span>{percentage}%</span>
+                          <div className="mt-4">
+                            <div className="flex justify-between text-sm font-medium text-gray-700 mb-3">
+                              <span>Participación en volumen</span>
+                              <span className="text-lg font-bold" style={{ color: color.bg }}>{percentage}%</span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                               <div 
-                                className="h-2 rounded-full" 
+                                className="h-full rounded-full transition-all duration-500 group-hover:scale-x-105 origin-left" 
                                 style={{ 
                                   width: `${percentage}%`, 
-                                  backgroundColor: color.bg 
+                                  background: `linear-gradient(90deg, ${color.bg} 0%, ${color.hover} 100%)`,
+                                  boxShadow: `0 2px 8px ${color.bg}30`
                                 }}
                               ></div>
                             </div>
