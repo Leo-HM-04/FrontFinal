@@ -228,11 +228,11 @@ export default function ViaticosPagadorPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="bg-gradient-to-br from-blue-600 to-blue-600 rounded-2xl p-4 mb-6 shadow-xl">
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-4 mb-6 shadow-xl">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-white mb-1 tracking-tight">Viáticos Autorizados</h1>
-                <p className="text-green-100 text-sm">
+                <p className="text-blue-100 text-sm">
                   Gestiona y procesa los pagos de viáticos autorizados
                 </p>
               </div>
@@ -246,36 +246,36 @@ export default function ViaticosPagadorPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
                 <div className="flex items-center gap-3">
-                  <div className="bg-green-500/20 rounded-lg p-2 flex-shrink-0">
-                    <svg className="w-5 h-5 text-green-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="bg-blue-500/20 rounded-lg p-2 flex-shrink-0">
+                    <svg className="w-5 h-5 text-blue-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-2xl font-bold text-white">{stats.total}</p>
-                    <p className="text-green-100 text-sm">Total para Pago</p>
+                    <p className="text-blue-100 text-sm">Total para Pago</p>
                   </div>
                 </div>
               </div>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
                 <div className="flex items-center gap-3">
-                  <div className="bg-yellow-500/20 rounded-lg p-2 flex-shrink-0">
-                    <svg className="w-5 h-5 text-yellow-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="bg-indigo-500/20 rounded-lg p-2 flex-shrink-0">
+                    <svg className="w-5 h-5 text-indigo-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-2xl font-bold text-white">{stats.seleccionados}</p>
-                    <p className="text-green-100 text-sm">Seleccionados</p>
+                    <p className="text-blue-100 text-sm">Seleccionados</p>
                   </div>
                 </div>
               </div>
 
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
                 <div className="flex items-center gap-3">
-                  <div className="bg-emerald-500/20 rounded-lg p-2 flex-shrink-0">
-                    <svg className="w-5 h-5 text-emerald-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="bg-cyan-500/20 rounded-lg p-2 flex-shrink-0">
+                    <svg className="w-5 h-5 text-cyan-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                     </svg>
                   </div>
@@ -283,7 +283,7 @@ export default function ViaticosPagadorPage() {
                     <p className="text-2xl font-bold text-white">
                       ${stats.montoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="text-green-100 text-sm">Monto Seleccionado</p>
+                    <p className="text-blue-100 text-sm">Monto Seleccionado</p>
                   </div>
                 </div>
               </div>
@@ -298,7 +298,7 @@ export default function ViaticosPagadorPage() {
             <div className="fixed top-6 right-6 z-50 animate-slide-in-right">
               <div className="relative bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-100 p-5 w-80 overflow-hidden">
                 {/* Gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 via-white to-emerald-50/30 rounded-2xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/30 rounded-2xl"></div>
                 
                 {/* Content */}
                 <div className="relative z-10">
@@ -306,7 +306,7 @@ export default function ViaticosPagadorPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-sm">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm">
                           <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                           </svg>
@@ -336,10 +336,10 @@ export default function ViaticosPagadorPage() {
                   </div>
 
                   {/* Monto total */}
-                  <div className="bg-green-50 rounded-lg p-3 mb-4">
+                  <div className="bg-blue-50 rounded-lg p-3 mb-4">
                     <div className="text-center">
-                      <p className="text-sm text-green-600 font-medium">Monto Total</p>
-                      <p className="text-xl font-bold text-green-700">
+                      <p className="text-sm text-blue-600 font-medium">Monto Total</p>
+                      <p className="text-xl font-bold text-blue-700">
                         ${stats.montoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
@@ -347,7 +347,7 @@ export default function ViaticosPagadorPage() {
 
                   {/* Action button */}
                   <button
-                    className="group relative w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-green-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="group relative w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                     onClick={() => setShowConfirm(true)}
                     disabled={processing}
                   >
@@ -534,14 +534,14 @@ export default function ViaticosPagadorPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 animate-in zoom-in duration-200">
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Check className="w-8 h-8 text-green-600" />
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-8 h-8 text-blue-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Confirmar pago</h3>
                 <p className="text-gray-600 mb-2">
                   Estás a punto de marcar como pagados <strong>{selected.size}</strong> viáticos
                 </p>
-                <p className="text-lg font-bold text-green-600 mb-6">
+                <p className="text-lg font-bold text-blue-600 mb-6">
                   Total: ${stats.montoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </p>
                 <p className="text-sm text-gray-500 mb-8">
@@ -557,7 +557,7 @@ export default function ViaticosPagadorPage() {
                     Cancelar
                   </button>
                   <button
-                    className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors disabled:opacity-50"
+                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-50"
                     onClick={handleMarkAsPaid}
                     disabled={processing}
                   >
