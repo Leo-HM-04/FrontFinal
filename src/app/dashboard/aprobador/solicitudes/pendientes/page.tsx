@@ -562,15 +562,27 @@ export default function SolicitudesPendientesPage() {
                           </tbody>
                         </table>
                       </div>
-                      <div className="w-full flex justify-center items-center py-4 bg-white/90 border-t border-gray-200">
-                        <Pagination
-                          currentPage={currentPage}
-                          totalPages={totalPages}
-                          totalItems={totalItems}
-                          itemsPerPage={itemsPerPage}
-                          onPageChange={goToPage}
-                          showPageSizeSelector={false} // Oculta el selector de cantidad por página
-                        />
+                      <div className="bg-gray-50 border-t border-gray-200 px-6 py-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                          {/* Información de registros */}
+                          <div className="flex items-center text-sm text-gray-700">
+                            <span className="font-medium">
+                              Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, totalItems)} de {totalItems} solicitudes
+                            </span>
+                          </div>
+                          
+                          {/* Paginador */}
+                          <div className="flex items-center">
+                            <Pagination
+                              currentPage={currentPage}
+                              totalPages={totalPages}
+                              totalItems={totalItems}
+                              itemsPerPage={itemsPerPage}
+                              onPageChange={goToPage}
+                              showPageSizeSelector={false}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </>
                   )}
