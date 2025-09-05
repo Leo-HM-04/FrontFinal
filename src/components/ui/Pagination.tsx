@@ -84,7 +84,7 @@ export function Pagination({
                     className={`min-w-[40px] h-10 flex items-center justify-center rounded-lg border-2 transition-all duration-200 font-semibold ${
                       currentPage === page 
                         ? 'bg-blue-600 text-white border-blue-600 shadow-lg scale-105' 
-                        : 'bg-white text-blue-600 border-blue-300 hover:bg-blue-50 hover:border-blue-500 shadow-sm hover:shadow-md'
+                        : 'bg-gray-100 text-blue-600 border-gray-300 hover:bg-blue-100 hover:border-blue-400 shadow-sm hover:shadow-md'
                     }`}
                   >
                     {page}

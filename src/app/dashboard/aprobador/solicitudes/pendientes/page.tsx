@@ -400,7 +400,7 @@ export default function SolicitudesPendientesPage() {
             />
           )}
               <div className="overflow-x-auto">
-                <table className="min-w-max w-full divide-y divide-gray-200 text-xs md:text-sm">
+                <table className="min-w-max w-full divide-y divide-gray-100 text-xs md:text-sm">
                   <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                     <tr>
                       <th className="px-1 py-2"><input type="checkbox" checked={selectedViaticos.length === viaticos.length && viaticos.length > 0} onChange={toggleAllViaticos} /></th>
@@ -415,7 +415,7 @@ export default function SolicitudesPendientesPage() {
                       <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">BANCO</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-gray-100">
                     {viaticos.map((s) => {
                       const isUrgent = new Date(s.fecha_limite_pago) < tresDiasDespues;
                       let tipoCuentaTarjeta = '-';
@@ -492,7 +492,7 @@ export default function SolicitudesPendientesPage() {
                   ) : (
                     <>
                       <div className="overflow-x-auto">
-                        <table className="min-w-max w-full divide-y divide-gray-200 text-xs md:text-sm">
+                        <table className="min-w-max w-full divide-y divide-gray-100 text-xs md:text-sm">
                           <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
                               <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Folio</th>
@@ -507,7 +507,7 @@ export default function SolicitudesPendientesPage() {
                               <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Acciones</th>
                             </tr>
                           </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
+                          <tbody className="bg-white divide-y divide-gray-100">
                             {paginadas.map((s) => {
                               const isUrgent = new Date(s.fecha_limite_pago) < tresDiasDespues;
                               // Combinar tipo de cuenta y tipo de tarjeta
