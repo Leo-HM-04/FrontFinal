@@ -3,12 +3,13 @@
 import { FaFilePdf, FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import { Clock, CheckCircle, XCircle, AlertCircle, FileText, Search } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { ViaticoDetailModal } from '@/components/viaticos/ViaticoDetailModal';
 import { ExportViaticoModal } from '@/components/modals/ExportViaticoModal';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { ViaticosService } from '@/services/viaticos.service';
 import type { Viatico as BaseViatico } from '@/services/viaticos.service';
 import {
@@ -25,6 +26,14 @@ type Viatico = BaseViatico & {
 };
 
 export default function MisViaticosPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <MisViaticosContent />
+    </Suspense>
+  );
+}
+
+function MisViaticosContent() {
   // Estados para exportación
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -156,6 +165,11 @@ export default function MisViaticosPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedViatico, setSelectedViatico] = useState<Viatico | null>(null);
 
+  // Estados para highlighting desde notificaciones
+  const [highlightedId, setHighlightedId] = useState<number | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const handleEliminar = async () => {
     if (!viaticoAEliminar) return;
     try {
@@ -173,6 +187,34 @@ export default function MisViaticosPage() {
     setSelectedViatico(viatico);
     setShowDetailModal(true);
   };
+
+  // Manejo de parámetros URL para highlighting
+  useEffect(() => {
+    const highlightParam = searchParams?.get('highlight');
+    if (highlightParam) {
+      const id = parseInt(highlightParam);
+      if (!isNaN(id)) {
+        setHighlightedId(id);
+        
+        // Buscar el viático y abrir modal si es necesario
+        const targetViatico = viaticos.find(v => v.id_viatico === id);
+        if (targetViatico) {
+          setSelectedViatico(targetViatico);
+          setShowDetailModal(true);
+        }
+        
+        setTimeout(() => {
+          setHighlightedId(null);
+          const newSearchParams = new URLSearchParams(searchParams?.toString() || '');
+          newSearchParams.delete('highlight');
+          router.replace(
+            `${window.location.pathname}?${newSearchParams.toString()}`,
+            { scroll: false }
+          );
+        }, 3000);
+      }
+    }
+  }, [searchParams, router, viaticos]);
 
   useEffect(() => {
     ViaticosService.getAll()
@@ -446,8 +488,17 @@ export default function MisViaticosPage() {
                       </td>
                     </tr>
                   ) :
-                    currentViaticos.map((v: Viatico) => (
-                      <tr key={v.id_viatico} className="hover:bg-blue-50/70 transition-colors">
+                    currentViaticos.map((v: Viatico) => {
+                      const isHighlighted = highlightedId === v.id_viatico;
+                      return (
+                        <tr 
+                          key={v.id_viatico} 
+                          className={`hover:bg-blue-50/70 transition-colors ${
+                            isHighlighted 
+                              ? 'bg-yellow-100 border-2 border-yellow-400 animate-pulse' 
+                              : ''
+                          }`}
+                        >
                         <td className="px-3 py-2.5">
                           <span className="font-mono text-xs text-blue-800 bg-blue-50 px-2 py-0.5 rounded">{v.folio || '-'}</span>
                         </td>
@@ -559,7 +610,8 @@ export default function MisViaticosPage() {
                             )}
                         </td>
                       </tr>
-                    ))
+                      );
+                    })
                   }
                 </tbody>
               </table>
