@@ -256,102 +256,152 @@ export default function ViaticosPagadorPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Header mejorado con estadísticas */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-            <h2 className="text-3xl font-extrabold text-white font-sans mb-4 text-center">
-              Viáticos para pagar <span className="hidden sm:inline">(Pagador)</span>
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div className="bg-white/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-white">{stats.total}</div>
-                <div className="text-white/80 text-sm">Total viáticos</div>
+          <div className="bg-gradient-to-br from-green-600 to-green-800 rounded-2xl p-4 mb-6 shadow-xl">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-white mb-1 tracking-tight">Viáticos Autorizados</h1>
+                <p className="text-green-100 text-sm">
+                  Gestiona y procesa los pagos de viáticos autorizados
+                </p>
               </div>
-              <div className="bg-white/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-yellow-300">{stats.seleccionados}</div>
-                <div className="text-white/80 text-sm">Seleccionados</div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20 lg:flex-shrink-0">
+                <p className="text-white/90 text-sm font-medium">
+                  Total: <span className="text-white font-semibold">{stats.total}</span> viáticos
+                </p>
               </div>
-              <div className="bg-white/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-green-300">
-                  ${stats.montoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-500/20 rounded-lg p-2 flex-shrink-0">
+                    <svg className="w-5 h-5 text-green-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xl font-bold text-white">{stats.total}</p>
+                    <p className="text-green-100 text-sm">Total para Pago</p>
+                  </div>
                 </div>
-                <div className="text-white/80 text-sm">Monto seleccionado</div>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="flex items-center gap-3">
+                  <div className="bg-yellow-500/20 rounded-lg p-2 flex-shrink-0">
+                    <svg className="w-5 h-5 text-yellow-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xl font-bold text-white">{stats.seleccionados}</p>
+                    <p className="text-green-100 text-sm">Seleccionados</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="flex items-center gap-3">
+                  <div className="bg-emerald-500/20 rounded-lg p-2 flex-shrink-0">
+                    <svg className="w-5 h-5 text-emerald-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xl font-bold text-white">
+                      ${stats.montoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-green-100 text-sm">Monto Seleccionado</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Controles de filtrado mejorados */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Búsqueda de usuarios */}
-              <div>
-                <label className="block text-white font-medium mb-2">Buscar usuario</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Buscar usuario..."
-                    className="w-full pl-10 pr-4 py-3 bg-white/90 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent text-blue-900 placeholder-blue-400"
-                    value={busquedaUsuario}
-                    onChange={(e) => setBusquedaUsuario(e.target.value)}
-                  />
-                </div>
-              </div>
 
-              {/* Búsqueda general */}
-              <div>
-                <label className="block text-white font-medium mb-2">Búsqueda general</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Buscar por folio, beneficiario, banco..."
-                    className="w-full pl-10 pr-4 py-3 bg-white/90 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent text-blue-900 placeholder-blue-400"
-                    value={busquedaGeneral}
-                    onChange={(e) => setBusquedaGeneral(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Filtros de usuario */}
-            <div className="mt-6">
-              <label className="block text-white font-medium mb-3">Filtrar por usuario</label>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                    usuarioSeleccionado === 'todos'
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-white/80 text-blue-800 hover:bg-white'
-                  }`}
-                  onClick={() => setUsuarioSeleccionado('todos')}
-                >
-                  Todos ({viaticos.length})
-                </button>
-                {usuariosFiltrados.map(usuario => {
-                  const count = viaticos.filter(v => 
-                    (v.usuario_nombre || 'Sin usuario') === usuario
-                  ).length;
-                  
-                  return (
-                    <button
-                      key={usuario}
-                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                        usuario === usuarioSeleccionado
-                          ? 'bg-blue-600 text-white shadow-lg'
-                          : 'bg-white/80 text-blue-800 hover:bg-white'
-                      }`}
-                      onClick={() => setUsuarioSeleccionado(usuario)}
-                    >
-                      {usuario} ({count})
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
 
           {/* Tabla mejorada */}
+          {/* Panel de acciones flotante al estilo aprobador */}
+          {selected.size > 0 && (
+            <div className="fixed top-6 right-6 z-50 animate-slide-in-right">
+              <div className="relative bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-100 p-5 w-80 overflow-hidden">
+                {/* Gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 via-white to-emerald-50/30 rounded-2xl"></div>
+                
+                {/* Content */}
+                <div className="relative z-10">
+                  {/* Header with close button */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-sm">
+                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                          </svg>
+                        </div>
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-md">
+                          <span className="text-white text-xs font-bold">{selected.size}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-900">Procesar Pagos</h3>
+                        <p className="text-xs text-gray-600">
+                          {selected.size} seleccionado{selected.size !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Close button */}
+                    <button
+                      onClick={() => setSelected(new Set())}
+                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                      aria-label="Cerrar panel de pagos"
+                    >
+                      <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Monto total */}
+                  <div className="bg-green-50 rounded-lg p-3 mb-4">
+                    <div className="text-center">
+                      <p className="text-sm text-green-600 font-medium">Monto Total</p>
+                      <p className="text-xl font-bold text-green-700">
+                        ${stats.montoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action button */}
+                  <button
+                    className="group relative w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-green-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    onClick={() => setShowConfirm(true)}
+                    disabled={processing}
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      {processing ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <span>Procesando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>Marcar como Pagados</span>
+                        </>
+                      )}
+                    </div>
+                    {/* Subtle hover effect */}
+                    <div className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-blue-100">
@@ -507,39 +557,6 @@ export default function ViaticosPagadorPage() {
               </p>
             </div>
           )}
-        </div>
-
-        {/* Barra de acciones flotante mejorada */}
-        {selected.size > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-blue-900 to-blue-800 text-white shadow-2xl border-t-4 border-blue-400">
-            <div className="max-w-7xl mx-auto px-6 py-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-yellow-300">{selected.size}</div>
-                    <div className="text-sm text-white/80">Seleccionados</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-green-300">
-                      ${stats.montoTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-sm text-white/80">Total a pagar</div>
-                  </div>
-                </div>
-                
-                <button
-                  className="flex items-center gap-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-300 border-2 border-white/30"
-                  onClick={() => setShowConfirm(true)}
-                  disabled={processing}
-                >
-                  <Check className="w-6 h-6" />
-                  {processing ? 'Procesando...' : 'Marcar como pagados'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Modal de confirmación mejorado */}
         {showConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -579,6 +596,8 @@ export default function ViaticosPagadorPage() {
             </div>
           </div>
         )}
+
+        </div>
 
         {/* Modal de detalles */}
         <ViaticoDetailModal
