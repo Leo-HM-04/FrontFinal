@@ -590,7 +590,7 @@ function MisSolicitudesContent() {
     setDateFilter('');
   }, []);
 
-  const handleExport = (format: string, filter: 'todos' | 'activo' | 'inactivo') => {
+  const handleExport = async (format: string, filter: 'todos' | 'activo' | 'inactivo') => {
     let solicitudesExport = filteredSolicitudes;
 
     if (filter === 'activo') {
@@ -603,12 +603,17 @@ function MisSolicitudesContent() {
       );
     }
 
-    if (format === 'pdf') {
-      exportMisSolicitudesPDF(solicitudesExport, filter);
-    } else if (format === 'excel') {
-      exportMisSolicitudesExcel(solicitudesExport, filter);
-    } else if (format === 'csv') {
-      exportMisSolicitudesCSV(solicitudesExport, filter);
+    try {
+      if (format === 'pdf') {
+        await exportMisSolicitudesPDF(solicitudesExport, filter);
+      } else if (format === 'excel') {
+        exportMisSolicitudesExcel(solicitudesExport, filter);
+      } else if (format === 'csv') {
+        exportMisSolicitudesCSV(solicitudesExport, filter);
+      }
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      // Aquí podrías mostrar una notificación de error al usuario
     }
 
     setShowExportModal(false);

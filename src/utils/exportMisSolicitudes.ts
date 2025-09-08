@@ -7,6 +7,43 @@ import 'jspdf-autotable';
 import { autoTable } from 'jspdf-autotable';
 import { Solicitud } from '@/types';
 
+// Función para convertir imagen a base64
+const getImageAsBase64 = (imagePath: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        reject(new Error('No se pudo obtener el contexto del canvas'));
+        return;
+      }
+      
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      ctx.drawImage(img, 0, 0);
+      
+      try {
+        const dataURL = canvas.toDataURL('image/png');
+        resolve(dataURL);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    img.onerror = () => {
+      reject(new Error(`No se pudo cargar la imagen: ${imagePath}`));
+    };
+    
+    // Cargar la imagen
+    img.src = imagePath;
+  });
+};
+
 // Función auxiliar para formatear moneda de manera consistente
 const formatoMoneda = (valor: number | string | null | undefined) => {
   let numeroValido = 0;
@@ -324,7 +361,7 @@ export async function exportMisSolicitudesExcel(solicitudes: Solicitud[], rango:
 }
 
 // Exportar a PDF
-export function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: string = 'total') {
+export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: string = 'total') {
   const datos = filtrarSolicitudesPorRango(solicitudes, rango as 'dia' | 'semana' | 'mes' | 'año' | 'total');
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'A4' });
   
@@ -410,7 +447,36 @@ export function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: string 
   const logoX = pageWidth - 180;
   const logoY = 20;
   
-  // Fondo elegante para el logo
+  // Intentar cargar y agregar el logo del proyecto
+  try {
+    const logoPath = '/assets/images/Logo_16x9_Azul@2x.png';
+    const logoBase64 = await getImageAsBase64(logoPath);
+    
+    // Agregar la imagen al PDF
+    doc.addImage(logoBase64, 'PNG', logoX, logoY, 140, 70);
+    console.log('Logo cargado correctamente en el PDF');
+  } catch (error) {
+    console.warn('No se pudo cargar el logo, usando diseño alternativo:', error);
+    
+    // Diseño alternativo profesional si no se puede cargar la imagen
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(logoX, logoY, 140, 70, 10, 10, 'F');
+    doc.setDrawColor(41, 128, 185);
+    doc.setLineWidth(2);
+    doc.roundedRect(logoX, logoY, 140, 70, 10, 10, 'S');
+    
+    // Texto corporativo
+    doc.setTextColor(18, 61, 140);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text('BECHAPRA', logoX + 70, logoY + 35, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text('Soluciones Corporativas', logoX + 70, logoY + 50, { align: 'center' });
+  }
+  
+  // Fondo elegante para información adicional
   doc.setFillColor(255, 255, 255);
   doc.roundedRect(logoX - 10, logoY - 10, 160, 80, 8, 8, 'F');
   
@@ -421,19 +487,19 @@ export function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: string 
   
   // Cargar y añadir el logo desde el proyecto
   try {
-    // Usar el logo azul sin fondo que se ve mejor en documentos
-    const logoPath = '/assets/images/Logo_16x9_AzulSinFondo@2x.png';
+    // Usar el logo azul que se ve mejor en documentos
+    const logoPath = '/assets/images/Logo_16x9_Azul@2x.png';
     doc.addImage(logoPath, 'PNG', logoX, logoY, 140, 60);
-  } catch (error) {
+  } catch {
     // Fallback: Logo de texto si la imagen no se puede cargar
     doc.setTextColor(18, 61, 140);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
     doc.text('BECHAPRA', logoX + 10, logoY + 35);
     
-    doc.setTextColor(100, 100, 100);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
+    //doc.setTextColor(100, 100, 100);
+    //doc.setFontSize(12);
+    //doc.setFont('helvetica', 'normal');
     //doc.text('S.A.S', logoX + 10, logoY + 55);
   }
 
