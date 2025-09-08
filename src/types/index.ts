@@ -34,6 +34,7 @@ export interface Solicitud {
   id_usuario: number;
   departamento: string;
   monto: number;
+  tipo_moneda?: string;
   cuenta_destino: string;
   factura_url: string;
   concepto: string;

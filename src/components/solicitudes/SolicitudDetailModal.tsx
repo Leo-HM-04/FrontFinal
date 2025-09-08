@@ -203,19 +203,26 @@ return (
             {/* Monto destacado con mejor diseño */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl border border-blue-300/50 mb-6 shadow-lg">
               <span className="text-sm uppercase tracking-wider text-blue-100 font-bold block mb-2">Monto total</span>
-              <p className="text-4xl font-black text-white tracking-tight">{formatCurrency(solicitud.monto)}</p>
+              <div className="flex items-baseline gap-3">
+                <p className="text-4xl font-black text-white tracking-tight">{formatCurrency(solicitud.monto)}</p>
+                {solicitud.tipo_moneda && (
+                  <span className="text-lg font-bold text-yellow-300 bg-yellow-400/20 px-3 py-1 rounded-lg border border-yellow-400/30">
+                    {solicitud.tipo_moneda.toUpperCase()}
+                  </span>
+                )}
+              </div>
               <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-24"></div>
             </div>
           
           {/* Grid principal de información */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
             <div className="bg-white p-2 rounded-md">
-              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Empresa a pagar</span>
+              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Se paga por:</span>
               <p className="text-blue-900 font-medium">{solicitud.empresa_a_pagar || '-'}</p>
             </div>
             
             <div className="bg-white p-2 rounded-md">
-              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Persona que recibe</span>
+              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Nombre del Beneficiario</span>
               <p className="text-blue-900 font-medium">{solicitud.nombre_persona || '-'}</p>
             </div>
           </div>
