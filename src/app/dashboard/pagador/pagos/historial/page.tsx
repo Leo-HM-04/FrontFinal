@@ -63,49 +63,59 @@ export default function HistorialPagosPage() {
   return (
     <ProtectedRoute requiredRoles={['pagador_banca']}>
       <PagadorLayout>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-10 py-6 border border-white/20 flex-1 flex items-center justify-center min-w-[260px]">
-            <h2 className="text-3xl font-extrabold text-white text-center tracking-tight">Pagos Autorizados</h2>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header mejorado */}
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 mb-8 shadow-xl">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-white mb-1 tracking-tight">Historial de Pagos</h1>
+              <p className="text-blue-100 text-sm">
+                Consulta el historial completo de pagos autorizados y procesados
+              </p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20 lg:flex-shrink-0">
+              <p className="text-white/90 text-sm font-medium">
+                Total: <span className="text-white font-semibold">{pagos.length}</span> pagos
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col md:flex-row gap-6 flex-1 justify-end">
+        </div>
+
+        {/* Filtros mejorados */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Filtro Estado */}
-            <div className="bg-white/80 rounded-xl shadow border border-blue-200 flex flex-col items-start px-6 py-4 min-w-[240px]">
-              <label className="font-bold text-blue-700 text-base mb-2">Filtrar por estado</label>
-              <div className="relative w-full">
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">Filtrar por estado</label>
+              <div className="relative">
                 <select
                   value={estadoFiltro}
-                  onChange={e => { setEstadoFiltro(e.target.value as 'todas' | 'pagada' | 'autorizada'); setPagina(1); }}
-                  className="w-full border border-blue-300 rounded-xl px-4 py-2 text-blue-900 font-semibold bg-white shadow focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-150"
+                  onChange={e => { 
+                    setEstadoFiltro(e.target.value as 'todas' | 'pagada' | 'autorizada'); 
+                    setPagina(1); 
+                  }}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="todas">Todas</option>
                   <option value="pagada">Pagadas</option>
                   <option value="autorizada">Autorizadas</option>
                 </select>
-                <span className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-blue-400">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6"/></svg>
-                </span>
               </div>
             </div>
             {/* Filtro Departamento */}
-            <div className="bg-white/80 rounded-xl shadow border border-blue-200 flex flex-col items-start px-6 py-4 min-w-[240px]">
-              <label className="font-bold text-blue-700 text-base mb-2">Filtrar por departamento</label>
-              <div className="relative w-full">
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">Filtrar por departamento</label>
+              <div className="relative">
                 <select
                   value={departamentoFiltro}
                   onChange={e => { setDepartamentoFiltro(e.target.value); setPagina(1); }}
-                  className="w-full border border-blue-300 rounded-xl px-4 py-2 text-blue-900 font-semibold bg-white shadow focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-150"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 >
                   <option value="todos">Todos</option>
-                  {/* Opciones dinámicas de departamento */}
                   {[...new Set(pagosFiltradosPorEstado.map(p => p.departamento).filter(Boolean))].map(dep => (
                     <option key={dep} value={dep}>{dep}</option>
                   ))}
                 </select>
-                <span className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-blue-400">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6"/></svg>
-                </span>
               </div>
             </div>
           </div>
@@ -127,79 +137,107 @@ export default function HistorialPagosPage() {
             </div>
           ) : (
             <>
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl overflow-x-auto p-0 w-full max-w-7xl mx-auto">
-                <table className="min-w-full divide-y divide-blue-100">
-                  <thead style={{backgroundColor: '#F0F4FC'}}>
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">ID</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Solicitante</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Beneficiario</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Departamento</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Monto</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Cuenta Destino</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Concepto</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Tipo Pago</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Tipo de Cuenta/Tarjeta</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Banco Destino</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Estado</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Fecha Límite</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Fecha Pago</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Aprobador</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Comentario</th>
-                      <th className="px-6 py-4 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Nuevo</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white/60 divide-y divide-blue-50">
-                    {pagosPaginados.map((pago, idx) => (
-                      <tr
-                        key={pago.id_solicitud}
-                        className={`transition-all duration-150 ${idx % 2 === 0 ? 'bg-blue-50/60' : 'bg-white/40'} hover:bg-blue-100/80 group`}
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900 font-bold">#{pago.id_solicitud}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.usuario_nombre ? pago.usuario_nombre : (pago.nombre_usuario ? pago.nombre_usuario : '-')}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.nombre_persona ? pago.nombre_persona : '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-3 py-1 text-xs font-bold rounded-lg shadow-sm" style={{background: 'linear-gradient(90deg, #e0e7ff 0%, #bae6fd 100%)', color: '#2563eb'}}>{pago.departamento || '-'}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.cuenta_destino}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900 max-w-xs truncate" title={pago.concepto}>{pago.concepto}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.tipo_pago}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.tipo_cuenta_destino ? pago.tipo_cuenta_destino : ''}{pago.tipo_tarjeta ? ` / ${pago.tipo_tarjeta}` : ''}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.banco_destino || ''}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-full shadow ${pago.estado === 'pagada' ? 'bg-green-200 text-green-800' : 'bg-blue-200 text-blue-800'}`}>{pago.estado === 'pagada' ? 'Pagada' : 'Autorizada'}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700">{pago.fecha_limite_pago ? new Date(pago.fecha_limite_pago).toLocaleDateString('es-CO') : '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700">{pago.fecha_pago ? new Date(pago.fecha_pago).toLocaleDateString('es-CO') : '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{typeof pago.aprobador_nombre === 'string' && pago.aprobador_nombre ? pago.aprobador_nombre : '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-900">{pago.comentario_aprobador || '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-1 border-2 border-blue-500 !bg-transparent !text-blue-600 font-bold hover:!bg-blue-50 hover:!text-blue-800 hover:!border-blue-700 focus:!bg-blue-50 focus:!text-blue-800 focus:!border-blue-700 active:!bg-blue-100 active:!text-blue-800 focus:ring-2 focus:ring-blue-300 shadow-sm transition-all duration-150"
-                            style={{ boxShadow: '0 2px 8px 0 rgba(59,130,246,0.08)' }}
-                            onClick={() => { setSelectedPago(pago); setShowDetailModal(true); }}
-                            type="button"
-                          >
-                            <Eye className="w-4 h-4 mr-1" /> Ver
-                          </Button>
-                        </td>
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead style={{backgroundColor: '#F0F4FC'}}>
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">ID</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Solicitante</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Beneficiario</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Departamento</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Monto</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Cuenta Destino</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Concepto</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Estado</th>
+                        <th className="px-6 py-3 text-center text-xs font-medium text-blue-700 uppercase tracking-wider">Acciones</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {pagosPaginados.map((pago) => (
+                        <tr
+                          key={pago.id_solicitud}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            #{pago.id_solicitud}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {pago.usuario_nombre || pago.nombre_usuario || '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {pago.nombre_persona || '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {pago.departamento || '-'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {new Intl.NumberFormat('es-CO', { 
+                              style: 'currency', 
+                              currency: 'COP', 
+                              minimumFractionDigits: 0 
+                            }).format(pago.monto)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="max-w-xs truncate" title={pago.cuenta_destino}>
+                              {pago.cuenta_destino}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            <div className="max-w-xs truncate" title={pago.concepto}>
+                              {pago.concepto}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              pago.estado === 'pagada' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {pago.estado === 'pagada' ? 'Pagada' : 'Autorizada'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700 focus:ring-2 focus:ring-blue-300"
+                              onClick={() => { 
+                                setSelectedPago(pago); 
+                                setShowDetailModal(true); 
+                              }}
+                              type="button"
+                            >
+                              <Eye className="w-4 h-4 mr-1" /> 
+                              Ver
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              {/* Paginador reutilizado */}
-              <div className="px-6 py-4" style={{backgroundColor: '#F0F4FC'}}>
-                <Pagination
-                  currentPage={pagina}
-                  totalPages={totalPaginas}
-                  totalItems={pagosFiltrados.length}
-                  itemsPerPage={pagosPorPagina}
-                  onPageChange={setPagina}
-                />
+              {/* Paginador con mejor diseño */}
+              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="text-sm text-gray-700">
+                    Mostrando <span className="font-medium">{((pagina - 1) * pagosPorPagina) + 1}</span> a{' '}
+                    <span className="font-medium">
+                      {Math.min(pagina * pagosPorPagina, pagosFiltrados.length)}
+                    </span> de{' '}
+                    <span className="font-medium">{pagosFiltrados.length}</span> resultados
+                  </div>
+                  <Pagination
+                    currentPage={pagina}
+                    totalPages={totalPaginas}
+                    totalItems={pagosFiltrados.length}
+                    itemsPerPage={pagosPorPagina}
+                    onPageChange={setPagina}
+                  />
+                </div>
               </div>
             </>
           )}
