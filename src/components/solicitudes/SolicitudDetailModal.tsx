@@ -725,7 +725,21 @@ return (
               ) : error ? (
                 <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{error}</div>
               ) : comprobantes.length === 0 ? (
-                <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">No hay comprobantes de pago disponibles</div>
+                <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                      <FileCheck className="w-8 h-8 text-blue-600" />
+                    </div>
+                  </div>
+                  <h5 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h5>
+                  <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
+                    Los comprobantes de pago aparecerán aquí una vez que el viático sea marcado como pagado
+                  </p>
+                  <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+                    <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
+                  </div>
+                </div>
               ) : (
                 <div className="space-y-4">
                     {comprobantes.map((comprobante) => {
