@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye, CheckCircle, XCircle} from 'lucide-react';
+import { FileText, Eye, CheckCircle, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
@@ -17,6 +17,10 @@ import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailMo
 import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
 import Modal from '@/components/ui/Modal';
 import { Solicitud } from '@/types';
+
+// Tipos para el ordenamiento
+type SortField = 'folio' | 'usuario' | 'tipo_pago' | 'departamento' | 'monto' | 'fecha_limite' | 'fecha_creacion' | 'cuenta' | 'banco';
+type SortOrder = 'asc' | 'desc';
 
 export default function SolicitudesPendientesPage() {
   // ...existing code...
@@ -39,24 +43,78 @@ export default function SolicitudesPendientesPage() {
     updateFilters
   } = useAdvancedFilters(solicitudes, 'solicitudes');
 
-  // Tabla de selección múltiple para viáticos (debe ir después de filteredSolicitudes)
-  // Ordenar viáticos por urgencia y fecha límite (más urgentes y próximas primero)
+  // Aplicar ordenamiento a las solicitudes filtradas
   const tresDiasDespues = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000);
-  const viaticos = filteredSolicitudes
-    .filter(s => s.tipo_pago?.toLowerCase() === 'viaticos')
-    .slice()
-    .sort((a, b) => {
-      const fechaA = new Date(a.fecha_limite_pago).getTime();
-      const fechaB = new Date(b.fecha_limite_pago).getTime();
-      const esUrgenteA = fechaA < tresDiasDespues.getTime();
-      const esUrgenteB = fechaB < tresDiasDespues.getTime();
-      if (esUrgenteA && !esUrgenteB) return -1;
-      if (!esUrgenteA && esUrgenteB) return 1;
-      return fechaA - fechaB;
-    });
+  
+  const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
+    if (sortField && sortOrder) {
+      let comparison = 0;
+      switch (sortField) {
+        case 'folio':
+          comparison = (a.folio || '').localeCompare(b.folio || '');
+          break;
+        case 'usuario':
+          comparison = (a.usuario_nombre || '').localeCompare(b.usuario_nombre || '');
+          break;
+        case 'tipo_pago':
+          comparison = (a.tipo_pago || '').localeCompare(b.tipo_pago || '');
+          break;
+        case 'departamento':
+          comparison = (a.departamento || '').localeCompare(b.departamento || '');
+          break;
+        case 'monto':
+          comparison = (a.monto || 0) - (b.monto || 0);
+          break;
+        case 'fecha_limite':
+          comparison = new Date(a.fecha_limite_pago).getTime() - new Date(b.fecha_limite_pago).getTime();
+          break;
+        case 'fecha_creacion':
+          comparison = new Date(a.fecha_creacion).getTime() - new Date(b.fecha_creacion).getTime();
+          break;
+        case 'cuenta':
+          comparison = (a.cuenta_destino || '').localeCompare(b.cuenta_destino || '');
+          break;
+        case 'banco':
+          comparison = (a.banco_destino || '').localeCompare(b.banco_destino || '');
+          break;
+        default:
+          comparison = 0;
+      }
+      return sortOrder === 'asc' ? comparison : -comparison;
+    }
+
+    // Orden por defecto: urgencia y fecha límite
+    const fechaA = new Date(a.fecha_limite_pago).getTime();
+    const fechaB = new Date(b.fecha_limite_pago).getTime();
+    const esUrgenteA = fechaA < tresDiasDespues.getTime();
+    const esUrgenteB = fechaB < tresDiasDespues.getTime();
+    if (esUrgenteA && !esUrgenteB) return -1;
+    if (!esUrgenteA && esUrgenteB) return 1;
+    return fechaA - fechaB;
+  });
+
+  // Tabla de selección múltiple para viáticos (aplicar ordenamiento)
+  const viaticos = solicitudesOrdenadas.filter(s => s.tipo_pago?.toLowerCase() === 'viaticos');
   const [selectedViaticos, setSelectedViaticos] = useState<number[]>([]);
   const [batchLoading, setBatchLoading] = useState(false);
   const [batchConfirm, setBatchConfirm] = useState<{ open: boolean; action: 'approve' | 'reject' | null }>({ open: false, action: null });
+
+  // Estados para ordenamiento
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+
+  // Función para manejar el ordenamiento
+  const handleSort = useCallback((field: SortField) => {
+    setSortField((prevField) => {
+      if (prevField === field) {
+        setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
+        return prevField;
+      } else {
+        setSortOrder('desc');
+        return field;
+      }
+    });
+  }, []);
 
   const toggleViatico = (id: number) => {
     setSelectedViaticos(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -118,10 +176,13 @@ export default function SolicitudesPendientesPage() {
     totalItems,
     itemsPerPage,
     goToPage,
-  } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 5 });
+  } = usePagination({ data: solicitudesOrdenadas.filter(s => s.tipo_pago?.toLowerCase() !== 'viaticos'), initialItemsPerPage: 5 });
 
-  // Ordenar todas por urgencia y fecha límite de pago (más urgentes y próximas primero)
-  const todasOrdenadas = filteredSolicitudes
+  // Filtrar solicitudes que no son viáticos (ya que los viáticos se muestran por separado)
+  const noViaticos = solicitudesOrdenadas.filter(s => s.tipo_pago?.toLowerCase() !== 'viaticos');
+
+  // Aplicar paginación después de ordenar
+  const todasOrdenadas = noViaticos
     .slice()
     .sort((a, b) => {
       const fechaA = new Date(a.fecha_limite_pago).getTime();
@@ -257,6 +318,43 @@ export default function SolicitudesPendientesPage() {
       await handleReject(confirmModal.solicitud.id_solicitud);
     }
     closeConfirmModal();
+  };
+
+  // Componente para headers ordenables
+  const SortableHeader = ({ 
+    field, 
+    children, 
+    className = "px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200" 
+  }: { 
+    field?: SortField; 
+    children: React.ReactNode; 
+    className?: string; 
+  }) => {
+    if (!field) {
+      return <th className={className}>{children}</th>;
+    }
+
+    const isActive = sortField === field;
+    const isAsc = isActive && sortOrder === 'asc';
+
+    return (
+      <th 
+        className={`${className} cursor-pointer hover:bg-blue-100/50 transition-colors select-none`}
+        onClick={() => handleSort(field)}
+      >
+        <div className="flex items-center gap-1">
+          {children}
+          <div className="flex flex-col">
+            <ChevronUp 
+              className={`w-3 h-3 ${isActive && isAsc ? 'text-blue-600' : 'text-gray-400'}`} 
+            />
+            <ChevronDown 
+              className={`w-3 h-3 -mt-1 ${isActive && !isAsc ? 'text-blue-600' : 'text-gray-400'}`} 
+            />
+          </div>
+        </div>
+      </th>
+    );
   };
 
   return (
@@ -404,15 +502,33 @@ export default function SolicitudesPendientesPage() {
                   <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                     <tr>
                       <th className="px-1 py-2"><input type="checkbox" checked={selectedViaticos.length === viaticos.length && viaticos.length > 0} onChange={toggleAllViaticos} /></th>
-                      <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Folio</th>
-                      <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Usuario</th>
-                      <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">TIPO DE PAGO</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">DEPTO.</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">MONTO</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">LÍMITE</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">SOLICITUD</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">CUENTA/TARJETA</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">BANCO</th>
+                      <SortableHeader field="folio">
+                        Folio
+                      </SortableHeader>
+                      <SortableHeader field="usuario">
+                        Usuario
+                      </SortableHeader>
+                      <SortableHeader field="tipo_pago">
+                        TIPO DE PAGO
+                      </SortableHeader>
+                      <SortableHeader field="departamento">
+                        DEPTO.
+                      </SortableHeader>
+                      <SortableHeader field="monto">
+                        MONTO
+                      </SortableHeader>
+                      <SortableHeader field="fecha_limite">
+                        LÍMITE
+                      </SortableHeader>
+                      <SortableHeader field="fecha_creacion">
+                        SOLICITUD
+                      </SortableHeader>
+                      <SortableHeader field="cuenta">
+                        CUENTA/TARJETA
+                      </SortableHeader>
+                      <SortableHeader field="banco">
+                        BANCO
+                      </SortableHeader>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-100">
@@ -495,15 +611,33 @@ export default function SolicitudesPendientesPage() {
                         <table className="min-w-max w-full divide-y divide-gray-100 text-xs md:text-sm">
                           <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
-                              <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Folio</th>
-                              <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Usuario</th>
-                              <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">TIPO DE PAGO</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">DEPTO.</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">MONTO</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">LÍMITE</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">SOLICITUD</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">CUENTA/TARJETA</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">BANCO</th>
+                              <SortableHeader field="folio">
+                                Folio
+                              </SortableHeader>
+                              <SortableHeader field="usuario">
+                                Usuario
+                              </SortableHeader>
+                              <SortableHeader field="tipo_pago">
+                                TIPO DE PAGO
+                              </SortableHeader>
+                              <SortableHeader field="departamento">
+                                DEPTO.
+                              </SortableHeader>
+                              <SortableHeader field="monto">
+                                MONTO
+                              </SortableHeader>
+                              <SortableHeader field="fecha_limite">
+                                LÍMITE
+                              </SortableHeader>
+                              <SortableHeader field="fecha_creacion">
+                                SOLICITUD
+                              </SortableHeader>
+                              <SortableHeader field="cuenta">
+                                CUENTA/TARJETA
+                              </SortableHeader>
+                              <SortableHeader field="banco">
+                                BANCO
+                              </SortableHeader>
                               <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Acciones</th>
                             </tr>
                           </thead>
