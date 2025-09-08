@@ -890,7 +890,7 @@ function MisSolicitudesContent() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleViewDetails(solicitud)}
-                                className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 active:bg-blue-200 focus:bg-blue-100 focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                                className="!bg-blue-50 !text-blue-700 !border-blue-200 hover:!bg-blue-100 active:!bg-blue-200 focus:!bg-blue-100 focus:!text-blue-700 focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all duration-200 transform hover:scale-105 active:scale-95"
                               >
                                 <Eye className="w-3.5 h-3.5" />
                                 Ver
@@ -906,7 +906,7 @@ function MisSolicitudesContent() {
                                         `/dashboard/solicitante/editar-solicitud/${solicitud.id_solicitud}`
                                       )
                                     }
-                                    className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 active:bg-amber-200 focus:bg-amber-100 focus:ring-2 focus:ring-amber-300 focus:ring-offset-1 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                                    className="!bg-amber-50 !text-amber-700 !border-amber-200 hover:!bg-amber-100 active:!bg-amber-200 focus:!bg-amber-100 focus:!text-amber-700 focus:ring-2 focus:ring-amber-300 focus:ring-offset-1 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all duration-200 transform hover:scale-105 active:scale-95"
                                   >
                                     <Edit className="w-3.5 h-3.5" />
                                     Editar
@@ -918,7 +918,7 @@ function MisSolicitudesContent() {
                                       setSolicitudAEliminar(solicitud);
                                       setDeleteModalOpen(true);
                                     }}
-                                    className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100 active:bg-red-200 focus:bg-red-100 focus:ring-2 focus:ring-red-300 focus:ring-offset-1 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                                    className="!bg-red-50 !text-red-700 !border-red-200 hover:!bg-red-100 active:!bg-red-200 focus:!bg-red-100 focus:!text-red-700 focus:ring-2 focus:ring-red-300 focus:ring-offset-1 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all duration-200 transform hover:scale-105 active:scale-95"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                     Eliminar
