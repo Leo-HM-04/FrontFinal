@@ -398,7 +398,7 @@ export function exportRecurrentesPDF(recurrentes: PlantillaRecurrente[], estado:
   // Texto de uso interno
   doc.setFontSize(10); // Reducido de 12 a 10
   doc.setTextColor(220, 220, 220);
-  doc.text('Este documento contiene información sensible y es para uso exclusivo de BECHAPRA S.A.S.', 40, 70); // Movido arriba
+  doc.text('Este documento contiene información sensible y es para uso exclusivo de BECHAPRA', 40, 70); // Movido arriba
 
   // Fecha de exportación, alineada a la derecha y debajo del logo
   doc.setFontSize(12); // Reducido de 14 a 12

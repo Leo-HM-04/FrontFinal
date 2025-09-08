@@ -406,9 +406,36 @@ export function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: string 
   doc.setFillColor(18, 61, 140);
   doc.rect(0, 0, pageWidth, headerHeight, 'F');
 
-  // Logo más grande y mejor posicionado
-  const logoUrl = 'https://media.licdn.com/dms/image/v2/D4E0BAQEEoooIoWmBfw/company-logo_200_200/company-logo_200_200/0/1734988712036/bechapra_logo?e=2147483647&v=beta&t=Zud09Nh9JmjqB47tZ4cPzFAN9NtiyXWDqvlyqqRZAV0';
-  doc.addImage(logoUrl, 'PNG', pageWidth - 140, 25, 100, 60);
+  // Logo corporativo usando la imagen del proyecto
+  const logoX = pageWidth - 180;
+  const logoY = 20;
+  
+  // Fondo elegante para el logo
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(logoX - 10, logoY - 10, 160, 80, 8, 8, 'F');
+  
+  // Marco sutil
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(logoX - 10, logoY - 10, 160, 80, 8, 8, 'S');
+  
+  // Cargar y añadir el logo desde el proyecto
+  try {
+    // Usar el logo azul sin fondo que se ve mejor en documentos
+    const logoPath = '/assets/images/Logo_16x9_AzulSinFondo@2x.png';
+    doc.addImage(logoPath, 'PNG', logoX, logoY, 140, 60);
+  } catch (error) {
+    // Fallback: Logo de texto si la imagen no se puede cargar
+    doc.setTextColor(18, 61, 140);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BECHAPRA', logoX + 10, logoY + 35);
+    
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    //doc.text('S.A.S', logoX + 10, logoY + 55);
+  }
 
   // Título principal centrado
   doc.setFontSize(28);
@@ -425,7 +452,7 @@ export function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: string 
   // Texto de uso interno
   doc.setFontSize(12);
   doc.setTextColor(220, 220, 220);
-  doc.text('Este documento contiene información sensible y es para uso exclusivo de BECHAPRA S.A.S.', 40, 98);
+  doc.text('Este documento contiene información sensible y es para uso exclusivo de BECHAPRA', 40, 98);
 
   // Fecha de exportación, alineada a la derecha y debajo del logo, formato más entendible
   doc.setFontSize(14);
