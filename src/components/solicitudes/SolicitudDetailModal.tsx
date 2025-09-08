@@ -222,7 +222,7 @@ return (
             </div>
             
             <div className="bg-white p-2 rounded-md">
-              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Nombre del Beneficiario</span>
+              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Beneficiario</span>
               <p className="text-blue-900 font-medium">{solicitud.nombre_persona || '-'}</p>
             </div>
           </div>
@@ -713,12 +713,11 @@ return (
             </div>
           
           {/* Sección de comprobantes de pago */}
-          {solicitud.estado === 'pagada' && (
-            <div className="mt-4 pt-4 border-t border-blue-100">
-              <h4 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
-                <FileCheck className="w-5 h-5 mr-2 text-blue-600" />
-                Comprobantes de Pago
-              </h4>
+          <div className="mt-4 pt-4 border-t border-blue-100">
+            <h4 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
+              <FileCheck className="w-5 h-5 mr-2 text-blue-600" />
+              Comprobantes de Pago
+            </h4>
               
               {loadingComprobantes ? (
                 <div className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Cargando comprobantes...</div>
@@ -731,9 +730,9 @@ return (
                       <FileCheck className="w-8 h-8 text-blue-600" />
                     </div>
                   </div>
-                  <h5 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h5>
+                  <h5 className="text-lg font-bold text-blue-900 mb-2">ComprobantesPendiente</h5>
                   <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
-                    Los comprobantes de pago aparecerán aquí una vez que el viático sea marcado como pagado
+                    El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
                   </p>
                   <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
                     <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
@@ -764,7 +763,6 @@ return (
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex-1">
                               <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
-                                <span className="text-xs text-blue-700/80 mr-2">Subido por:</span>
                                 <span className="text-xs text-blue-800 font-semibold">
                                   {comprobante.nombre_usuario || `Usuario ${comprobante.usuario_subio}`}
                                 </span>
@@ -845,7 +843,7 @@ return (
                   </div>
                 )}
               </div>
-            )}
+            )
           </div>
           </Card>
         </div>
