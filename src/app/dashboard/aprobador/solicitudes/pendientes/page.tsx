@@ -44,7 +44,12 @@ export default function SolicitudesPendientesPage() {
   } = useAdvancedFilters(solicitudes, 'solicitudes');
 
   // Aplicar ordenamiento a las solicitudes filtradas
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Definir fecha límite para urgencia
   const tresDiasDespues = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000);
+
+  // Aplicar ordenamiento a las solicitudes filtradas
   
   const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
     if (sortField && sortOrder) {
@@ -181,21 +186,8 @@ export default function SolicitudesPendientesPage() {
   // Filtrar solicitudes que no son viáticos (ya que los viáticos se muestran por separado)
   const noViaticos = solicitudesOrdenadas.filter(s => s.tipo_pago?.toLowerCase() !== 'viaticos');
 
-  // Aplicar paginación después de ordenar
-  const todasOrdenadas = noViaticos
-    .slice()
-    .sort((a, b) => {
-      const fechaA = new Date(a.fecha_limite_pago).getTime();
-      const fechaB = new Date(b.fecha_limite_pago).getTime();
-      const esUrgenteA = fechaA < tresDiasDespues.getTime();
-      const esUrgenteB = fechaB < tresDiasDespues.getTime();
-      if (esUrgenteA && !esUrgenteB) return -1;
-      if (!esUrgenteA && esUrgenteB) return 1;
-      return fechaA - fechaB;
-    });
-
-  // Aplicar paginación después de ordenar
-  const paginadas = todasOrdenadas.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  // Aplicar paginación después del filtro (el ordenamiento ya se aplicó en solicitudesOrdenadas)
+  const paginadas = noViaticos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleViewDetail = (solicitud: Solicitud) => {
     setSelectedSolicitud(solicitud);
@@ -599,7 +591,7 @@ export default function SolicitudesPendientesPage() {
                 </div>
               ) : (
                 <div className="bg-white rounded-xl overflow-hidden">
-                  {todasOrdenadas.length === 0 ? (
+                  {noViaticos.length === 0 ? (
                     <div className="py-12 text-center">
                       <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                       <p className="text-gray-500 text-lg">No hay solicitudes pendientes</p>
