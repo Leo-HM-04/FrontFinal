@@ -37,15 +37,27 @@ const ViaticoRow: React.FC<{
     tipoCuentaTarjeta = v.tipo_tarjeta;
   }
   return (
-    <tr className={`group transition-colors duration-150 ${isSelected ? 'bg-blue-50/70' : 'hover:bg-gray-50/80'}`}>
-      <td className="px-4 py-3">
-        <input
-          type="checkbox"
-          aria-label={isSelected ? 'Deseleccionar viático' : 'Seleccionar viático'}
-          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors"
-          checked={isSelected}
-          onChange={() => onToggle(v.id_solicitud)}
-        />
+    <tr className={`group transition-colors duration-150 ${isSelected ? 'bg-gradient-to-r from-green-50 to-blue-50 border-l-4 border-green-400' : 'hover:bg-gray-50/80'}`}>
+      <td className="px-6 py-4">
+        <div className="flex flex-col items-center gap-2">
+          <div className={`relative ${isSelected ? 'animate-pulse' : ''}`}>
+            <input
+              type="checkbox"
+              aria-label={isSelected ? 'Deseleccionar viático' : 'Seleccionar viático'}
+              className="w-6 h-6 rounded border-2 border-blue-400 text-blue-600 focus:ring-blue-500 focus:ring-2 transition-all duration-300 transform scale-125 hover:scale-150"
+              checked={isSelected}
+              onChange={() => onToggle(v.id_solicitud)}
+            />
+            {isSelected && (
+              <div className="absolute -inset-1 bg-green-200 rounded-full opacity-50 animate-ping"></div>
+            )}
+          </div>
+          {isSelected && (
+            <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold animate-bounce">
+              ¡Seleccionado!
+            </div>
+          )}
+        </div>
       </td>
       <td className="px-4 py-3">
         <span className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
@@ -305,6 +317,36 @@ const Viaticos: React.FC = () => {
             </div>
           </div>
 
+          {/* Leyenda llamativa para indicar selección */}
+          <div className="mb-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 shadow-2xl animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  ✅ ¡Selecciona los Viáticos para Aprobar o Rechazar!
+                </h3>
+                <p className="text-blue-100 text-lg">
+                  Marca las casillas de verificación (✓) de los viáticos que desees gestionar. 
+                  Una vez seleccionados, aparecerán las opciones de <strong className="text-yellow-300">Aprobar</strong> o <strong className="text-red-300">Rechazar</strong> en el panel lateral.
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/20">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">{selectedViaticos.length}</div>
+                    <div className="text-blue-100 text-sm">Seleccionados</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               {hasSelection && (
@@ -554,14 +596,25 @@ const Viaticos: React.FC = () => {
                                   <div className="overflow-x-auto">
                                     <table className="min-w-[1050px] w-full border-collapse text-sm">
                                       <thead>
-                                        <tr className="bg-gray-50/80">
-                                          <th className="px-4 py-3 first:rounded-tl-lg">
-                                            <input
-                                              type="checkbox"
-                                              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                              checked={pageViaticos.length > 0 && pageViaticos.every(v => selectedViaticos.includes(v.id_solicitud))}
-                                              onChange={() => selectAllByUsuario(userId)}
-                                            />
+                                        <tr className="bg-gradient-to-r from-blue-100 to-purple-100">
+                                          <th className="px-6 py-4 first:rounded-tl-lg w-32">
+                                            <div className="flex flex-col items-center gap-2">
+                                              <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-bounce">
+                                                ¡SELECCIONAR!
+                                              </div>
+                                              <div className="relative">
+                                                <input
+                                                  type="checkbox"
+                                                  className="w-6 h-6 rounded border-2 border-blue-400 text-blue-600 focus:ring-blue-500 focus:ring-2 transform scale-125"
+                                                  checked={pageViaticos.length > 0 && pageViaticos.every(v => selectedViaticos.includes(v.id_solicitud))}
+                                                  onChange={() => selectAllByUsuario(userId)}
+                                                />
+                                                <div className="absolute -inset-1 bg-blue-200 rounded-full opacity-30 animate-ping"></div>
+                                              </div>
+                                              <div className="text-xs text-blue-700 font-semibold text-center">
+                                                Todos
+                                              </div>
+                                            </div>
                                           </th>
                                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Folio</th>
                                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
