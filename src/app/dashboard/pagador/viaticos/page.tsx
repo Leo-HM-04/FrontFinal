@@ -13,7 +13,6 @@ import {
   Filter, 
   Download, 
   User, 
-  Calendar,
   CreditCard,
   DollarSign,
   Search,
@@ -165,7 +164,7 @@ export default function ViaticosPagadorPage() {
 
   // Viáticos filtrados
   const viaticosFiltrados = useMemo(() => {
-    let filtered = viaticos.filter(v => {
+    const filtered = viaticos.filter(v => {
       // Filtro por estado
       if (filters.estado && v.estado?.toLowerCase() !== filters.estado.toLowerCase()) {
         return false;
