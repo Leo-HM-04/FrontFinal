@@ -5,10 +5,8 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
-import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { Eye, CreditCard, AlertCircle, Download, ArrowUpDown, ArrowUp, ArrowDown, FileText, FileSpreadsheet } from 'lucide-react';
 import { usePagination } from '@/hooks/usePagination';
-import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { toast } from 'react-hot-toast';
 import { getPagosPendientes, marcarPagoComoPagado, subirComprobante } from '@/services/pagosService';
 import type { Solicitud } from '../../../../../types/index';
@@ -34,18 +32,83 @@ export default function PagosPendientesPage() {
   // Estados para exportación
   const [showExportModal, setShowExportModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  
+  // Estados para filtros personalizados
+  const [localFilters, setLocalFilters] = useState({
+    search: '',
+    departamento: '',
+    montoMin: '',
+    montoMax: '',
+    fechaDesde: '',
+    fechaHasta: ''
+  });
 
   // Filtrar solo los pagos con estado 'autorizada'
   const pagosAutorizados = pagosPendientes.filter(
     (p) => p.estado && p.estado.toLowerCase() === 'autorizada'
   );
 
-  const {
-    filters,
-    filteredData: filteredPagos,
-    resetFilters,
-    updateFilters
-  } = useAdvancedFilters(pagosAutorizados, 'solicitudes');
+  // Aplicar filtros personalizados
+  const filteredPagos = pagosAutorizados.filter(pago => {
+    // Filtro de búsqueda
+    if (localFilters.search) {
+      const searchLower = localFilters.search.toLowerCase();
+      const matchesSearch = 
+        pago.folio?.toLowerCase().includes(searchLower) ||
+        pago.nombre_usuario?.toLowerCase().includes(searchLower) ||
+        pago.usuario_nombre?.toLowerCase().includes(searchLower) ||
+        pago.departamento?.toLowerCase().includes(searchLower);
+      if (!matchesSearch) return false;
+    }
+    
+    // Filtro de departamento
+    if (localFilters.departamento && pago.departamento !== localFilters.departamento) {
+      return false;
+    }
+    
+    // Filtro de monto mínimo
+    if (localFilters.montoMin && pago.monto < Number(localFilters.montoMin)) {
+      return false;
+    }
+    
+    // Filtro de monto máximo
+    if (localFilters.montoMax && pago.monto > Number(localFilters.montoMax)) {
+      return false;
+    }
+    
+    // Filtro de fecha desde
+    if (localFilters.fechaDesde) {
+      const fechaPago = new Date(pago.fecha_creacion);
+      const fechaDesde = new Date(localFilters.fechaDesde);
+      if (fechaPago < fechaDesde) return false;
+    }
+    
+    // Filtro de fecha hasta
+    if (localFilters.fechaHasta) {
+      const fechaPago = new Date(pago.fecha_creacion);
+      const fechaHasta = new Date(localFilters.fechaHasta);
+      if (fechaPago > fechaHasta) return false;
+    }
+    
+    return true;
+  });
+
+  // Función para actualizar filtros
+  const updateLocalFilters = (newFilters: Partial<typeof localFilters>) => {
+    setLocalFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  // Función para resetear filtros
+  const resetLocalFilters = () => {
+    setLocalFilters({
+      search: '',
+      departamento: '',
+      montoMin: '',
+      montoMax: '',
+      fechaDesde: '',
+      fechaHasta: ''
+    });
+  };
 
   const {
     currentPage,
@@ -301,13 +364,98 @@ export default function PagosPendientesPage() {
           {/* Stats Cards removido */}
 
           {/* Filters */}
-          <div className="bg-white/15 rounded-xl p-4 mb-6">              
-            <AdvancedFilters
-              filters={filters}
-              onFiltersChange={updateFilters}
-              onReset={resetFilters}
-              type="pagos"
-            />
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Eye className="w-5 h-5 text-blue-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Filtros de búsqueda</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+                <input
+                  type="text"
+                  placeholder="Buscar por folio, solicitante..."
+                  value={localFilters.search}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  onChange={(e) => updateLocalFilters({ search: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Departamento</label>
+                <select
+                  value={localFilters.departamento}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  onChange={(e) => updateLocalFilters({ departamento: e.target.value })}
+                >
+                  <option value="">Todos los departamentos</option>
+                  <option value="Finanzas">Finanzas</option>
+                  <option value="Recursos Humanos">Recursos Humanos</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Ventas">Ventas</option>
+                  <option value="Operaciones">Operaciones</option>
+                  <option value="Tecnología">Tecnología</option>
+                  <option value="Administración">Administración</option>
+                  <option value="Logística">Logística</option>
+                  <option value="Proyectos">Proyectos</option>
+                  <option value="Legal">Legal</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Monto Mínimo</label>
+                <input
+                  type="number"
+                  placeholder="Ej: 1000"
+                  value={localFilters.montoMin}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  onChange={(e) => updateLocalFilters({ montoMin: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Monto Máximo</label>
+                <input
+                  type="number"
+                  placeholder="Ej: 10000"
+                  value={localFilters.montoMax}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  onChange={(e) => updateLocalFilters({ montoMax: e.target.value })}
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Desde</label>
+                <input
+                  type="date"
+                  value={localFilters.fechaDesde}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  onChange={(e) => updateLocalFilters({ fechaDesde: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Hasta</label>
+                <input
+                  type="date"
+                  value={localFilters.fechaHasta}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  onChange={(e) => updateLocalFilters({ fechaHasta: e.target.value })}
+                />
+              </div>
+              
+              <div className="flex items-end">
+                <button
+                  onClick={resetLocalFilters}
+                  className="w-full px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+                >
+                  Limpiar Filtros
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Pagos Table */}
