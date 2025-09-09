@@ -865,77 +865,129 @@ export default function ViaticosPagadorPage() {
 
         {/* Modal de exportación */}
         {showExportModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 export-modal">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 export-modal-content">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Exportar Viáticos
-                  </h3>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 export-modal">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 export-modal-content">
+              {/* Header del Modal */}
+              <div className="bg-gradient-to-r from-gray-800 to-blue-900 p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Download className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Exportar Viáticos</h2>
+                      <p className="text-gray-300 text-sm">Selecciona el formato para exportar {viaticosFiltrados.length} viáticos</p>
+                    </div>
+                  </div>
                   <button
                     onClick={() => setShowExportModal(false)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    className="text-gray-300 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
+              </div>
 
-                <div className="space-y-3">
+              <div className="p-8">
+                {/* Título de sección */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">Seleccionar formato de exportación</h3>
+                </div>
+
+                {/* Grid de opciones */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                   {/* Opción PDF */}
-                  <button
-                    onClick={handleExportPDF}
-                    disabled={processing}
-                    className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-all duration-200 text-left group disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                        <FileText className="w-5 h-5 text-red-600" />
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group">
+                    <div className="text-center mb-4">
+                      <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <FileText className="w-8 h-8 text-white" />
                       </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900">Exportar como PDF</h4>
-                        <p className="text-sm text-gray-500">Formato ideal para impresión y presentaciones</p>
-                      </div>
+                      <h4 className="text-xl font-bold text-blue-900 mb-2">PDF</h4>
+                      <p className="text-blue-700 font-medium mb-1">Documento PDF profesional</p>
                     </div>
-                  </button>
+                    <div className="mb-6">
+                      <p className="text-sm text-gray-700 text-center leading-relaxed">
+                        Ideal para impresión y presentaciones oficiales
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleExportPDF}
+                      disabled={processing}
+                      className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Download className="w-5 h-5" />
+                      Exportar PDF
+                    </button>
+                  </div>
 
                   {/* Opción Excel */}
-                  <button
-                    onClick={handleExportExcel}
-                    disabled={processing}
-                    className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-all duration-200 text-left group disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                        <FileSpreadsheet className="w-5 h-5 text-green-600" />
+                  <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group">
+                    <div className="text-center mb-4">
+                      <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <FileSpreadsheet className="w-8 h-8 text-white" />
                       </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900">Exportar como Excel</h4>
-                        <p className="text-sm text-gray-500">Perfecto para análisis y cálculos adicionales</p>
-                      </div>
+                      <h4 className="text-xl font-bold text-green-900 mb-2">Excel</h4>
+                      <p className="text-green-700 font-medium mb-1">Hoja de cálculo editable</p>
                     </div>
-                  </button>
+                    <div className="mb-6">
+                      <p className="text-sm text-gray-700 text-center leading-relaxed">
+                        Perfecto para análisis de datos y reportes
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleExportExcel}
+                      disabled={processing}
+                      className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Download className="w-5 h-5" />
+                      Exportar Excel
+                    </button>
+                  </div>
 
                   {/* Opción CSV */}
-                  <button
-                    onClick={handleExportCSV}
-                    disabled={processing}
-                    className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-left group disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                        <FileText className="w-5 h-5 text-blue-600" />
+                  <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group">
+                    <div className="text-center mb-4">
+                      <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <FileText className="w-8 h-8 text-white" />
                       </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900">Exportar como CSV</h4>
-                        <p className="text-sm text-gray-500">Formato ligero compatible con múltiples aplicaciones</p>
-                      </div>
+                      <h4 className="text-xl font-bold text-orange-900 mb-2">CSV</h4>
+                      <p className="text-orange-700 font-medium mb-1">Valores separados por comas</p>
                     </div>
-                  </button>
+                    <div className="mb-6">
+                      <p className="text-sm text-gray-700 text-center leading-relaxed">
+                        Compatible con cualquier sistema o software
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleExportCSV}
+                      disabled={processing}
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Download className="w-5 h-5" />
+                      Exportar CSV
+                    </button>
+                  </div>
+                </div>
+
+                {/* Nota informativa */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="flex items-center gap-2">
+                    <Download className="w-5 h-5 text-blue-600" />
+                    <p className="text-sm text-blue-800 font-medium">
+                      Los archivos exportados incluirán toda la información disponible de los viáticos
+                    </p>
+                  </div>
                 </div>
 
                 {processing && (
-                  <div className="mt-4 text-center">
-                    <div className="text-sm text-gray-600">Procesando exportación...</div>
+                  <div className="mt-6 text-center">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+                      <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                      Procesando exportación...
+                    </div>
                   </div>
                 )}
               </div>
