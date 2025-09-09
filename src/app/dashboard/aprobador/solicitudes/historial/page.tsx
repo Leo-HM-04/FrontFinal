@@ -169,13 +169,27 @@ export default function HistorialSolicitudesPage() {
 
   const getDepartmentColorClass = (departamento: string) => {
     const departamentosColores = {
+      'Contabilidad': 'px-3 py-1 text-sm font-medium rounded-lg bg-blue-100 text-blue-800',
+      'Facturación': 'px-3 py-1 text-sm font-medium rounded-lg bg-green-100 text-green-800',
+      'Cobranza': 'px-3 py-1 text-sm font-medium rounded-lg bg-orange-100 text-orange-800',
+      'Vinculación': 'px-3 py-1 text-sm font-medium rounded-lg bg-purple-100 text-purple-800',
+      'Administración': 'px-3 py-1 text-sm font-medium rounded-lg bg-pink-100 text-pink-800',
+      'TI': 'px-3 py-1 text-sm font-medium rounded-lg bg-indigo-100 text-indigo-800',
+      'Automatizaciones': 'px-3 py-1 text-sm font-medium rounded-lg bg-teal-100 text-teal-800',
+      'Comercial': 'px-3 py-1 text-sm font-medium rounded-lg bg-amber-100 text-amber-800',
+      'Atención a Clientes': 'px-3 py-1 text-sm font-medium rounded-lg bg-cyan-100 text-cyan-800',
+      'Tesorería': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800',
+      'Nómina': 'px-3 py-1 text-sm font-medium rounded-lg bg-yellow-100 text-yellow-800',
+      'Atracción de Talento': 'px-3 py-1 text-sm font-medium rounded-lg bg-emerald-100 text-emerald-800',
+      'Dirección General': 'px-3 py-1 text-sm font-medium rounded-lg bg-slate-100 text-slate-800',
+      'Asuntos Corporativos': 'px-3 py-1 text-sm font-medium rounded-lg bg-violet-100 text-violet-800',
+      // Departamentos antiguos para compatibilidad
       'Finanzas': 'px-3 py-1 text-sm font-medium rounded-lg bg-blue-100 text-blue-800',
       'Recursos Humanos': 'px-3 py-1 text-sm font-medium rounded-lg bg-purple-100 text-purple-800',
       'Marketing': 'px-3 py-1 text-sm font-medium rounded-lg bg-green-100 text-green-800',
       'Ventas': 'px-3 py-1 text-sm font-medium rounded-lg bg-orange-100 text-orange-800',
       'Operaciones': 'px-3 py-1 text-sm font-medium rounded-lg bg-teal-100 text-teal-800',
       'Tecnología': 'px-3 py-1 text-sm font-medium rounded-lg bg-indigo-100 text-indigo-800',
-      'Administración': 'px-3 py-1 text-sm font-medium rounded-lg bg-pink-100 text-pink-800',
       'Logística': 'px-3 py-1 text-sm font-medium rounded-lg bg-amber-100 text-amber-800',
       'Proyectos': 'px-3 py-1 text-sm font-medium rounded-lg bg-cyan-100 text-cyan-800',
       'Legal': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800'
