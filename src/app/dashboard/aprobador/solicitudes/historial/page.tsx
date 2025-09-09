@@ -299,6 +299,16 @@ export default function HistorialSolicitudesPage() {
                           <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
                               <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">ID</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Hora Envío</th>
+                              <th 
+                                className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('fecha_creacion')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Fecha Envío
+                                  {getSortIcon('fecha_creacion')}
+                                </div>
+                              </th>
                               <th 
                                 className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
                                 onClick={() => handleSort('folio')}
@@ -346,16 +356,6 @@ export default function HistorialSolicitudesPage() {
                               </th>
                               <th 
                                 className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
-                                onClick={() => handleSort('fecha_creacion')}
-                              >
-                                <div className="flex items-center gap-2">
-                                  Fecha Envío
-                                  {getSortIcon('fecha_creacion')}
-                                </div>
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Hora Envío</th>
-                              <th 
-                                className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
                                 onClick={() => handleSort('fecha_revision')}
                               >
                                 <div className="flex items-center gap-2">
@@ -400,6 +400,12 @@ export default function HistorialSolicitudesPage() {
                                   <td className="px-4 py-3 font-mono text-black text-sm">
                                     {solicitud.id_solicitud}
                                   </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {solicitud.fecha_creacion ? formatDateTime(solicitud.fecha_creacion).time : '-'}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {solicitud.fecha_creacion ? formatDateTime(solicitud.fecha_creacion).date : '-'}
+                                  </td>
                                   <td className="px-4 py-3 text-black text-sm">
                                     {solicitud.folio || '-'}
                                   </td>
@@ -419,12 +425,6 @@ export default function HistorialSolicitudesPage() {
                                       {estadoIcon}
                                       {estadoLabel}
                                     </span>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {solicitud.fecha_creacion ? formatDateTime(solicitud.fecha_creacion).date : '-'}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {solicitud.fecha_creacion ? formatDateTime(solicitud.fecha_creacion).time : '-'}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {solicitud.fecha_revision ? formatDateTime(solicitud.fecha_revision).date : '-'}
