@@ -360,6 +360,16 @@ export default function HistorialSolicitudesPage() {
                               </th>
                               <th 
                                 className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('fecha_creacion')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Fecha Envío
+                                  {getSortIcon('fecha_creacion')}
+                                </div>
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Hora Envío</th>
+                              <th 
+                                className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
                                 onClick={() => handleSort('fecha_revision')}
                               >
                                 <div className="flex items-center gap-2">
@@ -423,6 +433,12 @@ export default function HistorialSolicitudesPage() {
                                       {estadoIcon}
                                       {estadoLabel}
                                     </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {solicitud.fecha_creacion ? formatDateTime(solicitud.fecha_creacion).date : '-'}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {solicitud.fecha_creacion ? formatDateTime(solicitud.fecha_creacion).time : '-'}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {solicitud.fecha_revision ? formatDateTime(solicitud.fecha_revision).date : '-'}
