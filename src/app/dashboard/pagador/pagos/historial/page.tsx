@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/Button';
 import { Eye } from 'lucide-react';
 import { PagoDetailModal } from '@/components/pagos/PagoDetailModal';
 
-
 export default function HistorialPagosPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedPago, setSelectedPago] = useState<Solicitud | null>(null);
