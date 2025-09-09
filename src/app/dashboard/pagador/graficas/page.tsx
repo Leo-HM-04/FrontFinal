@@ -8,13 +8,13 @@ import { Bar, Pie, Doughnut } from 'react-chartjs-2';
 import { 
   MdInsertChartOutlined, 
   MdTrendingUp, 
-  MdPieChart, 
   MdFilterList,
   MdCompare,
   MdBusiness,
   MdPayments,
   MdAnalytics,
-  MdRefresh
+  MdRefresh,
+  MdPieChart
 } from 'react-icons/md';
 import {
   Chart as ChartJS,
@@ -171,9 +171,6 @@ export default function PagadorGraficasPage() {
     return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
   };
 
-  // Calcular estadísticas
-  const totalSolicitudes = resumenEstado.reduce((acc, curr) => acc + curr.total, 0);
-
   // Paleta de colores profesional
   const estadoColors = {
     'pendiente': { 
@@ -206,21 +203,40 @@ export default function PagadorGraficasPage() {
     }
   };
 
-  // Datos para gráfica de pie
+  // Consolidar estados duplicados
+  const estadosConsolidados = resumenEstado.reduce((acc, estado) => {
+    const estadoKey = estado.estado.toLowerCase();
+    const existing = acc.find(item => item.estado.toLowerCase() === estadoKey);
+    
+    if (existing) {
+      existing.total += estado.total;
+      existing.monto_total += estado.monto_total;
+    } else {
+      acc.push({ ...estado });
+    }
+    
+    return acc;
+  }, [] as EstadoResumen[]);
+
+  // Calcular total de solicitudes usando estados consolidados
+  const totalSolicitudes = estadosConsolidados.reduce((acc: number, curr) => acc + curr.total, 0);
+
+  // Datos para gráfica de pie (usando estados consolidados)
   const pieData = {
-    labels: resumenEstado.map(estado => estado.estado.charAt(0).toUpperCase() + estado.estado.slice(1)),
+    labels: estadosConsolidados.map(estado => estado.estado.charAt(0).toUpperCase() + estado.estado.slice(1)),
     datasets: [{
-      data: resumenEstado.map(estado => estado.total),
-      backgroundColor: resumenEstado.map(estado => 
+      data: estadosConsolidados.map(estado => estado.total),
+      backgroundColor: estadosConsolidados.map(estado => 
         estadoColors[estado.estado.toLowerCase() as keyof typeof estadoColors]?.bg || 'rgba(203, 213, 225, 0.9)'
       ),
-      borderColor: resumenEstado.map(estado => 
+      borderColor: estadosConsolidados.map(estado => 
         estadoColors[estado.estado.toLowerCase() as keyof typeof estadoColors]?.border || '#cbd5e1'
       ),
-      borderWidth: 2,
-      hoverBackgroundColor: resumenEstado.map(estado => 
+      borderWidth: 3,
+      hoverBackgroundColor: estadosConsolidados.map(estado => 
         estadoColors[estado.estado.toLowerCase() as keyof typeof estadoColors]?.hover || '#94a3b8'
-      )
+      ),
+      hoverBorderWidth: 4
     }]
   };
 
@@ -230,32 +246,65 @@ export default function PagadorGraficasPage() {
         position: 'right' as const,
         labels: {
           usePointStyle: true,
-          pointStyle: 'circle',
-          padding: 20,
-          font: { size: 14, weight: 500 }
+          pointStyle: 'circle' as const,
+          padding: 25,
+          font: { 
+            size: 16, 
+            weight: 600,
+            family: 'Inter, system-ui, sans-serif'
+          },
+          color: '#1f2937',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          generateLabels: (chart: any) => {
+            const datasets = chart.data.datasets;
+            if (datasets.length) {
+              return chart.data.labels.map((label: string, index: number) => {
+                const value = datasets[0].data[index];
+                const total = datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                return {
+                  text: `${label}: ${value} (${percentage}%)`,
+                  fillStyle: datasets[0].backgroundColor[index],
+                  strokeStyle: datasets[0].borderColor[index],
+                  lineWidth: 2,
+                  hidden: false,
+                  index
+                };
+              });
+            }
+            return [];
+          }
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
         titleColor: '#1e293b',
-        titleFont: { weight: 'bold' as const, size: 14 },
-        bodyColor: '#334155',
-        borderColor: '#e2e8f0',
-        borderWidth: 1,
-        cornerRadius: 8,
-        padding: 12,
+        titleFont: { 
+          weight: 'bold' as const, 
+          size: 16,
+          family: 'Inter, system-ui, sans-serif'
+        },
+        bodyColor: '#374151',
+        bodyFont: {
+          size: 14,
+          family: 'Inter, system-ui, sans-serif'
+        },
+        borderColor: '#d1d5db',
+        borderWidth: 2,
+        cornerRadius: 12,
+        padding: 16,
         callbacks: {
           label: (context: TooltipItem<'pie'>) => {
             const value = context.parsed;
             const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
             const percentage = ((value / total) * 100).toFixed(1);
-            return ` ${value} solicitudes (${percentage}%)`;
+            return `📊 ${value} solicitudes (${percentage}%)`;
           },
           afterLabel: (context: TooltipItem<'pie'>) => {
             const idx = context.dataIndex;
-            const estado = resumenEstado[idx];
+            const estado = estadosConsolidados[idx];
             if (estado && typeof estado.monto_total === 'number') {
-              return ` Monto total: ${formatCurrency(estado.monto_total)}`;
+              return `💰 Monto: ${formatCurrency(estado.monto_total)}`;
             }
             return '';
           }
@@ -267,7 +316,7 @@ export default function PagadorGraficasPage() {
     animation: {
       animateScale: true,
       animateRotate: true,
-      duration: 1800,
+      duration: 2000,
       easing: 'easeInOutCubic' as const
     }
   };
@@ -324,64 +373,81 @@ export default function PagadorGraficasPage() {
 
   // Renderizar controles de filtros
   const renderControles = () => (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
-      <div className="flex flex-wrap gap-4 items-center justify-between">
+    <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 mb-8">
+      <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
         <div className="flex items-center space-x-4">
-          <MdFilterList className="text-gray-600 text-xl" />
-          <span className="font-semibold text-gray-900">Filtros y Vista:</span>
+          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <MdFilterList className="text-blue-600 text-xl" />
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-900 text-lg">Panel de Control</h3>
+            <p className="text-sm text-gray-500">Configura la vista y filtros</p>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-4">
           {/* Selector de vista */}
-          <select
-            value={vistaActual}
-            onChange={(e) => setVistaActual(e.target.value as 'general' | 'departamentos' | 'comparativa' | 'tipos-pago')}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="general">Vista General</option>
-            <option value="departamentos">Por Departamentos</option>
-            <option value="tipos-pago">Por Tipos de Pago</option>
-            <option value="comparativa">Comparativas</option>
-          </select>
-
-          {/* Selector de departamento */}
-          <select
-            value={departamentoSeleccionado}
-            onChange={(e) => setDepartamentoSeleccionado(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Todos los departamentos</option>
-            {departamentos.map((dept) => (
-              <option key={dept.departamento} value={dept.departamento}>
-                {dept.departamento}
-              </option>
-            ))}
-          </select>
-
-          {/* Selector de período */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            {['semana', 'mes', 'año'].map((periodo) => (
-              <button
-                key={periodo}
-                onClick={() => setPeriodoTemporal(periodo as 'semana' | 'mes' | 'año')}
-                className={`px-4 py-1 rounded-md text-sm font-medium transition-colors capitalize ${
-                  periodoTemporal === periodo
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {periodo}
-              </button>
-            ))}
+          <div className="flex flex-col">
+            <label className="text-xs font-semibold text-gray-700 mb-2">VISTA</label>
+            <select
+              value={vistaActual}
+              onChange={(e) => setVistaActual(e.target.value as 'general' | 'departamentos' | 'comparativa' | 'tipos-pago')}
+              className="px-4 py-3 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-colors min-w-[180px]"
+            >
+              <option value="general">📊 Vista General</option>
+              <option value="departamentos">🏢 Por Departamentos</option>
+              <option value="tipos-pago">💳 Por Tipos de Pago</option>
+              <option value="comparativa">📈 Comparativas</option>
+            </select>
           </div>
 
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <MdRefresh />
-            <span>Actualizar</span>
-          </button>
+          {/* Selector de departamento */}
+          <div className="flex flex-col">
+            <label className="text-xs font-semibold text-gray-700 mb-2">DEPARTAMENTO</label>
+            <select
+              value={departamentoSeleccionado}
+              onChange={(e) => setDepartamentoSeleccionado(e.target.value)}
+              className="px-4 py-3 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-colors min-w-[180px]"
+            >
+              <option value="">🏢 Todos los departamentos</option>
+              {departamentos.map((dept) => (
+                <option key={dept.departamento} value={dept.departamento}>
+                  🏢 {dept.departamento}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Selector de período */}
+          <div className="flex flex-col">
+            <label className="text-xs font-semibold text-gray-700 mb-2">PERÍODO</label>
+            <div className="flex bg-gray-100 rounded-lg p-1 border-2 border-gray-300">
+              {['semana', 'mes', 'año'].map((periodo) => (
+                <button
+                  key={periodo}
+                  onClick={() => setPeriodoTemporal(periodo as 'semana' | 'mes' | 'año')}
+                  className={`px-4 py-2 rounded-md text-sm font-bold transition-all capitalize ${
+                    periodoTemporal === periodo
+                      ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'
+                  }`}
+                >
+                  {periodo}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-xs font-semibold text-gray-700 mb-2">ACCIÓN</label>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-medium hover:from-blue-700 hover:to-blue-800 transition-all flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <MdRefresh className="text-lg" />
+              <span>Actualizar</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
