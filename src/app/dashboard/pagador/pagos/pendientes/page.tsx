@@ -172,16 +172,20 @@ export default function PagosPendientesPage() {
 
   const getDepartmentColorClass = (departamento: string) => {
     const departamentosColores: Record<string, string> = {
-      'Finanzas': 'px-3 py-1 text-sm font-medium rounded-lg bg-blue-100 text-blue-800',
-      'Recursos Humanos': 'px-3 py-1 text-sm font-medium rounded-lg bg-purple-100 text-purple-800',
-      'Marketing': 'px-3 py-1 text-sm font-medium rounded-lg bg-green-100 text-green-800',
-      'Ventas': 'px-3 py-1 text-sm font-medium rounded-lg bg-orange-100 text-orange-800',
-      'Operaciones': 'px-3 py-1 text-sm font-medium rounded-lg bg-teal-100 text-teal-800',
-      'Tecnología': 'px-3 py-1 text-sm font-medium rounded-lg bg-indigo-100 text-indigo-800',
+      'Contabilidad': 'px-3 py-1 text-sm font-medium rounded-lg bg-blue-100 text-blue-800',
+      'Facturación': 'px-3 py-1 text-sm font-medium rounded-lg bg-green-100 text-green-800',
+      'Cobranza': 'px-3 py-1 text-sm font-medium rounded-lg bg-orange-100 text-orange-800',
+      'Vinculación': 'px-3 py-1 text-sm font-medium rounded-lg bg-purple-100 text-purple-800',
       'Administración': 'px-3 py-1 text-sm font-medium rounded-lg bg-pink-100 text-pink-800',
-      'Logística': 'px-3 py-1 text-sm font-medium rounded-lg bg-amber-100 text-amber-800',
-      'Proyectos': 'px-3 py-1 text-sm font-medium rounded-lg bg-cyan-100 text-cyan-800',
-      'Legal': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800'
+      'TI': 'px-3 py-1 text-sm font-medium rounded-lg bg-indigo-100 text-indigo-800',
+      'Automatizaciones': 'px-3 py-1 text-sm font-medium rounded-lg bg-teal-100 text-teal-800',
+      'Comercial': 'px-3 py-1 text-sm font-medium rounded-lg bg-amber-100 text-amber-800',
+      'Atención a Clientes': 'px-3 py-1 text-sm font-medium rounded-lg bg-cyan-100 text-cyan-800',
+      'Tesorería': 'px-3 py-1 text-sm font-medium rounded-lg bg-emerald-100 text-emerald-800',
+      'Nómina': 'px-3 py-1 text-sm font-medium rounded-lg bg-violet-100 text-violet-800',
+      'Atracción de Talento': 'px-3 py-1 text-sm font-medium rounded-lg bg-rose-100 text-rose-800',
+      'Dirección General': 'px-3 py-1 text-sm font-medium rounded-lg bg-slate-100 text-slate-800',
+      'Asuntos Corporativos': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800'
     };
     return departamentosColores[departamento] || 'px-3 py-1 text-sm font-medium rounded-lg bg-gray-100 text-gray-800';
   };
@@ -390,16 +394,20 @@ export default function PagosPendientesPage() {
                   onChange={(e) => updateLocalFilters({ departamento: e.target.value })}
                 >
                   <option value="">Todos los departamentos</option>
-                  <option value="Finanzas">Finanzas</option>
-                  <option value="Recursos Humanos">Recursos Humanos</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Ventas">Ventas</option>
-                  <option value="Operaciones">Operaciones</option>
-                  <option value="Tecnología">Tecnología</option>
+                  <option value="Contabilidad">Contabilidad</option>
+                  <option value="Facturación">Facturación</option>
+                  <option value="Cobranza">Cobranza</option>
+                  <option value="Vinculación">Vinculación</option>
                   <option value="Administración">Administración</option>
-                  <option value="Logística">Logística</option>
-                  <option value="Proyectos">Proyectos</option>
-                  <option value="Legal">Legal</option>
+                  <option value="TI">TI</option>
+                  <option value="Automatizaciones">Automatizaciones</option>
+                  <option value="Comercial">Comercial</option>
+                  <option value="Atención a Clientes">Atención a Clientes</option>
+                  <option value="Tesorería">Tesorería</option>
+                  <option value="Nómina">Nómina</option>
+                  <option value="Atracción de Talento">Atracción de Talento</option>
+                  <option value="Dirección General">Dirección General</option>
+                  <option value="Asuntos Corporativos">Asuntos Corporativos</option>
                 </select>
               </div>
               
