@@ -17,7 +17,8 @@ import {
   DollarSign,
   Search,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  FileSpreadsheet
 } from "lucide-react";
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
@@ -124,7 +125,7 @@ export default function ViaticosPagadorPage() {
   const [processing, setProcessing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   
   // Estados del modal
@@ -168,20 +169,20 @@ export default function ViaticosPagadorPage() {
     loadViaticos();
   }, [loadViaticos]);
 
-  // Cerrar menú de exportación al hacer clic fuera
+  // Cerrar modal de exportación al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showExportMenu) {
+      if (showExportModal) {
         const target = event.target as Element;
-        if (!target.closest('.export-menu')) {
-          setShowExportMenu(false);
+        if (!target.closest('.export-modal') && !target.closest('.export-modal-content')) {
+          setShowExportModal(false);
         }
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showExportMenu]);
+  }, [showExportModal]);
 
   // Viáticos filtrados
   const viaticosFiltrados = useMemo(() => {
@@ -349,7 +350,7 @@ export default function ViaticosPagadorPage() {
       addNotification('error', 'Error al exportar CSV');
     } finally {
       setProcessing(false);
-      setShowExportMenu(false);
+      setShowExportModal(false);
     }
   }, [viaticosFiltrados, addNotification]);
 
@@ -368,7 +369,7 @@ export default function ViaticosPagadorPage() {
       addNotification('error', 'Error al exportar Excel');
     } finally {
       setProcessing(false);
-      setShowExportMenu(false);
+      setShowExportModal(false);
     }
   }, [viaticosFiltrados, addNotification]);
 
@@ -387,7 +388,7 @@ export default function ViaticosPagadorPage() {
       addNotification('error', 'Error al exportar PDF');
     } finally {
       setProcessing(false);
-      setShowExportMenu(false);
+      setShowExportModal(false);
     }
   }, [viaticosFiltrados, addNotification]);
 
@@ -439,49 +440,15 @@ export default function ViaticosPagadorPage() {
                   Filtros
                 </button>
                 
-                {/* Menú desplegable de exportación */}
-                <div className="relative export-menu">
-                  <button
-                    onClick={() => setShowExportMenu(!showExportMenu)}
-                    disabled={processing}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-lg disabled:opacity-60"
-                  >
-                    <Download className="w-5 h-5" />
-                    Exportar
-                    <ChevronDown className={`w-4 h-4 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  {showExportMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="py-2">
-                        <button
-                          onClick={handleExportPDF}
-                          disabled={processing}
-                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
-                        >
-                          <FileText className="w-4 h-4" />
-                          Exportar PDF
-                        </button>
-                        <button
-                          onClick={handleExportExcel}
-                          disabled={processing}
-                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
-                        >
-                          <FileText className="w-4 h-4" />
-                          Exportar Excel
-                        </button>
-                        <button
-                          onClick={handleExportCSV}
-                          disabled={processing}
-                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
-                        >
-                          <FileText className="w-4 h-4" />
-                          Exportar CSV
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {/* Botón de exportación */}
+                <button
+                  onClick={() => setShowExportModal(!showExportModal)}
+                  disabled={processing}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-lg disabled:opacity-60"
+                >
+                  <Download className="w-5 h-5" />
+                  Exportar
+                </button>
               </div>
             </div>
 
@@ -894,6 +861,86 @@ export default function ViaticosPagadorPage() {
               setSelectedViatico(null);
             }}
           />
+        )}
+
+        {/* Modal de exportación */}
+        {showExportModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 export-modal">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 export-modal-content">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Exportar Viáticos
+                  </h3>
+                  <button
+                    onClick={() => setShowExportModal(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Opción PDF */}
+                  <button
+                    onClick={handleExportPDF}
+                    disabled={processing}
+                    className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-all duration-200 text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                        <FileText className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Exportar como PDF</h4>
+                        <p className="text-sm text-gray-500">Formato ideal para impresión y presentaciones</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Opción Excel */}
+                  <button
+                    onClick={handleExportExcel}
+                    disabled={processing}
+                    className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-all duration-200 text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                        <FileSpreadsheet className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Exportar como Excel</h4>
+                        <p className="text-sm text-gray-500">Perfecto para análisis y cálculos adicionales</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Opción CSV */}
+                  <button
+                    onClick={handleExportCSV}
+                    disabled={processing}
+                    className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Exportar como CSV</h4>
+                        <p className="text-sm text-gray-500">Formato ligero compatible con múltiples aplicaciones</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                {processing && (
+                  <div className="mt-4 text-center">
+                    <div className="text-sm text-gray-600">Procesando exportación...</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
       </PagadorLayout>
     </ProtectedRoute>
