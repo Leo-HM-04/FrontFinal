@@ -171,6 +171,13 @@ export default function PagadorGraficasPage() {
     return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
   };
 
+  const formatDepartmentName = (departamento: string) => {
+    if (departamento.toLowerCase() === 'ti') {
+      return 'TI';
+    }
+    return departamento.charAt(0).toUpperCase() + departamento.slice(1).toLowerCase();
+  };
+
   // Paleta de colores profesional
   const estadoColors = {
     'pendiente': { 
@@ -298,13 +305,13 @@ export default function PagadorGraficasPage() {
             const value = context.parsed;
             const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
             const percentage = ((value / total) * 100).toFixed(1);
-            return `📊 ${value} solicitudes (${percentage}%)`;
+            return `${value} solicitudes (${percentage}%)`;
           },
           afterLabel: (context: TooltipItem<'pie'>) => {
             const idx = context.dataIndex;
             const estado = estadosConsolidados[idx];
             if (estado && typeof estado.monto_total === 'number') {
-              return `💰 Monto: ${formatCurrency(estado.monto_total)}`;
+              return `Monto: ${formatCurrency(estado.monto_total)}`;
             }
             return '';
           }
@@ -394,10 +401,10 @@ export default function PagadorGraficasPage() {
               onChange={(e) => setVistaActual(e.target.value as 'general' | 'departamentos' | 'comparativa' | 'tipos-pago')}
               className="px-4 py-3 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-colors min-w-[180px]"
             >
-              <option value="general">📊 Vista General</option>
-              <option value="departamentos">🏢 Por Departamentos</option>
-              <option value="tipos-pago">💳 Por Tipos de Pago</option>
-              <option value="comparativa">📈 Comparativas</option>
+              <option value="general">Vista General</option>
+              <option value="departamentos">Por Departamentos</option>
+              <option value="tipos-pago">Por Tipos de Pago</option>
+              <option value="comparativa">Comparativas</option>
             </select>
           </div>
 
@@ -409,10 +416,10 @@ export default function PagadorGraficasPage() {
               onChange={(e) => setDepartamentoSeleccionado(e.target.value)}
               className="px-4 py-3 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-colors min-w-[180px]"
             >
-              <option value="">🏢 Todos los departamentos</option>
+              <option value="">Todos los departamentos</option>
               {departamentos.map((dept) => (
                 <option key={dept.departamento} value={dept.departamento}>
-                  🏢 {dept.departamento}
+                  {formatDepartmentName(dept.departamento)}
                 </option>
               ))}
             </select>
@@ -608,7 +615,7 @@ export default function PagadorGraficasPage() {
                         {gastoNeto.map((dept, index) => (
                           <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 shadow-sm border border-blue-200">
                             <div className="flex items-center justify-between mb-4">
-                              <h3 className="font-semibold text-gray-900 truncate">{dept.departamento}</h3>
+                              <h3 className="font-semibold text-gray-900 truncate">{formatDepartmentName(dept.departamento)}</h3>
                               <MdBusiness className="text-blue-600" />
                             </div>
                             <div className="space-y-3">
