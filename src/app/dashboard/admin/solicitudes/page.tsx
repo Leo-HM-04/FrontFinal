@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, memo } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminLayout } from '@/components/layout/AdminLayout';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
-import { FileText, Trash2, Eye, Download, ChevronUp, ChevronDown } from 'lucide-react';
+import { FileText, Trash2, Eye, Download } from 'lucide-react';
 import { exportSolicitudesPDF, exportSolicitudesExcel, exportSolicitudesCSV } from '@/utils/exportSolicitudes';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { ExportOptions } from '@/components/common/ExportOptions';
@@ -18,97 +18,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Solicitud } from '@/types';
 import { toast } from 'react-hot-toast';
 
-// Tipos para ordenamiento
-type SortField = 'id_solicitud' | 'folio' | 'usuario_nombre' | 'departamento' | 'monto' | 'estado' | 'fecha_creacion' | 'hora_envio';
-type SortOrder = 'asc' | 'desc';
-
-// Función para formatear el monto
-const formatMontoVisual = (monto: number) => {
-  return new Intl.NumberFormat('es-MX', {
-    style: 'currency',
-    currency: 'MXN',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(monto || 0);
-};
-
-// Componente para encabezados ordenables
-const SortableHeader = memo(function SortableHeader({
-  field,
-  children,
-  className = 'px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200',
-  sortField,
-  sortOrder,
-  onSort,
-}: {
-  field?: SortField;
-  children: React.ReactNode;
-  className?: string;
-  sortField?: SortField | null;
-  sortOrder?: SortOrder;
-  onSort?: (field: SortField) => void;
-}) {
-  if (!field) {
-    return <th className={className}>{children}</th>;
-  }
-  
-  const handleClick = () => onSort && onSort(field);
-
-  return (
-    <th
-      className={`${className} cursor-pointer hover:bg-blue-100 transition-colors select-none`}
-      onClick={handleClick}
-    >
-      <div className="flex items-center gap-2">
-        {children}
-        <div className="flex flex-col">
-          <ChevronUp
-            className={`w-3 h-3 ${
-              sortField === field && sortOrder === 'asc'
-                ? 'text-blue-600'
-                : 'text-gray-400'
-            }`}
-          />
-          <ChevronDown
-            className={`w-3 h-3 -mt-1 ${
-              sortField === field && sortOrder === 'desc'
-                ? 'text-blue-600'
-                : 'text-gray-400'
-            }`}
-          />
-        </div>
-      </div>
-    </th>
-  );
-});
-
 export default function SolicitudesPage() {
   const router = useRouter();
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  
-  // Estados para ordenamiento
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  
   const { } = useAuth();
 
   const { solicitudes, loading, deleteSolicitud } = useSolicitudes();
-
-  // Función para manejar ordenamiento
-  const handleSort = useCallback((field: SortField) => {
-    setSortField((prevField) => {
-      if (prevField === field) {
-        setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
-        return prevField;
-      } else {
-        setSortOrder('desc');
-        return field;
-      }
-    });
-  }, []);
 
   const {
     filters,
@@ -116,43 +34,6 @@ export default function SolicitudesPage() {
     resetFilters,
     updateFilters
   } = useAdvancedFilters(solicitudes, 'solicitudes');
-
-  // Aplicar ordenamiento a los datos filtrados
-  const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
-    if (sortField && sortOrder) {
-      let comparison = 0;
-      switch (sortField) {
-        case 'id_solicitud':
-          comparison = (a.id_solicitud || 0) - (b.id_solicitud || 0);
-          break;
-        case 'folio':
-          comparison = (a.folio || '').localeCompare(b.folio || '');
-          break;
-        case 'usuario_nombre':
-          comparison = (a.usuario_nombre || '').localeCompare(b.usuario_nombre || '');
-          break;
-        case 'departamento':
-          comparison = (a.departamento || '').localeCompare(b.departamento || '');
-          break;
-        case 'monto':
-          comparison = (a.monto || 0) - (b.monto || 0);
-          break;
-        case 'estado':
-          comparison = (a.estado || '').localeCompare(b.estado || '');
-          break;
-        case 'fecha_creacion':
-        case 'hora_envio':
-          comparison = new Date(a.fecha_creacion).getTime() - new Date(b.fecha_creacion).getTime();
-          break;
-        default:
-          comparison = 0;
-      }
-      return sortOrder === 'asc' ? comparison : -comparison;
-    }
-    
-    // Orden por defecto (más recientes primero)
-    return new Date(b.fecha_creacion).getTime() - new Date(a.fecha_creacion).getTime();
-  });
 
   const {
     currentPage,
@@ -162,7 +43,7 @@ export default function SolicitudesPage() {
     paginatedData: paginatedSolicitudes,
     goToPage,
     changeItemsPerPage,
-  } = usePagination({ data: solicitudesOrdenadas, initialItemsPerPage: 5 });
+  } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 5 });
 
   const handleDelete = (solicitud: Solicitud) => {
     setSelectedSolicitud(solicitud);
@@ -382,72 +263,15 @@ export default function SolicitudesPage() {
                     <table className="min-w-full rounded-xl shadow-sm border border-gray-200 overflow-hidden font-sans">
                       <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                         <tr>
-                          <SortableHeader 
-                            field="id_solicitud" 
-                            sortField={sortField} 
-                            sortOrder={sortOrder} 
-                            onSort={handleSort}
-                          >
-                            ID
-                          </SortableHeader>
-                          <SortableHeader 
-                            field="folio" 
-                            sortField={sortField} 
-                            sortOrder={sortOrder} 
-                            onSort={handleSort}
-                          >
-                            Folio
-                          </SortableHeader>
-                          <SortableHeader 
-                            field="usuario_nombre" 
-                            sortField={sortField} 
-                            sortOrder={sortOrder} 
-                            onSort={handleSort}
-                          >
-                            Usuario
-                          </SortableHeader>
-                          <SortableHeader 
-                            field="departamento" 
-                            sortField={sortField} 
-                            sortOrder={sortOrder} 
-                            onSort={handleSort}
-                          >
-                            Departamento
-                          </SortableHeader>
-                          <SortableHeader 
-                            field="monto" 
-                            sortField={sortField} 
-                            sortOrder={sortOrder} 
-                            onSort={handleSort}
-                          >
-                            Monto
-                          </SortableHeader>
-                          <SortableHeader 
-                            field="estado" 
-                            sortField={sortField} 
-                            sortOrder={sortOrder} 
-                            onSort={handleSort}
-                          >
-                            Estado
-                          </SortableHeader>
-                          <SortableHeader 
-                            field="fecha_creacion" 
-                            sortField={sortField} 
-                            sortOrder={sortOrder} 
-                            onSort={handleSort}
-                          >
-                            Fecha de Revisión
-                          </SortableHeader>
-                          <SortableHeader 
-                            field="hora_envio" 
-                            sortField={sortField} 
-                            sortOrder={sortOrder} 
-                            onSort={handleSort}
-                          >
-                            Hora de Envío
-                          </SortableHeader>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">ID</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Folio</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Solicitante</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Departamento</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Tipo de Cuenta/Tarjeta</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Banco Destino</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Monto</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Estado</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Fecha</th>
                           <th className="px-6 py-3 text-left text-xs font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200">Acciones</th>
                         </tr>
                       </thead>
@@ -462,6 +286,14 @@ export default function SolicitudesPage() {
                                 {solicitud.departamento?.toUpperCase()}
                               </span>
                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {solicitud.tipo_cuenta_destino === 'Tarjeta'
+                                ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
+                                : solicitud.tipo_cuenta_destino || '-'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {solicitud.banco_destino || '-'}
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-base font-semibold">
                               {formatMontoVisual(solicitud.monto)}
                             </td>
@@ -474,26 +306,7 @@ export default function SolicitudesPage() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {new Date(solicitud.fecha_creacion).toLocaleDateString('es-MX', { 
-                                day: '2-digit', 
-                                month: 'short', 
-                                year: 'numeric' 
-                              })}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {new Date(solicitud.fecha_creacion).toLocaleTimeString('es-MX', { 
-                                hour: '2-digit', 
-                                minute: '2-digit',
-                                hour12: true 
-                              })}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {solicitud.tipo_cuenta_destino === 'Tarjeta'
-                                ? `Tarjeta${solicitud.tipo_tarjeta ? ' - ' + solicitud.tipo_tarjeta : ''}`
-                                : solicitud.tipo_cuenta_destino || '-'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {solicitud.banco_destino || '-'}
+                              {new Date(solicitud.fecha_creacion).toLocaleString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
                               <Button 
