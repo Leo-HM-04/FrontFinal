@@ -6,7 +6,7 @@ import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye, CheckCircle, XCircle} from 'lucide-react';
+import { FileText, Eye, CheckCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
@@ -31,6 +31,29 @@ export default function SolicitudesPendientesPage() {
   const [showExportModal, setShowExportModal] = useState(false);
   //const [search, setSearch] = useState('');
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; solicitud: Solicitud | null; action: 'approve' | 'reject' | null }>({ open: false, solicitud: null, action: null });
+  
+  // Estados para ordenamiento
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Funciones para ordenamiento
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
+    }
+    return sortDirection === 'asc' ? 
+      <ArrowUp className="w-4 h-4 text-blue-600" /> : 
+      <ArrowDown className="w-4 h-4 text-blue-600" />;
+  };
 
   const {
     filters,
@@ -40,12 +63,55 @@ export default function SolicitudesPendientesPage() {
   } = useAdvancedFilters(solicitudes, 'solicitudes');
 
   // Tabla de selección múltiple para viáticos (debe ir después de filteredSolicitudes)
-  // Ordenar viáticos por urgencia y fecha límite (más urgentes y próximas primero)
+  // Ordenar viáticos con ordenamiento personalizable
   const tresDiasDespues = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000);
   const viaticos = filteredSolicitudes
     .filter(s => s.tipo_pago?.toLowerCase() === 'viaticos')
     .slice()
     .sort((a, b) => {
+      // Si hay un campo de ordenamiento seleccionado, usar ese primero
+      if (sortField) {
+        let aVal, bVal;
+        switch (sortField) {
+          case 'folio':
+            aVal = a.folio || '';
+            bVal = b.folio || '';
+            break;
+          case 'usuario':
+            aVal = a.usuario_nombre || '';
+            bVal = b.usuario_nombre || '';
+            break;
+          case 'tipo_pago':
+            aVal = a.tipo_pago || '';
+            bVal = b.tipo_pago || '';
+            break;
+          case 'departamento':
+            aVal = a.departamento || '';
+            bVal = b.departamento || '';
+            break;
+          case 'monto':
+            aVal = a.monto || 0;
+            bVal = b.monto || 0;
+            break;
+          case 'fecha_limite':
+            aVal = new Date(a.fecha_limite_pago).getTime();
+            bVal = new Date(b.fecha_limite_pago).getTime();
+            break;
+          case 'fecha_creacion':
+            aVal = new Date(a.fecha_creacion).getTime();
+            bVal = new Date(b.fecha_creacion).getTime();
+            break;
+          default:
+            aVal = '';
+            bVal = '';
+        }
+        
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      }
+      
+      // Ordenamiento por defecto: urgencia y fecha límite de pago
       const fechaA = new Date(a.fecha_limite_pago).getTime();
       const fechaB = new Date(b.fecha_limite_pago).getTime();
       const esUrgenteA = fechaA < tresDiasDespues.getTime();
@@ -120,10 +186,53 @@ export default function SolicitudesPendientesPage() {
     goToPage,
   } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 5 });
 
-  // Ordenar todas por urgencia y fecha límite de pago (más urgentes y próximas primero)
+  // Ordenar todas con ordenamiento personalizable por columnas
   const todasOrdenadas = filteredSolicitudes
     .slice()
     .sort((a, b) => {
+      // Si hay un campo de ordenamiento seleccionado, usar ese primero
+      if (sortField) {
+        let aVal, bVal;
+        switch (sortField) {
+          case 'folio':
+            aVal = a.folio || '';
+            bVal = b.folio || '';
+            break;
+          case 'usuario':
+            aVal = a.usuario_nombre || '';
+            bVal = b.usuario_nombre || '';
+            break;
+          case 'tipo_pago':
+            aVal = a.tipo_pago || '';
+            bVal = b.tipo_pago || '';
+            break;
+          case 'departamento':
+            aVal = a.departamento || '';
+            bVal = b.departamento || '';
+            break;
+          case 'monto':
+            aVal = a.monto || 0;
+            bVal = b.monto || 0;
+            break;
+          case 'fecha_limite':
+            aVal = new Date(a.fecha_limite_pago).getTime();
+            bVal = new Date(b.fecha_limite_pago).getTime();
+            break;
+          case 'fecha_creacion':
+            aVal = new Date(a.fecha_creacion).getTime();
+            bVal = new Date(b.fecha_creacion).getTime();
+            break;
+          default:
+            aVal = '';
+            bVal = '';
+        }
+        
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      }
+      
+      // Ordenamiento por defecto: urgencia y fecha límite de pago
       const fechaA = new Date(a.fecha_limite_pago).getTime();
       const fechaB = new Date(b.fecha_limite_pago).getTime();
       const esUrgenteA = fechaA < tresDiasDespues.getTime();
@@ -404,13 +513,69 @@ export default function SolicitudesPendientesPage() {
                   <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                     <tr>
                       <th className="px-1 py-2"><input type="checkbox" checked={selectedViaticos.length === viaticos.length && viaticos.length > 0} onChange={toggleAllViaticos} /></th>
-                      <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Folio</th>
-                      <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Usuario</th>
-                      <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">TIPO DE PAGO</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">DEPTO.</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">MONTO</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">LÍMITE</th>
-                      <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">SOLICITUD</th>
+                      <th 
+                        className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                        onClick={() => handleSort('folio')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Folio
+                          {getSortIcon('folio')}
+                        </div>
+                      </th>
+                      <th 
+                        className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                        onClick={() => handleSort('usuario')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Usuario
+                          {getSortIcon('usuario')}
+                        </div>
+                      </th>
+                      <th 
+                        className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                        onClick={() => handleSort('tipo_pago')}
+                      >
+                        <div className="flex items-center gap-2">
+                          TIPO DE PAGO
+                          {getSortIcon('tipo_pago')}
+                        </div>
+                      </th>
+                      <th 
+                        className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                        onClick={() => handleSort('departamento')}
+                      >
+                        <div className="flex items-center gap-2">
+                          DEPTO.
+                          {getSortIcon('departamento')}
+                        </div>
+                      </th>
+                      <th 
+                        className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                        onClick={() => handleSort('monto')}
+                      >
+                        <div className="flex items-center gap-2">
+                          MONTO
+                          {getSortIcon('monto')}
+                        </div>
+                      </th>
+                      <th 
+                        className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                        onClick={() => handleSort('fecha_limite')}
+                      >
+                        <div className="flex items-center gap-2">
+                          LÍMITE
+                          {getSortIcon('fecha_limite')}
+                        </div>
+                      </th>
+                      <th 
+                        className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                        onClick={() => handleSort('fecha_creacion')}
+                      >
+                        <div className="flex items-center gap-2">
+                          SOLICITUD
+                          {getSortIcon('fecha_creacion')}
+                        </div>
+                      </th>
                       <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">CUENTA/TARJETA</th>
                       <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">BANCO</th>
                     </tr>
@@ -495,13 +660,69 @@ export default function SolicitudesPendientesPage() {
                         <table className="min-w-max w-full divide-y divide-gray-100 text-xs md:text-sm">
                           <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
-                              <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Folio</th>
-                              <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Usuario</th>
-                              <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">TIPO DE PAGO</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">DEPTO.</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">MONTO</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">LÍMITE</th>
-                              <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">SOLICITUD</th>
+                              <th 
+                                className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('folio')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Folio
+                                  {getSortIcon('folio')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('usuario')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Usuario
+                                  {getSortIcon('usuario')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('tipo_pago')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  TIPO DE PAGO
+                                  {getSortIcon('tipo_pago')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('departamento')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  DEPTO.
+                                  {getSortIcon('departamento')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('monto')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  MONTO
+                                  {getSortIcon('monto')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('fecha_limite')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  LÍMITE
+                                  {getSortIcon('fecha_limite')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('fecha_creacion')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  SOLICITUD
+                                  {getSortIcon('fecha_creacion')}
+                                </div>
+                              </th>
                               <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">CUENTA/TARJETA</th>
                               <th className="px-3 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">BANCO</th>
                               <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">Acciones</th>
