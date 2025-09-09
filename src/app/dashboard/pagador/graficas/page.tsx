@@ -4,20 +4,17 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 
 import { useEffect, useState } from 'react';
-import { Bar, Pie, Line, Doughnut } from 'react-chartjs-2';
+import { Bar, Pie, Doughnut } from 'react-chartjs-2';
 import { 
   MdInsertChartOutlined, 
   MdTrendingUp, 
   MdPieChart, 
-  MdInfoOutline,
-  MdBarChart,
   MdFilterList,
   MdCompare,
   MdBusiness,
   MdPayments,
   MdAnalytics,
-  MdRefresh,
-  MdExpandMore
+  MdRefresh
 } from 'react-icons/md';
 import {
   Chart as ChartJS,
@@ -34,8 +31,7 @@ import {
   TimeScale
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import type { ScriptableContext, TooltipItem } from 'chart.js';
-import type { Context as DataLabelsContext } from 'chartjs-plugin-datalabels/types';
+import type { TooltipItem } from 'chart.js';
 
 ChartJS.register(
   ArcElement, 
@@ -53,7 +49,6 @@ ChartJS.register(
 );
 
 type EstadoResumen = { estado: string; total: number; monto_total: number; origen?: string };
-type TendenciaMensual = { mes: string; total: number; monto_total: number; origen?: string };
 type GastoNeto = { departamento: string; gasto_total: number; total_transacciones: number; promedio_por_transaccion: number };
 type GastoTipoPago = { tipo_pago: string; total_transacciones: number; monto_total: number; promedio_monto: number };
 type TendenciaTemporal = { periodo: string; monto_total: number; total_transacciones: number };
@@ -68,7 +63,6 @@ type Departamento = { departamento: string };
 
 export default function PagadorGraficasPage() {
   const [resumenEstado, setResumenEstado] = useState<EstadoResumen[]>([]);
-  const [tendenciaMensual, setTendenciaMensual] = useState<TendenciaMensual[]>([]);
   const [gastoNeto, setGastoNeto] = useState<GastoNeto[]>([]);
   const [gastosPorTipo, setGastosPorTipo] = useState<GastoTipoPago[]>([]);
   const [tendenciaTemporal, setTendenciaTemporal] = useState<TendenciaTemporal[]>([]);
@@ -89,10 +83,9 @@ export default function PagadorGraficasPage() {
         const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
         
         const [
-          res1, res2, res3, res4, res5, res6, res7
+          res1, res2, res3, res4, res5, res6
         ] = await Promise.all([
           fetch('/api/estadisticas-pagador-dashboard/resumen-estado', { headers }),
-          fetch('/api/estadisticas-pagador-dashboard/tendencia-mensual', { headers }),
           fetch(`/api/estadisticas-pagador-dashboard/gasto-neto${departamentoSeleccionado ? `?departamento=${departamentoSeleccionado}` : ''}`, { headers }),
           fetch('/api/estadisticas-pagador-dashboard/gastos-por-tipo-pago', { headers }),
           fetch(`/api/estadisticas-pagador-dashboard/tendencia-temporal?periodo=${periodoTemporal}`, { headers }),
@@ -100,17 +93,16 @@ export default function PagadorGraficasPage() {
           fetch('/api/estadisticas-pagador-dashboard/departamentos', { headers })
         ]);
         
-        if (!res1.ok || !res2.ok || !res3.ok || !res4.ok || !res5.ok || !res6.ok || !res7.ok) {
+        if (!res1.ok || !res2.ok || !res3.ok || !res4.ok || !res5.ok || !res6.ok) {
           throw new Error('Error al obtener datos');
         }
         
         setResumenEstado(await res1.json());
-        setTendenciaMensual(await res2.json());
-        setGastoNeto(await res3.json());
-        setGastosPorTipo(await res4.json());
-        setTendenciaTemporal(await res5.json());
-        setResumenMesActual(await res6.json());
-        setDepartamentos(await res7.json());
+        setGastoNeto(await res2.json());
+        setGastosPorTipo(await res3.json());
+        setTendenciaTemporal(await res4.json());
+        setResumenMesActual(await res5.json());
+        setDepartamentos(await res6.json());
       } catch (err) {
         if (err instanceof Error) setError(err.message);
         else setError('Error desconocido');
@@ -181,8 +173,6 @@ export default function PagadorGraficasPage() {
 
   // Calcular estadísticas
   const totalSolicitudes = resumenEstado.reduce((acc, curr) => acc + curr.total, 0);
-  const pagadas = resumenEstado.find(e => e.estado.toLowerCase() === 'pagada')?.total || 0;
-  const porcentajePagadas = totalSolicitudes > 0 ? ((pagadas / totalSolicitudes) * 100).toFixed(1) : '0.0';
 
   // Paleta de colores profesional
   const estadoColors = {
@@ -345,7 +335,7 @@ export default function PagadorGraficasPage() {
           {/* Selector de vista */}
           <select
             value={vistaActual}
-            onChange={(e) => setVistaActual(e.target.value as any)}
+            onChange={(e) => setVistaActual(e.target.value as 'general' | 'departamentos' | 'comparativa' | 'tipos-pago')}
             className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="general">Vista General</option>
@@ -373,7 +363,7 @@ export default function PagadorGraficasPage() {
             {['semana', 'mes', 'año'].map((periodo) => (
               <button
                 key={periodo}
-                onClick={() => setPeriodoTemporal(periodo as any)}
+                onClick={() => setPeriodoTemporal(periodo as 'semana' | 'mes' | 'año')}
                 className={`px-4 py-1 rounded-md text-sm font-medium transition-colors capitalize ${
                   periodoTemporal === periodo
                     ? 'bg-blue-600 text-white shadow-sm'
@@ -399,35 +389,6 @@ export default function PagadorGraficasPage() {
 
   return (
     <>
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes float {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-          100% { transform: translateY(0px); }
-        }
-        
-        .stat-card {
-          animation: fadeIn 0.6s ease-out forwards;
-          transform: translateY(20px);
-          opacity: 0;
-        }
-        
-        .chart-container {
-          animation: fadeIn 0.8s ease-out forwards;
-          animation-delay: 0.2s;
-          transform: translateY(20px);
-          opacity: 0;
-        }
-        
-        .floating {
-          animation: float 3s ease-in-out infinite;
-        }
-      `}</style>
 
       <ProtectedRoute requiredRoles={['pagador_banca']}>
         <PagadorLayout>
@@ -435,7 +396,7 @@ export default function PagadorGraficasPage() {
             <div className="max-w-7xl mx-auto space-y-8">
               {/* Header */}
               <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 floating">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 animate-bounce">
                   <MdInsertChartOutlined className="text-white text-2xl" />
                 </div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">
@@ -535,7 +496,7 @@ export default function PagadorGraficasPage() {
                                 legend: { display: false },
                                 tooltip: {
                                   callbacks: {
-                                    label: (context: any) => formatCurrency(context.parsed.y)
+                                    label: (context: TooltipItem<'bar'>) => formatCurrency(context.parsed.y)
                                   }
                                 }
                               },
@@ -543,7 +504,7 @@ export default function PagadorGraficasPage() {
                                 y: {
                                   beginAtZero: true,
                                   ticks: {
-                                    callback: (value: any) => formatCurrency(value)
+                                    callback: (value: string | number) => formatCurrency(Number(value))
                                   }
                                 }
                               }
@@ -656,9 +617,9 @@ export default function PagadorGraficasPage() {
                                 },
                                 tooltip: {
                                   callbacks: {
-                                    label: (context: any) => {
+                                    label: (context: TooltipItem<'doughnut'>) => {
                                       const value = context.parsed;
-                                      const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                                      const total = (context.dataset.data as number[]).reduce((a: number, b: number) => a + b, 0);
                                       const percentage = ((value / total) * 100).toFixed(1);
                                       return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
                                     }
