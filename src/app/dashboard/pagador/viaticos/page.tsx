@@ -22,6 +22,11 @@ import {
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { ViaticoDetailModal } from '@/components/viaticos/ViaticoDetailModal';
+import { 
+  exportMisViaticosCSV, 
+  exportMisViaticosExcel, 
+  exportMisViaticosPDF 
+} from '@/utils/exportMisViaticos';
 
 // Tipos mejorados
 type Viatico = BaseViatico & {
@@ -119,6 +124,7 @@ export default function ViaticosPagadorPage() {
   const [processing, setProcessing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   
   // Estados del modal
@@ -161,6 +167,21 @@ export default function ViaticosPagadorPage() {
   useEffect(() => {
     loadViaticos();
   }, [loadViaticos]);
+
+  // Cerrar menú de exportación al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showExportMenu) {
+        const target = event.target as Element;
+        if (!target.closest('.export-menu')) {
+          setShowExportMenu(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showExportMenu]);
 
   // Viáticos filtrados
   const viaticosFiltrados = useMemo(() => {
@@ -312,33 +333,63 @@ export default function ViaticosPagadorPage() {
     setShowDetailModal(true);
   }, []);
 
-  // Función para exportar
-  const handleExport = useCallback(() => {
-    const csvContent = [
-      ['Folio', 'Usuario', 'Beneficiario', 'Banco', 'Fecha Límite', 'Tipo Cuenta', 'Departamento', 'Monto', 'Cuenta Destino'],
-      ...viaticosFiltrados.map(v => [
-        v.folio || '',
-        v.usuario_nombre || '',
-        v.nombre_persona || '',
-        v.banco_destino || '',
-        v.fecha_limite_pago ? new Date(v.fecha_limite_pago).toLocaleDateString('es-MX') : '',
-        [v.tipo_cuenta_destino, v.tipo_tarjeta].filter(Boolean).join(' / '),
-        v.departamento || '',
-        v.monto || '',
-        v.cuenta_destino || ''
-      ])
-    ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+  // Funciones para exportar en diferentes formatos
+  const handleExportCSV = useCallback(async () => {
+    try {
+      setProcessing(true);
+      const viaticosParaExportar = viaticosFiltrados.map(v => ({
+        ...v,
+        monto: Number(v.monto) || 0
+      }));
+      
+      exportMisViaticosCSV(viaticosParaExportar, 'filtrados');
+      addNotification('success', 'Archivo CSV exportado correctamente');
+    } catch (error) {
+      console.error('Error exportando CSV:', error);
+      addNotification('error', 'Error al exportar CSV');
+    } finally {
+      setProcessing(false);
+      setShowExportMenu(false);
+    }
+  }, [viaticosFiltrados, addNotification]);
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `viaticos_${filters.estado}_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    
-    addNotification('success', 'Archivo exportado correctamente');
-  }, [viaticosFiltrados, filters.estado, addNotification]);
+  const handleExportExcel = useCallback(async () => {
+    try {
+      setProcessing(true);
+      const viaticosParaExportar = viaticosFiltrados.map(v => ({
+        ...v,
+        monto: Number(v.monto) || 0
+      }));
+      
+      await exportMisViaticosExcel(viaticosParaExportar, 'filtrados');
+      addNotification('success', 'Archivo Excel exportado correctamente');
+    } catch (error) {
+      console.error('Error exportando Excel:', error);
+      addNotification('error', 'Error al exportar Excel');
+    } finally {
+      setProcessing(false);
+      setShowExportMenu(false);
+    }
+  }, [viaticosFiltrados, addNotification]);
+
+  const handleExportPDF = useCallback(async () => {
+    try {
+      setProcessing(true);
+      const viaticosParaExportar = viaticosFiltrados.map(v => ({
+        ...v,
+        monto: Number(v.monto) || 0
+      }));
+      
+      await exportMisViaticosPDF(viaticosParaExportar, 'filtrados');
+      addNotification('success', 'Archivo PDF exportado correctamente');
+    } catch (error) {
+      console.error('Error exportando PDF:', error);
+      addNotification('error', 'Error al exportar PDF');
+    } finally {
+      setProcessing(false);
+      setShowExportMenu(false);
+    }
+  }, [viaticosFiltrados, addNotification]);
 
   if (loading) {
     return (
@@ -387,13 +438,50 @@ export default function ViaticosPagadorPage() {
                   <Filter className="w-5 h-5" />
                   Filtros
                 </button>
-                <button
-                  onClick={handleExport}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-lg"
-                >
-                  <Download className="w-5 h-5" />
-                  Exportar
-                </button>
+                
+                {/* Menú desplegable de exportación */}
+                <div className="relative export-menu">
+                  <button
+                    onClick={() => setShowExportMenu(!showExportMenu)}
+                    disabled={processing}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-lg disabled:opacity-60"
+                  >
+                    <Download className="w-5 h-5" />
+                    Exportar
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {showExportMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="py-2">
+                        <button
+                          onClick={handleExportPDF}
+                          disabled={processing}
+                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Exportar PDF
+                        </button>
+                        <button
+                          onClick={handleExportExcel}
+                          disabled={processing}
+                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Exportar Excel
+                        </button>
+                        <button
+                          onClick={handleExportCSV}
+                          disabled={processing}
+                          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Exportar CSV
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
