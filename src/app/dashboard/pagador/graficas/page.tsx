@@ -14,7 +14,10 @@ import {
   MdPayments,
   MdAnalytics,
   MdRefresh,
-  MdPieChart
+  MdPieChart,
+  MdShowChart,
+  MdAttachMoney,
+  MdDateRange
 } from 'react-icons/md';
 import {
   Chart as ChartJS,
@@ -117,16 +120,18 @@ export default function PagadorGraficasPage() {
     return (
       <ProtectedRoute requiredRoles={['pagador_banca']}>
         <PagadorLayout>
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="text-center bg-white rounded-lg shadow-sm border border-gray-200 p-8 max-w-md mx-4">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+            <div className="text-center bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8 max-w-md mx-4">
+              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <div className="animate-spin w-10 h-10 border-3 border-white border-t-transparent rounded-full"></div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Cargando Dashboard</h3>
-              <p className="text-gray-600 mb-4">Procesando información financiera...</p>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">
+                Cargando Dashboard
+              </h3>
+              <p className="text-gray-600 mb-6 text-lg">Procesando información financiera...</p>
               
-              <div className="w-48 h-2 bg-gray-100 rounded-full overflow-hidden mx-auto">
-                <div className="h-full bg-blue-600 rounded-full animate-pulse" style={{width: '60%'}}></div>
+              <div className="w-64 h-3 bg-gray-200 rounded-full overflow-hidden mx-auto shadow-inner">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full animate-pulse shadow-sm" style={{width: '60%'}}></div>
               </div>
             </div>
           </div>
@@ -139,16 +144,16 @@ export default function PagadorGraficasPage() {
     return (
       <ProtectedRoute requiredRoles={['pagador_banca']}>
         <PagadorLayout>
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center max-w-md mx-4">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MdInsertChartOutlined className="text-red-600 text-2xl" />
+          <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
+            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-red-200/50 p-8 text-center max-w-md mx-4">
+              <div className="w-20 h-20 bg-gradient-to-r from-red-400 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <MdInsertChartOutlined className="text-white text-3xl" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Error de Conexión</h3>
-              <p className="text-gray-600 mb-6 bg-red-50 rounded-md p-3 border border-red-200 text-sm">{error}</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Error de Conexión</h3>
+              <p className="text-gray-600 mb-6 bg-red-50 rounded-xl p-4 border border-red-200 text-sm leading-relaxed">{error}</p>
               <button 
                 onClick={() => window.location.reload()} 
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium text-sm"
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-3 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 font-semibold text-sm shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Reintentar
               </button>
@@ -178,38 +183,6 @@ export default function PagadorGraficasPage() {
     return departamento.charAt(0).toUpperCase() + departamento.slice(1).toLowerCase();
   };
 
-  // Paleta de colores profesional
-  const estadoColors = {
-    'pendiente': { 
-      bg: 'rgba(99, 102, 241, 0.9)', 
-      border: '#6366f1', 
-      gradient: ['#818cf8', '#6366f1'], 
-      hover: '#4f46e5',
-      text: '#4f46e5'
-    },
-    'autorizada': { 
-      bg: 'rgba(16, 185, 129, 0.9)', 
-      border: '#10b981', 
-      gradient: ['#34d399', '#10b981'], 
-      hover: '#059669',
-      text: '#059669'
-    },
-    'rechazada': { 
-      bg: 'rgba(245, 158, 11, 0.9)', 
-      border: '#f59e0b', 
-      gradient: ['#fbbf24', '#f59e0b'], 
-      hover: '#d97706',
-      text: '#d97706'
-    },
-    'pagada': { 
-      bg: 'rgba(59, 130, 246, 0.9)', 
-      border: '#3b82f6', 
-      gradient: ['#60a5fa', '#3b82f6'], 
-      hover: '#2563eb',
-      text: '#2563eb'
-    }
-  };
-
   // Consolidar estados duplicados
   const estadosConsolidados = resumenEstado.reduce((acc, estado) => {
     const estadoKey = estado.estado.toLowerCase();
@@ -228,39 +201,55 @@ export default function PagadorGraficasPage() {
   // Calcular total de solicitudes usando estados consolidados
   const totalSolicitudes = estadosConsolidados.reduce((acc: number, curr) => acc + curr.total, 0);
 
-  // Datos para gráfica de pie (usando estados consolidados)
+  // Datos para gráfica de pie mejorada
   const pieData = {
     labels: estadosConsolidados.map(estado => estado.estado.charAt(0).toUpperCase() + estado.estado.slice(1)),
     datasets: [{
       data: estadosConsolidados.map(estado => estado.total),
-      backgroundColor: estadosConsolidados.map(estado => 
-        estadoColors[estado.estado.toLowerCase() as keyof typeof estadoColors]?.bg || 'rgba(203, 213, 225, 0.9)'
-      ),
-      borderColor: estadosConsolidados.map(estado => 
-        estadoColors[estado.estado.toLowerCase() as keyof typeof estadoColors]?.border || '#cbd5e1'
-      ),
+      backgroundColor: [
+        'rgba(99, 102, 241, 0.85)',
+        'rgba(16, 185, 129, 0.85)',
+        'rgba(245, 158, 11, 0.85)',
+        'rgba(59, 130, 246, 0.85)',
+        'rgba(139, 92, 246, 0.85)'
+      ],
+      borderColor: [
+        '#6366f1',
+        '#10b981',
+        '#f59e0b',
+        '#3b82f6',
+        '#8b5cf6'
+      ],
       borderWidth: 3,
-      hoverBackgroundColor: estadosConsolidados.map(estado => 
-        estadoColors[estado.estado.toLowerCase() as keyof typeof estadoColors]?.hover || '#94a3b8'
-      ),
-      hoverBorderWidth: 4
+      hoverBackgroundColor: [
+        'rgba(99, 102, 241, 0.95)',
+        'rgba(16, 185, 129, 0.95)',
+        'rgba(245, 158, 11, 0.95)',
+        'rgba(59, 130, 246, 0.95)',
+        'rgba(139, 92, 246, 0.95)'
+      ],
+      hoverBorderWidth: 4,
+      shadowOffsetX: 3,
+      shadowOffsetY: 3,
+      shadowBlur: 10,
+      shadowColor: 'rgba(0, 0, 0, 0.2)'
     }]
   };
 
   const pieOptions = {
     plugins: {
       legend: {
-        position: 'right' as const,
+        position: 'bottom' as const,
         labels: {
           usePointStyle: true,
-          pointStyle: 'circle' as const,
-          padding: 25,
+          pointStyle: 'rectRounded' as const,
+          padding: 20,
           font: { 
-            size: 16, 
+            size: 14, 
             weight: 600,
             family: 'Inter, system-ui, sans-serif'
           },
-          color: '#1f2937',
+          color: '#374151',
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           generateLabels: (chart: any) => {
             const datasets = chart.data.datasets;
@@ -328,130 +317,181 @@ export default function PagadorGraficasPage() {
     }
   };
 
-  // Renderizar barra superior con métricas
+  // Renderizar barra superior con métricas mejorada
   const renderBarraSuperior = () => {
     if (!resumenMesActual) return null;
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <MdPayments className="text-3xl opacity-80" />
-            <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Mes Actual</span>
-          </div>
-          <div className="text-3xl font-bold mb-1">
-            {formatCurrency(resumenMesActual.gasto_mes_actual)}
-          </div>
-          <div className="text-sm opacity-90">
-            {resumenMesActual.transacciones_mes_actual} transacciones
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        {/* Mes Actual */}
+        <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl p-8 text-white shadow-2xl border border-blue-400/30 hover:shadow-3xl transition-all duration-300 transform hover:scale-[1.02]">
+          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                <MdAttachMoney className="text-3xl" />
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full">
+                <span className="text-xs font-semibold">Mes Actual</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-4xl font-black tracking-tight">
+                {formatCurrency(resumenMesActual.gasto_mes_actual)}
+              </div>
+              <div className="text-blue-100 font-medium">
+                {resumenMesActual.transacciones_mes_actual} transacciones
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className={`rounded-xl p-6 text-white shadow-lg ${
+        {/* Comparación */}
+        <div className={`group relative overflow-hidden rounded-2xl p-8 text-white shadow-2xl border border-opacity-30 hover:shadow-3xl transition-all duration-300 transform hover:scale-[1.02] ${
           resumenMesActual.diferencia >= 0 
-            ? 'bg-gradient-to-r from-red-500 to-red-600' 
-            : 'bg-gradient-to-r from-green-500 to-green-600'
+            ? 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 border-red-400' 
+            : 'bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 border-emerald-400'
         }`}>
-          <div className="flex items-center justify-between mb-4">
-            <MdTrendingUp className="text-3xl opacity-80" />
-            <span className="text-xs bg-white/20 px-2 py-1 rounded-full">vs Mes Anterior</span>
-          </div>
-          <div className="text-3xl font-bold mb-1">
-            {formatCurrency(Math.abs(resumenMesActual.diferencia))}
-          </div>
-          <div className="text-sm opacity-90">
-            {formatPercentage(resumenMesActual.porcentaje_cambio)} cambio
+          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                <MdTrendingUp className="text-3xl" />
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full">
+                <span className="text-xs font-semibold">vs Mes Anterior</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-4xl font-black tracking-tight">
+                {formatCurrency(Math.abs(resumenMesActual.diferencia))}
+              </div>
+              <div className={`font-medium ${resumenMesActual.diferencia >= 0 ? 'text-red-100' : 'text-emerald-100'}`}>
+                {formatPercentage(resumenMesActual.porcentaje_cambio)} cambio
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <MdAnalytics className="text-3xl opacity-80" />
-            <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Balance</span>
+        {/* Balance */}
+        <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-2xl p-8 text-white shadow-2xl border border-purple-400/30 hover:shadow-3xl transition-all duration-300 transform hover:scale-[1.02]">
+          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                <MdAnalytics className="text-3xl" />
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full">
+                <span className="text-xs font-semibold">Histórico</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-4xl font-black tracking-tight">
+                {formatCurrency(resumenMesActual.gasto_mes_anterior)}
+              </div>
+              <div className="text-purple-100 font-medium">Mes anterior</div>
+            </div>
           </div>
-          <div className="text-3xl font-bold mb-1">
-            {formatCurrency(resumenMesActual.gasto_mes_anterior)}
-          </div>
-          <div className="text-sm opacity-90">Mes anterior</div>
         </div>
       </div>
     );
   };
 
-  // Renderizar controles de filtros
+  // Renderizar controles mejorados
   const renderControles = () => (
-    <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 mb-8">
-      <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 mb-10 overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-6 border-b border-gray-200/50">
         <div className="flex items-center space-x-4">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-            <MdFilterList className="text-blue-600 text-xl" />
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <MdFilterList className="text-white text-xl" />
           </div>
           <div>
-            <h3 className="font-bold text-gray-900 text-lg">Panel de Control</h3>
-            <p className="text-sm text-gray-500">Configura la vista y filtros</p>
+            <h3 className="font-bold text-gray-900 text-xl">Panel de Control</h3>
+            <p className="text-sm text-gray-600">Configura la vista y filtros del dashboard</p>
           </div>
         </div>
+      </div>
 
-        <div className="flex flex-wrap gap-4">
+      <div className="p-6">
+        <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-end">
           {/* Selector de vista */}
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-gray-700 mb-2">VISTA</label>
-            <select
-              value={vistaActual}
-              onChange={(e) => setVistaActual(e.target.value as 'general' | 'departamentos' | 'comparativa' | 'tipos-pago')}
-              className="px-4 py-3 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-colors min-w-[180px]"
-            >
-              <option value="general">Vista General</option>
-              <option value="departamentos">Por Departamentos</option>
-              <option value="tipos-pago">Por Tipos de Pago</option>
-              <option value="comparativa">Comparativas</option>
-            </select>
+          <div className="flex flex-col space-y-2">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Vista</label>
+            <div className="relative">
+              <select
+                value={vistaActual}
+                onChange={(e) => setVistaActual(e.target.value as 'general' | 'departamentos' | 'comparativa' | 'tipos-pago')}
+                className="appearance-none px-4 py-3 pr-10 border-2 border-gray-300 rounded-xl text-sm font-semibold text-gray-900 bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-400 transition-all duration-200 min-w-[200px] shadow-sm"
+              >
+                <option value="general">Vista General</option>
+                <option value="departamentos">Por Departamentos</option>
+                <option value="tipos-pago">Por Tipos de Pago</option>
+                <option value="comparativa">Comparativas</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Selector de departamento */}
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-gray-700 mb-2">DEPARTAMENTO</label>
-            <select
-              value={departamentoSeleccionado}
-              onChange={(e) => setDepartamentoSeleccionado(e.target.value)}
-              className="px-4 py-3 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-colors min-w-[180px]"
-            >
-              <option value="">Todos los departamentos</option>
-              {departamentos.map((dept) => (
-                <option key={dept.departamento} value={dept.departamento}>
-                  {formatDepartmentName(dept.departamento)}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-col space-y-2">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Departamento</label>
+            <div className="relative">
+              <select
+                value={departamentoSeleccionado}
+                onChange={(e) => setDepartamentoSeleccionado(e.target.value)}
+                className="appearance-none px-4 py-3 pr-10 border-2 border-gray-300 rounded-xl text-sm font-semibold text-gray-900 bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-400 transition-all duration-200 min-w-[200px] shadow-sm"
+              >
+                <option value="">Todos los departamentos</option>
+                {departamentos.map((dept) => (
+                  <option key={dept.departamento} value={dept.departamento}>
+                    {formatDepartmentName(dept.departamento)}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Selector de período */}
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-gray-700 mb-2">PERÍODO</label>
-            <div className="flex bg-gray-100 rounded-lg p-1 border-2 border-gray-300">
-              {['semana', 'mes', 'año'].map((periodo) => (
+          <div className="flex flex-col space-y-2">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Período</label>
+            <div className="flex bg-gray-100 rounded-xl p-1 border-2 border-gray-200 shadow-inner">
+              {[
+                { key: 'semana', label: 'Semana' },
+                { key: 'mes', label: 'Mes' },
+                { key: 'año', label: 'Año' }
+              ].map((periodo) => (
                 <button
-                  key={periodo}
-                  onClick={() => setPeriodoTemporal(periodo as 'semana' | 'mes' | 'año')}
-                  className={`px-4 py-2 rounded-md text-sm font-bold transition-all capitalize ${
-                    periodoTemporal === periodo
-                      ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                  key={periodo.key}
+                  onClick={() => setPeriodoTemporal(periodo.key as 'semana' | 'mes' | 'año')}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
+                    periodoTemporal === periodo.key
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105'
                       : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'
                   }`}
                 >
-                  {periodo}
+                  {periodo.label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-gray-700 mb-2">ACCIÓN</label>
+          {/* Botón de actualizar */}
+          <div className="flex flex-col space-y-2">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Acción</label>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-medium hover:from-blue-700 hover:to-blue-800 transition-all flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="group px-6 py-3 bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white rounded-xl text-sm font-bold hover:from-blue-700 hover:via-blue-800 hover:to-purple-800 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              <MdRefresh className="text-lg" />
+              <MdRefresh className="text-lg group-hover:rotate-180 transition-transform duration-500" />
               <span>Actualizar</span>
             </button>
           </div>
@@ -462,21 +502,20 @@ export default function PagadorGraficasPage() {
 
   return (
     <>
-
       <ProtectedRoute requiredRoles={['pagador_banca']}>
         <PagadorLayout>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-            <div className="max-w-7xl mx-auto space-y-8">
-              {/* Header */}
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 animate-bounce">
-                  <MdInsertChartOutlined className="text-white text-2xl" />
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+            <div className="max-w-7xl mx-auto space-y-10">
+              {/* Header mejorado */}
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-700 rounded-3xl mb-6 shadow-2xl animate-pulse">
+                  <MdInsertChartOutlined className="text-white text-3xl" />
                 </div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">
+                <h1 className="text-6xl font-black bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-4 tracking-tight">
                   Dashboard Financiero
                 </h1>
-                <p className="text-gray-600 text-lg">
-                  Análisis detallado de pagos y transacciones
+                <p className="text-gray-600 text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+                  Análisis detallado y visualización inteligente de pagos, transacciones y tendencias financieras
                 </p>
               </div>
 
@@ -489,106 +528,140 @@ export default function PagadorGraficasPage() {
               {/* Contenido según la vista seleccionada */}
               {vistaActual === 'general' && (
                 <>
-                  {/* Gráfica de estado */}
-                  <div className="chart-container bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <MdPieChart className="text-blue-600 text-lg" />
+                  {/* Grid de gráficas principales */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                    {/* Gráfica de estado */}
+                    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                      <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-6 border-b border-gray-200/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                              <MdPieChart className="text-white text-lg" />
+                            </div>
+                            <div>
+                              <h2 className="text-xl font-bold text-gray-900">Distribución por Estado</h2>
+                              <p className="text-sm text-gray-600">Estado actual de las solicitudes</p>
+                            </div>
                           </div>
-                          <div>
-                            <h2 className="text-lg font-semibold text-gray-900">Distribución por Estado</h2>
-                            <p className="text-sm text-gray-500">Estado actual de las solicitudes</p>
+                          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full shadow-lg">
+                            <span className="text-sm font-bold">{totalSolicitudes} solicitudes</span>
                           </div>
-                        </div>
-                        <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-1 rounded-md">
-                          {totalSolicitudes} solicitudes
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex flex-col lg:flex-row">
-                      <div className="flex-1 p-6">
-                        <div className="h-80">
+                      
+                      <div className="p-8">
+                        <div className="h-96">
                           {resumenEstado.length > 0 ? (
                             <Pie data={pieData} options={pieOptions} />
                           ) : (
                             <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                              <MdPieChart size={48} className="mb-3" />
-                              <p className="text-base font-semibold">Sin datos disponibles</p>
+                              <MdPieChart size={64} className="mb-4 opacity-50" />
+                              <p className="text-lg font-semibold">Sin datos disponibles</p>
+                              <p className="text-sm">Los datos aparecerán aquí cuando estén disponibles</p>
                             </div>
                           )}
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Tendencia temporal */}
-                  <div className="chart-container bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                            <MdTrendingUp className="text-green-600 text-lg" />
+                    {/* Tendencia temporal */}
+                    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                      <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-6 border-b border-gray-200/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                              <MdTrendingUp className="text-white text-lg" />
+                            </div>
+                            <div>
+                              <h2 className="text-xl font-bold text-gray-900">
+                                Tendencia por {periodoTemporal}
+                              </h2>
+                              <p className="text-sm text-gray-600">
+                                Evolución de gastos ({periodoTemporal})
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h2 className="text-lg font-semibold text-gray-900">
-                              Tendencia por {periodoTemporal}
-                            </h2>
-                            <p className="text-sm text-gray-500">
-                              Evolución de gastos ({periodoTemporal})
-                            </p>
+                          <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-2 rounded-full shadow-lg">
+                            <span className="text-sm font-bold">
+                              {formatCurrency(tendenciaTemporal.reduce((sum, item) => sum + item.monto_total, 0))}
+                            </span>
                           </div>
-                        </div>
-                        <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-1 rounded-md">
-                          {formatCurrency(tendenciaTemporal.reduce((sum, item) => sum + item.monto_total, 0))}
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="p-6">
-                      <div className="h-80">
-                        {tendenciaTemporal.length > 0 ? (
-                          <Bar 
-                            data={{
-                              labels: tendenciaTemporal.map(item => item.periodo),
-                              datasets: [{
-                                label: 'Monto Total',
-                                data: tendenciaTemporal.map(item => item.monto_total),
-                                backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                                borderColor: 'rgb(59, 130, 246)',
-                                borderWidth: 2,
-                                borderRadius: 8
-                              }]
-                            }} 
-                            options={{
-                              responsive: true,
-                              maintainAspectRatio: false,
-                              plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                  callbacks: {
-                                    label: (context: TooltipItem<'bar'>) => formatCurrency(context.parsed.y)
+                      
+                      <div className="p-8">
+                        <div className="h-96">
+                          {tendenciaTemporal.length > 0 ? (
+                            <Bar 
+                              data={{
+                                labels: tendenciaTemporal.map(item => item.periodo),
+                                datasets: [{
+                                  label: 'Monto Total',
+                                  data: tendenciaTemporal.map(item => item.monto_total),
+                                  backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                                  borderColor: 'rgb(16, 185, 129)',
+                                  borderWidth: 2,
+                                  borderRadius: 12,
+                                  borderSkipped: false,
+                                  hoverBackgroundColor: 'rgba(16, 185, 129, 0.9)',
+                                  hoverBorderColor: 'rgb(5, 150, 105)',
+                                  hoverBorderWidth: 3
+                                }]
+                              }} 
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: { display: false },
+                                  tooltip: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                                    titleColor: '#1e293b',
+                                    bodyColor: '#374151',
+                                    borderColor: '#d1d5db',
+                                    borderWidth: 2,
+                                    cornerRadius: 12,
+                                    padding: 16,
+                                    callbacks: {
+                                      label: (context: TooltipItem<'bar'>) => formatCurrency(context.parsed.y)
+                                    }
+                                  }
+                                },
+                                scales: {
+                                  x: {
+                                    grid: {
+                                      display: false
+                                    },
+                                    ticks: {
+                                      color: '#6b7280',
+                                      font: {
+                                        weight: 'bold'
+                                      }
+                                    }
+                                  },
+                                  y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                      color: 'rgba(107, 114, 128, 0.1)'
+                                    },
+                                    ticks: {
+                                      color: '#6b7280',
+                                      font: {
+                                        weight: 'bold'
+                                      },
+                                      callback: (value: string | number) => formatCurrency(Number(value))
+                                    }
                                   }
                                 }
-                              },
-                              scales: {
-                                y: {
-                                  beginAtZero: true,
-                                  ticks: {
-                                    callback: (value: string | number) => formatCurrency(Number(value))
-                                  }
-                                }
-                              }
-                            }}
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                            <MdInsertChartOutlined size={48} className="mb-3" />
-                            <p className="text-base font-semibold">Sin datos disponibles</p>
-                          </div>
-                        )}
+                              }}
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                              <MdShowChart size={64} className="mb-4 opacity-50" />
+                              <p className="text-lg font-semibold">Sin datos de tendencia</p>
+                              <p className="text-sm">Los datos aparecerán cuando haya información temporal</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -596,42 +669,49 @@ export default function PagadorGraficasPage() {
               )}
 
               {vistaActual === 'departamentos' && (
-                <div className="chart-container bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
+                <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                  <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 border-b border-gray-200/50">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                        <MdBusiness className="text-yellow-600 text-lg" />
+                      <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <MdBusiness className="text-white text-xl" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Gastos por Departamento</h2>
-                        <p className="text-sm text-gray-500">Distribución de gastos por área</p>
+                        <h2 className="text-2xl font-bold text-gray-900">Gastos por Departamento</h2>
+                        <p className="text-sm text-gray-600">Distribución de gastos por área organizacional</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="p-6">
+                  <div className="p-8">
                     {gastoNeto.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {gastoNeto.map((dept, index) => (
-                          <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 shadow-sm border border-blue-200">
-                            <div className="flex items-center justify-between mb-4">
-                              <h3 className="font-semibold text-gray-900 truncate">{formatDepartmentName(dept.departamento)}</h3>
-                              <MdBusiness className="text-blue-600" />
-                            </div>
-                            <div className="space-y-3">
-                              <div>
-                                <div className="text-2xl font-bold text-gray-900">
-                                  {formatCurrency(dept.gasto_total)}
+                          <div key={index} className="group relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 rounded-2xl p-6 shadow-lg border border-blue-200/50 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="relative z-10">
+                              <div className="flex items-center justify-between mb-6">
+                                <h3 className="font-bold text-gray-900 text-lg truncate">{formatDepartmentName(dept.departamento)}</h3>
+                                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                                  <MdBusiness className="text-white" />
                                 </div>
-                                <div className="text-xs text-gray-500">Gasto Total</div>
                               </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Transacciones:</span>
-                                <span className="font-medium">{dept.total_transacciones}</span>
-                              </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Promedio:</span>
-                                <span className="font-medium">{formatCurrency(dept.promedio_por_transaccion)}</span>
+                              <div className="space-y-4">
+                                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4">
+                                  <div className="text-3xl font-black text-gray-900 mb-1">
+                                    {formatCurrency(dept.gasto_total)}
+                                  </div>
+                                  <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Gasto Total</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-3">
+                                    <div className="font-bold text-gray-900 text-lg">{dept.total_transacciones}</div>
+                                    <div className="text-xs text-gray-600">Transacciones</div>
+                                  </div>
+                                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-3">
+                                    <div className="font-bold text-gray-900 text-sm">{formatCurrency(dept.promedio_por_transaccion)}</div>
+                                    <div className="text-xs text-gray-600">Promedio</div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -639,8 +719,9 @@ export default function PagadorGraficasPage() {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-                        <MdBusiness size={48} className="mb-3" />
-                        <p className="text-base font-semibold">Sin datos de departamentos</p>
+                        <MdBusiness size={64} className="mb-4 opacity-50" />
+                        <p className="text-lg font-semibold">Sin datos de departamentos</p>
+                        <p className="text-sm">Selecciona un filtro diferente o verifica la conexión</p>
                       </div>
                     )}
                   </div>
@@ -648,22 +729,22 @@ export default function PagadorGraficasPage() {
               )}
 
               {vistaActual === 'tipos-pago' && (
-                <div className="chart-container bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
+                <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 border-b border-gray-200/50">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <MdPayments className="text-purple-600 text-lg" />
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <MdPayments className="text-white text-xl" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Gastos por Tipo de Pago</h2>
-                        <p className="text-sm text-gray-500">Análisis por método de pago</p>
+                        <h2 className="text-2xl font-bold text-gray-900">Gastos por Tipo de Pago</h2>
+                        <p className="text-sm text-gray-600">Análisis detallado por método de pago</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex flex-col lg:flex-row">
-                    <div className="flex-1 p-6">
-                      <div className="h-80">
+                  <div className="flex flex-col xl:flex-row">
+                    <div className="flex-1 p-8">
+                      <div className="h-96">
                         {gastosPorTipo.length > 0 ? (
                           <Doughnut 
                             data={{
@@ -671,24 +752,49 @@ export default function PagadorGraficasPage() {
                               datasets: [{
                                 data: gastosPorTipo.map(tipo => tipo.monto_total),
                                 backgroundColor: [
-                                  'rgba(59, 130, 246, 0.8)',
-                                  'rgba(16, 185, 129, 0.8)',
-                                  'rgba(245, 158, 11, 0.8)',
-                                  'rgba(239, 68, 68, 0.8)',
-                                  'rgba(139, 92, 246, 0.8)'
+                                  'rgba(59, 130, 246, 0.85)',
+                                  'rgba(16, 185, 129, 0.85)',
+                                  'rgba(245, 158, 11, 0.85)',
+                                  'rgba(239, 68, 68, 0.85)',
+                                  'rgba(139, 92, 246, 0.85)',
+                                  'rgba(236, 72, 153, 0.85)'
                                 ],
-                                borderWidth: 2,
-                                borderColor: '#fff'
+                                borderWidth: 3,
+                                borderColor: '#fff',
+                                hoverBackgroundColor: [
+                                  'rgba(59, 130, 246, 0.95)',
+                                  'rgba(16, 185, 129, 0.95)',
+                                  'rgba(245, 158, 11, 0.95)',
+                                  'rgba(239, 68, 68, 0.95)',
+                                  'rgba(139, 92, 246, 0.95)',
+                                  'rgba(236, 72, 153, 0.95)'
+                                ],
+                                hoverBorderWidth: 4
                               }]
                             }}
                             options={{
                               responsive: true,
                               maintainAspectRatio: false,
+                              cutout: '60%',
                               plugins: {
                                 legend: {
-                                  position: 'right' as const
+                                  position: 'bottom' as const,
+                                  labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    font: {
+                                      weight: 'bold'
+                                    }
+                                  }
                                 },
                                 tooltip: {
+                                  backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                                  titleColor: '#1e293b',
+                                  bodyColor: '#374151',
+                                  borderColor: '#d1d5db',
+                                  borderWidth: 2,
+                                  cornerRadius: 12,
+                                  padding: 16,
                                   callbacks: {
                                     label: (context: TooltipItem<'doughnut'>) => {
                                       const value = context.parsed;
@@ -703,31 +809,35 @@ export default function PagadorGraficasPage() {
                           />
                         ) : (
                           <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                            <MdPayments size={48} className="mb-3" />
-                            <p className="text-base font-semibold">Sin datos de tipos de pago</p>
+                            <MdPayments size={64} className="mb-4 opacity-50" />
+                            <p className="text-lg font-semibold">Sin datos de tipos de pago</p>
+                            <p className="text-sm">Los datos aparecerán cuando haya transacciones</p>
                           </div>
                         )}
                       </div>
                     </div>
                     
-                    <div className="lg:w-96 bg-gray-50 p-6">
-                      <h3 className="font-semibold text-gray-900 mb-4">Detalles por Tipo</h3>
+                    <div className="xl:w-96 bg-gradient-to-b from-gray-50 to-white p-6 border-l border-gray-200/50">
+                      <h3 className="font-bold text-gray-900 text-xl mb-6 flex items-center">
+                        <MdAnalytics className="mr-2 text-purple-600" />
+                        Detalles por Tipo
+                      </h3>
                       <div className="space-y-4">
                         {gastosPorTipo.map((tipo, index) => (
-                          <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
-                            <div className="font-medium text-gray-900 mb-2">{tipo.tipo_pago}</div>
-                            <div className="space-y-1 text-sm">
-                              <div className="flex justify-between">
-                                <span className="text-gray-600">Monto:</span>
-                                <span className="font-medium">{formatCurrency(tipo.monto_total)}</span>
+                          <div key={index} className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200">
+                            <div className="font-bold text-gray-900 mb-3 text-lg">{tipo.tipo_pago}</div>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600 font-medium">Monto Total:</span>
+                                <span className="font-bold text-green-600">{formatCurrency(tipo.monto_total)}</span>
                               </div>
-                              <div className="flex justify-between">
-                                <span className="text-gray-600">Transacciones:</span>
-                                <span className="font-medium">{tipo.total_transacciones}</span>
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600 font-medium">Transacciones:</span>
+                                <span className="font-bold text-blue-600">{tipo.total_transacciones}</span>
                               </div>
-                              <div className="flex justify-between">
-                                <span className="text-gray-600">Promedio:</span>
-                                <span className="font-medium">{formatCurrency(tipo.promedio_monto)}</span>
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600 font-medium">Promedio:</span>
+                                <span className="font-bold text-purple-600">{formatCurrency(tipo.promedio_monto)}</span>
                               </div>
                             </div>
                           </div>
@@ -739,24 +849,32 @@ export default function PagadorGraficasPage() {
               )}
 
               {vistaActual === 'comparativa' && (
-                <div className="chart-container bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
+                <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                  <div className="bg-gradient-to-r from-red-50 to-rose-50 p-6 border-b border-gray-200/50">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                        <MdCompare className="text-red-600 text-lg" />
+                      <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <MdCompare className="text-white text-xl" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Análisis Comparativo</h2>
-                        <p className="text-sm text-gray-500">Comparaciones de períodos y categorías</p>
+                        <h2 className="text-2xl font-bold text-gray-900">Análisis Comparativo</h2>
+                        <p className="text-sm text-gray-600">Comparaciones avanzadas de períodos y categorías</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="p-6">
-                    <div className="text-center py-12 text-gray-500">
-                      <MdCompare size={64} className="mx-auto mb-4 opacity-50" />
-                      <h3 className="text-lg font-semibold mb-2">Próximamente</h3>
-                      <p>Las funciones de comparativa estarán disponibles pronto</p>
+                  <div className="p-12">
+                    <div className="text-center py-16">
+                      <div className="w-24 h-24 bg-gradient-to-r from-red-100 to-rose-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <MdCompare size={48} className="text-red-500" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-4">Funciones Comparativas</h3>
+                      <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto leading-relaxed">
+                        Las herramientas de análisis comparativo y benchmarking estarán disponibles próximamente
+                      </p>
+                      <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-full shadow-lg">
+                        <MdDateRange className="mr-2" />
+                        <span className="font-semibold">En desarrollo</span>
+                      </div>
                     </div>
                   </div>
                 </div>
