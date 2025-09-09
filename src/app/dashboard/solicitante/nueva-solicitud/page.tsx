@@ -285,12 +285,22 @@ export default function NuevaSolicitudPage() {
       }
     });
     
+    // Limpiar el error si se agregan archivos
+    if (files.length > 0) {
+      setErrors((prev) => ({ ...prev, archivos_adicionales: undefined }));
+    }
+    
     // Limpiar el input
     e.target.value = '';
   };
 
   const removeArchivoAdicional = (index: number) => {
     dispatch({ type: 'REMOVE_ARCHIVO_ADICIONAL', index });
+    
+    // Si después de eliminar no quedan archivos, mostrar error
+    if (formData.archivos_adicionales.length <= 1) {
+      setErrors((prev) => ({ ...prev, archivos_adicionales: 'Debe subir al menos un documento' }));
+    }
   };
 
   const updateTipoArchivoAdicional = (index: number, tipo: string) => {
@@ -323,12 +333,17 @@ export default function NuevaSolicitudPage() {
     setIsFormSubmitted(true);
     const newErrors: Record<string, string> = {};
     // Validar campos requeridos
-    const requiredFields = ['departamento', 'monto', 'fecha_limite_pago', 'factura_file', 'nombre_persona'];
+    const requiredFields = ['departamento', 'monto', 'fecha_limite_pago', 'nombre_persona'];
     requiredFields.forEach(field => {
       if (!formData[field as keyof typeof formData]) {
         newErrors[field] = 'Este campo es obligatorio';
       }
     });
+
+    // Validar que haya al menos un archivo
+    if (formData.archivos_adicionales.length === 0) {
+      newErrors.archivos_adicionales = 'Debe subir al menos un documento';
+    }
     
     // Validar concepto solo si tipo_concepto es "otro"
     if (formData.tipo_concepto === 'otro' && !formData.concepto) {
@@ -466,8 +481,9 @@ export default function NuevaSolicitudPage() {
     }
     
     try {
-      if (!formData.factura_file) {
-        throw new Error('El archivo de factura es obligatorio.');
+      // Verificar que haya al menos un archivo
+      if (formData.archivos_adicionales.length === 0) {
+        throw new Error('Debe subir al menos un documento.');
       }
       
       console.log('FormData antes de enviar:', formData);
@@ -509,7 +525,7 @@ export default function NuevaSolicitudPage() {
       empresa_a_pagar: formData.empresa_a_pagar,
       nombre_persona: formData.nombre_persona,
       fecha_limite_pago: formData.fecha_limite_pago,
-      factura: formData.factura_file as File,
+      factura: formData.archivos_adicionales[0] as File,
       tipo_cuenta_destino: formData.tipo_cuenta_destino,
       tipo_tarjeta: formData.tipo_cuenta_destino === 'Número de Tarjeta' ? formData.tipo_tarjeta : '',
       banco_destino: formData.banco_destino,
@@ -1469,88 +1485,11 @@ export default function NuevaSolicitudPage() {
                   <Upload className="w-6 h-6 mr-3" />
                   Documentos Requeridos
                 </h3>
-                <div>
-                  <label className={getLabelStyles('factura_file', true)}>
-                    <span className="text-red-400">*</span> Factura 
-                    <span className="text-white/70 text-sm ml-2">(PDF, Excel, JPG, PNG - Máx. 5MB)</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange(e, 'factura_file')}
-                      required
-                      className={getFieldStyles('factura_file', 'w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-white/30 file:text-white hover:file:bg-white/40 text-base transition-all duration-200')}
-                    />
-                  </div>
-                  
-                  {errors.factura_file && (
-                    <div className="mt-2 flex items-center space-x-2 animate-bounce">
-                      <span className="text-red-400 text-2xl">📄</span>
-                      <span className="text-red-400 text-sm font-bold">{errors.factura_file}</span>
-                    </div>
-                  )}
-                  
-                  {/* Previsualización mejorada */}
-                  {formData.factura_file && (
-                    <div className="mt-6 p-6 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/20 backdrop-blur-sm">
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 rounded-full bg-green-500/20 border border-green-400/30">
-                          <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-3">
-                            <div>
-                              <p className="text-white font-semibold text-lg">
-                                {formData.factura_file.name}
-                              </p>
-                              <p className="text-white/70 text-sm">
-                                {formData.factura_file.type === 'application/pdf' && '📄 Documento PDF'}
-                                {formData.factura_file.type.includes('excel') && '📊 Archivo Excel'}
-                                {formData.factura_file.type.startsWith('image/') && '🖼️ Imagen'}
-                              </p>
-                            </div>
-                            <span className="text-white/80 text-sm font-medium bg-white/10 px-3 py-1 rounded-full">
-                              {(formData.factura_file.size / 1024 / 1024).toFixed(2)} MB
-                            </span>
-                          </div>
-                          
-                          {/* Previsualización según tipo */}
-                          {formData.factura_file.type.startsWith('image/') && (
-                            <div className="mt-4 w-64 h-48 relative bg-white/10 rounded-lg overflow-hidden border border-white/20">
-                              <Image
-                                src={URL.createObjectURL(formData.factura_file)}
-                                alt="Previsualización"
-                                fill
-                                className="object-contain"
-                              />
-                            </div>
-                          )}
-                          
-                          {(formData.factura_file.type === 'application/pdf' || formData.factura_file.type.includes('excel')) && (
-                            <div className="mt-4 flex items-center space-x-4 p-4 bg-white/10 rounded-lg border border-white/20">
-                              <div className="p-3 rounded-lg bg-blue-500/20 border border-blue-400/30">
-                                <FileText className="w-8 h-8 text-blue-400" />
-                              </div>
-                              <div>
-                                <p className="text-white font-semibold">Archivo listo para envío</p>
-                                <p className="text-white/70 text-sm">
-                                  {formData.factura_file.type === 'application/pdf' ? 'Documento PDF' : 'Archivo Excel'} verificado y listo
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {errors.factura_file && <span className="text-red-400 text-sm mt-2 block">{errors.factura_file}</span>}
-                </div>
 
-                {/* Archivos Adicionales */}
-                <div className="mt-8 border-t border-white/10 pt-8">
+                {/* Archivos (antes "Adicionales", ahora principal) */}
+                <div>
                   <label className="block text-base font-medium text-white/90 mb-4">
-                    📎 Archivos Adicionales (Opcional)
+                    <span className="text-red-400">*</span> Documentos 
                     <span className="text-white/70 text-sm ml-2">(PDF, Excel, JPG, PNG - Máx. 5MB c/u)</span>
                   </label>
                   
@@ -1558,22 +1497,30 @@ export default function NuevaSolicitudPage() {
                   <div className="mb-6">
                     <input
                       type="file"
-                      id="archivos-adicionales"
+                      id="archivos-documentos"
                       accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png"
                       multiple
                       onChange={handleArchivoAdicionalChange}
                       className="hidden"
                     />
                     <label
-                      htmlFor="archivos-adicionales"
+                      htmlFor="archivos-documentos"
                       className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white hover:bg-white/30 transition-all duration-200 cursor-pointer"
                     >
                       <Upload className="w-5 h-5 mr-2" />
-                      Agregar Archivos
+                      Agregar Documentos
                     </label>
                   </div>
 
-                  {/* Lista de archivos adicionales */}
+                  {/* Mostrar error si no hay archivos */}
+                  {errors.archivos_adicionales && (
+                    <div className="mb-4 flex items-center space-x-2 animate-bounce">
+                      <span className="text-red-400 text-2xl">📄</span>
+                      <span className="text-red-400 text-sm font-bold">{errors.archivos_adicionales}</span>
+                    </div>
+                  )}
+
+                  {/* Lista de archivos */}
                   {formData.archivos_adicionales.length > 0 && (
                     <div className="space-y-4">
                       {formData.archivos_adicionales.map((archivo, index) => (
@@ -1639,7 +1586,7 @@ export default function NuevaSolicitudPage() {
                     (formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && !formData.cuenta_destino) ||
                     (formData.tipo_concepto === 'otro' && !formData.concepto) ||
                     !formData.fecha_limite_pago ||
-                    !formData.factura_file ||
+                    formData.archivos_adicionales.length === 0 ||
                     (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') ||
                     (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional')
                   }
