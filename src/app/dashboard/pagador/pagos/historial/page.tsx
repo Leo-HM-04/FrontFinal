@@ -604,76 +604,223 @@ export default function HistorialPagosPage() {
 
         {/* Modal de Exportación */}
         {showExportModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-gray-900">Exportar Historial</h3>
-                  <button
-                    onClick={() => setShowExportModal(false)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-6 text-white relative">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Download className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">Exportar Mis Solicitudes</h2>
+                    <p className="text-blue-100 text-sm mt-1">Selecciona el formato y filtro deseado para exportar tus solicitudes</p>
+                  </div>
                 </div>
-                
-                <p className="text-gray-600 mb-6 text-sm">
-                  Selecciona el formato en el que deseas exportar los datos del historial de pagos:
-                </p>
-                
-                <div className="space-y-3">
-                  <button
-                    onClick={() => {
-                      exportToPDF();
-                      setShowExportModal(false);
-                    }}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors group"
-                  >
-                    <FileText className="w-5 h-5 text-red-600" />
-                    <div className="text-left">
-                      <div className="font-medium text-red-800">Exportar como PDF</div>
-                      <div className="text-sm text-red-600">Formato de documento portátil</div>
+                <button
+                  onClick={() => setShowExportModal(false)}
+                  className="absolute top-6 right-6 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="p-8">
+                {/* Sección Filtros */}
+                <div className="mb-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                      </svg>
                     </div>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      exportToExcel();
-                      setShowExportModal(false);
-                    }}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors group"
-                  >
-                    <FileSpreadsheet className="w-5 h-5 text-green-600" />
-                    <div className="text-left">
-                      <div className="font-medium text-green-800">Exportar como Excel</div>
-                      <div className="text-sm text-green-600">Hoja de cálculo de Microsoft</div>
+                    <h3 className="text-xl font-semibold text-gray-900">Seleccionar datos a exportar</h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Todos los registros */}
+                    <div className="relative group">
+                      <input
+                        type="radio"
+                        id="todos"
+                        name="filtro"
+                        className="sr-only"
+                        defaultChecked
+                      />
+                      <label
+                        htmlFor="todos"
+                        className="block p-6 border-2 border-blue-200 bg-blue-50 rounded-2xl cursor-pointer hover:border-blue-300 transition-all group-hover:shadow-lg"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white">
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 mb-1">Todos los registros</h4>
+                            <p className="text-sm text-gray-600 leading-relaxed">Incluye todos los elementos disponibles</p>
+                          </div>
+                          <div className="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="mt-4 text-xs text-blue-700 font-medium">Todos los elementos</div>
+                      </label>
                     </div>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      exportToCSV();
-                      setShowExportModal(false);
-                    }}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors group"
-                  >
-                    <FileSpreadsheet className="w-5 h-5 text-blue-600" />
-                    <div className="text-left">
-                      <div className="font-medium text-blue-800">Exportar como CSV</div>
-                      <div className="text-sm text-blue-600">Valores separados por comas</div>
+
+                    {/* Solo pagadas */}
+                    <div className="relative group">
+                      <input
+                        type="radio"
+                        id="pagadas"
+                        name="filtro"
+                        className="sr-only"
+                      />
+                      <label
+                        htmlFor="pagadas"
+                        className="block p-6 border-2 border-gray-200 bg-white rounded-2xl cursor-pointer hover:border-green-300 hover:bg-green-50 transition-all group-hover:shadow-lg"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center text-white">
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 mb-1">Solo pagadas</h4>
+                            <p className="text-sm text-gray-600 leading-relaxed">Únicamente elementos completados</p>
+                          </div>
+                          <div className="w-5 h-5 rounded-full border-2 border-gray-300 bg-white"></div>
+                        </div>
+                        <div className="mt-4 text-xs text-green-700 font-medium">Elementos completados</div>
+                      </label>
                     </div>
-                  </button>
+
+                    {/* Solo autorizadas */}
+                    <div className="relative group">
+                      <input
+                        type="radio"
+                        id="autorizadas"
+                        name="filtro"
+                        className="sr-only"
+                      />
+                      <label
+                        htmlFor="autorizadas"
+                        className="block p-6 border-2 border-gray-200 bg-white rounded-2xl cursor-pointer hover:border-yellow-300 hover:bg-yellow-50 transition-all group-hover:shadow-lg"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-yellow-500 rounded-xl flex items-center justify-center text-white">
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 mb-1">Solo autorizadas</h4>
+                            <p className="text-sm text-gray-600 leading-relaxed">Únicamente elementos pendientes</p>
+                          </div>
+                          <div className="w-5 h-5 rounded-full border-2 border-gray-300 bg-white"></div>
+                        </div>
+                        <div className="mt-4 text-xs text-yellow-700 font-medium">Elementos pendientes</div>
+                      </label>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={() => setShowExportModal(false)}
-                    className="w-full px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                  >
-                    Cancelar
-                  </button>
+
+                {/* Sección Formatos */}
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900">Seleccionar formato de exportación</h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* PDF */}
+                    <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group">
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-14 h-14 bg-red-500 rounded-2xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                          <FileText className="w-7 h-7" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-bold text-red-800 mb-1">PDF</h4>
+                          <p className="text-sm text-red-600 font-medium">Documento PDF profesional</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-red-700 mb-6 leading-relaxed">
+                        Ideal para impresión y presentaciones oficiales
+                      </p>
+                      <button
+                        onClick={() => {
+                          exportToPDF();
+                          setShowExportModal(false);
+                        }}
+                        className="w-full bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        Exportar PDF
+                      </button>
+                    </div>
+
+                    {/* Excel */}
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group">
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-14 h-14 bg-green-500 rounded-2xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                          <FileSpreadsheet className="w-7 h-7" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-bold text-green-800 mb-1">Excel</h4>
+                          <p className="text-sm text-green-600 font-medium">Hoja de cálculo editable</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-green-700 mb-6 leading-relaxed">
+                        Perfecto para análisis de datos y reportes
+                      </p>
+                      <button
+                        onClick={() => {
+                          exportToExcel();
+                          setShowExportModal(false);
+                        }}
+                        className="w-full bg-green-600 text-white font-semibold py-3 rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        Exportar Excel
+                      </button>
+                    </div>
+
+                    {/* CSV */}
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group">
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-14 h-14 bg-orange-500 rounded-2xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                          <FileSpreadsheet className="w-7 h-7" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-bold text-orange-800 mb-1">CSV</h4>
+                          <p className="text-sm text-orange-600 font-medium">Valores separados por comas</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-orange-700 mb-6 leading-relaxed">
+                        Compatible con cualquier sistema o software
+                      </p>
+                      <button
+                        onClick={() => {
+                          exportToCSV();
+                          setShowExportModal(false);
+                        }}
+                        className="w-full bg-orange-600 text-white font-semibold py-3 rounded-xl hover:bg-orange-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        Exportar CSV
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
