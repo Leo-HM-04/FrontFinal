@@ -508,11 +508,8 @@ export default function PagadorGraficasPage() {
             <div className="max-w-7xl mx-auto space-y-10">
               {/* Header mejorado */}
               <div className="text-center mb-12">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-700 rounded-3xl mb-6 shadow-2xl animate-pulse">
-                  <MdInsertChartOutlined className="text-white text-3xl" />
-                </div>
                 <h1 className="text-6xl font-black bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-4 tracking-tight">
-                  Dashboard Financiero
+                  Graficas 
                 </h1>
                 <p className="text-gray-600 text-xl font-medium max-w-2xl mx-auto leading-relaxed">
                   Análisis detallado y visualización inteligente de pagos, transacciones y tendencias financieras
@@ -729,22 +726,27 @@ export default function PagadorGraficasPage() {
               )}
 
               {vistaActual === 'tipos-pago' && (
-                <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 border-b border-gray-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <MdPayments className="text-white text-xl" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Gastos por Tipo de Pago</h2>
-                        <p className="text-sm text-gray-600">Análisis detallado por método de pago</p>
+                <div className="space-y-8">
+                  {/* Header */}
+                  <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <MdPayments className="text-white text-xl" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900">Gastos por Tipo de Pago</h2>
+                          <p className="text-sm text-gray-600">Análisis detallado por método de pago</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="flex flex-col xl:flex-row">
-                    <div className="flex-1 p-8">
-                      <div className="h-96">
+
+                  {/* Grid de contenido optimizado */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Gráfica principal - más compacta */}
+                    <div className="lg:col-span-2 bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6">
+                      <div className="h-80 lg:h-96">
                         {gastosPorTipo.length > 0 ? (
                           <Doughnut 
                             data={{
@@ -775,16 +777,19 @@ export default function PagadorGraficasPage() {
                             options={{
                               responsive: true,
                               maintainAspectRatio: false,
-                              cutout: '60%',
+                              cutout: '65%',
                               plugins: {
                                 legend: {
-                                  position: 'bottom' as const,
+                                  position: 'right' as const,
                                   labels: {
-                                    padding: 20,
+                                    padding: 15,
                                     usePointStyle: true,
                                     font: {
-                                      weight: 'bold'
-                                    }
+                                      weight: 'bold',
+                                      size: 12
+                                    },
+                                    boxWidth: 12,
+                                    boxHeight: 12
                                   }
                                 },
                                 tooltip: {
@@ -817,27 +822,40 @@ export default function PagadorGraficasPage() {
                       </div>
                     </div>
                     
-                    <div className="xl:w-96 bg-gradient-to-b from-gray-50 to-white p-6 border-l border-gray-200/50">
-                      <h3 className="font-bold text-gray-900 text-xl mb-6 flex items-center">
-                        <MdAnalytics className="mr-2 text-purple-600" />
-                        Detalles por Tipo
-                      </h3>
-                      <div className="space-y-4">
+                    {/* Panel de detalles optimizado */}
+                    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6">
+                      <div className="flex items-center mb-6">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center shadow-lg mr-3">
+                          <MdAnalytics className="text-white text-lg" />
+                        </div>
+                        <h3 className="font-bold text-gray-900 text-xl">Detalles por Tipo</h3>
+                      </div>
+                      
+                      <div className="space-y-4 max-h-96 overflow-y-auto">
                         {gastosPorTipo.map((tipo, index) => (
-                          <div key={index} className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200">
-                            <div className="font-bold text-gray-900 mb-3 text-lg">{tipo.tipo_pago}</div>
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-600 font-medium">Monto Total:</span>
-                                <span className="font-bold text-green-600">{formatCurrency(tipo.monto_total)}</span>
+                          <div key={index} className="group bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 shadow-md border border-gray-100 hover:shadow-lg hover:border-purple-200 transition-all duration-300">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="font-bold text-gray-900 text-lg">{tipo.tipo_pago}</div>
+                              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 group-hover:scale-110 transition-transform duration-200"></div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3">
+                              <div className="bg-green-50 rounded-lg p-3 border-l-4 border-green-400">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-green-700 font-medium text-sm">Monto Total</span>
+                                  <span className="font-bold text-green-800 text-lg">{formatCurrency(tipo.monto_total)}</span>
+                                </div>
                               </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-600 font-medium">Transacciones:</span>
-                                <span className="font-bold text-blue-600">{tipo.total_transacciones}</span>
+                              <div className="bg-blue-50 rounded-lg p-3 border-l-4 border-blue-400">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-blue-700 font-medium text-sm">Transacciones</span>
+                                  <span className="font-bold text-blue-800 text-lg">{tipo.total_transacciones}</span>
+                                </div>
                               </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-600 font-medium">Promedio:</span>
-                                <span className="font-bold text-purple-600">{formatCurrency(tipo.promedio_monto)}</span>
+                              <div className="bg-purple-50 rounded-lg p-3 border-l-4 border-purple-400">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-black font-medium text-sm">Promedio</span>
+                                  <span className="font-bold text-black text-lg">{formatCurrency(tipo.promedio_monto)}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -845,6 +863,62 @@ export default function PagadorGraficasPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Resumen estadístico adicional */}
+                  {gastosPorTipo.length > 0 && (
+                    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6">
+                      <h3 className="font-bold text-gray-900 text-xl mb-6 flex items-center">
+                        <MdInsertChartOutlined className="mr-2 text-purple-600" />
+                        Resumen Estadístico
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <MdPayments className="text-blue-600 text-2xl" />
+                            <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full font-semibold">Total</span>
+                          </div>
+                          <div className="text-2xl font-bold text-blue-900">
+                            {formatCurrency(gastosPorTipo.reduce((sum, tipo) => sum + tipo.monto_total, 0))}
+                          </div>
+                          <div className="text-sm text-blue-700">Monto Global</div>
+                        </div>
+                        
+                        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <MdTrendingUp className="text-green-600 text-2xl" />
+                            <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full font-semibold">Tipos</span>
+                          </div>
+                          <div className="text-2xl font-bold text-green-900">{gastosPorTipo.length}</div>
+                          <div className="text-sm text-green-700">Métodos de Pago</div>
+                        </div>
+                        
+                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <MdAnalytics className="text-purple-600 text-2xl" />
+                            <span className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full font-semibold">Total</span>
+                          </div>
+                          <div className="text-2xl font-bold text-purple-900">
+                            {gastosPorTipo.reduce((sum, tipo) => sum + tipo.total_transacciones, 0)}
+                          </div>
+                          <div className="text-sm text-purple-700">Transacciones</div>
+                        </div>
+                        
+                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <MdAttachMoney className="text-orange-600 text-2xl" />
+                            <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded-full font-semibold">Promedio</span>
+                          </div>
+                          <div className="text-2xl font-bold text-orange-900">
+                            {formatCurrency(
+                              gastosPorTipo.reduce((sum, tipo) => sum + tipo.monto_total, 0) / 
+                              gastosPorTipo.reduce((sum, tipo) => sum + tipo.total_transacciones, 0) || 0
+                            )}
+                          </div>
+                          <div className="text-sm text-orange-700">Por Transacción</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
