@@ -541,7 +541,7 @@ export default function ViaticosPagadorPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Usuario</label>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">Usuario</label>
                   <input
                     type="text"
                     value={filters.usuario}
@@ -552,7 +552,7 @@ export default function ViaticosPagadorPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">Estado</label>
                   <select
                     value={filters.estado}
                     onChange={(e) => setFilters(prev => ({ ...prev, estado: e.target.value }))}
@@ -567,7 +567,7 @@ export default function ViaticosPagadorPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Banco</label>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">Banco</label>
                   <input
                     type="text"
                     value={filters.banco}
