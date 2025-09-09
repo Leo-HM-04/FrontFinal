@@ -878,7 +878,7 @@ export default function PagadorGraficasPage() {
                             <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full font-semibold">Total</span>
                           </div>
                           <div className="text-2xl font-bold text-blue-900">
-                            {formatCurrency(gastosPorTipo.reduce((sum, tipo) => sum + tipo.monto_total, 0))}
+                            {formatCurrency(gastosPorTipo.reduce((sum, tipo) => sum + (Number(tipo.monto_total) || 0), 0))}
                           </div>
                           <div className="text-sm text-blue-700">Monto Global</div>
                         </div>
@@ -898,7 +898,7 @@ export default function PagadorGraficasPage() {
                             <span className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full font-semibold">Total</span>
                           </div>
                           <div className="text-2xl font-bold text-purple-900">
-                            {gastosPorTipo.reduce((sum, tipo) => sum + tipo.total_transacciones, 0)}
+                            {gastosPorTipo.reduce((sum, tipo) => sum + (Number(tipo.total_transacciones) || 0), 0)}
                           </div>
                           <div className="text-sm text-purple-700">Transacciones</div>
                         </div>
@@ -909,10 +909,12 @@ export default function PagadorGraficasPage() {
                             <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded-full font-semibold">Promedio</span>
                           </div>
                           <div className="text-2xl font-bold text-orange-900">
-                            {formatCurrency(
-                              gastosPorTipo.reduce((sum, tipo) => sum + tipo.monto_total, 0) / 
-                              gastosPorTipo.reduce((sum, tipo) => sum + tipo.total_transacciones, 0) || 0
-                            )}
+                            {(() => {
+                              const totalMonto = gastosPorTipo.reduce((sum, tipo) => sum + (Number(tipo.monto_total) || 0), 0);
+                              const totalTransacciones = gastosPorTipo.reduce((sum, tipo) => sum + (Number(tipo.total_transacciones) || 0), 0);
+                              const promedio = totalTransacciones > 0 ? totalMonto / totalTransacciones : 0;
+                              return formatCurrency(promedio);
+                            })()}
                           </div>
                           <div className="text-sm text-orange-700">Por Transacción</div>
                         </div>
