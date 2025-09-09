@@ -6,7 +6,7 @@ import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { FileText, Eye, CheckCircle, XCircle} from 'lucide-react';
+import { FileText, Eye, CheckCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
@@ -24,6 +24,49 @@ export default function HistorialSolicitudesPage() {
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  
+  // Estados para ordenamiento
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Funciones para ordenamiento
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
+    }
+    return sortDirection === 'asc' ? 
+      <ArrowUp className="w-4 h-4 text-blue-600" /> : 
+      <ArrowDown className="w-4 h-4 text-blue-600" />;
+  };
+
+  // Función para formatear fecha y hora
+  const formatDateTime = (dateString: string): { date: string; time: string } => {
+    if (!dateString) return { date: '-', time: '-' };
+    const date = new Date(dateString);
+    const dateOptions: Intl.DateTimeFormatOptions = { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    };
+    const timeOptions: Intl.DateTimeFormatOptions = { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false
+    };
+    return {
+      date: date.toLocaleDateString('es-MX', dateOptions),
+      time: date.toLocaleTimeString('es-MX', timeOptions)
+    };
+  };
 
   const {
     filters,
@@ -32,6 +75,57 @@ export default function HistorialSolicitudesPage() {
     updateFilters
   } = useAdvancedFilters(solicitudes, 'solicitudes');
 
+  // Aplicar ordenamiento a las solicitudes filtradas
+  const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aVal, bVal;
+    switch (sortField) {
+      case 'folio':
+        aVal = a.folio || '';
+        bVal = b.folio || '';
+        break;
+      case 'usuario':
+        aVal = a.usuario_nombre || '';
+        bVal = b.usuario_nombre || '';
+        break;
+      case 'departamento':
+        aVal = a.departamento || '';
+        bVal = b.departamento || '';
+        break;
+      case 'monto':
+        aVal = a.monto || 0;
+        bVal = b.monto || 0;
+        break;
+      case 'estado':
+        aVal = a.estado || '';
+        bVal = b.estado || '';
+        break;
+      case 'fecha_revision':
+        aVal = new Date(a.fecha_revision || 0).getTime();
+        bVal = new Date(b.fecha_revision || 0).getTime();
+        break;
+      case 'fecha_creacion':
+        aVal = new Date(a.fecha_creacion || 0).getTime();
+        bVal = new Date(b.fecha_creacion || 0).getTime();
+        break;
+      case 'tipo_pago':
+        aVal = a.tipo_pago || '';
+        bVal = b.tipo_pago || '';
+        break;
+      case 'banco_destino':
+        aVal = a.banco_destino || '';
+        bVal = b.banco_destino || '';
+        break;
+      default:
+        return 0;
+    }
+    
+    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   const {
     currentPage,
     totalPages,
@@ -39,7 +133,7 @@ export default function HistorialSolicitudesPage() {
     itemsPerPage,
     goToPage,
     changeItemsPerPage,
-  } = usePagination({ data: filteredSolicitudes, initialItemsPerPage: 5 });
+  } = usePagination({ data: solicitudesOrdenadas, initialItemsPerPage: 5 });
 
   const handleViewDetail = (solicitud: Solicitud) => {
     setSelectedSolicitud(solicitud);
@@ -49,16 +143,16 @@ export default function HistorialSolicitudesPage() {
   const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
     switch(format) {
       case 'csv':
-        exportSolicitudesToCSV(filteredSolicitudes);
-        toast.success(`${filteredSolicitudes.length} solicitudes exportadas a CSV`);
+        exportSolicitudesToCSV(solicitudesOrdenadas);
+        toast.success(`${solicitudesOrdenadas.length} solicitudes exportadas a CSV`);
         break;
       case 'excel':
-        exportSolicitudesToExcel(filteredSolicitudes);
-        toast.success(`${filteredSolicitudes.length} solicitudes exportadas a Excel`);
+        exportSolicitudesToExcel(solicitudesOrdenadas);
+        toast.success(`${solicitudesOrdenadas.length} solicitudes exportadas a Excel`);
         break;
       case 'pdf':
-        exportSolicitudesToPDF(filteredSolicitudes);
-        toast.success(`${filteredSolicitudes.length} solicitudes exportadas a PDF`);
+        exportSolicitudesToPDF(solicitudesOrdenadas);
+        toast.success(`${solicitudesOrdenadas.length} solicitudes exportadas a PDF`);
         break;
     }
   };
@@ -110,7 +204,7 @@ export default function HistorialSolicitudesPage() {
 
   // Nuevo: búsqueda rápida
   const [search] = useState('');
-  const quickFilteredSolicitudes = filteredSolicitudes.filter(s =>
+  const quickFilteredSolicitudes = solicitudesOrdenadas.filter(s =>
     s.usuario_nombre?.toLowerCase().includes(search.toLowerCase()) ||
     s.departamento?.toLowerCase().includes(search.toLowerCase()) ||
     s.estado?.toLowerCase().includes(search.toLowerCase())
@@ -205,15 +299,72 @@ export default function HistorialSolicitudesPage() {
                           <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
                               <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">ID</th>
-                              <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Folio</th>
-                              <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">Usuario</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Revisión</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Cuenta/Tarjeta</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Banco Destino</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detalles</th>
+                              <th 
+                                className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('folio')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Folio
+                                  {getSortIcon('folio')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('usuario')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Usuario
+                                  {getSortIcon('usuario')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('departamento')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Departamento
+                                  {getSortIcon('departamento')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('monto')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Monto
+                                  {getSortIcon('monto')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('estado')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Estado
+                                  {getSortIcon('estado')}
+                                </div>
+                              </th>
+                              <th 
+                                className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('fecha_revision')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Fecha Revisión
+                                  {getSortIcon('fecha_revision')}
+                                </div>
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Hora Revisión</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Tipo de Cuenta/Tarjeta</th>
+                              <th 
+                                className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={() => handleSort('banco_destino')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  Banco Destino
+                                  {getSortIcon('banco_destino')}
+                                </div>
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Detalles</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
@@ -260,7 +411,10 @@ export default function HistorialSolicitudesPage() {
                                     </span>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {solicitud.fecha_revision ? new Date(solicitud.fecha_revision).toLocaleDateString('es-CO') : '-'}
+                                    {solicitud.fecha_revision ? formatDateTime(solicitud.fecha_revision).date : '-'}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {solicitud.fecha_revision ? formatDateTime(solicitud.fecha_revision).time : '-'}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {solicitud.tipo_cuenta_destino ? solicitud.tipo_cuenta_destino : ''}
