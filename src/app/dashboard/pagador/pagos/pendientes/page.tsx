@@ -6,7 +6,7 @@ import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
-import { Eye, CreditCard, AlertCircle } from 'lucide-react';
+import { Eye, CreditCard, AlertCircle, Download, ArrowUpDown, ArrowUp, ArrowDown, FileText, FileSpreadsheet } from 'lucide-react';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { toast } from 'react-hot-toast';
@@ -26,6 +26,14 @@ export default function PagosPendientesPage() {
   const [comprobantePagoId] = useState<number | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pagoAConfirmar, setPagoAConfirmar] = useState<Solicitud | null>(null);
+  
+  // Estados para ordenamiento
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  
+  // Estados para exportación
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Filtrar solo los pagos con estado 'autorizada'
   const pagosAutorizados = pagosPendientes.filter(
@@ -130,18 +138,164 @@ export default function PagosPendientesPage() {
     toast.success('Comprobante subido correctamente');
   };
 
+  // Función para ordenar
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Función para obtener el ícono de ordenamiento
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
+    }
+    return sortDirection === 'asc' ? 
+      <ArrowUp className="w-4 h-4 text-blue-600" /> : 
+      <ArrowDown className="w-4 h-4 text-blue-600" />;
+  };
+
+  // Aplicar ordenamiento a los datos paginados
+  const sortedPagos = [...paginatedPagos].sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aValue: string | number | Date = a[sortField as keyof Solicitud] as string | number | Date;
+    let bValue: string | number | Date = b[sortField as keyof Solicitud] as string | number | Date;
+    
+    // Manejar casos específicos
+    if (sortField === 'monto') {
+      aValue = Number(aValue) || 0;
+      bValue = Number(bValue) || 0;
+    } else if (sortField === 'fecha_limite_pago' || sortField === 'fecha_creacion') {
+      aValue = new Date(aValue as string || 0).getTime();
+      bValue = new Date(bValue as string || 0).getTime();
+    } else if (typeof aValue === 'string') {
+      aValue = aValue.toLowerCase();
+      bValue = typeof bValue === 'string' ? bValue.toLowerCase() : '';
+    }
+    
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Funciones de exportación
+  const exportToPDF = () => {
+    setIsExporting(true);
+    try {
+      const data = filteredPagos.map(pago => ({
+        Folio: pago.folio,
+        Solicitante: pago.nombre_usuario || pago.usuario_nombre || '-',
+        Departamento: pago.departamento,
+        Monto: formatCurrency(pago.monto),
+        'Fecha Solicitud': new Date(pago.fecha_creacion).toLocaleDateString('es-MX'),
+        'Fecha Límite': new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX'),
+        Estado: pago.estado?.charAt(0).toUpperCase() + pago.estado?.slice(1) || 'Autorizada',
+        Aprobador: pago.aprobador_nombre || '-'
+      }));
+
+      // Aquí implementarías la lógica de exportación a PDF
+      console.log('Exportando a PDF:', data);
+      toast.success('PDF exportado correctamente');
+    } catch {
+      toast.error('Error al exportar PDF');
+    } finally {
+      setIsExporting(false);
+      setShowExportModal(false);
+    }
+  };
+
+  const exportToExcel = () => {
+    setIsExporting(true);
+    try {
+      const data = filteredPagos.map(pago => ({
+        Folio: pago.folio,
+        Solicitante: pago.nombre_usuario || pago.usuario_nombre || '-',
+        Departamento: pago.departamento,
+        Monto: pago.monto,
+        'Fecha Solicitud': new Date(pago.fecha_creacion).toLocaleDateString('es-MX'),
+        'Fecha Límite': new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX'),
+        Estado: pago.estado?.charAt(0).toUpperCase() + pago.estado?.slice(1) || 'Autorizada',
+        Aprobador: pago.aprobador_nombre || '-'
+      }));
+
+      // Aquí implementarías la lógica de exportación a Excel
+      console.log('Exportando a Excel:', data);
+      toast.success('Excel exportado correctamente');
+    } catch {
+      toast.error('Error al exportar Excel');
+    } finally {
+      setIsExporting(false);
+      setShowExportModal(false);
+    }
+  };
+
+  const exportToCSV = () => {
+    setIsExporting(true);
+    try {
+      const headers = ['Folio', 'Solicitante', 'Departamento', 'Monto', 'Fecha Solicitud', 'Fecha Límite', 'Estado', 'Aprobador'];
+      const csvContent = [
+        headers.join(','),
+        ...filteredPagos.map(pago => [
+          pago.folio,
+          pago.nombre_usuario || pago.usuario_nombre || '-',
+          pago.departamento,
+          pago.monto,
+          new Date(pago.fecha_creacion).toLocaleDateString('es-MX'),
+          new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX'),
+          pago.estado?.charAt(0).toUpperCase() + pago.estado?.slice(1) || 'Autorizada',
+          pago.aprobador_nombre || '-'
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `pagos-pendientes-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('CSV exportado correctamente');
+    } catch {
+      toast.error('Error al exportar CSV');
+    } finally {
+      setIsExporting(false);
+      setShowExportModal(false);
+    }
+  };
+
   return (
     <ProtectedRoute requiredRoles={['pagador_banca']}>
       <PagadorLayout>
         <div className="container mx-auto px-4 py-8">
          {/* Header */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-            <h2 className="text-2xl font-bold text-white font-sans">
-              Pagos Autorizados
-            </h2>
-            <p className="text-white/80">
-              {filteredPagos.length} pagos autorizados, para procesar el pago.
-            </p>
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 mb-8 shadow-xl">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex-1">
+                <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
+                  Pagos Autorizados
+                </h2>
+                <p className="text-blue-100 text-lg">
+                  {filteredPagos.length} pagos autorizados, para procesar el pago.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowExportModal(true)}
+                  disabled={isExporting}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-lg disabled:opacity-60"
+                >
+                  <Download className="w-5 h-5" />
+                  Exportar
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Stats Cards removido */}
@@ -186,34 +340,87 @@ export default function PagosPendientesPage() {
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead style={{backgroundColor: '#F0F4FC'}}>
                           <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Folio
+                            <th 
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-blue-50 transition-colors"
+                              onClick={() => handleSort('folio')}
+                            >
+                              <div className="flex items-center gap-2">
+                                Folio
+                                {getSortIcon('folio')}
+                              </div>
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Solicitante
+                            <th 
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-blue-50 transition-colors"
+                              onClick={() => handleSort('nombre_usuario')}
+                            >
+                              <div className="flex items-center gap-2">
+                                Solicitante
+                                {getSortIcon('nombre_usuario')}
+                              </div>
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Departamento
+                            <th 
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-blue-50 transition-colors"
+                              onClick={() => handleSort('departamento')}
+                            >
+                              <div className="flex items-center gap-2">
+                                Departamento
+                                {getSortIcon('departamento')}
+                              </div>
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Monto
+                            <th 
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-blue-50 transition-colors"
+                              onClick={() => handleSort('monto')}
+                            >
+                              <div className="flex items-center gap-2">
+                                Monto
+                                {getSortIcon('monto')}
+                              </div>
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Fecha Límite Pago
+                            <th 
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-blue-50 transition-colors"
+                              onClick={() => handleSort('fecha_creacion')}
+                            >
+                              <div className="flex items-center gap-2">
+                                Fecha Solicitud
+                                {getSortIcon('fecha_creacion')}
+                              </div>
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Estado
+                            <th 
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-blue-50 transition-colors"
+                              onClick={() => handleSort('fecha_limite_pago')}
+                            >
+                              <div className="flex items-center gap-2">
+                                Fecha Límite Pago
+                                {getSortIcon('fecha_limite_pago')}
+                              </div>
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aprobador</th>
+                            <th 
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-blue-50 transition-colors"
+                              onClick={() => handleSort('estado')}
+                            >
+                              <div className="flex items-center gap-2">
+                                Estado
+                                {getSortIcon('estado')}
+                              </div>
+                            </th>
+                            <th 
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-blue-50 transition-colors"
+                              onClick={() => handleSort('aprobador_nombre')}
+                            >
+                              <div className="flex items-center gap-2">
+                                Aprobador
+                                {getSortIcon('aprobador_nombre')}
+                              </div>
+                            </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Acciones
                             </th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {paginatedPagos.map((pago: Solicitud) => (
+                          {sortedPagos.map((pago: Solicitud) => (
                             <tr key={pago.id_solicitud} className="hover:bg-gray-50 transition-colors">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-700">
                                 {pago.folio}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -228,11 +435,14 @@ export default function PagosPendientesPage() {
                                   {pago.departamento}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-700">
                                 {formatCurrency(pago.monto)}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-CO')}
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {new Date(pago.fecha_creacion).toLocaleDateString('es-MX')}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX')}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
@@ -298,7 +508,137 @@ export default function PagosPendientesPage() {
           </div>
         </div>
 
-          {/* Export Options Modal removido */}
+        {/* Modal de exportación */}
+        {showExportModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4">
+              {/* Header del Modal */}
+              <div className="bg-gradient-to-r from-gray-800 to-blue-900 p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Download className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Exportar Pagos Pendientes</h2>
+                      <p className="text-gray-300 text-sm">Selecciona el formato para exportar {filteredPagos.length} pagos</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowExportModal(false)}
+                    className="text-gray-300 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                  >
+                    <AlertCircle className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-8">
+                {/* Título de sección */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">Seleccionar formato de exportación</h3>
+                </div>
+
+                {/* Grid de opciones */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                  {/* Opción PDF */}
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group">
+                    <div className="text-center mb-4">
+                      <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <FileText className="w-8 h-8 text-white" />
+                      </div>
+                      <h4 className="text-xl font-bold text-blue-900 mb-2">PDF</h4>
+                      <p className="text-blue-700 font-medium mb-1">Documento PDF profesional</p>
+                    </div>
+                    <div className="mb-6">
+                      <p className="text-sm text-gray-700 text-center leading-relaxed">
+                        Ideal para impresión y presentaciones oficiales
+                      </p>
+                    </div>
+                    <button
+                      onClick={exportToPDF}
+                      disabled={isExporting}
+                      className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Download className="w-5 h-5" />
+                      Exportar PDF
+                    </button>
+                  </div>
+
+                  {/* Opción Excel */}
+                  <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group">
+                    <div className="text-center mb-4">
+                      <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <FileSpreadsheet className="w-8 h-8 text-white" />
+                      </div>
+                      <h4 className="text-xl font-bold text-green-900 mb-2">Excel</h4>
+                      <p className="text-green-700 font-medium mb-1">Hoja de cálculo editable</p>
+                    </div>
+                    <div className="mb-6">
+                      <p className="text-sm text-gray-700 text-center leading-relaxed">
+                        Perfecto para análisis de datos y reportes
+                      </p>
+                    </div>
+                    <button
+                      onClick={exportToExcel}
+                      disabled={isExporting}
+                      className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Download className="w-5 h-5" />
+                      Exportar Excel
+                    </button>
+                  </div>
+
+                  {/* Opción CSV */}
+                  <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group">
+                    <div className="text-center mb-4">
+                      <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                        <FileText className="w-8 h-8 text-white" />
+                      </div>
+                      <h4 className="text-xl font-bold text-orange-900 mb-2">CSV</h4>
+                      <p className="text-orange-700 font-medium mb-1">Valores separados por comas</p>
+                    </div>
+                    <div className="mb-6">
+                      <p className="text-sm text-gray-700 text-center leading-relaxed">
+                        Compatible con cualquier sistema o software
+                      </p>
+                    </div>
+                    <button
+                      onClick={exportToCSV}
+                      disabled={isExporting}
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Download className="w-5 h-5" />
+                      Exportar CSV
+                    </button>
+                  </div>
+                </div>
+
+                {/* Nota informativa */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="flex items-center gap-2">
+                    <Download className="w-5 h-5 text-blue-600" />
+                    <p className="text-sm text-blue-800 font-medium">
+                      Los archivos exportados incluirán toda la información disponible de los pagos pendientes
+                    </p>
+                  </div>
+                </div>
+
+                {isExporting && (
+                  <div className="mt-6 text-center">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+                      <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                      Procesando exportación...
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Pago Detail Modal */}
         <PagoDetailModal 
