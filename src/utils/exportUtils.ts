@@ -1210,6 +1210,391 @@ class ExportUtils {
     if (estimatedKB < 1024) return `~${Math.round(estimatedKB)} KB`;
     return `~${(estimatedKB / 1024).toFixed(1)} MB`;
   }
+
+  // ============ EXPORTACIÓN DE VIÁTICOS ============
+
+  static async exportViaticosToPDF(viaticos: Solicitud[], options: ExportOptions = {}): Promise<void> {
+    const doc = new jsPDF({ 
+      orientation: 'landscape', 
+      unit: 'mm', 
+      format: 'a4',
+      compress: true
+    });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const stats = this.calculateViaticoStats(viaticos);
+
+    // Configurar metadatos
+    doc.setProperties({
+      title: options.customTitle || `Reporte de Viáticos - ${this.formatDate(new Date())}`,
+      subject: 'Reporte de Viáticos BECHAPRA',
+      author: COMPANY_CONFIG.fullName,
+      creator: COMPANY_CONFIG.name
+    });
+
+    // Cabecera profesional específica para viáticos
+    await this.createViaticoHeader(doc, pageWidth, stats, options);
+
+    // Línea divisoria elegante bajo la cabecera
+    doc.setDrawColor(18, 61, 140);
+    doc.setLineWidth(1.2);
+    doc.line(10, 42, pageWidth - 10, 42);
+
+    // Descripción específica para viáticos
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(50, 50, 50);
+    doc.text(
+      'Este reporte contiene información detallada sobre las solicitudes de viáticos pendientes de aprobación en el sistema BECHAPRA.\n' +
+      'Incluye datos sobre fechas límite de pago, montos, usuarios solicitantes y estado de cada viático para facilitar la gestión y toma de decisiones.',
+      pageWidth / 2,
+      50,
+      { align: 'center', maxWidth: pageWidth - 40 }
+    );
+
+    // Resumen de viáticos con métricas específicas
+    const resumenY = 62;
+    const viaticoMetrics = this.calculateViaticoMetrics(viaticos);
+    this.createViaticoSummaryCards(doc, pageWidth, resumenY, viaticoMetrics);
+
+    // Tabla de viáticos
+    const tableStartY = resumenY + 45;
+    await this.createViaticosTable(doc, viaticos, tableStartY, pageWidth);
+    this.addProfessionalFooter(doc, pageWidth, pageHeight, options, true);
+
+    // Guardar archivo
+    const filename = this.generateFilename('Viaticos', 'pdf', viaticos.length);
+    doc.save(filename);
+  }
+
+  private static calculateViaticoStats(viaticos: Solicitud[]): PDFStats {
+    const totalViaticos = viaticos.length;
+    const montoTotal = viaticos.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
+    const pendientes = viaticos.filter(v => v.estado === 'pendiente').length;
+    const urgentes = viaticos.filter(v => {
+      const fechaLimite = new Date(v.fecha_limite_pago);
+      const tresDias = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+      return fechaLimite < tresDias;
+    }).length;
+    const departamentos = new Set(viaticos.map(v => v.departamento).filter(Boolean));
+    const montoPromedio = totalViaticos > 0 ? montoTotal / totalViaticos : 0;
+
+    return {
+      totalSolicitudes: totalViaticos,
+      montoTotal,
+      pendientes,
+      aprobadas: 0, // Los viáticos generalmente están en estado pendiente
+      rechazadas: 0,
+      departamentos,
+      montoPromedio,
+      solicitudesPorDia: 0
+    };
+  }
+
+  private static calculateViaticoMetrics(viaticos: Solicitud[]) {
+    const tresDias = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const urgentes = viaticos.filter(v => new Date(v.fecha_limite_pago) < tresDias);
+    const montoUrgentes = urgentes.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
+    const montoTotal = viaticos.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
+    
+    return {
+      total: viaticos.length,
+      urgentes: urgentes.length,
+      montoTotal,
+      montoUrgentes,
+      porcentajeUrgentes: viaticos.length > 0 ? (urgentes.length / viaticos.length) * 100 : 0
+    };
+  }
+
+  private static async createViaticoHeader(doc: jsPDF, pageWidth: number, stats: PDFStats, options: ExportOptions): Promise<void> {
+    // Fondo con gradiente específico para viáticos (verde-azul)
+    doc.setFillColor(13, 148, 136); // Teal profesional
+    doc.roundedRect(0, 0, pageWidth, 40, 0, 0, 'F');
+    
+    // Intentar cargar logo
+    try {
+      const logoBase64 = await this.getImageBase64(options.companyLogo || COMPANY_CONFIG.logoUrl);
+      doc.addImage(logoBase64, 'PNG', 10, 6, 24, 24, undefined, 'FAST');
+    } catch {
+      // Logo alternativo con texto
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(10, 6, 24, 24, 3, 3, 'F');
+      doc.setTextColor(13, 148, 136);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text(COMPANY_CONFIG.name, 22, 20, { align: 'center' });
+    }
+
+    // Información del header específica para viáticos
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.text(COMPANY_CONFIG.name, 40, 15);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(16);
+    doc.text('Reporte de Viáticos Pendientes', 40, 25);
+
+    // Información resumida
+    const headerInfo = `${stats.totalSolicitudes} Viáticos | ${stats.departamentos.size} Departamentos`;
+    doc.setFontSize(13);
+    doc.text(headerInfo, 40, 36);
+
+    // Fecha de generación
+    const fechaGeneracion = this.formatDate(new Date(), true);
+    doc.text(`Generado: ${fechaGeneracion}`, pageWidth - 15, 20, { align: 'right' });
+
+    // Línea decorativa
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(2);
+    doc.line(10, 38, pageWidth - 10, 38);
+  }
+
+  private static createViaticoSummaryCards(doc: jsPDF, pageWidth: number, startY: number, metrics: {
+    total: number;
+    urgentes: number;
+    montoTotal: number;
+    montoUrgentes: number;
+    porcentajeUrgentes: number;
+  }): void {
+    const cardW = (pageWidth - 50) / 4;
+    const cardData = [
+      { label: 'Total Viáticos', value: metrics.total.toString(), color: [13, 148, 136] },
+      { label: 'Urgentes', value: metrics.urgentes.toString(), color: [239, 68, 68] },
+      { label: 'Monto Total', value: this.formatLargeNumberExact(metrics.montoTotal), color: [34, 197, 94] },
+      { label: 'Monto Urgentes', value: this.formatLargeNumberExact(metrics.montoUrgentes), color: [249, 115, 22] }
+    ];
+
+    cardData.forEach((card, i) => {
+      const x = 15 + i * (cardW + 5);
+      
+      // Fondo de la tarjeta
+      doc.setFillColor(248, 250, 252); // Gris muy claro
+      doc.roundedRect(x, startY, cardW, 16, 2, 2, 'F');
+      
+      // Borde coloreado
+      doc.setDrawColor(card.color[0], card.color[1], card.color[2]);
+      doc.setLineWidth(0.8);
+      doc.roundedRect(x, startY, cardW, 16, 2, 2);
+      
+      // Label
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(55, 65, 81);
+      doc.text(card.label, x + cardW / 2, startY + 6, { align: 'center' });
+      
+      // Valor
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(card.color[0], card.color[1], card.color[2]);
+      doc.text(card.value, x + cardW / 2, startY + 13, { align: 'center' });
+    });
+
+    // Indicador de urgencia
+    const urgencyY = startY + 25;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(239, 68, 68);
+    const urgencyText = `⚠️ ${metrics.porcentajeUrgentes.toFixed(1)}% de viáticos requieren atención urgente`;
+    doc.text(urgencyText, pageWidth / 2, urgencyY, { align: 'center' });
+  }
+
+  private static async createViaticosTable(doc: jsPDF, viaticos: Solicitud[], startY: number, pageWidth: number): Promise<void> {
+    // Preparar datos de la tabla
+    const tableData = viaticos.map(v => {
+      const fechaLimite = new Date(v.fecha_limite_pago);
+      const tresDias = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+      const isUrgent = fechaLimite < tresDias;
+      
+      return [
+        v.folio || v.id_solicitud?.toString() || '-',
+        v.usuario_nombre || `Usuario ${v.id_usuario}`,
+        v.departamento || '-',
+        this.formatCurrency(Number(v.monto) || 0),
+        this.formatDate(v.fecha_creacion),
+        this.formatDate(v.fecha_limite_pago),
+        isUrgent ? '🔴 Urgente' : '🟢 Normal',
+        v.tipo_pago || '-',
+        v.banco_destino || '-'
+      ];
+    });
+
+    // Configurar tabla
+    autoTable(doc, {
+      head: [[
+        'Folio',
+        'Solicitante', 
+        'Departamento',
+        'Monto',
+        'Fecha Solicitud',
+        'Fecha Límite',
+        'Prioridad',
+        'Tipo Pago',
+        'Banco'
+      ]],
+      body: tableData,
+      startY: startY,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [13, 148, 136],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9,
+        halign: 'center'
+      },
+      bodyStyles: {
+        fontSize: 8,
+        cellPadding: 2
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 20 }, // Folio
+        1: { halign: 'left', cellWidth: 35 },   // Solicitante
+        2: { halign: 'center', cellWidth: 25 }, // Departamento
+        3: { halign: 'right', cellWidth: 25 },  // Monto
+        4: { halign: 'center', cellWidth: 22 }, // Fecha Solicitud
+        5: { halign: 'center', cellWidth: 22 }, // Fecha Límite
+        6: { halign: 'center', cellWidth: 20 }, // Prioridad
+        7: { halign: 'center', cellWidth: 20 }, // Tipo Pago
+        8: { halign: 'center', cellWidth: 25 }  // Banco
+      },
+      didParseCell: (data) => {
+        // Resaltar filas urgentes
+        if (data.section === 'body' && Array.isArray(data.row.raw) && data.row.raw[6] && data.row.raw[6].toString().includes('Urgente')) {
+          data.cell.styles.fillColor = [254, 242, 242]; // Fondo rojo muy claro
+        }
+      },
+      margin: { left: 10, right: 10 },
+      tableWidth: 'auto'
+    });
+  }
+
+  static async exportViaticosToExcel(viaticos: Solicitud[], options: ExportOptions = {}): Promise<void> {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Viáticos');
+
+    // Configurar propiedades del archivo
+    workbook.creator = COMPANY_CONFIG.fullName;
+    workbook.title = 'Reporte de Viáticos';
+    workbook.subject = 'Exportación de viáticos BECHAPRA';
+
+    // Encabezados de columnas específicos para viáticos
+    const headers = [
+      'Folio',
+      'Usuario Solicitante',
+      'Departamento',
+      'Monto',
+      'Fecha Solicitud',
+      'Fecha Límite Pago',
+      'Días Restantes',
+      'Prioridad',
+      'Tipo Pago',
+      'Banco Destino',
+      'Estado'
+    ];
+
+    // Aplicar encabezados
+    const headerRow = worksheet.addRow(headers);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D9488' } };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    // Agregar datos
+    const tresDias = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    viaticos.forEach(viatico => {
+      const fechaLimite = new Date(viatico.fecha_limite_pago);
+      const diasRestantes = Math.ceil((fechaLimite.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      const isUrgent = fechaLimite < tresDias;
+
+      const row = worksheet.addRow([
+        viatico.folio || viatico.id_solicitud?.toString() || '-',
+        viatico.usuario_nombre || `Usuario ${viatico.id_usuario}`,
+        viatico.departamento || '-',
+        Number(viatico.monto) || 0,
+        viatico.fecha_creacion ? this.formatDate(viatico.fecha_creacion) : '-',
+        viatico.fecha_limite_pago ? this.formatDate(viatico.fecha_limite_pago) : '-',
+        diasRestantes,
+        isUrgent ? 'URGENTE' : 'NORMAL',
+        viatico.tipo_pago || '-',
+        viatico.banco_destino || '-',
+        viatico.estado || 'pendiente'
+      ]);
+
+      // Colorear filas urgentes
+      if (isUrgent) {
+        row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF2F2' } };
+      }
+    });
+
+    // Ajustar ancho de columnas
+    worksheet.columns = [
+      { width: 15 }, // Folio
+      { width: 30 }, // Usuario
+      { width: 20 }, // Departamento
+      { width: 15 }, // Monto
+      { width: 18 }, // Fecha Solicitud
+      { width: 18 }, // Fecha Límite
+      { width: 15 }, // Días Restantes
+      { width: 12 }, // Prioridad
+      { width: 15 }, // Tipo Pago
+      { width: 20 }, // Banco
+      { width: 12 }  // Estado
+    ];
+
+    // Generar y descargar
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = this.generateFilename('Viaticos', 'xlsx', viaticos.length);
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  static exportViaticosToCSV(viaticos: Solicitud[]): void {
+    const headers = [
+      'Folio',
+      'Usuario Solicitante',
+      'Departamento',
+      'Monto',
+      'Fecha Solicitud',
+      'Fecha Límite Pago',
+      'Días Restantes',
+      'Prioridad',
+      'Tipo Pago',
+      'Banco Destino',
+      'Estado'
+    ];
+
+    let csvContent = 'REPORTE DE VIÁTICOS\n';
+    csvContent += `Generado: ${this.formatDate(new Date(), true)}\n`;
+    csvContent += `Total de viáticos: ${viaticos.length}\n\n`;
+    csvContent += headers.join(',') + '\n';
+
+    const tresDias = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    viaticos.forEach(viatico => {
+      const fechaLimite = new Date(viatico.fecha_limite_pago);
+      const diasRestantes = Math.ceil((fechaLimite.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      const isUrgent = fechaLimite < tresDias;
+
+      const row = [
+        `"${(viatico.folio || viatico.id_solicitud?.toString() || '-').toString().replace(/"/g, '""')}"`,
+        `"${(viatico.usuario_nombre || `Usuario ${viatico.id_usuario}`).toString().replace(/"/g, '""')}"`,
+        `"${(viatico.departamento || '-').toString().replace(/"/g, '""')}"`,
+        Number(viatico.monto) || 0,
+        viatico.fecha_creacion ? this.formatDate(viatico.fecha_creacion) : '-',
+        viatico.fecha_limite_pago ? this.formatDate(viatico.fecha_limite_pago) : '-',
+        diasRestantes,
+        isUrgent ? 'URGENTE' : 'NORMAL',
+        `"${(viatico.tipo_pago || '-').toString().replace(/"/g, '""')}"`,
+        `"${(viatico.banco_destino || '-').toString().replace(/"/g, '""')}"`,
+        `"${(viatico.estado || 'pendiente').toString().replace(/"/g, '""')}"`
+      ];
+      csvContent += row.join(',') + '\n';
+    });
+
+    this.downloadFile(csvContent, this.generateFilename('Viaticos', 'csv', viaticos.length), 'text/csv');
+  }
 }
 
 // ============ EXPORTACIÓN DE LA CLASE ============
@@ -1225,5 +1610,8 @@ export const exportUsuariosToCSV = ExportUtils.exportUsuariosToCSV.bind(ExportUt
 export const exportSolicitudesToCSV = ExportUtils.exportSolicitudesToCSV.bind(ExportUtils);
 export const exportSolicitudesToExcel = ExportUtils.exportSolicitudesToExcel.bind(ExportUtils);
 export const exportSolicitudesToPDF = ExportUtils.exportSolicitudesToPDF.bind(ExportUtils);
+export const exportViaticosToPDF = ExportUtils.exportViaticosToPDF.bind(ExportUtils);
+export const exportViaticosToExcel = ExportUtils.exportViaticosToExcel.bind(ExportUtils);
+export const exportViaticosToCSV = ExportUtils.exportViaticosToCSV.bind(ExportUtils);
 export const exportDetailedReport = ExportUtils.exportDetailedReport.bind(ExportUtils);
 export const exportPagosToCSV = ExportUtils.exportPagosToCSV.bind(ExportUtils);

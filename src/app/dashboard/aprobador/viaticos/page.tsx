@@ -10,7 +10,7 @@ import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { usePagination } from '@/hooks/usePagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
-import { exportSolicitudesToCSV, exportSolicitudesToExcel, exportSolicitudesToPDF } from '@/utils/exportUtils';
+import { exportViaticosToCSV, exportViaticosToExcel, exportViaticosToPDF } from '@/utils/exportUtils';
 import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
 import { toast } from 'react-hot-toast';
 
@@ -214,15 +214,15 @@ const Viaticos: React.FC = () => {
   const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
     switch(format) {
       case 'csv':
-        exportSolicitudesToCSV(filteredViaticos);
+        exportViaticosToCSV(filteredViaticos);
         toast.success(`${filteredViaticos.length} viáticos exportados a CSV`);
         break;
       case 'excel':
-        exportSolicitudesToExcel(filteredViaticos);
+        exportViaticosToExcel(filteredViaticos);
         toast.success(`${filteredViaticos.length} viáticos exportados a Excel`);
         break;
       case 'pdf':
-        exportSolicitudesToPDF(filteredViaticos);
+        exportViaticosToPDF(filteredViaticos);
         toast.success(`${filteredViaticos.length} viáticos exportados a PDF`);
         break;
     }
