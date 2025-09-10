@@ -13,8 +13,13 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
-import Image from 'next/image';
 import { formatDateForAPI } from '@/utils/dateUtils';
+
+// Importaciones para plantillas
+import { SelectorPlantillas } from '@/components/plantillas/SelectorPlantillas';
+import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
+import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
+import { obtenerPlantillasActivas } from '@/data/plantillas';
 
 // Reducer para manejar el formulario
 type FormState = {
@@ -126,6 +131,21 @@ export default function NuevaSolicitudPage() {
   const [checkingCuenta, setCheckingCuenta] = useState(false);
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
+  // Hook para manejo de plantillas
+  const {
+    estado: estadoPlantilla,
+    seleccionarPlantilla,
+    actualizarCampo,
+    validarFormulario: validarFormularioPlantilla,
+    obtenerDatosParaEnvio
+  } = usePlantillaSolicitud();
+
+  // Obtener plantillas activas
+  const plantillasActivas = obtenerPlantillasActivas();
+
+  // Estado para controlar si se usa plantilla o formulario estándar
+  const usandoPlantilla = estadoPlantilla.plantillaSeleccionada !== null;
 
   // Limpiar campos cuando cambie tipo_concepto
   useEffect(() => {
@@ -331,8 +351,74 @@ export default function NuevaSolicitudPage() {
     e.preventDefault();
     setLoading(true);
     setIsFormSubmitted(true);
+
+    // Si se está usando una plantilla, validar con el sistema de plantillas
+    if (usandoPlantilla) {
+      if (!validarFormularioPlantilla()) {
+        setLoading(false);
+        toast.error('Por favor corrige los errores en el formulario');
+        return;
+      }
+
+      try {
+        const datosPlantilla = obtenerDatosParaEnvio();
+        if (!datosPlantilla) {
+          throw new Error('Error al obtener datos de la plantilla');
+        }
+
+        // Procesar archivos de la plantilla
+        let archivosParaSubir: File[] = [];
+        if (estadoPlantilla.datos.archivos_adjuntos && Array.isArray(estadoPlantilla.datos.archivos_adjuntos)) {
+          archivosParaSubir = estadoPlantilla.datos.archivos_adjuntos;
+        }
+
+        // Validar que hay al menos un archivo
+        if (archivosParaSubir.length === 0) {
+          throw new Error('Debe adjuntar al menos un archivo para la plantilla');
+        }
+
+        // Crear la solicitud usando datos de la plantilla con tipos correctos
+        const solicitudData = {
+          departamento: 'Finanzas',
+          monto: String(estadoPlantilla.datos.monto || '0'),
+          tipo_moneda: String(estadoPlantilla.datos.moneda || 'MXN'),
+          cuenta_destino: String(estadoPlantilla.datos.numero_cuenta || ''),
+          concepto: `${estadoPlantilla.datos.asunto || 'Plantilla'} - ${estadoPlantilla.datos.beneficiario || 'Sin beneficiario'}`,
+          tipo_pago: 'transferencia',
+          tipo_cuenta_destino: String(estadoPlantilla.datos.tipo_cuenta || 'CLABE'),
+          banco_destino: String(estadoPlantilla.datos.banco_destino || ''),
+          fecha_limite_pago: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          factura: archivosParaSubir[0],
+          nombre_persona: String(estadoPlantilla.datos.beneficiario || ''),
+          empresa_a_pagar: String(estadoPlantilla.datos.beneficiario || ''),
+          cuenta: String(estadoPlantilla.datos.numero_cuenta || ''),
+          archivos_adicionales: archivosParaSubir.slice(1),
+          tipos_archivos_adicionales: archivosParaSubir.slice(1).map(() => 'adjunto'),
+          // Campos adicionales de la plantilla como metadata
+          tipo_concepto: 'plantilla',
+          referencia: `Plantilla: ${estadoPlantilla.plantillaSeleccionada?.nombre || 'Desconocida'}`
+        };
+
+        console.log('Datos de plantilla para enviar:', solicitudData);
+
+        const response = await SolicitudesService.createWithFiles(solicitudData);
+        const solicitudId = (response as { id_solicitud: number }).id_solicitud;
+
+        toast.success('Solicitud creada exitosamente');
+        router.push('/dashboard/solicitante/solicitudes');
+        
+      } catch (error: unknown) {
+        console.error('Error al crear solicitud con plantilla:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error al crear la solicitud';
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Validación del formulario estándar (código original)
     const newErrors: Record<string, string> = {};
-    // Validar campos requeridos
     const requiredFields = ['departamento', 'monto', 'fecha_limite_pago', 'nombre_persona'];
     requiredFields.forEach(field => {
       if (!formData[field as keyof typeof formData]) {
@@ -642,7 +728,52 @@ export default function NuevaSolicitudPage() {
               </div>
             </div>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
+
+          {/* Selector de Plantillas */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <SelectorPlantillas
+              plantillas={plantillasActivas}
+              plantillaSeleccionada={estadoPlantilla.plantillaSeleccionada}
+              onSeleccionar={seleccionarPlantilla}
+            />
+          </div>
+
+          {/* Formulario dinámico basado en plantilla o estándar */}
+          {usandoPlantilla ? (
+            // Formulario de plantilla
+            <div className="space-y-8">
+              <FormularioPlantilla
+                plantilla={estadoPlantilla.plantillaSeleccionada!}
+                datos={estadoPlantilla.datos}
+                errores={estadoPlantilla.errores}
+                camposVisibles={estadoPlantilla.camposVisibles}
+                onCambiarCampo={actualizarCampo}
+              />
+              
+              {/* Botón de envío para plantilla */}
+              <div className="flex justify-center">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transform transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  {loading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Enviando solicitud...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5" />
+                      <span>Enviar Solicitud</span>
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // Formulario estándar (código original)
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
             <div className="flex items-center space-x-4 mb-12">
               <div className="p-4 rounded-full bg-white/20">
                 <FileText className="w-7 h-7 text-white" />
@@ -1610,6 +1741,7 @@ export default function NuevaSolicitudPage() {
               </div>
             </form>
           </div>
+          )}
         </div>
       </SolicitanteLayout>
     </ProtectedRoute>
