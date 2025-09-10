@@ -1240,27 +1240,34 @@ class ExportUtils {
     doc.setLineWidth(1.2);
     doc.line(10, 42, pageWidth - 10, 42);
 
-    // Descripción específica para viáticos
+    // Descripción específica para viáticos con diseño profesional
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(50, 50, 50);
+    
+    // Fondo sutil para la descripción
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(20, 46, pageWidth - 40, 12, 2, 2, 'F');
+    
     doc.text(
-      'Este reporte contiene información detallada sobre las solicitudes de viáticos pendientes de aprobación en el sistema BECHAPRA.\n' +
-      'Incluye datos sobre fechas límite de pago, montos, usuarios solicitantes y estado de cada viático para facilitar la gestión y toma de decisiones.',
+      'Reporte ejecutivo de viáticos pendientes con análisis de urgencias, fechas límite y métricas de gestión.\n' +
+      'Sistema BECHAPRA - Módulo de Gestión de Viáticos y Gastos de Representación.',
       pageWidth / 2,
-      50,
-      { align: 'center', maxWidth: pageWidth - 40 }
+      52,
+      { align: 'center', maxWidth: pageWidth - 50 }
     );
 
     // Resumen de viáticos con métricas específicas
-    const resumenY = 62;
+    const resumenY = 64;
     const viaticoMetrics = this.calculateViaticoMetrics(viaticos);
     this.createViaticoSummaryCards(doc, pageWidth, resumenY, viaticoMetrics);
 
     // Tabla de viáticos
-    const tableStartY = resumenY + 45;
+    const tableStartY = resumenY + 50;
     await this.createViaticosTable(doc, viaticos, tableStartY, pageWidth);
-    this.addProfessionalFooter(doc, pageWidth, pageHeight, options, true);
+    
+    // Footer profesional específico para viáticos
+    this.addViaticoFooter(doc, pageWidth, pageHeight, viaticos, options);
 
     // Guardar archivo
     const filename = this.generateFilename('Viaticos', 'pdf', viaticos.length);
@@ -1307,8 +1314,8 @@ class ExportUtils {
   }
 
   private static async createViaticoHeader(doc: jsPDF, pageWidth: number, stats: PDFStats, options: ExportOptions): Promise<void> {
-    // Fondo con gradiente específico para viáticos (verde-azul)
-    doc.setFillColor(13, 148, 136); // Teal profesional
+    // Fondo con gradiente azul corporativo profesional
+    doc.setFillColor(...COMPANY_CONFIG.colors.primary); // Azul fuerte corporativo
     doc.roundedRect(0, 0, pageWidth, 40, 0, 0, 'F');
     
     // Intentar cargar logo
@@ -1319,7 +1326,7 @@ class ExportUtils {
       // Logo alternativo con texto
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(10, 6, 24, 24, 3, 3, 'F');
-      doc.setTextColor(13, 148, 136);
+      doc.setTextColor(...COMPANY_CONFIG.colors.primary);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.text(COMPANY_CONFIG.name, 22, 20, { align: 'center' });
@@ -1333,10 +1340,10 @@ class ExportUtils {
     
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(16);
-    doc.text('Reporte de Viáticos Pendientes', 40, 25);
+    doc.text('Reporte Ejecutivo de Viáticos', 40, 25);
 
     // Información resumida
-    const headerInfo = `${stats.totalSolicitudes} Viáticos | ${stats.departamentos.size} Departamentos`;
+    const headerInfo = `${stats.totalSolicitudes} Viáticos Pendientes | ${stats.departamentos.size} Departamentos`;
     doc.setFontSize(13);
     doc.text(headerInfo, 40, 36);
 
@@ -1359,44 +1366,98 @@ class ExportUtils {
   }): void {
     const cardW = (pageWidth - 50) / 4;
     const cardData = [
-      { label: 'Total Viáticos', value: metrics.total.toString(), color: [13, 148, 136] },
-      { label: 'Urgentes', value: metrics.urgentes.toString(), color: [239, 68, 68] },
-      { label: 'Monto Total', value: this.formatLargeNumberExact(metrics.montoTotal), color: [34, 197, 94] },
-      { label: 'Monto Urgentes', value: this.formatLargeNumberExact(metrics.montoUrgentes), color: [249, 115, 22] }
+      { 
+        label: 'Total Viáticos', 
+        value: metrics.total.toString(), 
+        color: COMPANY_CONFIG.colors.primary,
+        icon: '📋'
+      },
+      { 
+        label: 'Urgentes', 
+        value: metrics.urgentes.toString(), 
+        color: COMPANY_CONFIG.colors.danger,
+        icon: '⚡'
+      },
+      { 
+        label: 'Monto Total', 
+        value: this.formatLargeNumberExact(metrics.montoTotal), 
+        color: COMPANY_CONFIG.colors.success,
+        icon: '💰'
+      },
+      { 
+        label: 'Monto Urgentes', 
+        value: this.formatLargeNumberExact(metrics.montoUrgentes), 
+        color: COMPANY_CONFIG.colors.warning,
+        icon: '🔥'
+      }
     ];
 
     cardData.forEach((card, i) => {
       const x = 15 + i * (cardW + 5);
       
-      // Fondo de la tarjeta
-      doc.setFillColor(248, 250, 252); // Gris muy claro
-      doc.roundedRect(x, startY, cardW, 16, 2, 2, 'F');
+      // Fondo degradado sutil
+      doc.setFillColor(240, 248, 255); // Azul muy claro corporativo
+      doc.roundedRect(x, startY, cardW, 20, 3, 3, 'F');
       
-      // Borde coloreado
+      // Borde con color de la métrica
       doc.setDrawColor(card.color[0], card.color[1], card.color[2]);
-      doc.setLineWidth(0.8);
-      doc.roundedRect(x, startY, cardW, 16, 2, 2);
+      doc.setLineWidth(1.2);
+      doc.roundedRect(x, startY, cardW, 20, 3, 3);
+      
+      // Barra superior de color
+      doc.setFillColor(card.color[0], card.color[1], card.color[2]);
+      doc.roundedRect(x, startY, cardW, 4, 3, 3, 'F');
+      
+      // Icono
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(card.icon, x + 5, startY + 12);
       
       // Label
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(55, 65, 81);
-      doc.text(card.label, x + cardW / 2, startY + 6, { align: 'center' });
+      doc.text(card.label, x + cardW / 2, startY + 8, { align: 'center' });
       
       // Valor
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
+      doc.setFontSize(12);
       doc.setTextColor(card.color[0], card.color[1], card.color[2]);
-      doc.text(card.value, x + cardW / 2, startY + 13, { align: 'center' });
+      doc.text(card.value, x + cardW / 2, startY + 16, { align: 'center' });
     });
 
-    // Indicador de urgencia
-    const urgencyY = startY + 25;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(239, 68, 68);
-    const urgencyText = `⚠️ ${metrics.porcentajeUrgentes.toFixed(1)}% de viáticos requieren atención urgente`;
-    doc.text(urgencyText, pageWidth / 2, urgencyY, { align: 'center' });
+    // Indicador de urgencia profesional
+    const urgencyY = startY + 30;
+    if (metrics.porcentajeUrgentes > 0) {
+      // Fondo del indicador
+      doc.setFillColor(254, 242, 242); // Rojo muy claro
+      doc.roundedRect(15, urgencyY - 3, pageWidth - 30, 8, 2, 2, 'F');
+      
+      // Borde rojo
+      doc.setDrawColor(...COMPANY_CONFIG.colors.danger);
+      doc.setLineWidth(0.8);
+      doc.roundedRect(15, urgencyY - 3, pageWidth - 30, 8, 2, 2);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...COMPANY_CONFIG.colors.danger);
+      const urgencyText = `⚠️ ALERTA: ${metrics.porcentajeUrgentes.toFixed(1)}% de los viáticos requieren atención inmediata`;
+      doc.text(urgencyText, pageWidth / 2, urgencyY + 1, { align: 'center' });
+    } else {
+      // Mensaje positivo
+      doc.setFillColor(240, 253, 244); // Verde muy claro
+      doc.roundedRect(15, urgencyY - 3, pageWidth - 30, 8, 2, 2, 'F');
+      
+      doc.setDrawColor(...COMPANY_CONFIG.colors.success);
+      doc.setLineWidth(0.8);
+      doc.roundedRect(15, urgencyY - 3, pageWidth - 30, 8, 2, 2);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...COMPANY_CONFIG.colors.success);
+      doc.text('✅ Todos los viáticos están dentro de los tiempos normales', pageWidth / 2, urgencyY + 1, { align: 'center' });
+    }
   }
 
   private static async createViaticosTable(doc: jsPDF, viaticos: Solicitud[], startY: number, pageWidth: number): Promise<void> {
@@ -1419,7 +1480,7 @@ class ExportUtils {
       ];
     });
 
-    // Configurar tabla
+    // Configurar tabla con diseño profesional azul
     autoTable(doc, {
       head: [[
         'Folio',
@@ -1430,42 +1491,115 @@ class ExportUtils {
         'Fecha Límite',
         'Prioridad',
         'Tipo Pago',
-        'Banco'
+        'Banco Destino'
       ]],
       body: tableData,
       startY: startY,
       theme: 'grid',
       headStyles: {
-        fillColor: [13, 148, 136],
+        fillColor: COMPANY_CONFIG.colors.primary, // Azul corporativo
         textColor: [255, 255, 255],
         fontStyle: 'bold',
-        fontSize: 9,
-        halign: 'center'
+        fontSize: 10,
+        halign: 'center',
+        cellPadding: 3
       },
       bodyStyles: {
-        fontSize: 8,
-        cellPadding: 2
+        fontSize: 9,
+        cellPadding: 3,
+        lineColor: [220, 220, 220],
+        lineWidth: 0.5
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252] // Azul muy claro alternado
       },
       columnStyles: {
-        0: { halign: 'center', cellWidth: 20 }, // Folio
+        0: { halign: 'center', cellWidth: 20, fontStyle: 'bold' }, // Folio
         1: { halign: 'left', cellWidth: 35 },   // Solicitante
         2: { halign: 'center', cellWidth: 25 }, // Departamento
-        3: { halign: 'right', cellWidth: 25 },  // Monto
+        3: { halign: 'right', cellWidth: 25, fontStyle: 'bold' },  // Monto
         4: { halign: 'center', cellWidth: 22 }, // Fecha Solicitud
         5: { halign: 'center', cellWidth: 22 }, // Fecha Límite
-        6: { halign: 'center', cellWidth: 20 }, // Prioridad
+        6: { halign: 'center', cellWidth: 20, fontStyle: 'bold' }, // Prioridad
         7: { halign: 'center', cellWidth: 20 }, // Tipo Pago
         8: { halign: 'center', cellWidth: 25 }  // Banco
       },
       didParseCell: (data) => {
-        // Resaltar filas urgentes
-        if (data.section === 'body' && Array.isArray(data.row.raw) && data.row.raw[6] && data.row.raw[6].toString().includes('Urgente')) {
+        // Resaltar filas urgentes con colores corporativos
+        if (data.section === 'body' && Array.isArray(data.row.raw) && data.row.raw[6] && data.row.raw[6].toString().includes('🔴')) {
           data.cell.styles.fillColor = [254, 242, 242]; // Fondo rojo muy claro
+          if (data.column.index === 6) { // Columna de prioridad
+            data.cell.styles.textColor = COMPANY_CONFIG.colors.danger;
+            data.cell.styles.fontStyle = 'bold';
+          }
+        }
+        
+        // Estilo especial para montos
+        if (data.section === 'body' && data.column.index === 3) {
+          data.cell.styles.textColor = COMPANY_CONFIG.colors.success;
+          data.cell.styles.fontStyle = 'bold';
+        }
+        
+        // Estilo para folios
+        if (data.section === 'body' && data.column.index === 0) {
+          data.cell.styles.textColor = COMPANY_CONFIG.colors.primary;
         }
       },
       margin: { left: 10, right: 10 },
-      tableWidth: 'auto'
+      tableWidth: 'auto',
+      styles: {
+        cellPadding: 3,
+        fontSize: 9,
+        valign: 'middle'
+      }
     });
+  }
+
+  private static addViaticoFooter(doc: jsPDF, pageWidth: number, pageHeight: number, viaticos: Solicitud[], options: ExportOptions): void {
+    const footerY = pageHeight - 25;
+    
+    // Línea divisoria superior
+    doc.setDrawColor(...COMPANY_CONFIG.colors.primary);
+    doc.setLineWidth(1);
+    doc.line(10, footerY - 5, pageWidth - 10, footerY - 5);
+    
+    // Fondo sutil del footer
+    doc.setFillColor(248, 250, 252);
+    doc.rect(0, footerY - 3, pageWidth, 28, 'F');
+    
+    // Información de confidencialidad
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...COMPANY_CONFIG.colors.primary);
+    doc.text('DOCUMENTO CONFIDENCIAL - BECHAPRA', 15, footerY + 2);
+    
+    // Estadísticas del reporte
+    const urgentes = viaticos.filter(v => {
+      const fechaLimite = new Date(v.fecha_limite_pago);
+      const tresDias = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+      return fechaLimite < tresDias;
+    }).length;
+    
+    const montoTotal = viaticos.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Total: ${viaticos.length} viáticos | Urgentes: ${urgentes} | Monto: ${this.formatCurrency(montoTotal)}`, 15, footerY + 8);
+    
+    // Información del sistema
+    doc.text(`Sistema BECHAPRA v2.0 | Módulo de Viáticos | ${new Date().getFullYear()}`, 15, footerY + 14);
+    
+    // Página y fecha en la derecha
+    doc.setTextColor(...COMPANY_CONFIG.colors.primary);
+    doc.text(`Página 1`, pageWidth - 15, footerY + 2, { align: 'right' });
+    doc.setTextColor(100, 100, 100);
+    doc.text(`${this.formatDate(new Date(), true)}`, pageWidth - 15, footerY + 8, { align: 'right' });
+    
+    // Logo pequeño o marca de agua (opcional)
+    doc.setTextColor(200, 200, 200);
+    doc.setFontSize(6);
+    doc.text('Powered by BECHAPRA Technology', pageWidth - 15, footerY + 14, { align: 'right' });
   }
 
   static async exportViaticosToExcel(viaticos: Solicitud[], options: ExportOptions = {}): Promise<void> {
