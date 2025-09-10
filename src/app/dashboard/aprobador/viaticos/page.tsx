@@ -8,6 +8,11 @@ import { useViaticos } from '@/hooks/useViaticos';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { usePagination } from '@/hooks/usePagination';
+import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
+import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
+import { exportSolicitudesToCSV, exportSolicitudesToExcel, exportSolicitudesToPDF } from '@/utils/exportUtils';
+import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
+import { toast } from 'react-hot-toast';
 
 import { Solicitud } from '@/types';
 import { formatDate, normalizeViatico } from '@/utils/viaticos';
@@ -152,6 +157,8 @@ const Viaticos: React.FC = () => {
   const tresDiasDespues = useMemo(() => new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000), []);
 
   const [selectedViaticos, setSelectedViaticos] = React.useState<number[]>([]);
+  const [showExportModal, setShowExportModal] = useState(false);
+  
   const toggleViatico = useCallback((id: number) => {
     setSelectedViaticos(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   }, []);
@@ -173,9 +180,13 @@ const Viaticos: React.FC = () => {
     [viaticos, tresDiasDespues]
   );
 
-  const viaticosForFilter: Solicitud[] = viaticosOrdenados;
-
-  const filteredViaticos = viaticosForFilter;
+  // Configurar filtros avanzados
+  const {
+    filters,
+    filteredData: filteredViaticos,
+    resetFilters,
+    updateFilters
+  } = useAdvancedFilters(viaticosOrdenados, 'solicitudes');
 
   const viaticosPorUsuario = useMemo(() => {
     if (!Array.isArray(filteredViaticos)) return {};
@@ -198,6 +209,29 @@ const Viaticos: React.FC = () => {
     setSelectedViaticos
   );
   const hasSelection = selectedViaticos.length > 0;
+
+  // Funciones de exportación
+  const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
+    switch(format) {
+      case 'csv':
+        exportSolicitudesToCSV(filteredViaticos);
+        toast.success(`${filteredViaticos.length} viáticos exportados a CSV`);
+        break;
+      case 'excel':
+        exportSolicitudesToExcel(filteredViaticos);
+        toast.success(`${filteredViaticos.length} viáticos exportados a Excel`);
+        break;
+      case 'pdf':
+        exportSolicitudesToPDF(filteredViaticos);
+        toast.success(`${filteredViaticos.length} viáticos exportados a PDF`);
+        break;
+    }
+    setShowExportModal(false);
+  };
+
+  const openExportModal = () => {
+    setShowExportModal(true);
+  };
 
   const [usuarioExpandido, setUsuarioExpandido] = React.useState<string | null>(null);
 
@@ -303,6 +337,17 @@ const Viaticos: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Filters */}
+          <div className="bg-white/15 rounded-xl p-4 mb-6">
+            <AdvancedFilters
+              filters={filters}
+              onFiltersChange={updateFilters}
+              onExport={() => openExportModal()}
+              onReset={resetFilters}
+              type="solicitudes"
+            />
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -685,6 +730,14 @@ const Viaticos: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Export Options Modal */}
+        <ExportOptionsModal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          onExport={handleExport}
+          itemCount={filteredViaticos.length}
+        />
       </AprobadorLayout>
     </ProtectedRoute>
   );
