@@ -62,7 +62,7 @@ export interface ExportOptions {
 
 const COMPANY_CONFIG = {
   name: 'BECHAPRA',
-  fullName: 'BECHAPRA - Sistema de Gestión de Pagos',
+  fullName: 'BECHAPRA Business Services - Sistema de Gestión de Pagos',
   colors: {
     primary: [18, 61, 140] as [number, number, number],
     secondary: [52, 152, 219] as [number, number, number],
@@ -1370,25 +1370,25 @@ class ExportUtils {
         label: 'Total Viáticos', 
         value: metrics.total.toString(), 
         color: COMPANY_CONFIG.colors.primary,
-        icon: '📋'
+        icon: 'TOT'
       },
       { 
         label: 'Urgentes', 
         value: metrics.urgentes.toString(), 
         color: COMPANY_CONFIG.colors.danger,
-        icon: '⚡'
+        icon: 'URG'
       },
       { 
         label: 'Monto Total', 
         value: this.formatLargeNumberExact(metrics.montoTotal), 
         color: COMPANY_CONFIG.colors.success,
-        icon: '💰'
+        icon: 'MTO'
       },
       { 
         label: 'Monto Urgentes', 
         value: this.formatLargeNumberExact(metrics.montoUrgentes), 
         color: COMPANY_CONFIG.colors.warning,
-        icon: '🔥'
+        icon: 'MUR'
       }
     ];
 
@@ -1442,7 +1442,7 @@ class ExportUtils {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(...COMPANY_CONFIG.colors.danger);
-      const urgencyText = `⚠️ ALERTA: ${metrics.porcentajeUrgentes.toFixed(1)}% de los viáticos requieren atención inmediata`;
+      const urgencyText = `ALERTA: ${metrics.porcentajeUrgentes.toFixed(1)}% de los viáticos requieren atención inmediata`;
       doc.text(urgencyText, pageWidth / 2, urgencyY + 1, { align: 'center' });
     } else {
       // Mensaje positivo
@@ -1456,7 +1456,7 @@ class ExportUtils {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(...COMPANY_CONFIG.colors.success);
-      doc.text('✅ Todos los viáticos están dentro de los tiempos normales', pageWidth / 2, urgencyY + 1, { align: 'center' });
+      doc.text('ESTADO: Todos los viáticos están dentro de los tiempos normales', pageWidth / 2, urgencyY + 1, { align: 'center' });
     }
   }
 
@@ -1474,7 +1474,7 @@ class ExportUtils {
         this.formatCurrency(Number(v.monto) || 0),
         this.formatDate(v.fecha_creacion),
         this.formatDate(v.fecha_limite_pago),
-        isUrgent ? '🔴 Urgente' : '🟢 Normal',
+        isUrgent ? 'URGENTE' : 'NORMAL',
         v.tipo_pago || '-',
         v.banco_destino || '-'
       ];
@@ -1526,7 +1526,7 @@ class ExportUtils {
       },
       didParseCell: (data) => {
         // Resaltar filas urgentes con colores corporativos
-        if (data.section === 'body' && Array.isArray(data.row.raw) && data.row.raw[6] && data.row.raw[6].toString().includes('🔴')) {
+        if (data.section === 'body' && Array.isArray(data.row.raw) && data.row.raw[6] && data.row.raw[6].toString().includes('URGENTE')) {
           data.cell.styles.fillColor = [254, 242, 242]; // Fondo rojo muy claro
           if (data.column.index === 6) { // Columna de prioridad
             data.cell.styles.textColor = COMPANY_CONFIG.colors.danger;
@@ -1599,7 +1599,7 @@ class ExportUtils {
     // Logo pequeño o marca de agua (opcional)
     doc.setTextColor(200, 200, 200);
     doc.setFontSize(6);
-    doc.text('Powered by BECHAPRA Technology', pageWidth - 15, footerY + 14, { align: 'right' });
+    doc.text('Powered by BECHAPRA Business Services', pageWidth - 15, footerY + 14, { align: 'right' });
   }
 
   static async exportViaticosToExcel(viaticos: Solicitud[], options: ExportOptions = {}): Promise<void> {
