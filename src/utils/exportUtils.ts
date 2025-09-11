@@ -522,16 +522,16 @@ class ExportUtils {
     doc.setLineWidth(1.2);
     doc.line(10, 42, pageWidth - 10, 42);
 
-    // Descripción general del reporte (centrada y clara)
+    // Descripción general del reporte (justificada y profesional)
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(50, 50, 50);
     doc.text(
       'Este archivo contiene un reporte profesional y detallado de las solicitudes de pago, usuarios y movimientos registrados en el sistema BECHAPRA.\n' +
       'Permite analizar, compartir y validar la información relevante de manera clara y ordenada. Incluye métricas, tablas y leyendas para facilitar la interpretación de los datos exportados.',
-      pageWidth / 2,
+      20,
       50,
-      { align: 'center', maxWidth: pageWidth - 40 }
+      { align: 'justify', maxWidth: pageWidth - 40 }
     );
 
     // Resumen de montos por estado en tabla profesional como la imagen
