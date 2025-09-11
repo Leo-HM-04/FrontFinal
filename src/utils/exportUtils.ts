@@ -534,17 +534,19 @@ class ExportUtils {
       { align: 'center', maxWidth: pageWidth - 40 }
     );
 
-    // Resumen de montos por estado (pendiente, rechazado, pagado, autorizado) con íconos y resaltados sutiles
+    // Resumen de montos por estado en tabla profesional como la imagen
     const resumenMontosY = 62;
     const estadosMontos = this.calculateMontosPorEstado(solicitudes);
-    const resumenLabels = [
-      { label: 'Pendientes', color: [241,196,15], monto: Number(estadosMontos.pendiente) || 0 },
-      { label: 'Rechazadas', color: [231,76,60], monto: Number(estadosMontos.rechazada) || 0 },
-      { label: 'Pagadas', color: [52,152,219], monto: Number(estadosMontos.pagada) || 0 },
-      { label: 'Autorizadas', color: [46,204,113], monto: Number(estadosMontos.autorizada) || 0 }
-    ];
+    
+    // Crear datos para la tabla de resumen
+    const resumenData = [
+      ['Pendientes', solicitudes.filter(s => s.estado === 'pendiente').length.toString(), this.formatCurrency(Number(estadosMontos.pendiente) || 0)],
+      ['Rechazadas', solicitudes.filter(s => s.estado === 'rechazada').length.toString(), this.formatCurrency(Number(estadosMontos.rechazada) || 0)],
+      ['Pagadas', solicitudes.filter(s => s.estado === 'pagada').length.toString(), this.formatCurrency(Number(estadosMontos.pagada) || 0)],
+      ['Autorizadas', solicitudes.filter(s => s.estado === 'autorizada').length.toString(), this.formatCurrency(Number(estadosMontos.autorizada) || 0)]
+    ].filter(row => parseInt(row[1]) > 0); // Solo mostrar estados que tienen solicitudes
+
     // El total general debe ser la suma de todos los montos de todas las solicitudes
-    // Sumar todos los montos válidos, incluso si vienen como string o 0
     const totalGeneral = solicitudes.reduce((sum, s) => {
       let monto = 0;
       if (typeof s.monto === 'number' && !isNaN(s.monto)) {
@@ -553,52 +555,54 @@ class ExportUtils {
         const parsed = parseFloat(String(s.monto).replace(/[^\d.-]/g, ''));
         monto = !isNaN(parsed) ? parsed : 0;
       } else {
-        // Fallback: try to coerce to number
         const parsed = Number(s.monto);
         monto = !isNaN(parsed) ? parsed : 0;
       }
       return sum + monto;
     }, 0);
-    const cardW = (pageWidth - 40) / resumenLabels.length;
-    // Color de fondo suave corporativo (azul claro)
-    const resumenBg = [230, 240, 255]; // azul muy claro
-    resumenLabels.forEach((r, i) => {
-      const x = 15 + i * (cardW + 2);
-      // Fondo suave
-      doc.setFillColor(resumenBg[0], resumenBg[1], resumenBg[2]);
-      doc.roundedRect(x, resumenMontosY, cardW, 16, 2, 2, 'F');
-      // Borde sutil
-      doc.setDrawColor(r.color[0], r.color[1], r.color[2]);
-      doc.setLineWidth(0.7);
-      doc.roundedRect(x, resumenMontosY, cardW, 16, 2, 2);
-      // Label centrado y profesional
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10.5);
-      doc.setTextColor(40, 40, 60);
-      doc.text(r.label, x + cardW / 2, resumenMontosY + 7, { align: 'center' });
-      // Solo monto con unidad, centrado
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.setTextColor(r.color[0], r.color[1], r.color[2]);
-      const montoUnidad = this.formatLargeNumberExact(r.monto);
-      doc.text(montoUnidad, x + cardW / 2, resumenMontosY + 13, { align: 'center' });
+
+    // Crear tabla de resumen con autoTable
+    autoTable(doc, {
+      head: [['Estado', 'Cantidad', 'Total']],
+      body: resumenData,
+      startY: resumenMontosY,
+      margin: { left: 15, right: 15 },
+      theme: 'grid',
+      headStyles: {
+        fillColor: [18, 61, 140], // Color azul corporativo
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 11,
+        halign: 'center'
+      },
+      bodyStyles: {
+        fontSize: 10,
+        cellPadding: 4,
+        halign: 'center'
+      },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 60 },
+        1: { halign: 'center', cellWidth: 40 },
+        2: { halign: 'right', cellWidth: 60 }
+      },
+      alternateRowStyles: {
+        fillColor: [248, 249, 250]
+      }
     });
-    // Total general
-    // Espacio profesional y sin superposición para Total General
-    const totalY = resumenMontosY + 32; // Más espacio debajo de las tarjetas
-    const totalLabel = 'Total General:';
-    const totalUnidad = this.formatLargeNumberExact(Number(totalGeneral) || 0);
-    // Ajustar fuente y color
+
+    // Obtener posición final de la tabla
+    const finalY = (doc as any).lastAutoTable.finalY;
+
+    // Total general debajo de la tabla
+    const totalY = finalY + 10;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(15);
+    doc.setFontSize(14);
     doc.setTextColor(18, 61, 140);
-    // Imprimir ambos en la misma línea, bien alineados y con espacio suficiente
-    // El label a la izquierda, el valor a la derecha
-    doc.text(totalLabel, 15, totalY, { align: 'left' });
-    doc.text(totalUnidad, pageWidth - 15, totalY, { align: 'right' });
+    doc.text('Total General:', 15, totalY);
+    doc.text(this.formatCurrency(totalGeneral), pageWidth - 15, totalY, { align: 'right' });
 
     // Asegura que la tabla y leyenda siempre queden al menos 10mm debajo del resumen
-    const tableStartY = resumenMontosY + 35;
+    const tableStartY = totalY + 15;
     await this.createSolicitudesTable(doc, solicitudes, tableStartY, pageWidth);
     this.addProfessionalFooter(doc, pageWidth, pageHeight, options, true);
 
@@ -663,51 +667,81 @@ class ExportUtils {
     doc.setFontSize(16);
     doc.text('RESUMEN EJECUTIVO', 15, startY);
 
-    // Métricas en tarjetas
-    const cardWidth = (pageWidth - 80) / 5;
-    const cardHeight = 25;
-    const cardY = startY + 10;
-    
-    const metrics = [
-      { title: 'Total', value: stats.totalSolicitudes.toString(), color: COMPANY_CONFIG.colors.secondary },
-      { title: 'Monto Total', value: this.formatCurrency(stats.montoTotal).split(' ')[0], color: COMPANY_CONFIG.colors.success },
-      { title: 'Aprobadas', value: `${stats.aprobadas} (${((stats.aprobadas/stats.totalSolicitudes)*100).toFixed(0)}%)`, color: COMPANY_CONFIG.colors.info },
-      { title: 'Pendientes', value: `${stats.pendientes} (${((stats.pendientes/stats.totalSolicitudes)*100).toFixed(0)}%)`, color: COMPANY_CONFIG.colors.warning },
-      { title: 'Promedio', value: this.formatCurrency(stats.montoPromedio).split(' ')[0], color: COMPANY_CONFIG.colors.primary }
+    // Crear tabla de métricas profesional como en las imágenes
+    const metricsData = [
+      ['Total Solicitudes', stats.totalSolicitudes.toString()],
+      ['Monto Total', this.formatCurrency(stats.montoTotal)],
+      ['Aprobadas', `${stats.aprobadas} (${((stats.aprobadas/stats.totalSolicitudes)*100).toFixed(0)}%)`],
+      ['Pendientes', `${stats.pendientes} (${((stats.pendientes/stats.totalSolicitudes)*100).toFixed(0)}%)`],
+      ['Promedio', this.formatCurrency(stats.montoPromedio)]
     ];
 
-    metrics.forEach((metric, index) => {
-      const x = 15 + (index * (cardWidth + 10));
-      
-      // Fondo de la tarjeta
-      doc.setFillColor(...metric.color);
-      doc.roundedRect(x, cardY, cardWidth, cardHeight, 3, 3, 'F');
-      
-      // Valor principal
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.text(metric.value, x + cardWidth/2, cardY + 10, { align: 'center' });
-      
-      // Título
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text(metric.title, x + cardWidth/2, cardY + 18, { align: 'center' });
+    autoTable(doc, {
+      head: [['Métrica', 'Valor']],
+      body: metricsData,
+      startY: startY + 10,
+      margin: { left: 15, right: 15 },
+      theme: 'grid',
+      headStyles: {
+        fillColor: [18, 61, 140],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 11,
+        halign: 'center'
+      },
+      bodyStyles: {
+        fontSize: 10,
+        cellPadding: 4
+      },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 80 },
+        1: { halign: 'right', cellWidth: 80 }
+      },
+      alternateRowStyles: {
+        fillColor: [248, 249, 250]
+      }
     });
 
-    // Resumen por estado con montos
-    const estados = this.calculateStateTotals(solicitudes);
-    const resumenY = cardY + cardHeight + 10;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(...COMPANY_CONFIG.colors.success);
-    doc.text(`Aprobadas: ${estados.aprobadas.cantidad} | Ganancia: ${this.formatCurrency(estados.aprobadas.monto)}`, 15, resumenY);
-    doc.setTextColor(...COMPANY_CONFIG.colors.warning);
-    doc.text(`Pendientes: ${estados.pendientes.cantidad} | Monto: ${this.formatCurrency(estados.pendientes.monto)}`, 15, resumenY + 8);
-    doc.setTextColor(...COMPANY_CONFIG.colors.danger);
-    doc.text(`Rechazadas: ${estados.rechazadas.cantidad} | Monto: ${this.formatCurrency(estados.rechazadas.monto)}`, 15, resumenY + 16);
+    // Obtener posición final de la primera tabla
+    const firstTableFinalY = (doc as any).lastAutoTable.finalY;
 
-    return resumenY + 24;
+    // Tabla de resumen por estado
+    const estados = this.calculateStateTotals(solicitudes);
+    const estadosData = [
+      ['Aprobadas', estados.aprobadas.cantidad.toString(), this.formatCurrency(estados.aprobadas.monto)],
+      ['Pendientes', estados.pendientes.cantidad.toString(), this.formatCurrency(estados.pendientes.monto)],
+      ['Rechazadas', estados.rechazadas.cantidad.toString(), this.formatCurrency(estados.rechazadas.monto)]
+    ];
+
+    autoTable(doc, {
+      head: [['Estado', 'Cantidad', 'Monto']],
+      body: estadosData,
+      startY: firstTableFinalY + 10,
+      margin: { left: 15, right: 15 },
+      theme: 'grid',
+      headStyles: {
+        fillColor: [18, 61, 140],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 11,
+        halign: 'center'
+      },
+      bodyStyles: {
+        fontSize: 10,
+        cellPadding: 4
+      },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 60 },
+        1: { halign: 'center', cellWidth: 40 },
+        2: { halign: 'right', cellWidth: 60 }
+      },
+      alternateRowStyles: {
+        fillColor: [248, 249, 250]
+      }
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY;
+    return finalY + 10;
   }
 
   private static async createSolicitudesTable(doc: jsPDF, solicitudes: Solicitud[], startY: number, pageWidth: number): Promise<void> {
@@ -1260,10 +1294,10 @@ class ExportUtils {
     // Resumen de viáticos con métricas específicas
     const resumenY = 64;
     const viaticoMetrics = this.calculateViaticoMetrics(viaticos);
-    this.createViaticoSummaryCards(doc, pageWidth, resumenY, viaticoMetrics);
+    const tableEndY = this.createViaticoSummaryTable(doc, pageWidth, resumenY, viaticoMetrics);
 
     // Tabla de viáticos
-    const tableStartY = resumenY + 50;
+    const tableStartY = tableEndY + 10;
     await this.createViaticosTable(doc, viaticos, tableStartY, pageWidth);
     
     // Footer profesional específico para viáticos
@@ -1357,107 +1391,68 @@ class ExportUtils {
     doc.line(10, 38, pageWidth - 10, 38);
   }
 
-  private static createViaticoSummaryCards(doc: jsPDF, pageWidth: number, startY: number, metrics: {
+  private static createViaticoSummaryTable(doc: jsPDF, pageWidth: number, startY: number, metrics: {
     total: number;
     urgentes: number;
     montoTotal: number;
     montoUrgentes: number;
     porcentajeUrgentes: number;
-  }): void {
-    const cardW = (pageWidth - 50) / 4;
-    const cardData = [
-      { 
-        label: 'Total Viáticos', 
-        value: metrics.total.toString(), 
-        color: COMPANY_CONFIG.colors.primary,
-        icon: 'TOT'
-      },
-      { 
-        label: 'Urgentes', 
-        value: metrics.urgentes.toString(), 
-        color: COMPANY_CONFIG.colors.danger,
-        icon: 'URG'
-      },
-      { 
-        label: 'Monto Total', 
-        value: this.formatLargeNumberExact(metrics.montoTotal), 
-        color: COMPANY_CONFIG.colors.success,
-        icon: 'MTO'
-      },
-      { 
-        label: 'Monto Urgentes', 
-        value: this.formatLargeNumberExact(metrics.montoUrgentes), 
-        color: COMPANY_CONFIG.colors.warning,
-        icon: 'MUR'
-      }
+  }): number {
+    // Crear tabla de resumen de viáticos como en las imágenes
+    const viaticoData = [
+      ['Total Viáticos', metrics.total.toString()],
+      ['Urgentes', metrics.urgentes.toString()],
+      ['Monto Total', this.formatCurrency(metrics.montoTotal)],
+      ['Monto Urgentes', this.formatCurrency(metrics.montoUrgentes)],
+      ['Porcentaje Urgentes', `${metrics.porcentajeUrgentes.toFixed(1)}%`]
     ];
 
-    cardData.forEach((card, i) => {
-      const x = 15 + i * (cardW + 5);
-      
-      // Fondo degradado sutil
-      doc.setFillColor(240, 248, 255); // Azul muy claro corporativo
-      doc.roundedRect(x, startY, cardW, 20, 3, 3, 'F');
-      
-      // Borde con color de la métrica
-      doc.setDrawColor(card.color[0], card.color[1], card.color[2]);
-      doc.setLineWidth(1.2);
-      doc.roundedRect(x, startY, cardW, 20, 3, 3);
-      
-      // Barra superior de color
-      doc.setFillColor(card.color[0], card.color[1], card.color[2]);
-      doc.roundedRect(x, startY, cardW, 4, 3, 3, 'F');
-      
-      // Icono
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text(card.icon, x + 5, startY + 12);
-      
-      // Label
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(55, 65, 81);
-      doc.text(card.label, x + cardW / 2, startY + 8, { align: 'center' });
-      
-      // Valor
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.setTextColor(card.color[0], card.color[1], card.color[2]);
-      doc.text(card.value, x + cardW / 2, startY + 16, { align: 'center' });
+    autoTable(doc, {
+      head: [['Métrica', 'Valor']],
+      body: viaticoData,
+      startY: startY,
+      margin: { left: 15, right: 15 },
+      theme: 'grid',
+      headStyles: {
+        fillColor: [18, 61, 140],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 11,
+        halign: 'center'
+      },
+      bodyStyles: {
+        fontSize: 10,
+        cellPadding: 4
+      },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 80 },
+        1: { halign: 'right', cellWidth: 80 }
+      },
+      alternateRowStyles: {
+        fillColor: [248, 249, 250]
+      }
     });
 
-    // Indicador de urgencia profesional
-    const urgencyY = startY + 30;
+    const finalY = (doc as any).lastAutoTable.finalY;
+
+    // Indicador de urgencia profesional debajo de la tabla
+    const urgencyY = finalY + 10;
     if (metrics.porcentajeUrgentes > 0) {
-      // Fondo del indicador
-      doc.setFillColor(254, 242, 242); // Rojo muy claro
-      doc.roundedRect(15, urgencyY - 3, pageWidth - 30, 8, 2, 2, 'F');
-      
-      // Borde rojo
-      doc.setDrawColor(...COMPANY_CONFIG.colors.danger);
-      doc.setLineWidth(0.8);
-      doc.roundedRect(15, urgencyY - 3, pageWidth - 30, 8, 2, 2);
-      
+      // Mensaje de alerta
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(...COMPANY_CONFIG.colors.danger);
       const urgencyText = `ALERTA: ${metrics.porcentajeUrgentes.toFixed(1)}% de los viáticos requieren atención inmediata`;
-      doc.text(urgencyText, pageWidth / 2, urgencyY + 1, { align: 'center' });
+      doc.text(urgencyText, pageWidth / 2, urgencyY, { align: 'center' });
     } else {
       // Mensaje positivo
-      doc.setFillColor(240, 253, 244); // Verde muy claro
-      doc.roundedRect(15, urgencyY - 3, pageWidth - 30, 8, 2, 2, 'F');
-      
-      doc.setDrawColor(...COMPANY_CONFIG.colors.success);
-      doc.setLineWidth(0.8);
-      doc.roundedRect(15, urgencyY - 3, pageWidth - 30, 8, 2, 2);
-      
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(...COMPANY_CONFIG.colors.success);
-      doc.text('ESTADO: Todos los viáticos están dentro de los tiempos normales', pageWidth / 2, urgencyY + 1, { align: 'center' });
+      doc.text('ESTADO: Todos los viáticos están dentro de los tiempos normales', pageWidth / 2, urgencyY, { align: 'center' });
     }
+    
+    return urgencyY + 10;
   }
 
   private static async createViaticosTable(doc: jsPDF, viaticos: Solicitud[], startY: number, pageWidth: number): Promise<void> {
