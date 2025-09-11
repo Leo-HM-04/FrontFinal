@@ -449,7 +449,7 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
   
   // Intentar cargar y agregar el logo del proyecto
   try {
-    const logoPath = '/assets/images/Logo_16x9_Azul@2x.png';
+    const logoPath = '/assets/images/Logo_1x1_AzulSinFondo@2x.png';
     const logoBase64 = await getImageAsBase64(logoPath);
     
     // Agregar la imagen al PDF

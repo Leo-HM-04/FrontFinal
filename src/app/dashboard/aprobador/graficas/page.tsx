@@ -495,11 +495,8 @@ export default function GraficasAprobador() {
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-4">
                       Panel de Estadísticas Ejecutivas
                     </h1>
-                    <p className="text-lg text-gray-600 leading-relaxed">
-                      Dashboard integral con insights de rendimiento y análisis de solicitudes
-                    </p>
                   </div>
-                  <div className="flex justify-center lg:justify-end">
+                  {/* <div className="flex justify-center lg:justify-end">
                     <button
                       onClick={() => setShowExportModal(true)}
                       className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
@@ -508,7 +505,7 @@ export default function GraficasAprobador() {
                       <MdFileDownload size={20} />
                       {exporting ? 'Exportando...' : 'Exportar PDF'}
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
