@@ -102,7 +102,7 @@ export default function GraficasAprobador() {
   const handleExportChartsOnly = async () => {
     setExporting(true);
     try {
-      await exportChartsOnly();
+      await exportChartsOnly(data);
     } finally {
       setExporting(false);
       setShowExportModal(false);
