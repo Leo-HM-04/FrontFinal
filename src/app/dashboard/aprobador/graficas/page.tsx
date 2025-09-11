@@ -20,6 +20,8 @@ import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels/typ
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { toast } from 'react-hot-toast';
+import { exportToPDF, exportChartsOnly } from '@/utils/pdfExportUtils';
+import '@/styles/charts.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, ChartDataLabels);
 
@@ -86,202 +88,21 @@ export default function GraficasAprobador() {
     fetchData();
   }, []);
 
-  // Funciones de exportación a PDF
-  const exportToPDF = async () => {
+  // Funciones de exportación a PDF usando utilidades externas
+  const handleExportFullReport = async () => {
+    setExporting(true);
     try {
-      setExporting(true);
-      const { jsPDF } = await import('jspdf');
-      
-      const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape para mejor visualización
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
-      // Título del reporte
-      pdf.setFontSize(20);
-      pdf.text('Panel de Estadísticas Ejecutivas', pageWidth / 2, 20, { align: 'center' });
-      
-      pdf.setFontSize(12);
-      pdf.text(`Generado el: ${new Date().toLocaleDateString('es-MX')}`, pageWidth / 2, 30, { align: 'center' });
-      
-      // Intentar capturar directamente desde los canvas de Chart.js
-      const doughnutChart = document.querySelector('.doughnut-chart canvas') as HTMLCanvasElement;
-      const barChart = document.querySelector('.bar-chart canvas') as HTMLCanvasElement;
-      
-      if (doughnutChart && barChart) {
-        try {
-          // Método 1: Usar directamente los canvas de Chart.js (más confiable)
-          const doughnutImgData = doughnutChart.toDataURL('image/png');
-          const barImgData = barChart.toDataURL('image/png');
-          
-          // Agregar gráfica de dona (lado izquierdo)
-          const chartWidth = (pageWidth / 2) - 20;
-          const chartHeight = chartWidth * 0.8; // Aspecto ratio apropiado
-          
-          pdf.addImage(doughnutImgData, 'PNG', 10, 45, chartWidth, chartHeight);
-          pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 45, chartWidth, chartHeight);
-          
-        } catch (canvasError) {
-          console.warn('Error con canvas directo, usando html2canvas:', canvasError);
-          
-          // Método 2: Fallback con html2canvas si el método directo falla
-          const html2canvas = (await import('html2canvas')).default;
-          
-          const doughnutCanvas = await html2canvas(doughnutChart.parentElement as HTMLElement, {
-            backgroundColor: '#ffffff',
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            foreignObjectRendering: false,
-            logging: false,
-            windowWidth: 1200,
-            windowHeight: 800,
-          });
-          
-          const barCanvas = await html2canvas(barChart.parentElement as HTMLElement, {
-            backgroundColor: '#ffffff',
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            foreignObjectRendering: false,
-            logging: false,
-            windowWidth: 1200,
-            windowHeight: 800,
-          });
-          
-          const doughnutImgData = doughnutCanvas.toDataURL('image/png');
-          const barImgData = barCanvas.toDataURL('image/png');
-          const doughnutWidth = (pageWidth / 2) - 20;
-          const doughnutHeight = (doughnutWidth * doughnutCanvas.height) / doughnutCanvas.width;
-          const barWidth = (pageWidth / 2) - 20;
-          const barHeight = (barWidth * barCanvas.height) / barCanvas.width;
-          
-          pdf.addImage(doughnutImgData, 'PNG', 10, 45, doughnutWidth, doughnutHeight);
-          pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 45, barWidth, barHeight);
-        }
-        
-        // Agregar estadísticas resumidas
-        const totalSolicitudes = data.reduce((sum, item) => sum + item.total, 0);
-        const totalMonto = data.reduce((sum, item) => sum + Number(item.monto_total), 0);
-        
-        // Calcular la posición de las estadísticas basado en el tamaño de las gráficas
-        const referenceChartWidth = (pageWidth / 2) - 20;
-        const referenceChartHeight = referenceChartWidth * 0.8;
-        const statsY = referenceChartHeight + 60;
-        pdf.setFontSize(14);
-        pdf.text('Resumen Estadístico:', 20, statsY);
-        
-        pdf.setFontSize(12);
-        pdf.text(`• Total de solicitudes: ${totalSolicitudes.toLocaleString()}`, 20, statsY + 15);
-        pdf.text(`• Monto total: $${totalMonto.toLocaleString('es-MX')}`, 20, statsY + 25);
-        pdf.text(`• Estados activos: ${data.length}`, 20, statsY + 35);
-        pdf.text(`• Promedio por solicitud: $${Math.round(totalMonto / totalSolicitudes).toLocaleString('es-MX')}`, 20, statsY + 45);
-        
-        // Detalle por estado
-        pdf.text('Detalle por Estado:', pageWidth / 2 + 20, statsY);
-        let detailY = statsY + 15;
-        
-        data.forEach((item, index) => {
-          const promedio = Math.round(Number(item.monto_total) / item.total);
-          pdf.text(`• ${item.estado}: ${item.total} solicitudes ($${Number(item.monto_total).toLocaleString('es-MX')})`, 
-                   pageWidth / 2 + 20, detailY);
-          pdf.text(`  Promedio: $${promedio.toLocaleString('es-MX')}`, 
-                   pageWidth / 2 + 25, detailY + 8);
-          detailY += 20;
-        });
-        
-        // Footer
-        pdf.setFontSize(8);
-        pdf.text('Generado por Sistema de Gestión de Pagos', pageWidth / 2, pageHeight - 10, { align: 'center' });
-      }
-      
-      // Descargar el PDF
-      pdf.save(`estadisticas-ejecutivas-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('Reporte PDF generado exitosamente');
-      
-    } catch (error) {
-      console.error('Error al exportar PDF:', error);
-      toast.error('Error al generar el reporte PDF');
+      await exportToPDF(data);
     } finally {
       setExporting(false);
       setShowExportModal(false);
     }
   };
 
-  const exportChartsOnly = async () => {
+  const handleExportChartsOnly = async () => {
+    setExporting(true);
     try {
-      setExporting(true);
-      const { jsPDF } = await import('jspdf');
-      
-      const pdf = new jsPDF('l', 'mm', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      
-      // Título
-      pdf.setFontSize(18);
-      pdf.text('Gráficas de Estadísticas', pageWidth / 2, 20, { align: 'center' });
-      
-      // Intentar capturar directamente desde los canvas de Chart.js
-      const doughnutChart = document.querySelector('.doughnut-chart canvas') as HTMLCanvasElement;
-      const barChart = document.querySelector('.bar-chart canvas') as HTMLCanvasElement;
-      
-      if (doughnutChart && barChart) {
-        try {
-          // Método 1: Usar directamente los canvas de Chart.js (más confiable)
-          const doughnutImgData = doughnutChart.toDataURL('image/png');
-          const barImgData = barChart.toDataURL('image/png');
-          
-          // Gráficas más grandes al ocupar toda la página
-          const chartWidth = (pageWidth / 2) - 20;
-          const chartHeight = chartWidth * 0.8;
-          
-          pdf.addImage(doughnutImgData, 'PNG', 10, 35, chartWidth, chartHeight);
-          pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 35, chartWidth, chartHeight);
-          
-        } catch (canvasError) {
-          console.warn('Error con canvas directo, usando html2canvas:', canvasError);
-          
-          // Método 2: Fallback con html2canvas si el método directo falla
-          const html2canvas = (await import('html2canvas')).default;
-          
-          const doughnutCanvas = await html2canvas(doughnutChart.parentElement as HTMLElement, {
-            backgroundColor: '#ffffff',
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            foreignObjectRendering: false,
-            logging: false,
-            windowWidth: 1200,
-            windowHeight: 800,
-          });
-          
-          const barCanvas = await html2canvas(barChart.parentElement as HTMLElement, {
-            backgroundColor: '#ffffff',
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            foreignObjectRendering: false,
-            logging: false,
-            windowWidth: 1200,
-            windowHeight: 800,
-          });
-          
-          const chartWidth = (pageWidth / 2) - 20;
-          const doughnutHeight = (chartWidth * doughnutCanvas.height) / doughnutCanvas.width;
-          const barHeight = (chartWidth * barCanvas.height) / barCanvas.width;
-          
-          const doughnutImgData = doughnutCanvas.toDataURL('image/png');
-          const barImgData = barCanvas.toDataURL('image/png');
-          
-          pdf.addImage(doughnutImgData, 'PNG', 10, 35, chartWidth, doughnutHeight);
-          pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 35, chartWidth, barHeight);
-        }
-      }
-      
-      pdf.save(`graficas-estadisticas-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('Gráficas exportadas exitosamente');
-      
-    } catch (error) {
-      console.error('Error al exportar gráficas:', error);
-      toast.error('Error al exportar las gráficas');
+      await exportChartsOnly();
     } finally {
       setExporting(false);
       setShowExportModal(false);
@@ -659,43 +480,12 @@ export default function GraficasAprobador() {
     }
   };
 
-  // CSS global para tooltips de Chart.js y datalabels
-  // Esto asegura que los tooltips y datalabels estén siempre por encima
-  // Puedes mover este bloque a un CSS global si lo prefieres
-  // El selector .chartjs-tooltip es para tooltips, .chartjs-datalabel para datalabels
-  // El !important es necesario para sobrescribir cualquier stacking context
+  // CSS global para tooltips de Chart.js y datalabels mejorado
+  // Movido a charts.css para mejor organización
   return (
-    <>
-      <style>{`
-        .chartjs-tooltip {
-          z-index: 9999 !important;
-          font-family: 'Inter', system-ui, sans-serif !important;
-        }
-        .chartjs-datalabel {
-          z-index: 9999 !important;
-          font-family: 'Inter', system-ui, sans-serif !important;
-        }
-        .chartjs-size-monitor, .chartjs-size-monitor-expand, .chartjs-size-monitor-shrink {
-          z-index: auto !important;
-        }
-        .chartjs-render-monitor {
-          z-index: auto !important;
-        }
-        canvas {
-          z-index: 1 !important;
-          filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
-        }
-        /* Mejorar animaciones de hover en las gráficas */
-        .chart-container {
-          transition: all 0.3s ease;
-        }
-        .chart-container:hover {
-          transform: translateY(-2px);
-        }
-      `}</style>
-      <ProtectedRoute>
-        <AprobadorLayout>
-          <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20 py-10 px-6">
+    <ProtectedRoute>
+      <AprobadorLayout>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20 py-10 px-6">
             <div className="max-w-7xl mx-auto">
               
               {/* Header Section */}
@@ -984,8 +774,8 @@ export default function GraficasAprobador() {
 
           {/* Modal de Exportación */}
           {showExportModal && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl max-w-lg w-full mx-4 shadow-2xl border border-gray-100">
+            <div className="fixed inset-0 export-modal z-50 flex items-center justify-center p-4">
+              <div className="export-modal-content max-w-lg w-full mx-4">
                 <div className="p-6 border-b border-gray-100">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -1012,9 +802,9 @@ export default function GraficasAprobador() {
                 <div className="p-6 space-y-4">
                   <div className="space-y-3">
                     <button
-                      onClick={exportToPDF}
+                      onClick={handleExportFullReport}
                       disabled={exporting}
-                      className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                      className="export-button w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
                       <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:shadow-lg transition-shadow">
                         <MdAnalytics size={20} className="text-white" />
@@ -1031,9 +821,9 @@ export default function GraficasAprobador() {
                     </button>
                     
                     <button
-                      onClick={exportChartsOnly}
+                      onClick={handleExportChartsOnly}
                       disabled={exporting}
-                      className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border border-emerald-200 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                      className="export-button w-full flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border border-emerald-200 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
                       <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center group-hover:shadow-lg transition-shadow">
                         <MdPieChart size={20} className="text-white" />
@@ -1062,6 +852,5 @@ export default function GraficasAprobador() {
 
       </AprobadorLayout>
     </ProtectedRoute>
-    </>
   );
 }

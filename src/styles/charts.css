@@ -1,0 +1,203 @@
+/* Estilos específicos para gráficas y exportación PDF */
+
+/* Mejora del espaciado y diseño de las gráficas */
+.chart-container {
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.chart-container:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+}
+
+.doughnut-chart,
+.bar-chart {
+  position: relative;
+  padding: 20px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Optimización de canvas para exportación */
+.doughnut-chart canvas,
+.bar-chart canvas {
+  z-index: 1 !important;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
+  background: #ffffff;
+  border-radius: 16px;
+}
+
+/* Tooltips de Chart.js con mejor z-index */
+.chartjs-tooltip {
+  z-index: 9999 !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Datalabels con mejor estilo */
+.chartjs-datalabel {
+  z-index: 9998 !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Evitar conflictos de z-index con size monitor */
+.chartjs-size-monitor, 
+.chartjs-size-monitor-expand, 
+.chartjs-size-monitor-shrink,
+.chartjs-render-monitor {
+  z-index: auto !important;
+}
+
+/* Mejorar el diseño de estadísticas */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Mejoras para el modal de exportación */
+.export-modal {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.export-modal-content {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 10px 20px -5px rgba(0, 0, 0, 0.1);
+}
+
+.export-button {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.export-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.export-button:hover::before {
+  left: 100%;
+}
+
+/* Animaciones suaves para el loading */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.chart-loading {
+  animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Mejoras responsivas */
+@media (max-width: 768px) {
+  .doughnut-chart,
+  .bar-chart {
+    padding: 15px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .chart-container:hover {
+    transform: none;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Estilos para impresión y PDF */
+@media print {
+  .chart-container,
+  .doughnut-chart,
+  .bar-chart {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .doughnut-chart canvas,
+  .bar-chart canvas {
+    background: #ffffff !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+}
+
+/* Gradientes corporativos para las gráficas */
+.gradient-blue {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.gradient-orange {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.gradient-red {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+.gradient-cyan {
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+}
