@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
-import { MdAssignment, MdAttachMoney, MdBarChart, MdPieChart, MdStackedBarChart, MdErrorOutline, MdInsertChartOutlined, MdAnalytics } from "react-icons/md";
+import { MdAssignment, MdAttachMoney, MdBarChart, MdPieChart, MdStackedBarChart, MdErrorOutline, MdInsertChartOutlined, MdAnalytics, MdFileDownload } from "react-icons/md";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -19,6 +19,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels/types";
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
+import { toast } from 'react-hot-toast';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, ChartDataLabels);
 
@@ -41,6 +42,8 @@ export default function GraficasAprobador() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tendencia, setTendencia] = useState<TendenciaMes[]>([]);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,6 +80,154 @@ export default function GraficasAprobador() {
     };
     fetchData();
   }, []);
+
+  // Funciones de exportación a PDF
+  const exportToPDF = async () => {
+    try {
+      setExporting(true);
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape para mejor visualización
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      // Título del reporte
+      pdf.setFontSize(20);
+      pdf.text('Panel de Estadísticas Ejecutivas', pageWidth / 2, 20, { align: 'center' });
+      
+      pdf.setFontSize(12);
+      pdf.text(`Generado el: ${new Date().toLocaleDateString('es-MX')}`, pageWidth / 2, 30, { align: 'center' });
+      
+      // Capturar las gráficas
+      const doughnutChart = document.querySelector('.doughnut-chart canvas') as HTMLCanvasElement;
+      const barChart = document.querySelector('.bar-chart canvas') as HTMLCanvasElement;
+      
+      if (doughnutChart && barChart) {
+        // Capturar gráfica de dona
+        const doughnutCanvas = await html2canvas(doughnutChart.parentElement as HTMLElement, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true,
+        });
+        
+        // Capturar gráfica de barras
+        const barCanvas = await html2canvas(barChart.parentElement as HTMLElement, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true,
+        });
+        
+        // Agregar gráfica de dona (lado izquierdo)
+        const doughnutImgData = doughnutCanvas.toDataURL('image/png');
+        const doughnutWidth = (pageWidth / 2) - 20;
+        const doughnutHeight = (doughnutWidth * doughnutCanvas.height) / doughnutCanvas.width;
+        pdf.addImage(doughnutImgData, 'PNG', 10, 45, doughnutWidth, doughnutHeight);
+        
+        // Agregar gráfica de barras (lado derecho)
+        const barImgData = barCanvas.toDataURL('image/png');
+        const barWidth = (pageWidth / 2) - 20;
+        const barHeight = (barWidth * barCanvas.height) / barCanvas.width;
+        pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 45, barWidth, barHeight);
+        
+        // Agregar estadísticas resumidas
+        const totalSolicitudes = data.reduce((sum, item) => sum + item.total, 0);
+        const totalMonto = data.reduce((sum, item) => sum + Number(item.monto_total), 0);
+        
+        const statsY = Math.max(doughnutHeight, barHeight) + 60;
+        pdf.setFontSize(14);
+        pdf.text('Resumen Estadístico:', 20, statsY);
+        
+        pdf.setFontSize(12);
+        pdf.text(`• Total de solicitudes: ${totalSolicitudes.toLocaleString()}`, 20, statsY + 15);
+        pdf.text(`• Monto total: $${totalMonto.toLocaleString('es-MX')}`, 20, statsY + 25);
+        pdf.text(`• Estados activos: ${data.length}`, 20, statsY + 35);
+        pdf.text(`• Promedio por solicitud: $${Math.round(totalMonto / totalSolicitudes).toLocaleString('es-MX')}`, 20, statsY + 45);
+        
+        // Detalle por estado
+        pdf.text('Detalle por Estado:', pageWidth / 2 + 20, statsY);
+        let detailY = statsY + 15;
+        
+        data.forEach((item, index) => {
+          const promedio = Math.round(Number(item.monto_total) / item.total);
+          pdf.text(`• ${item.estado}: ${item.total} solicitudes ($${Number(item.monto_total).toLocaleString('es-MX')})`, 
+                   pageWidth / 2 + 20, detailY);
+          pdf.text(`  Promedio: $${promedio.toLocaleString('es-MX')}`, 
+                   pageWidth / 2 + 25, detailY + 8);
+          detailY += 20;
+        });
+        
+        // Footer
+        pdf.setFontSize(8);
+        pdf.text('Generado por Sistema de Gestión de Pagos', pageWidth / 2, pageHeight - 10, { align: 'center' });
+      }
+      
+      // Descargar el PDF
+      pdf.save(`estadisticas-ejecutivas-${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('Reporte PDF generado exitosamente');
+      
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+      toast.error('Error al generar el reporte PDF');
+    } finally {
+      setExporting(false);
+      setShowExportModal(false);
+    }
+  };
+
+  const exportChartsOnly = async () => {
+    try {
+      setExporting(true);
+      const { jsPDF } = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const pdf = new jsPDF('l', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      
+      // Título
+      pdf.setFontSize(18);
+      pdf.text('Gráficas de Estadísticas', pageWidth / 2, 20, { align: 'center' });
+      
+      // Capturar solo las gráficas
+      const doughnutChart = document.querySelector('.doughnut-chart canvas') as HTMLCanvasElement;
+      const barChart = document.querySelector('.bar-chart canvas') as HTMLCanvasElement;
+      
+      if (doughnutChart && barChart) {
+        const doughnutCanvas = await html2canvas(doughnutChart.parentElement as HTMLElement, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true,
+        });
+        
+        const barCanvas = await html2canvas(barChart.parentElement as HTMLElement, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true,
+        });
+        
+        // Gráficas más grandes al ocupar toda la página
+        const chartWidth = (pageWidth / 2) - 20;
+        const doughnutHeight = (chartWidth * doughnutCanvas.height) / doughnutCanvas.width;
+        const barHeight = (chartWidth * barCanvas.height) / barCanvas.width;
+        
+        const doughnutImgData = doughnutCanvas.toDataURL('image/png');
+        const barImgData = barCanvas.toDataURL('image/png');
+        
+        pdf.addImage(doughnutImgData, 'PNG', 10, 35, chartWidth, doughnutHeight);
+        pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 35, chartWidth, barHeight);
+      }
+      
+      pdf.save(`graficas-estadisticas-${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('Gráficas exportadas exitosamente');
+      
+    } catch (error) {
+      console.error('Error al exportar gráficas:', error);
+      toast.error('Error al exportar las gráficas');
+    } finally {
+      setExporting(false);
+      setShowExportModal(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -490,13 +641,25 @@ export default function GraficasAprobador() {
               
               {/* Header Section */}
               <div className="mb-12">
-                <div className="text-center max-w-3xl mx-auto">
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-4">
-                    Panel de Estadísticas Ejecutivas
-                  </h1>
-                  <p className="text-lg text-gray-600 leading-relaxed">
-                    Dashboard integral con insights de rendimiento y análisis de solicitudes
-                  </p>
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                  <div className="text-center lg:text-left max-w-3xl">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-4">
+                      Panel de Estadísticas Ejecutivas
+                    </h1>
+                    <p className="text-lg text-gray-600 leading-relaxed">
+                      Dashboard integral con insights de rendimiento y análisis de solicitudes
+                    </p>
+                  </div>
+                  <div className="flex justify-center lg:justify-end">
+                    <button
+                      onClick={() => setShowExportModal(true)}
+                      className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                      disabled={exporting}
+                    >
+                      <MdFileDownload size={20} />
+                      {exporting ? 'Exportando...' : 'Exportar PDF'}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -573,7 +736,7 @@ export default function GraficasAprobador() {
                       <MdPieChart size={24} className="text-white" />
                     </div>
                   </div>
-                  <div className="relative h-96 flex items-center justify-center chart-container">
+                  <div className="relative h-96 flex items-center justify-center chart-container doughnut-chart">
                     <Doughnut data={doughnutData} options={doughnutOptions} />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="text-center bg-white/95 rounded-2xl px-6 py-4 shadow-xl backdrop-blur-md border border-white/50">
@@ -597,7 +760,7 @@ export default function GraficasAprobador() {
                       <MdStackedBarChart size={24} className="text-white" />
                     </div>
                   </div>
-                  <div className="relative h-96 chart-container">
+                  <div className="relative h-96 chart-container bar-chart">
                     <Bar data={barData} options={barOptions} />
                   </div>
                 </div>
@@ -759,6 +922,85 @@ export default function GraficasAprobador() {
               </div>
             </div>
           </div>
+
+          {/* Modal de Exportación */}
+          {showExportModal && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl max-w-lg w-full mx-4 shadow-2xl border border-gray-100">
+                <div className="p-6 border-b border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                        <MdFileDownload size={20} className="text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">Exportar a PDF</h3>
+                        <p className="text-sm text-gray-600">Selecciona el tipo de exportación</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowExportModal(false)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      disabled={exporting}
+                    >
+                      <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="p-6 space-y-4">
+                  <div className="space-y-3">
+                    <button
+                      onClick={exportToPDF}
+                      disabled={exporting}
+                      className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                    >
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:shadow-lg transition-shadow">
+                        <MdAnalytics size={20} className="text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-gray-900">Reporte Completo</p>
+                        <p className="text-sm text-gray-600">Incluye gráficas, estadísticas y análisis detallado</p>
+                      </div>
+                      {exporting && (
+                        <div className="ml-auto">
+                          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                    </button>
+                    
+                    <button
+                      onClick={exportChartsOnly}
+                      disabled={exporting}
+                      className="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border border-emerald-200 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                    >
+                      <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center group-hover:shadow-lg transition-shadow">
+                        <MdPieChart size={20} className="text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-gray-900">Solo Gráficas</p>
+                        <p className="text-sm text-gray-600">Exporta únicamente las gráficas en alta calidad</p>
+                      </div>
+                      {exporting && (
+                        <div className="ml-auto">
+                          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-gray-100">
+                    <p className="text-xs text-gray-500 text-center">
+                      Los archivos se descargarán automáticamente en formato PDF
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
       </AprobadorLayout>
     </ProtectedRoute>
     </>
