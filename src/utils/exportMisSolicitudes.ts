@@ -488,7 +488,7 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
   // Cargar y añadir el logo desde el proyecto
   try {
     // Usar el logo azul que se ve mejor en documentos
-    const logoPath = '/assets/images/Logo_16x9_Azul@2x.png';
+    const logoPath = '/assets/images/Logo_1x1_AzulSinFondo@2x.png';
     doc.addImage(logoPath, 'PNG', logoX, logoY, 140, 60);
   } catch {
     // Fallback: Logo de texto si la imagen no se puede cargar
