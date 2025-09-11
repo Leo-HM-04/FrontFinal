@@ -444,58 +444,58 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
   doc.rect(0, 0, pageWidth, headerHeight, 'F');
 
   // Logo corporativo usando la imagen del proyecto
-  const logoX = pageWidth - 150;
-  const logoY = 20;
+  const logoX = pageWidth - 140;
+  const logoY = 25;
   
   // Intentar cargar y agregar el logo del proyecto
   try {
     const logoPath = '/assets/images/Logo_1x1_AzulSinFondo@2x.png';
     const logoBase64 = await getImageAsBase64(logoPath);
     
-    // Agregar la imagen al PDF con proporciones perfectas para Bechapra
-    doc.addImage(logoBase64, 'PNG', logoX, logoY, 85, 70);
+    // Agregar la imagen al PDF con más margen para evitar cortes
+    doc.addImage(logoBase64, 'PNG', logoX, logoY, 80, 60);
     console.log('Logo cargado correctamente en el PDF');
   } catch (error) {
     console.warn('No se pudo cargar el logo, usando diseño alternativo:', error);
     
     // Diseño alternativo profesional si no se puede cargar la imagen
     doc.setFillColor(255, 255, 255);
-    doc.roundedRect(logoX, logoY, 85, 70, 10, 10, 'F');
+    doc.roundedRect(logoX, logoY, 80, 60, 8, 8, 'F');
     doc.setDrawColor(41, 128, 185);
     doc.setLineWidth(2);
-    doc.roundedRect(logoX, logoY, 85, 70, 10, 10, 'S');
+    doc.roundedRect(logoX, logoY, 80, 60, 8, 8, 'S');
     
     // Texto corporativo
     doc.setTextColor(18, 61, 140);
-    doc.setFontSize(20);
+    doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text('BECHAPRA', logoX + 42.5, logoY + 35, { align: 'center' });
+    doc.text('BECHAPRA', logoX + 40, logoY + 30, { align: 'center' });
     
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.text('Soluciones Corporativas', logoX + 42.5, logoY + 50, { align: 'center' });
+    doc.text('Soluciones Corporativas', logoX + 40, logoY + 45, { align: 'center' });
   }
   
   // Fondo elegante para información adicional
   doc.setFillColor(255, 255, 255);
-  doc.roundedRect(logoX - 10, logoY - 10, 105, 80, 8, 8, 'F');
+  doc.roundedRect(logoX - 8, logoY - 8, 96, 76, 8, 8, 'F');
   
   // Marco sutil
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.5);
-  doc.roundedRect(logoX - 10, logoY - 10, 105, 80, 8, 8, 'S');
+  doc.roundedRect(logoX - 8, logoY - 8, 96, 76, 8, 8, 'S');
   
   // Cargar y añadir el logo desde el proyecto
   try {
     // Usar el logo azul que se ve mejor en documentos
     const logoPath = '/assets/images/Logo_1x1_AzulSinFondo@2x.png';
-    doc.addImage(logoPath, 'PNG', logoX, logoY, 85, 60);
+    doc.addImage(logoPath, 'PNG', logoX, logoY, 80, 55);
   } catch {
     // Fallback: Logo de texto si la imagen no se puede cargar
     doc.setTextColor(18, 61, 140);
-    doc.setFontSize(20);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('BECHAPRA', logoX + 42.5, logoY + 35, { align: 'center' });
+    doc.text('BECHAPRA', logoX + 40, logoY + 30, { align: 'center' });
     
     //doc.setTextColor(100, 100, 100);
     //doc.setFontSize(12);
