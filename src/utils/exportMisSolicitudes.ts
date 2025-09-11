@@ -443,9 +443,9 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
   doc.setFillColor(18, 61, 140);
   doc.rect(0, 0, pageWidth, headerHeight, 'F');
 
-  // Logo corporativo usando la imagen del proyecto - posición centrada
-  const logoX = pageWidth - 130;
-  const logoY = 15;
+  // Logo corporativo usando la imagen del proyecto - posición optimizada
+  const logoX = pageWidth - 120;
+  const logoY = 20;
   
   // Intentar cargar y agregar el logo del proyecto
   try {
@@ -453,49 +453,49 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
     const logoBase64 = await getImageAsBase64(logoPath);
     
     // Agregar la imagen al PDF con tamaño bien proporcionado
-    doc.addImage(logoBase64, 'PNG', logoX, logoY, 90, 80);
+    doc.addImage(logoBase64, 'PNG', logoX, logoY, 85, 70);
     console.log('Logo cargado correctamente en el PDF');
   } catch (error) {
     console.warn('No se pudo cargar el logo, usando diseño alternativo:', error);
     
     // Diseño alternativo profesional si no se puede cargar la imagen
     doc.setFillColor(255, 255, 255);
-    doc.roundedRect(logoX, logoY, 90, 80, 10, 10, 'F');
+    doc.roundedRect(logoX, logoY, 85, 70, 10, 10, 'F');
     doc.setDrawColor(41, 128, 185);
     doc.setLineWidth(2);
-    doc.roundedRect(logoX, logoY, 90, 80, 10, 10, 'S');
+    doc.roundedRect(logoX, logoY, 85, 70, 10, 10, 'S');
     
     // Texto corporativo
     doc.setTextColor(18, 61, 140);
-    doc.setFontSize(20);
+    doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text('BECHAPRA', logoX + 45, logoY + 40, { align: 'center' });
+    doc.text('BECHAPRA', logoX + 42.5, logoY + 35, { align: 'center' });
     
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text('Soluciones Corporativas', logoX + 45, logoY + 55, { align: 'center' });
+    doc.text('Soluciones Corporativas', logoX + 42.5, logoY + 50, { align: 'center' });
   }
   
   // Fondo elegante para información adicional
   doc.setFillColor(255, 255, 255);
-  doc.roundedRect(logoX - 10, logoY - 5, 110, 90, 8, 8, 'F');
+  doc.roundedRect(logoX - 8, logoY - 8, 101, 86, 8, 8, 'F');
   
   // Marco sutil
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.5);
-  doc.roundedRect(logoX - 10, logoY - 5, 110, 90, 8, 8, 'S');
+  doc.roundedRect(logoX - 8, logoY - 8, 101, 86, 8, 8, 'S');
   
   // Cargar y añadir el logo desde el proyecto
   try {
     // Usar el logo azul que se ve mejor en documentos
     const logoPath = '/assets/images/Logo_1x1_AzulSinFondo@2x.png';
-    doc.addImage(logoPath, 'PNG', logoX, logoY, 90, 75);
+    doc.addImage(logoPath, 'PNG', logoX, logoY, 85, 65);
   } catch {
     // Fallback: Logo de texto si la imagen no se puede cargar
     doc.setTextColor(18, 61, 140);
-    doc.setFontSize(20);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('BECHAPRA', logoX + 45, logoY + 40, { align: 'center' });
+    doc.text('BECHAPRA', logoX + 42.5, logoY + 35, { align: 'center' });
     
     //doc.setTextColor(100, 100, 100);
     //doc.setFontSize(12);
@@ -519,17 +519,6 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
   doc.setFontSize(12);
   doc.setTextColor(220, 220, 220);
   doc.text('Este documento contiene información sensible y es para uso exclusivo de BECHAPRA', 40, 98);
-
-  // Fecha de exportación, alineada a la derecha y debajo del logo, formato más entendible
-  doc.setFontSize(14);
-  doc.setTextColor(220, 230, 255);
-  const meses = [
-    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-  ];
-  const hoy = new Date();
-  const fechaExport = `Exportado el ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
-  doc.text(fechaExport, pageWidth - 240, 105);
 
   // Calcular totales
   const totalCount = estadisticas.pendientes.count + 
@@ -596,5 +585,19 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
       doc.text(`Página ${pageNum}`, doc.internal.pageSize.getWidth() - 80, doc.internal.pageSize.getHeight() - 20);
     }
   });
+
+  // Agregar fecha de exportación en la última página
+  const meses = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+  ];
+  const hoy = new Date();
+  const fechaExport = `Exportado el ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+  
+  doc.setFontSize(12);
+  doc.setTextColor(100, 100, 100);
+  const fechaWidth = doc.getTextWidth(fechaExport);
+  doc.text(fechaExport, (doc.internal.pageSize.getWidth() - fechaWidth) / 2, doc.internal.pageSize.getHeight() - 40);
+
   doc.save(`MisSolicitudes_${rango}.pdf`);
 }
