@@ -295,4 +295,68 @@ export class SolicitudesService {
     );
     return response.data;
   }
+
+  static async createPlantilla(data: {
+    // Datos básicos de la solicitud
+    departamento: string;
+    monto: string | number;
+    tipo_moneda: string;
+    cuenta_destino: string;
+    concepto: string;
+    tipo_pago: string;
+    tipo_cuenta_destino: string;
+    banco_destino?: string;
+    nombre_persona: string;
+    empresa_a_pagar?: string;
+    fecha_limite_pago: string;
+    
+    // Datos específicos de plantilla
+    plantilla_id: string;
+    plantilla_version?: string;
+    plantilla_datos?: string; // JSON string con datos de campos
+    
+    // Archivos
+    archivos: File[];
+  }): Promise<unknown> {
+    const token = localStorage.getItem('token');
+    
+    console.log('Service createPlantilla data received:', data);
+    
+    const formData = new FormData();
+    
+    // Agregar campos básicos
+    formData.append('departamento', data.departamento);
+    formData.append('monto', String(data.monto));
+    formData.append('tipo_moneda', data.tipo_moneda);
+    formData.append('cuenta_destino', data.cuenta_destino);
+    formData.append('concepto', data.concepto);
+    formData.append('tipo_pago', data.tipo_pago);
+    formData.append('tipo_cuenta_destino', data.tipo_cuenta_destino);
+    formData.append('banco_destino', data.banco_destino || '');
+    formData.append('nombre_persona', data.nombre_persona);
+    formData.append('empresa_a_pagar', data.empresa_a_pagar || data.nombre_persona);
+    formData.append('fecha_limite_pago', data.fecha_limite_pago);
+    
+    // Agregar campos específicos de plantilla
+    formData.append('plantilla_id', data.plantilla_id);
+    formData.append('plantilla_version', data.plantilla_version || '1.0');
+    formData.append('plantilla_datos', data.plantilla_datos || '{}');
+    
+    // Agregar archivos múltiples
+    data.archivos.forEach((archivo, index) => {
+      formData.append('archivos', archivo);
+      console.log(`Archivo ${index + 1} agregado:`, archivo.name);
+    });
+    
+    console.log('FormData entries para plantilla:', Array.from(formData.entries()).map(([key, value]) => [key, typeof value === 'object' ? `File: ${(value as File).name}` : value]));
+    
+    const response = await api.post('/solicitudes/plantilla', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+    
+    return response.data;
+  }
 }

@@ -377,8 +377,9 @@ export default function NuevaSolicitudPage() {
           throw new Error('Debe adjuntar al menos un archivo para la plantilla');
         }
 
-        // Crear la solicitud usando datos de la plantilla con tipos correctos
-        const solicitudData = {
+        // Preparar datos para el nuevo servicio de plantillas
+        const solicitudPlantillaData = {
+          // Datos básicos de la solicitud
           departamento: 'Finanzas',
           monto: String(estadoPlantilla.datos.monto || '0'),
           tipo_moneda: String(estadoPlantilla.datos.moneda || 'MXN'),
@@ -387,29 +388,33 @@ export default function NuevaSolicitudPage() {
           tipo_pago: 'transferencia',
           tipo_cuenta_destino: String(estadoPlantilla.datos.tipo_cuenta || 'CLABE'),
           banco_destino: String(estadoPlantilla.datos.banco_destino || ''),
-          fecha_limite_pago: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          factura: archivosParaSubir[0],
           nombre_persona: String(estadoPlantilla.datos.beneficiario || ''),
           empresa_a_pagar: String(estadoPlantilla.datos.beneficiario || ''),
-          cuenta: String(estadoPlantilla.datos.numero_cuenta || ''),
-          archivos_adicionales: archivosParaSubir.slice(1),
-          tipos_archivos_adicionales: archivosParaSubir.slice(1).map(() => 'adjunto'),
-          // Campos adicionales de la plantilla como metadata
-          tipo_concepto: 'plantilla',
-          referencia: `Plantilla: ${estadoPlantilla.plantillaSeleccionada?.nombre || 'Desconocida'}`
+          fecha_limite_pago: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          
+          // Datos específicos de plantilla
+          plantilla_id: estadoPlantilla.plantillaSeleccionada?.id || 'unknown',
+          plantilla_version: estadoPlantilla.plantillaSeleccionada?.version || '1.0',
+          plantilla_datos: JSON.stringify(estadoPlantilla.datos),
+          
+          // Todos los archivos van juntos
+          archivos: archivosParaSubir
         };
 
-        console.log('Datos de plantilla para enviar:', solicitudData);
+        console.log('Datos de plantilla para enviar al nuevo servicio:', solicitudPlantillaData);
+        console.log('Archivos a enviar:', archivosParaSubir.map(f => ({ name: f.name, size: f.size, type: f.type })));
 
-        const response = await SolicitudesService.createWithFiles(solicitudData);
-        const solicitudId = (response as { id_solicitud: number }).id_solicitud;
+        // Usar el nuevo servicio específico para plantillas
+        const response = await SolicitudesService.createPlantilla(solicitudPlantillaData);
+        
+        console.log('Respuesta del servicio de plantillas:', response);
 
-        toast.success('Solicitud creada exitosamente');
+        toast.success('Solicitud de plantilla creada exitosamente');
         router.push('/dashboard/solicitante/solicitudes');
         
       } catch (error: unknown) {
         console.error('Error al crear solicitud con plantilla:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error al crear la solicitud';
+        const errorMessage = error instanceof Error ? error.message : 'Error al crear la solicitud de plantilla';
         toast.error(errorMessage);
       } finally {
         setLoading(false);

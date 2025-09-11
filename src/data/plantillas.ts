@@ -198,7 +198,7 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
           nombre: 'archivos_adjuntos',
           tipo: 'archivo',
           etiqueta: 'Documentos',
-          ayuda: 'Dos archivos un excel con el cálculo de las comisiones y una imagen o pdf con el comprobante del pago. Implementar la opción de arrastrar archivos a recuadro para subir',
+          ayuda: 'Dos archivos: un excel con el cálculo de las comisiones y una imagen o pdf con el comprobante del pago.',
           valorPorDefecto: [],
           validaciones: {
             requerido: true,
