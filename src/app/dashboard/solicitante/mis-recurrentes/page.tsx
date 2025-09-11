@@ -241,6 +241,81 @@ function MisRecurrentesContent() {
                         <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Recurrentes</h1>
                     </div>
 
+                    {/* Descripción de funcionamiento de pagos recurrentes */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-6 mb-8 border-l-4 border-blue-500 shadow-lg">
+                        <div className="flex items-start gap-4">
+                            <div className="bg-blue-500 p-3 rounded-xl shadow-md">
+                                <Clock className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-4">¿Cómo funcionan los Pagos Recurrentes?</h2>
+                                
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-200">
+                                            <h3 className="text-lg font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                                                <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">1</span>
+                                                Plantillas Recurrentes
+                                            </h3>
+                                            <p className="text-gray-700 text-sm">
+                                                Las plantillas son formatos predefinidos que contienen toda la información necesaria para generar pagos automáticamente cada mes: concepto, monto, cuenta destino, departamento y frecuencia.
+                                            </p>
+                                        </div>
+                                        
+                                        <div className="bg-white p-4 rounded-xl shadow-sm border border-green-200">
+                                            <h3 className="text-lg font-semibold text-green-900 mb-2 flex items-center gap-2">
+                                                <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">2</span>
+                                                Proceso Automático
+                                            </h3>
+                                            <p className="text-gray-700 text-sm">
+                                                Cada mes, el sistema genera automáticamente solicitudes de pago basadas en tus plantillas activas. Estas solicitudes siguen el flujo normal de aprobación: Pendiente → Aprobada → Pagada.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="bg-white p-4 rounded-xl shadow-sm border border-orange-200">
+                                            <h3 className="text-lg font-semibold text-orange-900 mb-2 flex items-center gap-2">
+                                                <span className="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded-full">3</span>
+                                                Actualización Mensual
+                                            </h3>
+                                            <p className="text-gray-700 text-sm">
+                                                <strong>¡Importante!</strong> Debes revisar y actualizar tus plantillas cada mes antes del día 5. Puedes modificar montos, cambiar cuentas destino, agregar nuevas plantillas o desactivar las que ya no necesites.
+                                            </p>
+                                        </div>
+                                        
+                                        <div className="bg-white p-4 rounded-xl shadow-sm border border-purple-200">
+                                            <h3 className="text-lg font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                                                <span className="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-full">4</span>
+                                                Gestión y Control
+                                            </h3>
+                                            <p className="text-gray-700 text-sm">
+                                                Puedes activar/desactivar plantillas, editarlas, duplicarlas o eliminarlas en cualquier momento. Las plantillas inactivas no generarán solicitudes automáticas.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                                    <div className="flex items-start gap-3">
+                                        <div className="bg-yellow-400 p-2 rounded-lg">
+                                            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-yellow-900 mb-1">Recordatorio Importante</h4>
+                                            <p className="text-yellow-800 text-sm">
+                                                Las plantillas activas generan solicitudes automáticamente cada mes. Si no actualizas los montos o datos antes del día 5, se utilizarán los valores de la plantilla actual. 
+                                                <strong> Revisa mensualmente tus plantillas para mantener la información actualizada.</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {error && <div className="bg-red-100 text-red-800 border border-red-300 p-4 rounded mb-4">{error}</div>}
                     {success && <div className="bg-green-100 text-green-800 border border-green-300 p-4 rounded mb-4">{success}</div>}
 
