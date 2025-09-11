@@ -58,15 +58,20 @@ export default function GraficasAprobador() {
         if (!res.ok) throw new Error("Error al obtener datos");
         const json = await res.json();
         setData(json);
-        // Tendencia mensual
-        const resTend = await fetch("/api/estadisticas-aprobador/tendencia-mensual", {
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
-          },
-        });
-        if (resTend.ok) {
-          const tendenciaJson = await resTend.json();
-          setTendencia(tendenciaJson);
+        // Tendencia mensual (opcional - si no existe el endpoint, continúa sin error)
+        try {
+          const resTend = await fetch("/api/estadisticas-aprobador/tendencia-mensual", {
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+          });
+          if (resTend.ok) {
+            const tendenciaJson = await resTend.json();
+            setTendencia(tendenciaJson);
+          }
+        } catch (tendenciaError) {
+          console.warn('Endpoint de tendencia mensual no disponible:', tendenciaError);
+          // Continúa sin la data de tendencia
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -86,7 +91,6 @@ export default function GraficasAprobador() {
     try {
       setExporting(true);
       const { jsPDF } = await import('jspdf');
-      const html2canvas = (await import('html2canvas')).default;
       
       const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape para mejor visualización
       const pageWidth = pdf.internal.pageSize.getWidth();
@@ -99,42 +103,70 @@ export default function GraficasAprobador() {
       pdf.setFontSize(12);
       pdf.text(`Generado el: ${new Date().toLocaleDateString('es-MX')}`, pageWidth / 2, 30, { align: 'center' });
       
-      // Capturar las gráficas
+      // Intentar capturar directamente desde los canvas de Chart.js
       const doughnutChart = document.querySelector('.doughnut-chart canvas') as HTMLCanvasElement;
       const barChart = document.querySelector('.bar-chart canvas') as HTMLCanvasElement;
       
       if (doughnutChart && barChart) {
-        // Capturar gráfica de dona
-        const doughnutCanvas = await html2canvas(doughnutChart.parentElement as HTMLElement, {
-          backgroundColor: '#ffffff',
-          scale: 2,
-          useCORS: true,
-        });
-        
-        // Capturar gráfica de barras
-        const barCanvas = await html2canvas(barChart.parentElement as HTMLElement, {
-          backgroundColor: '#ffffff',
-          scale: 2,
-          useCORS: true,
-        });
-        
-        // Agregar gráfica de dona (lado izquierdo)
-        const doughnutImgData = doughnutCanvas.toDataURL('image/png');
-        const doughnutWidth = (pageWidth / 2) - 20;
-        const doughnutHeight = (doughnutWidth * doughnutCanvas.height) / doughnutCanvas.width;
-        pdf.addImage(doughnutImgData, 'PNG', 10, 45, doughnutWidth, doughnutHeight);
-        
-        // Agregar gráfica de barras (lado derecho)
-        const barImgData = barCanvas.toDataURL('image/png');
-        const barWidth = (pageWidth / 2) - 20;
-        const barHeight = (barWidth * barCanvas.height) / barCanvas.width;
-        pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 45, barWidth, barHeight);
+        try {
+          // Método 1: Usar directamente los canvas de Chart.js (más confiable)
+          const doughnutImgData = doughnutChart.toDataURL('image/png');
+          const barImgData = barChart.toDataURL('image/png');
+          
+          // Agregar gráfica de dona (lado izquierdo)
+          const chartWidth = (pageWidth / 2) - 20;
+          const chartHeight = chartWidth * 0.8; // Aspecto ratio apropiado
+          
+          pdf.addImage(doughnutImgData, 'PNG', 10, 45, chartWidth, chartHeight);
+          pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 45, chartWidth, chartHeight);
+          
+        } catch (canvasError) {
+          console.warn('Error con canvas directo, usando html2canvas:', canvasError);
+          
+          // Método 2: Fallback con html2canvas si el método directo falla
+          const html2canvas = (await import('html2canvas')).default;
+          
+          const doughnutCanvas = await html2canvas(doughnutChart.parentElement as HTMLElement, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            foreignObjectRendering: false,
+            logging: false,
+            windowWidth: 1200,
+            windowHeight: 800,
+          });
+          
+          const barCanvas = await html2canvas(barChart.parentElement as HTMLElement, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            foreignObjectRendering: false,
+            logging: false,
+            windowWidth: 1200,
+            windowHeight: 800,
+          });
+          
+          const doughnutImgData = doughnutCanvas.toDataURL('image/png');
+          const barImgData = barCanvas.toDataURL('image/png');
+          const doughnutWidth = (pageWidth / 2) - 20;
+          const doughnutHeight = (doughnutWidth * doughnutCanvas.height) / doughnutCanvas.width;
+          const barWidth = (pageWidth / 2) - 20;
+          const barHeight = (barWidth * barCanvas.height) / barCanvas.width;
+          
+          pdf.addImage(doughnutImgData, 'PNG', 10, 45, doughnutWidth, doughnutHeight);
+          pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 45, barWidth, barHeight);
+        }
         
         // Agregar estadísticas resumidas
         const totalSolicitudes = data.reduce((sum, item) => sum + item.total, 0);
         const totalMonto = data.reduce((sum, item) => sum + Number(item.monto_total), 0);
         
-        const statsY = Math.max(doughnutHeight, barHeight) + 60;
+        // Calcular la posición de las estadísticas basado en el tamaño de las gráficas
+        const referenceChartWidth = (pageWidth / 2) - 20;
+        const referenceChartHeight = referenceChartWidth * 0.8;
+        const statsY = referenceChartHeight + 60;
         pdf.setFontSize(14);
         pdf.text('Resumen Estadístico:', 20, statsY);
         
@@ -179,7 +211,6 @@ export default function GraficasAprobador() {
     try {
       setExporting(true);
       const { jsPDF } = await import('jspdf');
-      const html2canvas = (await import('html2canvas')).default;
       
       const pdf = new jsPDF('l', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
@@ -188,33 +219,61 @@ export default function GraficasAprobador() {
       pdf.setFontSize(18);
       pdf.text('Gráficas de Estadísticas', pageWidth / 2, 20, { align: 'center' });
       
-      // Capturar solo las gráficas
+      // Intentar capturar directamente desde los canvas de Chart.js
       const doughnutChart = document.querySelector('.doughnut-chart canvas') as HTMLCanvasElement;
       const barChart = document.querySelector('.bar-chart canvas') as HTMLCanvasElement;
       
       if (doughnutChart && barChart) {
-        const doughnutCanvas = await html2canvas(doughnutChart.parentElement as HTMLElement, {
-          backgroundColor: '#ffffff',
-          scale: 2,
-          useCORS: true,
-        });
-        
-        const barCanvas = await html2canvas(barChart.parentElement as HTMLElement, {
-          backgroundColor: '#ffffff',
-          scale: 2,
-          useCORS: true,
-        });
-        
-        // Gráficas más grandes al ocupar toda la página
-        const chartWidth = (pageWidth / 2) - 20;
-        const doughnutHeight = (chartWidth * doughnutCanvas.height) / doughnutCanvas.width;
-        const barHeight = (chartWidth * barCanvas.height) / barCanvas.width;
-        
-        const doughnutImgData = doughnutCanvas.toDataURL('image/png');
-        const barImgData = barCanvas.toDataURL('image/png');
-        
-        pdf.addImage(doughnutImgData, 'PNG', 10, 35, chartWidth, doughnutHeight);
-        pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 35, chartWidth, barHeight);
+        try {
+          // Método 1: Usar directamente los canvas de Chart.js (más confiable)
+          const doughnutImgData = doughnutChart.toDataURL('image/png');
+          const barImgData = barChart.toDataURL('image/png');
+          
+          // Gráficas más grandes al ocupar toda la página
+          const chartWidth = (pageWidth / 2) - 20;
+          const chartHeight = chartWidth * 0.8;
+          
+          pdf.addImage(doughnutImgData, 'PNG', 10, 35, chartWidth, chartHeight);
+          pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 35, chartWidth, chartHeight);
+          
+        } catch (canvasError) {
+          console.warn('Error con canvas directo, usando html2canvas:', canvasError);
+          
+          // Método 2: Fallback con html2canvas si el método directo falla
+          const html2canvas = (await import('html2canvas')).default;
+          
+          const doughnutCanvas = await html2canvas(doughnutChart.parentElement as HTMLElement, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            foreignObjectRendering: false,
+            logging: false,
+            windowWidth: 1200,
+            windowHeight: 800,
+          });
+          
+          const barCanvas = await html2canvas(barChart.parentElement as HTMLElement, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            foreignObjectRendering: false,
+            logging: false,
+            windowWidth: 1200,
+            windowHeight: 800,
+          });
+          
+          const chartWidth = (pageWidth / 2) - 20;
+          const doughnutHeight = (chartWidth * doughnutCanvas.height) / doughnutCanvas.width;
+          const barHeight = (chartWidth * barCanvas.height) / barCanvas.width;
+          
+          const doughnutImgData = doughnutCanvas.toDataURL('image/png');
+          const barImgData = barCanvas.toDataURL('image/png');
+          
+          pdf.addImage(doughnutImgData, 'PNG', 10, 35, chartWidth, doughnutHeight);
+          pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, 35, chartWidth, barHeight);
+        }
       }
       
       pdf.save(`graficas-estadisticas-${new Date().toISOString().split('T')[0]}.pdf`);
