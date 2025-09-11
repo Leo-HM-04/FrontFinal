@@ -12,182 +12,258 @@ export const exportToPDF = async (data: EstadoData[]) => {
   try {
     const { jsPDF } = await import('jspdf');
     
-    const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape para mejor visualización
+    const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     
-    // Header con gradiente simulado
-    pdf.setFillColor(30, 64, 175); // Azul corporativo
+    // === HEADER CORPORATIVO ===
+    pdf.setFillColor(30, 64, 175);
     pdf.rect(0, 0, pageWidth, 50, 'F');
     
     // Título principal
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(24);
+    pdf.setFontSize(22);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('PANEL DE ESTADÍSTICAS EJECUTIVAS', pageWidth / 2, 25, { align: 'center' });
+    pdf.text('PANEL DE ESTADÍSTICAS EJECUTIVAS', pageWidth / 2, 20, { align: 'center' });
     
-    // Subtítulo
-    pdf.setFontSize(12);
+    // Subtítulo con fecha completa
+    pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`Generado el: ${new Date().toLocaleDateString('es-MX', { 
+    const fechaCompleta = new Date().toLocaleDateString('es-MX', { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
-      day: 'numeric' 
-    })}`, pageWidth / 2, 38, { align: 'center' });
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    pdf.text(`Generado el: ${fechaCompleta}`, pageWidth / 2, 32, { align: 'center' });
+    
+    // Línea decorativa
+    pdf.setDrawColor(255, 255, 255);
+    pdf.setLineWidth(0.5);
+    pdf.line(pageWidth / 2 - 100, 38, pageWidth / 2 + 100, 38);
     
     pdf.setTextColor(0, 0, 0); // Restaurar color negro
     
-    // Intentar capturar directamente desde los canvas de Chart.js
+    // === SECCIÓN DE GRÁFICAS ===
     const doughnutChart = document.querySelector('.doughnut-chart canvas') as HTMLCanvasElement;
     const barChart = document.querySelector('.bar-chart canvas') as HTMLCanvasElement;
     
     if (doughnutChart && barChart) {
       try {
-        // Método 1: Usar directamente los canvas de Chart.js (más confiable)
+        // Capturar gráficas con alta calidad
         const doughnutImgData = doughnutChart.toDataURL('image/png', 1.0);
         const barImgData = barChart.toDataURL('image/png', 1.0);
         
-        // Dimensiones mejoradas para las gráficas
-        const chartWidth = (pageWidth / 2.2) - 15;
-        const chartHeight = chartWidth * 0.75;
+        // Dimensiones optimizadas para mejor espaciado
+        const chartWidth = 180; // Tamaño fijo para consistencia
+        const chartHeight = 135;
         const startY = 65;
+        const spacing = 30; // Espaciado entre elementos
         
-        // Agregar marcos y títulos para las gráficas
+        // === MARCO PARA GRÁFICA DE DONA ===
         pdf.setFillColor(248, 250, 252);
-        pdf.rect(15, startY - 10, chartWidth + 10, chartHeight + 30, 'F');
-        pdf.setDrawColor(226, 232, 240);
-        pdf.rect(15, startY - 10, chartWidth + 10, chartHeight + 30, 'S');
+        pdf.rect(20, startY - 5, chartWidth + 20, chartHeight + 35, 'F');
+        pdf.setDrawColor(203, 213, 225);
+        pdf.setLineWidth(0.5);
+        pdf.rect(20, startY - 5, chartWidth + 20, chartHeight + 35, 'S');
         
-        pdf.rect(pageWidth / 2 + 5, startY - 10, chartWidth + 10, chartHeight + 30, 'F');
-        pdf.rect(pageWidth / 2 + 5, startY - 10, chartWidth + 10, chartHeight + 30, 'S');
-        
-        // Títulos de gráficas
+        // Título gráfica de dona
         pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(71, 85, 105);
-        pdf.text('Distribución por Estado', 20 + chartWidth / 2, startY - 2, { align: 'center' });
-        pdf.text('Valores Monetarios', (pageWidth / 2 + 10) + chartWidth / 2, startY - 2, { align: 'center' });
+        pdf.setTextColor(51, 65, 85);
+        pdf.text('Distribución por Estado', 30 + chartWidth / 2, startY + 5, { align: 'center' });
         
-        // Agregar gráficas
-        pdf.addImage(doughnutImgData, 'PNG', 20, startY, chartWidth, chartHeight);
-        pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, startY, chartWidth, chartHeight);
+        // Gráfica de dona
+        pdf.addImage(doughnutImgData, 'PNG', 30, startY + 10, chartWidth, chartHeight);
+        
+        // === MARCO PARA GRÁFICA DE BARRAS ===
+        const barX = 20 + chartWidth + 50; // Posición de la segunda gráfica
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(barX, startY - 5, chartWidth + 20, chartHeight + 35, 'F');
+        pdf.setDrawColor(203, 213, 225);
+        pdf.rect(barX, startY - 5, chartWidth + 20, chartHeight + 35, 'S');
+        
+        // Título gráfica de barras
+        pdf.text('Análisis de Montos', barX + 10 + chartWidth / 2, startY + 5, { align: 'center' });
+        
+        // Gráfica de barras
+        pdf.addImage(barImgData, 'PNG', barX + 10, startY + 10, chartWidth, chartHeight);
         
       } catch (canvasError) {
         console.warn('Error con canvas directo, usando html2canvas:', canvasError);
         
-        // Método 2: Fallback con html2canvas
+        // Método fallback con html2canvas
         const html2canvas = (await import('html2canvas')).default;
         
         const [doughnutCanvas, barCanvas] = await Promise.all([
           html2canvas(doughnutChart.parentElement as HTMLElement, {
             backgroundColor: '#ffffff',
-            scale: 2,
+            scale: 3,
             useCORS: true,
             allowTaint: true,
             foreignObjectRendering: false,
             logging: false,
-            windowWidth: 1400,
-            windowHeight: 900,
+            windowWidth: 1600,
+            windowHeight: 1000,
           }),
           html2canvas(barChart.parentElement as HTMLElement, {
             backgroundColor: '#ffffff',
-            scale: 2,
+            scale: 3,
             useCORS: true,
             allowTaint: true,
             foreignObjectRendering: false,
             logging: false,
-            windowWidth: 1400,
-            windowHeight: 900,
+            windowWidth: 1600,
+            windowHeight: 1000,
           })
         ]);
         
-        const chartWidth = (pageWidth / 2.2) - 15;
-        const doughnutHeight = (chartWidth * doughnutCanvas.height) / doughnutCanvas.width;
-        const barHeight = (chartWidth * barCanvas.height) / barCanvas.width;
+        const chartWidth = 180;
+        const chartHeight = 135;
         const startY = 65;
+        const barX = 20 + chartWidth + 50;
         
         const doughnutImgData = doughnutCanvas.toDataURL('image/png', 1.0);
         const barImgData = barCanvas.toDataURL('image/png', 1.0);
         
-        pdf.addImage(doughnutImgData, 'PNG', 20, startY, chartWidth, doughnutHeight);
-        pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, startY, chartWidth, barHeight);
+        // Marcos
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(20, startY - 5, chartWidth + 20, chartHeight + 35, 'F');
+        pdf.rect(barX, startY - 5, chartWidth + 20, chartHeight + 35, 'F');
+        pdf.setDrawColor(203, 213, 225);
+        pdf.rect(20, startY - 5, chartWidth + 20, chartHeight + 35, 'S');
+        pdf.rect(barX, startY - 5, chartWidth + 20, chartHeight + 35, 'S');
+        
+        // Títulos
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(51, 65, 85);
+        pdf.text('Distribución por Estado', 30 + chartWidth / 2, startY + 5, { align: 'center' });
+        pdf.text('Análisis de Montos', barX + 10 + chartWidth / 2, startY + 5, { align: 'center' });
+        
+        // Gráficas
+        pdf.addImage(doughnutImgData, 'PNG', 30, startY + 10, chartWidth, chartHeight);
+        pdf.addImage(barImgData, 'PNG', barX + 10, startY + 10, chartWidth, chartHeight);
       }
       
-      // Calcular estadísticas
+      // === SECCIÓN DE ESTADÍSTICAS ===
       const totalSolicitudes = data.reduce((sum, item) => sum + item.total, 0);
       const totalMonto = data.reduce((sum, item) => sum + Number(item.monto_total), 0);
       
-      // Sección de estadísticas mejorada
-      const statsY = 180;
+      const statsY = 240; // Posición más baja para evitar superposición
       
-      // Marco para estadísticas
+      // Marco principal de estadísticas
       pdf.setFillColor(241, 245, 249);
-      pdf.rect(15, statsY - 5, pageWidth - 30, 80, 'F');
+      pdf.rect(20, statsY, pageWidth - 40, 120, 'F');
       pdf.setDrawColor(203, 213, 225);
-      pdf.rect(15, statsY - 5, pageWidth - 30, 80, 'S');
+      pdf.setLineWidth(0.5);
+      pdf.rect(20, statsY, pageWidth - 40, 120, 'S');
       
-      // Título de estadísticas
+      // Header de estadísticas
       pdf.setFillColor(30, 64, 175);
-      pdf.rect(15, statsY - 5, pageWidth - 30, 20, 'F');
+      pdf.rect(20, statsY, pageWidth - 40, 25, 'F');
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(16);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('RESUMEN EJECUTIVO', pageWidth / 2, statsY + 7, { align: 'center' });
+      pdf.text('📊 RESUMEN EJECUTIVO', pageWidth / 2, statsY + 16, { align: 'center' });
       
-      // Estadísticas en dos columnas
+      // === COLUMNA IZQUIERDA - RESUMEN GENERAL ===
       pdf.setTextColor(0, 0, 0);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'normal');
-      
-      const col1X = 25;
-      const col2X = pageWidth / 2 + 15;
-      let currentY = statsY + 25;
-      
-      // Columna izquierda
+      pdf.setFontSize(13);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('📊 RESUMEN GENERAL:', col1X, currentY);
+      
+      const col1X = 35;
+      const col2X = pageWidth / 2 + 20;
+      let currentY = statsY + 35;
+      
+      // Título columna izquierda
+      pdf.setTextColor(30, 64, 175);
+      pdf.text('� RESUMEN GENERAL', col1X, currentY);
+      currentY += 15;
+      
+      // Estadísticas generales
+      pdf.setFontSize(11);
       pdf.setFont('helvetica', 'normal');
-      currentY += 8;
-      pdf.text(`• Total de solicitudes: ${totalSolicitudes.toLocaleString()}`, col1X + 5, currentY);
-      currentY += 7;
-      pdf.text(`• Monto total procesado: $${totalMonto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`, col1X + 5, currentY);
-      currentY += 7;
+      pdf.setTextColor(51, 65, 85);
+      
+      pdf.text(`• Total de solicitudes: ${totalSolicitudes.toLocaleString('es-MX')}`, col1X + 5, currentY);
+      currentY += 12;
+      
+      pdf.text(`• Monto total procesado: $${totalMonto.toLocaleString('es-MX', { 
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`, col1X + 5, currentY);
+      currentY += 12;
+      
       pdf.text(`• Estados diferentes: ${data.length}`, col1X + 5, currentY);
-      currentY += 7;
-      pdf.text(`• Promedio por solicitud: $${Math.round(totalMonto / totalSolicitudes).toLocaleString('es-MX')}`, col1X + 5, currentY);
+      currentY += 12;
       
-      // Columna derecha - Detalle por estado
-      currentY = statsY + 25;
+      const promedioSolicitud = totalSolicitudes > 0 ? totalMonto / totalSolicitudes : 0;
+      pdf.text(`• Promedio por solicitud: $${promedioSolicitud.toLocaleString('es-MX', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`, col1X + 5, currentY);
+      
+      // === COLUMNA DERECHA - DETALLE POR ESTADO ===
+      currentY = statsY + 35;
+      pdf.setFontSize(13);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('📋 DETALLE POR ESTADO:', col2X, currentY);
-      pdf.setFont('helvetica', 'normal');
-      currentY += 8;
+      pdf.setTextColor(30, 64, 175);
+      pdf.text('📋 DETALLE POR ESTADO', col2X, currentY);
+      currentY += 15;
       
-      data.forEach((item, index) => {
-        const promedio = Math.round(Number(item.monto_total) / item.total);
-        const porcentaje = ((item.total / totalSolicitudes) * 100).toFixed(1);
+      // Detalle por cada estado
+      data.forEach((item) => {
+        const promedio = item.total > 0 ? Number(item.monto_total) / item.total : 0;
+        const porcentaje = totalSolicitudes > 0 ? ((item.total / totalSolicitudes) * 100) : 0;
         
-        pdf.text(`• ${item.estado.toUpperCase()}: ${item.total} (${porcentaje}%)`, col2X + 5, currentY);
-        currentY += 5;
-        pdf.setFontSize(10);
-        pdf.setTextColor(100, 100, 100);
-        pdf.text(`  Monto: $${Number(item.monto_total).toLocaleString('es-MX')} | Promedio: $${promedio.toLocaleString('es-MX')}`, col2X + 8, currentY);
-        pdf.setFontSize(12);
-        pdf.setTextColor(0, 0, 0);
+        // Estado principal
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(51, 65, 85);
+        pdf.text(
+          `• ${item.estado.toUpperCase()}: ${item.total} solicitudes (${porcentaje.toFixed(1)}%)`, 
+          col2X + 5, 
+          currentY
+        );
         currentY += 8;
+        
+        // Detalles monetarios
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(107, 114, 128);
+        pdf.text(
+          `  Monto: $${Number(item.monto_total).toLocaleString('es-MX', { 
+            minimumFractionDigits: 2 
+          })} | Promedio: $${promedio.toLocaleString('es-MX', { 
+            minimumFractionDigits: 2 
+          })}`, 
+          col2X + 8, 
+          currentY
+        );
+        currentY += 12;
       });
     }
     
-    // Footer profesional
+    // === FOOTER PROFESIONAL ===
     pdf.setFillColor(51, 65, 85);
     pdf.rect(0, pageHeight - 25, pageWidth, 25, 'F');
+    
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(10);
+    pdf.setFontSize(9);
     pdf.setFont('helvetica', 'normal');
-    pdf.text('Sistema de Gestión de Pagos - Reporte Ejecutivo', 20, pageHeight - 15);
-    pdf.text(`Página 1 de 1`, pageWidth - 20, pageHeight - 15, { align: 'right' });
-    pdf.text(new Date().toLocaleString('es-MX'), pageWidth / 2, pageHeight - 8, { align: 'center' });
+    
+    // Información del sistema
+    pdf.text('Sistema de Gestión de Pagos - Reporte Ejecutivo', 25, pageHeight - 12);
+    
+    // Número de página
+    pdf.text('Página 1 de 1', pageWidth - 25, pageHeight - 12, { align: 'right' });
+    
+    // Timestamp completo
+    const timestamp = new Date().toLocaleString('es-MX');
+    pdf.text(timestamp, pageWidth / 2, pageHeight - 5, { align: 'center' });
     
     // Descargar el PDF
     pdf.save(`estadisticas-ejecutivas-${new Date().toISOString().split('T')[0]}.pdf`);
@@ -208,105 +284,188 @@ export const exportChartsOnly = async () => {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     
-    // Header elegante
-    pdf.setFillColor(15, 23, 42);
-    pdf.rect(0, 0, pageWidth, 45, 'F');
+    // === HEADER MODERNO ===
+    pdf.setFillColor(15, 23, 42); // Azul oscuro elegante
+    pdf.rect(0, 0, pageWidth, 60, 'F');
     
+    // Título principal
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(22);
+    pdf.setFontSize(24);
     pdf.setFont('helvetica', 'bold');
     pdf.text('GRÁFICAS ESTADÍSTICAS', pageWidth / 2, 25, { align: 'center' });
     
-    pdf.setFontSize(11);
+    // Subtítulo
+    pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`Exportación de gráficas - ${new Date().toLocaleDateString('es-MX')}`, pageWidth / 2, 35, { align: 'center' });
+    pdf.text(`Análisis Visual - ${new Date().toLocaleDateString('es-MX', { 
+      weekday: 'long', 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    })}`, pageWidth / 2, 40, { align: 'center' });
     
-    // Intentar capturar directamente desde los canvas de Chart.js
+    // Línea decorativa
+    pdf.setDrawColor(255, 255, 255);
+    pdf.setLineWidth(0.5);
+    pdf.line(pageWidth / 2 - 120, 48, pageWidth / 2 + 120, 48);
+    
+    // === CAPTURA DE GRÁFICAS ===
     const doughnutChart = document.querySelector('.doughnut-chart canvas') as HTMLCanvasElement;
     const barChart = document.querySelector('.bar-chart canvas') as HTMLCanvasElement;
     
     if (doughnutChart && barChart) {
       try {
-        // Método 1: Canvas directo
+        // Captura directa de canvas con máxima calidad
         const doughnutImgData = doughnutChart.toDataURL('image/png', 1.0);
         const barImgData = barChart.toDataURL('image/png', 1.0);
         
-        // Dimensiones más grandes para mejor calidad
-        const chartWidth = (pageWidth / 2.1) - 10;
-        const chartHeight = chartWidth * 0.8;
-        const startY = 60;
+        // === LAYOUT OPTIMIZADO ===
+        const chartWidth = 200; // Tamaño más grande para mejor visualización
+        const chartHeight = 150;
+        const startY = 80;
+        const centerSpacing = 40; // Espacio entre gráficas
         
-        // Marcos con sombra para las gráficas
+        // Posiciones calculadas para centrado perfecto
+        const doughnutX = (pageWidth / 4) - (chartWidth / 2);
+        const barX = (3 * pageWidth / 4) - (chartWidth / 2);
+        
+        // === MARCO GRÁFICA DE DONA ===
         pdf.setFillColor(255, 255, 255);
-        pdf.rect(15, startY - 5, chartWidth + 10, chartHeight + 25, 'F');
-        pdf.setDrawColor(148, 163, 184);
-        pdf.setLineWidth(0.5);
-        pdf.rect(15, startY - 5, chartWidth + 10, chartHeight + 25, 'S');
+        pdf.rect(doughnutX - 10, startY - 10, chartWidth + 20, chartHeight + 50, 'F');
+        pdf.setDrawColor(203, 213, 225);
+        pdf.setLineWidth(0.8);
+        pdf.rect(doughnutX - 10, startY - 10, chartWidth + 20, chartHeight + 50, 'S');
         
-        pdf.rect(pageWidth / 2 + 5, startY - 5, chartWidth + 10, chartHeight + 25, 'F');
-        pdf.rect(pageWidth / 2 + 5, startY - 5, chartWidth + 10, chartHeight + 25, 'S');
-        
-        // Títulos elegantes
+        // Título gráfica de dona
         pdf.setTextColor(30, 41, 59);
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Distribución por Estado', pageWidth / 4, startY - 2, { align: 'center' });
+        
+        // Gráfica de dona
+        pdf.addImage(doughnutImgData, 'PNG', doughnutX, startY + 5, chartWidth, chartHeight);
+        
+        // === MARCO GRÁFICA DE BARRAS ===
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(barX - 10, startY - 10, chartWidth + 20, chartHeight + 50, 'F');
+        pdf.setDrawColor(203, 213, 225);
+        pdf.rect(barX - 10, startY - 10, chartWidth + 20, chartHeight + 50, 'S');
+        
+        // Título gráfica de barras
+        pdf.text('Análisis de Valores', 3 * pageWidth / 4, startY - 2, { align: 'center' });
+        
+        // Gráfica de barras
+        pdf.addImage(barImgData, 'PNG', barX, startY + 5, chartWidth, chartHeight);
+        
+        // === DESCRIPCIÓN PROFESIONAL ===
+        const descY = startY + chartHeight + 60;
+        
+        // Marco para descripción
+        pdf.setFillColor(248, 250, 252);
+        pdf.rect(40, descY, pageWidth - 80, 60, 'F');
+        pdf.setDrawColor(203, 213, 225);
+        pdf.rect(40, descY, pageWidth - 80, 60, 'S');
+        
+        // Título descripción
+        pdf.setFillColor(30, 64, 175);
+        pdf.rect(40, descY, pageWidth - 80, 20, 'F');
+        pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(14);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Distribución por Estado', 20 + chartWidth / 2, startY + chartHeight + 15, { align: 'center' });
-        pdf.text('Análisis de Valores', (pageWidth / 2 + 10) + chartWidth / 2, startY + chartHeight + 15, { align: 'center' });
+        pdf.text('📊 ANÁLISIS VISUAL', pageWidth / 2, descY + 13, { align: 'center' });
         
-        // Agregar gráficas con mejor espaciado
-        pdf.addImage(doughnutImgData, 'PNG', 20, startY, chartWidth, chartHeight);
-        pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, startY, chartWidth, chartHeight);
+        // Contenido descripción
+        pdf.setTextColor(51, 65, 85);
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'normal');
+        
+        const descripcionY = descY + 30;
+        pdf.text('• La gráfica circular muestra la distribución proporcional de solicitudes por estado', 50, descripcionY);
+        pdf.text('• El gráfico de barras presenta el análisis comparativo de valores monetarios', 50, descripcionY + 12);
+        pdf.text('• Ambas visualizaciones proporcionan insights complementarios para la toma de decisiones', 50, descripcionY + 24);
         
       } catch (canvasError) {
         console.warn('Error con canvas directo, usando html2canvas:', canvasError);
         
-        // Método 2: Fallback
+        // === MÉTODO FALLBACK CON HTML2CANVAS ===
         const html2canvas = (await import('html2canvas')).default;
         
         const [doughnutCanvas, barCanvas] = await Promise.all([
           html2canvas(doughnutChart.parentElement as HTMLElement, {
             backgroundColor: '#ffffff',
-            scale: 3,
+            scale: 4, // Máxima calidad para fallback
             useCORS: true,
             allowTaint: true,
             foreignObjectRendering: false,
             logging: false,
-            windowWidth: 1600,
-            windowHeight: 1000,
+            windowWidth: 1800,
+            windowHeight: 1200,
           }),
           html2canvas(barChart.parentElement as HTMLElement, {
             backgroundColor: '#ffffff',
-            scale: 3,
+            scale: 4,
             useCORS: true,
             allowTaint: true,
             foreignObjectRendering: false,
             logging: false,
-            windowWidth: 1600,
-            windowHeight: 1000,
+            windowWidth: 1800,
+            windowHeight: 1200,
           })
         ]);
         
-        const chartWidth = (pageWidth / 2.1) - 10;
-        const startY = 60;
+        const chartWidth = 200;
+        const startY = 80;
+        const doughnutX = (pageWidth / 4) - (chartWidth / 2);
+        const barX = (3 * pageWidth / 4) - (chartWidth / 2);
+        
         const doughnutHeight = (chartWidth * doughnutCanvas.height) / doughnutCanvas.width;
         const barHeight = (chartWidth * barCanvas.height) / barCanvas.width;
         
         const doughnutImgData = doughnutCanvas.toDataURL('image/png', 1.0);
         const barImgData = barCanvas.toDataURL('image/png', 1.0);
         
-        pdf.addImage(doughnutImgData, 'PNG', 20, startY, chartWidth, doughnutHeight);
-        pdf.addImage(barImgData, 'PNG', pageWidth / 2 + 10, startY, chartWidth, barHeight);
+        // Marcos y títulos
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(doughnutX - 10, startY - 10, chartWidth + 20, doughnutHeight + 30, 'F');
+        pdf.rect(barX - 10, startY - 10, chartWidth + 20, barHeight + 30, 'F');
+        pdf.setDrawColor(203, 213, 225);
+        pdf.rect(doughnutX - 10, startY - 10, chartWidth + 20, doughnutHeight + 30, 'S');
+        pdf.rect(barX - 10, startY - 10, chartWidth + 20, barHeight + 30, 'S');
+        
+        pdf.setTextColor(30, 41, 59);
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Distribución por Estado', pageWidth / 4, startY - 2, { align: 'center' });
+        pdf.text('Análisis de Valores', 3 * pageWidth / 4, startY - 2, { align: 'center' });
+        
+        // Gráficas
+        pdf.addImage(doughnutImgData, 'PNG', doughnutX, startY + 5, chartWidth, doughnutHeight);
+        pdf.addImage(barImgData, 'PNG', barX, startY + 5, chartWidth, barHeight);
       }
     }
     
-    // Footer
+    // === FOOTER ELEGANTE ===
     pdf.setFillColor(51, 65, 85);
-    pdf.rect(0, pageHeight - 20, pageWidth, 20, 'F');
+    pdf.rect(0, pageHeight - 25, pageWidth, 25, 'F');
+    
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(9);
-    pdf.text('Sistema de Gestión de Pagos', 20, pageHeight - 10);
-    pdf.text(`Gráficas Estadísticas`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-    pdf.text(new Date().toLocaleString('es-MX'), pageWidth - 20, pageHeight - 10, { align: 'right' });
+    pdf.setFont('helvetica', 'normal');
+    
+    // Información del sistema
+    pdf.text('Sistema de Gestión de Pagos - Exportación de Gráficas', 25, pageHeight - 15);
+    
+    // Timestamp
+    const timestamp = new Date().toLocaleString('es-MX');
+    pdf.text(timestamp, pageWidth / 2, pageHeight - 15, { align: 'center' });
+    
+    // Página
+    pdf.text('Visualización Ejecutiva', pageWidth - 25, pageHeight - 15, { align: 'right' });
+    
+    // Línea decorativa en footer
+    pdf.setDrawColor(255, 255, 255);
+    pdf.setLineWidth(0.3);
+    pdf.line(25, pageHeight - 8, pageWidth - 25, pageHeight - 8);
     
     pdf.save(`graficas-estadisticas-${new Date().toISOString().split('T')[0]}.pdf`);
     toast.success('📈 Gráficas exportadas exitosamente');
