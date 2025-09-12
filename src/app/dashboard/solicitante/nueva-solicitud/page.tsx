@@ -410,7 +410,7 @@ export default function NuevaSolicitudPage() {
         console.log('Respuesta del servicio de plantillas:', response);
 
         toast.success('Solicitud de plantilla creada exitosamente');
-        router.push('/dashboard/solicitante/solicitudes');
+        router.push('/dashboard/solicitante/mis-solicitudes');
         
       } catch (error: unknown) {
         console.error('Error al crear solicitud con plantilla:', error);

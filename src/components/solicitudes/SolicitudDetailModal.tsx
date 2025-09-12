@@ -263,8 +263,8 @@ return (
                 }</p>
               </div>
 
-              {/* Cuenta adicional opcional */}
-              {(() => {
+              {/* Cuenta adicional opcional - Ocultar para plantillas */}
+              {!solicitud.tipo_pago_descripcion?.startsWith('Plantilla:') && (() => {
                 // Verificar si cuenta o banco_cuenta tienen valores (no vacíos ni null)
                 const cuentaValida = solicitud.cuenta && solicitud.cuenta.trim() !== '';
                 const bancoValido = solicitud.banco_cuenta && solicitud.banco_cuenta.trim() !== '';
@@ -608,20 +608,25 @@ return (
                 );
               }
             })() : (
-              <div className="bg-gray-50/80 p-3 rounded-lg border border-gray-200">
-                <span className="text-sm text-gray-600 flex items-center font-medium">
-                  <FileText className="w-4 h-4 mr-1.5 text-gray-500" />
-                  No hay factura adjunta
-                </span>
-                <p className="text-xs text-gray-500 mt-1">Esta solicitud no tiene documentos adjuntos</p>
-              </div>
+              // Solo mostrar mensaje de "no hay factura" si NO es plantilla
+              !solicitud.tipo_pago_descripcion?.startsWith('Plantilla:') && (
+                <div className="bg-gray-50/80 p-3 rounded-lg border border-gray-200">
+                  <span className="text-sm text-gray-600 flex items-center font-medium">
+                    <FileText className="w-4 h-4 mr-1.5 text-gray-500" />
+                    No hay factura adjunta
+                  </span>
+                  <p className="text-xs text-gray-500 mt-1">Esta solicitud no tiene documentos adjuntos</p>
+                </div>
+              )
             )}
 
             {/* Archivos de solicitud_archivos */}
             <div className="mt-6">
               <h4 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
                 <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                Archivos adjuntos de la solicitud
+                {solicitud.tipo_pago_descripcion?.startsWith('Plantilla:') 
+                  ? 'Archivos de la plantilla' 
+                  : 'Archivos adjuntos de la solicitud'}
               </h4>
               {loadingArchivos ? (
                 <div className="text-blue-600 text-sm bg-blue-50 p-3 rounded-lg">Cargando archivos...</div>
@@ -707,7 +712,10 @@ return (
                 </div>
               ) : (
                 <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">
-                  No hay documentos adjuntos disponibles
+                  {solicitud.tipo_pago_descripcion?.startsWith('Plantilla:') 
+                    ? 'Los archivos de la plantilla se están cargando...' 
+                    : 'No hay documentos adjuntos disponibles'
+                  }
                 </div>
               )}
             </div>
