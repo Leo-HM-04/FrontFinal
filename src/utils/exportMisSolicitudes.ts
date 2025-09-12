@@ -69,12 +69,23 @@ const formatoMoneda = (valor: number | string | null | undefined) => {
   }).format(numeroValido);
 };
 
-// Función auxiliar para formatear texto con primera letra mayúscula
+// Función auxiliar para formatear texto con primera letra mayúscula de cada palabra
 const formatoTitulo = (texto: string | null | undefined) => {
   if (!texto) return '';
   const textoLimpio = texto.trim();
   if (textoLimpio.length === 0) return '';
-  return textoLimpio.charAt(0).toUpperCase() + textoLimpio.slice(1).toLowerCase();
+  
+  // Casos especiales
+  if (textoLimpio.toLowerCase() === 'ti') {
+    return 'TI';
+  }
+  
+  // Capitalizar primera letra de cada palabra
+  return textoLimpio
+    .toLowerCase()
+    .split(' ')
+    .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+    .join(' ');
 };
 
 // Array de meses y función para formato legible de fecha
