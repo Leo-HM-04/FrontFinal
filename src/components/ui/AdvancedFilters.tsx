@@ -63,11 +63,14 @@ export function AdvancedFilters({
 
   const departamentoOptions = [
     { value: 'administracion', label: 'Administración' },
+    { value: 'asuntos_corporativos', label: 'Asuntos Corporativos' },
+    { value: 'atraccion_talento', label: 'Atracción de Talento' },
     { value: 'atencion_clientes', label: 'Atención a Clientes' },
     { value: 'automatizaciones', label: 'Automatizaciones' },
     { value: 'cobranza', label: 'Cobranza' },
     { value: 'comercial', label: 'Comercial' },
     { value: 'contabilidad', label: 'Contabilidad' },
+    { value: 'direccion_general', label: 'Dirección General' },
     { value: 'facturacion', label: 'Facturación' },
     { value: 'nomina', label: 'Nómina' },
     { value: 'tesoreria', label: 'Tesorería' },
