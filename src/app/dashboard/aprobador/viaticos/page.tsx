@@ -3,6 +3,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useState } from 'react';
 import { FaFilePdf } from 'react-icons/fa';
+import { Eye } from 'lucide-react';
 import axios from 'axios';
 import { useViaticos } from '@/hooks/useViaticos';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -12,6 +13,7 @@ import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { exportViaticosToCSV, exportViaticosToExcel, exportViaticosToPDF } from '@/utils/exportUtils';
 import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
+import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { toast } from 'react-hot-toast';
 
 import { Solicitud } from '@/types';
@@ -30,7 +32,8 @@ const ViaticoRow: React.FC<{
   isSelected: boolean;
   onToggle: (id: number) => void;
   tresDiasDespues: Date;
-}> = React.memo(({ v, isSelected, onToggle, tresDiasDespues }) => {
+  onViewDetail: (viatico: Solicitud) => void;
+}> = React.memo(({ v, isSelected, onToggle, tresDiasDespues, onViewDetail }) => {
   if (!v.id_solicitud) return null;
   const isUrgent = new Date(v.fecha_limite_pago) < tresDiasDespues;
   let tipoCuentaTarjeta = '-';
@@ -113,19 +116,29 @@ const ViaticoRow: React.FC<{
         <span className="text-sm text-gray-900">{v.banco_destino || '-'}</span>
       </td>
       <td className="px-4 py-3 text-center">
-        {v.viatico_url ? (
-          <a
-            href={`/uploads/viaticos/${v.viatico_url.split('/').pop()}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-blue-700 hover:text-blue-800 hover:bg-blue-50 transition-colors"
+        <div className="flex items-center justify-center gap-2">
+          {v.viatico_url ? (
+            <a
+              href={`/uploads/viaticos/${v.viatico_url.split('/').pop()}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-blue-700 hover:text-blue-800 hover:bg-blue-50 transition-colors"
+            >
+              <FaFilePdf className="text-red-500" />
+              <span>Ver PDF</span>
+            </a>
+          ) : (
+            <span className="text-sm text-gray-400">Sin archivo</span>
+          )}
+          <button
+            onClick={() => onViewDetail(v)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 transition-colors"
+            title="Ver detalles del viático"
           >
-            <FaFilePdf className="text-red-500" />
-            <span>Ver PDF</span>
-          </a>
-        ) : (
-          <span className="text-sm text-gray-400">Sin archivo</span>
-        )}
+            <Eye className="w-4 h-4" />
+            <span>Ver Detalle</span>
+          </button>
+        </div>
       </td>
     </tr>
   );
@@ -158,9 +171,16 @@ const Viaticos: React.FC = () => {
 
   const [selectedViaticos, setSelectedViaticos] = React.useState<number[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedViatico, setSelectedViatico] = useState<Solicitud | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   
   const toggleViatico = useCallback((id: number) => {
     setSelectedViaticos(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  }, []);
+
+  const handleViewDetail = useCallback((viatico: Solicitud) => {
+    setSelectedViatico(viatico);
+    setShowDetailModal(true);
   }, []);
 
   const viaticosOrdenados = useMemo(() =>
@@ -668,6 +688,7 @@ const Viaticos: React.FC = () => {
                                             isSelected={selectedViaticos.includes(v.id_solicitud)}
                                             onToggle={toggleViatico}
                                             tresDiasDespues={tresDiasDespues}
+                                            onViewDetail={handleViewDetail}
                                           />
                                         ))}
                                       </tbody>
@@ -738,6 +759,18 @@ const Viaticos: React.FC = () => {
           onExport={handleExport}
           itemCount={filteredViaticos.length}
         />
+
+        {/* Detail Modal */}
+        {selectedViatico && (
+          <SolicitudDetailModal 
+            solicitud={selectedViatico}
+            isOpen={showDetailModal}
+            onClose={() => {
+              setShowDetailModal(false);
+              setSelectedViatico(null);
+            }}
+          />
+        )}
       </AprobadorLayout>
     </ProtectedRoute>
   );
