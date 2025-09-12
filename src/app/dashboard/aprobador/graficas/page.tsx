@@ -88,32 +88,102 @@ export default function GraficasAprobador() {
     fetchData();
   }, []);
 
+  // Función alternativa más simple para casos problemáticos
+  const downloadSimplePDF = async () => {
+    try {
+      console.log('Usando método alternativo simple...');
+      
+      // Usar window.print() nativo con estilos CSS para PDF
+      const originalTitle = document.title;
+      const currentDate = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+      document.title = `Dashboard-Estadisticas-${currentDate}`;
+      
+      // Agregar estilos específicos para impresión
+      const printStyles = document.createElement('style');
+      printStyles.textContent = `
+        @media print {
+          body * { visibility: hidden; }
+          #dashboard-content, #dashboard-content * { visibility: visible; }
+          #dashboard-content { position: absolute; left: 0; top: 0; width: 100%; }
+          .no-print { display: none !important; }
+        }
+      `;
+      document.head.appendChild(printStyles);
+      
+      // Trigger print
+      window.print();
+      
+      // Limpiar después
+      setTimeout(() => {
+        document.title = originalTitle;
+        document.head.removeChild(printStyles);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error en método alternativo:', error);
+      alert('Error al abrir el diálogo de impresión');
+    }
+  };
+
   // Función para descargar PDF como Ctrl+P
   const downloadPageAsPDF = async () => {
     setExporting(true);
     try {
+      console.log('Iniciando generación de PDF...');
+      
       // Obtener el elemento que contiene todo el dashboard
       const element = document.getElementById('dashboard-content');
       if (!element) {
         console.error('No se encontró el elemento dashboard-content');
+        alert('Error: No se encontró el contenido para exportar');
         return;
       }
 
-      // Configuración para html2canvas
+      console.log('Elemento encontrado, generando canvas...');
+
+      // Ocultar temporalmente los tooltips si existen
+      const tooltips = document.querySelectorAll('[role="tooltip"]');
+      tooltips.forEach(tooltip => {
+        (tooltip as HTMLElement).style.display = 'none';
+      });
+
+      // Configuración para html2canvas - más conservadora
       const canvas = await html2canvas(element, {
-        scale: 2, // Mayor resolución
-        useCORS: true, // Para imágenes externas
-        backgroundColor: '#f8fafc', // Fondo del dashboard
-        logging: false, // Sin logs en consola
+        scale: 1.5, // Reducir escala para evitar problemas de memoria
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#f8fafc',
+        logging: true, // Habilitar logs para debug
         width: element.scrollWidth,
         height: element.scrollHeight,
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 1200,
+        windowHeight: 800,
+        onclone: (clonedDoc) => {
+          // Asegurar que los estilos se mantengan en el clon
+          const clonedElement = clonedDoc.getElementById('dashboard-content');
+          if (clonedElement) {
+            clonedElement.style.transform = 'none';
+            clonedElement.style.webkitTransform = 'none';
+          }
+        }
+      });
+
+      console.log('Canvas generado exitosamente, creando PDF...');
+
+      // Mostrar tooltips nuevamente
+      tooltips.forEach(tooltip => {
+        (tooltip as HTMLElement).style.display = '';
       });
 
       // Crear PDF
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png', 0.95); // Calidad optimizada
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
       
       // Calcular dimensiones
       const imgWidth = 210; // A4 width en mm
@@ -122,6 +192,8 @@ export default function GraficasAprobador() {
       
       let heightLeft = imgHeight;
       let position = 0;
+
+      console.log(`Dimensiones: ${imgWidth}x${imgHeight}mm`);
 
       // Agregar primera página
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
@@ -137,10 +209,33 @@ export default function GraficasAprobador() {
 
       // Descargar el PDF
       const currentDate = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
-      pdf.save(`Dashboard-Estadisticas-${currentDate}.pdf`);
+      const fileName = `Dashboard-Estadisticas-${currentDate}.pdf`;
+      
+      console.log(`Guardando PDF como: ${fileName}`);
+      pdf.save(fileName);
+      
+      console.log('PDF generado exitosamente');
+
     } catch (error) {
-      console.error('Error al generar PDF:', error);
-      alert('Error al generar el PDF. Inténtalo nuevamente.');
+      console.error('Error detallado al generar PDF:', error);
+      
+      // Mostrar error más específico al usuario
+      let errorMessage = 'Error desconocido al generar el PDF';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Errores específicos comunes
+        if (error.message.includes('canvas')) {
+          errorMessage = 'Error al capturar la imagen de la página. Intenta reducir el zoom del navegador.';
+        } else if (error.message.includes('memory') || error.message.includes('size')) {
+          errorMessage = 'La página es muy grande para exportar. Intenta ocultar algunas secciones temporalmente.';
+        } else if (error.message.includes('CORS') || error.message.includes('cross-origin')) {
+          errorMessage = 'Error de permisos. Intenta recargar la página y volver a intentar.';
+        }
+      }
+      
+      alert(`Error al generar el PDF: ${errorMessage}`);
     } finally {
       setExporting(false);
     }
@@ -544,7 +639,7 @@ export default function GraficasAprobador() {
                       Panel de Estadísticas Ejecutivas
                     </h1>
                   </div>
-                  <div className="flex justify-center lg:justify-end gap-3">
+                  <div className="flex justify-center lg:justify-end gap-3 no-print">
                     <button
                       onClick={downloadPageAsPDF}
                       className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
@@ -552,6 +647,16 @@ export default function GraficasAprobador() {
                     >
                       <MdFileDownload size={20} />
                       {exporting ? 'Generando PDF...' : 'Descargar PDF'}
+                    </button>
+                    <button
+                      onClick={downloadSimplePDF}
+                      className="flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                      title="Método alternativo usando Ctrl+P del navegador"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                      </svg>
+                      Imprimir
                     </button>
                   </div>
                 </div>
