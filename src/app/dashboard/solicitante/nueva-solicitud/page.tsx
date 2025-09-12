@@ -374,28 +374,58 @@ export default function NuevaSolicitudPage() {
 
         // Procesar archivos de la plantilla
         let archivosParaSubir: File[] = [];
+        console.log('Verificando archivos en estadoPlantilla.datos:', estadoPlantilla.datos);
+        
         if (estadoPlantilla.datos.archivos_adjuntos && Array.isArray(estadoPlantilla.datos.archivos_adjuntos)) {
           archivosParaSubir = estadoPlantilla.datos.archivos_adjuntos;
+          console.log('Archivos encontrados:', archivosParaSubir.length, archivosParaSubir.map(f => f.name));
+        } else {
+          console.log('No se encontraron archivos o no es un array:', estadoPlantilla.datos.archivos_adjuntos);
         }
 
         // Validar que hay al menos un archivo
         if (archivosParaSubir.length === 0) {
+          console.error('No hay archivos para subir. Datos completos:', estadoPlantilla.datos);
           throw new Error('Debe adjuntar al menos un archivo para la plantilla');
         }
 
         // Preparar datos para el nuevo servicio de plantillas
         const solicitudPlantillaData = {
-          // Datos básicos de la solicitud
+          // Datos básicos de la solicitud - mapeo dinámico según la plantilla
           departamento: 'Finanzas',
-          monto: String(estadoPlantilla.datos.monto || '0'),
+          monto: String(
+            estadoPlantilla.datos.monto_total_cliente || 
+            estadoPlantilla.datos.monto || 
+            '0'
+          ),
           tipo_moneda: String(estadoPlantilla.datos.moneda || 'MXN'),
-          cuenta_destino: String(estadoPlantilla.datos.numero_cuenta || ''),
-          concepto: `${estadoPlantilla.datos.asunto || 'Plantilla'} - ${estadoPlantilla.datos.beneficiario || 'Sin beneficiario'}`,
-          tipo_pago: 'transferencia',
-          tipo_cuenta_destino: String(estadoPlantilla.datos.tipo_cuenta || 'CLABE'),
+          cuenta_destino: String(
+            estadoPlantilla.datos.numero_tarjeta ||
+            estadoPlantilla.datos.numero_cuenta || 
+            ''
+          ),
+          concepto: `${estadoPlantilla.datos.asunto || 'Plantilla'} - ${
+            estadoPlantilla.datos.beneficiario_tarjeta ||
+            estadoPlantilla.datos.beneficiario || 
+            estadoPlantilla.datos.cliente ||
+            'Sin beneficiario'
+          }`,
+          tipo_pago: estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-tukash' ? 'tarjeta' : 'transferencia',
+          tipo_cuenta_destino: estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-tukash' 
+            ? 'Número de Tarjeta' 
+            : String(estadoPlantilla.datos.tipo_cuenta || 'CLABE'),
           banco_destino: String(estadoPlantilla.datos.banco_destino || ''),
-          nombre_persona: String(estadoPlantilla.datos.beneficiario || ''),
-          empresa_a_pagar: String(estadoPlantilla.datos.beneficiario || ''),
+          nombre_persona: String(
+            estadoPlantilla.datos.beneficiario_tarjeta ||
+            estadoPlantilla.datos.beneficiario || 
+            estadoPlantilla.datos.cliente ||
+            ''
+          ),
+          empresa_a_pagar: String(
+            estadoPlantilla.datos.cliente ||
+            estadoPlantilla.datos.beneficiario || 
+            ''
+          ),
           fecha_limite_pago: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           
           // Datos específicos de plantilla
@@ -409,6 +439,8 @@ export default function NuevaSolicitudPage() {
 
         console.log('Datos de plantilla para enviar al nuevo servicio:', solicitudPlantillaData);
         console.log('Archivos a enviar:', archivosParaSubir.map(f => ({ name: f.name, size: f.size, type: f.type })));
+        console.log('Datos completos de la plantilla:', estadoPlantilla.datos);
+        console.log('Plantilla seleccionada:', estadoPlantilla.plantillaSeleccionada?.id);
 
         // Usar el nuevo servicio específico para plantillas
         const response = await SolicitudesService.createPlantilla(solicitudPlantillaData);
@@ -420,6 +452,17 @@ export default function NuevaSolicitudPage() {
         
       } catch (error: unknown) {
         console.error('Error al crear solicitud con plantilla:', error);
+        
+        // Log más detallado del error
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response?: { data?: unknown; status?: number; statusText?: string } };
+          console.error('Detalles del error del servidor:', {
+            status: axiosError.response?.status,
+            statusText: axiosError.response?.statusText,
+            data: axiosError.response?.data
+          });
+        }
+        
         const errorMessage = error instanceof Error ? error.message : 'Error al crear la solicitud de plantilla';
         toast.error(errorMessage);
       } finally {
