@@ -589,8 +589,7 @@ class ExportUtils {
     });
 
     // Obtener posición final de la tabla
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const finalY = (doc as any).lastAutoTable.finalY;
+    const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
 
     // Total general debajo de la tabla
     const totalY = finalY + 10;
@@ -702,8 +701,7 @@ class ExportUtils {
     });
 
     // Obtener posición final de la primera tabla
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const firstTableFinalY = (doc as any).lastAutoTable.finalY;
+    const firstTableFinalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
 
     // Tabla de resumen por estado
     const estados = this.calculateStateTotals(solicitudes);
@@ -740,8 +738,7 @@ class ExportUtils {
       }
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const finalY = (doc as any).lastAutoTable.finalY;
+    const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
     return finalY + 10;
   }
 
@@ -1343,8 +1340,7 @@ class ExportUtils {
       }
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const finalY = (doc as any).lastAutoTable.finalY;
+    const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
 
     // Indicador de urgencia profesional debajo de la tabla
     const urgencyY = finalY + 10;
