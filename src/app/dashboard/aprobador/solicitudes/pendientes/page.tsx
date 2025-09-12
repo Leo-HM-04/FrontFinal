@@ -19,8 +19,7 @@ import Modal from '@/components/ui/Modal';
 import { Solicitud } from '@/types';
 
 export default function SolicitudesPendientesPage() {
-  // ...existing code...
-  
+
   const { solicitudes: allSolicitudes, loading, fetchSolicitudes } = useSolicitudes();
   // Filtrar solo las solicitudes pendientes
   const solicitudes = allSolicitudes.filter(s => s.estado === 'pendiente');
@@ -347,6 +346,21 @@ export default function SolicitudesPendientesPage() {
     }
   };
 
+  // Función para formatear solo la hora
+  const formatTime = (date: string | Date) => {
+    if (!date) return '-';
+    try {
+      const d = new Date(date);
+      return d.toLocaleTimeString('es-MX', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      });
+    } catch {
+      return '-';
+    }
+  };
+
   // Nuevo: abrir modal de confirmación
   const openConfirmModal = (solicitud: Solicitud, action: 'approve' | 'reject') => {
     setConfirmModal({ open: true, solicitud, action });
@@ -522,6 +536,9 @@ export default function SolicitudesPendientesPage() {
                           {getSortIcon('folio')}
                         </div>
                       </th>
+                      <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">
+                        Hora de envío
+                      </th>
                       <th 
                         className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
                         onClick={() => handleSort('usuario')}
@@ -601,6 +618,7 @@ export default function SolicitudesPendientesPage() {
                             />
                           </td>
                           <td className="px-4 py-3 text-black text-sm">{s.folio || '-'}</td>
+                          <td className="px-4 py-3 text-black text-sm">{formatTime(s.fecha_creacion)}</td>
                           <td className="px-4 py-3 text-black text-sm">{s.usuario_nombre || `Usuario ${s.id_usuario}`}</td>
                           <td className="px-4 py-3 text-black text-sm">
                             <span className="px-3 py-1 text-xs font-bold rounded-lg bg-blue-100 text-blue-800">
@@ -668,6 +686,9 @@ export default function SolicitudesPendientesPage() {
                                   Folio
                                   {getSortIcon('folio')}
                                 </div>
+                              </th>
+                              <th className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200">
+                                Hora de envío
                               </th>
                               <th 
                                 className="px-2 py-2 text-left text-blue-800 font-semibold border-b border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
@@ -743,6 +764,7 @@ export default function SolicitudesPendientesPage() {
                               return (
                                 <tr key={s.id_solicitud} className="border-b last:border-b-0 hover:bg-blue-50 transition-colors group">
                                   <td className="px-4 py-3 text-black text-sm">{s.folio || '-'}</td>
+                                  <td className="px-4 py-3 text-black text-sm">{formatTime(s.fecha_creacion)}</td>
                                   <td className="px-4 py-3 text-black text-sm">{s.usuario_nombre || `Usuario ${s.id_usuario}`}</td>
                                   <td className="px-4 py-3 text-black text-sm">
                                     <span className="px-3 py-1 text-xs font-bold rounded-lg bg-blue-100 text-blue-800">
