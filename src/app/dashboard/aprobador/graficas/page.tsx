@@ -19,7 +19,8 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels/types";
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
-import { exportToPDF, exportChartsOnly } from '@/utils/pdfExportUtils';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import '@/styles/charts.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, ChartDataLabels);
@@ -87,25 +88,73 @@ export default function GraficasAprobador() {
     fetchData();
   }, []);
 
-  // Funciones de exportación a PDF usando utilidades externas
-  const handleExportFullReport = async () => {
+  // Función para descargar PDF como Ctrl+P
+  const downloadPageAsPDF = async () => {
     setExporting(true);
     try {
-      await exportToPDF(data);
+      // Obtener el elemento que contiene todo el dashboard
+      const element = document.getElementById('dashboard-content');
+      if (!element) {
+        console.error('No se encontró el elemento dashboard-content');
+        return;
+      }
+
+      // Configuración para html2canvas
+      const canvas = await html2canvas(element, {
+        scale: 2, // Mayor resolución
+        useCORS: true, // Para imágenes externas
+        backgroundColor: '#f8fafc', // Fondo del dashboard
+        logging: false, // Sin logs en consola
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+      });
+
+      // Crear PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Calcular dimensiones
+      const imgWidth = 210; // A4 width en mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pageHeight = 297; // A4 height en mm
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Agregar primera página
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Si la imagen es más alta que una página, agregar páginas adicionales
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Descargar el PDF
+      const currentDate = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+      pdf.save(`Dashboard-Estadisticas-${currentDate}.pdf`);
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      alert('Error al generar el PDF. Inténtalo nuevamente.');
     } finally {
       setExporting(false);
-      setShowExportModal(false);
     }
   };
 
+  // Funciones de exportación a PDF usando utilidades externas
+  const handleExportFullReport = async () => {
+    await downloadPageAsPDF();
+    setShowExportModal(false);
+  };
+
   const handleExportChartsOnly = async () => {
-    setExporting(true);
-    try {
-      await exportChartsOnly(data);
-    } finally {
-      setExporting(false);
-      setShowExportModal(false);
-    }
+    await downloadPageAsPDF();
+    setShowExportModal(false);
   };
 
   if (loading) {
@@ -484,7 +533,7 @@ export default function GraficasAprobador() {
   return (
     <ProtectedRoute>
       <AprobadorLayout>
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20 py-10 px-6">
+        <div id="dashboard-content" className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20 py-10 px-6">
             <div className="max-w-7xl mx-auto">
               
               {/* Header Section */}
@@ -495,16 +544,16 @@ export default function GraficasAprobador() {
                       Panel de Estadísticas Ejecutivas
                     </h1>
                   </div>
-                  {/* <div className="flex justify-center lg:justify-end">
+                  <div className="flex justify-center lg:justify-end gap-3">
                     <button
-                      onClick={() => setShowExportModal(true)}
+                      onClick={downloadPageAsPDF}
                       className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       disabled={exporting}
                     >
                       <MdFileDownload size={20} />
-                      {exporting ? 'Exportando...' : 'Exportar PDF'}
+                      {exporting ? 'Generando PDF...' : 'Descargar PDF'}
                     </button>
-                  </div> */}
+                  </div>
                 </div>
               </div>
 
@@ -806,8 +855,8 @@ export default function GraficasAprobador() {
                         <MdAnalytics size={20} className="text-white" />
                       </div>
                       <div className="text-left">
-                        <p className="font-semibold text-gray-900">Reporte Completo</p>
-                        <p className="text-sm text-gray-600">Incluye gráficas, estadísticas y análisis detallado</p>
+                        <p className="font-semibold text-gray-900">Descargar Dashboard Completo</p>
+                        <p className="text-sm text-gray-600">Captura toda la página tal como se ve (Ctrl+P)</p>
                       </div>
                       {exporting && (
                         <div className="ml-auto">
@@ -815,30 +864,11 @@ export default function GraficasAprobador() {
                         </div>
                       )}
                     </button>
-                    
-                    <button
-                      onClick={handleExportChartsOnly}
-                      disabled={exporting}
-                      className="export-button w-full flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 border border-emerald-200 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed group"
-                    >
-                      <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center group-hover:shadow-lg transition-shadow">
-                        <MdPieChart size={20} className="text-white" />
-                      </div>
-                      <div className="text-left">
-                        <p className="font-semibold text-gray-900">Solo Gráficas</p>
-                        <p className="text-sm text-gray-600">Exporta únicamente las gráficas en alta calidad</p>
-                      </div>
-                      {exporting && (
-                        <div className="ml-auto">
-                          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                      )}
-                    </button>
                   </div>
                   
                   <div className="pt-4 border-t border-gray-100">
                     <p className="text-xs text-gray-500 text-center">
-                      Los archivos se descargarán automáticamente en formato PDF
+                      El archivo PDF se descargará automáticamente con toda la información visible
                     </p>
                   </div>
                 </div>
