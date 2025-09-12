@@ -117,9 +117,8 @@ export function filtrarSolicitudesPorRango(solicitudes: Solicitud[], rango: 'dia
 // Exportar a CSV
 export function exportMisSolicitudesCSV(solicitudes: Solicitud[], rango: string = 'total') {
   const datos = filtrarSolicitudesPorRango(solicitudes, rango as 'dia' | 'semana' | 'mes' | 'año' | 'total');
-  const headers = ['ID', 'Folio', 'Concepto', 'Monto', 'Departamento', 'Estado', 'Fecha Creación', 'Solicitante', 'Cuenta Destino', 'Banco'];
+  const headers = ['Folio', 'Concepto', 'Monto', 'Departamento', 'Estado', 'Fecha Creación', 'Solicitante', 'Cuenta Destino', 'Banco'];
   const rows = datos.map(s => [
-    s.id_solicitud,
     s.folio || '',
     s.concepto || '',
     formatoMoneda(s.monto),
@@ -256,7 +255,6 @@ export async function exportMisSolicitudesExcel(solicitudes: Solicitud[], rango:
 
   // Encabezados de columnas
   const headerRow = sheet.addRow([
-    'ID',
     'Folio',
     'Concepto',
     'Monto',
@@ -293,7 +291,6 @@ export async function exportMisSolicitudesExcel(solicitudes: Solicitud[], rango:
     }
 
     const row = sheet.addRow([
-      s.id_solicitud,
       s.folio || '',
       s.concepto || '',
       monto, // Guardamos el número, no el string formateado
@@ -305,8 +302,8 @@ export async function exportMisSolicitudesExcel(solicitudes: Solicitud[], rango:
       s.banco_destino || ''
     ]);
 
-    // Aplicar formato de moneda a la columna de monto (índice 3)
-    const montoCell = row.getCell(4); // La columna 4 es 'Monto'
+    // Aplicar formato de moneda a la columna de monto (índice 2, antes era 3)
+    const montoCell = row.getCell(3); // La columna 3 es ahora 'Monto'
     montoCell.numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00';
 
     row.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -410,7 +407,7 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
     }
   });
 
-  const columns = ['ID', 'Folio', 'Concepto', 'Monto', 'Departamento', 'Estado', 'Fecha Creación'];
+  const columns = ['Folio', 'Concepto', 'Monto', 'Departamento', 'Estado', 'Fecha Creación'];
   const rows = datos.map(s => {
     // Convertir el monto a número
     let monto = 0;
@@ -426,7 +423,6 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
     }
     
     return [
-      s.id_solicitud,
       s.folio || '',
       s.concepto || '',
       formatoMoneda(monto),
