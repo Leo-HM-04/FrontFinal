@@ -19,8 +19,6 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels/types";
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import '@/styles/charts.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, ChartDataLabels);
@@ -45,7 +43,6 @@ export default function GraficasAprobador() {
   const [error, setError] = useState<string | null>(null);
   const [tendencia, setTendencia] = useState<TendenciaMes[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,133 +120,6 @@ export default function GraficasAprobador() {
       console.error('Error en método alternativo:', error);
       alert('Error al abrir el diálogo de impresión');
     }
-  };
-
-  // Función para descargar PDF como Ctrl+P
-  const downloadPageAsPDF = async () => {
-    setExporting(true);
-    try {
-      console.log('Iniciando generación de PDF...');
-      
-      // Obtener el elemento que contiene todo el dashboard
-      const element = document.getElementById('dashboard-content');
-      if (!element) {
-        console.error('No se encontró el elemento dashboard-content');
-        alert('Error: No se encontró el contenido para exportar');
-        return;
-      }
-
-      console.log('Elemento encontrado, generando canvas...');
-
-      // Ocultar temporalmente los tooltips si existen
-      const tooltips = document.querySelectorAll('[role="tooltip"]');
-      tooltips.forEach(tooltip => {
-        (tooltip as HTMLElement).style.display = 'none';
-      });
-
-      // Configuración para html2canvas - más conservadora
-      const canvas = await html2canvas(element, {
-        scale: 1.5, // Reducir escala para evitar problemas de memoria
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#f8fafc',
-        logging: true, // Habilitar logs para debug
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: 1200,
-        windowHeight: 800,
-        onclone: (clonedDoc) => {
-          // Asegurar que los estilos se mantengan en el clon
-          const clonedElement = clonedDoc.getElementById('dashboard-content');
-          if (clonedElement) {
-            clonedElement.style.transform = 'none';
-            clonedElement.style.webkitTransform = 'none';
-          }
-        }
-      });
-
-      console.log('Canvas generado exitosamente, creando PDF...');
-
-      // Mostrar tooltips nuevamente
-      tooltips.forEach(tooltip => {
-        (tooltip as HTMLElement).style.display = '';
-      });
-
-      // Crear PDF
-      const imgData = canvas.toDataURL('image/png', 0.95); // Calidad optimizada
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      // Calcular dimensiones
-      const imgWidth = 210; // A4 width en mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pageHeight = 297; // A4 height en mm
-      
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      console.log(`Dimensiones: ${imgWidth}x${imgHeight}mm`);
-
-      // Agregar primera página
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      // Si la imagen es más alta que una página, agregar páginas adicionales
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      // Descargar el PDF
-      const currentDate = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
-      const fileName = `Dashboard-Estadisticas-${currentDate}.pdf`;
-      
-      console.log(`Guardando PDF como: ${fileName}`);
-      pdf.save(fileName);
-      
-      console.log('PDF generado exitosamente');
-
-    } catch (error) {
-      console.error('Error detallado al generar PDF:', error);
-      
-      // Mostrar error más específico al usuario
-      let errorMessage = 'Error desconocido al generar el PDF';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-        
-        // Errores específicos comunes
-        if (error.message.includes('canvas')) {
-          errorMessage = 'Error al capturar la imagen de la página. Intenta reducir el zoom del navegador.';
-        } else if (error.message.includes('memory') || error.message.includes('size')) {
-          errorMessage = 'La página es muy grande para exportar. Intenta ocultar algunas secciones temporalmente.';
-        } else if (error.message.includes('CORS') || error.message.includes('cross-origin')) {
-          errorMessage = 'Error de permisos. Intenta recargar la página y volver a intentar.';
-        }
-      }
-      
-      alert(`Error al generar el PDF: ${errorMessage}`);
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  // Funciones de exportación a PDF usando utilidades externas
-  const handleExportFullReport = async () => {
-    await downloadPageAsPDF();
-    setShowExportModal(false);
-  };
-
-  const handleExportChartsOnly = async () => {
-    await downloadPageAsPDF();
-    setShowExportModal(false);
   };
 
   if (loading) {
@@ -641,14 +511,6 @@ export default function GraficasAprobador() {
                   </div>
                   <div className="flex justify-center lg:justify-end gap-3 no-print">
                     <button
-                      onClick={downloadPageAsPDF}
-                      className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                      disabled={exporting}
-                    >
-                      <MdFileDownload size={20} />
-                      {exporting ? 'Generando PDF...' : 'Descargar PDF'}
-                    </button>
-                    <button
                       onClick={downloadSimplePDF}
                       className="flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       title="Método alternativo usando Ctrl+P del navegador"
@@ -933,14 +795,13 @@ export default function GraficasAprobador() {
                         <MdFileDownload size={20} className="text-white" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900">Exportar a PDF</h3>
-                        <p className="text-sm text-gray-600">Selecciona el tipo de exportación</p>
+                        <h3 className="text-xl font-bold text-gray-900">Imprimir Dashboard</h3>
+                        <p className="text-sm text-gray-600">Usar función de impresión del navegador</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setShowExportModal(false)}
                       className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                      disabled={exporting}
                     >
                       <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -952,28 +813,24 @@ export default function GraficasAprobador() {
                 <div className="p-6 space-y-4">
                   <div className="space-y-3">
                     <button
-                      onClick={handleExportFullReport}
-                      disabled={exporting}
-                      className="export-button w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed group"
+                      onClick={() => { downloadSimplePDF(); setShowExportModal(false); }}
+                      className="export-button w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 rounded-xl group"
                     >
                       <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:shadow-lg transition-shadow">
-                        <MdAnalytics size={20} className="text-white" />
+                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
                       </div>
                       <div className="text-left">
-                        <p className="font-semibold text-gray-900">Descargar Dashboard Completo</p>
-                        <p className="text-sm text-gray-600">Captura toda la página tal como se ve (Ctrl+P)</p>
+                        <p className="font-semibold text-gray-900">Imprimir Dashboard</p>
+                        <p className="text-sm text-gray-600">Abre el diálogo de impresión para guardar como PDF</p>
                       </div>
-                      {exporting && (
-                        <div className="ml-auto">
-                          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                      )}
                     </button>
                   </div>
                   
                   <div className="pt-4 border-t border-gray-100">
                     <p className="text-xs text-gray-500 text-center">
-                      El archivo PDF se descargará automáticamente con toda la información visible
+                      En el diálogo de impresión, selecciona &ldquo;Guardar como PDF&rdquo; como destino
                     </p>
                   </div>
                 </div>
