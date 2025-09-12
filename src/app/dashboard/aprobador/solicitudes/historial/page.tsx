@@ -312,7 +312,6 @@ export default function HistorialSolicitudesPage() {
                         <table className="min-w-full divide-y divide-gray-200">
                           <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
-                              <th className="px-4 py-3 text-left text-blue-800 font-semibold text-sm border-b border-blue-200">ID</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Hora Envío</th>
                               <th 
                                 className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-colors"
@@ -411,9 +410,6 @@ export default function HistorialSolicitudesPage() {
                               }
                               return (
                                 <tr key={solicitud.id_solicitud} className={`hover:bg-gray-50 transition-colors ${rowClass}`}>
-                                  <td className="px-4 py-3 font-mono text-black text-sm">
-                                    {solicitud.id_solicitud}
-                                  </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {solicitud.fecha_creacion ? formatDateTime(solicitud.fecha_creacion).time : '-'}
                                   </td>
