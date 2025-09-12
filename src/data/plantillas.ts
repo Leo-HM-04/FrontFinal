@@ -44,6 +44,24 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
           }
         },
         {
+          id: 'cliente',
+          nombre: 'cliente',
+          tipo: 'texto',
+          etiqueta: 'Cliente',
+          placeholder: 'Ej. ROCALLOSA',
+          ayuda: 'Nombre del cliente para el cual se realiza el pago',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 3,
+            maxLength: 100,
+            mensaje: 'El cliente es requerido y debe tener entre 3 y 100 caracteres'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
           id: 'beneficiario',
           nombre: 'beneficiario',
           tipo: 'texto',
@@ -58,12 +76,12 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
             mensaje: 'El beneficiario es requerido y debe tener entre 5 y 200 caracteres'
           },
           estilos: {
-            ancho: 'completo'
+            ancho: 'medio'
           }
         }
       ],
       estilos: {
-        columnas: 1,
+        columnas: 2,
         espaciado: 'normal'
       }
     },
@@ -83,12 +101,12 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
             {
               valor: 'CLABE',
               etiqueta: 'CLABE Interbancaria',
-              descripcion: 'Clave Bancaria Estandarizada (18 dígitos)'
+              descripcion: 'Clave Bancaria Estandarizada (16 o 18 dígitos)'
             },
             {
               valor: 'CUENTA',
               etiqueta: 'Número de Cuenta',
-              descripcion: 'Número de cuenta bancaria (máximo 18 dígitos)'
+              descripcion: 'Número de cuenta bancaria (8 a 10 dígitos)'
             }
           ],
           validaciones: {
@@ -103,8 +121,8 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
           nombre: 'numero_cuenta',
           tipo: 'cuenta_clabe',
           etiqueta: 'CUENTA/CLABE',
-          placeholder: '646014342400009000.00',
-          ayuda: 'Número de la cuenta destino a realizar el depósito',
+          placeholder: '646014342400009000 ó 1234567890',
+          ayuda: 'Número de la cuenta destino a realizar el depósito. CLABE: 16 o 18 dígitos. Cuenta: 8 a 10 dígitos.',
           valorPorDefecto: '',
           validaciones: {
             requerido: true,
@@ -115,6 +133,11 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
             {
               campo: 'tipo_cuenta',
               valor: 'CLABE',
+              accion: 'mostrar'
+            },
+            {
+              campo: 'tipo_cuenta', 
+              valor: 'CUENTA',
               accion: 'mostrar'
             }
           ],

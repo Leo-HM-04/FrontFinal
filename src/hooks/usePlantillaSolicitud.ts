@@ -42,6 +42,23 @@ export const usePlantillaSolicitud = () => {
         });
       });
 
+      // Evaluar dependencias iniciales con valores por defecto
+      plantilla.secciones.forEach(seccion => {
+        seccion.campos.forEach(campo => {
+          if (campo.dependencias && campo.dependencias.length > 0) {
+            campo.dependencias.forEach(dependencia => {
+              const valorCumple = datosIniciales[dependencia.campo] === dependencia.valor;
+              
+              if (dependencia.accion === 'mostrar' && valorCumple) {
+                camposVisiblesIniciales.add(campo.id);
+              } else if (dependencia.accion === 'ocultar' && valorCumple) {
+                camposVisiblesIniciales.delete(campo.id);
+              }
+            });
+          }
+        });
+      });
+
       return {
         plantillaSeleccionada: plantilla,
         datos: datosIniciales,
@@ -145,11 +162,15 @@ export const usePlantillaSolicitud = () => {
     // Validaciones específicas por tipo de campo
     if (campo.tipo === 'cuenta_clabe') {
       const tipoCuenta = estado.datos['tipo_cuenta'];
-      if (tipoCuenta === 'CLABE' && valorStr.length !== 18) {
-        return 'La CLABE debe tener exactamente 18 dígitos';
+      if (tipoCuenta === 'CLABE') {
+        if (valorStr.length !== 16 && valorStr.length !== 18) {
+          return 'La CLABE debe tener 16 o 18 dígitos';
+        }
       }
-      if (tipoCuenta === 'CUENTA' && valorStr.length > 18) {
-        return 'El número de cuenta no puede tener más de 18 dígitos';
+      if (tipoCuenta === 'CUENTA') {
+        if (valorStr.length < 8 || valorStr.length > 10) {
+          return 'El número de cuenta debe tener entre 8 y 10 dígitos';
+        }
       }
     }
 

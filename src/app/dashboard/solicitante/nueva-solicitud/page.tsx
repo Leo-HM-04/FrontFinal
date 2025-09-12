@@ -195,9 +195,15 @@ export default function NuevaSolicitudPage() {
       errorMsg: '',
       required: false
     };
+  } else if (formData.tipo_cuenta_destino === 'Cuenta') {
+    cuentaConfig = {
+      placeholder: 'Número de cuenta (8 a 10 dígitos)',
+      errorMsg: 'Ingresa un número de cuenta válido.',
+      required: true
+    };
   } else {
     cuentaConfig = {
-      placeholder: 'Número de cuenta CLABE',
+      placeholder: 'Número de cuenta CLABE (16 o 18 dígitos)',
       errorMsg: 'Ingresa un número de cuenta CLABE válido.',
       required: true
     };
@@ -468,11 +474,19 @@ export default function NuevaSolicitudPage() {
       newErrors.tipo_tarjeta_2 = 'Selecciona el tipo de tarjeta';
     }
 
-    // Validar dígitos de CLABE (18 dígitos exactos)
+    // Validar dígitos de CLABE (16 o 18 dígitos)
     if (formData.tipo_cuenta_destino === 'CLABE' && formData.cuenta_destino) {
-      const clabePattern = /^\d{18}$/;
+      const clabePattern = /^\d{16}$|^\d{18}$/;
       if (!clabePattern.test(formData.cuenta_destino)) {
-        newErrors.cuenta_destino = 'La CLABE debe tener exactamente 18 dígitos';
+        newErrors.cuenta_destino = 'La CLABE debe tener 16 o 18 dígitos';
+      }
+    }
+
+    // Validar dígitos de Cuenta (8 a 10 dígitos)
+    if (formData.tipo_cuenta_destino === 'Cuenta' && formData.cuenta_destino) {
+      const cuentaPattern = /^\d{8,10}$/;
+      if (!cuentaPattern.test(formData.cuenta_destino)) {
+        newErrors.cuenta_destino = 'El número de cuenta debe tener entre 8 y 10 dígitos';
       }
     }
 
@@ -484,11 +498,19 @@ export default function NuevaSolicitudPage() {
       }
     }
 
-    // Validar dígitos de CLABE para segunda forma de pago (18 dígitos exactos)
+    // Validar dígitos de CLABE para segunda forma de pago (16 o 18 dígitos)
     if (formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'CLABE' && formData.cuenta_destino_2) {
-      const clabePattern = /^\d{18}$/;
+      const clabePattern = /^\d{16}$|^\d{18}$/;
       if (!clabePattern.test(formData.cuenta_destino_2)) {
-        newErrors.cuenta_destino_2 = 'La CLABE debe tener exactamente 18 dígitos';
+        newErrors.cuenta_destino_2 = 'La CLABE debe tener 16 o 18 dígitos';
+      }
+    }
+
+    // Validar dígitos de Cuenta para segunda forma de pago (8 a 10 dígitos)
+    if (formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Cuenta' && formData.cuenta_destino_2) {
+      const cuentaPattern = /^\d{8,10}$/;
+      if (!cuentaPattern.test(formData.cuenta_destino_2)) {
+        newErrors.cuenta_destino_2 = 'El número de cuenta debe tener entre 8 y 10 dígitos';
       }
     }
 
@@ -930,6 +952,7 @@ export default function NuevaSolicitudPage() {
                       className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                     >
                       <option value="CLABE" className="text-black">CLABE</option>
+                      <option value="Cuenta" className="text-black">Número de Cuenta</option>
                       <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
                       <option value="Tarjeta Institucional" className="text-black">Pago con Tarjeta Corporativa</option>
                     </select>
@@ -1220,6 +1243,7 @@ export default function NuevaSolicitudPage() {
                         className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
                       >
                         <option value="CLABE" className="text-black">CLABE</option>
+                        <option value="Cuenta" className="text-black">Número de Cuenta</option>
                         <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
                         <option value="Tarjeta Institucional" className="text-black">Pago con Tarjeta Corporativa</option>
                       </select>
@@ -1305,11 +1329,18 @@ export default function NuevaSolicitudPage() {
                           // Validar en tiempo real según el tipo de cuenta
                           if (value) {
                             if (formData.tipo_cuenta_destino_2 === 'CLABE') {
-                              const clabePattern = /^\d{18}$/;
+                              const clabePattern = /^\d{16,18}$/;
                               if (!clabePattern.test(value) && value.length <= 18) {
                                 setErrors((prev) => ({ ...prev, cuenta_destino_2: undefined }));
                               } else if (!clabePattern.test(value) && value.length > 18) {
-                                setErrors((prev) => ({ ...prev, cuenta_destino_2: 'La CLABE debe tener exactamente 18 dígitos' }));
+                                setErrors((prev) => ({ ...prev, cuenta_destino_2: 'La CLABE debe tener entre 16 y 18 dígitos' }));
+                              }
+                            } else if (formData.tipo_cuenta_destino_2 === 'Cuenta') {
+                              const cuentaPattern = /^\d{8,10}$/;
+                              if (!cuentaPattern.test(value) && value.length <= 10) {
+                                setErrors((prev) => ({ ...prev, cuenta_destino_2: undefined }));
+                              } else if (!cuentaPattern.test(value) && value.length > 10) {
+                                setErrors((prev) => ({ ...prev, cuenta_destino_2: 'El número de cuenta debe tener entre 8 y 10 dígitos' }));
                               }
                             } else if (formData.tipo_cuenta_destino_2 === 'Número de Tarjeta') {
                               const tarjetaPattern = /^\d{1,16}$/;
@@ -1326,19 +1357,25 @@ export default function NuevaSolicitudPage() {
                           }
                         }}
                         pattern={
-                          formData.tipo_cuenta_destino_2 === 'CLABE' ? '[0-9]{18}' : 
+                          formData.tipo_cuenta_destino_2 === 'CLABE' ? '[0-9]{16,18}' : 
+                          formData.tipo_cuenta_destino_2 === 'Cuenta' ? '[0-9]{8,10}' : 
                           formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? '[0-9]{1,16}' : 
                           undefined
                         }
                         maxLength={
                           formData.tipo_cuenta_destino_2 === 'CLABE' ? 18 : 
+                          formData.tipo_cuenta_destino_2 === 'Cuenta' ? 10 : 
                           formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' ? 16 : 
                           undefined
                         }
                         placeholder={
-                          formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' 
-                            ? 'Número de tarjeta' 
-                            : 'Número de cuenta CLABE'
+                          formData.tipo_cuenta_destino_2 === 'CLABE' 
+                            ? 'Número de cuenta CLABE (16-18 dígitos)' 
+                            : formData.tipo_cuenta_destino_2 === 'Cuenta' 
+                            ? 'Número de cuenta (8-10 dígitos)' 
+                            : formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' 
+                            ? 'Número de tarjeta (máx. 16 dígitos)' 
+                            : 'Selecciona el tipo de cuenta primero'
                         }
                         required={formData.tiene_segunda_forma_pago}
                         className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base font-mono tracking-wide"
@@ -1350,7 +1387,13 @@ export default function NuevaSolicitudPage() {
                           {formData.tipo_cuenta_destino_2 === 'CLABE' && (
                             <p className="text-white/60 text-sm flex items-center">
                               <span className="mr-2">💡</span>
-                              La CLABE debe tener exactamente 18 dígitos
+                              La CLABE debe tener entre 16 y 18 dígitos
+                            </p>
+                          )}
+                          {formData.tipo_cuenta_destino_2 === 'Cuenta' && (
+                            <p className="text-white/60 text-sm flex items-center">
+                              <span className="mr-2">🏦</span>
+                              El número de cuenta debe tener entre 8 y 10 dígitos
                             </p>
                           )}
                           {formData.tipo_cuenta_destino_2 === 'Número de Tarjeta' && (
