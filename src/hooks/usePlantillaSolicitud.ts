@@ -46,15 +46,24 @@ export const usePlantillaSolicitud = () => {
       plantilla.secciones.forEach(seccion => {
         seccion.campos.forEach(campo => {
           if (campo.dependencias && campo.dependencias.length > 0) {
+            let deberiaEstarVisible = false;
+            
             campo.dependencias.forEach(dependencia => {
               const valorCumple = datosIniciales[dependencia.campo] === dependencia.valor;
               
               if (dependencia.accion === 'mostrar' && valorCumple) {
-                camposVisiblesIniciales.add(campo.id);
+                deberiaEstarVisible = true;
               } else if (dependencia.accion === 'ocultar' && valorCumple) {
-                camposVisiblesIniciales.delete(campo.id);
+                deberiaEstarVisible = false;
+                return; // Si hay una acción ocultar que se cumple, prevalece
               }
             });
+            
+            if (deberiaEstarVisible) {
+              camposVisiblesIniciales.add(campo.id);
+            } else {
+              camposVisiblesIniciales.delete(campo.id);
+            }
           }
         });
       });
@@ -78,30 +87,48 @@ export const usePlantillaSolicitud = () => {
       // Limpiar error del campo si existe
       delete nuevosErrores[campoId];
 
+      // Validar el campo en tiempo real si tiene validaciones
+      if (prev.plantillaSeleccionada) {
+        for (const seccion of prev.plantillaSeleccionada.secciones) {
+          const campo = seccion.campos.find(c => c.id === campoId);
+          if (campo && campo.validaciones) {
+            const error = validarCampo(campo, valor, nuevosDatos);
+            if (error) {
+              nuevosErrores[campoId] = error;
+            }
+            break;
+          }
+        }
+      }
+
       // Actualizar visibilidad de campos dependientes
       const nuevaCamposVisibles = new Set(prev.camposVisibles);
       
       if (prev.plantillaSeleccionada) {
         prev.plantillaSeleccionada.secciones.forEach(seccion => {
           seccion.campos.forEach(campo => {
-            if (campo.dependencias) {
+            if (campo.dependencias && campo.dependencias.some(dep => dep.campo === campoId)) {
+              // Evaluar todas las dependencias de este campo
+              let deberiaEstarVisible = false;
+              
               campo.dependencias.forEach(dependencia => {
-                if (dependencia.campo === campoId) {
-                  const valorCumple = nuevosDatos[dependencia.campo] === dependencia.valor;
-                  
-                  if (dependencia.accion === 'mostrar' && valorCumple) {
-                    nuevaCamposVisibles.add(campo.id);
-                  } else if (dependencia.accion === 'ocultar' && valorCumple) {
-                    nuevaCamposVisibles.delete(campo.id);
-                    // Limpiar valor del campo oculto
-                    delete nuevosDatos[campo.id];
-                  } else if (dependencia.accion === 'mostrar' && !valorCumple) {
-                    nuevaCamposVisibles.delete(campo.id);
-                    // Limpiar valor del campo oculto
-                    delete nuevosDatos[campo.id];
-                  }
+                const valorCumple = nuevosDatos[dependencia.campo] === dependencia.valor;
+                
+                if (dependencia.accion === 'mostrar' && valorCumple) {
+                  deberiaEstarVisible = true;
+                } else if (dependencia.accion === 'ocultar' && valorCumple) {
+                  deberiaEstarVisible = false;
+                  return; // Si hay una acción ocultar que se cumple, prevalece
                 }
               });
+              
+              if (deberiaEstarVisible) {
+                nuevaCamposVisibles.add(campo.id);
+              } else {
+                nuevaCamposVisibles.delete(campo.id);
+                // Limpiar valor del campo oculto
+                delete nuevosDatos[campo.id];
+              }
             }
           });
         });
@@ -117,7 +144,7 @@ export const usePlantillaSolicitud = () => {
   }, []);
 
   // Función para validar un campo
-  const validarCampo = useCallback((campo: CampoPlantilla, valor: unknown): string | null => {
+  const validarCampo = useCallback((campo: CampoPlantilla, valor: unknown, datosActuales?: Record<string, unknown>): string | null => {
     if (!campo.validaciones) return null;
 
     const { requerido, minLength, maxLength, longitudExacta, soloNumeros, patron, mensaje } = campo.validaciones;
@@ -161,7 +188,8 @@ export const usePlantillaSolicitud = () => {
 
     // Validaciones específicas por tipo de campo
     if (campo.tipo === 'cuenta_clabe') {
-      const tipoCuenta = estado.datos['tipo_cuenta'];
+      const datos = datosActuales || estado.datos;
+      const tipoCuenta = datos['tipo_cuenta'];
       if (tipoCuenta === 'CLABE') {
         if (valorStr.length !== 16 && valorStr.length !== 18) {
           return 'La CLABE debe tener 16 o 18 dígitos';
@@ -198,7 +226,7 @@ export const usePlantillaSolicitud = () => {
       seccion.campos.forEach(campo => {
         // Solo validar campos visibles
         if (estado.camposVisibles.has(campo.id)) {
-          const error = validarCampo(campo, estado.datos[campo.id]);
+          const error = validarCampo(campo, estado.datos[campo.id], estado.datos);
           if (error) {
             nuevosErrores[campo.id] = error;
             formularioValido = false;
