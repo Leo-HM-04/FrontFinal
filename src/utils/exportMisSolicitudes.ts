@@ -69,6 +69,14 @@ const formatoMoneda = (valor: number | string | null | undefined) => {
   }).format(numeroValido);
 };
 
+// Función auxiliar para formatear texto con primera letra mayúscula
+const formatoTitulo = (texto: string | null | undefined) => {
+  if (!texto) return '';
+  const textoLimpio = texto.trim();
+  if (textoLimpio.length === 0) return '';
+  return textoLimpio.charAt(0).toUpperCase() + textoLimpio.slice(1).toLowerCase();
+};
+
 // Array de meses y función para formato legible de fecha
 const meses = [
   'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -122,8 +130,8 @@ export function exportMisSolicitudesCSV(solicitudes: Solicitud[], rango: string 
     s.folio || '',
     s.concepto || '',
     formatoMoneda(s.monto),
-    s.departamento || '',
-    s.estado || '',
+    formatoTitulo(s.departamento),
+    formatoTitulo(s.estado),
     fechaLegible(s.fecha_creacion),
     s.usuario_nombre || `Usuario ${s.id_usuario}`,
     s.cuenta_destino || '',
@@ -294,8 +302,8 @@ export async function exportMisSolicitudesExcel(solicitudes: Solicitud[], rango:
       s.folio || '',
       s.concepto || '',
       monto, // Guardamos el número, no el string formateado
-      s.departamento || '',
-      s.estado || '',
+      formatoTitulo(s.departamento),
+      formatoTitulo(s.estado),
       fechaLegible(s.fecha_creacion),
       s.usuario_nombre || `Usuario ${s.id_usuario}`,
       s.cuenta_destino || '',
@@ -426,8 +434,8 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
       s.folio || '',
       s.concepto || '',
       formatoMoneda(monto),
-      s.departamento || '',
-      s.estado || '',
+      formatoTitulo(s.departamento),
+      formatoTitulo(s.estado),
       fechaLegible(s.fecha_creacion)
     ];
   });
