@@ -539,7 +539,8 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                               cy="50%" 
                               outerRadius={90} 
                               innerRadius={45} 
-                              label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              label={(entry: any) => `${((entry.percent ?? 0) * 100).toFixed(0)}%`}
                               labelLine={true}
                               animationDuration={1000}
                               animationBegin={200}
@@ -604,7 +605,8 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                     <h2 className="text-xl font-bold text-green-700 mb-4">Usuarios (Pie)</h2>
                     <ResponsiveContainer width="100%" height={260}>
                       <PieChart>
-                        <Pie data={usuariosBloqueados} dataKey="value" nameKey="bloqueado" cx="50%" cy="50%" outerRadius={90} innerRadius={45} label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        <Pie data={usuariosBloqueados} dataKey="value" nameKey="bloqueado" cx="50%" cy="50%" outerRadius={90} innerRadius={45} label={(entry: any) => `${((entry.percent ?? 0) * 100).toFixed(0)}%`}>
                           {usuariosBloqueados.map((entry, index) => (
                             <Cell key={`cell-usuario-${index}`} fill={COLORS[index % COLORS.length]} stroke="#fff" strokeWidth={2} />
                           ))}
@@ -636,7 +638,8 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                     <h2 className="text-xl font-bold text-purple-700 mb-4">Recurrentes (Pie)</h2>
                     <ResponsiveContainer width="100%" height={260}>
                       <PieChart>
-                        <Pie data={recurrentesPorFrecuencia} dataKey="value" nameKey="frecuencia" cx="50%" cy="50%" outerRadius={90} innerRadius={45} label={({ percent }) => `${((percent ?? 0) * 100).toFixed(0)}%`}>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        <Pie data={recurrentesPorFrecuencia} dataKey="value" nameKey="frecuencia" cx="50%" cy="50%" outerRadius={90} innerRadius={45} label={(entry: any) => `${((entry.percent ?? 0) * 100).toFixed(0)}%`}>
                           {recurrentesPorFrecuencia.map((entry, index) => (
                             <Cell key={`cell-recurrente-${index}`} fill={COLORS[index % COLORS.length]} stroke="#fff" strokeWidth={2} />
                           ))}
@@ -680,27 +683,29 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                             cy="50%"
                             outerRadius={90}
                             innerRadius={45}
-                            label={({ percent, value, payload }) => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            label={(entry: any) => {
                               let nombre: string = '';
-                              if (!payload || !payload.usuario) return '';
-                              if (usuariosNombres[payload.usuario]) {
-                                nombre = (usuariosNombres[payload.usuario] || '').split(' ')[0];
+                              if (!entry || !entry.usuario) return '';
+                              if (usuariosNombres[entry.usuario]) {
+                                nombre = (usuariosNombres[entry.usuario] || '').split(' ')[0];
                               } else {
-                                const usuarioObj = notificacionesPorUsuario.find(u => u.usuario === payload.usuario);
+                                const usuarioObj = notificacionesPorUsuario.find(u => u.usuario === entry.usuario);
                                 if (usuarioObj && usuarioObj.nombre) {
                                   nombre = (usuarioObj.nombre || '').split(' ')[0];
                                 } else {
-                                  nombre = String(payload.usuario);
+                                  nombre = String(entry.usuario);
                                 }
                               }
-                              return `${nombre}: ${value} (${((percent ?? 0) * 100).toFixed(0)}%)`;
+                              return `${nombre}: ${entry.value} (${((entry.percent ?? 0) * 100).toFixed(0)}%)`;
                             }}
                           >
                             {notificacionesPorUsuario.map((entry, index) => (
                               <Cell key={`cell-notif-${index}`} fill={COLORS[index % COLORS.length]} stroke="#fff" strokeWidth={2} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value, name, props) => {
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          <Tooltip formatter={(value: any, name: any, props: any) => {
                             let nombre: string = '';
                             const usuarioId = props?.payload?.usuario;
                             if (!usuarioId) return [`${value} notificaciones`, ''];
@@ -716,7 +721,8 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                             }
                             return [`${value} notificaciones`, nombre];
                           }} />
-                          <Legend formatter={(value) => {
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          <Legend formatter={(value: any) => {
                             let nombre: string = '';
                             if (!value) return '';
                             if (usuariosNombres[value]) {

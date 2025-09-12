@@ -19,7 +19,6 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels/types";
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
-import { toast } from 'react-hot-toast';
 import { exportToPDF, exportChartsOnly } from '@/utils/pdfExportUtils';
 import '@/styles/charts.css';
 

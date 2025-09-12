@@ -745,7 +745,7 @@ class ExportUtils {
   }
 
   private static async createSolicitudesTable(doc: jsPDF, solicitudes: Solicitud[], startY: number, pageWidth: number): Promise<void> {
-    // Agregar columna de prioridad con iconos
+    // Agregar columna con iconos
     // Ajuste de columnas para mayor estabilidad visual y evitar cortes
     // Si existe la propiedad 'folio' en los datos, agregar la columna
     const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
@@ -771,8 +771,7 @@ class ExportUtils {
       { key: 'concepto', label: 'Concepto', min: 28, rel: 1.5 },
       { key: 'fecha_limite_pago', label: 'F. Límite', min: 20, rel: 1.5 },
       { key: 'usuario_nombre', label: 'Solicitante', min: 14, rel: 1 },
-      { key: 'aprobador_nombre', label: 'Aprobador', min: 14, rel: 1 },
-      { key: 'prioridad', label: 'Prioridad', min: 10, rel: 0.7 }
+      { key: 'aprobador_nombre', label: 'Aprobador', min: 14, rel: 1 }
     ];
     const totalRel = baseColumns.reduce((sum, c) => sum + c.rel, 0);
     // Calcular anchos proporcionales pero nunca menores al mínimo
@@ -804,68 +803,12 @@ class ExportUtils {
         value = typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '';
       } else if (col.key === 'aprobador_nombre') {
         value = typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A';
-      } else if (col.key === 'prioridad') {
-        if (String(value).toLowerCase() === 'alta') value = 'Alta';
-        else if (String(value).toLowerCase() === 'media') value = 'Media';
-        else value = 'Baja';
       }
       return String(value || '');
     }));
 
-    // Leyenda visual de prioridad (más ordenada y profesional)
-    const legendY = startY + 10;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.setTextColor(30, 30, 60);
-    doc.text('Leyenda de prioridad', pageWidth / 2, legendY, { align: 'center' });
-
-    // Tarjetas de prioridad más compactas y mejor centradas
-    const legendCardW = (pageWidth - 36) / 3;
-    const legendCardH = 18;
-    const legendCardY = legendY + 8;
-    const legendBg = [245, 250, 255]; // azul grisáceo muy claro
-    const legendData = [
-      {
-        label: 'Alta',
-        desc: 'Solicitudes urgentes que requieren atención inmediata.',
-        color: [220, 53, 69]
-      },
-      {
-        label: 'Media',
-        desc: 'Importantes pero no urgentes.',
-        color: [255, 193, 7]
-      },
-      {
-        label: 'Baja',
-        desc: 'Pueden esperar sin afectar procesos críticos.',
-        color: [40, 167, 69]
-      }
-    ];
-    legendData.forEach((item, idx) => {
-      const x = 8 + idx * (legendCardW + 10);
-      // Fondo suave
-      doc.setFillColor(legendBg[0], legendBg[1], legendBg[2]);
-      doc.roundedRect(x, legendCardY, legendCardW, legendCardH, 4, 4, 'F');
-      // Borde sutil
-      doc.setDrawColor(item.color[0], item.color[1], item.color[2]);
-      doc.setLineWidth(0.8);
-      doc.roundedRect(x, legendCardY, legendCardW, legendCardH, 4, 4);
-      // Centrado vertical y horizontal
-      const centerY = legendCardY + legendCardH / 2;
-      // Label
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10.5);
-      doc.setTextColor(item.color[0], item.color[1], item.color[2]);
-      doc.text(item.label + ':', x + 10, centerY - 1.5, { align: 'left' });
-      // Descripción
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.setTextColor(60, 60, 60);
-      doc.text(item.desc, x + 10, centerY + 4.5, { align: 'left', maxWidth: legendCardW - 16 });
-    });
-
-    // Ajustar el inicio de la tabla para que nunca se sobreponga con la leyenda
-    const tableY = legendCardY + legendCardH + 8;
+    // Ajustar el inicio de la tabla
+    const tableY = startY + 10;
     autoTable(doc, {
       willDrawCell: function(data) {
         if (data.column.index === 3 && data.section === 'body') {
@@ -909,12 +852,12 @@ class ExportUtils {
       columnStyles: columns.reduce((acc, col, index) => {
         acc[index] = { 
           cellWidth: col.width,
-          halign: (col.key === 'monto') ? 'right' : ((col.key === 'id_solicitud' || col.key === 'estado' || col.key === 'prioridad') ? 'center' : 'left')
+          halign: (col.key === 'monto') ? 'right' : ((col.key === 'id_solicitud' || col.key === 'estado') ? 'center' : 'left')
         };
         return acc;
       }, {} as { [key: number]: Partial<{ cellWidth: number; halign: 'left' | 'center' | 'right' }> }),
       didDrawCell: function(data) {
-        // Colorear estados y prioridad para mejor visualización
+        // Colorear estados para mejor visualización
         if (data.column.index === 3 && data.section === 'body') {
           let estadoRaw: unknown;
           if (Array.isArray(data.row.raw)) {
@@ -938,33 +881,6 @@ class ExportUtils {
           doc.setFont('helvetica', fontStyle);
           doc.setFontSize(9.5);
           doc.text(estado.charAt(0).toUpperCase() + estado.slice(1), data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2, {
-            align: 'center',
-            baseline: 'middle'
-          });
-        }
-
-        if (data.column.index === 8 && data.section === 'body') {
-          let prioridadRaw: unknown;
-          if (Array.isArray(data.row.raw)) {
-            prioridadRaw = data.row.raw[8];
-          } else if (data.cell.raw) {
-            prioridadRaw = data.cell.raw;
-          } else {
-            prioridadRaw = data.cell.text[0];
-          }
-          const prioridad = String(prioridadRaw).toLowerCase();
-          let color: [number, number, number] = [45, 45, 45];
-          if (prioridad.includes('alta')) {
-            color = [220, 53, 69]; // Rojo
-          } else if (prioridad.includes('media')) {
-            color = [255, 193, 7]; // Amarillo
-          } else if (prioridad.includes('baja')) {
-            color = [40, 167, 69]; // Verde
-          }
-          doc.setTextColor(color[0], color[1], color[2]);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(9.5);
-          doc.text(prioridad.charAt(0).toUpperCase() + prioridad.slice(1), data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2, {
             align: 'center',
             baseline: 'middle'
           });
@@ -1298,10 +1214,10 @@ class ExportUtils {
 
     // Tabla de viáticos
     const tableStartY = tableEndY + 10;
-    await this.createViaticosTable(doc, viaticos, tableStartY, pageWidth);
+    await this.createViaticosTable(doc, viaticos, tableStartY);
     
     // Footer profesional específico para viáticos
-    this.addViaticoFooter(doc, pageWidth, pageHeight, viaticos, options);
+    this.addViaticoFooter(doc, pageWidth, pageHeight, viaticos);
 
     // Guardar archivo
     const filename = this.generateFilename('Viaticos', 'pdf', viaticos.length);
@@ -1312,11 +1228,6 @@ class ExportUtils {
     const totalViaticos = viaticos.length;
     const montoTotal = viaticos.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
     const pendientes = viaticos.filter(v => v.estado === 'pendiente').length;
-    const urgentes = viaticos.filter(v => {
-      const fechaLimite = new Date(v.fecha_limite_pago);
-      const tresDias = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-      return fechaLimite < tresDias;
-    }).length;
     const departamentos = new Set(viaticos.map(v => v.departamento).filter(Boolean));
     const montoPromedio = totalViaticos > 0 ? montoTotal / totalViaticos : 0;
 
@@ -1455,7 +1366,7 @@ class ExportUtils {
     return urgencyY + 10;
   }
 
-  private static async createViaticosTable(doc: jsPDF, viaticos: Solicitud[], startY: number, pageWidth: number): Promise<void> {
+  private static async createViaticosTable(doc: jsPDF, viaticos: Solicitud[], startY: number): Promise<void> {
     // Preparar datos de la tabla
     const tableData = viaticos.map(v => {
       const fechaLimite = new Date(v.fecha_limite_pago);
@@ -1484,7 +1395,6 @@ class ExportUtils {
         'Monto',
         'Fecha Solicitud',
         'Fecha Límite',
-        'Prioridad',
         'Tipo Pago',
         'Banco Destino'
       ]],
@@ -1515,18 +1425,13 @@ class ExportUtils {
         3: { halign: 'right', cellWidth: 25, fontStyle: 'bold' },  // Monto
         4: { halign: 'center', cellWidth: 22 }, // Fecha Solicitud
         5: { halign: 'center', cellWidth: 22 }, // Fecha Límite
-        6: { halign: 'center', cellWidth: 20, fontStyle: 'bold' }, // Prioridad
-        7: { halign: 'center', cellWidth: 20 }, // Tipo Pago
-        8: { halign: 'center', cellWidth: 25 }  // Banco
+        6: { halign: 'center', cellWidth: 20 }, // Tipo Pago
+        7: { halign: 'center', cellWidth: 25 }  // Banco
       },
       didParseCell: (data) => {
         // Resaltar filas urgentes con colores corporativos
-        if (data.section === 'body' && Array.isArray(data.row.raw) && data.row.raw[6] && data.row.raw[6].toString().includes('URGENTE')) {
+        if (data.section === 'body' && Array.isArray(data.row.raw) && data.row.raw[5] && data.row.raw[5].toString().includes('URGENTE')) {
           data.cell.styles.fillColor = [254, 242, 242]; // Fondo rojo muy claro
-          if (data.column.index === 6) { // Columna de prioridad
-            data.cell.styles.textColor = COMPANY_CONFIG.colors.danger;
-            data.cell.styles.fontStyle = 'bold';
-          }
         }
         
         // Estilo especial para montos
@@ -1550,7 +1455,7 @@ class ExportUtils {
     });
   }
 
-  private static addViaticoFooter(doc: jsPDF, pageWidth: number, pageHeight: number, viaticos: Solicitud[], options: ExportOptions): void {
+  private static addViaticoFooter(doc: jsPDF, pageWidth: number, pageHeight: number, viaticos: Solicitud[]): void {
     const footerY = pageHeight - 25;
     
     // Línea divisoria superior
@@ -1597,7 +1502,7 @@ class ExportUtils {
     doc.text('Powered by BECHAPRA Business Services', pageWidth - 15, footerY + 14, { align: 'right' });
   }
 
-  static async exportViaticosToExcel(viaticos: Solicitud[], options: ExportOptions = {}): Promise<void> {
+  static async exportViaticosToExcel(viaticos: Solicitud[]): Promise<void> {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Viáticos');
 
@@ -1615,7 +1520,6 @@ class ExportUtils {
       'Fecha Solicitud',
       'Fecha Límite Pago',
       'Días Restantes',
-      'Prioridad',
       'Tipo Pago',
       'Banco Destino',
       'Estado'
@@ -1642,7 +1546,6 @@ class ExportUtils {
         viatico.fecha_creacion ? this.formatDate(viatico.fecha_creacion) : '-',
         viatico.fecha_limite_pago ? this.formatDate(viatico.fecha_limite_pago) : '-',
         diasRestantes,
-        isUrgent ? 'URGENTE' : 'NORMAL',
         viatico.tipo_pago || '-',
         viatico.banco_destino || '-',
         viatico.estado || 'pendiente'
@@ -1663,7 +1566,6 @@ class ExportUtils {
       { width: 18 }, // Fecha Solicitud
       { width: 18 }, // Fecha Límite
       { width: 15 }, // Días Restantes
-      { width: 12 }, // Prioridad
       { width: 15 }, // Tipo Pago
       { width: 20 }, // Banco
       { width: 12 }  // Estado
@@ -1689,7 +1591,6 @@ class ExportUtils {
       'Fecha Solicitud',
       'Fecha Límite Pago',
       'Días Restantes',
-      'Prioridad',
       'Tipo Pago',
       'Banco Destino',
       'Estado'
@@ -1714,7 +1615,6 @@ class ExportUtils {
         viatico.fecha_creacion ? this.formatDate(viatico.fecha_creacion) : '-',
         viatico.fecha_limite_pago ? this.formatDate(viatico.fecha_limite_pago) : '-',
         diasRestantes,
-        isUrgent ? 'URGENTE' : 'NORMAL',
         `"${(viatico.tipo_pago || '-').toString().replace(/"/g, '""')}"`,
         `"${(viatico.banco_destino || '-').toString().replace(/"/g, '""')}"`,
         `"${(viatico.estado || 'pendiente').toString().replace(/"/g, '""')}"`
