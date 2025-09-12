@@ -252,9 +252,186 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
   }
 };
 
+// Plantilla para SOLICITUD DE PAGO TARJETAS TUKASH
+export const plantillaTarjetasTukash: PlantillaSolicitud = {
+  id: 'tarjetas-tukash',
+  nombre: 'SOLICITUD DE PAGO TARJETAS TUKASH',
+  descripcion: 'Plantilla especializada para pagos y fondeo de tarjetas TUKASH',
+  version: '1.0',
+  activa: true,
+  icono: '🎴',
+  color: 'green',
+  categoria: 'Pagos Corporativos',
+  secciones: [
+    {
+      id: 'informacion-basica',
+      titulo: 'Información Básica',
+      descripcion: 'Datos principales de la solicitud TUKASH',
+      campos: [
+        {
+          id: 'asunto',
+          nombre: 'asunto',
+          tipo: 'select',
+          etiqueta: 'Asunto',
+          ayuda: 'Ej. SOLICITUD PAGO A TUKASH FONDEO',
+          valorPorDefecto: '',
+          opciones: [
+            {
+              valor: 'TUKASH',
+              etiqueta: 'TUKASH',
+              descripcion: 'Solicitud de pago para fondeo TUKASH'
+            }
+          ],
+          validaciones: {
+            requerido: true,
+            mensaje: 'Debe seleccionar el asunto TUKASH'
+          },
+          estilos: {
+            ancho: 'completo'
+          }
+        },
+        {
+          id: 'cliente',
+          nombre: 'cliente',
+          tipo: 'texto',
+          etiqueta: 'Cliente',
+          placeholder: 'Ej. ROCALLOSA',
+          ayuda: 'Nombre del cliente correspondiente',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 2,
+            mensaje: 'Ingrese el nombre del cliente'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'beneficiario_tarjeta',
+          nombre: 'beneficiario_tarjeta',
+          tipo: 'texto',
+          etiqueta: 'Beneficiario Tarjeta Tukash',
+          placeholder: 'Ej. Juan Domínguez de la Cruz',
+          ayuda: 'Nombre completo del beneficiario de la tarjeta',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 3,
+            mensaje: 'Ingrese el nombre completo del beneficiario'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        }
+      ]
+    },
+    {
+      id: 'datos-tarjeta',
+      titulo: 'Datos de Tarjeta',
+      descripcion: 'Información específica de la tarjeta TUKASH',
+      campos: [
+        {
+          id: 'numero_tarjeta',
+          nombre: 'numero_tarjeta',
+          tipo: 'texto',
+          etiqueta: 'Nº de Tarjeta',
+          placeholder: '1234567890123456',
+          ayuda: 'Número de tarjeta TUKASH (máximo 16 dígitos)',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            soloNumeros: true,
+            maxLength: 16,
+            minLength: 13,
+            mensaje: 'Ingrese un número de tarjeta válido (13-16 dígitos)'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        }
+      ]
+    },
+    {
+      id: 'montos',
+      titulo: 'Montos',
+      descripcion: 'Cantidades para el fondeo',
+      campos: [
+        {
+          id: 'monto_total_cliente',
+          nombre: 'monto_total_cliente',
+          tipo: 'moneda',
+          etiqueta: 'Monto Total Cliente',
+          placeholder: 'Ej. 152.90',
+          ayuda: 'Cantidad a fondear al cliente',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            mensaje: 'Ingrese el monto total del cliente'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'monto_total_tukash',
+          nombre: 'monto_total_tukash',
+          tipo: 'moneda',
+          etiqueta: 'Monto Total Tukash',
+          placeholder: 'Ej. 153.10',
+          ayuda: 'Cantidad a depositar en la cuenta TUKASH',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            mensaje: 'Ingrese el monto total TUKASH'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        }
+      ]
+    },
+    {
+      id: 'archivos',
+      titulo: 'Documentos',
+      descripcion: 'Archivos adjuntos requeridos',
+      campos: [
+        {
+          id: 'archivos_adjuntos',
+          nombre: 'archivos_adjuntos',
+          tipo: 'archivo',
+          etiqueta: 'Archivos Adjuntos',
+          ayuda: 'Seleccione o arrastre los documentos necesarios. Formatos permitidos: PDF, JPG, PNG, XLSX, DOCX',
+          valorPorDefecto: [],
+          validaciones: {
+            requerido: true,
+            mensaje: 'Debe adjuntar al menos un documento'
+          },
+          estilos: {
+            ancho: 'completo'
+          }
+        }
+      ]
+    }
+  ],
+  configuracion: {
+    permiteArchivosMultiples: true,
+    tiposArchivosPermitidos: ['.pdf', '.jpg', '.jpeg', '.png', '.xlsx', '.docx', '.xls', '.doc'],
+    tamanoMaximoArchivo: 10 * 1024 * 1024, // 10MB
+    mostrarProgreso: true
+  },
+  metadatos: {
+    creadoPor: 'Sistema',
+    fechaCreacion: new Date().toISOString(),
+    fechaModificacion: new Date().toISOString(),
+    usosFrecuentes: 0
+  }
+};
+
 // Lista de todas las plantillas disponibles
 export const plantillasDisponibles: PlantillaSolicitud[] = [
-  plantillaTarjetasN09Toka
+  plantillaTarjetasN09Toka,
+  plantillaTarjetasTukash
   // Aquí se pueden agregar más plantillas en el futuro
 ];
 
