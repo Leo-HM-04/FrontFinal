@@ -166,6 +166,9 @@ export default function PagadorGraficasPage() {
 
   // Funciones auxiliares
   const formatCurrency = (amount: number) => {
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      return '$0.00';
+    }
     return new Intl.NumberFormat('es-MX', { 
       style: 'currency', 
       currency: 'MXN' 
@@ -580,7 +583,7 @@ export default function PagadorGraficasPage() {
                           </div>
                           <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-2 rounded-full shadow-lg">
                             <span className="text-sm font-bold">
-                              {formatCurrency(tendenciaTemporal.reduce((sum, item) => sum + item.monto_total, 0))}
+                              {formatCurrency(tendenciaTemporal.reduce((sum, item) => sum + (Number(item.monto_total) || 0), 0))}
                             </span>
                           </div>
                         </div>
@@ -594,7 +597,7 @@ export default function PagadorGraficasPage() {
                                 labels: tendenciaTemporal.map(item => item.periodo),
                                 datasets: [{
                                   label: 'Monto Total',
-                                  data: tendenciaTemporal.map(item => item.monto_total),
+                                  data: tendenciaTemporal.map(item => Number(item.monto_total) || 0),
                                   backgroundColor: 'rgba(16, 185, 129, 0.8)',
                                   borderColor: 'rgb(16, 185, 129)',
                                   borderWidth: 2,
