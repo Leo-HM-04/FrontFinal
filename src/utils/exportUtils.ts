@@ -267,7 +267,6 @@ class ExportUtils {
       } },
       { key: 'estado', label: 'Estado' },
       { key: 'concepto', label: 'Concepto' },
-      { key: 'fecha_limite_pago', label: 'Fecha Límite', formatter: (value) => this.formatDate(value as string) },
       { key: 'usuario_nombre', label: 'Solicitante', formatter: (value, item) => typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '' },
       { key: 'aprobador_nombre', label: 'Aprobador', formatter: (value, item) => typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A' }
     ];
@@ -447,7 +446,6 @@ class ExportUtils {
       } },
       { key: 'estado', label: 'Estado', width: 12, align: 'center' },
       { key: 'concepto', label: 'Concepto', width: 30 },
-      { key: 'fecha_limite_pago', label: 'Fecha Límite', width: 12, align: 'center', formatter: (value) => this.formatDate(value as string) },
       { key: 'usuario_nombre', label: 'Solicitante', width: 20, formatter: (value, item) => typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '' },
       { key: 'aprobador_nombre', label: 'Aprobador', width: 20, formatter: (value, item) => typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A' }
     ];
@@ -764,7 +762,6 @@ class ExportUtils {
     const usableWidth = pageWidth - margin * 2;
     // Ajuste: más espacio para Monto, F. Límite, Cuenta Destino y Tipo de Cuenta/Tarjeta
     const baseColumns = [
-      { key: 'id_solicitud', label: 'ID', min: 12, rel: 0.9 },
       ...(hasFolio ? [{ key: 'folio', label: 'Folio', min: 16, rel: 1.1 }] : []),
       { key: 'departamento', label: 'Departamento', min: 22, rel: 1.2 },
       { key: 'monto', label: 'Monto', min: 22, rel: 1.5 },
@@ -772,7 +769,6 @@ class ExportUtils {
       { key: 'tipoCuentaTarjeta', label: 'Tipo Cuenta/Tarj.', min: 30, rel: 1.7 },
       { key: 'estado', label: 'Estado', min: 13, rel: 0.9 },
       { key: 'concepto', label: 'Concepto', min: 28, rel: 1.5 },
-      { key: 'fecha_limite_pago', label: 'F. Límite', min: 20, rel: 1.5 },
       { key: 'usuario_nombre', label: 'Solicitante', min: 14, rel: 1 },
       { key: 'aprobador_nombre', label: 'Aprobador', min: 14, rel: 1 }
     ];
@@ -800,7 +796,7 @@ class ExportUtils {
       }
       if (col.key === 'monto') {
         value = this.formatCurrency(typeof value === 'number' ? value : Number(value));
-      } else if (col.key === 'fecha_limite_pago' || col.key === 'fecha_creacion') {
+      } else if (col.key === 'fecha_creacion') {
         value = this.formatDate(value as string);
       } else if (col.key === 'usuario_nombre') {
         value = typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '';
@@ -855,7 +851,7 @@ class ExportUtils {
       columnStyles: columns.reduce((acc, col, index) => {
         acc[index] = { 
           cellWidth: col.width,
-          halign: (col.key === 'monto') ? 'right' : ((col.key === 'id_solicitud' || col.key === 'estado') ? 'center' : 'left')
+          halign: (col.key === 'monto') ? 'right' : (col.key === 'estado' ? 'center' : 'left')
         };
         return acc;
       }, {} as { [key: number]: Partial<{ cellWidth: number; halign: 'left' | 'center' | 'right' }> }),
@@ -1398,7 +1394,6 @@ class ExportUtils {
         'Departamento',
         'Monto',
         'Fecha Solicitud',
-        'Fecha Límite',
         'Tipo Pago',
         'Banco Destino'
       ]],
@@ -1428,13 +1423,12 @@ class ExportUtils {
         2: { halign: 'center', cellWidth: 25 }, // Departamento
         3: { halign: 'right', cellWidth: 25, fontStyle: 'bold' },  // Monto
         4: { halign: 'center', cellWidth: 22 }, // Fecha Solicitud
-        5: { halign: 'center', cellWidth: 22 }, // Fecha Límite
-        6: { halign: 'center', cellWidth: 20 }, // Tipo Pago
-        7: { halign: 'center', cellWidth: 25 }  // Banco
+        5: { halign: 'center', cellWidth: 20 }, // Tipo Pago
+        6: { halign: 'center', cellWidth: 25 }  // Banco
       },
       didParseCell: (data) => {
         // Resaltar filas urgentes con colores corporativos
-        if (data.section === 'body' && Array.isArray(data.row.raw) && data.row.raw[5] && data.row.raw[5].toString().includes('URGENTE')) {
+        if (data.section === 'body' && Array.isArray(data.row.raw) && data.row.raw[4] && data.row.raw[4].toString().includes('URGENTE')) {
           data.cell.styles.fillColor = [254, 242, 242]; // Fondo rojo muy claro
         }
         
@@ -1522,7 +1516,6 @@ class ExportUtils {
       'Departamento',
       'Monto',
       'Fecha Solicitud',
-      'Fecha Límite Pago',
       'Días Restantes',
       'Tipo Pago',
       'Banco Destino',
@@ -1548,7 +1541,6 @@ class ExportUtils {
         viatico.departamento || '-',
         Number(viatico.monto) || 0,
         viatico.fecha_creacion ? this.formatDate(viatico.fecha_creacion) : '-',
-        viatico.fecha_limite_pago ? this.formatDate(viatico.fecha_limite_pago) : '-',
         diasRestantes,
         viatico.tipo_pago || '-',
         viatico.banco_destino || '-',
@@ -1568,7 +1560,6 @@ class ExportUtils {
       { width: 20 }, // Departamento
       { width: 15 }, // Monto
       { width: 18 }, // Fecha Solicitud
-      { width: 18 }, // Fecha Límite
       { width: 15 }, // Días Restantes
       { width: 15 }, // Tipo Pago
       { width: 20 }, // Banco
@@ -1593,7 +1584,6 @@ class ExportUtils {
       'Departamento',
       'Monto',
       'Fecha Solicitud',
-      'Fecha Límite Pago',
       'Días Restantes',
       'Tipo Pago',
       'Banco Destino',
@@ -1617,7 +1607,6 @@ class ExportUtils {
         `"${(viatico.departamento || '-').toString().replace(/"/g, '""')}"`,
         Number(viatico.monto) || 0,
         viatico.fecha_creacion ? this.formatDate(viatico.fecha_creacion) : '-',
-        viatico.fecha_limite_pago ? this.formatDate(viatico.fecha_limite_pago) : '-',
         diasRestantes,
         `"${(viatico.tipo_pago || '-').toString().replace(/"/g, '""')}"`,
         `"${(viatico.banco_destino || '-').toString().replace(/"/g, '""')}"`,
