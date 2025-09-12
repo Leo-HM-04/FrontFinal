@@ -522,16 +522,16 @@ class ExportUtils {
     doc.setLineWidth(1.2);
     doc.line(10, 42, pageWidth - 10, 42);
 
-    // Descripción general del reporte (justificada y profesional)
+    // Descripción general del reporte (centrada y clara)
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(50, 50, 50);
     doc.text(
       'Este archivo contiene un reporte profesional y detallado de las solicitudes de pago, usuarios y movimientos registrados en el sistema BECHAPRA.\n' +
       'Permite analizar, compartir y validar la información relevante de manera clara y ordenada. Incluye métricas, tablas y leyendas para facilitar la interpretación de los datos exportados.',
-      20,
+      pageWidth / 2,
       50,
-      { align: 'justify', maxWidth: pageWidth - 40 }
+      { align: 'center', maxWidth: pageWidth - 40 }
     );
 
     // Resumen de montos por estado en tabla profesional como la imagen
@@ -591,6 +591,7 @@ class ExportUtils {
     });
 
     // Obtener posición final de la tabla
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const finalY = (doc as any).lastAutoTable.finalY;
 
     // Total general debajo de la tabla
@@ -703,6 +704,7 @@ class ExportUtils {
     });
 
     // Obtener posición final de la primera tabla
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const firstTableFinalY = (doc as any).lastAutoTable.finalY;
 
     // Tabla de resumen por estado
@@ -740,6 +742,7 @@ class ExportUtils {
       }
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const finalY = (doc as any).lastAutoTable.finalY;
     return finalY + 10;
   }
@@ -1298,10 +1301,10 @@ class ExportUtils {
 
     // Tabla de viáticos
     const tableStartY = tableEndY + 10;
-    await this.createViaticosTable(doc, viaticos, tableStartY, pageWidth);
+    await this.createViaticosTable(doc, viaticos, tableStartY);
     
     // Footer profesional específico para viáticos
-    this.addViaticoFooter(doc, pageWidth, pageHeight, viaticos, options);
+    this.addViaticoFooter(doc, pageWidth, pageHeight, viaticos);
 
     // Guardar archivo
     const filename = this.generateFilename('Viaticos', 'pdf', viaticos.length);
@@ -1312,11 +1315,6 @@ class ExportUtils {
     const totalViaticos = viaticos.length;
     const montoTotal = viaticos.reduce((sum, v) => sum + (Number(v.monto) || 0), 0);
     const pendientes = viaticos.filter(v => v.estado === 'pendiente').length;
-    const urgentes = viaticos.filter(v => {
-      const fechaLimite = new Date(v.fecha_limite_pago);
-      const tresDias = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-      return fechaLimite < tresDias;
-    }).length;
     const departamentos = new Set(viaticos.map(v => v.departamento).filter(Boolean));
     const montoPromedio = totalViaticos > 0 ? montoTotal / totalViaticos : 0;
 
@@ -1433,6 +1431,7 @@ class ExportUtils {
       }
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const finalY = (doc as any).lastAutoTable.finalY;
 
     // Indicador de urgencia profesional debajo de la tabla
@@ -1455,7 +1454,7 @@ class ExportUtils {
     return urgencyY + 10;
   }
 
-  private static async createViaticosTable(doc: jsPDF, viaticos: Solicitud[], startY: number, pageWidth: number): Promise<void> {
+  private static async createViaticosTable(doc: jsPDF, viaticos: Solicitud[], startY: number): Promise<void> {
     // Preparar datos de la tabla
     const tableData = viaticos.map(v => {
       const fechaLimite = new Date(v.fecha_limite_pago);
@@ -1550,7 +1549,7 @@ class ExportUtils {
     });
   }
 
-  private static addViaticoFooter(doc: jsPDF, pageWidth: number, pageHeight: number, viaticos: Solicitud[], options: ExportOptions): void {
+  private static addViaticoFooter(doc: jsPDF, pageWidth: number, pageHeight: number, viaticos: Solicitud[]): void {
     const footerY = pageHeight - 25;
     
     // Línea divisoria superior
@@ -1597,7 +1596,7 @@ class ExportUtils {
     doc.text('Powered by BECHAPRA Business Services', pageWidth - 15, footerY + 14, { align: 'right' });
   }
 
-  static async exportViaticosToExcel(viaticos: Solicitud[], options: ExportOptions = {}): Promise<void> {
+  static async exportViaticosToExcel(viaticos: Solicitud[]): Promise<void> {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Viáticos');
 
