@@ -2,7 +2,6 @@
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
-
 import { useEffect, useState } from 'react';
 import { Bar, Pie, Doughnut } from 'react-chartjs-2';
 import { 
