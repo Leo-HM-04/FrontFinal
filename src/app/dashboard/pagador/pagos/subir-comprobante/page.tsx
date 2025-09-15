@@ -847,7 +847,7 @@ export default function HistorialPagosPage() {
                   <div className="bg-gray-50/50 border border-gray-200 rounded-lg p-3 text-center">
                     <p className="text-xs text-gray-600 leading-tight">
                       <span className="font-medium">{pagosFiltrados.length} registros</span>
-                      {searchTerm && <span className="text-gray-500 block sm:inline"> • Filtrado: "{searchTerm}"</span>}
+                      {searchTerm && <span className="text-gray-500 block sm:inline"> • Filtrado: &ldquo;{searchTerm}&rdquo;</span>}
                       {filtroEstado !== 'todos' && (
                         <span className="text-gray-500 block sm:inline">
                           • {filtroEstado === 'con_comprobante' ? 'Con comprobante' : 'Sin comprobante'}
