@@ -41,16 +41,16 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
     return (
       <div key={seccion.id} className="bg-white rounded-2xl border border-blue-400 w-full mb-8 shadow-lg">
         <div className="bg-blue-600 rounded-t-2xl px-4 sm:px-8 py-4">
-          <h3 className="text-xl font-bold text-white">
+          <h3 className="text-xl font-bold text-black">
             {seccion.titulo}
           </h3>
           {seccion.descripcion && (
-            <p className="text-blue-100 text-base mt-1">
+            <p className="text-gray-700 text-base mt-1">
               {seccion.descripcion}
             </p>
           )}
         </div>
-        <div className="p-4 sm:p-8 md:p-12 lg:p-16">
+        <div className="p-4 sm:p-8 md:p-12 lg:p-16 text-black">
           <div className={`grid ${gridCols} ${espaciadoClase} w-full`}>
             {seccion.campos.map((campo) => (
               <CampoFormulario
@@ -76,10 +76,10 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
             <span className="text-xl text-white">{plantilla.icono || '📋'}</span>
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-blue-900 mb-2">
+            <h2 className="text-xl font-bold text-black mb-2">
               {plantilla.nombre}
             </h2>
-            <p className="text-blue-700 mb-3">
+            <p className="text-gray-800 mb-3">
               {plantilla.descripcion}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -98,10 +98,10 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
       </div>
 
   {/* Indicador de progreso */}
-  <div className="bg-white rounded-2xl border border-blue-400 p-4 sm:p-8 mb-8 w-full">
+      <div className="bg-white rounded-2xl border border-blue-400 p-4 sm:p-8 mb-8 w-full">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-white/80">Progreso del formulario</span>
-          <span className="text-sm text-white/60">
+          <span className="text-sm font-medium text-black">Progreso del formulario</span>
+          <span className="text-sm text-gray-700">
             {Object.keys(datos).length} de {camposVisibles.size} campos completados
           </span>
         </div>
@@ -123,10 +123,10 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
       {/* Información adicional */}
       {plantilla.configuracion && (
         <div className="bg-white rounded-2xl border border-blue-400 p-4 sm:p-8 mb-8 w-full">
-          <h4 className="text-sm font-medium text-white mb-2">
+          <h4 className="text-sm font-medium text-black mb-2">
             Información de la plantilla
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-white/80">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-black">
             {plantilla.configuracion.permiteArchivosMultiples && (
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
