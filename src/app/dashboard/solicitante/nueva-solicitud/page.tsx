@@ -786,9 +786,9 @@ export default function NuevaSolicitudPage() {
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="max-w-7xl mx-auto px-8 py-12 md:py-16">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-12 lg:py-16 w-full">
           {/* Header */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-white/20">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-8 mb-8 sm:mb-12 border border-white/20 w-full">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
                 <div>
@@ -800,7 +800,7 @@ export default function NuevaSolicitudPage() {
           </div>
 
           {/* Selector de Plantillas */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-8 mb-8 w-full">
             <SelectorPlantillas
               plantillas={plantillasActivas}
               plantillaSeleccionada={estadoPlantilla.plantillaSeleccionada}
@@ -811,7 +811,7 @@ export default function NuevaSolicitudPage() {
           {/* Formulario dinámico basado en plantilla o estándar */}
           {usandoPlantilla ? (
             // Formulario de plantilla
-            <div className="space-y-8">
+            <div className="space-y-8 w-full">
               <FormularioPlantilla
                 plantilla={estadoPlantilla.plantillaSeleccionada!}
                 datos={estadoPlantilla.datos}
@@ -843,14 +843,14 @@ export default function NuevaSolicitudPage() {
             </div>
           ) : (
             // Formulario estándar (código original)
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
-            <div className="flex items-center space-x-4 mb-12">
-              <div className="p-4 rounded-full bg-white/20">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-8 md:p-12 lg:p-16 w-full">
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 sm:mb-12">
+              <div className="p-3 sm:p-4 rounded-full bg-white/20">
                 <FileText className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white mb-1">Solicitud de Pago</h2>
-                <p className="text-white/80 text-base">Completa todos los campos para crear tu solicitud</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">Solicitud de Pago</h2>
+                <p className="text-white/80 text-sm sm:text-base">Completa todos los campos para crear tu solicitud</p>
               </div>
             </div>
 
@@ -892,9 +892,9 @@ export default function NuevaSolicitudPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-10 max-w-full">
+            <form onSubmit={handleSubmit} className="space-y-10 w-full">
               {/* SECCIÓN 1: INFORMACIÓN BÁSICA - 2 columnas */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                 {/* Departamento */}
                 <div>
                   <label className={getLabelStyles('departamento', true)}>
@@ -976,12 +976,12 @@ export default function NuevaSolicitudPage() {
               </div>
 
               {/* SECCIÓN 2: INFORMACIÓN BANCARIA - 4 columnas para mejor aprovechamiento */}
-              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+              <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 w-full">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                   <CreditCard className="w-5 h-5 mr-2" />
                   Información Bancaria
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                   {/* “Información Bancaria” */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
@@ -1173,12 +1173,12 @@ export default function NuevaSolicitudPage() {
 
               {/* SECCIÓN 2.4: CAMPOS DE TARJETA INSTITUCIONAL (CONDICIONAL) */}
               {formData.tipo_cuenta_destino === 'Tarjeta Institucional' && (
-                <div className="bg-blue-600/10 rounded-xl p-6 border border-blue-600/30">
+                <div className="bg-blue-600/10 rounded-xl p-4 sm:p-6 border border-blue-600/30 w-full">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                     <CreditCard className="w-5 h-5 mr-2" />
                     Datos de Acceso - Tarjeta Institucional
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {/* Link de Pago */}
                     <div>
                       <label className="block text-base font-medium text-white/90 mb-3">
@@ -1229,7 +1229,7 @@ export default function NuevaSolicitudPage() {
 
               {/* BOTÓN PARA AGREGAR SEGUNDA FORMA DE PAGO */}
               {!formData.tiene_segunda_forma_pago && (
-                <div className="text-center">
+                <div className="text-center w-full">
                   <button
                     type="button"
                     onClick={() => dispatch({ type: 'SET_FIELD', field: 'tiene_segunda_forma_pago', value: true })}
@@ -1246,7 +1246,7 @@ export default function NuevaSolicitudPage() {
 
               {/* SECCIÓN 2.6: SEGUNDA FORMA DE PAGO (CONDICIONAL) */}
               {formData.tiene_segunda_forma_pago && (
-                <div className="bg-green-600/10 rounded-xl p-6 border border-green-600/30">
+                <div className="bg-green-600/10 rounded-xl p-4 sm:p-6 border border-green-600/30 w-full">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-white flex items-center">
                       <CreditCard className="w-5 h-5 mr-2" />
@@ -1273,7 +1273,7 @@ export default function NuevaSolicitudPage() {
                   </div>
                   
                   {/* Información Bancaria 2 */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
                     <div>
                       <label className="block text-base font-medium text-white/90 mb-3">
                         Datos Bancarios *
@@ -1356,7 +1356,7 @@ export default function NuevaSolicitudPage() {
 
                   {/* Cuenta Destino 2 - Solo mostrar si NO es Tarjeta Institucional */}
                   {formData.tipo_cuenta_destino_2 !== 'Tarjeta Institucional' && (
-                    <div className="mb-6">
+                    <div className="mb-6 w-full">
                       <label className="block text-base font-medium text-white/90 mb-3">
                         <CreditCard className="w-4 h-4 inline mr-2" />
                         Cuenta Destino *
@@ -1459,7 +1459,7 @@ export default function NuevaSolicitudPage() {
 
                   {/* CAMPOS DE TARJETA INSTITUCIONAL PARA SEGUNDA FORMA DE PAGO */}
                   {formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' && (
-                    <div className="bg-blue-600/10 rounded-xl p-6 border border-blue-600/30">
+                    <div className="bg-blue-600/10 rounded-xl p-4 sm:p-6 border border-blue-600/30 w-full">
                       <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
                         <CreditCard className="w-5 h-5 mr-2" />
                         Datos de Acceso - Segunda Tarjeta Institucional
@@ -1516,7 +1516,7 @@ export default function NuevaSolicitudPage() {
               )}
 
               {/* SECCIÓN 3: INFORMACIÓN DEL PAGO - 2 columnas */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                 {/* Tipo de Pago */}
                 <div>
                   <label className="block text-base font-medium text-white/90 mb-3">
@@ -1656,12 +1656,12 @@ export default function NuevaSolicitudPage() {
               </div>
 
               {/* SECCIÓN 5: INFORMACIÓN DEL BENEFICIARIO - 2 columnas */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+              <div className="bg-white/5 rounded-xl p-4 sm:p-8 border border-white/10 w-full">
                 <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                   <Building className="w-6 h-6 mr-3" />
                   Información del Beneficiario
                 </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                   {/* Nombre de la persona (obligatorio) */}
                   <div>
                     <label className={getLabelStyles('nombre_persona', true)}>
@@ -1702,7 +1702,7 @@ export default function NuevaSolicitudPage() {
               </div>
 
               {/* SECCIÓN 6: DOCUMENTOS - Ancho completo con previsualización mejorada */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
+              <div className="bg-white/5 rounded-xl p-4 sm:p-8 border border-white/10 w-full">
                 <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                   <Upload className="w-6 h-6 mr-3" />
                   Documentos Requeridos
