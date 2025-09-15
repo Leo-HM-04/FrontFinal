@@ -257,7 +257,7 @@ export default function NuevoViaticoPage() {
             {formularios.map((f, idx) => (
               <div
                 key={idx}
-                className="relative mb-6 border border-blue-200 bg-blue-50/30 rounded-xl p-6"
+                className="relative mb-4 sm:mb-6 border border-blue-200 bg-blue-50/30 rounded-xl p-4 sm:p-6"
               >
                 {/* Identificador simple */}
                 <div className="absolute -top-3 left-4 bg-blue-600 text-white text-sm font-semibold px-3 py-1 rounded-full">
@@ -277,7 +277,7 @@ export default function NuevoViaticoPage() {
                 {/* Campos organizados en grid simple */}
                 <div className="mt-4 space-y-4">
                   {/* Primera fila: Datos bancarios */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-blue-900 font-medium text-sm">Tipo de Cuenta *</label>
                       <select name="tipo_cuenta_destino" onChange={e => {
@@ -491,10 +491,10 @@ export default function NuevoViaticoPage() {
             ))}
             
             {/* Botones de acción */}
-            <div className="flex justify-between items-center gap-4 mt-8 pt-6 border-t border-blue-200">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-blue-200">
               <button
                 type="button"
-                className="flex items-center gap-2 px-6 py-2.5 rounded-lg border border-blue-600 text-blue-700 font-medium hover:bg-blue-50 transition-colors"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg border border-blue-600 text-blue-700 font-medium hover:bg-blue-50 transition-colors text-sm sm:text-base"
                 onClick={handleAgregarOtro}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -502,10 +502,10 @@ export default function NuevoViaticoPage() {
                 </svg>
                 Agregar Otro Viático
               </button>
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-lg border border-gray-400 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg border border-gray-400 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base"
                   onClick={() => router.push('/dashboard/solicitante/mis-viaticos')}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
