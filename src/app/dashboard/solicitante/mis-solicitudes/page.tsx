@@ -730,305 +730,279 @@ function MisSolicitudesContent() {
             onExportClick={onExportClick}
           />
 
-          {/* Tabla */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+          {/* Tabla de solicitudes - Desktop */}
+          <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden">
+            {/* Vista de tabla para desktop */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-blue-200">
+                <thead className="bg-gradient-to-r from-blue-50 to-blue-100/50">
                   <tr>
-                    <SortableHeader>Folio</SortableHeader>
-                    <SortableHeader
-                      field="hora"
-                      sortField={sortField}
-                      sortOrder={sortOrder}
-                      onSort={handleSort}
-                    >
-                      Hora de envío
-                    </SortableHeader>
-                    <SortableHeader>Concepto</SortableHeader>
-                    <SortableHeader
-                      field="monto"
-                      sortField={sortField}
-                      sortOrder={sortOrder}
-                      onSort={handleSort}
-                    >
-                      Monto
-                    </SortableHeader>
-                    <SortableHeader>Cuenta</SortableHeader>
-                    <SortableHeader
-                      field="estado"
-                      sortField={sortField}
-                      sortOrder={sortOrder}
-                      onSort={handleSort}
-                    >
-                      Estado
-                    </SortableHeader>
-                    <SortableHeader
-                      field="fecha"
-                      sortField={sortField}
-                      sortOrder={sortOrder}
-                      onSort={handleSort}
-                      className="px-6 py-4 text-left text-sm font-semibold text-gray-900"
-                    >
-                      Fecha
-                    </SortableHeader>
-                    <SortableHeader className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                      Acciones
-                    </SortableHeader>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-28">Folio</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-40">Departamento</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Concepto</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-32">Monto</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-40">Cuenta Destino</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-32">Estado</th>
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider w-32">Fecha Límite</th>
+                    <th className="px-3 py-3 text-center text-xs font-semibold text-blue-900 uppercase tracking-wider w-24">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-blue-100">
                   {currentSolicitudes.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-6 py-16 text-center">
-                        <div className="flex flex-col items-center">
-                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                            <FileText className="w-8 h-8 text-gray-400" />
-                          </div>
-                          <h3 className="text-lg font-medium text-gray-900 mb-1">
-                            {searchTerm || statusFilter || dateFilter
-                              ? 'No se encontraron solicitudes'
-                              : 'No tienes solicitudes aún'}
-                          </h3>
-                          <p className="text-gray-500 mb-4">
-                            {searchTerm || statusFilter || dateFilter
-                              ? 'Intenta ajustar los filtros de búsqueda'
-                              : 'Crea tu primera solicitud de pago'}
-                          </p>
-                          {!searchTerm && !statusFilter && !dateFilter && (
-                            <Button
-                              onClick={() =>
-                                router.push('/dashboard/solicitante/nueva-solicitud')
-                              }
-                              className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-lg font-medium flex items-center gap-2"
-                            >
-                              <Plus className="w-4 h-4" />
-                              Nueva Solicitud
-                            </Button>
-                          )}
-                        </div>
+                      <td colSpan={8} className="px-6 py-12 text-center text-blue-900/80">
+                        <FileText className="w-12 h-12 mx-auto mb-4 text-blue-300" />
+                        <p className="text-lg font-semibold">No tienes solicitudes aún</p>
+                        <p className="text-sm text-blue-500 mt-1">
+                          {searchTerm || statusFilter || dateFilter
+                            ? 'No se encontraron solicitudes con los filtros aplicados'
+                            : 'Crea tu primer solicitud'}
+                        </p>
                       </td>
                     </tr>
-                  ) : (
-                    currentSolicitudes.map((solicitud) => {
-                      const estadoConfig = getEstadoConfig(solicitud.estado);
-                      const isHighlighted = highlightedId === solicitud.id_solicitud;
+                  ) :
+                    currentSolicitudes.map((s) => {
+                      const estadoConfig = getEstadoConfig(s.estado);
+                      const isHighlighted = highlightedId === s.id_solicitud;
                       return (
-                        <tr
-                          key={solicitud.id_solicitud}
-                          className={`hover:bg-gray-50 transition-colors ${
-                            isHighlighted
-                              ? 'bg-blue-50 ring-2 ring-blue-300 ring-inset animate-pulse'
+                        <tr 
+                          key={s.id_solicitud} 
+                          className={`hover:bg-blue-50/70 transition-colors ${
+                            isHighlighted 
+                              ? 'bg-yellow-100 border-2 border-yellow-400 animate-pulse' 
                               : ''
                           }`}
                         >
-                          <td className="px-6 py-4">
-                            <div className="font-mono text-sm font-semibold text-gray-900">
-                              {solicitud.folio || '-'}
-                            </div>
-                          </td>
-
-                          <td className="px-6 py-4">
-                            <div className="text-sm font-semibold text-gray-900">
-                              {formatTime(solicitud.fecha_creacion)}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {formatShortDate(solicitud.fecha_creacion)}
-                            </div>
-                          </td>
-
-                          <td className="px-6 py-4">
-                            <div className="max-w-xs">
-                              <div className="font-medium text-gray-900 truncate">
-                                {solicitud.concepto}
-                              </div>
-                              <div className="text-sm text-gray-500 truncate">
-                                {solicitud.departamento}
-                              </div>
-                            </div>
-                          </td>
-
-                          <td className="px-6 py-4">
-                            <div className="text-sm font-semibold text-gray-900">
-                              {formatCurrency(solicitud.monto)}
-                            </div>
-                          </td>
-
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900 font-mono">
-                              {solicitud.cuenta_destino}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {solicitud.banco_destino}
-                            </div>
-                          </td>
-
-                          <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${estadoConfig.color}`}
+                        <td className="px-3 py-2.5">
+                          <span className="font-mono text-xs text-blue-800 bg-blue-50 px-2 py-0.5 rounded">{s.folio || '-'}</span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm text-blue-900 font-medium truncate max-w-[160px]">
+                            {s.departamento}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm text-blue-900 truncate max-w-[200px]">{s.concepto}</div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm font-bold text-blue-900">{formatCurrency(Number(s.monto))}</div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm text-blue-900/90 font-medium truncate max-w-[160px]">{s.cuenta_destino}</div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${estadoConfig.color} shadow-sm bg-white/90`}>
+                            {estadoConfig.icon}
+                            <span className="ml-1 capitalize truncate max-w-[80px]">{s.estado || 'pendiente'}</span>
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="text-sm text-blue-900/80">{formatShortDate(s.fecha_limite_pago)}</div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              title="Ver detalles"
+                              className="inline-flex items-center justify-center p-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                              onClick={() => handleViewDetails(s)}
                             >
-                              {estadoConfig.icon}
-                              <span className="ml-1.5 capitalize">{solicitud.estado}</span>
-                            </span>
-                          </td>
-
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">
-                              {formatShortDate(solicitud.fecha_creacion)}
-                            </div>
-                            {solicitud.fecha_limite_pago && (
-                              <div className="text-xs text-gray-500">
-                                Límite:{' '}
-                                {formatShortDate(solicitud.fecha_limite_pago)}
-                              </div>
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            {String(s.estado).toLowerCase() === 'pendiente' && (
+                              <>
+                                <button
+                                  title="Editar"
+                                  className="inline-flex items-center justify-center p-1.5 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
+                                  onClick={() => router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`)}
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  title="Eliminar"
+                                  className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                                  onClick={() => { setSolicitudAEliminar(s); setDeleteModalOpen(true); }}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </>
                             )}
-                          </td>
-
-                          <td className="px-6 py-4">
-                            <div className="flex items-center justify-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewDetails(solicitud)}
-                                className="!bg-blue-50 !text-blue-700 !border-blue-200 hover:!bg-blue-100 active:!bg-blue-200 focus:!bg-blue-100 focus:!text-blue-700 focus:ring-2 focus:ring-blue-300 focus:ring-offset-1 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all duration-200 transform hover:scale-105 active:scale-95"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                                Ver
-                              </Button>
-
-                              {solicitud.estado?.toLowerCase() === 'pendiente' && (
-                                <>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                      router.push(
-                                        `/dashboard/solicitante/editar-solicitud/${solicitud.id_solicitud}`
-                                      )
-                                    }
-                                    className="!bg-amber-50 !text-amber-700 !border-amber-200 hover:!bg-amber-100 active:!bg-amber-200 focus:!bg-amber-100 focus:!text-amber-700 focus:ring-2 focus:ring-amber-300 focus:ring-offset-1 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all duration-200 transform hover:scale-105 active:scale-95"
-                                  >
-                                    <Edit className="w-3.5 h-3.5" />
-                                    Editar
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setSolicitudAEliminar(solicitud);
-                                      setDeleteModalOpen(true);
-                                    }}
-                                    className="!bg-red-50 !text-red-700 !border-red-200 hover:!bg-red-100 active:!bg-red-200 focus:!bg-red-100 focus:!text-red-700 focus:ring-2 focus:ring-red-300 focus:ring-offset-1 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all duration-200 transform hover:scale-105 active:scale-95"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                    Eliminar
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
+                          </div>
+                        </td>
+                      </tr>
                       );
                     })
-                  )}
+                  }
                 </tbody>
               </table>
             </div>
 
-            {/* Paginación */}
-            {totalPages > 1 && (
-              <div className="border-t border-gray-200 bg-gray-50 px-6 py-5">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    Mostrando{' '}
-                    <span className="font-semibold text-gray-900">
-                      {filteredSolicitudes.length === 0 ? 0 : startIndex + 1}
-                    </span>{' '}
-                    a{' '}
-                    <span className="font-semibold text-gray-900">{endIndex}</span> de{' '}
-                    <span className="font-semibold text-gray-900">
-                      {filteredSolicitudes.length}
-                    </span>{' '}
-                    resultados
+            {/* Vista de tarjetas para móvil */}
+            <div className="md:hidden">
+              {currentSolicitudes.length === 0 ? (
+                <div className="px-6 py-12 text-center text-blue-900/80">
+                  <FileText className="w-12 h-12 mx-auto mb-4 text-blue-300" />
+                  <p className="text-lg font-semibold">No tienes solicitudes aún</p>
+                  <p className="text-sm text-blue-500 mt-1">
+                    {searchTerm || statusFilter || dateFilter
+                      ? 'No se encontraron solicitudes con los filtros aplicados'
+                      : 'Crea tu primer solicitud'}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 space-y-3">
+                  {currentSolicitudes.map((s) => {
+                    const estadoConfig = getEstadoConfig(s.estado);
+                    const isHighlighted = highlightedId === s.id_solicitud;
+                    return (
+                      <div 
+                        key={s.id_solicitud}
+                        className={`border border-blue-200 rounded-lg p-4 bg-white shadow-sm transition-all ${
+                          isHighlighted 
+                            ? 'bg-yellow-100 border-yellow-400 shadow-lg animate-pulse' 
+                            : 'hover:shadow-md hover:border-blue-300'
+                        }`}
+                      >
+                        {/* Header de la tarjeta */}
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex flex-col">
+                            <span className="font-mono text-xs text-blue-800 bg-blue-50 px-2 py-1 rounded w-fit">
+                              {s.folio || '-'}
+                            </span>
+                            <div className="mt-2">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${estadoConfig.color} shadow-sm bg-white/90`}>
+                                {estadoConfig.icon}
+                                <span className="ml-1 capitalize">{s.estado || 'pendiente'}</span>
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-blue-900 mb-1">
+                              {formatCurrency(Number(s.monto))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Información principal */}
+                        <div className="space-y-2 mb-4">
+                          <div>
+                            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Departamento</span>
+                            <p className="text-sm text-blue-900 font-medium mt-1">
+                              {s.departamento}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Concepto</span>
+                            <p className="text-sm text-blue-900 mt-1">{s.concepto}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Cuenta Destino</span>
+                            <p className="text-sm text-blue-900/90 font-medium mt-1">{s.cuenta_destino}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Fecha Límite</span>
+                            <p className="text-sm text-blue-900/80 mt-1">{formatShortDate(s.fecha_limite_pago)}</p>
+                          </div>
+                        </div>
+
+                        {/* Botones de acción */}
+                        <div className="flex items-center justify-end gap-2 pt-3 border-t border-blue-100">
+                          <button
+                            title="Ver detalles"
+                            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-sm font-medium"
+                            onClick={() => handleViewDetails(s)}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            Ver
+                          </button>
+                          {String(s.estado).toLowerCase() === 'pendiente' && (
+                            <>
+                              <button
+                                title="Editar"
+                                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors text-sm font-medium"
+                                onClick={() => router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`)}
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                                Editar
+                              </button>
+                              <button
+                                title="Eliminar"
+                                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors text-sm font-medium"
+                                onClick={() => { setSolicitudAEliminar(s); setDeleteModalOpen(true); }}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                Eliminar
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Paginación responsiva */}
+            <div className="border-t border-blue-100 bg-gradient-to-r from-blue-100/60 to-blue-50/80">
+              {/* Información de registros */}
+              <div className="px-3 sm:px-6 py-3 sm:py-4">
+                <div className="text-xs sm:text-sm text-blue-900 font-medium text-center">
+                  Mostrando <span className="font-bold text-blue-700">{filteredSolicitudes.length === 0 ? 0 : startIndex + 1}-{endIndex}</span> de <span className="font-bold text-blue-700">{filteredSolicitudes.length}</span>
+                </div>
+              </div>
+
+              {totalPages > 1 && (
+                <>
+                  {/* Paginador Móvil - Diseño VERTICAL */}
+                  <div className="flex md:hidden flex-col items-center gap-2 px-2 py-3 border-t border-blue-100">
+                    <div className="text-xs font-medium text-blue-700">
+                      Página {currentPage} de {totalPages}
+                    </div>
+                    <div className="flex items-center justify-center gap-4">
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="flex items-center gap-1 px-3 py-2 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300 transition-colors"
+                      >
+                        ← Anterior
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="flex items-center gap-1 px-3 py-2 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300 transition-colors"
+                      >
+                        Siguiente →
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  {/* Paginador Desktop */}
+                  <div className="hidden md:flex items-center justify-center gap-2 px-6 py-4 border-t border-blue-100">
                     <button
                       onClick={() => setCurrentPage(1)}
                       disabled={currentPage === 1}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200
-                        ${
-                          currentPage === 1
-                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
-                        }`}
-                    >
-                      ⏮ Primera
-                    </button>
-
+                      className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === 1 ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    >Primera</button>
                     <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200
-                        ${
-                          currentPage === 1
-                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
-                        }`}
-                    >
-                      ← Anterior
-                    </button>
-
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        const pageNum =
-                          Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => setCurrentPage(pageNum)}
-                            className={`px-4 py-2 text-sm font-semibold rounded-lg border transition-all duration-200 min-w-[44px]
-                              ${
-                                pageNum === currentPage
-                                  ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105'
-                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
-                              }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                    </div>
-
+                      className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === 1 ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    >Anterior</button>
+                    <span className="text-blue-900 text-base font-semibold px-2">Página <span className="text-blue-700">{currentPage}</span> de <span className="text-blue-700">{totalPages}</span></span>
                     <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200
-                        ${
-                          currentPage === totalPages
-                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
-                        }`}
-                    >
-                      Siguiente →
-                    </button>
-
+                      className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === totalPages ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    >Siguiente</button>
                     <button
                       onClick={() => setCurrentPage(totalPages)}
                       disabled={currentPage === totalPages}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200
-                        ${
-                          currentPage === totalPages
-                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1'
-                        }`}
-                    >
-                      Última ⏭
-                    </button>
+                      className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === totalPages ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    >Última</button>
                   </div>
-                </div>
-              </div>
-            )}
+                </>
+              )}
+            </div>
           </div>
 
           {/* Modales */}
