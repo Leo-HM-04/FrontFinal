@@ -403,40 +403,40 @@ export default function HistorialPagosPage() {
           )}
           {/* Header Profesional */}
           <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-2xl shadow-2xl border border-blue-500/30 mb-8">
-            <div className="px-8 py-6">
+            <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
               {/* Título y estadísticas */}
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="bg-white/20 p-3 rounded-xl">
-                    <FileText className="w-8 h-8 text-white" />
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6 mb-6">
+                <div className="flex items-center gap-3 lg:gap-4">
+                  <div className="bg-white/20 p-2 lg:p-3 rounded-xl">
+                    <FileText className="w-6 h-6 lg:w-8 lg:h-8 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold text-white">Subir Comprobante</h1>
-                    <p className="text-blue-100">Gestión de comprobantes de pago</p>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Subir Comprobante</h1>
+                    <p className="text-blue-100 text-sm lg:text-base">Gestión de comprobantes de pago</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
-                    <p className="text-2xl font-bold text-white">{pagosFiltrados.length}</p>
-                    <p className="text-blue-100 text-sm">Total</p>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 lg:p-3 text-center border border-white/20">
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white break-words">{pagosFiltrados.length}</p>
+                    <p className="text-blue-100 text-xs sm:text-sm">Total</p>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
-                    <p className="text-2xl font-bold text-green-300">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 lg:p-3 text-center border border-white/20">
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-300 break-words">
                       {pagosFiltrados.filter(p => comprobantes[p.id_solicitud]).length}
                     </p>
-                    <p className="text-blue-100 text-sm">Con Comprobante</p>
+                    <p className="text-blue-100 text-xs sm:text-sm">Con Comprobante</p>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
-                    <p className="text-2xl font-bold text-yellow-300">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 lg:p-3 text-center border border-white/20">
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-300 break-words">
                       {pagosFiltrados.filter(p => !comprobantes[p.id_solicitud]).length}
                     </p>
-                    <p className="text-blue-100 text-sm">Sin Comprobante</p>
+                    <p className="text-blue-100 text-xs sm:text-sm">Sin Comprobante</p>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
-                    <p className="text-2xl font-bold text-blue-200">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2 lg:p-3 text-center border border-white/20 col-span-2 lg:col-span-1">
+                    <p className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-blue-200 leading-tight break-words overflow-hidden">
                       {formatCurrency(pagosFiltrados.reduce((sum, p) => sum + (Number(p.monto) || 0), 0))}
                     </p>
-                    <p className="text-blue-100 text-sm">Total Monto</p>
+                    <p className="text-blue-100 text-xs sm:text-sm">Total Monto</p>
                   </div>
                 </div>
               </div>
