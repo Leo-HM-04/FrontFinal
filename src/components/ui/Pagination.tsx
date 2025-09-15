@@ -59,28 +59,21 @@ export function Pagination({
         </div>
       </div>
 
-      {/* Paginador Móvil - Solo botones esenciales */}
-      <div className="flex sm:hidden items-center justify-between px-2 py-2 border-t border-gray-100">
+      {/* Paginador Móvil - Ultra compacto */}
+      <div className="flex sm:hidden items-center justify-center gap-1 px-1 py-2 border-t border-gray-100">
         <Button
           variant="outline"
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300 disabled:text-gray-500"
+          className="p-1.5 bg-blue-600 text-white rounded disabled:bg-gray-300"
         >
           <ChevronLeft className="w-3 h-3" />
-          Anterior
         </Button>
         
-        <div className="flex items-center gap-1">
-          <span className="px-2 py-1 text-xs font-medium text-gray-600">
-            Página
-          </span>
-          <span className="px-3 py-1 text-sm font-bold bg-blue-600 text-white rounded min-w-[50px] text-center">
-            {currentPage}
-          </span>
-          <span className="px-2 py-1 text-xs font-medium text-gray-600">
-            de {totalPages}
+        <div className="flex items-center">
+          <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded font-medium">
+            {currentPage}/{totalPages}
           </span>
         </div>
         
@@ -89,9 +82,8 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300 disabled:text-gray-500"
+          className="p-1.5 bg-blue-600 text-white rounded disabled:bg-gray-300"
         >
-          Siguiente
           <ChevronRight className="w-3 h-3" />
         </Button>
       </div>
