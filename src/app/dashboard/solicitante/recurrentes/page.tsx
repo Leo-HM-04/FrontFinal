@@ -202,15 +202,15 @@ export default function NuevaRecurrentePage() {
               </div>
               
               <div className="text-left">
-                <label className="text-white/90 block mb-3 font-medium text-left">
-                  <CreditCard className="inline w-4 h-4 mr-2" /> Tipo de Cuenta Destino *
+                <label className="text-white/90 block mb-2 sm:mb-3 font-medium text-left text-sm sm:text-base">
+                  <CreditCard className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" /> Tipo de Cuenta Destino *
                 </label>
                 <select
                   name="tipo_cuenta_destino"
                   value={formData.tipo_cuenta_destino}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
+                  className="w-full px-3 sm:px-4 md:px-5 py-2 sm:py-3 md:py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left text-sm sm:text-base"
                 >
                   <option value="CLABE" className="text-black">CLABE</option>
                   <option value="Tarjeta" className="text-black">Tarjeta</option>
@@ -369,10 +369,10 @@ export default function NuevaRecurrentePage() {
             </div>
 
             {/* Sección de Configuración */}
-            <div className="bg-white/10 rounded-xl border border-white/20 p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 w-full items-start shadow-lg text-left">
+            <div className="bg-white/10 rounded-xl border border-white/20 p-4 sm:p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-x-10 md:gap-y-8 w-full items-start shadow-lg text-left">
               <div className="col-span-2 mb-2">
-                <h2 className="text-xl font-semibold text-blue-200 flex items-center gap-2 mb-2">
-                  <Repeat className="w-6 h-6" /> Configuración de Recurrencia
+                <h2 className="text-lg sm:text-xl font-semibold text-blue-200 flex items-center gap-2 mb-2">
+                  <Repeat className="w-5 h-5 sm:w-6 sm:h-6" /> Configuración de Recurrencia
                 </h2>
                 <hr className="border-blue-400/30 mb-2" />
               </div>
@@ -455,36 +455,36 @@ export default function NuevaRecurrentePage() {
             </div>
 
             {/* Sección de Concepto */}
-            <div className="bg-white/10 rounded-xl border border-white/20 p-6 md:p-10 w-full shadow-lg text-left">
-              <h2 className="text-xl font-semibold text-blue-200 flex items-center gap-2 mb-2">
-                <MessageSquare className="w-6 h-6" /> Concepto del Pago
+            <div className="bg-white/10 rounded-xl border border-white/20 p-4 sm:p-6 md:p-10 w-full shadow-lg text-left">
+              <h2 className="text-lg sm:text-xl font-semibold text-blue-200 flex items-center gap-2 mb-2">
+                <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6" /> Concepto del Pago
               </h2>
-              <hr className="border-blue-400/30 mb-4" />
+              <hr className="border-blue-400/30 mb-3 sm:mb-4" />
               <textarea
                 name="concepto"
                 value={formData.concepto}
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="w-full px-5 py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left"
+                className="w-full px-3 sm:px-4 md:px-5 py-2 sm:py-3 md:py-4 bg-white/20 text-white rounded-lg border border-white/30 text-left text-sm sm:text-base"
                 placeholder="Describe el motivo del pago..."
               />
             </div>
 
             {/* Botones */}
-            <div className="flex justify-end space-x-6 pt-6">
+            <div className="flex flex-col sm:flex-row justify-end sm:space-x-4 space-y-3 sm:space-y-0 pt-4 sm:pt-6">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.back()}
-                className="bg-gray-600 text-white border-gray-500 hover:bg-gray-700 px-8 py-4 text-base"
+                className="w-full sm:w-auto bg-gray-600 text-white border-gray-500 hover:bg-gray-700 px-4 sm:px-6 md:px-8 py-3 sm:py-4 text-sm sm:text-base"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={loading}
-                className="bg-green-600 text-white hover:bg-green-700 px-8 py-4 text-base"
+                className="w-full sm:w-auto bg-green-600 text-white hover:bg-green-700 px-4 sm:px-6 md:px-8 py-3 sm:py-4 text-sm sm:text-base"
               >
                 {loading ? 'Guardando...' : 'Crear Plantilla'}
               </Button>
