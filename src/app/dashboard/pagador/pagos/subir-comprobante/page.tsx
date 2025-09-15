@@ -706,73 +706,73 @@ export default function HistorialPagosPage() {
             </>
           )}
 
-          {/* Modal de Exportación Mejorado */}
+          {/* Modal de Exportación Mejorado - Responsive */}
           {showExportModal && (
-            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-2xl w-full transform animate-in slide-in-from-bottom-4 duration-300 border border-gray-200/50">
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+              <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-2xl w-full max-h-[95vh] overflow-y-auto transform animate-in slide-in-from-bottom-4 duration-300 border border-gray-200/50 mx-2 sm:mx-0">
                 {/* Header del modal */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-t-2xl border-b border-gray-200/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-gray-500/20 p-2 rounded-lg">
-                        <Download className="w-6 h-6 text-gray-600" />
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 sm:p-6 rounded-t-2xl border-b border-gray-200/50 sticky top-0 z-10">
+                  <div className="flex items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-start sm:items-center gap-3 flex-1">
+                      <div className="bg-gray-500/20 p-2 rounded-lg flex-shrink-0">
+                        <Download className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
                       </div>
-                      <div>
-                        <h3 className="text-xl font-semibold text-gray-800">Exportar Comprobantes</h3>
-                        <p className="text-gray-600 text-sm">Selecciona el formato deseado para exportar los comprobantes</p>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 leading-tight">Exportar Comprobantes</h3>
+                        <p className="text-gray-600 text-xs sm:text-sm mt-1 leading-tight">Selecciona el formato deseado para exportar los comprobantes</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setShowExportModal(false)}
-                      className="text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg p-2 transition-all duration-200"
+                      className="text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg p-2 transition-all duration-200 flex-shrink-0"
                     >
-                      <X className="w-5 h-5" />
+                      <X className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </div>
                 </div>
 
-                <div className="p-6 bg-white/80">
+                <div className="p-3 sm:p-6 bg-white/80">
                   {/* Sección de selección de datos */}
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-4">
+                  <div className="mb-4 sm:mb-6">
+                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
                       <div className="bg-gray-100 p-1.5 rounded-lg">
-                        <Download className="w-4 h-4 text-gray-600" />
+                        <Download className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
                       </div>
-                      <h4 className="font-medium text-gray-700">Seleccionar datos a exportar</h4>
+                      <h4 className="font-medium text-gray-700 text-sm sm:text-base">Seleccionar datos a exportar</h4>
                     </div>
                     
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                       {/* Todos los registros */}
-                      <div className="border border-gray-200 bg-gray-50/50 rounded-xl p-4 text-center hover:border-gray-300 hover:bg-gray-100/50 transition-all">
+                      <div className="border border-gray-200 bg-gray-50/50 rounded-xl p-3 sm:p-4 text-center hover:border-gray-300 hover:bg-gray-100/50 transition-all">
                         <div className="bg-gray-400 p-2 rounded-lg w-fit mx-auto mb-2">
-                          <Download className="w-5 h-5 text-white" />
+                          <Download className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                         </div>
-                        <h5 className="font-medium text-gray-800 text-sm mb-1">Todos los registros</h5>
-                        <p className="text-xs text-gray-600 mb-2">Incluye todos los elementos disponibles</p>
+                        <h5 className="font-medium text-gray-800 text-xs sm:text-sm mb-1">Todos los registros</h5>
+                        <p className="text-xs text-gray-600 mb-2 leading-tight">Incluye todos los elementos disponibles</p>
                         <div className="bg-white/80 rounded-lg p-1.5 border border-gray-200">
                           <p className="text-xs text-gray-500">Todos los elementos</p>
                         </div>
                       </div>
 
                       {/* Solo con comprobante */}
-                      <div className="border border-gray-200 rounded-xl p-4 text-center hover:border-gray-300 hover:bg-gray-50 transition-all cursor-pointer">
+                      <div className="border border-gray-200 rounded-xl p-3 sm:p-4 text-center hover:border-gray-300 hover:bg-gray-50 transition-all cursor-pointer">
                         <div className="bg-gray-500 p-2 rounded-lg w-fit mx-auto mb-2">
-                          <FileText className="w-5 h-5 text-white" />
+                          <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                         </div>
-                        <h5 className="font-medium text-gray-800 text-sm mb-1">Con comprobante</h5>
-                        <p className="text-xs text-gray-600 mb-2">Únicamente con comprobantes</p>
+                        <h5 className="font-medium text-gray-800 text-xs sm:text-sm mb-1">Con comprobante</h5>
+                        <p className="text-xs text-gray-600 mb-2 leading-tight">Únicamente con comprobantes</p>
                         <div className="bg-white/80 rounded-lg p-1.5 border border-gray-200">
                           <p className="text-xs text-gray-600">Elementos activos</p>
                         </div>
                       </div>
 
                       {/* Solo sin comprobante */}
-                      <div className="border border-gray-200 rounded-xl p-4 text-center hover:border-gray-300 hover:bg-gray-50 transition-all cursor-pointer">
+                      <div className="border border-gray-200 rounded-xl p-3 sm:p-4 text-center hover:border-gray-300 hover:bg-gray-50 transition-all cursor-pointer">
                         <div className="bg-gray-500 p-2 rounded-lg w-fit mx-auto mb-2">
-                          <X className="w-5 h-5 text-white" />
+                          <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                         </div>
-                        <h5 className="font-medium text-gray-800 text-sm mb-1">Sin comprobante</h5>
-                        <p className="text-xs text-gray-600 mb-2">Únicamente sin comprobantes</p>
+                        <h5 className="font-medium text-gray-800 text-xs sm:text-sm mb-1">Sin comprobante</h5>
+                        <p className="text-xs text-gray-600 mb-2 leading-tight">Únicamente sin comprobantes</p>
                         <div className="bg-white/80 rounded-lg p-1.5 border border-gray-200">
                           <p className="text-xs text-gray-600">Elementos pendientes</p>
                         </div>
@@ -781,75 +781,75 @@ export default function HistorialPagosPage() {
                   </div>
 
                   {/* Sección de formato de exportación */}
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-4">
+                  <div className="mb-4 sm:mb-6">
+                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
                       <div className="bg-gray-100 p-1.5 rounded-lg">
-                        <FileSpreadsheet className="w-4 h-4 text-gray-600" />
+                        <FileSpreadsheet className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
                       </div>
-                      <h4 className="font-medium text-gray-700">Seleccionar formato de exportación</h4>
+                      <h4 className="font-medium text-gray-700 text-sm sm:text-base">Seleccionar formato de exportación</h4>
                     </div>
                     
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                       {/* PDF */}
-                      <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:bg-gray-100/50 transition-all cursor-pointer group"
+                      <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-3 sm:p-4 hover:border-gray-300 hover:bg-gray-100/50 transition-all cursor-pointer group"
                            onClick={() => { exportToPDF(); setShowExportModal(false); }}>
-                        <div className="bg-gray-600 p-3 rounded-lg w-fit mx-auto mb-3 group-hover:bg-gray-700 transition-colors">
-                          <FileText className="w-6 h-6 text-white" />
+                        <div className="bg-gray-600 p-2 sm:p-3 rounded-lg w-fit mx-auto mb-2 sm:mb-3 group-hover:bg-gray-700 transition-colors">
+                          <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
-                        <h5 className="font-semibold text-gray-800 text-center mb-1">PDF</h5>
-                        <p className="text-sm text-gray-600 font-medium text-center mb-2">Documento PDF profesional</p>
-                        <div className="bg-white/80 border border-gray-200 rounded-lg p-2 mb-3">
-                          <p className="text-xs text-gray-600 text-center">Ideal para impresión y presentaciones oficiales</p>
+                        <h5 className="font-semibold text-gray-800 text-center mb-1 text-sm sm:text-base">PDF</h5>
+                        <p className="text-xs sm:text-sm text-gray-600 font-medium text-center mb-2 leading-tight">Documento PDF profesional</p>
+                        <div className="bg-white/80 border border-gray-200 rounded-lg p-2 mb-2 sm:mb-3">
+                          <p className="text-xs text-gray-600 text-center leading-tight">Ideal para impresión y presentaciones oficiales</p>
                         </div>
-                        <button className="w-full bg-gray-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
-                          <Download className="w-4 h-4" />
-                          Exportar PDF
+                        <button className="w-full bg-gray-600 text-white py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+                          <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span>Exportar PDF</span>
                         </button>
                       </div>
 
                       {/* Excel */}
-                      <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:bg-gray-100/50 transition-all cursor-pointer group"
+                      <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-3 sm:p-4 hover:border-gray-300 hover:bg-gray-100/50 transition-all cursor-pointer group"
                            onClick={() => { exportToExcel(); setShowExportModal(false); }}>
-                        <div className="bg-gray-600 p-3 rounded-lg w-fit mx-auto mb-3 group-hover:bg-gray-700 transition-colors">
-                          <FileSpreadsheet className="w-6 h-6 text-white" />
+                        <div className="bg-gray-600 p-2 sm:p-3 rounded-lg w-fit mx-auto mb-2 sm:mb-3 group-hover:bg-gray-700 transition-colors">
+                          <FileSpreadsheet className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
-                        <h5 className="font-semibold text-gray-800 text-center mb-1">Excel</h5>
-                        <p className="text-sm text-gray-600 font-medium text-center mb-2">Hoja de cálculo editable</p>
-                        <div className="bg-white/80 border border-gray-200 rounded-lg p-2 mb-3">
-                          <p className="text-xs text-gray-600 text-center">Perfecto para análisis de datos y reportes</p>
+                        <h5 className="font-semibold text-gray-800 text-center mb-1 text-sm sm:text-base">Excel</h5>
+                        <p className="text-xs sm:text-sm text-gray-600 font-medium text-center mb-2 leading-tight">Hoja de cálculo editable</p>
+                        <div className="bg-white/80 border border-gray-200 rounded-lg p-2 mb-2 sm:mb-3">
+                          <p className="text-xs text-gray-600 text-center leading-tight">Perfecto para análisis de datos y reportes</p>
                         </div>
-                        <button className="w-full bg-gray-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
-                          <FileSpreadsheet className="w-4 h-4" />
-                          Exportar Excel
+                        <button className="w-full bg-gray-600 text-white py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+                          <FileSpreadsheet className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span>Exportar Excel</span>
                         </button>
                       </div>
 
                       {/* CSV */}
-                      <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:bg-gray-100/50 transition-all cursor-pointer group"
+                      <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-3 sm:p-4 hover:border-gray-300 hover:bg-gray-100/50 transition-all cursor-pointer group"
                            onClick={() => { exportToCSV(); setShowExportModal(false); }}>
-                        <div className="bg-gray-600 p-3 rounded-lg w-fit mx-auto mb-3 group-hover:bg-gray-700 transition-colors">
-                          <Download className="w-6 h-6 text-white" />
+                        <div className="bg-gray-600 p-2 sm:p-3 rounded-lg w-fit mx-auto mb-2 sm:mb-3 group-hover:bg-gray-700 transition-colors">
+                          <Download className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
-                        <h5 className="font-semibold text-gray-800 text-center mb-1">CSV</h5>
-                        <p className="text-sm text-gray-600 font-medium text-center mb-2">Valores separados por comas</p>
-                        <div className="bg-white/80 border border-gray-200 rounded-lg p-2 mb-3">
-                          <p className="text-xs text-gray-600 text-center">Compatible con cualquier sistema o software</p>
+                        <h5 className="font-semibold text-gray-800 text-center mb-1 text-sm sm:text-base">CSV</h5>
+                        <p className="text-xs sm:text-sm text-gray-600 font-medium text-center mb-2 leading-tight">Valores separados por comas</p>
+                        <div className="bg-white/80 border border-gray-200 rounded-lg p-2 mb-2 sm:mb-3">
+                          <p className="text-xs text-gray-600 text-center leading-tight">Compatible con cualquier sistema o software</p>
                         </div>
-                        <button className="w-full bg-gray-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
-                          <Download className="w-4 h-4" />
-                          Exportar CSV
+                        <button className="w-full bg-gray-600 text-white py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+                          <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span>Exportar CSV</span>
                         </button>
                       </div>
                     </div>
                   </div>
 
                   {/* Footer con información */}
-                  <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-4 text-center">
-                    <p className="text-sm text-gray-600">
+                  <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-3 sm:p-4 text-center">
+                    <p className="text-xs sm:text-sm text-gray-600 leading-tight">
                       <span className="font-medium">Se exportarán {pagosFiltrados.length} registros</span>
-                      {searchTerm && <span className="text-gray-500"> • Filtrado por: &ldquo;{searchTerm}&rdquo;</span>}
+                      {searchTerm && <span className="text-gray-500 block sm:inline"> • Filtrado por: &ldquo;{searchTerm}&rdquo;</span>}
                       {filtroEstado !== 'todos' && (
-                        <span className="text-gray-500">
+                        <span className="text-gray-500 block sm:inline">
                           • {filtroEstado === 'con_comprobante' ? 'Con comprobante' : 'Sin comprobante'}
                         </span>
                       )}
