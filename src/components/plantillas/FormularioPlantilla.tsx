@@ -39,7 +39,7 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
     const gridCols = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
 
     return (
-      <div key={seccion.id} className="bg-blue-500/30 rounded-2xl border border-blue-400 w-full mb-8 shadow-lg">
+      <div key={seccion.id} className="bg-white rounded-2xl border border-blue-400 w-full mb-8 shadow-lg">
         <div className="bg-blue-600 rounded-t-2xl px-4 sm:px-8 py-4">
           <h3 className="text-xl font-bold text-white">
             {seccion.titulo}
@@ -98,7 +98,7 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
       </div>
 
   {/* Indicador de progreso */}
-  <div className="bg-blue-500/30 rounded-2xl border border-blue-400 p-4 sm:p-8 mb-8 w-full">
+  <div className="bg-white rounded-2xl border border-blue-400 p-4 sm:p-8 mb-8 w-full">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-white/80">Progreso del formulario</span>
           <span className="text-sm text-white/60">
@@ -122,7 +122,7 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
 
       {/* Información adicional */}
       {plantilla.configuracion && (
-        <div className="bg-blue-500/30 rounded-2xl border border-blue-400 p-4 sm:p-8 mb-8 w-full">
+        <div className="bg-white rounded-2xl border border-blue-400 p-4 sm:p-8 mb-8 w-full">
           <h4 className="text-sm font-medium text-white mb-2">
             Información de la plantilla
           </h4>
