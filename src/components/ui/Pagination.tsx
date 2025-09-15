@@ -50,38 +50,40 @@ export function Pagination({
 
   // Mostrar siempre la paginación, incluso si solo hay una página
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-6 bg-white border-t border-gray-200 rounded-b-xl">
-      {/* Información de registros */}
-      <div className="text-sm text-gray-700 font-medium">
+    <div className="flex flex-col gap-4 p-3 sm:p-6 bg-white border-t border-gray-200 rounded-b-xl">
+      {/* Información de registros - más compacta en móvil */}
+      <div className="text-xs sm:text-sm text-gray-700 font-medium text-center sm:text-left">
         Mostrando {startItem} a {endItem} de {totalItems} registros
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto">
-
-        {/* Controles de paginación */}
-        <div className="flex items-center gap-2 w-full justify-center">
+      {/* Controles de paginación responsivos */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        {/* Botones Anterior/Siguiente para móvil */}
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
           <Button
             variant="outline"
             size="sm"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-blue-600 text-white border-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
+            className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-lg bg-blue-600 text-white border-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
           >
-            <ChevronLeft className="w-4 h-4" />
-            Anterior
+            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Anterior</span>
+            <span className="sm:hidden">Ant</span>
           </Button>
 
-          <div className="flex items-center gap-2 mx-4">
+          {/* Números de página - simplificado en móvil */}
+          <div className="flex items-center gap-1 sm:gap-2 mx-2 sm:mx-4">
             {getVisiblePages().map((page, index) => (
               <React.Fragment key={index}>
                 {page === '...' ? (
-                  <span className="px-3 py-2 text-gray-500 font-medium">...</span>
+                  <span className="px-1 sm:px-3 py-2 text-gray-500 font-medium text-xs sm:text-sm">...</span>
                 ) : (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onPageChange(page as number)}
-                    className={`min-w-[40px] h-10 flex items-center justify-center rounded-lg border-2 transition-all duration-200 font-semibold ${
+                    className={`min-w-[32px] sm:min-w-[40px] h-8 sm:h-10 flex items-center justify-center rounded-lg border-2 transition-all duration-200 font-semibold text-xs sm:text-sm ${
                       currentPage === page 
                         ? 'bg-blue-600 text-white border-blue-600 shadow-lg scale-105' 
                         : 'bg-gray-100 text-blue-600 border-gray-300 hover:bg-blue-100 hover:border-blue-400 shadow-sm hover:shadow-md'
@@ -99,10 +101,11 @@ export function Pagination({
             size="sm"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-blue-600 text-white border-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
+            className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-lg bg-blue-600 text-white border-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300"
           >
-            Siguiente
-            <ChevronRight className="w-4 h-4" />
+            <span className="hidden sm:inline">Siguiente</span>
+            <span className="sm:hidden">Sig</span>
+            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
         </div>
       </div>

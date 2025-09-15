@@ -489,9 +489,19 @@ export default function HistorialPagosPage() {
                     className="w-full px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
                   >
                     <option value="todos" className="text-gray-800">Todos</option>
-                    {[...new Set(pagos.filter(p => p.estado === 'pagada').map((p: Solicitud) => p.departamento).filter(Boolean))].map((dep: string) => (
-                      <option key={dep} value={dep} className="text-gray-800">{dep.toUpperCase()}</option>
-                    ))}
+                    <option value="CONTABILIDAD" className="text-gray-800">CONTABILIDAD</option>
+                    <option value="FACTURACIÓN" className="text-gray-800">FACTURACIÓN</option>
+                    <option value="COBRANZA" className="text-gray-800">COBRANZA</option>
+                    <option value="VINCULACIÓN" className="text-gray-800">VINCULACIÓN</option>
+                    <option value="ADMINISTRACIÓN" className="text-gray-800">ADMINISTRACIÓN</option>
+                    <option value="TI" className="text-gray-800">TI</option>
+                    <option value="AUTOMATIZACIONES" className="text-gray-800">AUTOMATIZACIONES</option>
+                    <option value="COMERCIAL" className="text-gray-800">COMERCIAL</option>
+                    <option value="ATENCIÓN A CLIENTES" className="text-gray-800">ATENCIÓN A CLIENTES</option>
+                    <option value="TESORERÍA" className="text-gray-800">TESORERÍA</option>
+                    <option value="NÓMINA" className="text-gray-800">NÓMINA</option>
+                    <option value="ATRACCIÓN DE TALENTO" className="text-gray-800">ATRACCIÓN DE TALENTO</option>
+                    <option value="DIRECCIÓN GENERAL" className="text-gray-800">DIRECCIÓN GENERAL</option>
                   </select>
                 </div>
 
