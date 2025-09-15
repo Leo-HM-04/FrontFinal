@@ -59,33 +59,37 @@ export function Pagination({
         </div>
       </div>
 
-      {/* Paginador Móvil - Ultra compacto */}
-      <div className="flex sm:hidden items-center justify-center gap-1 px-1 py-2 border-t border-gray-100">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="p-1.5 bg-blue-600 text-white rounded disabled:bg-gray-300"
-        >
-          <ChevronLeft className="w-3 h-3" />
-        </Button>
-        
-        <div className="flex items-center">
-          <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded font-medium">
-            {currentPage}/{totalPages}
-          </span>
+      {/* Paginador Móvil - Diseño VERTICAL */}
+      <div className="flex sm:hidden flex-col items-center gap-2 px-2 py-3 border-t border-gray-100">
+        {/* Fila 1: Información de página */}
+        <div className="text-xs font-medium text-gray-600">
+          Página {currentPage} de {totalPages}
         </div>
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="p-1.5 bg-blue-600 text-white rounded disabled:bg-gray-300"
-        >
-          <ChevronRight className="w-3 h-3" />
-        </Button>
+        {/* Fila 2: Botones de navegación */}
+        <div className="flex items-center justify-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1 px-3 py-2 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300"
+          >
+            <ChevronLeft className="w-3 h-3" />
+            Anterior
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-1 px-3 py-2 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300"
+          >
+            Siguiente
+            <ChevronRight className="w-3 h-3" />
+          </Button>
+        </div>
       </div>
 
       {/* Paginador Desktop - Completo */}
