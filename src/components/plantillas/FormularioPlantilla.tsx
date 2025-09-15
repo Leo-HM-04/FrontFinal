@@ -39,7 +39,7 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
     const gridCols = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
 
     return (
-      <div key={seccion.id} className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 w-full mb-8">
+      <div key={seccion.id} className="bg-blue-700/10 backdrop-blur-sm rounded-2xl border border-blue-600/30 w-full mb-8">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-8 py-4 rounded-t-2xl">
           <h3 className="text-lg font-semibold text-white">
             {seccion.titulo}
@@ -70,7 +70,7 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
   return (
     <div className={`max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-12 lg:py-16 w-full space-y-8 ${className}`}>
       {/* Header de la plantilla */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 rounded-2xl p-4 sm:p-8 mb-8 w-full">
+      <div className="bg-gradient-to-br from-blue-600/80 to-blue-700/80 border border-blue-700 rounded-2xl p-4 sm:p-8 mb-8 w-full">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
             <span className="text-xl text-white">{plantilla.icono || '📋'}</span>
@@ -97,8 +97,8 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
         </div>
       </div>
 
-      {/* Indicador de progreso */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-8 mb-8 w-full">
+  {/* Indicador de progreso */}
+  <div className="bg-blue-700/10 backdrop-blur-sm rounded-2xl border border-blue-600/30 p-4 sm:p-8 mb-8 w-full">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-white/80">Progreso del formulario</span>
           <span className="text-sm text-white/60">
@@ -122,7 +122,7 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
 
       {/* Información adicional */}
       {plantilla.configuracion && (
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-8 mb-8 w-full">
+        <div className="bg-blue-700/10 backdrop-blur-sm rounded-2xl border border-blue-600/30 p-4 sm:p-8 mb-8 w-full">
           <h4 className="text-sm font-medium text-white mb-2">
             Información de la plantilla
           </h4>
