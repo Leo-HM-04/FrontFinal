@@ -1,7 +1,7 @@
 'use client';
 
 import { FaFilePdf, FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
-import { Clock, CheckCircle, XCircle, AlertCircle, FileText, Search } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, AlertCircle, FileText, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -344,41 +344,41 @@ function MisViaticosContent() {
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 sm:mb-10 gap-4 sm:gap-6">
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center justify-center rounded-full bg-blue-100 p-2 shadow-sm">
-                <FaFilePdf className="text-blue-600 w-7 h-7" />
+                <FaFilePdf className="text-blue-600 w-5 sm:w-6 md:w-7 h-5 sm:h-6 md:h-7" />
               </span>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Viáticos</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Viáticos</h1>
             </div>
           </div>
           {/* Filtros */}
-          <div className="mb-8">
-            <div className="bg-white rounded-xl p-6 border border-blue-200 shadow-md">
-              <div className="flex items-center gap-3 mb-4">
+          <div className="mb-6 sm:mb-8">
+            <div className="bg-white rounded-xl p-4 sm:p-6 border border-blue-200 shadow-md">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                 <div className="inline-flex items-center justify-center rounded-full bg-blue-100 p-2">
-                  <Search className="text-blue-600 w-5 h-5" />
+                  <Search className="text-blue-600 w-4 sm:w-5 h-4 sm:h-5" />
                 </div>
-                <h2 className="text-lg font-semibold text-blue-900">Filtros</h2>
-                <span className="text-sm text-blue-600">Refina tu búsqueda de viáticos</span>
+                <h2 className="text-base sm:text-lg font-semibold text-blue-900">Filtros</h2>
+                <span className="text-xs sm:text-sm text-blue-600 hidden sm:inline">Refina tu búsqueda de viáticos</span>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 w-5 h-5" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
+                <div className="relative col-span-1 sm:col-span-2 lg:col-span-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 w-4 sm:w-5 h-4 sm:h-5" />
                   <input
                     type="text"
-                    placeholder="Buscar por concepto, departamento o cuenta..."
+                    placeholder="Buscar por concepto, departamento..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-white border border-blue-200 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="w-full pl-9 sm:pl-10 pr-4 py-2 bg-white border border-blue-200 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
                   />
                 </div>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-white border border-blue-200 rounded-lg px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="bg-white border border-blue-200 rounded-lg px-3 sm:px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
                 >
                   {filterOptions.map(option => (
                     <option key={option.value} value={option.value} className="text-gray-900">
@@ -389,7 +389,7 @@ function MisViaticosContent() {
                 <select
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="bg-white border border-blue-200 rounded-lg px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="bg-white border border-blue-200 rounded-lg px-3 sm:px-4 py-2 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
                 >
                   {dateOptions.map(option => (
                     <option key={option.value} value={option.value} className="text-gray-900">
@@ -399,9 +399,9 @@ function MisViaticosContent() {
                 </select>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <button
-                  className="px-4 py-2 rounded-lg border border-blue-200 bg-white text-blue-600 hover:bg-blue-50 transition-colors text-sm font-medium"
+                  className="px-3 sm:px-4 py-2 rounded-lg border border-blue-200 bg-white text-blue-600 hover:bg-blue-50 transition-colors text-sm font-medium w-full sm:w-auto"
                   onClick={() => {
                     setSearchTerm('');
                     setStatusFilter('');
@@ -411,20 +411,20 @@ function MisViaticosContent() {
                   Limpiar Filtros
                 </button>
                 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                   <Link
                     href="/dashboard/solicitante/nuevo-viatico"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                   >
-                    <FaPlus className="w-4 h-4" />
+                    <FaPlus className="w-3 sm:w-4 h-3 sm:h-4" />
                     Nueva Solicitud
                   </Link>
                   
                   <Button
                     onClick={() => setIsExportModalOpen(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm transition-colors duration-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                   >
-                    <FaFilePdf className="w-4 h-4" />
+                    <FaFilePdf className="w-3 sm:w-4 h-3 sm:h-4" />
                     Exportar
                   </Button>
                 </div>
@@ -457,9 +457,10 @@ function MisViaticosContent() {
             </div>
           )}
 
-          {/* Tabla de viáticos */}
+          {/* Tabla de viáticos - Desktop */}
           <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Vista de tabla para desktop */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full divide-y divide-blue-200">
                 <thead className="bg-gradient-to-r from-blue-50 to-blue-100/50">
                   <tr>
@@ -477,7 +478,7 @@ function MisViaticosContent() {
                 <tbody className="divide-y divide-blue-100">
                   {currentViaticos.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-6 py-12 text-center text-blue-900/80">
+                      <td colSpan={9} className="px-6 py-12 text-center text-blue-900/80">
                         <FileText className="w-12 h-12 mx-auto mb-4 text-blue-300" />
                         <p className="text-lg font-semibold">No tienes viáticos aún</p>
                         <p className="text-sm text-blue-500 mt-1">
@@ -545,7 +546,6 @@ function MisViaticosContent() {
                         </td>
                         <td className="px-3 py-2.5">
                           <div className="flex items-center justify-center gap-1.5">
-                            {/* Botón de ver detalles disponible para todos los estados */}
                             <button
                               title="Ver detalles"
                               className="inline-flex items-center justify-center p-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
@@ -553,7 +553,6 @@ function MisViaticosContent() {
                             >
                               <FaEye className="w-3.5 h-3.5" />
                             </button>
-                            {/* Si está pendiente, también mostrar editar y eliminar */}
                             {String(v.estado).toLowerCase() === 'pendiente' && (
                               <>
                                 <Link
@@ -573,41 +572,6 @@ function MisViaticosContent() {
                               </>
                             )}
                           </div>
-                            {/* Modal de confirmación para eliminar */}
-                            {showModal && (
-                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a237e19] backdrop-blur-sm">
-                                <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-                                    <div className="flex items-center justify-between px-6 py-4 bg-red-50 rounded-t-2xl border-b border-red-200">
-                                    <div className="flex items-center gap-2">
-                                        <AlertCircle className="w-6 h-6 text-red-600" />
-                                        <span className="text-lg font-bold text-red-700">¿Eliminar viático?</span>
-                                    </div>
-                                    <button onClick={() => { setShowModal(false); setViaticoAEliminar(null); }} className="text-red-400 hover:text-red-600 text-xl font-bold px-2 py-1 rounded-full transition">×</button>
-                                    </div>
-                                    <div className="px-8 py-6 flex flex-col items-center">
-                                    <p className="text-blue-900 text-base mb-4 text-center">Esta acción eliminará el viático de forma permanente. No podrás recuperarlo.</p>
-                                    <div className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mb-4 text-left">
-                                        <span className="block text-xs text-gray-500 font-semibold mb-1">Elemento a eliminar:</span>
-                                        <span className="font-mono text-blue-800 text-sm">ID {viaticoAEliminar}</span>
-                                    </div>
-                                    <div className="w-full bg-red-50 border border-red-200 rounded-lg px-4 py-2 mb-6 flex items-center gap-2">
-                                        <span className="text-red-600 font-bold">Advertencia</span>
-                                        <span className="text-xs text-red-700">⚠️ Haz esto solo si estás completamente seguro</span>
-                                    </div>
-                                    <div className="flex gap-4 w-full justify-center">
-                                        <button
-                                        className="px-6 py-2 rounded-lg border border-gray-400 bg-white text-gray-800 font-semibold hover:bg-gray-100 transition"
-                                        onClick={() => { setShowModal(false); setViaticoAEliminar(null); }}
-                                        >Cancelar</button>
-                                        <button
-                                        className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition"
-                                        onClick={() => handleEliminar()}
-                                        >Eliminar</button>
-                                    </div>
-                                    </div>
-                                </div>
-                                </div>
-                            )}
                         </td>
                       </tr>
                       );
@@ -617,35 +581,222 @@ function MisViaticosContent() {
               </table>
             </div>
 
-            {/* Paginación visual */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between px-6 py-6 border-t border-blue-100 gap-6 bg-gradient-to-r from-blue-100/60 to-blue-50/80">
-              <div className="text-blue-900 text-base font-medium">
-                Mostrando <span className="font-bold text-blue-700">{filteredViaticos.length === 0 ? 0 : startIndex + 1}-{endIndex}</span> de <span className="font-bold text-blue-700">{filteredViaticos.length}</span>
-              </div>
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setCurrentPage(1)}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === 1 ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                  >Primera</button>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === 1 ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                  >Anterior</button>
-                  <span className="text-blue-900 text-base font-semibold px-2">Página <span className="text-blue-700">{currentPage}</span> de <span className="text-blue-700">{totalPages}</span></span>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === totalPages ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                  >Siguiente</button>
-                  <button
-                    onClick={() => setCurrentPage(totalPages)}
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === totalPages ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                  >Última</button>
+            {/* Vista de tarjetas para móvil */}
+            <div className="md:hidden">
+              {currentViaticos.length === 0 ? (
+                <div className="px-6 py-12 text-center text-blue-900/80">
+                  <FileText className="w-12 h-12 mx-auto mb-4 text-blue-300" />
+                  <p className="text-lg font-semibold">No tienes viáticos aún</p>
+                  <p className="text-sm text-blue-500 mt-1">
+                    {searchTerm || statusFilter || dateFilter
+                      ? 'No se encontraron viáticos con los filtros aplicados'
+                      : 'Crea tu primer viático'}
+                  </p>
                 </div>
+              ) : (
+                <div className="p-3 space-y-3">
+                  {currentViaticos.map((v: Viatico) => {
+                    const isHighlighted = highlightedId === v.id_viatico;
+                    return (
+                      <div 
+                        key={v.id_viatico}
+                        className={`border border-blue-200 rounded-lg p-4 bg-white shadow-sm transition-all ${
+                          isHighlighted 
+                            ? 'bg-yellow-100 border-yellow-400 shadow-lg animate-pulse' 
+                            : 'hover:shadow-md hover:border-blue-300'
+                        }`}
+                      >
+                        {/* Header de la tarjeta */}
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex flex-col">
+                            <span className="font-mono text-xs text-blue-800 bg-blue-50 px-2 py-1 rounded w-fit">
+                              {v.folio || '-'}
+                            </span>
+                            <div className="mt-2">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getEstadoColor(v.estado || '')} shadow-sm bg-white/90`}>
+                                {getEstadoIcon(v.estado || '')}
+                                <span className="ml-1 capitalize">{v.estado || 'pendiente'}</span>
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-blue-900 mb-1">
+                              {formatCurrency(Number(v.monto))}
+                            </div>
+                            {v.viatico_url && (
+                              <a
+                                href={`${v.viatico_url.startsWith('/') ? '' : '/'}${v.viatico_url}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center p-2 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                                title="Ver archivo"
+                              >
+                                <FaFilePdf className="w-4 h-4" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Información principal */}
+                        <div className="space-y-2 mb-4">
+                          <div>
+                            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Departamento</span>
+                            <p className="text-sm text-blue-900 font-medium mt-1">
+                              {v.departamento?.split(' ').map(word => 
+                                word.toLowerCase() === 'ti' ? 'TI' :
+                                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                              ).join(' ')}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Concepto</span>
+                            <p className="text-sm text-blue-900 mt-1">{v.concepto}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Cuenta Destino</span>
+                            <p className="text-sm text-blue-900/90 font-medium mt-1">{v.cuenta_destino}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Fecha Límite</span>
+                            <p className="text-sm text-blue-900/80 mt-1">{formatDate(v.fecha_limite_pago)}</p>
+                          </div>
+                        </div>
+
+                        {/* Botones de acción */}
+                        <div className="flex items-center justify-end gap-2 pt-3 border-t border-blue-100">
+                          <button
+                            title="Ver detalles"
+                            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-sm font-medium"
+                            onClick={() => handleOpenDetailModal(v)}
+                          >
+                            <FaEye className="w-3.5 h-3.5" />
+                            Ver
+                          </button>
+                          {String(v.estado).toLowerCase() === 'pendiente' && (
+                            <>
+                              <Link
+                                href={`/dashboard/solicitante/editar-viatico?id=${v.id_viatico}`}
+                                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors text-sm font-medium"
+                                title="Editar"
+                              >
+                                <FaEdit className="w-3.5 h-3.5" />
+                                Editar
+                              </Link>
+                              <button
+                                title="Eliminar"
+                                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors text-sm font-medium"
+                                onClick={() => { setShowModal(true); setViaticoAEliminar(v.id_viatico); }}
+                              >
+                                <FaTrash className="w-3.5 h-3.5" />
+                                Eliminar
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal de confirmación para eliminar */}
+            {showModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a237e19] backdrop-blur-sm">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4">
+                  <div className="flex items-center justify-between px-6 py-4 bg-red-50 rounded-t-2xl border-b border-red-200">
+                  <div className="flex items-center gap-2">
+                      <AlertCircle className="w-6 h-6 text-red-600" />
+                      <span className="text-lg font-bold text-red-700">¿Eliminar viático?</span>
+                  </div>
+                  <button onClick={() => { setShowModal(false); setViaticoAEliminar(null); }} className="text-red-400 hover:text-red-600 text-xl font-bold px-2 py-1 rounded-full transition">×</button>
+                  </div>
+                  <div className="px-8 py-6 flex flex-col items-center">
+                  <p className="text-blue-900 text-base mb-4 text-center">Esta acción eliminará el viático de forma permanente. No podrás recuperarlo.</p>
+                  <div className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mb-4 text-left">
+                      <span className="block text-xs text-gray-500 font-semibold mb-1">Elemento a eliminar:</span>
+                      <span className="font-mono text-blue-800 text-sm">ID {viaticoAEliminar}</span>
+                  </div>
+                  <div className="w-full bg-red-50 border border-red-200 rounded-lg px-4 py-2 mb-6 flex items-center gap-2">
+                      <span className="text-red-600 font-bold">Advertencia</span>
+                      <span className="text-xs text-red-700">⚠️ Haz esto solo si estás completamente seguro</span>
+                  </div>
+                  <div className="flex gap-4 w-full justify-center">
+                      <button
+                      className="px-6 py-2 rounded-lg border border-gray-400 bg-white text-gray-800 font-semibold hover:bg-gray-100 transition"
+                      onClick={() => { setShowModal(false); setViaticoAEliminar(null); }}
+                      >Cancelar</button>
+                      <button
+                      className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                      onClick={() => handleEliminar()}
+                      >Eliminar</button>
+                  </div>
+                  </div>
+              </div>
+              </div>
+            )}
+
+            {/* Paginación responsiva */}
+            <div className="border-t border-blue-100 bg-gradient-to-r from-blue-100/60 to-blue-50/80">
+              {/* Información de registros */}
+              <div className="px-3 sm:px-6 py-3 sm:py-4">
+                <div className="text-xs sm:text-sm text-blue-900 font-medium text-center">
+                  Mostrando <span className="font-bold text-blue-700">{filteredViaticos.length === 0 ? 0 : startIndex + 1}-{endIndex}</span> de <span className="font-bold text-blue-700">{filteredViaticos.length}</span>
+                </div>
+              </div>
+
+              {totalPages > 1 && (
+                <>
+                  {/* Paginador Móvil - Diseño VERTICAL */}
+                  <div className="flex md:hidden flex-col items-center gap-2 px-2 py-3 border-t border-blue-100">
+                    <div className="text-xs font-medium text-blue-700">
+                      Página {currentPage} de {totalPages}
+                    </div>
+                    <div className="flex items-center justify-center gap-4">
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="flex items-center gap-1 px-3 py-2 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300 transition-colors"
+                      >
+                        <ChevronLeft className="w-3 h-3" />
+                        Anterior
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="flex items-center gap-1 px-3 py-2 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300 transition-colors"
+                      >
+                        Siguiente
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Paginador Desktop */}
+                  <div className="hidden md:flex items-center justify-center gap-2 px-6 py-4 border-t border-blue-100">
+                    <button
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === 1 ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    >Primera</button>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === 1 ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    >Anterior</button>
+                    <span className="text-blue-900 text-base font-semibold px-2">Página <span className="text-blue-700">{currentPage}</span> de <span className="text-blue-700">{totalPages}</span></span>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === totalPages ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    >Siguiente</button>
+                    <button
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 border border-blue-300 shadow-sm ${currentPage === totalPages ? 'bg-gray-200 text-blue-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    >Última</button>
+                  </div>
+                </>
               )}
             </div>
           </div>
