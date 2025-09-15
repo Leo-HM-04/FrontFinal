@@ -204,40 +204,40 @@ export default function NuevaRecurrentePage() {
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="max-w-7xl mx-auto px-8 py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12">
           {/* Header */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-white/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6">
-                <div className="p-4 rounded-full bg-white/20">
-                  <Clock className="w-7 h-7 text-white" />
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 md:mb-12 border border-white/20">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left">
+                <div className="p-3 sm:p-4 rounded-full bg-white/20">
+                  <Clock className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-white font-montserrat mb-1">Nueva Plantilla Recurrente</h1>
-                  <p className="text-white/80 text-lg">Configura pagos automáticos periódicos</p>
+                  <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-white font-montserrat mb-1">Nueva Plantilla Recurrente</h1>
+                  <p className="text-white/80 text-base sm:text-lg">Configura pagos automáticos periódicos</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
-            <div className="flex items-center space-x-4 mb-12">
-              <div className="p-4 rounded-full bg-white/20">
-                <FileText className="w-7 h-7 text-white" />
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-8 md:p-12">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6 sm:mb-8 md:mb-12">
+              <div className="p-3 sm:p-4 rounded-full bg-white/20">
+                <FileText className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-1">Plantilla Recurrente</h2>
-                <p className="text-white/80 text-base">Completa todos los campos para crear tu plantilla</p>
+              <div className="text-center sm:text-left">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">Plantilla Recurrente</h2>
+                <p className="text-white/80 text-sm sm:text-base">Completa todos los campos para crear tu plantilla</p>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-10 max-w-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0 w-full">
+            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 md:space-y-10 max-w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 sm:gap-x-8 md:gap-x-12 gap-y-6 sm:gap-y-8 w-full">
                 {/* Columna izquierda: datos bancarios */}
                 <div className="flex-1 space-y-8">
                   <div className="mb-0">
-                    <label className="block text-base font-medium text-white/90 mb-3">
-                      <CreditCard className="w-4 h-4 inline mr-2" />
+                    <label className="block text-sm sm:text-base font-medium text-white/90 mb-2 sm:mb-3">
+                      <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-1.5 sm:mr-2" />
                       Datos Bancarios *
                     </label>
                     <select
@@ -245,7 +245,7 @@ export default function NuevaRecurrentePage() {
                       value={formData.tipo_cuenta_destino}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 md:py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm sm:text-base"
                     >
                       <option value="CLABE" className="text-black">CLABE</option>
                       <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
@@ -485,15 +485,15 @@ export default function NuevaRecurrentePage() {
                         dateFormat="yyyy-MM-dd"
                         minDate={new Date()}
                         placeholderText="Selecciona la fecha"
-                        className={`w-full px-5 py-4 pr-12 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.siguiente_fecha ? 'border-red-400' : ''}`}
-                        calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg"
+                        className={`w-full px-3 sm:px-4 py-2 sm:py-3 md:py-4 pr-10 sm:pr-12 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm sm:text-base ${errors.siguiente_fecha ? 'border-red-400' : ''}`}
+                        calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg text-sm sm:text-base"
                         locale={es}
                       />
                       <span className="absolute right-4 pointer-events-none">
                         <Calendar className="w-5 h-5 text-white/70" />
                       </span>
                     </div>
-                    {errors.siguiente_fecha && <span className="text-red-400 text-sm mt-1 block">{errors.siguiente_fecha}</span>}
+                    {errors.siguiente_fecha && <span className="text-red-400 text-xs sm:text-sm mt-1 block">{errors.siguiente_fecha}</span>}
                   </div>
                 </div>
               </div>
