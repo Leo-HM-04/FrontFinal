@@ -23,10 +23,11 @@ export function Pagination({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   const getVisiblePages = () => {
-    const delta = window.innerWidth < 640 ? 1 : 2; // Menos páginas en móvil
+    const delta = 1; // Solo 1 página a cada lado para móvil
     const range = [];
     const rangeWithDots = [];
 
+    // En móvil, solo mostrar página actual y adyacentes
     for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
       range.push(i);
     }
@@ -50,68 +51,53 @@ export function Pagination({
 
   // Mostrar siempre la paginación, incluso si solo hay una página
   return (
-    <div className="flex flex-col gap-2 sm:gap-4 p-2 sm:p-3 lg:p-6 bg-white border-t border-gray-200 rounded-b-xl">
-      {/* Información de registros - más compacta en móvil */}
-      <div className="text-xs sm:text-sm text-gray-700 font-medium text-center">
-        Mostrando {startItem} a {endItem} de {totalItems} resultados
-      </div>
-
-      {/* Layout móvil vs desktop completamente diferente */}
-      <div className="flex flex-col sm:hidden gap-2">
-        {/* Versión móvil simplificada */}
-        <div className="flex justify-between items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(1)}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1 px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 disabled:opacity-50"
-          >
-            <ChevronLeft className="w-3 h-3" />
-            Primera
-          </Button>
-          
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
-            >
-              <ChevronLeft className="w-3 h-3" />
-            </Button>
-            
-            <span className="px-3 py-1 text-xs font-medium bg-blue-600 text-white rounded min-w-[60px] text-center">
-              {currentPage} / {totalPages}
-            </span>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500"
-            >
-              <ChevronRight className="w-3 h-3" />
-            </Button>
-          </div>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(totalPages)}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 disabled:opacity-50"
-          >
-            Última
-            <ChevronRight className="w-3 h-3" />
-          </Button>
+    <div className="w-full bg-white border-t border-gray-200 rounded-b-xl">
+      {/* Información de registros */}
+      <div className="px-2 sm:px-6 py-2 sm:py-4">
+        <div className="text-xs sm:text-sm text-gray-700 font-medium text-center">
+          Mostrando {startItem} a {endItem} de {totalItems} resultados
         </div>
       </div>
 
-      {/* Versión desktop (oculta en móvil) */}
-      <div className="hidden sm:flex items-center justify-center gap-2">
+      {/* Paginador Móvil - Solo botones esenciales */}
+      <div className="flex sm:hidden items-center justify-between px-2 py-2 border-t border-gray-100">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300 disabled:text-gray-500"
+        >
+          <ChevronLeft className="w-3 h-3" />
+          Anterior
+        </Button>
+        
+        <div className="flex items-center gap-1">
+          <span className="px-2 py-1 text-xs font-medium text-gray-600">
+            Página
+          </span>
+          <span className="px-3 py-1 text-sm font-bold bg-blue-600 text-white rounded min-w-[50px] text-center">
+            {currentPage}
+          </span>
+          <span className="px-2 py-1 text-xs font-medium text-gray-600">
+            de {totalPages}
+          </span>
+        </div>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 text-white rounded disabled:bg-gray-300 disabled:text-gray-500"
+        >
+          Siguiente
+          <ChevronRight className="w-3 h-3" />
+        </Button>
+      </div>
+
+      {/* Paginador Desktop - Completo */}
+      <div className="hidden sm:flex items-center justify-center gap-2 px-6 py-4 border-t border-gray-100">
         <Button
           variant="outline"
           size="sm"
@@ -123,7 +109,7 @@ export function Pagination({
           Anterior
         </Button>
 
-        {/* Números de página para desktop */}
+        {/* Números de página */}
         <div className="flex items-center gap-2 mx-4">
           {getVisiblePages().map((page, index) => (
             <React.Fragment key={index}>
