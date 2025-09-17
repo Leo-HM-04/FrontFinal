@@ -508,6 +508,40 @@ export default function NuevoViaticoPage() {
             </tr>
         </table>
 
+        <!-- COMPROBANTE -->
+        <div class="section-title">COMPROBANTE</div>
+        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #000; background-color: #f8f9fa;">
+            <p style="margin: 0 0 10px 0; font-weight: normal; color: #000;">
+                Inserta aquí la fotografía del comprobante o adjunta el archivo correspondiente.
+            </p>
+            <div style="border: 1px solid #000; height: 200px; background-color: white; display: flex; align-items: center; justify-content: center; color: #666;">
+                <div style="text-align: center; font-size: 14px;">
+                    <div style="font-size: 60px; margin-bottom: 10px; color: #ddd;">📄</div>
+                    <p style="margin: 0;">Espacio para comprobante</p>
+                    <p style="margin: 5px 0 0 0; font-size: 12px;">(Fotografía o archivo adjunto)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADVERTENCIAS -->
+        <div class="section-title">ADVERTENCIAS PARA EL ENVÍO DE COMPROBANTES</div>
+        <div style="margin-bottom: 30px; padding: 15px; border: 1px solid #000; background-color: #fff8dc;">
+            <ul style="margin: 0; padding-left: 20px; list-style-type: disc; color: #000;">
+                <li style="margin-bottom: 10px; line-height: 1.4;">
+                    <strong>Si el comprobante es un documento (PDF, Word, Excel), adjúntalo aparte de esta plantilla.</strong>
+                </li>
+                <li style="margin-bottom: 10px; line-height: 1.4;">
+                    <strong>Cuida la presentación y la legibilidad:</strong> enfoca, recorta bordes y confirma que se lean monto, fecha y conceptos.
+                </li>
+                <li style="margin-bottom: 10px; line-height: 1.4;">
+                    <strong>Evita fotos a la pantalla o capturas sin recortar;</strong> no envíes mensajes de WhatsApp difíciles de leer.
+                </li>
+                <li style="margin-bottom: 0; line-height: 1.4;">
+                    <strong>Incluye contexto suficiente</strong> (proveedor, concepto, fecha, monto desglosado e información de pago). Evita enviar una imagen borrosa o un mensaje suelto; agrega una nota breve en 'Comentarios' si aplica.
+                </li>
+            </ul>
+        </div>
+
         <!-- FIRMAS -->
         <div class="signature-section">
             <div class="section-title">AUTORIZACIÓN</div>
@@ -525,6 +559,16 @@ export default function NuevoViaticoPage() {
                     </td>
                 </tr>
             </table>
+        </div>
+
+        <!-- PIE DE PÁGINA CORPORATIVO -->
+        <div style="margin-top: 40px; text-align: center; padding: 15px; border-top: 2px solid #3A75BD; background-color: #f8f9fa;">
+            <div style="font-weight: bold; color: #3A75BD; font-size: 16px; margin-bottom: 5px;">Bechapra</div>
+            <div style="font-size: 11px; color: #666; line-height: 1.3;">
+                Solicitud de Viáticos - Documento oficial<br/>
+                Av. Insurgentes Sur 1079, Col del Valle Sur, Benito Juárez, Ciudad de México 03720, México<br/>
+                @bechapra | bechapra.com
+            </div>
         </div>
     </div>
 </body>
