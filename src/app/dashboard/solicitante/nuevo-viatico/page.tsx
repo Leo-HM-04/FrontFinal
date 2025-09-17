@@ -231,11 +231,10 @@ export default function NuevoViaticoPage() {
   // Función para manejar la descarga de la plantilla
   const handleDescargarPlantilla = async () => {
     try {
-      // Verificar si el archivo existe
-      const response = await fetch('/plantilla-viaticos.docx');
+      // Por ahora descargamos un archivo temporal mientras llega la plantilla oficial
+      const response = await fetch('/plantilla-viaticos-temporal.txt');
       
       if (!response.ok) {
-        // Si el archivo no existe, mostrar mensaje
         setMensajeGlobal('La plantilla estará disponible próximamente. Por favor contacta al administrador.');
         setExito(false);
         return;
@@ -246,19 +245,19 @@ export default function NuevoViaticoPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Plantilla_Solicitud_Viaticos.docx';
+      link.download = 'Instrucciones_Viaticos_Temporal.txt';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       // Mensaje de éxito
-      setMensajeGlobal('¡Plantilla descargada exitosamente! Úsala para crear tu solicitud.');
+      setMensajeGlobal('¡Instrucciones descargadas! La plantilla oficial de Word estará disponible próximamente.');
       setExito(true);
       
     } catch (error) {
       console.error('Error al descargar plantilla:', error);
-      setMensajeGlobal('Error al descargar la plantilla. Intenta nuevamente.');
+      setMensajeGlobal('Error al descargar las instrucciones. Intenta nuevamente.');
       setExito(false);
     }
   };
@@ -295,7 +294,9 @@ export default function NuevoViaticoPage() {
                       </h3>
                       <p className="text-blue-50 text-base lg:text-lg leading-relaxed font-medium">
                         <strong className="text-white">Usa el formato recomendado para solicitar tus viáticos</strong>, 
-                        si aún no lo tienes, <strong className="text-yellow-200">¡descárgalo aquí!</strong>
+                        si aún no lo tienes, <strong className="text-yellow-200">¡descarga las instrucciones aquí!</strong>
+                        <br />
+                        <small className="text-blue-200">*Plantilla oficial de Word próximamente</small>
                       </p>
                     </div>
                   </div>
@@ -307,7 +308,7 @@ export default function NuevoViaticoPage() {
                       className="group bg-white text-blue-700 font-bold py-4 px-8 rounded-2xl shadow-xl hover:bg-yellow-50 hover:text-blue-800 transform hover:scale-110 hover:-rotate-1 transition-all duration-300 flex items-center gap-3 text-xl border-4 border-white/20 hover:border-yellow-200"
                     >
                       <FaDownload className="text-2xl group-hover:animate-bounce" />
-                      <span>Descargar Plantilla</span>
+                      <span>Descargar Guía</span>
                     </button>
                   </div>
                 </div>
