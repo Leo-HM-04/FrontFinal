@@ -1,6 +1,10 @@
 import React, { useCallback } from 'react';
 import { CampoPlantilla } from '@/types/plantillas';
 import { NumericFormat } from 'react-number-format';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { es } from 'date-fns/locale/es';
+import { formatDateForAPI } from '@/utils/dateUtils';
 
 interface CampoFormularioProps {
   campo: CampoPlantilla;
@@ -279,14 +283,25 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
         );
 
       case 'fecha':
+        const fechaValue = valor instanceof Date ? valor : (valor ? new Date(valor as string) : null);
         return (
-          <input
-            type="date"
-            value={valorStr}
-            onChange={(e) => onChange(e.target.value)}
-            className={`${baseClasses} px-3 py-2`}
-            aria-describedby={error ? `${campo.id}-error` : undefined}
-          />
+          <div className="relative">
+            <DatePicker
+              selected={fechaValue}
+              onChange={(date: Date | null) => {
+                onChange(date ? formatDateForAPI(date) : '');
+              }}
+              dateFormat="yyyy-MM-dd"
+              minDate={new Date()}
+              placeholderText={campo.placeholder || "Selecciona la fecha"}
+              className={`${baseClasses} px-3 py-2 w-full`}
+              calendarClassName="bg-white text-gray-900 rounded-lg shadow-lg border border-gray-300"
+              locale={es}
+              aria-describedby={error ? `${campo.id}-error` : undefined}
+              showPopperArrow={false}
+              popperClassName="z-50"
+            />
+          </div>
         );
 
       default:
