@@ -1208,6 +1208,210 @@ export const plantillaRegresosTransferencia: PlantillaSolicitud = {
   }
 };
 
+// Plantilla para REGRESOS EN EFECTIVO
+export const plantillaRegresosEfectivo: PlantillaSolicitud = {
+  id: 'regresos-efectivo',
+  nombre: 'REGRESOS EN EFECTIVO',
+  descripcion: 'Plantilla para solicitudes de regreso en efectivo',
+  version: '1.0.0',
+  activa: true,
+  categoria: 'regresos',
+  icono: '💵',
+  secciones: [
+    {
+      id: 'datos-generales',
+      titulo: 'Datos Generales',
+      descripcion: 'Información general del regreso en efectivo',
+      campos: [
+        {
+          id: 'asunto',
+          nombre: 'asunto',
+          tipo: 'texto',
+          etiqueta: 'Asunto',
+          placeholder: 'Describe el asunto del regreso',
+          ayuda: 'Ej. Solicitud Regreso en Efectivo - BANCH',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 10,
+            mensaje: 'El asunto debe tener al menos 10 caracteres'
+          },
+          estilos: {
+            ancho: 'completo'
+          }
+        },
+        {
+          id: 'cliente',
+          nombre: 'cliente',
+          tipo: 'texto',
+          etiqueta: 'Cliente',
+          placeholder: 'Nombre del cliente',
+          ayuda: 'Ej. ROCALLOSA',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 2,
+            mensaje: 'Ingrese el nombre del cliente'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'persona_recibe',
+          nombre: 'persona_recibe',
+          tipo: 'texto',
+          etiqueta: 'Persona que Recibe',
+          placeholder: 'Nombre de la persona que recibe',
+          ayuda: 'Ej. Juan Domínguez',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 2,
+            mensaje: 'Ingrese el nombre de la persona que recibe'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'fecha_entrega',
+          nombre: 'fecha_entrega',
+          tipo: 'fecha',
+          etiqueta: 'Fecha de Entrega',
+          ayuda: 'Fecha en la que se acordó la entrega del efectivo al cliente',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            mensaje: 'Seleccione la fecha de entrega'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        }
+      ],
+      estilos: {
+        columnas: 2,
+        espaciado: 'normal'
+      }
+    },
+    {
+      id: 'montos',
+      titulo: 'Montos',
+      descripcion: 'Montos de efectivo y viáticos',
+      campos: [
+        {
+          id: 'monto_efectivo',
+          nombre: 'monto_efectivo',
+          tipo: 'numero',
+          etiqueta: 'Monto Efectivo',
+          placeholder: 'Ej. 56,000.00',
+          ayuda: 'Monto que tesorería debe entregar en efectivo',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minimo: 0.01,
+            mensaje: 'El monto efectivo debe ser mayor a 0'
+          },
+          estilos: {
+            ancho: 'medio',
+            formato: 'moneda'
+          }
+        },
+        {
+          id: 'viaticos',
+          nombre: 'viaticos',
+          tipo: 'numero',
+          etiqueta: 'Viáticos',
+          placeholder: 'Ej. 500.00',
+          ayuda: 'Son los viáticos en efectivo que se entregarán a la persona que hará la entrega del efectivo',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: false,
+            minimo: 0,
+            mensaje: 'Los viáticos deben ser mayor o igual a 0'
+          },
+          estilos: {
+            ancho: 'medio',
+            formato: 'moneda'
+          }
+        }
+      ],
+      estilos: {
+        columnas: 2,
+        espaciado: 'normal'
+      }
+    },
+    {
+      id: 'adicionales',
+      titulo: 'Adicionales',
+      descripcion: 'Elementos adicionales opcionales',
+      campos: [
+        {
+          id: 'elementos_adicionales',
+          nombre: 'elementos_adicionales',
+          tipo: 'checkbox',
+          etiqueta: 'Adicionales',
+          ayuda: 'Son elementos adicionales de manera opcional que se entregan junto con el efectivo',
+          valorPorDefecto: [],
+          validaciones: {
+            requerido: false
+          },
+          opciones: [
+            { valor: 'tarjeta_banorte', etiqueta: '1 TARJETA BANORTE' },
+            { valor: 'token_banorte', etiqueta: '1 TOKEN BANORTE' }
+          ],
+          estilos: {
+            ancho: 'completo'
+          }
+        }
+      ],
+      estilos: {
+        columnas: 1,
+        espaciado: 'normal'
+      }
+    },
+    {
+      id: 'documentacion',
+      titulo: 'Documentación',
+      descripcion: 'Archivos de soporte',
+      campos: [
+        {
+          id: 'archivos_adjuntos',
+          nombre: 'archivos_adjuntos',
+          tipo: 'archivos',
+          etiqueta: 'Archivos Adjuntos',
+          ayuda: 'Dos archivos excel con el cálculo de las comisiones y una imagen o pdf con el comprobante del pago',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: false
+          },
+          estilos: {
+            ancho: 'completo',
+            multiple: true
+          }
+        }
+      ],
+      estilos: {
+        columnas: 1,
+        espaciado: 'normal'
+      }
+    }
+  ],
+  configuracion: {
+    permiteArchivosMultiples: true,
+    tiposArchivosPermitidos: ['.pdf', '.jpg', '.jpeg', '.png', '.xlsx', '.xls', '.doc', '.docx'],
+    tamanoMaximoArchivo: 25 * 1024 * 1024, // 25MB
+    mostrarProgreso: true
+  },
+  metadatos: {
+    creadoPor: 'Sistema',
+    fechaCreacion: new Date().toISOString(),
+    fechaModificacion: new Date().toISOString(),
+    usosFrecuentes: 0
+  }
+};
+
 // Lista de todas las plantillas disponibles
 export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaTarjetasN09Toka,
@@ -1216,7 +1420,8 @@ export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaPagoSuaFrenshetsi,
   plantillaPagoComisiones,
   plantillaPagoPolizasGnp,
-  plantillaRegresosTransferencia
+  plantillaRegresosTransferencia,
+  plantillaRegresosEfectivo
   // Aquí se pueden agregar más plantillas en el futuro
 ];
 
