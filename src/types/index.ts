@@ -75,6 +75,8 @@ export interface Solicitud {
   tipo_tarjeta_2?: string;
   cuenta_2?: string;
   banco_cuenta_2?: string;
+  // Campos de plantillas
+  plantilla_datos?: string;
 }
 
 export interface CreateSolicitudData {

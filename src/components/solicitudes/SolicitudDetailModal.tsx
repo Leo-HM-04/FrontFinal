@@ -362,12 +362,14 @@ return (
                     valorFormateado = valor ? 'Sí' : 'No';
                   } else if (clave.includes('fecha') && valor) {
                     try {
-                      valorFormateado = formatDateForDisplay(valor);
+                      valorFormateado = formatDateForDisplay(String(valor));
                     } catch {
-                      valorFormateado = valor;
+                      valorFormateado = String(valor);
                     }
                   } else if (clave.includes('monto') && valor) {
-                    valorFormateado = `$${parseFloat(valor).toLocaleString('es-MX')}`;
+                    valorFormateado = `$${parseFloat(String(valor)).toLocaleString('es-MX')}`;
+                  } else {
+                    valorFormateado = String(valor);
                   }
 
                   if (!valor || valor === '' || valor === null || valor === undefined) return null;

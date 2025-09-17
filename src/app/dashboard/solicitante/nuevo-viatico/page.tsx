@@ -5,7 +5,7 @@ import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ViaticosService } from '@/services/viaticos.service';
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaDownload, FaFileWord } from 'react-icons/fa';
 import { formatDateForAPI, getCurrentUTC6Date } from '@/utils/dateUtils';
 
 // Si no existe el tipo Viatico, defínelo aquí o impórtalo desde '@/types/viatico'
@@ -228,6 +228,18 @@ export default function NuevoViaticoPage() {
     setFormularios(formularios.filter((_, i) => i !== idx));
   };
 
+  // Función para manejar la descarga de la plantilla
+  const handleDescargarPlantilla = () => {
+    // Por ahora usamos una plantilla de prueba
+    // Más adelante se reemplazará con la plantilla real
+    const link = document.createElement('a');
+    link.href = '/plantilla-viaticos.docx'; // Ruta temporal
+    link.download = 'Plantilla_Solicitud_Viaticos.docx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
@@ -235,6 +247,39 @@ export default function NuevoViaticoPage() {
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-blue-900 mb-2">Nuevo Viático</h1>
             <p className="text-blue-600">Completa los campos necesarios para crear tu viático</p>
+          </div>
+
+          {/* Sección de Descarga de Plantilla */}
+          <div className="mb-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg border-2 border-blue-300 transform hover:scale-[1.02] transition-all duration-300">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="bg-white/20 p-3 rounded-xl">
+                  <FaFileWord className="text-3xl text-white" />
+                </div>
+                <div className="text-center md:text-left">
+                  <h3 className="text-xl font-bold mb-2">📋 Formato Recomendado</h3>
+                  <p className="text-blue-100 text-sm md:text-base leading-relaxed">
+                    <strong>Usa el formato recomendado para solicitar tus viáticos</strong>, si aún no lo tienes, <strong>descárgalo aquí</strong>
+                  </p>
+                </div>
+              </div>
+              <div className="flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={handleDescargarPlantilla}
+                  className="bg-white text-blue-600 font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-50 transform hover:scale-105 transition-all duration-200 flex items-center gap-2 text-lg"
+                >
+                  <FaDownload className="text-xl" />
+                  Descargar Plantilla
+                </button>
+              </div>
+            </div>
+            <div className="mt-4 text-center">
+              <div className="inline-flex items-center bg-white/10 rounded-full px-4 py-2 text-sm">
+                <span className="animate-pulse mr-2">💡</span>
+                <span className="font-medium">¡Importante! Usa esta plantilla para agilizar tu solicitud</span>
+              </div>
+            </div>
           </div>
           {mensajeGlobal && (
             <div

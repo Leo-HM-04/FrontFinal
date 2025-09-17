@@ -3,6 +3,8 @@
  * Permite personalizar los nombres de los campos sin cambiar la estructura de BD
  */
 
+import type { Solicitud } from '@/types/index';
+
 export interface EtiquetasCampo {
   [key: string]: string;
 }
@@ -176,7 +178,7 @@ export function esCampoOculto(plantillaId: string | null, campo: string): boolea
 }
 
 // Función para detectar el ID de plantilla desde tipo_pago_descripcion
-export function detectarPlantillaId(solicitud: any): string | null {
+export function detectarPlantillaId(solicitud: Solicitud): string | null {
   if (!solicitud.tipo_pago_descripcion) return null;
   
   // Buscar si tipo_pago_descripcion comienza con "Plantilla:" y extraer ID
@@ -201,7 +203,7 @@ export function detectarPlantillaId(solicitud: any): string | null {
 }
 
 // Función para obtener datos adicionales de plantilla_datos
-export function obtenerDatosPlantilla(solicitud: any): Record<string, any> {
+export function obtenerDatosPlantilla(solicitud: Solicitud): Record<string, unknown> {
   if (!solicitud.plantilla_datos) return {};
   
   try {
