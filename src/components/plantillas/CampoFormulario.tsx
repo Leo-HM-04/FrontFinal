@@ -708,28 +708,23 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         CLABE <span className="text-red-500">*</span>
                       </label>
-                      {cuenta.tipo_cuenta ? (
-                        <input
-                          type="text"
-                          value={cuenta.numero_cuenta}
-                          onChange={(e) => {
+                      <input
+                        type="text"
+                        value={cuenta.numero_cuenta}
+                        onChange={(e) => {
+                          if (cuenta.tipo_cuenta) {
                             const validacion = getValidacionTipoCuenta(cuenta.tipo_cuenta);
                             const soloNumeros = e.target.value.replace(/\D/g, '').slice(0, validacion.maxLength);
                             actualizarCuentaTransferencia(index, 'numero_cuenta', soloNumeros);
-                          }}
-                          placeholder={getValidacionTipoCuenta(cuenta.tipo_cuenta).placeholder}
-                          maxLength={getValidacionTipoCuenta(cuenta.tipo_cuenta).maxLength}
-                          className={`${baseClasses} px-3 py-2 w-full font-mono`}
-                        />
-                      ) : (
-                        <input
-                          type="text"
-                          disabled
-                          value=""
-                          placeholder="Seleccione el tipo de información bancaria"
-                          className={`${baseClasses} px-3 py-2 w-full bg-gray-100 text-gray-500 cursor-not-allowed`}
-                        />
-                      )}
+                          }
+                        }}
+                        placeholder={cuenta.tipo_cuenta ? getValidacionTipoCuenta(cuenta.tipo_cuenta).placeholder : 'Seleccione el tipo de información bancaria'}
+                        maxLength={cuenta.tipo_cuenta ? getValidacionTipoCuenta(cuenta.tipo_cuenta).maxLength : 20}
+                        disabled={!cuenta.tipo_cuenta}
+                        className={`${baseClasses} px-3 py-2 w-full font-mono ${
+                          !cuenta.tipo_cuenta ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+                        }`}
+                      />
                       <p className="text-xs text-gray-500 mt-1">
                         {cuenta.tipo_cuenta === 'clabe' && 'CLABE: 16 o 18 dígitos'}
                         {cuenta.tipo_cuenta === 'cuenta' && 'CUENTA: 8 o 10 dígitos'}
