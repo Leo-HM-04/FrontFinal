@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PlantillaSolicitud } from '@/types/plantillas';
 
 interface SelectorPlantillasProps {
@@ -14,26 +14,75 @@ export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
   onSeleccionar,
   className = ''
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  const handleSeleccionar = (plantilla: PlantillaSolicitud | null) => {
+    onSeleccionar(plantilla);
+    // Opcional: colapsar después de seleccionar
+    setIsExpanded(false);
+  };
+
   return (
     <div className={`space-y-4 ${className}`}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Seleccionar Plantilla de Solicitud
-        </h3>
-        {plantillaSeleccionada && (
-          <button
-            onClick={() => onSeleccionar(null)}
-            className="text-sm text-red-600 hover:text-red-700 font-medium"
-          >
-            Usar formulario estándar
-          </button>
-        )}
+      {/* Botón principal para expandir/colapsar la selección de plantillas */}
+      <div 
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="cursor-pointer bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-all duration-200 shadow-sm"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <span className="text-lg">
+                {plantillaSeleccionada ? (plantillaSeleccionada.icono || '📋') : '📋'}
+              </span>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {plantillaSeleccionada ? plantillaSeleccionada.nombre : 'Seleccionar Plantilla de Solicitud'}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {plantillaSeleccionada 
+                  ? 'Plantilla personalizada seleccionada' 
+                  : 'Haz clic para ver opciones disponibles'
+                }
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {plantillaSeleccionada && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSeleccionar(null);
+                }}
+                className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1 rounded-md hover:bg-red-50 transition-colors"
+              >
+                Quitar
+              </button>
+            )}
+            <div className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+              <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Sección expandible con las plantillas */}
+      {isExpanded && (
+        <div className="animate-in slide-in-from-top duration-300 ease-out">
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div className="mb-3">
+              <p className="text-sm text-gray-600 font-medium">
+                Selecciona una plantilla o usa el formulario estándar:
+              </p>
+            </div>
       
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
         {/* Opción para formulario estándar */}
         <div
-          onClick={() => onSeleccionar(null)}
+          onClick={() => handleSeleccionar(null)}
           className={`relative cursor-pointer rounded-lg border transition-all duration-200 hover:shadow-md ${
             !plantillaSeleccionada
               ? 'border-blue-500 bg-blue-50 shadow'
@@ -71,7 +120,7 @@ export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
         {plantillas.map((plantilla) => (
           <div
             key={plantilla.id}
-            onClick={() => onSeleccionar(plantilla)}
+            onClick={() => handleSeleccionar(plantilla)}
             className={`relative cursor-pointer rounded-lg border transition-all duration-200 hover:shadow-md ${
               plantillaSeleccionada?.id === plantilla.id
                 ? 'border-blue-500 bg-blue-50 shadow'
@@ -114,6 +163,9 @@ export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
           </div>
         ))}
       </div>
+          </div>
+        </div>
+      )}
       
       {plantillaSeleccionada && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
