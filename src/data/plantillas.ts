@@ -495,6 +495,27 @@ export const plantillaPagoSuaInternas: PlantillaSolicitud = {
           estilos: {
             ancho: 'medio'
           }
+        },
+        {
+          id: 'departamento_origen',
+          nombre: 'departamento_origen',
+          tipo: 'select',
+          etiqueta: 'Departamento que Solicita',
+          ayuda: 'Departamento desde el cual se genera la solicitud',
+          valorPorDefecto: 'administracion',
+          opciones: [
+            { valor: 'administracion', etiqueta: 'Administración' },
+            { valor: 'contabilidad', etiqueta: 'Contabilidad' },
+            { valor: 'finanzas', etiqueta: 'Finanzas' },
+            { valor: 'recursos humanos', etiqueta: 'Recursos Humanos' }
+          ],
+          validaciones: {
+            requerido: true,
+            mensaje: 'Debe seleccionar un departamento'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
         }
       ],
       estilos: {
