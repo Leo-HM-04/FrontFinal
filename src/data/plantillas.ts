@@ -939,13 +939,177 @@ export const plantillaPagoComisiones: PlantillaSolicitud = {
   }
 };
 
+// Plantilla para PAGO POLIZAS GNP
+export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
+  id: 'pago-polizas-gnp',
+  nombre: 'PAGO POLIZAS GNP',
+  descripcion: 'Plantilla para solicitudes de pago de pólizas GNP y otras aseguradoras',
+  version: '1.0.0',
+  activa: true,
+  categoria: 'pagos',
+  icono: '🛡️',
+  secciones: [
+    {
+      id: 'datos-generales',
+      titulo: 'Datos Generales',
+      descripcion: 'Información general del pago de pólizas',
+      campos: [
+        {
+          id: 'asunto',
+          nombre: 'asunto',
+          tipo: 'textarea',
+          etiqueta: 'Asunto',
+          placeholder: 'Describe el asunto del pago',
+          ayuda: 'Ej. Recibo de pago 1/1 // Seguro Vida GNP // Corporativo Banch',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 10,
+            mensaje: 'El asunto debe tener al menos 10 caracteres'
+          },
+          estilos: {
+            filas: 3,
+            ancho: 'completo'
+          }
+        },
+        {
+          id: 'titular_cuenta',
+          nombre: 'titular_cuenta',
+          tipo: 'select',
+          etiqueta: 'Titular de la Cuenta',
+          ayuda: 'Seleccione la aseguradora correspondiente',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            mensaje: 'Seleccione el titular de la cuenta'
+          },
+          opciones: [
+            { valor: 'gnp', etiqueta: 'GNP' },
+            { valor: 'zurich', etiqueta: 'ZURICH' },
+            { valor: 'axa', etiqueta: 'AXA' },
+            { valor: 'seguros_monterrey', etiqueta: 'Seguros Monterrey' }
+          ],
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'empresa_emisora',
+          nombre: 'empresa_emisora',
+          tipo: 'texto',
+          etiqueta: 'Empresa Emisora del Pago',
+          placeholder: 'Nombre de la empresa emisora',
+          ayuda: 'Ej. CORPORATIVO BANCH',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 2,
+            mensaje: 'Ingrese el nombre de la empresa emisora'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        }
+      ],
+      estilos: {
+        columnas: 2,
+        espaciado: 'normal'
+      }
+    },
+    {
+      id: 'metodos-pago',
+      titulo: 'Métodos de Pago',
+      descripcion: 'Configure los métodos de pago (máximo 4)',
+      campos: [
+        {
+          id: 'metodos_pago',
+          nombre: 'metodos_pago',
+          tipo: 'metodos_pago_dinamicos',
+          etiqueta: 'Métodos de Pago',
+          ayuda: 'Agregue hasta 4 métodos de pago diferentes',
+          valorPorDefecto: [],
+          validaciones: {
+            requerido: true,
+            mensaje: 'Debe agregar al menos un método de pago'
+          },
+          estilos: {
+            ancho: 'completo',
+            maximo: 4
+          }
+        }
+      ],
+      estilos: {
+        columnas: 1,
+        espaciado: 'amplio'
+      }
+    },
+    {
+      id: 'datos-finales',
+      titulo: 'Datos Finales',
+      descripcion: 'Monto y archivos adjuntos',
+      campos: [
+        {
+          id: 'monto',
+          nombre: 'monto',
+          tipo: 'numero',
+          etiqueta: 'Monto',
+          placeholder: 'Ej. 56,000.00',
+          ayuda: 'Monto a pagar al proveedor',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minimo: 0.01,
+            mensaje: 'El monto debe ser mayor a 0'
+          },
+          estilos: {
+            ancho: 'medio',
+            formato: 'moneda'
+          }
+        },
+        {
+          id: 'archivos_adjuntos',
+          nombre: 'archivos_adjuntos',
+          tipo: 'archivos',
+          etiqueta: 'Archivos Adjuntos',
+          ayuda: 'Dos o tres documentos en formato PDF que contengan los datos de pago y la carátula de la póliza',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: false
+          },
+          estilos: {
+            ancho: 'completo',
+            multiple: true
+          }
+        }
+      ],
+      estilos: {
+        columnas: 2,
+        espaciado: 'normal'
+      }
+    }
+  ],
+  configuracion: {
+    permiteArchivosMultiples: true,
+    tiposArchivosPermitidos: ['.pdf', '.jpg', '.jpeg', '.png', '.xlsx', '.xls', '.doc', '.docx'],
+    tamanoMaximoArchivo: 25 * 1024 * 1024, // 25MB
+    mostrarProgreso: true
+  },
+  metadatos: {
+    creadoPor: 'Sistema',
+    fechaCreacion: new Date().toISOString(),
+    fechaModificacion: new Date().toISOString(),
+    usosFrecuentes: 0
+  }
+};
+
 // Lista de todas las plantillas disponibles
 export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaTarjetasN09Toka,
   plantillaTarjetasTukash,
   plantillaPagoSuaInternas,
   plantillaPagoSuaFrenshetsi,
-  plantillaPagoComisiones
+  plantillaPagoComisiones,
+  plantillaPagoPolizasGnp
   // Aquí se pueden agregar más plantillas en el futuro
 ];
 

@@ -462,6 +462,141 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
           </div>
         );
 
+      case 'metodos_pago_dinamicos':
+        // Valor es un array de métodos de pago
+        const metodosPago = Array.isArray(valor) ? valor as Array<{banco_destino: string, convenio: string, referencia: string}> : [];
+        const maximo = campo.estilos?.maximo || 4;
+
+        const agregarMetodoPago = () => {
+          if (metodosPago.length < maximo) {
+            const nuevosMetodos = [...metodosPago, {banco_destino: '', convenio: '', referencia: ''}];
+            onChange(nuevosMetodos);
+          }
+        };
+
+        const actualizarMetodoPago = (index: number, campo: string, valor: string) => {
+          const nuevosMetodos = [...metodosPago];
+          nuevosMetodos[index] = {...nuevosMetodos[index], [campo]: valor};
+          onChange(nuevosMetodos);
+        };
+
+        const eliminarMetodoPago = (index: number) => {
+          const nuevosMetodos = metodosPago.filter((_, i) => i !== index);
+          onChange(nuevosMetodos);
+        };
+
+        const opcionesBancosMetodos = obtenerOpcionesBancos();
+
+        return (
+          <div className="space-y-6">
+            {/* Métodos de pago existentes */}
+            {metodosPago.map((metodo, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-medium text-gray-900">Método de Pago {index + 1}</h4>
+                  {metodosPago.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => eliminarMetodoPago(index)}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    >
+                      Eliminar
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Banco Destino */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Banco Destino <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={metodo.banco_destino}
+                      onChange={(e) => actualizarMetodoPago(index, 'banco_destino', e.target.value)}
+                      className={`${baseClasses} px-3 py-2`}
+                    >
+                      <option value="">Seleccione el banco</option>
+                      {opcionesBancosMetodos.map((banco) => (
+                        <option key={banco.valor} value={banco.valor}>
+                          {banco.etiqueta}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Convenio */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Convenio <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={metodo.convenio}
+                      onChange={(e) => actualizarMetodoPago(index, 'convenio', e.target.value)}
+                      placeholder="Ej. CIE 1234567"
+                      className={`${baseClasses} px-3 py-2`}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Ej. CIE 1234567</p>
+                  </div>
+
+                  {/* Referencia */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Referencia <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={metodo.referencia}
+                      onChange={(e) => {
+                        // Solo números, máximo 20 dígitos
+                        const soloNumeros = e.target.value.replace(/\D/g, '').slice(0, 20);
+                        actualizarMetodoPago(index, 'referencia', soloNumeros);
+                      }}
+                      placeholder="Ej. 11112222333344445555"
+                      maxLength={20}
+                      className={`${baseClasses} px-3 py-2 font-mono`}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Hasta 20 dígitos máximo</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Botón para agregar nuevo método */}
+            {metodosPago.length < maximo && (
+              <button
+                type="button"
+                onClick={agregarMetodoPago}
+                className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <span className="text-gray-600 font-medium">
+                    Agregar otro método de pago ({metodosPago.length}/{maximo})
+                  </span>
+                </div>
+              </button>
+            )}
+
+            {/* Mensaje inicial si no hay métodos */}
+            {metodosPago.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">No hay métodos de pago configurados</p>
+                <button
+                  type="button"
+                  onClick={agregarMetodoPago}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Agregar primer método de pago
+                </button>
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return (
           <input

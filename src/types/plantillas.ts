@@ -17,7 +17,8 @@ export type TipoCampo =
   | 'cuenta_clabe'
   | 'banco'
   | 'selector_cuenta'
-  | 'select_banco';
+  | 'select_banco'
+  | 'metodos_pago_dinamicos';
 
 export type ValidacionCampo = {
   requerido?: boolean;
@@ -66,6 +67,7 @@ export type CampoPlantilla = {
     filas?: number;
     formato?: 'moneda' | 'fecha' | 'numero';
     multiple?: boolean;
+    maximo?: number;
   };
 };
 
