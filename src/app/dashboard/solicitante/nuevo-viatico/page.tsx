@@ -313,7 +313,7 @@ export default function NuevoViaticoPage() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud y Desglose de Viáticos</title>
+    <title>Solicitud de Viáticos</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -325,20 +325,56 @@ export default function NuevoViaticoPage() {
         .header {
             text-align: center;
             margin-bottom: 40px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+            padding: 40px 20px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 70% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 30% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
         }
         
         .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 10px;
+            font-size: 42px;
+            font-weight: 300;
+            color: #1e293b;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .company-name::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
+            margin: 10px auto;
+            border-radius: 2px;
         }
         
         .document-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #1e40af;
-            text-decoration: underline;
+            font-size: 24px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+            margin-top: 10px;
         }
         
         .section-title {
@@ -431,7 +467,7 @@ export default function NuevoViaticoPage() {
 </head>
 <body>
     <div class="header">
-        <div class="company-name">BECHARA SOLUTIONS</div>
+        <div class="company-name">Bechapra</div>
         <div class="document-title">SOLICITUD Y DESGLOSE DE VIÁTICOS</div>
     </div>
 
@@ -617,9 +653,9 @@ export default function NuevoViaticoPage() {
     </div>
 
     <!-- PIE DE PÁGINA -->
-    <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #6b7280;">
-        <p><strong>BECHARA SOLUTIONS</strong> - Solicitud de Viáticos</p>
-        <p>Documento generado automáticamente - Versión 2.0</p>
+    <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #6b7280; padding: 20px; background-color: #f8fafc; border-radius: 8px;">
+        <p><strong>Bechapra</strong> - Solicitud de Viáticos</p>
+        <p>Documento generado automáticamente - Versión 2.1</p>
     </div>
 </body>
 </html>
