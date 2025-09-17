@@ -308,7 +308,8 @@ export default function HistorialSolicitudesPage() {
                     </div>
                   ) : (
                     <>
-                      <div className="overflow-x-auto">
+                      {/* Vista de tabla para desktop */}
+                      <div className="hidden md:block overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                           <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
@@ -466,6 +467,128 @@ export default function HistorialSolicitudesPage() {
                           </tbody>
                         </table>
                       </div>
+
+                      {/* Vista de tarjetas para móvil */}
+                      <div className="md:hidden">
+                        <div className="p-3 space-y-3">
+                          {quickFilteredSolicitudes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((solicitud) => {
+                            let estadoLabel = '';
+                            let estadoIcon = null;
+                            let statusColorClass = '';
+                            let borderColorClass = '';
+                            
+                            if (solicitud.estado === 'autorizada') {
+                              estadoLabel = 'Aprobada';
+                              estadoIcon = <CheckCircle className="w-4 h-4" />;
+                              statusColorClass = 'bg-green-100 text-green-800 border-green-200';
+                              borderColorClass = 'border-green-300 bg-green-50';
+                            } else if (solicitud.estado === 'rechazada') {
+                              estadoLabel = 'Rechazada';
+                              estadoIcon = <XCircle className="w-4 h-4" />;
+                              statusColorClass = 'bg-red-100 text-red-800 border-red-200';
+                              borderColorClass = 'border-red-300 bg-red-50';
+                            } else if (solicitud.estado === 'pagada') {
+                              estadoLabel = 'Pagada';
+                              estadoIcon = <CheckCircle className="w-4 h-4" />;
+                              statusColorClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                              borderColorClass = 'border-blue-300 bg-blue-50';
+                            }
+
+                            return (
+                              <div 
+                                key={solicitud.id_solicitud}
+                                className={`border rounded-lg p-4 shadow-sm transition-all hover:shadow-md hover:border-blue-300 ${borderColorClass || 'border-blue-200 bg-white'}`}
+                              >
+                                {/* Header de la tarjeta */}
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex flex-col">
+                                    <span className="font-mono text-xs text-blue-800 bg-blue-50 px-2 py-1 rounded w-fit">
+                                      {solicitud.folio || '-'}
+                                    </span>
+                                    <div className="mt-2">
+                                      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${statusColorClass}`}>
+                                        {estadoIcon}
+                                        {estadoLabel}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-lg font-bold text-blue-900 mb-1">
+                                      {formatCurrency(solicitud.monto)}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Información principal */}
+                                <div className="space-y-2 mb-4">
+                                  <div>
+                                    <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Usuario</span>
+                                    <p className="text-sm text-blue-900 font-medium mt-1">
+                                      {solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Departamento</span>
+                                    <p className="text-sm text-blue-900 mt-1">
+                                      <span className={`${getDepartmentColorClass(solicitud.departamento)} text-xs px-2 py-1 rounded`}>
+                                        {solicitud.departamento}
+                                      </span>
+                                    </p>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Fecha Envío</span>
+                                      <p className="text-sm text-blue-900/80 mt-1">
+                                        {solicitud.fecha_creacion ? formatDateTime(solicitud.fecha_creacion).date : '-'}
+                                      </p>
+                                      <p className="text-xs text-blue-700 mt-0.5">
+                                        {solicitud.fecha_creacion ? formatDateTime(solicitud.fecha_creacion).time : '-'}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Fecha Revisión</span>
+                                      <p className="text-sm text-blue-900/80 mt-1">
+                                        {solicitud.fecha_revision ? formatDateTime(solicitud.fecha_revision).date : '-'}
+                                      </p>
+                                      <p className="text-xs text-blue-700 mt-0.5">
+                                        {solicitud.fecha_revision ? formatDateTime(solicitud.fecha_revision).time : '-'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  {(solicitud.tipo_cuenta_destino || solicitud.tipo_tarjeta) && (
+                                    <div>
+                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Cuenta/Tarjeta</span>
+                                      <p className="text-sm text-blue-900 font-medium mt-1">
+                                        {solicitud.tipo_cuenta_destino ? solicitud.tipo_cuenta_destino : ''}
+                                        {solicitud.tipo_tarjeta ? ` / ${solicitud.tipo_tarjeta}` : ''}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {solicitud.banco_destino && (
+                                    <div>
+                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Banco</span>
+                                      <p className="text-sm text-blue-900/90 mt-1">{solicitud.banco_destino}</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Botón de acción */}
+                                <div className="flex pt-3 border-t border-blue-100">
+                                  <button
+                                    onClick={() => handleViewDetail(solicitud)}
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-sm font-medium"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                    Ver Detalles
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Paginación */}
                       <div style={{backgroundColor: '#F0F4FC'}} className="px-6 py-4">
                         <Pagination
                           currentPage={currentPage}
