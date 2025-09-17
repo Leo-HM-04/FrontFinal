@@ -650,18 +650,18 @@ export default function EditarSolicitudPage() {
     return (
       <ProtectedRoute requiredRoles={['solicitante']}>
         <SolicitanteLayout>
-          <div className="max-w-7xl mx-auto px-8 py-12 md:py-16">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-white/20">
-              <div className="h-6 w-64 bg-white/20 rounded mb-3" />
-              <div className="h-4 w-96 bg-white/10 rounded" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12 lg:py-16">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 md:mb-12 border border-white/20">
+              <div className="h-4 sm:h-6 w-48 sm:w-64 bg-white/20 rounded mb-2 sm:mb-3" />
+              <div className="h-3 sm:h-4 w-72 sm:w-96 bg-white/10 rounded" />
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
-              <div className="h-5 w-72 bg-white/10 rounded mb-6" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="h-12 bg-white/10 rounded" />
-                <div className="h-12 bg-white/10 rounded" />
-                <div className="h-12 bg-white/10 rounded" />
-                <div className="h-12 bg-white/10 rounded" />
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16">
+              <div className="h-4 sm:h-5 w-56 sm:w-72 bg-white/10 rounded mb-4 sm:mb-6" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                <div className="h-10 sm:h-12 bg-white/10 rounded" />
+                <div className="h-10 sm:h-12 bg-white/10 rounded" />
+                <div className="h-10 sm:h-12 bg-white/10 rounded" />
+                <div className="h-10 sm:h-12 bg-white/10 rounded" />
               </div>
             </div>
           </div>
@@ -673,36 +673,44 @@ export default function EditarSolicitudPage() {
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="max-w-7xl mx-auto px-8 py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-12 lg:py-16">
           {/* Header */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12 border border-white/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 md:mb-12 border border-white/20">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-3 sm:space-x-6">
                 <div>
-                  <h1 className="text-3xl font-bold text-white font-montserrat mb-1">Editar Solicitud de Pago</h1>
-                  <p className="text-white/80 text-lg">Actualiza la información de tu solicitud</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-white font-montserrat mb-1">
+                    Editar Solicitud de Pago
+                  </h1>
+                  <p className="text-white/80 text-sm sm:text-base md:text-lg">
+                    Actualiza la información de tu solicitud
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-12 md:p-16">
-            <div className="flex items-center space-x-4 mb-12">
-              <div className="p-4 rounded-full bg-white/20">
-                <FileText className="w-7 h-7 text-white" />
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8 md:mb-12">
+              <div className="p-3 sm:p-4 rounded-full bg-white/20 self-start sm:self-auto">
+                <FileText className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white mb-1">Solicitud #{solicitudId}</h2>
-                <p className="text-white/80 text-base">Edita los campos necesarios y guarda los cambios</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">
+                  Solicitud #{solicitudId}
+                </h2>
+                <p className="text-white/80 text-sm sm:text-base">
+                  Edita los campos necesarios y guarda los cambios
+                </p>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-10 max-w-full">
+            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 md:space-y-10 max-w-full">
               {/* SECCIÓN 1: INFORMACIÓN BÁSICA */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                 {/* Departamento */}
                 <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
+                  <label className="block text-sm sm:text-base font-medium text-white/90 mb-2 sm:mb-3">
                     <Building className="w-4 h-4 inline mr-2" />
                     Departamento *
                   </label>
@@ -711,7 +719,7 @@ export default function EditarSolicitudPage() {
                     value={formData.departamento}
                     onChange={handleInputChange}
                     required
-                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.departamento ? 'border-red-400' : ''}`}
+                    className={`w-full px-3 sm:px-4 md:px-5 py-3 sm:py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm sm:text-base ${errors.departamento ? 'border-red-400' : ''}`}
                   >
                     <option value="" className="text-gray-900">Seleccionar departamento</option>
                     {departamentoOptions.map(dept => (
@@ -725,7 +733,7 @@ export default function EditarSolicitudPage() {
 
                 {/* Monto */}
                 <div>
-                  <label className="block text-base font-medium text-white/90 mb-3">
+                  <label className="block text-sm sm:text-base font-medium text-white/90 mb-2 sm:mb-3">
                     <DollarSign className="w-4 h-4 inline mr-2" />
                     Monto *
                   </label>
@@ -745,9 +753,9 @@ export default function EditarSolicitudPage() {
                       if (!value) setErrors((prev) => ({ ...prev, monto: 'Este campo es obligatorio' }));
                       else setErrors((prev) => ({ ...prev, monto: undefined }));
                     }}
-                    className={`w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base ${errors.monto ? 'border-red-400' : ''}`}
+                    className={`w-full px-3 sm:px-4 md:px-5 py-3 sm:py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm sm:text-base ${errors.monto ? 'border-red-400' : ''}`}
                   />
-                  {errors.monto && <span className="text-red-400 text-sm mt-1 block">{errors.monto}</span>}
+                  {errors.monto && <span className="text-red-400 text-xs sm:text-sm mt-1 block">{errors.monto}</span>}
                 </div>
 
                 {/* Tipo de Moneda */}
@@ -760,7 +768,7 @@ export default function EditarSolicitudPage() {
                     name="tipo_moneda"
                     value={formData.tipo_moneda}
                     onChange={handleInputChange}
-                    className="w-full px-5 py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-base"
+                    className="w-full px-3 sm:px-4 md:px-5 py-3 sm:py-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm sm:text-base"
                   >
                     <option value="MXN" className="bg-blue-900 text-white">MXN (Peso Mexicano)</option>
                     <option value="USD" className="bg-blue-900 text-white">USD (Dólar Americano)</option>
@@ -769,14 +777,14 @@ export default function EditarSolicitudPage() {
               </div>
 
               {/* SECCIÓN 2: INFORMACIÓN BANCARIA */}
-              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                  <CreditCard className="w-5 h-5 mr-2" />
+              <div className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10">
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6 flex items-center">
+                  <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                   Información Bancaria
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
+                    <label className="block text-sm sm:text-base font-medium text-white/90 mb-2 sm:mb-3">
                       Datos Bancarios *
                     </label>
                     <select
@@ -784,7 +792,7 @@ export default function EditarSolicitudPage() {
                       value={formData.tipo_cuenta_destino}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                      className="w-full px-3 sm:px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                     >
                       <option value="CLABE" className="text-black">CLABE</option>
                       <option value="Número de Tarjeta" className="text-black">Número de Tarjeta</option>
@@ -818,14 +826,14 @@ export default function EditarSolicitudPage() {
 
                   {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona' && (
                     <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
+                      <label className="block text-sm sm:text-base font-medium text-white/90 mb-2 sm:mb-3">
                         Banco Destino (opcional)
                       </label>
                       <select
                         name="banco_destino"
                         value={formData.banco_destino}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
+                        className="w-full px-3 sm:px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-sm"
                       >
                         <option value="" className="text-black">Selecciona banco</option>
                         {bancoOptions.map(banco => (
@@ -837,7 +845,7 @@ export default function EditarSolicitudPage() {
 
                   {formData.tipo_cuenta_destino !== 'Tarjeta Institucional' && formData.tipo_cuenta_destino !== 'Tarjeta Instituciona' && (
                     <div>
-                      <label className="block text-base font-medium text-white/90 mb-3">
+                      <label className="block text-sm sm:text-base font-medium text-white/90 mb-2 sm:mb-3">
                         Cuenta (opcional)
                       </label>
                       <input
@@ -1359,14 +1367,14 @@ export default function EditarSolicitudPage() {
               </div>
 
               {/* SECCIÓN 5: BENEFICIARIO */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
-                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
-                  <Building className="w-6 h-6 mr-3" />
+              <div className="bg-white/5 rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6 flex items-center">
+                  <Building className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                   Información del Beneficiario
                 </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                   <div>
-                    <label className="block text-base font-medium text-white/90 mb-3">
+                    <label className="block text-sm sm:text-base font-medium text-white/90 mb-2 sm:mb-3">
                       <span className="text-red-400">*</span> Nombre del Beneficiario
                     </label>
                     <input
@@ -1395,20 +1403,20 @@ export default function EditarSolicitudPage() {
               </div>
 
               {/* SECCIÓN 6: DOCUMENTOS */}
-              <div className="bg-white/5 rounded-xl p-8 border border-white/10">
-                <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
-                  <Upload className="w-6 h-6 mr-3" />
+              <div className="bg-white/5 rounded-xl p-4 sm:p-6 md:p-8 border border-white/10">
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6 flex items-center">
+                  <Upload className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                   Documentos
                 </h3>
 
                 {/* Factura (existente + reemplazo opcional) */}
-                <div className="mb-8">
-                  <label className="block text-base font-medium text-white/90 mb-4">
+                <div className="mb-6 sm:mb-8">
+                  <label className="block text-sm sm:text-base font-medium text-white/90 mb-3 sm:mb-4">
                     Factura (si no subes una nueva, se mantiene la actual)
                   </label>
 
                   {facturaExistente && !formData.factura_file && (
-                    <div className="p-4 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/20 backdrop-blur-sm flex items-center justify-between">
+                    <div className="p-3 sm:p-4 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/20 backdrop-blur-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-full bg-green-500/20 border border-green-400/30">
                           <CheckCircle className="w-5 h-5 text-green-400" />
@@ -1565,12 +1573,12 @@ export default function EditarSolicitudPage() {
               </div>
 
               {/* BOTONES */}
-              <div className="flex flex-col sm:flex-row justify-end gap-4 pt-12">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-8 sm:pt-10 md:pt-12">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => router.push('/dashboard/solicitante/mis-solicitudes')}
-                  className="bg-gray-600/80 text-white border-gray-500 hover:bg-gray-700 hover:scale-105 px-8 py-4 text-base font-medium transition-all duration-200 backdrop-blur-sm"
+                  className="bg-gray-600/80 text-white border-gray-500 hover:bg-gray-700 hover:scale-105 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-medium transition-all duration-200 backdrop-blur-sm"
                 >
                   Cancelar
                 </Button>
@@ -1586,7 +1594,7 @@ export default function EditarSolicitudPage() {
                     (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') ||
                     (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional')
                   }
-                  className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:scale-105 shadow-xl border-0 px-10 py-4 font-semibold text-base flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:scale-105 shadow-xl border-0 px-8 sm:px-10 py-3 sm:py-4 font-semibold text-sm sm:text-base flex items-center justify-center gap-2 sm:gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {loading ? (
                     <>
