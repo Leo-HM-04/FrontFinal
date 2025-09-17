@@ -229,15 +229,38 @@ export default function NuevoViaticoPage() {
   };
 
   // Función para manejar la descarga de la plantilla
-  const handleDescargarPlantilla = () => {
-    // Por ahora usamos una plantilla de prueba
-    // Más adelante se reemplazará con la plantilla real
-    const link = document.createElement('a');
-    link.href = '/plantilla-viaticos.docx'; // Ruta temporal
-    link.download = 'Plantilla_Solicitud_Viaticos.docx';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDescargarPlantilla = async () => {
+    try {
+      // Verificar si el archivo existe
+      const response = await fetch('/plantilla-viaticos.docx');
+      
+      if (!response.ok) {
+        // Si el archivo no existe, mostrar mensaje
+        setMensajeGlobal('La plantilla estará disponible próximamente. Por favor contacta al administrador.');
+        setExito(false);
+        return;
+      }
+
+      // Si existe, proceder con la descarga
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Plantilla_Solicitud_Viaticos.docx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      // Mensaje de éxito
+      setMensajeGlobal('¡Plantilla descargada exitosamente! Úsala para crear tu solicitud.');
+      setExito(true);
+      
+    } catch (error) {
+      console.error('Error al descargar plantilla:', error);
+      setMensajeGlobal('Error al descargar la plantilla. Intenta nuevamente.');
+      setExito(false);
+    }
   };
 
   return (
