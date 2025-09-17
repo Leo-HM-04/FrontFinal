@@ -694,8 +694,14 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
                         value={cuenta.tipo_cuenta}
                         onChange={(e) => {
                           console.log('Select onChange triggered, value:', e.target.value);
-                          actualizarCuentaTransferencia(index, 'tipo_cuenta', e.target.value);
-                          actualizarCuentaTransferencia(index, 'numero_cuenta', ''); // Limpiar número al cambiar tipo
+                          const nuevasCuentas = [...cuentasTransferencia];
+                          nuevasCuentas[index] = {
+                            ...nuevasCuentas[index], 
+                            tipo_cuenta: e.target.value,
+                            numero_cuenta: '' // Limpiar número al cambiar tipo
+                          };
+                          console.log('Actualizando cuenta completa:', nuevasCuentas[index]);
+                          onChange(nuevasCuentas);
                         }}
                         className={`${baseClasses} px-3 py-2 w-full`}
                       >
