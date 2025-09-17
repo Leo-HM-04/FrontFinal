@@ -313,22 +313,52 @@ export default function NuevoViaticoPage() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Viáticos</title>
+    <title>Solicitud y Desglose de Viáticos</title>
     <style>
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+        
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 30px;
             line-height: 1.4;
-            color: #333;
+            color: #1a1a1a;
+            background-color: #f8f9fa;
+            position: relative;
+        }
+        
+        /* Marca de agua con logo Bechapra */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            width: 500px;
+            height: 500px;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgdmlld0JveD0iMCAwIDUwMCA1MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPCEtLSBMb2dvIEJlY2hhcHJhIC0tPgogIDx0ZXh0IHg9IjI1MCIgeT0iMjAwIiBmb250LWZhbWlseT0iR2VvcmdpYSwgc2VyaWYiIGZvbnQtc2l6ZT0iMTIwIiBmb250LXdlaWdodD0iNzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjM0E3NUJEIiBvcGFjaXR5PSIwLjEiPkI8L3RleHQ+CiAgPHRleHQgeD0iMjUwIiB5PSIzMDAiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCBzZXJpZiIgZm9udC1zaXplPSIzNiIgZm9udC13ZWlnaHQ9IjQwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNBNzVCRCIgb3BhY2l0eT0iMC4wOCI+QmVjaGFwcmE8L3RleHQ+Cjwvc3ZnPgo=');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .document-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 40px;
+            position: relative;
+            z-index: 1;
         }
         
         .header {
             text-align: center;
             margin-bottom: 40px;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
-            padding: 40px 20px;
-            border-radius: 15px;
-            border: 2px solid #e2e8f0;
+            background: linear-gradient(135deg, #3474eb 0%, #4285f4 100%);
+            padding: 30px 20px;
+            border-radius: 12px;
+            color: white;
             position: relative;
             overflow: hidden;
         }
@@ -336,326 +366,485 @@ export default function NuevoViaticoPage() {
         .header::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 70% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 30% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjA1Ii8+Cjwvc3ZnPg==');
+            opacity: 0.1;
             pointer-events: none;
         }
         
         .company-name {
-            font-size: 42px;
+            font-size: 36px;
             font-weight: 300;
-            color: #1e293b;
-            margin-bottom: 15px;
-            letter-spacing: 2px;
-            font-family: 'Georgia', 'Times New Roman', serif;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            font-family: 'Georgia', serif;
             position: relative;
             z-index: 1;
         }
         
-        .company-name::after {
-            content: '';
-            display: block;
-            width: 80px;
-            height: 3px;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
-            margin: 10px auto;
-            border-radius: 2px;
-        }
-        
         .document-title {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 600;
-            color: #475569;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             position: relative;
             z-index: 1;
             margin-top: 10px;
         }
         
-        .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            background-color: #dbeafe;
-            padding: 8px;
-            margin: 30px 0 15px 0;
-            border-left: 4px solid #2563eb;
+        .section-header {
+            background: linear-gradient(90deg, #3474eb, #4285f4);
+            color: white;
+            padding: 12px 20px;
+            margin: 35px 0 20px 0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .info-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
-        .info-table td, .info-table th {
-            border: 1px solid #d1d5db;
-            padding: 12px 8px;
-            text-align: left;
-        }
-        
-        .info-table th {
-            background-color: #f3f4f6;
-            font-weight: bold;
+        .info-table td {
+            border: 1px solid #e1e5e9;
+            padding: 15px;
+            vertical-align: top;
         }
         
         .label {
-            font-weight: bold;
+            font-weight: 600;
             width: 30%;
-            background-color: #f9fafb;
+            background-color: #f8f9fa;
+            color: #495057;
+            border-right: 2px solid #3474eb;
+        }
+        
+        .field {
+            background-color: white;
+            border-bottom: 1px solid #3474eb;
+            min-height: 25px;
         }
         
         .expense-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .expense-table th {
-            background-color: #1e40af;
+            background: linear-gradient(90deg, #3474eb, #4285f4);
             color: white;
-            padding: 12px;
+            padding: 15px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 13px;
         }
         
         .expense-table td {
-            border: 1px solid #d1d5db;
-            padding: 10px;
-            text-align: left;
+            border: 1px solid #e1e5e9;
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+        
+        .expense-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
         }
         
         .total-row {
-            background-color: #fef3c7;
-            font-weight: bold;
+            background: linear-gradient(90deg, #fff3cd, #ffeaa7);
+            font-weight: 700;
+        }
+        
+        .total-row td {
+            border-top: 2px solid #ffc107;
+        }
+        
+        .signature-section {
+            margin-top: 40px;
+            page-break-inside: avoid;
         }
         
         .signature-table {
             width: 100%;
             border-collapse: collapse;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .signature-table td {
-            border: 1px solid #d1d5db;
-            padding: 40px 20px;
+            border: 1px solid #e1e5e9;
+            padding: 30px 15px;
             text-align: center;
             vertical-align: bottom;
             width: 33.33%;
         }
         
+        .signature-title {
+            font-weight: 700;
+            color: #3474eb;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+        
         .signature-line {
-            border-bottom: 1px solid #000;
-            margin-bottom: 5px;
-            height: 20px;
+            border-bottom: 2px solid #3474eb;
+            margin-bottom: 8px;
+            height: 25px;
+        }
+        
+        .signature-text {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
         }
         
         .checkbox {
-            margin-right: 10px;
+            width: 15px;
+            height: 15px;
+            border: 2px solid #3474eb;
+            display: inline-block;
         }
         
-        .notes {
+        .notes-section {
             margin-top: 30px;
-            padding: 15px;
-            background-color: #fef9e7;
-            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-left: 4px solid #ffc107;
+            border-radius: 6px;
+        }
+        
+        .notes-title {
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+        
+        .notes-list {
+            margin: 0;
+            padding-left: 20px;
+            color: #856404;
+        }
+        
+        .notes-list li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .footer-company {
+            font-weight: 700;
+            color: #3474eb;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .footer-text {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        
+        .icon {
+            color: #3474eb;
+            font-size: 16px;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                background: white;
+            }
+            .document-container {
+                box-shadow: none;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="company-name">Bechapra</div>
-        <div class="document-title">SOLICITUD Y DESGLOSE DE VIÁTICOS</div>
-    </div>
+    <div class="document-container">
+        <div class="header">
+            <div class="company-name">Bechapra</div>
+            <div class="document-title">Solicitud y Desglose de Viáticos</div>
+        </div>
 
-    <!-- INFORMACIÓN DEL SOLICITANTE -->
-    <div class="section-title">📋 INFORMACIÓN DEL SOLICITANTE</div>
-    <table class="info-table">
-        <tr>
-            <td class="label">Nombre completo:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Departamento:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Fecha de solicitud:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Puesto:</td>
-            <td>_________________________________________________</td>
-        </tr>
-    </table>
-
-    <!-- INFORMACIÓN DEL VIAJE -->
-    <div class="section-title">✈️ INFORMACIÓN DEL VIAJE</div>
-    <table class="info-table">
-        <tr>
-            <td class="label">Destino:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Fecha de salida:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Fecha de regreso:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Duración (días):</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Motivo del viaje:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Tipo de comisión:</td>
-            <td>
-                <span class="checkbox">☐</span> Nacional &nbsp;&nbsp;&nbsp;
-                <span class="checkbox">☐</span> Internacional
-            </td>
-        </tr>
-    </table>
-
-    <!-- DESGLOSE DE GASTOS -->
-    <div class="section-title">💰 DESGLOSE DE GASTOS ESTIMADOS</div>
-    <table class="expense-table">
-        <thead>
+        <!-- INFORMACIÓN DEL SOLICITANTE -->
+        <div class="section-header">
+            <i class="fas fa-user icon"></i>
+            INFORMACIÓN DEL SOLICITANTE
+        </div>
+        <table class="info-table">
             <tr>
-                <th style="width: 60%;">CONCEPTO</th>
-                <th style="width: 40%;">MONTO ESTIMADO (MXN)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>🏨 Hospedaje</td>
-                <td>$ ___________________</td>
+                <td class="label">Nombre completo:</td>
+                <td class="field">_________________________________________________</td>
             </tr>
             <tr>
-                <td>🍽️ Alimentación</td>
-                <td>$ ___________________</td>
+                <td class="label">Departamento:</td>
+                <td class="field">_________________________________________________</td>
             </tr>
             <tr>
-                <td>🚗 Transporte terrestre</td>
-                <td>$ ___________________</td>
+                <td class="label">Fecha de solicitud:</td>
+                <td class="field">_________________________________________________</td>
             </tr>
             <tr>
-                <td>✈️ Transporte aéreo</td>
-                <td>$ ___________________</td>
+                <td class="label">Puesto:</td>
+                <td class="field">_________________________________________________</td>
+            </tr>
+        </table>
+
+        <!-- INFORMACIÓN DEL VIAJE -->
+        <div class="section-header">
+            <i class="fas fa-plane icon"></i>
+            INFORMACIÓN DEL VIAJE
+        </div>
+        <table class="info-table">
+            <tr>
+                <td class="label">Destino:</td>
+                <td class="field">_________________________________________________</td>
             </tr>
             <tr>
-                <td>⛽ Combustible</td>
-                <td>$ ___________________</td>
+                <td class="label">Fecha de salida:</td>
+                <td class="field">_________________________________________________</td>
             </tr>
             <tr>
-                <td>📱 Comunicaciones</td>
-                <td>$ ___________________</td>
+                <td class="label">Fecha de regreso:</td>
+                <td class="field">_________________________________________________</td>
             </tr>
             <tr>
-                <td>📄 Otros gastos (especificar):<br/>_________________________</td>
-                <td>$ ___________________</td>
+                <td class="label">Duración (días):</td>
+                <td class="field">_________________________________________________</td>
             </tr>
-            <tr class="total-row">
-                <td><strong>💵 TOTAL ESTIMADO</strong></td>
-                <td><strong>$ ___________________</strong></td>
+            <tr>
+                <td class="label">Motivo del viaje:</td>
+                <td class="field">_________________________________________________</td>
             </tr>
-        </tbody>
-    </table>
+            <tr>
+                <td class="label">Tipo de comisión:</td>
+                <td class="field">
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <span class="checkbox"></span> Nacional
+                        </div>
+                        <div class="checkbox-item">
+                            <span class="checkbox"></span> Internacional
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
 
-    <!-- INFORMACIÓN BANCARIA -->
-    <div class="section-title">🏦 INFORMACIÓN BANCARIA PARA TRANSFERENCIA</div>
-    <table class="info-table">
-        <tr>
-            <td class="label">Nombre del beneficiario:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Banco:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">CLABE / No. de tarjeta:</td>
-            <td>_________________________________________________</td>
-        </tr>
-        <tr>
-            <td class="label">Tipo de cuenta:</td>
-            <td>
-                <span class="checkbox">☐</span> CLABE &nbsp;&nbsp;&nbsp;
-                <span class="checkbox">☐</span> Tarjeta de débito &nbsp;&nbsp;&nbsp;
-                <span class="checkbox">☐</span> Tarjeta de crédito
-            </td>
-        </tr>
-    </table>
+        <!-- DESGLOSE DE GASTOS -->
+        <div class="section-header">
+            <i class="fas fa-money-bill-wave icon"></i>
+            DESGLOSE DE GASTOS ESTIMADOS
+        </div>
+        <table class="expense-table">
+            <thead>
+                <tr>
+                    <th style="width: 60%;">CONCEPTO</th>
+                    <th style="width: 40%;">MONTO ESTIMADO (MXN)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><div class="expense-item"><i class="fas fa-bed icon"></i> Hospedaje</div></td>
+                    <td class="field">$ ___________________</td>
+                </tr>
+                <tr>
+                    <td><div class="expense-item"><i class="fas fa-utensils icon"></i> Alimentación</div></td>
+                    <td class="field">$ ___________________</td>
+                </tr>
+                <tr>
+                    <td><div class="expense-item"><i class="fas fa-car icon"></i> Transporte terrestre</div></td>
+                    <td class="field">$ ___________________</td>
+                </tr>
+                <tr>
+                    <td><div class="expense-item"><i class="fas fa-plane icon"></i> Transporte aéreo</div></td>
+                    <td class="field">$ ___________________</td>
+                </tr>
+                <tr>
+                    <td><div class="expense-item"><i class="fas fa-gas-pump icon"></i> Combustible</div></td>
+                    <td class="field">$ ___________________</td>
+                </tr>
+                <tr>
+                    <td><div class="expense-item"><i class="fas fa-phone icon"></i> Comunicaciones</div></td>
+                    <td class="field">$ ___________________</td>
+                </tr>
+                <tr>
+                    <td><div class="expense-item"><i class="fas fa-receipt icon"></i> Otros gastos (especificar):<br/>_________________________</div></td>
+                    <td class="field">$ ___________________</td>
+                </tr>
+                <tr class="total-row">
+                    <td><div class="expense-item"><i class="fas fa-calculator icon"></i> <strong>TOTAL ESTIMADO</strong></div></td>
+                    <td><strong>$ ___________________</strong></td>
+                </tr>
+            </tbody>
+        </table>
 
-    <!-- JUSTIFICACIÓN -->
-    <div class="section-title">📝 JUSTIFICACIÓN DEL VIAJE</div>
-    <table class="info-table">
-        <tr>
-            <td class="label" style="width: 20%;">Descripción detallada:</td>
-            <td style="height: 100px; vertical-align: top;">
-                <br/>
-                ________________________________________________<br/>
-                ________________________________________________<br/>
-                ________________________________________________<br/>
-                ________________________________________________<br/>
-            </td>
-        </tr>
-        <tr>
-            <td class="label">Beneficio esperado:</td>
-            <td>
-                <br/>
-                ________________________________________________<br/>
-                ________________________________________________<br/>
-            </td>
-        </tr>
-    </table>
+        <!-- INFORMACIÓN BANCARIA -->
+        <div class="section-header">
+            <i class="fas fa-university icon"></i>
+            INFORMACIÓN BANCARIA PARA TRANSFERENCIA
+        </div>
+        <table class="info-table">
+            <tr>
+                <td class="label">Nombre del beneficiario:</td>
+                <td class="field">_________________________________________________</td>
+            </tr>
+            <tr>
+                <td class="label">Banco:</td>
+                <td class="field">_________________________________________________</td>
+            </tr>
+            <tr>
+                <td class="label">CLABE / No. de tarjeta:</td>
+                <td class="field">_________________________________________________</td>
+            </tr>
+            <tr>
+                <td class="label">Tipo de cuenta:</td>
+                <td class="field">
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <span class="checkbox"></span> CLABE
+                        </div>
+                        <div class="checkbox-item">
+                            <span class="checkbox"></span> Tarjeta de débito
+                        </div>
+                        <div class="checkbox-item">
+                            <span class="checkbox"></span> Tarjeta de crédito
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
 
-    <!-- SECCIÓN DE FIRMAS -->
-    <div class="section-title">✅ AUTORIZACIONES</div>
-    <table class="signature-table">
-        <tr>
-            <td>
-                <strong>SOLICITANTE</strong><br/><br/><br/>
-                <div class="signature-line"></div>
-                Firma y fecha
-            </td>
-            <td>
-                <strong>JEFE DIRECTO</strong><br/><br/><br/>
-                <div class="signature-line"></div>
-                Firma y fecha
-            </td>
-            <td>
-                <strong>DIRECCIÓN GENERAL</strong><br/><br/><br/>
-                <div class="signature-line"></div>
-                Firma y fecha
-            </td>
-        </tr>
-    </table>
+        <!-- JUSTIFICACIÓN -->
+        <div class="section-header">
+            <i class="fas fa-edit icon"></i>
+            JUSTIFICACIÓN DEL VIAJE
+        </div>
+        <table class="info-table">
+            <tr>
+                <td class="label">Descripción detallada:</td>
+                <td class="field" style="height: 120px; vertical-align: top; padding-top: 15px;">
+                    ________________________________________________<br/>
+                    ________________________________________________<br/>
+                    ________________________________________________<br/>
+                    ________________________________________________<br/>
+                    ________________________________________________<br/>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Beneficio esperado:</td>
+                <td class="field" style="height: 80px; vertical-align: top; padding-top: 15px;">
+                    ________________________________________________<br/>
+                    ________________________________________________<br/>
+                    ________________________________________________<br/>
+                </td>
+            </tr>
+        </table>
 
-    <!-- NOTAS IMPORTANTES -->
-    <div class="notes">
-        <h3>⚠️ NOTAS IMPORTANTES:</h3>
-        <ul>
-            <li><strong>Anticipación:</strong> Esta solicitud debe ser presentada con al menos <strong>5 días hábiles</strong> de anticipación.</li>
-            <li><strong>Comprobantes:</strong> Los comprobantes de gastos deberán ser entregados dentro de los <strong>5 días posteriores</strong> al regreso.</li>
-            <li><strong>Excedentes:</strong> Cualquier gasto adicional deberá ser justificado y autorizado por la Dirección General.</li>
-            <li><strong>Cancelaciones:</strong> En caso de cancelación del viaje, notificar inmediatamente a Recursos Humanos.</li>
-            <li><strong>Reembolsos:</strong> Los gastos no justificados deberán ser reembolsados a la empresa.</li>
-            <li><strong>Política:</strong> Este documento está sujeto a las políticas internas de viáticos de la empresa.</li>
-        </ul>
-    </div>
+        <!-- AUTORIZACIONES -->
+        <div class="signature-section">
+            <div class="section-header">
+                <i class="fas fa-signature icon"></i>
+                AUTORIZACIONES
+            </div>
+            <table class="signature-table">
+                <tr>
+                    <td>
+                        <div class="signature-title">SOLICITANTE</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-text">Firma y fecha</div>
+                    </td>
+                    <td>
+                        <div class="signature-title">JEFE DIRECTO</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-text">Firma y fecha</div>
+                    </td>
+                    <td>
+                        <div class="signature-title">DIRECCIÓN GENERAL</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-text">Firma y fecha</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-    <!-- PIE DE PÁGINA -->
-    <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #6b7280; padding: 20px; background-color: #f8fafc; border-radius: 8px;">
-        <p><strong>Bechapra</strong> - Solicitud de Viáticos</p>
-        <p>Documento generado automáticamente - Versión 2.1</p>
+        <!-- NOTAS IMPORTANTES -->
+        <div class="notes-section">
+            <div class="notes-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                NOTAS IMPORTANTES
+            </div>
+            <ul class="notes-list">
+                <li><strong>Anticipación:</strong> Esta solicitud debe ser presentada con al menos <strong>5 días hábiles</strong> de anticipación.</li>
+                <li><strong>Comprobantes:</strong> Los comprobantes de gastos deberán ser entregados dentro de los <strong>5 días posteriores</strong> al regreso.</li>
+                <li><strong>Excedentes:</strong> Cualquier gasto adicional deberá ser justificado y autorizado por la Dirección General.</li>
+                <li><strong>Cancelaciones:</strong> En caso de cancelación del viaje, notificar inmediatamente a Recursos Humanos.</li>
+                <li><strong>Reembolsos:</strong> Los gastos no justificados deberán ser reembolsados a la empresa.</li>
+                <li><strong>Política:</strong> Este documento está sujeto a las políticas internas de viáticos de la empresa.</li>
+            </ul>
+        </div>
+
+        <!-- PIE DE PÁGINA -->
+        <div class="footer">
+            <div class="footer-company">Bechapra</div>
+            <div class="footer-text">Solicitud de Viáticos - Documento generado automáticamente - Versión 3.0</div>
+        </div>
     </div>
 </body>
 </html>
