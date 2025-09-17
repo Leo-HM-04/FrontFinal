@@ -311,14 +311,18 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
         );
 
       case 'selector_cuenta':
+        // Extraer valores del objeto o inicializar
+        const valorCuenta = typeof valor === 'object' && valor !== null ? valor as {tipo: string, numero: string} : {tipo: '', numero: ''};
+        const tipoSeleccionado = valorCuenta.tipo || '';
+        const numeroIngresado = valorCuenta.numero || '';
+
         return (
           <div className="space-y-3">
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => {
-                  setTipoSeleccionado('clabe');
-                  onChange(''); // Limpiar el valor cuando cambia el tipo
+                  onChange({tipo: 'clabe', numero: ''}); // Limpiar el número cuando cambia el tipo
                 }}
                 className={`px-4 py-2 text-sm font-medium rounded-md border ${
                   tipoSeleccionado === 'clabe'
@@ -331,8 +335,7 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  setTipoSeleccionado('cuenta');
-                  onChange(''); // Limpiar el valor cuando cambia el tipo
+                  onChange({tipo: 'cuenta', numero: ''}); // Limpiar el número cuando cambia el tipo
                 }}
                 className={`px-4 py-2 text-sm font-medium rounded-md border ${
                   tipoSeleccionado === 'cuenta'
@@ -347,10 +350,10 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
             {tipoSeleccionado && (
               <input
                 type="text"
-                value={valorStr}
+                value={numeroIngresado}
                 onChange={(e) => {
                   const soloNumeros = e.target.value.replace(/\D/g, '');
-                  onChange(soloNumeros);
+                  onChange({tipo: tipoSeleccionado, numero: soloNumeros});
                 }}
                 placeholder={`Ingrese el número de ${tipoSeleccionado.toUpperCase()}`}
                 className={`${baseClasses} px-3 py-2 font-mono`}

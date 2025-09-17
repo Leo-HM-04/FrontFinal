@@ -851,48 +851,22 @@ export const plantillaPagoComisiones: PlantillaSolicitud = {
           }
         },
         {
-          id: 'tipo_cuenta',
-          nombre: 'tipo_cuenta',
+          id: 'cuenta_clabe',
+          nombre: 'cuenta_clabe',
           tipo: 'selector_cuenta',
           etiqueta: 'CUENTA/CLABE',
           ayuda: 'Seleccione el tipo de cuenta interbancaria',
           valorPorDefecto: '',
           validaciones: {
             requerido: true,
-            mensaje: 'Seleccione el tipo de cuenta'
+            mensaje: 'Debe seleccionar tipo de cuenta e ingresar el número'
           },
           opciones: [
             { valor: 'clabe', etiqueta: 'CLABE (16-18 dígitos)' },
             { valor: 'cuenta', etiqueta: 'CUENTA (8-10 dígitos)' }
           ],
           estilos: {
-            ancho: 'medio'
-          }
-        },
-        {
-          id: 'numero_cuenta',
-          nombre: 'numero_cuenta',
-          tipo: 'texto',
-          etiqueta: 'Número',
-          placeholder: 'Ingresa el número',
-          ayuda: 'Número de cuenta destino a realizar el depósito',
-          valorPorDefecto: '',
-          dependeDe: 'tipo_cuenta',
-          validaciones: {
-            requerido: true,
-            condicional: {
-              clabe: {
-                patron: '^[0-9]{16,18}$',
-                mensaje: 'La CLABE debe tener entre 16 y 18 dígitos'
-              },
-              cuenta: {
-                patron: '^[0-9]{8,10}$',
-                mensaje: 'La CUENTA debe tener entre 8 y 10 dígitos'
-              }
-            }
-          },
-          estilos: {
-            ancho: 'medio'
+            ancho: 'completo'
           }
         },
         {
