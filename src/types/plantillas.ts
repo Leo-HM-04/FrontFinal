@@ -50,6 +50,7 @@ export type CampoPlantilla = {
   estilos?: {
     ancho?: 'completo' | 'medio' | 'tercio' | 'cuarto';
     orden?: number;
+    soloLectura?: boolean;
   };
 };
 

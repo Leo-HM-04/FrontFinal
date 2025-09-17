@@ -67,13 +67,15 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
       case 'texto':
       case 'email':
       case 'telefono':
+        const esReadOnly = campo.estilos?.soloLectura || false;
         return (
           <input
             type={campo.tipo === 'email' ? 'email' : campo.tipo === 'telefono' ? 'tel' : 'text'}
             value={valorStr}
             onChange={(e) => onChange(e.target.value)}
             placeholder={campo.placeholder}
-            className={`${baseClasses} px-3 py-2`}
+            readOnly={esReadOnly}
+            className={`${baseClasses} px-3 py-2 ${esReadOnly ? 'bg-gray-100 cursor-not-allowed text-gray-600' : ''}`}
             aria-describedby={error ? `${campo.id}-error` : undefined}
           />
         );

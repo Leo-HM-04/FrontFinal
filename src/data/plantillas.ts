@@ -588,11 +588,189 @@ export const plantillaPagoSuaInternas: PlantillaSolicitud = {
   }
 };
 
+// Plantilla para PAGO SUA FRENSHETSI
+export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
+  id: 'pago-sua-frenshetsi',
+  nombre: 'PAGO SUA FRENSHETSI',
+  descripcion: 'Plantilla especializada para pagos de impuestos SUA FRENSHETSI relacionados con el IMSS enviados por el Departamento de Seguridad Social',
+  version: '1.0',
+  activa: true,
+  icono: '🏢',
+  color: 'indigo',
+  categoria: 'Pagos Fiscales',
+  secciones: [
+    {
+      id: 'informacion-basica',
+      titulo: 'Información Básica',
+      descripcion: 'Datos principales del pago SUA FRENSHETSI',
+      campos: [
+        {
+          id: 'asunto',
+          nombre: 'asunto',
+          tipo: 'texto',
+          etiqueta: 'Asunto',
+          placeholder: 'PAGO SUA FRENSHETSI JULIO 2025',
+          ayuda: 'Ej. PAGO SUA FRENSHETSI JULIO 2025',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 5,
+            maxLength: 150,
+            mensaje: 'El asunto es requerido y debe tener entre 5 y 150 caracteres'
+          },
+          estilos: {
+            ancho: 'completo'
+          }
+        },
+        {
+          id: 'empresa',
+          nombre: 'empresa',
+          tipo: 'texto',
+          etiqueta: 'Empresa',
+          placeholder: 'FRENSHETSI',
+          ayuda: 'Empresa fija para pagos SUA FRENSHETSI',
+          valorPorDefecto: 'FRENSHETSI',
+          validaciones: {
+            requerido: true,
+            mensaje: 'La empresa FRENSHETSI es requerida'
+          },
+          estilos: {
+            ancho: 'medio',
+            soloLectura: true
+          }
+        },
+        {
+          id: 'cliente',
+          nombre: 'cliente',
+          tipo: 'texto',
+          etiqueta: 'Cliente',
+          placeholder: 'ROCALLOSA',
+          ayuda: 'Identifica al cliente correspondiente. Ej. ROCALLOSA',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 2,
+            maxLength: 100,
+            mensaje: 'El cliente es requerido y debe tener entre 2 y 100 caracteres'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'monto',
+          nombre: 'monto',
+          tipo: 'moneda',
+          etiqueta: 'Monto',
+          placeholder: '$56,000.00',
+          ayuda: 'El monto a pagar señalado en SIPARE se encuentra en los documentos contenidos en el archivo ZIP recibido',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            mensaje: 'El monto es requerido y debe ser mayor a 0'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        }
+      ],
+      estilos: {
+        columnas: 2,
+        espaciado: 'normal'
+      }
+    },
+    {
+      id: 'fechas-captura',
+      titulo: 'Fechas y Línea de Captura',
+      descripcion: 'Información temporal y datos de captura del IMSS',
+      campos: [
+        {
+          id: 'fecha_limite',
+          nombre: 'fecha_limite',
+          tipo: 'fecha',
+          etiqueta: 'Fecha Límite',
+          ayuda: 'Fecha límite para pagar el impuesto',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            mensaje: 'La fecha límite es requerida'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'linea_captura',
+          nombre: 'linea_captura',
+          tipo: 'texto',
+          etiqueta: 'Línea de Captura',
+          placeholder: 'C2RQZ3MN-4C97-2-0BCT-6186-000SRS4-0000000-0000000-0000000-I9OO',
+          ayuda: 'Corresponde a la línea de captura proporcionada por el IMSS para realizar el pago del impuesto. Este código se incluirá automáticamente en el concepto del pago.',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 10,
+            maxLength: 200,
+            patron: '^[A-Z0-9-]+$',
+            mensaje: 'La línea de captura es requerida y debe contener solo letras mayúsculas, números y guiones'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        }
+      ],
+      estilos: {
+        columnas: 2,
+        espaciado: 'normal'
+      }
+    },
+    {
+      id: 'documentos',
+      titulo: 'Archivos Adjuntos',
+      descripcion: 'Documentos de soporte para el pago SUA FRENSHETSI',
+      campos: [
+        {
+          id: 'archivos_adjuntos',
+          nombre: 'archivos_adjuntos',
+          tipo: 'archivo',
+          etiqueta: 'Archivos Adjuntos',
+          ayuda: 'Archivo ZIP que contiene 6 documentos en formato PDF con la información necesaria para efectuar el pago del impuesto. Selecciona o arrastra los documentos necesarios.',
+          valorPorDefecto: [],
+          validaciones: {
+            requerido: true,
+            mensaje: 'Debe adjuntar al menos un archivo ZIP con los documentos necesarios'
+          },
+          estilos: {
+            ancho: 'completo'
+          }
+        }
+      ],
+      estilos: {
+        columnas: 1,
+        espaciado: 'amplio'
+      }
+    }
+  ],
+  configuracion: {
+    permiteArchivosMultiples: true,
+    tiposArchivosPermitidos: ['.pdf', '.zip', '.jpg', '.jpeg', '.png', '.xlsx', '.xls', '.doc', '.docx'],
+    tamanoMaximoArchivo: 25 * 1024 * 1024, // 25MB (mayor por los archivos ZIP)
+    mostrarProgreso: true
+  },
+  metadatos: {
+    creadoPor: 'Sistema',
+    fechaCreacion: new Date().toISOString(),
+    fechaModificacion: new Date().toISOString(),
+    usosFrecuentes: 0
+  }
+};
+
 // Lista de todas las plantillas disponibles
 export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaTarjetasN09Toka,
   plantillaTarjetasTukash,
-  plantillaPagoSuaInternas
+  plantillaPagoSuaInternas,
+  plantillaPagoSuaFrenshetsi
   // Aquí se pueden agregar más plantillas en el futuro
 ];
 
