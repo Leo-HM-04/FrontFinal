@@ -528,7 +528,7 @@ export const plantillaPagoSuaInternas: PlantillaSolicitud = {
           tipo: 'texto',
           etiqueta: 'Línea de Captura',
           placeholder: 'C2RQZ3MN-4C97-2-0BCT-6186-000SRS4-0000000-0000000-0000000-I9OO',
-          ayuda: 'Corresponde a la línea de captura proporcionada por el IMSS para realizar el pago del impuesto. Dato correspondiente a la captura proporcionada por el IMSS',
+          ayuda: 'Corresponde a la línea de captura proporcionada por el IMSS para realizar el pago del impuesto. Este código se incluirá automáticamente en el concepto del pago.',
           valorPorDefecto: '',
           validaciones: {
             requerido: true,
