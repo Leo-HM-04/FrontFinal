@@ -717,16 +717,17 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
                             const soloNumeros = e.target.value.replace(/\D/g, '').slice(0, validacion.maxLength);
                             actualizarCuentaTransferencia(index, 'numero_cuenta', soloNumeros);
                           }}
-                          placeholder={cuenta.tipo_cuenta ? getValidacionTipoCuenta(cuenta.tipo_cuenta).placeholder : 'Seleccione tipo primero'}
-                          maxLength={cuenta.tipo_cuenta ? getValidacionTipoCuenta(cuenta.tipo_cuenta).maxLength : 20}
+                          placeholder={getValidacionTipoCuenta(cuenta.tipo_cuenta).placeholder}
+                          maxLength={getValidacionTipoCuenta(cuenta.tipo_cuenta).maxLength}
                           className={`${baseClasses} px-3 py-2 w-full font-mono`}
                         />
                       ) : (
                         <input
                           type="text"
                           disabled
-                          placeholder="Ej. CIE 1234567"
-                          className={`${baseClasses} px-3 py-2 w-full bg-gray-100 text-gray-500`}
+                          value=""
+                          placeholder="Seleccione el tipo de información bancaria"
+                          className={`${baseClasses} px-3 py-2 w-full bg-gray-100 text-gray-500 cursor-not-allowed`}
                         />
                       )}
                       <p className="text-xs text-gray-500 mt-1">
