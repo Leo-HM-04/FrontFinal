@@ -297,7 +297,8 @@ return (
                 </span>
               </div>
             </div>
-            <div className="overflow-x-auto">
+            {/* Vista de tabla para desktop */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>
                   <tr className="bg-gray-50">
@@ -504,89 +505,6 @@ return (
                                   </button>
                                 </>
                               )}
-                              {/* Modal de confirmación para aprobar/rechazar */}
-                                {confirmarAccion && (
-                                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm">
-                                    <div className="bg-gradient-to-br from-white via-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-2xl shadow-2xl p-8 max-w-xs w-full flex flex-col items-center relative">
-                                      <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full shadow-xl bg-yellow-100 animate-bounce border-4 border-yellow-300">
-                                        <svg className="w-10 h-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <circle cx="12" cy="12" r="10" fill="#fde68a" />
-                                          <path stroke="#f59e42" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01" />
-                                        </svg>
-                                      </div>
-                                      <h3 className="text-xl font-bold text-yellow-700 mb-1 text-center drop-shadow-sm">
-                                        Confirmación requerida
-                                      </h3>
-                                      <p className="text-xs text-yellow-700 mb-2 text-center font-medium">
-                                        Esta acción es importante y no se puede deshacer.
-                                      </p>
-                                      <p className="text-sm text-gray-700 mb-4 text-center">
-                                        {confirmarAccion.tipo === 'aprobar'
-                                          ? '¿Estás seguro que deseas aprobar esta solicitud?'
-                                          : '¿Estás seguro que deseas rechazar esta solicitud?'}
-                                      </p>
-                                      {confirmarAccion.tipo === 'rechazar' && (
-                                        <textarea
-                                          className="border w-full p-2 text-base mb-3 rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 text-black"
-                                          rows={3}
-                                          placeholder="Ingrese un motivo para el rechazo"
-                                          value={comentario}
-                                          onChange={e => setComentario(e.target.value)}
-                                        />
-                                      )}
-                                      <div className="flex gap-3 mt-2 w-full justify-center">
-                                        <button
-                                          className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-semibold"
-                                          onClick={() => { setConfirmarAccion(null); setComentario(''); }}
-                                        >
-                                          Cancelar
-                                        </button>
-                                        <button
-                                          className={`px-4 py-2 rounded-md font-semibold text-white ${confirmarAccion.tipo === 'aprobar' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
-                                          onClick={() => {
-                                            if (confirmarAccion.tipo === 'aprobar') handleAprobar(confirmarAccion.id);
-                                            else handleRechazar(confirmarAccion.id);
-                                          }}
-                                          disabled={accionEnCurso === confirmarAccion.id}
-                                        >
-                                          {accionEnCurso === confirmarAccion.id ? 'Procesando...' : confirmarAccion.tipo === 'aprobar' ? 'Aprobar' : 'Rechazar'}
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
-                              )}
-                              {rechazoId === s.id_recurrente && (
-                                <div className="absolute bg-white border shadow-lg p-3 z-10 rounded-lg mt-48 -ml-20 w-64">
-                                  <h3 className="text-base font-semibold mb-2 text-gray-700">Motivo del rechazo:</h3>
-                                  <textarea
-                                    className="border w-full p-2 text-base mb-3 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                    rows={3}
-                                    placeholder="Ingrese un motivo para el rechazo"
-                                    value={comentario}
-                                    onChange={e => setComentario(e.target.value)}
-                                  />
-                                  <div className="flex gap-2 justify-end">
-                                    <button
-                                      className="bg-gray-200 text-gray-600 px-3 py-1 rounded-md text-base font-semibold"
-                                      onClick={() => setRechazoId(null)}
-                                    >
-                                      Cancelar
-                                    </button>
-                                    <button
-                                      className="bg-red-600 text-white px-3 py-1 rounded-md text-base font-semibold"
-                                      disabled={accionEnCurso === s.id_recurrente}
-                                      onClick={() => handleRechazar(s.id_recurrente)}
-                                    >
-                                      {accionEnCurso === s.id_recurrente ? 'Procesando...' : 'Confirmar'}
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                              <SolicitudModal 
-                                solicitud={solicitudSeleccionada!}
-                                open={modalOpen && !!solicitudSeleccionada}
-                                onClose={() => setModalOpen(false)}
-                              />
                             </div>
                           </td>
                         </tr>
@@ -594,6 +512,193 @@ return (
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Vista de tarjetas para móvil */}
+            <div className="md:hidden">
+              {loading ? (
+                <div className="py-8 text-center">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                    <p className="text-blue-600 text-sm">Cargando solicitudes...</p>
+                  </div>
+                </div>
+              ) : solicitudesFiltradas.length === 0 ? (
+                <div className="py-8 text-center text-gray-500 text-sm">
+                  No se encontraron solicitudes que coincidan con los filtros aplicados.
+                </div>
+              ) : (
+                <div className="p-3 space-y-3">
+                  {solicitudesFiltradas
+                    .slice((paginaActual - 1) * elementosPorPagina, paginaActual * elementosPorPagina)
+                    .map((s) => {
+                      const estado = (s.estado || '').toLowerCase();
+                      let statusConfig = {
+                        label: s.estado || '-',
+                        icon: null,
+                        colorClass: 'bg-gray-50 text-gray-700 border-gray-200',
+                        borderClass: 'border-gray-200 bg-white'
+                      };
+                      
+                      if (estado === 'pendiente') {
+                        statusConfig = {
+                          label: 'pendiente',
+                          icon: null,
+                          colorClass: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+                          borderClass: 'border-yellow-300 bg-yellow-50'
+                        };
+                      } else if (estado === 'aprobada' || estado === 'aprobado') {
+                        statusConfig = {
+                          label: 'aprobada',
+                          icon: null,
+                          colorClass: 'bg-green-50 text-green-700 border-green-200',
+                          borderClass: 'border-green-300 bg-green-50'
+                        };
+                      } else if (estado === 'rechazada' || estado === 'rechazado') {
+                        statusConfig = {
+                          label: 'rechazada',
+                          icon: null,
+                          colorClass: 'bg-red-50 text-red-700 border-red-200',
+                          borderClass: 'border-red-300 bg-red-50'
+                        };
+                      } else if (estado === 'pagada' || estado === 'pagado') {
+                        statusConfig = {
+                          label: 'pagada',
+                          icon: null,
+                          colorClass: 'bg-blue-50 text-blue-700 border-blue-200',
+                          borderClass: 'border-blue-300 bg-blue-50'
+                        };
+                      }
+
+                      return (
+                        <div 
+                          key={s.id_recurrente}
+                          className={`border rounded-lg p-4 shadow-sm transition-all hover:shadow-md hover:border-blue-300 ${statusConfig.borderClass}`}
+                        >
+                          {/* Header de la tarjeta */}
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex flex-col">
+                              <span className="font-mono text-xs text-blue-800 bg-blue-50 px-2 py-1 rounded w-fit">
+                                {s.folio || '-'}
+                              </span>
+                              <div className="mt-2">
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border ${statusConfig.colorClass}`}>
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    estado === 'pendiente' ? 'bg-yellow-400' :
+                                    estado === 'aprobada' || estado === 'aprobado' ? 'bg-green-400' :
+                                    estado === 'rechazada' || estado === 'rechazado' ? 'bg-red-400' :
+                                    estado === 'pagada' || estado === 'pagado' ? 'bg-blue-400' : 'bg-gray-400'
+                                  }`} />
+                                  {statusConfig.label.charAt(0).toUpperCase() + statusConfig.label.slice(1)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-blue-900 mb-1">
+                                ${s.monto.toLocaleString('es-MX', {minimumFractionDigits:2})}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Información principal */}
+                          <div className="space-y-2 mb-4">
+                            <div>
+                              <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Usuario</span>
+                              <p className="text-sm text-blue-900 font-medium mt-1">
+                                {s.nombre_usuario || '-'}
+                              </p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Departamento</span>
+                                <p className="text-sm text-blue-900 mt-1">
+                                  {s.departamento?.split(' ').map(word => 
+                                    word.toLowerCase() === 'ti' ? 'TI' : 
+                                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                                  ).join(' ')}
+                                </p>
+                              </div>
+                              <div>
+                                <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Frecuencia</span>
+                                <p className="text-sm text-blue-900/80 mt-1">
+                                  {s.frecuencia?.charAt(0).toUpperCase() + s.frecuencia?.slice(1).toLowerCase()}
+                                </p>
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Cuenta Destino</span>
+                              <p className="text-sm text-blue-900 font-medium mt-1">{s.cuenta_destino}</p>
+                            </div>
+                            {s.siguiente_fecha && (
+                              <div>
+                                <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Siguiente Fecha</span>
+                                <p className="text-sm text-blue-900/80 mt-1">
+                                  {new Date(s.siguiente_fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                </p>
+                              </div>
+                            )}
+                            {(s.nombre_aprobador || s.nombre_pagador) && (
+                              <div className="grid grid-cols-2 gap-3">
+                                {s.nombre_aprobador && (
+                                  <div>
+                                    <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Aprobador</span>
+                                    <p className="text-sm text-blue-900/80 mt-1">{s.nombre_aprobador}</p>
+                                  </div>
+                                )}
+                                {s.nombre_pagador && (
+                                  <div>
+                                    <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Pagador</span>
+                                    <p className="text-sm text-blue-900/80 mt-1">{s.nombre_pagador}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Botones de acción */}
+                          <div className="flex flex-col gap-2 pt-3 border-t border-blue-100">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => { setSolicitudSeleccionada(s); setModalOpen(true); }}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-sm font-medium"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Ver Detalles
+                              </button>
+                            </div>
+                            {s.estado === 'pendiente' && (
+                              <div className="flex gap-2">
+                                <button
+                                  disabled={accionEnCurso === s.id_recurrente}
+                                  onClick={() => setConfirmarAccion({ tipo: 'aprobar', id: s.id_recurrente })}
+                                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors text-sm font-medium disabled:opacity-50"
+                                >
+                                  {accionEnCurso === s.id_recurrente ? (
+                                    <div className="animate-spin h-4 w-4 border-2 border-current rounded-full border-t-transparent"></div>
+                                  ) : (
+                                    <FaCheck className="w-4 h-4" />
+                                  )}
+                                  Aprobar
+                                </button>
+                                <button
+                                  disabled={accionEnCurso === s.id_recurrente}
+                                  onClick={() => setConfirmarAccion({ tipo: 'rechazar', id: s.id_recurrente })}
+                                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors text-sm font-medium disabled:opacity-50"
+                                >
+                                  <FaTimes className="w-4 h-4" />
+                                  Rechazar
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           
           {/* Paginador mejorado */}
@@ -677,8 +782,66 @@ return (
               </div>
             </div>
           )}
+        </div>
+
+        {/* Modales globales */}
+        {confirmarAccion && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm">
+            <div className="bg-gradient-to-br from-white via-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-2xl shadow-2xl p-8 max-w-xs w-full flex flex-col items-center relative">
+              <div className="mb-4 flex items-center justify-center w-16 h-16 rounded-full shadow-xl bg-yellow-100 animate-bounce border-4 border-yellow-300">
+                <svg className="w-10 h-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" fill="#fde68a" />
+                  <path stroke="#f59e42" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-yellow-700 mb-1 text-center drop-shadow-sm">
+                Confirmación requerida
+              </h3>
+              <p className="text-xs text-yellow-700 mb-2 text-center font-medium">
+                Esta acción es importante y no se puede deshacer.
+              </p>
+              <p className="text-sm text-gray-700 mb-4 text-center">
+                {confirmarAccion.tipo === 'aprobar'
+                  ? '¿Estás seguro que deseas aprobar esta solicitud?'
+                  : '¿Estás seguro que deseas rechazar esta solicitud?'}
+              </p>
+              {confirmarAccion.tipo === 'rechazar' && (
+                <textarea
+                  className="border w-full p-2 text-base mb-3 rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500 text-black"
+                  rows={3}
+                  placeholder="Ingrese un motivo para el rechazo"
+                  value={comentario}
+                  onChange={e => setComentario(e.target.value)}
+                />
+              )}
+              <div className="flex gap-3 mt-2 w-full justify-center">
+                <button
+                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-semibold"
+                  onClick={() => { setConfirmarAccion(null); setComentario(''); }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-md font-semibold text-white ${confirmarAccion.tipo === 'aprobar' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+                  onClick={() => {
+                    if (confirmarAccion.tipo === 'aprobar') handleAprobar(confirmarAccion.id);
+                    else handleRechazar(confirmarAccion.id);
+                  }}
+                  disabled={accionEnCurso === confirmarAccion.id}
+                >
+                  {accionEnCurso === confirmarAccion.id ? 'Procesando...' : confirmarAccion.tipo === 'aprobar' ? 'Aprobar' : 'Rechazar'}
+                </button>
+              </div>
             </div>
           </div>
+        )}
+
+        <SolicitudModal 
+          solicitud={solicitudSeleccionada!}
+          open={modalOpen && !!solicitudSeleccionada}
+          onClose={() => setModalOpen(false)}
+        />
+      </div>
     </AprobadorLayout>
   </ProtectedRoute>
 );
