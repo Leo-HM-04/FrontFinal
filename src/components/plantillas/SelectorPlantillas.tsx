@@ -30,34 +30,34 @@ export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
         )}
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
         {/* Opción para formulario estándar */}
         <div
           onClick={() => onSeleccionar(null)}
-          className={`relative cursor-pointer rounded-xl border-2 transition-all duration-200 hover:shadow-lg ${
+          className={`relative cursor-pointer rounded-lg border transition-all duration-200 hover:shadow-md ${
             !plantillaSeleccionada
-              ? 'border-blue-500 bg-blue-50 shadow-md'
+              ? 'border-blue-500 bg-blue-50 shadow'
               : 'border-gray-200 bg-white hover:border-gray-300'
           }`}
         >
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                <span className="text-lg">📄</span>
+          <div className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                <span className="text-base">📄</span>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900">
+                <h4 className="font-semibold text-gray-900 text-sm sm:text-base">
                   Formulario Estándar
                 </h4>
                 <p className="text-xs text-gray-500">Sistema general</p>
               </div>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               Utiliza el formulario tradicional con campos personalizables
             </p>
             {!plantillaSeleccionada && (
               <div className="absolute top-2 right-2">
-                <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
@@ -72,21 +72,21 @@ export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
           <div
             key={plantilla.id}
             onClick={() => onSeleccionar(plantilla)}
-            className={`relative cursor-pointer rounded-xl border-2 transition-all duration-200 hover:shadow-lg ${
+            className={`relative cursor-pointer rounded-lg border transition-all duration-200 hover:shadow-md ${
               plantillaSeleccionada?.id === plantilla.id
-                ? 'border-blue-500 bg-blue-50 shadow-md'
+                ? 'border-blue-500 bg-blue-50 shadow'
                 : 'border-gray-200 bg-white hover:border-gray-300'
             }`}
           >
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+            <div className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`w-8 h-8 rounded flex items-center justify-center ${
                   plantilla.color === 'blue' ? 'bg-blue-100' : 'bg-gray-100'
                 }`}>
-                  <span className="text-lg">{plantilla.icono || '📋'}</span>
+                  <span className="text-base">{plantilla.icono || '📋'}</span>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 text-sm leading-tight">
+                  <h4 className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight">
                     {plantilla.nombre}
                   </h4>
                   <p className="text-xs text-gray-500">
@@ -94,19 +94,16 @@ export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
                   </p>
                 </div>
               </div>
-              
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-xs sm:text-sm text-gray-600 mb-2">
                 {plantilla.descripcion}
               </p>
-              
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <span>v{plantilla.version}</span>
                 <span>{plantilla.metadatos?.usosFrecuentes || 0} usos</span>
               </div>
-              
               {plantillaSeleccionada?.id === plantilla.id && (
                 <div className="absolute top-2 right-2">
-                  <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                     <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>

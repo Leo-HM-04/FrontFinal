@@ -309,26 +309,26 @@ export default function NuevoViaticoPage() {
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
-        <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg px-8 py-6 mt-6 border border-blue-100">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-blue-900 mb-2">Nuevo Viático</h1>
-            <p className="text-blue-600">Completa los campos necesarios para crear tu viático</p>
+  <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg px-2 sm:px-4 md:px-8 py-4 sm:py-6 mt-4 sm:mt-6 border border-blue-100">
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-1 sm:mb-2">Nuevo Viático</h1>
+            <p className="text-blue-600 text-sm sm:text-base">Completa los campos necesarios para crear tu viático</p>
           </div>
 
           {/* Sección de Descarga de Plantilla - SENCILLA Y PROFESIONAL */}
-          <div className="mb-8">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg border border-blue-300">
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="bg-white/20 p-3 rounded-lg">
-                    <FaFileWord className="text-3xl text-white" />
+          <div className="mb-6 sm:mb-8">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-3 sm:p-6 text-white shadow-lg border border-blue-300">
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-4 sm:gap-6">
+                <div className="flex items-center gap-2 sm:gap-4 flex-1">
+                  <div className="bg-white/20 p-2 sm:p-3 rounded-lg">
+                    <FaFileWord className="text-2xl sm:text-3xl text-white" />
                   </div>
                   <div className="text-center lg:text-left">
-                    <h3 className="text-xl font-bold mb-2 flex items-center justify-center lg:justify-start gap-2">
+                    <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2 flex items-center justify-center lg:justify-start gap-1 sm:gap-2">
                       <FaClipboardList className="text-white" /> 
                       <span className="text-white">Formato Recomendado</span>
                     </h3>
-                    <p className="text-blue-100 text-base leading-relaxed">
+                    <p className="text-blue-100 text-xs sm:text-base leading-relaxed">
                       <strong className="text-white">Usa el formato recomendado para solicitar tus viáticos</strong>, 
                       si aún no lo tienes, <strong className="text-white">¡descárgalo aquí!</strong>
                       <br />
@@ -337,23 +337,23 @@ export default function NuevoViaticoPage() {
                   </div>
                 </div>
                 
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 w-full lg:w-auto mt-3 lg:mt-0">
                   <button
                     type="button"
                     onClick={handleDescargarPlantilla}
-                    className="bg-white text-blue-600 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-50 transition-colors duration-200 flex items-center gap-2 text-base"
+                    className="w-full lg:w-auto bg-white text-blue-600 font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg shadow-md hover:bg-blue-50 transition-colors duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
                   >
-                    <FaDownload className="text-lg" />
+                    <FaDownload className="text-base sm:text-lg" />
                     <span>Descargar Plantilla</span>
                   </button>
                 </div>
               </div>
               
-              <div className="mt-4 text-center">
-                <div className="inline-flex items-center bg-white/10 rounded-lg px-4 py-2 text-sm">
-                  <FaBolt className="mr-2 text-yellow-200" />
+              <div className="mt-3 sm:mt-4 text-center">
+                <div className="inline-flex items-center bg-white/10 rounded-lg px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm">
+                  <FaBolt className="mr-1 sm:mr-2 text-yellow-200" />
                   <span className="font-medium text-white">¡IMPORTANTE!</span>
-                  <span className="ml-2 text-blue-100">Usa esta plantilla para agilizar tu solicitud y evitar rechazos</span>
+                  <span className="ml-1 sm:ml-2 text-blue-100">Usa esta plantilla para agilizar tu solicitud y evitar rechazos</span>
                 </div>
               </div>
             </div>
@@ -376,7 +376,7 @@ export default function NuevoViaticoPage() {
             {formularios.map((f, idx) => (
               <div
                 key={idx}
-                className="relative mb-4 sm:mb-6 border border-blue-200 bg-blue-50/30 rounded-xl p-4 sm:p-6"
+                className="relative mb-3 sm:mb-4 border border-blue-200 bg-blue-50/30 rounded-xl p-2 sm:p-4 md:p-6"
               >
                 {/* Identificador simple */}
                 <div className="absolute -top-3 left-4 bg-blue-600 text-white text-sm font-semibold px-3 py-1 rounded-full">
@@ -394,9 +394,9 @@ export default function NuevoViaticoPage() {
                 )}
                 
                 {/* Campos organizados en grid simple */}
-                <div className="mt-4 space-y-4">
+                <div className="mt-2 sm:mt-4 space-y-3 sm:space-y-4">
                   {/* Primera fila: Datos bancarios */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-blue-900 font-medium text-sm">Tipo de Cuenta *</label>
                       <select name="tipo_cuenta_destino" onChange={e => {
@@ -509,7 +509,7 @@ export default function NuevoViaticoPage() {
                   </div>
                   
                   {/* Cuenta adicional (opcional) */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 p-2 sm:p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
                     <div className="flex flex-col gap-1">
                       <label className="text-green-800 font-medium text-sm">No. De Cuenta  (opcional)</label>
                       <input 
@@ -541,7 +541,7 @@ export default function NuevoViaticoPage() {
                   </div>
                   
                   {/* Segunda fila: Datos del pago */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-blue-900 font-medium text-sm">Monto *</label>
                       <input name="monto" placeholder="0.00" type="number" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400" />
@@ -582,7 +582,7 @@ export default function NuevoViaticoPage() {
                   </div>
                   
                   {/* Tercera fila: Beneficiario y descripción */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
                     <div className="flex flex-col gap-1">
                       <label className="text-blue-900 font-medium text-sm">Nombre del Beneficiario *</label>
                       <input name="nombre_persona" placeholder="Nombre completo" onChange={e => handleChange(idx, e)} required className="text-black input input-bordered text-sm px-3 py-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400" />
@@ -605,14 +605,14 @@ export default function NuevoViaticoPage() {
                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xlsx,.xls"
                       className="file-input file-input-bordered text-sm px-3 py-2 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400 text-blue-900 bg-white" 
                     />
-                    <div className="mt-1">
+                    <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:gap-4">
                       <p className="text-blue-600 text-xs flex items-center">
                         <span className="mr-1">📎</span>
-                        Formatos permitidos: PDF, JPG, PNG, DOC, DOCX, XLS, XLSX
+                        Formatos: PDF, JPG, PNG, DOC, DOCX, XLS, XLSX
                       </p>
-                      <p className="text-blue-600 text-xs flex items-center mt-1">
+                      <p className="text-blue-600 text-xs flex items-center mt-1 sm:mt-0">
                         <span className="mr-1">⚖️</span>
-                        Tamaño máximo: 10MB
+                        Máx: 10MB
                       </p>
                     </div>
                     {formularios[idx].errors?.file && (<span className="text-red-600 text-xs">{formularios[idx].errors.file}</span>)}
@@ -628,10 +628,10 @@ export default function NuevoViaticoPage() {
             ))}
             
             {/* Botones de acción */}
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-blue-200">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-4 mt-4 sm:mt-6 pt-3 sm:pt-6 border-t border-blue-200">
               <button
                 type="button"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg border border-blue-600 text-blue-700 font-medium hover:bg-blue-50 transition-colors text-sm sm:text-base"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-blue-600 text-blue-700 font-medium hover:bg-blue-50 transition-colors text-sm sm:text-base"
                 onClick={handleAgregarOtro}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -639,10 +639,10 @@ export default function NuevoViaticoPage() {
                 </svg>
                 Agregar Otro Viático
               </button>
-              <div className="flex gap-2 sm:gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 <button
                   type="button"
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg border border-gray-400 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-400 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm sm:text-base"
                   onClick={() => router.push('/dashboard/solicitante/mis-viaticos')}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -652,7 +652,7 @@ export default function NuevoViaticoPage() {
                 </button>
                 <button
                   type="submit"
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors ${enviando ? 'opacity-60 pointer-events-none' : ''}`}
+                  className={`w-full sm:w-auto flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors ${enviando ? 'opacity-60 pointer-events-none' : ''}`}
                   disabled={enviando}
                 >
                   {enviando ? (
