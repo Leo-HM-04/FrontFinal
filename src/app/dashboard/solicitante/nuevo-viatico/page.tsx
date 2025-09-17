@@ -270,36 +270,38 @@ export default function NuevoViaticoPage() {
     setFormularios(formularios.filter((_, i) => i !== idx));
   };
 
-  // Función para manejar la descarga de la plantilla
+  // Función para manejar la descarga de la plantilla mejorada
   const handleDescargarPlantilla = async () => {
     try {
-      // Descargar plantilla de Word detallada
-      const response = await fetch('/plantilla-viaticos.doc');
+      setMensajeGlobal('Generando plantilla mejorada...');
+      setExito(true);
+      setShowToast(true);
+      
+      // Descargar plantilla mejorada desde el API
+      const response = await fetch('/api/plantilla-viaticos');
       if (!response.ok) {
-        setMensajeGlobal('La plantilla no está disponible en este momento. Por favor contacta al administrador.');
-        setExito(false);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-        return;
+        throw new Error('No se pudo generar la plantilla');
       }
+      
       // Si existe, proceder con la descarga
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Plantilla_Solicitud_Viaticos.doc';
+      link.download = 'Solicitud_y_Desglose_de_Viaticos_Mejorada.doc';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
       // Mensaje de éxito
-      setMensajeGlobal('¡Plantilla descargada exitosamente!');
+      setMensajeGlobal('¡Plantilla mejorada descargada exitosamente! 📄✨');
       setExito(true);
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      setTimeout(() => setShowToast(false), 4000);
     } catch (error) {
       console.error('Error al descargar plantilla:', error);
-      setMensajeGlobal('Error al descargar la plantilla. Intenta nuevamente.');
+      setMensajeGlobal('Error al descargar la plantilla mejorada. Intenta nuevamente.');
       setExito(false);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -326,13 +328,16 @@ export default function NuevoViaticoPage() {
                   <div className="text-center lg:text-left">
                     <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2 flex items-center justify-center lg:justify-start gap-1 sm:gap-2">
                       <FaClipboardList className="text-white" /> 
-                      <span className="text-white">Formato Recomendado</span>
+                      <span className="text-white">Plantilla Profesional Mejorada</span>
                     </h3>
                     <p className="text-blue-100 text-xs sm:text-base leading-relaxed">
-                      <strong className="text-white">Usa el formato recomendado para solicitar tus viáticos</strong>, 
-                      si aún no lo tienes, <strong className="text-white">¡descárgalo aquí!</strong>
+                      <strong className="text-white">Nueva plantilla completa con formato profesional</strong>, 
+                      incluye todos los campos requeridos según estándares empresariales.
                       <br />
-                      <small className="text-blue-200">Formato completo en Word con todos los campos requeridos</small>
+                      <small className="text-blue-200">
+                        ✨ <strong>Mejoradas:</strong> Información del viaje, desglose detallado de gastos, 
+                        justificación, firmas de autorización y notas importantes
+                      </small>
                     </p>
                   </div>
                 </div>
@@ -344,7 +349,7 @@ export default function NuevoViaticoPage() {
                     className="w-full lg:w-auto bg-white text-blue-600 font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg shadow-md hover:bg-blue-50 transition-colors duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
                   >
                     <FaDownload className="text-base sm:text-lg" />
-                    <span>Descargar Plantilla</span>
+                    <span>Descargar Plantilla Mejorada</span>
                   </button>
                 </div>
               </div>
@@ -352,8 +357,8 @@ export default function NuevoViaticoPage() {
               <div className="mt-3 sm:mt-4 text-center">
                 <div className="inline-flex items-center bg-white/10 rounded-lg px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm">
                   <FaBolt className="mr-1 sm:mr-2 text-yellow-200" />
-                  <span className="font-medium text-white">¡IMPORTANTE!</span>
-                  <span className="ml-1 sm:ml-2 text-blue-100">Usa esta plantilla para agilizar tu solicitud y evitar rechazos</span>
+                  <span className="font-medium text-white">¡NUEVA VERSIÓN!</span>
+                  <span className="ml-1 sm:ml-2 text-blue-100">Plantilla profesional con desglose completo, información del viaje y autorizaciones</span>
                 </div>
               </div>
             </div>
