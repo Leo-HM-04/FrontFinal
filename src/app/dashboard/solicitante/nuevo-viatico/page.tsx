@@ -231,11 +231,11 @@ export default function NuevoViaticoPage() {
   // Función para manejar la descarga de la plantilla
   const handleDescargarPlantilla = async () => {
     try {
-      // Por ahora descargamos un archivo temporal mientras llega la plantilla oficial
-      const response = await fetch('/plantilla-viaticos-temporal.txt');
+      // Descargar plantilla de Word detallada
+      const response = await fetch('/plantilla-viaticos.doc');
       
       if (!response.ok) {
-        setMensajeGlobal('La plantilla estará disponible próximamente. Por favor contacta al administrador.');
+        setMensajeGlobal('La plantilla no está disponible en este momento. Por favor contacta al administrador.');
         setExito(false);
         return;
       }
@@ -245,19 +245,19 @@ export default function NuevoViaticoPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Instrucciones_Viaticos_Temporal.txt';
+      link.download = 'Plantilla_Solicitud_Viaticos.doc';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       // Mensaje de éxito
-      setMensajeGlobal('¡Instrucciones descargadas! La plantilla oficial de Word estará disponible próximamente.');
+      setMensajeGlobal('¡Plantilla descargada exitosamente! Completa el formato y adjunta los documentos requeridos.');
       setExito(true);
       
     } catch (error) {
       console.error('Error al descargar plantilla:', error);
-      setMensajeGlobal('Error al descargar las instrucciones. Intenta nuevamente.');
+      setMensajeGlobal('Error al descargar la plantilla. Intenta nuevamente.');
       setExito(false);
     }
   };
@@ -294,9 +294,9 @@ export default function NuevoViaticoPage() {
                       </h3>
                       <p className="text-blue-50 text-base lg:text-lg leading-relaxed font-medium">
                         <strong className="text-white">Usa el formato recomendado para solicitar tus viáticos</strong>, 
-                        si aún no lo tienes, <strong className="text-yellow-200">¡descarga las instrucciones aquí!</strong>
+                        si aún no lo tienes, <strong className="text-yellow-200">¡descárgalo aquí!</strong>
                         <br />
-                        <small className="text-blue-200">*Plantilla oficial de Word próximamente</small>
+                        <small className="text-blue-200">Formato completo en Word con todos los campos requeridos</small>
                       </p>
                     </div>
                   </div>
@@ -308,7 +308,7 @@ export default function NuevoViaticoPage() {
                       className="group bg-white text-blue-700 font-bold py-4 px-8 rounded-2xl shadow-xl hover:bg-yellow-50 hover:text-blue-800 transform hover:scale-110 hover:-rotate-1 transition-all duration-300 flex items-center gap-3 text-xl border-4 border-white/20 hover:border-yellow-200"
                     >
                       <FaDownload className="text-2xl group-hover:animate-bounce" />
-                      <span>Descargar Guía</span>
+                      <span>Descargar Plantilla</span>
                     </button>
                   </div>
                 </div>

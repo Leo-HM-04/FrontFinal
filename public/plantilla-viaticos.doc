@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>Plantilla Solicitud de Viáticos</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>90</w:Zoom>
+<w:DoNotPromptForConvert/>
+<w:DoNotShowInsertionsAndDeletions/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+@page {
+    margin: 1in;
+}
+body {
+    font-family: 'Times New Roman', serif;
+    font-size: 12pt;
+    line-height: 1.5;
+}
+.header {
+    text-align: center;
+    font-weight: bold;
+    font-size: 16pt;
+    margin-bottom: 20pt;
+    border-bottom: 2pt solid #000;
+    padding-bottom: 10pt;
+}
+.section {
+    margin: 15pt 0;
+}
+.section-title {
+    font-weight: bold;
+    font-size: 14pt;
+    color: #000080;
+    margin-bottom: 10pt;
+    border-bottom: 1pt solid #000080;
+}
+.form-field {
+    margin: 8pt 0;
+    border-bottom: 1pt dotted #000;
+    padding-bottom: 2pt;
+}
+.instructions {
+    background-color: #f0f8ff;
+    padding: 10pt;
+    border: 1pt solid #4169e1;
+    margin: 10pt 0;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10pt 0;
+}
+td, th {
+    border: 1pt solid #000;
+    padding: 5pt;
+    text-align: left;
+}
+th {
+    background-color: #e6f2ff;
+    font-weight: bold;
+}
+.checkbox {
+    margin-right: 10pt;
+}
+.signature {
+    margin-top: 30pt;
+    text-align: right;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    FORMATO PARA SOLICITUD DE VIÁTICOS
+    <br>
+    <span style="font-size: 12pt; font-weight: normal;">Plataforma de Pagos Corporativos</span>
+</div>
+
+<div class="instructions">
+    <strong>INSTRUCCIONES IMPORTANTES:</strong><br>
+    1. Complete todos los campos obligatorios marcados con (*)<br>
+    2. Adjunte TODOS los documentos requeridos<br>
+    3. Verifique la información antes de enviar<br>
+    4. Mantenga copias de todos los documentos
+</div>
+
+<div class="section">
+    <div class="section-title">I. INFORMACIÓN DEL SOLICITANTE</div>
+    
+    <div class="form-field">
+        <strong>Nombre Completo:</strong> _____________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Departamento:</strong> _____________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Puesto/Cargo:</strong> _____________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Fecha de Solicitud:</strong> _____________________________________________
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">II. DETALLES DEL VIÁTICO</div>
+    
+    <div class="form-field">
+        <strong>Motivo del Viático:</strong> _____________________________________________
+        <br>_________________________________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Monto Solicitado: $</strong> _____________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Moneda:</strong> 
+        <span class="checkbox">☐ MXN (Pesos Mexicanos)</span>
+        <span class="checkbox">☐ USD (Dólares)</span>
+        <span class="checkbox">☐ Otra: ___________</span>
+    </div>
+    
+    <div class="form-field">
+        <strong>Fecha Límite de Pago:</strong> _____________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Urgencia:</strong>
+        <span class="checkbox">☐ Normal</span>
+        <span class="checkbox">☐ Urgente</span>
+        <span class="checkbox">☐ Muy Urgente</span>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">III. INFORMACIÓN BANCARIA</div>
+    
+    <div class="form-field">
+        <strong>Tipo de Cuenta Destino:</strong>
+        <span class="checkbox">☐ CLABE Interbancaria</span>
+        <span class="checkbox">☐ Número de Tarjeta</span>
+    </div>
+    
+    <div class="form-field">
+        <strong>Banco Destino:</strong> _____________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Número de Cuenta/CLABE:</strong> _____________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Nombre del Titular:</strong> _____________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Tipo de Tarjeta (si aplica):</strong>
+        <span class="checkbox">☐ Débito</span>
+        <span class="checkbox">☐ Crédito</span>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">IV. CUENTA ADICIONAL (Opcional)</div>
+    
+    <div class="form-field">
+        <strong>Cuenta Adicional:</strong> _____________________________________________
+    </div>
+    
+    <div class="form-field">
+        <strong>Banco de Cuenta Adicional:</strong> _____________________________________________
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">V. DOCUMENTOS REQUERIDOS</div>
+    
+    <p><strong>Marque los documentos que adjunta (TODOS son obligatorios):</strong></p>
+    
+    <div class="form-field">
+        <span class="checkbox">☐ Factura o Comprobante del gasto</span>
+    </div>
+    <div class="form-field">
+        <span class="checkbox">☐ Identificación oficial vigente</span>
+    </div>
+    <div class="form-field">
+        <span class="checkbox">☐ Comprobante bancario (estado de cuenta)</span>
+    </div>
+    <div class="form-field">
+        <span class="checkbox">☐ Autorización del supervisor inmediato</span>
+    </div>
+    <div class="form-field">
+        <span class="checkbox">☐ Presupuesto o cotización (si aplica)</span>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">VI. DETALLES ADICIONALES</div>
+    
+    <div class="form-field">
+        <strong>Descripción detallada del gasto:</strong><br>
+        _________________________________________________________________<br>
+        _________________________________________________________________<br>
+        _________________________________________________________________<br>
+    </div>
+    
+    <div class="form-field">
+        <strong>Justificación de la urgencia (si aplica):</strong><br>
+        _________________________________________________________________<br>
+        _________________________________________________________________<br>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">VII. PROCESO DE APROBACIÓN</div>
+    
+    <table>
+        <tr>
+            <th>Paso</th>
+            <th>Responsable</th>
+            <th>Fecha</th>
+            <th>Firma/Observaciones</th>
+        </tr>
+        <tr>
+            <td>1. Solicitud</td>
+            <td>Solicitante</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>2. Revisión</td>
+            <td>Aprobador</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>3. Pago</td>
+            <td>Pagador</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+
+<div class="instructions">
+    <strong>NOTAS IMPORTANTES:</strong><br>
+    • Los viáticos se procesarán en un máximo de 5 días hábiles<br>
+    • Las solicitudes urgentes requieren justificación<br>
+    • Mantenga todos los comprobantes originales<br>
+    • Para dudas, contacte al departamento de administración<br>
+    • Email: admin@empresa.com | Tel: (55) 1234-5678
+</div>
+
+<div class="signature">
+    <p>_________________________________</p>
+    <p><strong>Firma del Solicitante</strong></p>
+    <p>Fecha: _______________</p>
+</div>
+
+<div style="margin-top: 20pt; font-size: 10pt; text-align: center; color: #666;">
+    Documento generado automáticamente - Plataforma de Pagos Corporativos
+</div>
+
+</body>
+</html>
