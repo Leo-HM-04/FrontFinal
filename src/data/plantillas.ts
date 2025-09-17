@@ -1102,6 +1102,112 @@ export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
   }
 };
 
+// Plantilla para REGRESOS EN TRANSFERENCIA
+export const plantillaRegresosTransferencia: PlantillaSolicitud = {
+  id: 'regresos-transferencia',
+  nombre: 'REGRESOS EN TRANSFERENCIA',
+  descripcion: 'Plantilla para solicitudes de regreso de transferencias bancarias',
+  version: '1.0.0',
+  activa: true,
+  categoria: 'regresos',
+  icono: '↩️',
+  secciones: [
+    {
+      id: 'datos-generales',
+      titulo: 'Datos Generales',
+      descripcion: 'Información general del regreso de transferencia',
+      campos: [
+        {
+          id: 'asunto',
+          nombre: 'asunto',
+          tipo: 'texto',
+          etiqueta: 'Asunto',
+          placeholder: 'Describe el asunto del regreso',
+          ayuda: 'Ej. Solicitud de regreso Juan Dominguez 123456',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 10,
+            mensaje: 'El asunto debe tener al menos 10 caracteres'
+          },
+          estilos: {
+            ancho: 'completo'
+          }
+        }
+      ],
+      estilos: {
+        columnas: 1,
+        espaciado: 'normal'
+      }
+    },
+    {
+      id: 'cuentas-transferencia',
+      titulo: 'Cuentas de Transferencia',
+      descripcion: 'Configure las cuentas de destino (máximo 3)',
+      campos: [
+        {
+          id: 'cuentas_transferencia',
+          nombre: 'cuentas_transferencia',
+          tipo: 'cuentas_dinamicas',
+          etiqueta: 'Cuentas de Transferencia',
+          ayuda: 'Agregue hasta 3 cuentas de transferencia diferentes',
+          valorPorDefecto: [],
+          validaciones: {
+            requerido: true,
+            mensaje: 'Debe agregar al menos una cuenta de transferencia'
+          },
+          estilos: {
+            ancho: 'completo',
+            maximo: 3
+          }
+        }
+      ],
+      estilos: {
+        columnas: 1,
+        espaciado: 'amplio'
+      }
+    },
+    {
+      id: 'archivos-adjuntos',
+      titulo: 'Documentación',
+      descripcion: 'Archivos de soporte',
+      campos: [
+        {
+          id: 'archivos_adjuntos',
+          nombre: 'archivos_adjuntos',
+          tipo: 'archivos',
+          etiqueta: 'Archivos Adjuntos',
+          ayuda: 'Dos archivos excel con el cálculo de las comisiones y una imagen o pdf con el comprobante del pago',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: false
+          },
+          estilos: {
+            ancho: 'completo',
+            multiple: true
+          }
+        }
+      ],
+      estilos: {
+        columnas: 1,
+        espaciado: 'normal'
+      }
+    }
+  ],
+  configuracion: {
+    permiteArchivosMultiples: true,
+    tiposArchivosPermitidos: ['.pdf', '.jpg', '.jpeg', '.png', '.xlsx', '.xls', '.doc', '.docx'],
+    tamanoMaximoArchivo: 25 * 1024 * 1024, // 25MB
+    mostrarProgreso: true
+  },
+  metadatos: {
+    creadoPor: 'Sistema',
+    fechaCreacion: new Date().toISOString(),
+    fechaModificacion: new Date().toISOString(),
+    usosFrecuentes: 0
+  }
+};
+
 // Lista de todas las plantillas disponibles
 export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaTarjetasN09Toka,
@@ -1109,7 +1215,8 @@ export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaPagoSuaInternas,
   plantillaPagoSuaFrenshetsi,
   plantillaPagoComisiones,
-  plantillaPagoPolizasGnp
+  plantillaPagoPolizasGnp,
+  plantillaRegresosTransferencia
   // Aquí se pueden agregar más plantillas en el futuro
 ];
 

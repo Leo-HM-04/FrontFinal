@@ -18,7 +18,8 @@ export type TipoCampo =
   | 'banco'
   | 'selector_cuenta'
   | 'select_banco'
-  | 'metodos_pago_dinamicos';
+  | 'metodos_pago_dinamicos'
+  | 'cuentas_dinamicas';
 
 export type ValidacionCampo = {
   requerido?: boolean;

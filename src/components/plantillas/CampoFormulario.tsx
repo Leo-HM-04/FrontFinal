@@ -597,6 +597,222 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
           </div>
         );
 
+      case 'cuentas_dinamicas':
+        // Valor es un array de cuentas de transferencia
+        const cuentasTransferencia = Array.isArray(valor) ? valor as Array<{
+          beneficiario: string,
+          tipo_cuenta: string,
+          numero_cuenta: string,
+          banco_destino: string,
+          monto: string
+        }> : [];
+        const maximoCuentas = campo.estilos?.maximo || 3;
+
+        const agregarCuentaTransferencia = () => {
+          if (cuentasTransferencia.length < maximoCuentas) {
+            const nuevasCuentas = [...cuentasTransferencia, {
+              beneficiario: '',
+              tipo_cuenta: '',
+              numero_cuenta: '',
+              banco_destino: '',
+              monto: ''
+            }];
+            onChange(nuevasCuentas);
+          }
+        };
+
+        const actualizarCuentaTransferencia = (index: number, campo: string, valor: string) => {
+          const nuevasCuentas = [...cuentasTransferencia];
+          nuevasCuentas[index] = {...nuevasCuentas[index], [campo]: valor};
+          onChange(nuevasCuentas);
+        };
+
+        const eliminarCuentaTransferencia = (index: number) => {
+          const nuevasCuentas = cuentasTransferencia.filter((_, i) => i !== index);
+          onChange(nuevasCuentas);
+        };
+
+        const opcionesBancosCuentas = obtenerOpcionesBancos();
+
+        const getValidacionTipoCuenta = (tipoCuenta: string) => {
+          switch (tipoCuenta) {
+            case 'clabe':
+              return { maxLength: 18, pattern: '[0-9]{16,18}', placeholder: '16-18 dígitos' };
+            case 'cuenta':
+              return { maxLength: 10, pattern: '[0-9]{8,10}', placeholder: '8-10 dígitos' };
+            case 'tarjeta':
+              return { maxLength: 16, pattern: '[0-9]{13,16}', placeholder: 'Máximo 16 dígitos' };
+            default:
+              return { maxLength: 20, pattern: '[0-9]*', placeholder: 'Seleccione tipo primero' };
+          }
+        };
+
+        return (
+          <div className="space-y-6">
+            {/* Cuentas existentes */}
+            {cuentasTransferencia.map((cuenta, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-medium text-gray-900">CUENTA {index + 1}</h4>
+                  {cuentasTransferencia.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => eliminarCuentaTransferencia(index)}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    >
+                      Eliminar
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  {/* Fila 1: Beneficiario */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Beneficiario <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={cuenta.beneficiario}
+                      onChange={(e) => actualizarCuentaTransferencia(index, 'beneficiario', e.target.value)}
+                      placeholder="Ej. JUAN DOMINGUEZ CRUZ"
+                      className={`${baseClasses} px-3 py-2 w-full`}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Ej. JUAN DOMINGUEZ CRUZ</p>
+                  </div>
+
+                  {/* Fila 2: Información Bancaria y CLABE */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Tipo de Cuenta */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Información Bancaria <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={cuenta.tipo_cuenta}
+                        onChange={(e) => {
+                          actualizarCuentaTransferencia(index, 'tipo_cuenta', e.target.value);
+                          actualizarCuentaTransferencia(index, 'numero_cuenta', ''); // Limpiar número al cambiar tipo
+                        }}
+                        className={`${baseClasses} px-3 py-2 w-full`}
+                      >
+                        <option value="">Seleccione tipo</option>
+                        <option value="cuenta">CUENTA</option>
+                        <option value="clabe">CLABE</option>
+                        <option value="tarjeta">TARJETA</option>
+                      </select>
+                    </div>
+
+                    {/* Número de Cuenta/CLABE/Tarjeta */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        CLABE <span className="text-red-500">*</span>
+                      </label>
+                      {cuenta.tipo_cuenta ? (
+                        <input
+                          type="text"
+                          value={cuenta.numero_cuenta}
+                          onChange={(e) => {
+                            const validacion = getValidacionTipoCuenta(cuenta.tipo_cuenta);
+                            const soloNumeros = e.target.value.replace(/\D/g, '').slice(0, validacion.maxLength);
+                            actualizarCuentaTransferencia(index, 'numero_cuenta', soloNumeros);
+                          }}
+                          placeholder={cuenta.tipo_cuenta ? getValidacionTipoCuenta(cuenta.tipo_cuenta).placeholder : 'Seleccione tipo primero'}
+                          maxLength={cuenta.tipo_cuenta ? getValidacionTipoCuenta(cuenta.tipo_cuenta).maxLength : 20}
+                          className={`${baseClasses} px-3 py-2 w-full font-mono`}
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          disabled
+                          placeholder="Ej. CIE 1234567"
+                          className={`${baseClasses} px-3 py-2 w-full bg-gray-100 text-gray-500`}
+                        />
+                      )}
+                      <p className="text-xs text-gray-500 mt-1">
+                        {cuenta.tipo_cuenta === 'clabe' && 'CLABE: 16 o 18 dígitos'}
+                        {cuenta.tipo_cuenta === 'cuenta' && 'CUENTA: 8 o 10 dígitos'}
+                        {cuenta.tipo_cuenta === 'tarjeta' && 'TARJETA: Máximo 16 dígitos'}
+                        {!cuenta.tipo_cuenta && 'Seleccione el tipo de información bancaria'}
+                      </p>
+                    </div>
+
+                    {/* Monto (movido a la derecha) */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Monto <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={cuenta.monto}
+                        onChange={(e) => {
+                          // Formato de moneda básico
+                          const valor = e.target.value.replace(/[^\d.,]/g, '');
+                          actualizarCuentaTransferencia(index, 'monto', valor);
+                        }}
+                        placeholder="Ej. 56,000.00"
+                        className={`${baseClasses} px-3 py-2 w-full`}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Ej. 56,000.00</p>
+                    </div>
+                  </div>
+
+                  {/* Fila 3: Banco Destino */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Banco Destino <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={cuenta.banco_destino}
+                      onChange={(e) => actualizarCuentaTransferencia(index, 'banco_destino', e.target.value)}
+                      className={`${baseClasses} px-3 py-2 w-full`}
+                    >
+                      <option value="">Seleccione el banco</option>
+                      {opcionesBancosCuentas.map((banco) => (
+                        <option key={banco.valor} value={banco.valor}>
+                          {banco.etiqueta}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Botón para agregar nueva cuenta */}
+            {cuentasTransferencia.length < maximoCuentas && (
+              <button
+                type="button"
+                onClick={agregarCuentaTransferencia}
+                className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <span className="text-gray-600 font-medium">
+                    Agregar otra cuenta ({cuentasTransferencia.length}/{maximoCuentas})
+                  </span>
+                </div>
+              </button>
+            )}
+
+            {/* Mensaje inicial si no hay cuentas */}
+            {cuentasTransferencia.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">No hay cuentas de transferencia configuradas</p>
+                <button
+                  type="button"
+                  onClick={agregarCuentaTransferencia}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Agregar primera cuenta de transferencia
+                </button>
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return (
           <input
