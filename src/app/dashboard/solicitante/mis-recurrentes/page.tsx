@@ -10,7 +10,7 @@ import { PlantillaRecurrente } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { exportMisRecurrentesPDF, exportMisRecurrentesExcel, exportMisRecurrentesCSV } from '@/utils/exportMisRecurrentes';
 import { Pagination } from '@/components/ui/Pagination';
-import { Plus, FileText, Clock, CheckCircle, XCircle, Eye, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Plus, FileText, Clock, CheckCircle, XCircle, Eye, ChevronLeft, ChevronRight, ChevronDown, Search, Star, Calendar, AlertTriangle } from 'lucide-react';
 import { RecurrenteDetalleModal } from '@/components/RecurrenteDetalleModal';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
@@ -73,6 +73,7 @@ function MisRecurrentesContent() {
 
     const [detalleModalOpen, setDetalleModalOpen] = useState(false);
     const [recurrenteDetalle, setRecurrenteDetalle] = useState<PlantillaRecurrente | null>(null);
+    const [explicacionExpandida, setExplicacionExpandida] = useState(false);
     const router = useRouter();
     // const { user } = useAuth();
     const [recurrentes, setRecurrentes] = useState<PlantillaRecurrente[]>([]);
@@ -241,171 +242,233 @@ function MisRecurrentesContent() {
                         <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-sm">Mis Recurrentes</h1>
                     </div>
 
-                    {/* Descripción de funcionamiento de pagos recurrentes responsiva */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border-l-4 border-blue-500 shadow-lg">
-                        <div className="flex items-start gap-3 sm:gap-4">
-                            <div className="bg-blue-500 p-2 sm:p-3 rounded-xl shadow-md flex-shrink-0">
-                                <Clock className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
+                    {/* Sección explicativa colapsible */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-lg p-4 mb-6 border border-blue-200 shadow-sm">
+                        <div 
+                            className="flex items-center justify-between cursor-pointer"
+                            onClick={() => setExplicacionExpandida(!explicacionExpandida)}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="bg-blue-500 p-2 rounded-lg">
+                                    <Clock className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-900">¿Cómo funcionan los Pagos Recurrentes?</h2>
+                                    <p className="text-sm text-gray-600">Haz clic para ver información detallada</p>
+                                </div>
                             </div>
-                            <div className="flex-1">
-                                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">¿Cómo funcionan los Pagos Recurrentes?</h2>
-                                
-                                <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                                    <div className="space-y-3 sm:space-y-4">
-                                        <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-blue-200">
-                                            <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                                                <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">1</span>
-                                                Plantillas Recurrentes
-                                            </h3>
-                                            <p className="text-gray-700 text-xs sm:text-sm">
-                                                Las plantillas son formatos predefinidos que contienen toda la información necesaria para generar pagos automáticamente cada mes: concepto, monto, cuenta destino, departamento y frecuencia.
-                                            </p>
-                                        </div>
-                                        
-                                        <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-green-200">
-                                            <h3 className="text-base sm:text-lg font-semibold text-green-900 mb-2 flex items-center gap-2">
-                                                <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">2</span>
-                                                Proceso Automático
-                                            </h3>
-                                            <p className="text-gray-700 text-xs sm:text-sm">
-                                                Cada mes, el sistema genera automáticamente solicitudes de pago basadas en tus plantillas activas. Estas solicitudes siguen el flujo normal de aprobación: Pendiente → Aprobada → Pagada.
-                                            </p>
-                                        </div>
+                            <ChevronDown 
+                                className={`w-5 h-5 text-gray-600 transition-transform duration-200 ${
+                                    explicacionExpandida ? 'rotate-180' : ''
+                                }`}
+                            />
+                        </div>
+                        
+                        {/* Contenido expandible */}
+                        {explicacionExpandida && (
+                            <div className="mt-6 space-y-6 animate-in slide-in-from-top-2 duration-200">
+                                {/* Explicación general */}
+                                <div className="bg-white p-4 rounded-lg border border-blue-200">
+                                    <p className="text-gray-700 leading-relaxed">
+                                        Los <strong>Pagos Recurrentes</strong> te permiten automatizar solicitudes de pago regulares. 
+                                        Una vez configurada una plantilla, el sistema creará automáticamente las solicitudes cada mes, 
+                                        ahorrándote tiempo y asegurando que no olvides pagos importantes.
+                                    </p>
+                                </div>
+
+                                {/* Proceso paso a paso */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div className="bg-white p-4 rounded-lg border border-blue-200">
+                                        <div className="bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full inline-block mb-3">Paso 1</div>
+                                        <h3 className="font-semibold text-blue-900 mb-2">Crear Plantilla</h3>
+                                        <p className="text-sm text-gray-600 mb-3">
+                                            Configura todos los datos del pago: beneficiario, monto, concepto, frecuencia y fechas.
+                                        </p>
+                                        <ul className="text-xs text-gray-500 space-y-1">
+                                            <li>• Define el monto y concepto</li>
+                                            <li>• Selecciona la frecuencia</li>
+                                            <li>• Configura fechas de inicio y fin</li>
+                                        </ul>
                                     </div>
                                     
-                                    <div className="space-y-3 sm:space-y-4">
-                                        <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-orange-200">
-                                            <h3 className="text-base sm:text-lg font-semibold text-orange-900 mb-2 flex items-center gap-2">
-                                                <span className="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded-full">3</span>
-                                                Actualización Mensual
-                                            </h3>
-                                            <p className="text-gray-700 text-xs sm:text-sm">
-                                                <strong>¡Importante!</strong> Debes revisar y actualizar tus plantillas cada mes antes del día 5. Puedes modificar montos, cambiar cuentas destino, agregar nuevas plantillas o desactivar las que ya no necesites.
-                                            </p>
+                                    <div className="bg-white p-4 rounded-lg border border-green-200">
+                                        <div className="bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full inline-block mb-3">Paso 2</div>
+                                        <h3 className="font-semibold text-green-900 mb-2">Generación Automática</h3>
+                                        <p className="text-sm text-gray-600 mb-3">
+                                            El sistema crea solicitudes automáticamente según la frecuencia configurada.
+                                        </p>
+                                        <ul className="text-xs text-gray-500 space-y-1">
+                                            <li>• Mensual, quincenal, etc.</li>
+                                            <li>• Se crean al inicio del período</li>
+                                            <li>• Mantiene todos los datos originales</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div className="bg-white p-4 rounded-lg border border-orange-200">
+                                        <div className="bg-orange-100 text-orange-800 text-sm font-bold px-3 py-1 rounded-full inline-block mb-3">Paso 3</div>
+                                        <h3 className="font-semibold text-orange-900 mb-2">Revisión y Actualización</h3>
+                                        <p className="text-sm text-gray-600 mb-3">
+                                            Tienes hasta el día 5 de cada mes para revisar y modificar las solicitudes generadas.
+                                        </p>
+                                        <ul className="text-xs text-gray-500 space-y-1">
+                                            <li>• Revisa montos y datos</li>
+                                            <li>• Actualiza si es necesario</li>
+                                            <li>• Elimina si no aplica ese mes</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div className="bg-white p-4 rounded-lg border border-purple-200">
+                                        <div className="bg-purple-100 text-purple-800 text-sm font-bold px-3 py-1 rounded-full inline-block mb-3">Paso 4</div>
+                                        <h3 className="font-semibold text-purple-900 mb-2">Control Total</h3>
+                                        <p className="text-sm text-gray-600 mb-3">
+                                            Activa, desactiva o elimina plantillas cuando lo necesites.
+                                        </p>
+                                        <ul className="text-xs text-gray-500 space-y-1">
+                                            <li>• Pausa temporalmente</li>
+                                            <li>• Modifica configuración</li>
+                                            <li>• Elimina cuando no se necesite</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {/* Beneficios */}
+                                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border border-green-200">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Star className="w-5 h-5 text-green-600" />
+                                        <h3 className="font-semibold text-green-900">Beneficios de los Pagos Recurrentes</h3>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
+                                        <div>• <strong>Ahorro de tiempo:</strong> No necesitas crear solicitudes manualmente cada mes</div>
+                                        <div>• <strong>No olvidos:</strong> El sistema se encarga de recordar todos los pagos</div>
+                                        <div>• <strong>Consistencia:</strong> Mantiene la información exacta cada vez</div>
+                                        <div>• <strong>Control:</strong> Siempre puedes revisar y modificar antes del procesamiento</div>
+                                    </div>
+                                </div>
+
+                                {/* Fechas importantes */}
+                                <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg border border-orange-200">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Calendar className="w-5 h-5 text-orange-600" />
+                                        <h3 className="font-semibold text-orange-900">Fechas Importantes a Recordar</h3>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                                        <div className="bg-white p-3 rounded border">
+                                            <div className="font-semibold text-blue-900">Día 1-3</div>
+                                            <div className="text-gray-600">Se generan las solicitudes automáticamente</div>
                                         </div>
-                                        
-                                        <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-purple-200">
-                                            <h3 className="text-base sm:text-lg font-semibold text-purple-900 mb-2 flex items-center gap-2">
-                                                <span className="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-full">4</span>
-                                                Gestión y Control
-                                            </h3>
-                                            <p className="text-gray-700 text-xs sm:text-sm">
-                                                Puedes activar/desactivar plantillas, editarlas, duplicarlas o eliminarlas en cualquier momento. Las plantillas inactivas no generarán solicitudes automáticas.
-                                            </p>
+                                        <div className="bg-white p-3 rounded border">
+                                            <div className="font-semibold text-orange-900">Día 4-5</div>
+                                            <div className="text-gray-600">Último día para revisar y modificar</div>
+                                        </div>
+                                        <div className="bg-white p-3 rounded border">
+                                            <div className="font-semibold text-green-900">Día 6+</div>
+                                            <div className="text-gray-600">Las solicitudes pasan a aprobación</div>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="bg-yellow-400 p-2 rounded-lg flex-shrink-0">
-                                            <svg className="w-4 sm:w-5 h-4 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                            </svg>
+
+                                {/* Alerta importante */}
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
+                                    <div className="bg-yellow-400 p-2 rounded-lg">
+                                        <AlertTriangle className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <AlertTriangle className="w-4 h-4 text-yellow-900" />
+                                            <p className="font-semibold text-yellow-900">Importante</p>
                                         </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-semibold text-yellow-900 mb-2 text-sm sm:text-base">Recordatorio Importante</h4>
-                                            <p className="text-yellow-800 text-xs sm:text-sm leading-relaxed">
-                                                Las plantillas activas generan solicitudes automáticamente cada mes. Si no actualizas los montos o datos antes del día 5, se utilizarán los valores de la plantilla actual. 
-                                                <strong className="block sm:inline sm:ml-1">Revisa mensualmente tus plantillas para mantener la información actualizada.</strong>
-                                            </p>
-                                        </div>
+                                        <p className="text-yellow-800 text-sm">
+                                            Revisa tus plantillas antes del día 5 de cada mes para mantener la información actualizada. 
+                                            Después de esta fecha, las solicitudes pasan automáticamente al proceso de aprobación.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
                     {error && <div className="bg-red-100 text-red-800 border border-red-300 p-3 sm:p-4 rounded mb-4 text-sm">{error}</div>}
                     {success && <div className="bg-green-100 text-green-800 border border-green-300 p-3 sm:p-4 rounded mb-4 text-sm">{success}</div>}
 
-                    {/* Filtros compactos responsivos */}
-                    <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-lg">
-                        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                            <div className="bg-blue-100 p-2 rounded-lg">
-                                <Search className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />
+                    {/* Filtros y acciones compactas */}
+                    <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border border-gray-200">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Search className="w-5 h-5 text-blue-600" />
+                                <span className="font-semibold text-gray-900">Filtros y Acciones</span>
                             </div>
-                            <span className="text-lg sm:text-xl font-semibold text-gray-900">Filtros</span>
-                            <span className="text-blue-500 text-sm hidden sm:inline">Refina tu búsqueda de recurrentes</span>
-                        </div>
-                        
-                        <div className="space-y-4">
-                            {/* Primera fila - Búsqueda */}
-                            <div className="w-full">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar por concepto, departamento..."
-                                        value={filtroBusqueda}
-                                        onChange={e => setFiltroBusqueda(e.target.value)}
-                                        className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-sm"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Segunda fila - Filtros */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                                {/* Estado */}
-                                <select
-                                    value={filtroEstado}
-                                    onChange={(e) => setFiltroEstado(e.target.value)}
-                                    className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                >
-                                    <option value="todas">Todos los estados</option>
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="aprobada">Aprobada</option>
-                                    <option value="rechazada">Rechazada</option>
-                                </select>
-
-                                {/* Frecuencia */}
-                                <select
-                                    value={filtroFrecuencia}
-                                    onChange={(e) => setFiltroFrecuencia(e.target.value)}
-                                    className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                >
-                                    <option value="todas">Todas las frecuencias</option>
-                                    {frecuencias.map(f => (
-                                        <option key={f} value={f}>
-                                            {f.charAt(0).toUpperCase() + f.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                {/* Limpiar filtros */}
-                                <button
-                                    onClick={() => {
-                                        setFiltroEstado('todas');
-                                        setFiltroDepartamento('todos');
-                                        setFiltroTipoPago('todos');
-                                        setFiltroFrecuencia('todas');
-                                        setFiltroFechaInicio('');
-                                        setFiltroFechaFin('');
-                                        setFiltroBusqueda('');
-                                    }}
-                                    className="px-3 sm:px-4 py-2 sm:py-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium border border-blue-200"
-                                >
-                                    Limpiar Filtros
-                                </button>
-                            </div>
-
-                            {/* Tercera fila - Botones de acción */}
-                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 border-t border-gray-100">
+                            <div className="flex gap-2">
                                 <Button
                                     onClick={() => router.push('/dashboard/solicitante/recurrentes')}
-                                    className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg transition-all text-sm"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm shadow-sm"
                                 >
-                                    <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
-                                    Nueva Solicitud
+                                    <Plus className="w-4 h-4" />
+                                    Nueva
                                 </Button>
                                 <Button
                                     onClick={() => setExportModalOpen(true)}
-                                    className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 font-medium shadow-lg transition-all text-sm"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm shadow-sm"
                                 >
-                                    <FileText className="w-4 sm:w-5 h-4 sm:h-5" />
+                                    <FileText className="w-4 h-4" />
                                     Exportar
                                 </Button>
                             </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                            {/* Búsqueda */}
+                            <div className="relative sm:col-span-2">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar..."
+                                    value={filtroBusqueda}
+                                    onChange={e => setFiltroBusqueda(e.target.value)}
+                                    className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                />
+                            </div>
+
+                            {/* Estado */}
+                            <select
+                                value={filtroEstado}
+                                onChange={(e) => setFiltroEstado(e.target.value)}
+                                className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="todas">Todos los estados</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="aprobada">Aprobada</option>
+                                <option value="rechazada">Rechazada</option>
+                            </select>
+
+                            {/* Frecuencia */}
+                            <select
+                                value={filtroFrecuencia}
+                                onChange={(e) => setFiltroFrecuencia(e.target.value)}
+                                className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="todas">Todas las frecuencias</option>
+                                {frecuencias.map(f => (
+                                    <option key={f} value={f}>
+                                        {f.charAt(0).toUpperCase() + f.slice(1)}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {/* Limpiar */}
+                            <button
+                                onClick={() => {
+                                    setFiltroEstado('todas');
+                                    setFiltroDepartamento('todos');
+                                    setFiltroTipoPago('todos');
+                                    setFiltroFrecuencia('todas');
+                                    setFiltroFechaInicio('');
+                                    setFiltroFechaFin('');
+                                    setFiltroBusqueda('');
+                                }}
+                                className="px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm font-medium border border-blue-200"
+                            >
+                                Limpiar
+                            </button>
                         </div>
                     </div>
 
