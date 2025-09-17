@@ -5,7 +5,7 @@ import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ViaticosService } from '@/services/viaticos.service';
-import { FaTrash, FaDownload, FaFileWord } from 'react-icons/fa';
+import { FaTrash, FaDownload, FaFileWord, FaClipboardList, FaBolt } from 'react-icons/fa';
 import { formatDateForAPI, getCurrentUTC6Date } from '@/utils/dateUtils';
 
 // Si no existe el tipo Viatico, defínelo aquí o impórtalo desde '@/types/viatico'
@@ -249,35 +249,54 @@ export default function NuevoViaticoPage() {
             <p className="text-blue-600">Completa los campos necesarios para crear tu viático</p>
           </div>
 
-          {/* Sección de Descarga de Plantilla */}
-          <div className="mb-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg border-2 border-blue-300 transform hover:scale-[1.02] transition-all duration-300">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <FaFileWord className="text-3xl text-white" />
+          {/* Sección de Descarga de Plantilla - PROMINENTE */}
+          <div className="mb-8 relative">
+            {/* Fondo con gradiente y bordes llamativos */}
+            <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-2xl border-4 border-blue-300 transform hover:scale-[1.01] transition-all duration-300 relative overflow-hidden">
+              {/* Efectos de fondo */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+              
+              {/* Contenido principal */}
+              <div className="relative z-10">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="bg-white/20 p-4 rounded-2xl shadow-lg backdrop-blur-sm">
+                      <FaFileWord className="text-4xl text-white drop-shadow-lg" />
+                    </div>
+                    <div className="text-center lg:text-left">
+                      <h3 className="text-2xl font-bold mb-3 flex items-center justify-center lg:justify-start gap-2">
+                        <FaClipboardList className="text-yellow-200" /> 
+                        <span className="bg-gradient-to-r from-yellow-200 to-yellow-100 bg-clip-text text-transparent">Formato Recomendado</span>
+                      </h3>
+                      <p className="text-blue-50 text-base lg:text-lg leading-relaxed font-medium">
+                        <strong className="text-white">Usa el formato recomendado para solicitar tus viáticos</strong>, 
+                        si aún no lo tienes, <strong className="text-yellow-200">¡descárgalo aquí!</strong>
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleDescargarPlantilla}
+                      className="group bg-white text-blue-700 font-bold py-4 px-8 rounded-2xl shadow-xl hover:bg-yellow-50 hover:text-blue-800 transform hover:scale-110 hover:-rotate-1 transition-all duration-300 flex items-center gap-3 text-xl border-4 border-white/20 hover:border-yellow-200"
+                    >
+                      <FaDownload className="text-2xl group-hover:animate-bounce" />
+                      <span>Descargar Plantilla</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="text-center md:text-left">
-                  <h3 className="text-xl font-bold mb-2">📋 Formato Recomendado</h3>
-                  <p className="text-blue-100 text-sm md:text-base leading-relaxed">
-                    <strong>Usa el formato recomendado para solicitar tus viáticos</strong>, si aún no lo tienes, <strong>descárgalo aquí</strong>
-                  </p>
+                
+                {/* Mensaje importante con animación */}
+                <div className="mt-6 text-center">
+                  <div className="inline-flex items-center bg-yellow-400/20 border-2 border-yellow-300/30 rounded-full px-6 py-3 text-base backdrop-blur-sm">
+                    <FaBolt className="animate-pulse mr-3 text-xl text-yellow-200" />
+                    <span className="font-bold text-yellow-100">¡IMPORTANTE!</span>
+                    <span className="ml-2 text-blue-100">Usa esta plantilla para agilizar tu solicitud y evitar rechazos</span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={handleDescargarPlantilla}
-                  className="bg-white text-blue-600 font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-50 transform hover:scale-105 transition-all duration-200 flex items-center gap-2 text-lg"
-                >
-                  <FaDownload className="text-xl" />
-                  Descargar Plantilla
-                </button>
-              </div>
-            </div>
-            <div className="mt-4 text-center">
-              <div className="inline-flex items-center bg-white/10 rounded-full px-4 py-2 text-sm">
-                <span className="animate-pulse mr-2">💡</span>
-                <span className="font-medium">¡Importante! Usa esta plantilla para agilizar tu solicitud</span>
               </div>
             </div>
           </div>
