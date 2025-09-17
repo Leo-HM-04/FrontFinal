@@ -424,7 +424,7 @@ function MisRecurrentesContent() {
                                     placeholder="Buscar..."
                                     value={filtroBusqueda}
                                     onChange={e => setFiltroBusqueda(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                    className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-black"
                                 />
                             </div>
 
@@ -432,7 +432,7 @@ function MisRecurrentesContent() {
                             <select
                                 value={filtroEstado}
                                 onChange={(e) => setFiltroEstado(e.target.value)}
-                                className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-blue-500"
+                                className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-black focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="todas">Todos los estados</option>
                                 <option value="pendiente">Pendiente</option>
@@ -444,7 +444,7 @@ function MisRecurrentesContent() {
                             <select
                                 value={filtroFrecuencia}
                                 onChange={(e) => setFiltroFrecuencia(e.target.value)}
-                                className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-blue-500"
+                                className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-black focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="todas">Todas las frecuencias</option>
                                 {frecuencias.map(f => (
