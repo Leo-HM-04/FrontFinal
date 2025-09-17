@@ -624,6 +624,8 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
         const actualizarCuentaTransferencia = (index: number, campo: string, valor: string) => {
           const nuevasCuentas = [...cuentasTransferencia];
           nuevasCuentas[index] = {...nuevasCuentas[index], [campo]: valor};
+          console.log(`Actualizando cuenta ${index}, campo ${campo}, valor:`, valor);
+          console.log('Nueva cuenta:', nuevasCuentas[index]);
           onChange(nuevasCuentas);
         };
 
@@ -691,6 +693,7 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
                       <select
                         value={cuenta.tipo_cuenta}
                         onChange={(e) => {
+                          console.log('Select onChange triggered, value:', e.target.value);
                           actualizarCuentaTransferencia(index, 'tipo_cuenta', e.target.value);
                           actualizarCuentaTransferencia(index, 'numero_cuenta', ''); // Limpiar número al cambiar tipo
                         }}
