@@ -674,7 +674,8 @@ export default function SolicitudesPendientesPage() {
                     </div>
                   ) : (
                     <>
-                      <div className="overflow-x-auto">
+                      {/* Vista de tabla para desktop */}
+                      <div className="hidden md:block overflow-x-auto">
                         <table className="min-w-max w-full divide-y divide-gray-100 text-xs md:text-sm">
                           <thead className="sticky top-0 z-10" style={{backgroundColor: '#F0F4FC'}}>
                             <tr>
@@ -805,6 +806,143 @@ export default function SolicitudesPendientesPage() {
                           </tbody>
                         </table>
                       </div>
+
+                      {/* Vista de tarjetas para móvil */}
+                      <div className="md:hidden">
+                        <div className="p-3 space-y-3">
+                          {paginadas.map((s) => {
+                            const isUrgent = new Date(s.fecha_limite_pago) < tresDiasDespues;
+                            // Combinar tipo de cuenta y tipo de tarjeta
+                            let tipoCuentaTarjeta = '-';
+                            if (s.tipo_cuenta_destino && s.tipo_tarjeta) {
+                              tipoCuentaTarjeta = `${s.tipo_cuenta_destino} / ${s.tipo_tarjeta}`;
+                            } else if (s.tipo_cuenta_destino) {
+                              tipoCuentaTarjeta = s.tipo_cuenta_destino;
+                            } else if (s.tipo_tarjeta) {
+                              tipoCuentaTarjeta = s.tipo_tarjeta;
+                            }
+                            return (
+                              <div 
+                                key={s.id_solicitud}
+                                className={`border rounded-lg p-4 bg-white shadow-sm transition-all hover:shadow-md hover:border-blue-300 ${
+                                  isUrgent ? 'border-red-300 bg-red-50' : 'border-blue-200'
+                                }`}
+                              >
+                                {/* Header de la tarjeta */}
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex flex-col">
+                                    <span className="font-mono text-xs text-blue-800 bg-blue-50 px-2 py-1 rounded w-fit">
+                                      {s.folio || '-'}
+                                    </span>
+                                    <div className="mt-2">
+                                      <span className="px-2 py-1 text-xs font-bold rounded-lg bg-blue-100 text-blue-800">
+                                        {(s.tipo_pago || '-').toUpperCase()}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-lg font-bold text-blue-900 mb-1">
+                                      {formatCurrency(s.monto)}
+                                    </div>
+                                    {isUrgent && (
+                                      <div className="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">
+                                        ¡URGENTE!
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Información principal */}
+                                <div className="space-y-2 mb-4">
+                                  <div>
+                                    <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Usuario</span>
+                                    <p className="text-sm text-blue-900 font-medium mt-1">
+                                      {s.usuario_nombre || `Usuario ${s.id_usuario}`}
+                                    </p>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Departamento</span>
+                                      <p className="text-sm text-blue-900 mt-1">
+                                        <span className={`${getDepartmentColorClass(s.departamento)} text-xs px-2 py-1 rounded`}>
+                                          {(s.departamento || '-').toUpperCase()}
+                                        </span>
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Hora de envío</span>
+                                      <p className="text-sm text-blue-900/80 mt-1">{formatTime(s.fecha_creacion)}</p>
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Fecha Límite</span>
+                                      <p className={`text-sm mt-1 ${isUrgent ? 'text-red-600 font-bold' : 'text-blue-900/80'}`}>
+                                        {formatDate(s.fecha_limite_pago)}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Solicitud</span>
+                                      <p className="text-sm text-blue-900/80 mt-1">{formatDate(s.fecha_creacion)}</p>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Cuenta/Tarjeta</span>
+                                    <p className="text-sm text-blue-900 font-medium mt-1">{tipoCuentaTarjeta}</p>
+                                  </div>
+                                  {s.banco_destino && (
+                                    <div>
+                                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Banco</span>
+                                      <p className="text-sm text-blue-900/90 mt-1">{s.banco_destino}</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Botones de acción */}
+                                <div className="flex flex-col gap-2 pt-3 border-t border-blue-100">
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleViewDetail(s)}
+                                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-sm font-medium"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                      Ver Detalles
+                                    </button>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <button
+                                      disabled={actionLoading}
+                                      onClick={() => openConfirmModal(s, 'approve')}
+                                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors text-sm font-medium disabled:opacity-50"
+                                    >
+                                      {actionLoading ? (
+                                        <span className="loader border-green-500"></span>
+                                      ) : (
+                                        <CheckCircle className="w-4 h-4" />
+                                      )}
+                                      Aprobar
+                                    </button>
+                                    <button
+                                      disabled={actionLoading}
+                                      onClick={() => openConfirmModal(s, 'reject')}
+                                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors text-sm font-medium disabled:opacity-50"
+                                    >
+                                      {actionLoading ? (
+                                        <span className="loader border-red-500"></span>
+                                      ) : (
+                                        <XCircle className="w-4 h-4" />
+                                      )}
+                                      Rechazar
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Paginación */}
                       <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
