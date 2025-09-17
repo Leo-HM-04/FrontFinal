@@ -363,7 +363,7 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
             {tipoSeleccionado && (
               <p className="text-xs text-gray-500">
                 {tipoSeleccionado === 'clabe' 
-                  ? 'Es al revés la CLABE: 16 o 18 dígitos y la CUENTA: 8 o 10 dígitos.'
+                  ? 'CLABE: 16 o 18 dígitos y CUENTA: 8 o 10 dígitos.'
                   : 'Número de cuenta destino a realizar el depósito, puede ser Nº de cuenta o CLABE interbancaria.'
                 }
               </p>

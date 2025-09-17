@@ -781,6 +781,41 @@ export const plantillaPagoComisiones: PlantillaSolicitud = {
       descripcion: 'Información general del pago de comisión',
       campos: [
         {
+          id: 'tipo_pago',
+          nombre: 'tipo_pago',
+          tipo: 'select',
+          etiqueta: 'Tipo de Pago',
+          ayuda: 'Seleccione el tipo de pago',
+          valorPorDefecto: 'pago_comision',
+          validaciones: {
+            requerido: true,
+            mensaje: 'Seleccione el tipo de pago'
+          },
+          opciones: [
+            { valor: 'pago_comision', etiqueta: 'pago de comisión' }
+          ],
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'cliente_comision',
+          nombre: 'cliente_comision',
+          tipo: 'texto',
+          etiqueta: 'Cliente por el cual se genera la comisión',
+          placeholder: 'Nombre del cliente',
+          ayuda: 'Cliente por el cual se genera la comisión',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 2,
+            mensaje: 'Ingrese el nombre del cliente'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
           id: 'asunto',
           nombre: 'asunto',
           tipo: 'textarea',
