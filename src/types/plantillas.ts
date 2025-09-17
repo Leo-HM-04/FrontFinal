@@ -12,9 +12,12 @@ export type TipoCampo =
   | 'checkbox'
   | 'textarea'
   | 'archivo'
+  | 'archivos'
   | 'fecha'
   | 'cuenta_clabe'
-  | 'banco';
+  | 'banco'
+  | 'selector_cuenta'
+  | 'select_banco';
 
 export type ValidacionCampo = {
   requerido?: boolean;
@@ -24,6 +27,14 @@ export type ValidacionCampo = {
   mensaje?: string;
   longitudExacta?: number;
   soloNumeros?: boolean;
+  minimo?: number;
+  maximo?: number;
+  condicional?: Record<string, {
+    patron?: string;
+    mensaje?: string;
+    minimo?: number;
+    maximo?: number;
+  }>;
 };
 
 export type OpcionCampo = {
@@ -42,6 +53,7 @@ export type CampoPlantilla = {
   valorPorDefecto?: string | number | boolean | string[] | File[];
   opciones?: OpcionCampo[];
   validaciones?: ValidacionCampo;
+  dependeDe?: string;
   dependencias?: {
     campo: string;
     valor: string | number | boolean;
@@ -51,6 +63,9 @@ export type CampoPlantilla = {
     ancho?: 'completo' | 'medio' | 'tercio' | 'cuarto';
     orden?: number;
     soloLectura?: boolean;
+    filas?: number;
+    formato?: 'moneda' | 'fecha' | 'numero';
+    multiple?: boolean;
   };
 };
 

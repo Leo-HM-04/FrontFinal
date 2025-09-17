@@ -1,10 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { CampoPlantilla } from '@/types/plantillas';
 import { NumericFormat } from 'react-number-format';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { formatDateForAPI } from '@/utils/dateUtils';
+import { obtenerOpcionesBancos } from '@/data/bancos';
 
 interface CampoFormularioProps {
   campo: CampoPlantilla;
@@ -23,6 +24,8 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
   esVisible,
   className = ''
 }) => {
+  // Estados para campos especiales
+  const [tipoSeleccionado, setTipoSeleccionado] = useState<string>('');
   const bancoOptions = [
     "ACTINVER","AFIRME","albo","ARCUS FI","ASP INTEGRA OPC","AUTOFIN","AZTECA","BaBien","BAJIO","BANAMEX","BANCO COVALTO","BANCOMEXT","BANCOPPEL","BANCO S3","BANCREA","BANJERCITO","BANKAOOL","BANK OF AMERICA","BANK OF CHINA","BANOBRAS","BANORTE","BANREGIO","BANSI","BANXICO","BARCLAYS","BBASE","BBVA MEXICO","BMONEX","CAJA POP MEXICA","CAJA TELEFONIST","CASHI CUENTA","CB INTERCAM","CIBANCO","CI BOLSA","CITI MEXICO","CoDi Valida","COMPARTAMOS","CONSUBANCO","CREDICAPITAL","CREDICLUB","CRISTOBAL COLON","Cuenca","Dep y Pag Dig","DONDE","FINAMEX","FINCOMUN","FINCO PAY","FOMPED","FONDEADORA","FONDO (FIRA)","GBM","HEY BANCO","HIPOTECARIA FED","HSBC","ICBC","INBURSA","INDEVAL","INMOBILIARIO","INTERCAM BANCO","INVEX","JP MORGAN","KLAR","KUSPIT","LIBERTAD","MASARI","Mercado Pago W","MexPago","MIFEL","MIZUHO BANK","MONEXCB","MUFG","MULTIVA BANCO","NAFIN","NU MEXICO","NVIO","PAGATODO","Peibo","PROFUTURO","SABADELL","SANTANDER","SCOTIABANK","SHINHAN","SPIN BY OXXO","STP","TESORED","TRANSFER","UALA","UNAGRA","VALMEX","VALUE","VECTOR","VE POR MAS","VOLKSWAGEN"
   ];
@@ -125,12 +128,13 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
         );
 
       case 'textarea':
+        const filas = campo.estilos?.filas || 4;
         return (
           <textarea
             value={valorStr}
             onChange={(e) => onChange(e.target.value)}
             placeholder={campo.placeholder}
-            rows={4}
+            rows={filas}
             className={`${baseClasses} px-3 py-2 resize-vertical`}
             aria-describedby={error ? `${campo.id}-error` : undefined}
           />
@@ -303,6 +307,155 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
               showPopperArrow={false}
               popperClassName="z-50"
             />
+          </div>
+        );
+
+      case 'selector_cuenta':
+        return (
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoSeleccionado('clabe');
+                  onChange(''); // Limpiar el valor cuando cambia el tipo
+                }}
+                className={`px-4 py-2 text-sm font-medium rounded-md border ${
+                  tipoSeleccionado === 'clabe'
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                CLABE (16-18 dígitos)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoSeleccionado('cuenta');
+                  onChange(''); // Limpiar el valor cuando cambia el tipo
+                }}
+                className={`px-4 py-2 text-sm font-medium rounded-md border ${
+                  tipoSeleccionado === 'cuenta'
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                CUENTA (8-10 dígitos)
+              </button>
+            </div>
+
+            {tipoSeleccionado && (
+              <input
+                type="text"
+                value={valorStr}
+                onChange={(e) => {
+                  const soloNumeros = e.target.value.replace(/\D/g, '');
+                  onChange(soloNumeros);
+                }}
+                placeholder={`Ingrese el número de ${tipoSeleccionado.toUpperCase()}`}
+                className={`${baseClasses} px-3 py-2 font-mono`}
+                maxLength={tipoSeleccionado === 'clabe' ? 18 : 10}
+                pattern={tipoSeleccionado === 'clabe' ? '[0-9]{16,18}' : '[0-9]{8,10}'}
+                aria-describedby={error ? `${campo.id}-error` : undefined}
+              />
+            )}
+
+            {tipoSeleccionado && (
+              <p className="text-xs text-gray-500">
+                {tipoSeleccionado === 'clabe' 
+                  ? 'Es al revés la CLABE: 16 o 18 dígitos y la CUENTA: 8 o 10 dígitos.'
+                  : 'Número de cuenta destino a realizar el depósito, puede ser Nº de cuenta o CLABE interbancaria.'
+                }
+              </p>
+            )}
+          </div>
+        );
+
+      case 'select_banco':
+        const opcionesBancos = obtenerOpcionesBancos();
+
+        return (
+          <select
+            value={valorStr}
+            onChange={(e) => onChange(e.target.value)}
+            className={`${baseClasses} px-3 py-2`}
+            aria-describedby={error ? `${campo.id}-error` : undefined}
+          >
+            <option value="">Seleccione el banco</option>
+            {opcionesBancos.map((banco) => (
+              <option key={banco.valor} value={banco.valor}>
+                {banco.etiqueta}
+              </option>
+            ))}
+          </select>
+        );
+
+      case 'archivos':
+        const archivosMultiples = Array.isArray(valor) ? valor as File[] : [];
+        return (
+          <div className="space-y-4">
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              className={`relative border-2 border-dashed rounded-lg px-6 py-4 transition-colors ${
+                error ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400 bg-gray-50'
+              }`}
+            >
+              <div className="text-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div className="mt-4">
+                  <label htmlFor={campo.id} className="cursor-pointer">
+                    <span className="mt-2 block text-sm font-medium text-gray-900">
+                      Arrastra archivos aquí o{' '}
+                      <span className="text-blue-600 hover:text-blue-500">selecciona múltiples archivos</span>
+                    </span>
+                  </label>
+                  <input
+                    id={campo.id}
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls,.doc,.docx"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    aria-describedby={error ? `${campo.id}-error` : undefined}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Implementar la opción de arrastrar archivos a recuadro para subir
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {archivosMultiples.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-900">Archivos seleccionados:</h4>
+                <ul className="space-y-2">
+                  {archivosMultiples.map((archivo, index) => (
+                    <li key={index} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-md">
+                      <div className="flex items-center space-x-2">
+                        <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-sm text-gray-900 font-medium">{archivo.name}</span>
+                        <span className="text-xs text-gray-500">({Math.round(archivo.size / 1024)} KB)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nuevosArchivos = archivosMultiples.filter((_, i) => i !== index);
+                          onChange(nuevosArchivos);
+                        }}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        Eliminar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         );
 

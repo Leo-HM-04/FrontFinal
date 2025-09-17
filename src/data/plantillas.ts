@@ -765,12 +765,178 @@ export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
   }
 };
 
+// Plantilla para PAGO COMISIONES
+export const plantillaPagoComisiones: PlantillaSolicitud = {
+  id: 'pago-comisiones',
+  nombre: 'PAGO COMISIONES',
+  descripcion: 'Plantilla para solicitudes de pago de comisiones',
+  version: '1.0.0',
+  activa: true,
+  categoria: 'pagos',
+  icono: '💰',
+  secciones: [
+    {
+      id: 'datos-generales',
+      titulo: 'Datos de Comisión',
+      descripcion: 'Información general del pago de comisión',
+      campos: [
+        {
+          id: 'asunto',
+          nombre: 'asunto',
+          tipo: 'textarea',
+          etiqueta: 'Asunto',
+          placeholder: 'Describe el asunto de la comisión',
+          ayuda: 'Ej. Solicitud de Pago de Comisión Juan Dominguez Banch Services | Movimiento 02 de septiembre 2025',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 10,
+            mensaje: 'El asunto debe tener al menos 10 caracteres'
+          },
+          estilos: {
+            filas: 3,
+            ancho: 'completo'
+          }
+        },
+        {
+          id: 'beneficiario',
+          nombre: 'beneficiario',
+          tipo: 'texto',
+          etiqueta: 'Beneficiario',
+          placeholder: 'Nombre del beneficiario',
+          ayuda: 'Ej. JUAN DOMINGUEZ',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 2,
+            mensaje: 'Ingrese el nombre del beneficiario'
+          },
+          estilos: {
+            ancho: 'completo'
+          }
+        },
+        {
+          id: 'tipo_cuenta',
+          nombre: 'tipo_cuenta',
+          tipo: 'selector_cuenta',
+          etiqueta: 'CUENTA/CLABE',
+          ayuda: 'Seleccione el tipo de cuenta interbancaria',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            mensaje: 'Seleccione el tipo de cuenta'
+          },
+          opciones: [
+            { valor: 'clabe', etiqueta: 'CLABE (16-18 dígitos)' },
+            { valor: 'cuenta', etiqueta: 'CUENTA (8-10 dígitos)' }
+          ],
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'numero_cuenta',
+          nombre: 'numero_cuenta',
+          tipo: 'texto',
+          etiqueta: 'Número',
+          placeholder: 'Ingresa el número',
+          ayuda: 'Número de cuenta destino a realizar el depósito',
+          valorPorDefecto: '',
+          dependeDe: 'tipo_cuenta',
+          validaciones: {
+            requerido: true,
+            condicional: {
+              clabe: {
+                patron: '^[0-9]{16,18}$',
+                mensaje: 'La CLABE debe tener entre 16 y 18 dígitos'
+              },
+              cuenta: {
+                patron: '^[0-9]{8,10}$',
+                mensaje: 'La CUENTA debe tener entre 8 y 10 dígitos'
+              }
+            }
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        },
+        {
+          id: 'banco_destino',
+          nombre: 'banco_destino',
+          tipo: 'select_banco',
+          etiqueta: 'Banco Destino',
+          placeholder: 'Selecciona el banco',
+          ayuda: 'Banco destino al que pertenece la cuenta o clabe proporcionada',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            mensaje: 'Seleccione el banco destino'
+          },
+          estilos: {
+            ancho: 'completo'
+          }
+        },
+        {
+          id: 'monto',
+          nombre: 'monto',
+          tipo: 'numero',
+          etiqueta: 'Monto',
+          placeholder: 'Ej. 56,000.00',
+          ayuda: 'Monto a pagar a la cuenta',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minimo: 0.01,
+            mensaje: 'El monto debe ser mayor a 0'
+          },
+          estilos: {
+            ancho: 'medio',
+            formato: 'moneda'
+          }
+        },
+        {
+          id: 'archivos_adjuntos',
+          nombre: 'archivos_adjuntos',
+          tipo: 'archivos',
+          etiqueta: 'Archivos Adjuntos',
+          ayuda: 'Dos archivos excel con el cálculo de las comisiones y una imagen o pdf con el comprobante del pago',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: false
+          },
+          estilos: {
+            ancho: 'completo',
+            multiple: true
+          }
+        }
+      ],
+      estilos: {
+        columnas: 2,
+        espaciado: 'amplio'
+      }
+    }
+  ],
+  configuracion: {
+    permiteArchivosMultiples: true,
+    tiposArchivosPermitidos: ['.pdf', '.jpg', '.jpeg', '.png', '.xlsx', '.xls', '.doc', '.docx'],
+    tamanoMaximoArchivo: 25 * 1024 * 1024, // 25MB
+    mostrarProgreso: true
+  },
+  metadatos: {
+    creadoPor: 'Sistema',
+    fechaCreacion: new Date().toISOString(),
+    fechaModificacion: new Date().toISOString(),
+    usosFrecuentes: 0
+  }
+};
+
 // Lista de todas las plantillas disponibles
 export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaTarjetasN09Toka,
   plantillaTarjetasTukash,
   plantillaPagoSuaInternas,
-  plantillaPagoSuaFrenshetsi
+  plantillaPagoSuaFrenshetsi,
+  plantillaPagoComisiones
   // Aquí se pueden agregar más plantillas en el futuro
 ];
 
