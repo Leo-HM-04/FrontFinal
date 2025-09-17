@@ -40,6 +40,7 @@ export default function NuevoViaticoPage() {
   ]);
   const [mensajeGlobal, setMensajeGlobal] = useState<string>('');
   const [exito, setExito] = useState<boolean>(false);
+  const [showToast, setShowToast] = useState<boolean>(false);
   const [enviando, setEnviando] = useState<boolean>(false);
   const router = useRouter();
 
@@ -274,13 +275,13 @@ export default function NuevoViaticoPage() {
     try {
       // Descargar plantilla de Word detallada
       const response = await fetch('/plantilla-viaticos.doc');
-      
       if (!response.ok) {
         setMensajeGlobal('La plantilla no está disponible en este momento. Por favor contacta al administrador.');
         setExito(false);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
         return;
       }
-
       // Si existe, proceder con la descarga
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -291,15 +292,17 @@ export default function NuevoViaticoPage() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
       // Mensaje de éxito
-      setMensajeGlobal('¡Plantilla descargada exitosamente! Completa el formato y adjunta los documentos requeridos.');
+      setMensajeGlobal('¡Plantilla descargada exitosamente!');
       setExito(true);
-      
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
       console.error('Error al descargar plantilla:', error);
       setMensajeGlobal('Error al descargar la plantilla. Intenta nuevamente.');
       setExito(false);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     }
   };
 
@@ -355,19 +358,16 @@ export default function NuevoViaticoPage() {
               </div>
             </div>
           </div>
-          {mensajeGlobal && (
+          {showToast && (
             <div
-              id={exito ? 'mensaje-global-exito' : undefined}
-              className={`fixed left-1/2 top-24 z-[9999] -translate-x-1/2 mb-4 flex items-center justify-center gap-3 text-center font-bold text-lg px-8 py-4 rounded-2xl shadow-2xl drop-shadow-2xl border-2 transition-all duration-300
-                ${exito ? 'bg-green-50 border-green-400 text-green-800' : 'bg-red-50 border-red-400 text-red-800'}
-                ${exito ? 'animate-bounce-in' : ''}
-              `}
-              style={{ minWidth: 320, maxWidth: 600 }}
+              className={`fixed top-6 right-6 z-[9999] flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg border text-sm font-semibold transition-all duration-300
+                ${exito ? 'bg-green-50 border-green-400 text-green-800' : 'bg-red-50 border-red-400 text-red-800'}`}
+              style={{ minWidth: 0, maxWidth: 320 }}
             >
               {exito ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" /></svg>
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 9l-6 6M9 9l6 6" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.2"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 9l-6 6M9 9l6 6" /></svg>
               )}
               <span>{mensajeGlobal}</span>
             </div>
