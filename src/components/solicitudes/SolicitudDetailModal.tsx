@@ -9,6 +9,13 @@ import { Solicitud, Comprobante } from '@/types';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { formatDateForDisplay, formatShortDate } from '@/utils/dateUtils';
+import { 
+  detectarPlantillaId, 
+  obtenerEtiquetaCampo, 
+  esCampoOculto, 
+  obtenerDatosPlantilla,
+  obtenerEtiquetasPlantilla 
+} from '@/utils/plantillasLabels';
 import '@/styles/modal.css';
 
 interface SolicitudDetailModalProps {
@@ -30,6 +37,21 @@ const [error, setError] = useState<string | null>(null);
 const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
 const [loadingArchivos, setLoadingArchivos] = useState(false);
 const [errorArchivos, setErrorArchivos] = useState<string | null>(null);
+
+// Estados para controlar visibilidad de contraseñas
+const [showPassword1, setShowPassword1] = useState(false);
+const [showPassword2, setShowPassword2] = useState(false);
+
+// Detectar ID de plantilla y obtener mapeo
+const plantillaId = solicitud ? detectarPlantillaId(solicitud) : null;
+const mapeoPlantilla = obtenerEtiquetasPlantilla(plantillaId);
+const datosPlantilla = solicitud ? obtenerDatosPlantilla(solicitud) : {};
+
+// Función para obtener etiqueta personalizada
+const obtenerEtiqueta = (campo: string) => obtenerEtiquetaCampo(plantillaId, campo);
+
+// Función para verificar si campo debe ocultarse
+const debeOcultarse = (campo: string) => esCampoOculto(plantillaId, campo);
 // Obtener archivos de solicitud_archivos
 const fetchArchivos = useCallback(async () => {
   if (!solicitud) return;
@@ -47,10 +69,6 @@ const fetchArchivos = useCallback(async () => {
   }
 }, [solicitud]);
 
-
-// Estados para mostrar/ocultar contraseñas
-const [showPassword1, setShowPassword1] = useState(false);
-const [showPassword2, setShowPassword2] = useState(false);
 
 // DEBUG: Log para verificar los datos de la solicitud
 if (solicitud && isOpen) {
@@ -217,23 +235,31 @@ return (
           {/* Grid principal de información */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
             <div className="bg-white p-2 rounded-md">
-              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Se paga por:</span>
+              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
+                {obtenerEtiqueta('empresa_a_pagar')}
+              </span>
               <p className="text-blue-900 font-medium">{solicitud.empresa_a_pagar || '-'}</p>
             </div>
             
             <div className="bg-white p-2 rounded-md">
-              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Beneficiario</span>
+              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
+                {obtenerEtiqueta('nombre_persona')}
+              </span>
               <p className="text-blue-900 font-medium">{solicitud.nombre_persona || '-'}</p>
             </div>
           </div>
             
-          {/* Información bancaria con bordes suaves */}
+          {/* Información bancaria con etiquetas personalizadas */}
           <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80 mb-3">
-            <h4 className="text-sm font-medium text-blue-800 mb-2">Información bancaria</h4>
+            <h4 className="text-sm font-medium text-blue-800 mb-2">
+              {mapeoPlantilla ? `${mapeoPlantilla.nombre} - Información de Pago` : 'Información bancaria'}
+            </h4>
             <div className="grid grid-cols-2 gap-3">
 
               <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de cuenta</span>
+                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
+                  {obtenerEtiqueta('tipo_cuenta_destino')}
+                </span>
                 <p className="text-blue-900 font-medium">
                   {solicitud.tipo_cuenta_destino === 'Número de Tarjeta'
                     ? `Número de Tarjeta${solicitud.tipo_tarjeta ? ' - ' + (solicitud.tipo_tarjeta === 'debito' ? 'Débito' : solicitud.tipo_tarjeta === 'credito' ? 'Crédito' : solicitud.tipo_tarjeta) : ''}`
@@ -245,17 +271,23 @@ return (
              
               
               <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Banco</span>
+                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
+                  {obtenerEtiqueta('banco_destino')}
+                </span>
                 <p className="text-blue-900 font-medium">{solicitud.banco_destino || '-'}</p>
               </div>
               
                <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta</span>
+                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
+                  {obtenerEtiqueta('cuenta_destino')}
+                </span>
                 <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta_destino}</p>
               </div>
               
               <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Fecha límite</span>
+                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
+                  {obtenerEtiqueta('fecha_limite_pago')}
+                </span>
                 <p className="text-blue-900 font-medium">{
                   solicitud.fecha_limite_pago
                     ? formatDateForDisplay(solicitud.fecha_limite_pago)
@@ -263,14 +295,17 @@ return (
                 }</p>
               </div>
 
-              {/* Cuenta adicional opcional - Ocultar para plantillas */}
-              {!solicitud.tipo_pago_descripcion?.startsWith('Plantilla:') && (() => {
+              {/* Cuenta adicional opcional - Aplicar reglas de ocultación */}
+              {!debeOcultarse('cuenta') && !debeOcultarse('banco_cuenta') && (() => {
                 // Verificar si cuenta o banco_cuenta tienen valores (no vacíos ni null)
                 const cuentaValida = solicitud.cuenta && solicitud.cuenta.trim() !== '';
                 const bancoValido = solicitud.banco_cuenta && solicitud.banco_cuenta.trim() !== '';
                 const mostrarCuentaAdicional = cuentaValida || bancoValido;
                 
                 console.log('🔍 MODAL DEBUG - Cuenta adicional:', {
+                  plantillaId,
+                  ocultoCuenta: debeOcultarse('cuenta'),
+                  ocultoBanco: debeOcultarse('banco_cuenta'),
                   cuenta: solicitud.cuenta,
                   banco_cuenta: solicitud.banco_cuenta,
                   cuentaValida,
@@ -294,6 +329,63 @@ return (
               )}
             </div>
           </div>
+
+          {/* Datos adicionales específicos de la plantilla */}
+          {mapeoPlantilla && Object.keys(datosPlantilla).length > 0 && (
+            <div className="bg-gradient-to-r from-purple-50/40 to-pink-50/40 rounded-md p-3 border border-purple-200/60 mb-3">
+              <h4 className="text-sm font-medium text-purple-800 mb-2 flex items-center">
+                <div className="w-2 h-2 bg-purple-600 rounded-full mr-2"></div>
+                Información Específica - {mapeoPlantilla.nombre}
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {Object.entries(datosPlantilla).map(([clave, valor]) => {
+                  // Evitar mostrar campos ya mostrados en la sección principal
+                  const camposYaMostrados = ['concepto', 'monto', 'empresa_a_pagar', 'nombre_persona'];
+                  if (camposYaMostrados.includes(clave)) return null;
+                  
+                  // Obtener etiqueta personalizada para el campo
+                  const etiqueta = obtenerEtiqueta(clave);
+                  
+                  // Formatear valores especiales
+                  let valorFormateado = valor;
+                  if (Array.isArray(valor)) {
+                    if (clave === 'elementos_adicionales') {
+                      valorFormateado = valor.map(elemento => {
+                        if (elemento === 'tarjeta_banorte') return '1 TARJETA BANORTE';
+                        if (elemento === 'token_banorte') return '1 TOKEN BANORTE';
+                        return elemento;
+                      }).join(', ');
+                    } else {
+                      valorFormateado = valor.join(', ');
+                    }
+                  } else if (typeof valor === 'boolean') {
+                    valorFormateado = valor ? 'Sí' : 'No';
+                  } else if (clave.includes('fecha') && valor) {
+                    try {
+                      valorFormateado = formatDateForDisplay(valor);
+                    } catch {
+                      valorFormateado = valor;
+                    }
+                  } else if (clave.includes('monto') && valor) {
+                    valorFormateado = `$${parseFloat(valor).toLocaleString('es-MX')}`;
+                  }
+
+                  if (!valor || valor === '' || valor === null || valor === undefined) return null;
+
+                  return (
+                    <div key={clave} className="bg-white/80 p-2 rounded border border-purple-100">
+                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">
+                        {etiqueta}
+                      </span>
+                      <p className="text-purple-900 font-medium break-words">
+                        {valorFormateado?.toString() || '-'}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Información de acceso para Tarjeta Institucional */}
           {(() => {
