@@ -259,7 +259,7 @@ return (
 
               <div>
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                  {obtenerEtiqueta('tipo_cuenta_destino')}
+                  Tipo de cuenta destino
                 </span>
                 <p className="text-blue-900 font-medium">
                   {solicitud.tipo_cuenta_destino === 'Número de Tarjeta'
@@ -273,21 +273,21 @@ return (
               
               <div>
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                  {obtenerEtiqueta('banco_destino')}
+                  Banco destino
                 </span>
                 <p className="text-blue-900 font-medium">{solicitud.banco_destino || '-'}</p>
               </div>
               
                <div>
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                  {obtenerEtiqueta('cuenta_destino')}
+                  Cuenta destino
                 </span>
                 <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta_destino}</p>
               </div>
               
               <div>
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                  {obtenerEtiqueta('fecha_limite_pago')}
+                  Fecha límite de pago
                 </span>
                 <p className="text-blue-900 font-medium">{
                   solicitud.fecha_limite_pago
