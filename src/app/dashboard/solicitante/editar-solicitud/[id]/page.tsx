@@ -15,10 +15,11 @@ import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
 import Image from 'next/image';
 import { formatDateForAPI } from '@/utils/dateUtils';
-import { detectarPlantillaId, obtenerDatosPlantilla, obtenerEtiquetasPlantilla } from '@/utils/plantillasLabels';
+import { detectarPlantillaId, obtenerDatosPlantilla } from '@/utils/plantillasLabels';
 import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
 import { plantillasDisponibles } from '@/data/plantillas';
 import type { PlantillaSolicitud } from '@/types/plantillas';
+import type { Solicitud } from '@/types';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
 
 type FormState = {
@@ -266,7 +267,7 @@ export default function EditarSolicitudPage() {
         setFechaLimitePago(fecha);
 
         // 🔍 DETECTAR Y CONFIGURAR PLANTILLA
-        const plantillaId = detectarPlantillaId(s as any);
+        const plantillaId = detectarPlantillaId(s as unknown as Solicitud);
         if (plantillaId) {
           console.log('🎯 Plantilla detectada para edición:', plantillaId);
           
@@ -280,7 +281,7 @@ export default function EditarSolicitudPage() {
             seleccionarPlantilla(plantillaEncontrada);
             
             // Prellenar datos de la plantilla desde plantilla_datos
-            const datosPlantilla = obtenerDatosPlantilla(s as any);
+            const datosPlantilla = obtenerDatosPlantilla(s as unknown as Solicitud);
             console.log('📋 Datos de plantilla a prellenar:', datosPlantilla);
             
             // Actualizar campos de la plantilla con los datos existentes
@@ -360,7 +361,7 @@ export default function EditarSolicitudPage() {
       }
     };
     cargar();
-  }, [solicitudId, router]);
+  }, [solicitudId, router, actualizarCampo, seleccionarPlantilla]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
