@@ -518,10 +518,10 @@ export function SolicitudDetailModal({
               </div>
             </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               
-              {/* Columna izquierda */}
-              <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+              {/* Contenido principal */}
+              <div className="space-y-4 sm:space-y-6">
                 
                 {/* Concepto */}
                 <Card className="p-4 sm:p-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200/50 shadow-lg rounded-xl sm:rounded-2xl">
@@ -800,11 +800,6 @@ export function SolicitudDetailModal({
                     </div>
                   </Card>
                 )}
-              </div>
-
-              {/* Columna derecha */}
-              <div className="lg:col-span-1 space-y-4 sm:space-y-6">
-                {/* La sección de detalles se removió para evitar duplicación de información */}
               </div>
             </div>
 
