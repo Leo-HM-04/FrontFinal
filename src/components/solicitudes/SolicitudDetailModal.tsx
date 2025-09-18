@@ -439,459 +439,204 @@ return (
                   </div>
                 )}
               </Card>
-                  </div>
-                </div>
-            <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
-              <div className="p-2 bg-blue-100 rounded-xl mr-3">
-                <DollarSign className="w-6 h-6 text-blue-700" />
-              </div>
-              Información Financiera
-            </h3>
-            
-            {/* Monto destacado con mejor diseño */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl border border-blue-300/50 mb-6 shadow-lg">
-              <span className="text-sm uppercase tracking-wider text-blue-100 font-bold block mb-2">Monto total</span>
-              <div className="flex items-baseline gap-3">
-                <p className="text-4xl font-black text-white tracking-tight">{formatCurrency(solicitud.monto)}</p>
-                {solicitud.tipo_moneda && (
-                  <span className="text-lg font-bold text-yellow-300 bg-yellow-400/20 px-3 py-1 rounded-lg border border-yellow-400/30">
-                    {solicitud.tipo_moneda.toUpperCase()}
-                  </span>
-                )}
-              </div>
-              <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-24"></div>
-            </div>
-          
-          {/* Grid principal de información */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
 
-            <div className="bg-white p-2 rounded-md">
-              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                Se paga por:
-              </span>
-              <p className="text-blue-900 font-medium">{solicitud.empresa_a_pagar || '-'}</p>
-            </div>
-            
-            <div className="bg-white p-2 rounded-md">
-              <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                Nombre del Beneficiario
-              </span>
-              <p className="text-blue-900 font-medium">{solicitud.nombre_persona || '-'}</p>
-            </div>
-          </div>
-            
-          {/* Información bancaria con etiquetas personalizadas */}
-          <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80 mb-3">
-            <h4 className="text-sm font-medium text-blue-800 mb-2">
-              {mapeoPlantilla ? `${mapeoPlantilla.nombre} - Información de Pago` : 'Información bancaria'}
-            </h4>
-            <div className="grid grid-cols-2 gap-3">
-
-              <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                  Tipo de cuenta destino
-                </span>
-                <p className="text-blue-900 font-medium">
-                  {(() => {
-                    const val = solicitud.tipo_cuenta_destino;
-                    if (!val) return '-';
-                    if (val === 'Número de Tarjeta') {
-                      return `Número de Tarjeta${solicitud.tipo_tarjeta ? ' - ' + (solicitud.tipo_tarjeta === 'debito' ? 'Débito' : solicitud.tipo_tarjeta === 'credito' ? 'Crédito' : solicitud.tipo_tarjeta) : ''}`;
-                    }
-                    if (val === 'Tarjeta Institucional' || val === 'Tarjeta Instituciona') {
-                      return 'Tarjeta Institucional';
-                    }
-                    // Quitar guiones bajos y poner mayúscula inicial
-                    return val.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                  })()}
-                </p>
-              </div>
-               
-
-              <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                  Banco destino
-                </span>
-                <p className="text-blue-900 font-medium">
-                  {(() => {
-                    if (!solicitud.banco_destino) return '-';
-                    // Buscar por código
-                    const banco = bancosMexico.find(b => b.codigo === solicitud.banco_destino);
-                    if (banco) return banco.nombre;
-                    // Si no es código, buscar por nombre corto o nombre
-                    if (solicitud.banco_destino) {
-                      const bancoPorNombre = bancosMexico.find(b =>
-                        b.nombreCorto.toLowerCase() === solicitud.banco_destino!.toLowerCase() ||
-                        b.nombre.toLowerCase() === solicitud.banco_destino!.toLowerCase()
-                      );
-                      if (bancoPorNombre) return bancoPorNombre.nombre;
-                    }
-                    // Si no se encuentra, mostrar el valor formateado
-                    return solicitud.banco_destino.replace(/_/g, ' ');
-                  })()}
-                </p>
-              </div>
-              
-               <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                  Cuenta destino
-                </span>
-                <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta_destino ? solicitud.cuenta_destino.replace(/_/g, ' ') : '-'}</p>
-              </div>
-              
-              <div>
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                  Fecha límite de pago
-                </span>
-                <p className="text-blue-900 font-medium">{
-                  solicitud.fecha_limite_pago
-                    ? formatDateForDisplay(solicitud.fecha_limite_pago)
-                    : '-'
-                }</p>
-              </div>
-
-              {/* Cuenta adicional opcional - Aplicar reglas de ocultación */}
-              {!debeOcultarse('cuenta') && !debeOcultarse('banco_cuenta') && (() => {
-                // Verificar si cuenta o banco_cuenta tienen valores (no vacíos ni null)
-                const cuentaValida = solicitud.cuenta && solicitud.cuenta.trim() !== '';
-                const bancoValido = solicitud.banco_cuenta && solicitud.banco_cuenta.trim() !== '';
-                const mostrarCuentaAdicional = cuentaValida || bancoValido;
-                
-                console.log('🔍 MODAL DEBUG - Cuenta adicional:', {
-                  plantillaId,
-                  ocultoCuenta: debeOcultarse('cuenta'),
-                  ocultoBanco: debeOcultarse('banco_cuenta'),
-                  cuenta: solicitud.cuenta,
-                  banco_cuenta: solicitud.banco_cuenta,
-                  cuentaValida,
-                  bancoValido,
-                  mostrarCuentaAdicional
-                });
-                return mostrarCuentaAdicional;
-              })() && (
-                <div className="col-span-2 bg-white/80 p-2 rounded border border-blue-100">
-                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta adicional</span>
-                  <div className="flex gap-2 items-center">
-                    <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta || '-'}</p>
-                    {solicitud.banco_cuenta && (
-                      (() => {
-                        // Buscar por código
-                        const banco = bancosMexico.find(b => b.codigo === solicitud.banco_cuenta);
-                        if (banco) {
-                          return <><span className="text-blue-600">|</span><span className="text-xs text-blue-600">Banco: {banco.nombre}</span></>;
-                        }
-                        // Si no es código, buscar por nombre corto o nombre
-                        const bancoPorNombre = bancosMexico.find(b =>
-                          b.nombreCorto.toLowerCase() === solicitud.banco_cuenta!.toLowerCase() ||
-                          b.nombre.toLowerCase() === solicitud.banco_cuenta!.toLowerCase()
-                        );
-                        if (bancoPorNombre) {
-                          return <><span className="text-blue-600">|</span><span className="text-xs text-blue-600">Banco: {bancoPorNombre.nombre}</span></>;
-                        }
-                        // Si no se encuentra, mostrar el valor formateado
-                        return <><span className="text-blue-600">|</span><span className="text-xs text-blue-600">Banco: {solicitud.banco_cuenta.replace(/_/g, ' ')}</span></>;
-                      })()
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Datos adicionales específicos de la plantilla */}
-          {mapeoPlantilla && Object.keys(datosPlantilla).length > 0 && (
-            <div className="bg-gradient-to-r from-purple-50/40 to-pink-50/40 rounded-md p-3 border border-purple-200/60 mb-3">
-              <h4 className="text-sm font-medium text-purple-800 mb-2 flex items-center">
-                <div className="w-2 h-2 bg-purple-600 rounded-full mr-2"></div>
-                Información Específica - {mapeoPlantilla.nombre}
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {Object.entries(datosPlantilla).map(([clave, valor]) => {
-                  // Evitar mostrar campos ya mostrados en la sección principal
-                  const camposYaMostrados = ['concepto', 'monto', 'empresa_a_pagar', 'nombre_persona'];
-                  if (camposYaMostrados.includes(clave)) return null;
+              {/* Segunda forma de pago */}
+              {solicitud.tiene_segunda_forma_pago && (
+                <Card className="p-4 sm:p-6 bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200/50 shadow-lg rounded-xl sm:rounded-2xl">
+                  <h3 className="text-lg sm:text-xl font-bold text-emerald-900 mb-4 flex items-center">
+                    <div className="p-2 bg-emerald-100 rounded-lg sm:rounded-xl mr-3">
+                      <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700" />
+                    </div>
+                    Segunda Forma de Pago
+                  </h3>
                   
-                  // Obtener etiqueta personalizada para el campo
-                  const etiqueta = obtenerEtiqueta(clave);
-                  
-                  // Formatear valores especiales
-                  let valorFormateado = valor;
-                  if (Array.isArray(valor)) {
-                    if (clave === 'elementos_adicionales') {
-                      valorFormateado = valor.map(elemento => {
-                        if (elemento === 'tarjeta_banorte') return '1 TARJETA BANORTE';
-                        if (elemento === 'token_banorte') return '1 TOKEN BANORTE';
-                        return elemento;
-                      }).join(', ');
-                    } else {
-                      valorFormateado = valor.join(', ');
-                    }
-                  } else if (typeof valor === 'boolean') {
-                    valorFormateado = valor ? 'Sí' : 'No';
-                  } else if (clave.includes('fecha') && valor) {
-                    try {
-                      valorFormateado = formatDateForDisplay(String(valor));
-                    } catch {
-                      valorFormateado = String(valor);
-                    }
-                  } else if (clave.includes('monto') && valor) {
-                    valorFormateado = `$${parseFloat(String(valor)).toLocaleString('es-MX')}`;
-                  } else {
-                    valorFormateado = String(valor);
-                  }
-
-                  if (!valor || valor === '' || valor === null || valor === undefined) return null;
-
-                  return (
-                    <div key={clave} className="bg-white/80 p-2 rounded border border-purple-100">
-                      <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">
-                        {etiqueta}
-                      </span>
-                      <p className="text-purple-900 font-medium break-words">
-                        {valorFormateado?.toString() || '-'}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="bg-white/80 p-3 rounded border border-emerald-100">
+                      <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Tipo de cuenta</span>
+                      <p className="text-emerald-900 font-medium text-sm">
+                        {solicitud.tipo_cuenta_destino_2 === 'Número de Tarjeta'
+                          ? `Número de Tarjeta${solicitud.tipo_tarjeta_2 ? ' - ' + (solicitud.tipo_tarjeta_2 === 'debito' ? 'Débito' : solicitud.tipo_tarjeta_2 === 'credito' ? 'Crédito' : solicitud.tipo_tarjeta_2) : ''}`
+                          : solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' || solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona'
+                            ? 'Tarjeta Institucional'
+                            : solicitud.tipo_cuenta_destino_2 || '-'}
                       </p>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Información de acceso para Tarjeta Institucional */}
-          {(() => {
-            // Arreglar para ambos valores: "Tarjeta Institucional" y "Tarjeta Instituciona" (falta L)
-            const esTarjetaInstitucional = solicitud.tipo_cuenta_destino === 'Tarjeta Institucional' || 
-                                         solicitud.tipo_cuenta_destino === 'Tarjeta Instituciona';
-            const tieneAcceso = solicitud.link_pago || solicitud.usuario_acceso || solicitud.contrasena_acceso;
-            const mostrarSeccion = esTarjetaInstitucional && tieneAcceso;
-            
-            console.log('🔍 MODAL DEBUG - Información de acceso primera forma:', {
-              tipo_cuenta_destino: solicitud.tipo_cuenta_destino,
-              esTarjetaInstitucional,
-              link_pago: solicitud.link_pago,
-              usuario_acceso: solicitud.usuario_acceso,
-              contrasena_acceso: !!solicitud.contrasena_acceso, // Solo mostrar si existe
-              tieneAcceso,
-              mostrarSeccion
-            });
-            
-            return mostrarSeccion;
-          })() && (
-            <div className="bg-gradient-to-r from-blue-50/40 to-indigo-50/40 rounded-md p-3 border border-blue-200/60 mb-3">
-              <h4 className="text-sm font-medium text-blue-800 mb-2 flex items-center">
-                <div className="w-2 h-2 bg-blue-600 rounded-full mr-2"></div>
-                Información de acceso - Tarjeta Institucional
-              </h4>
-              <div className="grid grid-cols-1 gap-3">
-                {solicitud.link_pago && (
-                  <div className="bg-white/80 p-2 rounded border border-blue-100">
-                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Link de pago</span>
-                    <p className="text-blue-900 font-medium break-all">{solicitud.link_pago}</p>
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-2 gap-3">
-                  {solicitud.usuario_acceso && (
-                    <div className="bg-white/80 p-2 rounded border border-blue-100">
-                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Usuario de acceso</span>
-                      <p className="text-blue-900 font-medium font-mono">{solicitud.usuario_acceso}</p>
-                    </div>
-                  )}
-                  
-                  {solicitud.contrasena_acceso && (
-                    <div className="bg-white/80 p-2 rounded border border-blue-100">
-                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Contraseña de acceso</span>
-                      <div className="flex items-center gap-2">
-                        <p className="text-blue-900 font-medium font-mono flex-1">
-                          {showPassword1 ? solicitud.contrasena_acceso : '••••••••'}
-                        </p>
-                        <button
-                          onClick={() => setShowPassword1(!showPassword1)}
-                          className="text-blue-600 hover:text-blue-800 transition-colors p-1"
-                          title={showPassword1 ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                        >
-                          {showPassword1 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      {!showPassword1 && (
-                        <span className="text-xs text-blue-600 italic">Haz clic en el ojo para ver la contraseña</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Descripción del tipo de pago */}
-          <div>
-            <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Descripción del tipo de pago</span>
-            <p className="text-blue-900 p-2 bg-white rounded-md">{solicitud.tipo_pago_descripcion || '-'}</p>
-          </div>
-
-          {/* Segunda forma de pago */}
-          {solicitud.tiene_segunda_forma_pago && (
-            <div className="bg-gradient-to-r from-emerald-50/40 to-green-50/40 rounded-md p-3 border border-emerald-200/60 mb-3">
-              <h4 className="text-sm font-medium text-emerald-800 mb-2 flex items-center">
-                <div className="w-2 h-2 bg-emerald-600 rounded-full mr-2"></div>
-                Segunda forma de pago
-              </h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/80 p-2 rounded border border-emerald-100">
-                  <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Tipo de cuenta</span>
-                  <p className="text-emerald-900 font-medium">
-                    {solicitud.tipo_cuenta_destino_2 === 'Número de Tarjeta'
-                      ? `Número de Tarjeta${solicitud.tipo_tarjeta_2 ? ' - ' + (solicitud.tipo_tarjeta_2 === 'debito' ? 'Débito' : solicitud.tipo_tarjeta_2 === 'credito' ? 'Crédito' : solicitud.tipo_tarjeta_2) : ''}`
-                      : solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' || solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona'
-                        ? 'Tarjeta Institucional'
-                        : solicitud.tipo_cuenta_destino_2 || '-'}
-                  </p>
-                </div>
-                
-                <div className="bg-white/80 p-2 rounded border border-emerald-100">
-                  <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Banco</span>
-                  <p className="text-emerald-900 font-medium">{solicitud.banco_destino_2 || '-'}</p>
-                </div>
-                
-                <div className="col-span-2 bg-white/80 p-2 rounded border border-emerald-100">
-                  <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Cuenta</span>
-                  <p className="font-mono text-emerald-900 font-medium">{solicitud.cuenta_destino_2 || '-'}</p>
-                </div>
-
-                {(solicitud.cuenta_2 || solicitud.banco_cuenta_2) && (
-                  <div className="col-span-2 bg-white/80 p-2 rounded border border-emerald-100">
-                    <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Cuenta adicional</span>
-                    <div className="flex gap-2 items-center">
-                      <p className="font-mono text-emerald-900 font-medium">{solicitud.cuenta_2 || '-'}</p>
-                      {solicitud.banco_cuenta_2 && (
-                        <>
-                          <span className="text-emerald-600">|</span>
-                          <span className="text-xs text-emerald-600">Banco: {solicitud.banco_cuenta_2}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Información de acceso para Tarjeta Institucional - Segunda forma */}
-              {(solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' || solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona') && (solicitud.link_pago_2 || solicitud.usuario_acceso_2 || solicitud.contrasena_acceso_2) && (
-                <div className="mt-3 bg-gradient-to-r from-blue-50/60 to-indigo-50/60 rounded p-2 border border-blue-200/40">
-                  <span className="text-xs font-medium text-blue-800 mb-2 block">Información de acceso</span>
-
-                  {solicitud.link_pago_2 && (
-                    <div className="bg-white/90 p-2 rounded border border-blue-100 mb-2">
-                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Link de pago</span>
-                      <p className="text-blue-900 font-medium break-all text-sm">{solicitud.link_pago_2}</p>
-                    </div>
-                  )}
-                  
-                  <div className="grid grid-cols-2 gap-2">
-                    {solicitud.usuario_acceso_2 && (
-                      <div className="bg-white/90 p-2 rounded border border-blue-100">
-                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Usuario</span>
-                        <p className="text-blue-900 font-medium font-mono text-sm">{solicitud.usuario_acceso_2}</p>
-                      </div>
-                    )}
                     
-                    {solicitud.contrasena_acceso_2 && (
-                      <div className="bg-white/90 p-2 rounded border border-blue-100">
-                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Contraseña</span>
-                        <div className="flex items-center gap-2">
-                          <p className="text-blue-900 font-medium font-mono text-sm flex-1">
-                            {showPassword2 ? solicitud.contrasena_acceso_2 : '••••••••'}
-                          </p>
-                          <button
-                            onClick={() => setShowPassword2(!showPassword2)}
-                            className="text-blue-600 hover:text-blue-800 transition-colors p-1"
-                            title={showPassword2 ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                          >
-                            {showPassword2 ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                          </button>
+                    <div className="bg-white/80 p-3 rounded border border-emerald-100">
+                      <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Banco</span>
+                      <p className="text-emerald-900 font-medium text-sm">{solicitud.banco_destino_2 || '-'}</p>
+                    </div>
+                    
+                    <div className="sm:col-span-2 bg-white/80 p-3 rounded border border-emerald-100">
+                      <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Cuenta</span>
+                      <p className="font-mono text-emerald-900 font-medium text-sm">{solicitud.cuenta_destino_2 || '-'}</p>
+                    </div>
+
+                    {(solicitud.cuenta_2 || solicitud.banco_cuenta_2) && (
+                      <div className="sm:col-span-2 bg-white/80 p-3 rounded border border-emerald-100">
+                        <span className="text-xs uppercase tracking-wider text-emerald-700/70 block mb-1 font-medium">Cuenta adicional</span>
+                        <div className="flex gap-2 items-center">
+                          <p className="font-mono text-emerald-900 font-medium text-sm">{solicitud.cuenta_2 || '-'}</p>
+                          {solicitud.banco_cuenta_2 && (
+                            <>
+                              <span className="text-emerald-600">|</span>
+                              <span className="text-xs text-emerald-600">Banco: {solicitud.banco_cuenta_2}</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     )}
                   </div>
-                </div>
+
+                  {/* Información de acceso segunda forma */}
+                  {(solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' || solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona') && (solicitud.link_pago_2 || solicitud.usuario_acceso_2 || solicitud.contrasena_acceso_2) && (
+                    <div className="mt-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/70 rounded p-3 border border-blue-200/40">
+                      <span className="text-xs font-medium text-blue-800 mb-3 block">Información de acceso</span>
+
+                      {solicitud.link_pago_2 && (
+                        <div className="bg-white/90 p-3 rounded border border-blue-100 mb-3">
+                          <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Link de pago</span>
+                          <p className="text-blue-900 font-medium break-all text-sm">{solicitud.link_pago_2}</p>
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {solicitud.usuario_acceso_2 && (
+                          <div className="bg-white/90 p-3 rounded border border-blue-100">
+                            <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Usuario</span>
+                            <p className="text-blue-900 font-medium font-mono text-sm">{solicitud.usuario_acceso_2}</p>
+                          </div>
+                        )}
+                        
+                        {solicitud.contrasena_acceso_2 && (
+                          <div className="bg-white/90 p-3 rounded border border-blue-100">
+                            <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Contraseña</span>
+                            <div className="flex items-center gap-2">
+                              <p className="text-blue-900 font-medium font-mono text-sm flex-1">
+                                {showPassword2 ? solicitud.contrasena_acceso_2 : '••••••••'}
+                              </p>
+                              <button
+                                onClick={() => setShowPassword2(!showPassword2)}
+                                className="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                                title={showPassword2 ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                              >
+                                {showPassword2 ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              )}
+
+              {/* Datos específicos de plantilla */}
+              {mapeoPlantilla && Object.keys(datosPlantilla).length > 0 && (
+                <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
+                  <h3 className="text-lg sm:text-xl font-bold text-purple-900 mb-4 flex items-center">
+                    <div className="p-2 bg-purple-100 rounded-lg sm:rounded-xl mr-3">
+                      <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-700" />
+                    </div>
+                    {mapeoPlantilla.nombre} - Información Específica
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    {Object.entries(datosPlantilla).map(([clave, valor]) => {
+                      const camposYaMostrados = ['concepto', 'monto', 'empresa_a_pagar', 'nombre_persona'];
+                      if (camposYaMostrados.includes(clave)) return null;
+                      
+                      const etiqueta = obtenerEtiqueta(clave);
+                      
+                      let valorFormateado = valor;
+                      if (Array.isArray(valor)) {
+                        if (clave === 'elementos_adicionales') {
+                          valorFormateado = valor.map(elemento => {
+                            if (elemento === 'tarjeta_banorte') return '1 TARJETA BANORTE';
+                            if (elemento === 'token_banorte') return '1 TOKEN BANORTE';
+                            return elemento;
+                          }).join(', ');
+                        } else {
+                          valorFormateado = valor.join(', ');
+                        }
+                      } else if (typeof valor === 'boolean') {
+                        valorFormateado = valor ? 'Sí' : 'No';
+                      } else if (clave.includes('fecha') && valor) {
+                        try {
+                          valorFormateado = formatDateForDisplay(String(valor));
+                        } catch {
+                          valorFormateado = String(valor);
+                        }
+                      } else if (clave.includes('monto') && valor) {
+                        valorFormateado = `$${parseFloat(String(valor)).toLocaleString('es-MX')}`;
+                      } else {
+                        valorFormateado = String(valor);
+                      }
+
+                      if (!valor || valor === '' || valor === null || valor === undefined) return null;
+
+                      return (
+                        <div key={clave} className="bg-white/80 p-3 rounded border border-purple-100">
+                          <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">
+                            {etiqueta}
+                          </span>
+                          <p className="text-purple-900 font-medium break-words text-sm">
+                            {valorFormateado?.toString() || '-'}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
               )}
             </div>
-          )}
-          
-            <Card className="p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
-                <div className="p-2 bg-indigo-100 rounded-xl mr-3">
-                  <Building className="w-6 h-6 text-indigo-700" />
+
+            {/* Columna derecha: Información organizacional */}
+            <div className="lg:col-span-1 space-y-4 sm:space-y-6">
+              <Card className="p-4 sm:p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl sm:rounded-2xl">
+                <h3 className="text-lg sm:text-xl font-bold text-blue-900 mb-4 sm:mb-6 flex items-center">
+                  <div className="p-2 bg-indigo-100 rounded-lg sm:rounded-xl mr-3">
+                    <Building className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-700" />
+                  </div>
+                  Detalles
+                </h3>
+                
+                {/* Información de aprobación */}
+                {solicitud.aprobador_nombre && (
+                  <div className="bg-green-50/50 p-3 sm:p-4 rounded-lg border border-green-200/50 mb-4">
+                    <span className="text-xs uppercase tracking-wider text-green-700/70 block mb-1 font-medium">Aprobado por</span>
+                    <p className="text-green-900 font-medium text-sm">{solicitud.aprobador_nombre}</p>
+                  </div>
+                )}
+                
+                {/* ID y fechas */}
+                <div className="space-y-3">
+                  <div className="flex items-center p-3 bg-blue-50/50 rounded-lg border border-blue-100">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                      <span className="text-blue-700 text-xs font-bold">#{solicitud.id_solicitud}</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-blue-700/70 font-medium">ID de Solicitud</p>
+                      <p className="text-sm font-bold text-blue-900">#{solicitud.id_solicitud}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center p-3 bg-indigo-50/50 rounded-lg border border-indigo-100">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                      <span className="text-indigo-700 text-xs font-bold">
+                        {formatShortDate(solicitud.fecha_creacion, 'dayMonth')}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-indigo-700/70 font-medium">Fecha de creación</p>
+                      <p className="text-sm font-bold text-indigo-900">{formatDateForDisplay(solicitud.fecha_creacion)}</p>
+                    </div>
+                  </div>
                 </div>
-                Información Organizacional
-              </h3>
-              
-              {/* Estado destacado con mejor diseño */}
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl border border-indigo-300/50 mb-6 shadow-lg">
-                <span className="text-sm uppercase tracking-wider font-bold block mb-2 text-indigo-100">Estado actual</span>
-                <div className="flex items-center">
-                  <div className="h-3 w-3 rounded-full mr-3 bg-yellow-400 shadow-lg"></div>
-                  <p className="font-black text-2xl text-white tracking-tight">{solicitud.estado.toUpperCase()}</p>
-                </div>
-                <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-20"></div>
-              </div>
-              
-              {/* Concepto - Ubicado entre estado y equipo */}
-              <div className="bg-gradient-to-r from-green-50/40 to-emerald-50/40 rounded-md p-4 border border-green-200/60 mb-4">
-                <h4 className="text-sm font-medium text-green-800 mb-2 flex items-center">
-                  <div className="w-2 h-2 bg-green-600 rounded-full mr-2"></div>
-                  Concepto
-                </h4>
-                <div className="bg-white/80 p-3 rounded border border-green-100">
-                  <p className="text-gray-800 leading-relaxed text-sm font-medium">{solicitud.concepto}</p>
-                </div>
-              </div>
-          
-          {/* Información de departamento y solicitante */}
-          <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80 mb-3">
-            <h4 className="text-sm font-medium text-blue-800 mb-2">Equipo y personal</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-              <div className="mb-2 sm:mb-0">
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Departamento</span>
-                <p className="text-blue-900 font-medium break-words">{solicitud.departamento ? solicitud.departamento.charAt(0).toUpperCase() + solicitud.departamento.slice(1) : '-'}</p>
-              </div>
-              <div className="mb-2 sm:mb-0">
-                <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Solicitante</span>
-                <p className="text-blue-900 font-medium break-words">{solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}</p>
-              </div>
-              {solicitud.aprobador_nombre && (
-                <div className="col-span-1 sm:col-span-2">
-                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Aprobado por</span>
-                  <p className="text-blue-900 font-medium break-words">{solicitud.aprobador_nombre}</p>
-                </div>
-              )}
+              </Card>
             </div>
           </div>
-          
-          {/* Información adicional */}
-          <div className="bg-white rounded-md p-3">
-            <div className="flex items-center mb-2">
-              <div className="flex-shrink-0 h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                <span className="text-blue-700 text-xs font-bold">{solicitud.id_solicitud}</span>
-              </div>
-              <div>
-                <p className="text-xs text-blue-700/70">ID de Solicitud</p>
-                <p className="text-sm font-medium text-blue-900">#{solicitud.id_solicitud}</p>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <div className="flex-shrink-0 h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                <span className="text-blue-700 text-xs">
-                  {formatShortDate(solicitud.fecha_creacion, 'dayMonth')}
-                </span>
-              </div>
-              <div>
-                <p className="text-xs text-blue-700/70">Fecha de creación</p>
-                <p className="text-sm font-medium text-blue-900">{formatDateForDisplay(solicitud.fecha_creacion)}</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
+
           {/* Concepto y Documentos con diseño mejorado */}
           <div className="space-y-6 mb-8">
             {/* Documentos - Sección expandida */}
@@ -1213,12 +958,12 @@ return (
                   </div>
                 )}
               </div>
-            )
-          </div>
+            </div>
           </Card>
         </div>
       </div>
     </div>
-      </div>
+  </div>
+  </div>
 );
 }
