@@ -804,51 +804,7 @@ export function SolicitudDetailModal({
 
               {/* Columna derecha */}
               <div className="lg:col-span-1 space-y-4 sm:space-y-6">
-                <Card className="p-4 sm:p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl sm:rounded-2xl">
-                  <h2 className="text-lg sm:text-xl font-bold text-blue-900 mb-4 sm:mb-6 flex items-center">
-                    <div className="p-2 bg-indigo-100 rounded-lg sm:rounded-xl mr-3">
-                      <Building className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-700" />
-                    </div>
-                    Detalles
-                  </h2>
-                  
-                  {/* Información de aprobación */}
-                  {solicitud.aprobador_nombre && (
-                    <div className="bg-green-50/50 p-3 sm:p-4 rounded-lg border border-green-200/50 mb-4">
-                      <span className="text-xs uppercase tracking-wider text-green-700/70 block mb-1 font-medium">
-                        Aprobado por
-                      </span>
-                      <p className="text-green-900 font-medium text-sm">{solicitud.aprobador_nombre}</p>
-                    </div>
-                  )}
-                  
-                  {/* ID y fechas */}
-                  <div className="space-y-3">
-                    <div className="flex items-center p-3 bg-blue-50/50 rounded-lg border border-blue-100">
-                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                        <span className="text-blue-700 text-xs font-bold">#{solicitud.id_solicitud}</span>
-                      </div>
-                      <div>
-                        <p className="text-xs text-blue-700/70 font-medium">ID de Solicitud</p>
-                        <p className="text-sm font-bold text-blue-900">#{solicitud.id_solicitud}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center p-3 bg-indigo-50/50 rounded-lg border border-indigo-100">
-                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                        <span className="text-indigo-700 text-xs font-bold">
-                          {formatShortDate(solicitud.fecha_creacion, 'dayMonth')}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-xs text-indigo-700/70 font-medium">Fecha de creación</p>
-                        <p className="text-sm font-bold text-indigo-900">
-                          {formatDateForDisplay(solicitud.fecha_creacion)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
+                {/* La sección de detalles se removió para evitar duplicación de información */}
               </div>
             </div>
 
