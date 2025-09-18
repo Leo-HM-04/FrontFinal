@@ -234,16 +234,17 @@ return (
           
           {/* Grid principal de información */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+
             <div className="bg-white p-2 rounded-md">
               <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                {obtenerEtiqueta('empresa_a_pagar')}
+                Se paga por:
               </span>
               <p className="text-blue-900 font-medium">{solicitud.empresa_a_pagar || '-'}</p>
             </div>
             
             <div className="bg-white p-2 rounded-md">
               <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
-                {obtenerEtiqueta('nombre_persona')}
+                Nombre del Beneficiario
               </span>
               <p className="text-blue-900 font-medium">{solicitud.nombre_persona || '-'}</p>
             </div>
