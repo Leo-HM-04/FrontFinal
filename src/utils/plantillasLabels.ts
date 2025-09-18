@@ -191,7 +191,12 @@ export function detectarPlantillaId(solicitud: Solicitud): string | null {
   if (solicitud.tipo_pago_descripcion.startsWith('Plantilla:')) {
     const plantillaParte = solicitud.tipo_pago_descripcion.split('Plantilla:')[1]?.trim();
     if (plantillaParte) {
-      // Convertir nombres de plantilla a IDs
+      // Si ya es un ID (formato kebab-case), devolverlo directamente
+      if (plantillaParte.includes('-')) {
+        return plantillaParte;
+      }
+      
+      // Si no, convertir nombres de plantilla a IDs (compatibilidad hacia atrás)
       const nombreAId: Record<string, string> = {
         'PAGO SUA INTERNAS': 'pago-sua-internas',
         'PAGO SUA FRENSHETSI': 'pago-sua-frenshetsi',

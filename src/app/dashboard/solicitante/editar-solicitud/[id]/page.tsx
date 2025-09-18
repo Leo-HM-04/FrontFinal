@@ -267,15 +267,24 @@ export default function EditarSolicitudPage() {
         setFechaLimitePago(fecha);
 
         // 🔍 DETECTAR Y CONFIGURAR PLANTILLA
+        console.log('🔍 Iniciando detección de plantilla...');
+        console.log('📊 tipo_pago_descripcion:', s.tipo_pago_descripcion);
+        console.log('📊 Datos completos s:', s);
+        
         const plantillaId = detectarPlantillaId(s as unknown as Solicitud);
+        console.log('🔍 Resultado detectarPlantillaId:', plantillaId);
+        
         if (plantillaId) {
           console.log('🎯 Plantilla detectada para edición:', plantillaId);
           
           // Buscar la plantilla en las disponibles
           const plantillaEncontrada = plantillasDisponibles.find(p => p.id === plantillaId);
+          console.log('🔍 Plantilla encontrada en disponibles:', plantillaEncontrada);
+          
           if (plantillaEncontrada) {
             setPlantillaDetectada(plantillaEncontrada);
             setEsEdicionPlantilla(true);
+            console.log('✅ Configurando edición de plantilla:', plantillaEncontrada.nombre);
             
             // Cargar plantilla en el hook
             seleccionarPlantilla(plantillaEncontrada);
@@ -290,8 +299,11 @@ export default function EditarSolicitudPage() {
                 actualizarCampo(campo, valor);
               }
             });
+          } else {
+            console.log('❌ No se encontró la plantilla en disponibles');
           }
         } else {
+          console.log('❌ No se detectó plantilla');
           console.log('📝 Solicitud estándar (sin plantilla)');
           setEsEdicionPlantilla(false);
           setPlantillaDetectada(null);
