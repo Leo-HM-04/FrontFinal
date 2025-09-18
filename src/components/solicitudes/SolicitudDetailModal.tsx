@@ -345,10 +345,23 @@ return (
                   <div className="flex gap-2 items-center">
                     <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta || '-'}</p>
                     {solicitud.banco_cuenta && (
-                      <>
-                        <span className="text-blue-600">|</span>
-                        <span className="text-xs text-blue-600">Banco: {solicitud.banco_cuenta}</span>
-                      </>
+                      (() => {
+                        // Buscar por código
+                        const banco = bancosMexico.find(b => b.codigo === solicitud.banco_cuenta);
+                        if (banco) {
+                          return <><span className="text-blue-600">|</span><span className="text-xs text-blue-600">Banco: {banco.nombre}</span></>;
+                        }
+                        // Si no es código, buscar por nombre corto o nombre
+                        const bancoPorNombre = bancosMexico.find(b =>
+                          b.nombreCorto.toLowerCase() === solicitud.banco_cuenta!.toLowerCase() ||
+                          b.nombre.toLowerCase() === solicitud.banco_cuenta!.toLowerCase()
+                        );
+                        if (bancoPorNombre) {
+                          return <><span className="text-blue-600">|</span><span className="text-xs text-blue-600">Banco: {bancoPorNombre.nombre}</span></>;
+                        }
+                        // Si no se encuentra, mostrar el valor formateado
+                        return <><span className="text-blue-600">|</span><span className="text-xs text-blue-600">Banco: {solicitud.banco_cuenta.replace(/_/g, ' ')}</span></>;
+                      })()
                     )}
                   </div>
                 </div>
