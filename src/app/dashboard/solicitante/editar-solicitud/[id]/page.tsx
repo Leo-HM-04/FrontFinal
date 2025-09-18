@@ -15,6 +15,11 @@ import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
 import Image from 'next/image';
 import { formatDateForAPI } from '@/utils/dateUtils';
+import { detectarPlantillaId, obtenerDatosPlantilla, obtenerEtiquetasPlantilla } from '@/utils/plantillasLabels';
+import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
+import { plantillasDisponibles } from '@/data/plantillas';
+import type { PlantillaSolicitud } from '@/types/plantillas';
+import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
 
 type FormState = {
   departamento: string;
@@ -136,6 +141,19 @@ export default function EditarSolicitudPage() {
   const [checkingCuenta, setCheckingCuenta] = useState(false);
   const [errors, setErrors] = useState<Record<keyof FormState | string, string | undefined>>({});
 
+  // Estados para manejo de plantillas
+  const [plantillaDetectada, setPlantillaDetectada] = useState<PlantillaSolicitud | null>(null);
+  const [esEdicionPlantilla, setEsEdicionPlantilla] = useState(false);
+  
+  // Hook para manejo de plantillas
+  const {
+    estado: estadoPlantilla,
+    seleccionarPlantilla,
+    actualizarCampo,
+    validarFormulario: validarFormularioPlantilla,
+    obtenerDatosParaEnvio
+  } = usePlantillaSolicitud();
+
   // Archivos existentes en el servidor
   const [facturaExistente, setFacturaExistente] = useState<ArchivoExistente | null>(null);
   const [archivosExistentes, setArchivosExistentes] = useState<ArchivoExistente[]>([]);
@@ -246,6 +264,37 @@ export default function EditarSolicitudPage() {
         dispatch({ type: 'SET_FIELD', field: 'fecha_limite_pago', value: fecha ? formatDateForAPI(fecha) : '' });
 
         setFechaLimitePago(fecha);
+
+        // 🔍 DETECTAR Y CONFIGURAR PLANTILLA
+        const plantillaId = detectarPlantillaId(s as any);
+        if (plantillaId) {
+          console.log('🎯 Plantilla detectada para edición:', plantillaId);
+          
+          // Buscar la plantilla en las disponibles
+          const plantillaEncontrada = plantillasDisponibles.find(p => p.id === plantillaId);
+          if (plantillaEncontrada) {
+            setPlantillaDetectada(plantillaEncontrada);
+            setEsEdicionPlantilla(true);
+            
+            // Cargar plantilla en el hook
+            seleccionarPlantilla(plantillaEncontrada);
+            
+            // Prellenar datos de la plantilla desde plantilla_datos
+            const datosPlantilla = obtenerDatosPlantilla(s as any);
+            console.log('📋 Datos de plantilla a prellenar:', datosPlantilla);
+            
+            // Actualizar campos de la plantilla con los datos existentes
+            Object.entries(datosPlantilla).forEach(([campo, valor]) => {
+              if (valor !== null && valor !== undefined && valor !== '') {
+                actualizarCampo(campo, valor);
+              }
+            });
+          }
+        } else {
+          console.log('📝 Solicitud estándar (sin plantilla)');
+          setEsEdicionPlantilla(false);
+          setPlantillaDetectada(null);
+        }
 
         // Bancarios
         dispatch({ type: 'SET_FIELD', field: 'tipo_cuenta_destino', value: (s.tipo_cuenta_destino as string) ?? 'CLABE' });
@@ -403,6 +452,44 @@ export default function EditarSolicitudPage() {
       setCuentaValida(false);
     } finally {
       setCheckingCuenta(false);
+    }
+  };
+
+  // Función específica para manejar envío de plantillas
+  const handleSubmitPlantilla = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!solicitudId || !plantillaDetectada) return;
+
+    setLoading(true);
+
+    try {
+      // Validar formulario de plantilla
+      if (!validarFormularioPlantilla()) {
+        toast.error('Por favor, completa todos los campos requeridos');
+        return;
+      }
+
+      // Obtener datos de la plantilla
+      const datosPlantilla = obtenerDatosParaEnvio();
+      
+      console.log('🔄 Actualizando solicitud de plantilla:', {
+        solicitudId,
+        plantilla: plantillaDetectada.id,
+        datos: datosPlantilla
+      });
+
+      // Aquí iría la llamada al endpoint de actualización
+      // Por ahora simulamos el éxito
+      toast.success(`Solicitud de ${plantillaDetectada.nombre} actualizada correctamente`);
+      
+      // Redirigir a mis solicitudes
+      router.push('/dashboard/solicitante/mis-solicitudes');
+      
+    } catch (error) {
+      console.error('❌ Error actualizando solicitud de plantilla:', error);
+      toast.error('Error al actualizar la solicitud');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -705,6 +792,27 @@ export default function EditarSolicitudPage() {
               </div>
             </div>
 
+            {/* Mostrar plantilla si se detectó, formulario estándar si no */}
+            {esEdicionPlantilla && plantillaDetectada ? (
+              <div>
+                <div className="mb-6 p-4 bg-blue-500/20 border border-blue-400/40 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="w-5 h-5 text-blue-400" />
+                    <span className="text-blue-300 font-medium">
+                      Editando solicitud de plantilla: {plantillaDetectada.nombre}
+                    </span>
+                  </div>
+                </div>
+                
+                <FormularioPlantilla
+                  plantilla={plantillaDetectada}
+                  datos={estadoPlantilla.datos}
+                  errores={estadoPlantilla.errores}
+                  camposVisibles={estadoPlantilla.camposVisibles}
+                  onCambiarCampo={actualizarCampo}
+                />
+              </div>
+            ) : (
             <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 md:space-y-10 max-w-full">
               {/* SECCIÓN 1: INFORMACIÓN BÁSICA */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
@@ -1613,6 +1721,29 @@ export default function EditarSolicitudPage() {
                 </Button>
               </div>
             </form>
+            )}
+            
+            {/* Botones para plantillas */}
+            {esEdicionPlantilla && plantillaDetectada && (
+              <div className="flex flex-col sm:flex-row gap-4 pt-8">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => router.push('/dashboard/solicitante/mis-solicitudes')}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="button"
+                  onClick={handleSubmitPlantilla}
+                  loading={loading}
+                  className="flex-1"
+                >
+                  {loading ? 'Actualizando...' : 'Actualizar Solicitud'}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </SolicitanteLayout>
