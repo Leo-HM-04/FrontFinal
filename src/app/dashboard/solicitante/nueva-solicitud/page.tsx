@@ -985,7 +985,7 @@ export default function NuevaSolicitudPage() {
                   {/* “Información Bancaria” */}
                   <div>
                     <label className="block text-base font-medium text-white/90 mb-3">
-                      “Información Bancaria” *
+                      Información Bancaria *
                     </label>
                     <select
                       name="tipo_cuenta_destino"

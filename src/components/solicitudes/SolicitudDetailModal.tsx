@@ -262,27 +262,33 @@ return (
                   Tipo de cuenta destino
                 </span>
                 <p className="text-blue-900 font-medium">
-                  {solicitud.tipo_cuenta_destino === 'Número de Tarjeta'
-                    ? `Número de Tarjeta${solicitud.tipo_tarjeta ? ' - ' + (solicitud.tipo_tarjeta === 'debito' ? 'Débito' : solicitud.tipo_tarjeta === 'credito' ? 'Crédito' : solicitud.tipo_tarjeta) : ''}`
-                    : solicitud.tipo_cuenta_destino === 'Tarjeta Institucional' || solicitud.tipo_cuenta_destino === 'Tarjeta Instituciona'
-                      ? 'Tarjeta Institucional'
-                      : solicitud.tipo_cuenta_destino || '-'}
+                  {(() => {
+                    const val = solicitud.tipo_cuenta_destino;
+                    if (!val) return '-';
+                    if (val === 'Número de Tarjeta') {
+                      return `Número de Tarjeta${solicitud.tipo_tarjeta ? ' - ' + (solicitud.tipo_tarjeta === 'debito' ? 'Débito' : solicitud.tipo_tarjeta === 'credito' ? 'Crédito' : solicitud.tipo_tarjeta) : ''}`;
+                    }
+                    if (val === 'Tarjeta Institucional' || val === 'Tarjeta Instituciona') {
+                      return 'Tarjeta Institucional';
+                    }
+                    // Quitar guiones bajos y poner mayúscula inicial
+                    return val.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                  })()}
                 </p>
               </div>
-             
-              
+               
               <div>
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
                   Banco destino
                 </span>
-                <p className="text-blue-900 font-medium">{solicitud.banco_destino || '-'}</p>
+                <p className="text-blue-900 font-medium">{solicitud.banco_destino ? solicitud.banco_destino.replace(/_/g, ' ') : '-'}</p>
               </div>
               
                <div>
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
                   Cuenta destino
                 </span>
-                <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta_destino}</p>
+                <p className="font-mono text-blue-900 font-medium">{solicitud.cuenta_destino ? solicitud.cuenta_destino.replace(/_/g, ' ') : '-'}</p>
               </div>
               
               <div>
