@@ -166,52 +166,281 @@ return colors[estado as keyof typeof colors] || 'bg-gray-100 text-gray-800 borde
 };
 
 return (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-  {/* Fondo degradado oscuro/transparente mejorado */}
-  <div
-    className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
-    onClick={onClose}
-  />
-  <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-7xl max-h-[98vh] sm:max-h-[90vh] overflow-hidden border border-white/20 backdrop-blur-sm">
-    {/* Contenedor con scroll interno */}
-    <div className="overflow-y-auto max-h-[98vh] sm:max-h-[90vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400">
-    {/* Botón de cerrar (X) flotante mejorado */}
-    <button
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
+    {/* Fondo con mejor responsive */}
+    <div
+      className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
       onClick={onClose}
-      className="absolute top-6 right-6 z-20 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-      aria-label="Cerrar"
-    >
-      <X className="w-6 h-6" />
-    </button>
-    {/* Header mejorado */}
-    <div className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-8 relative overflow-hidden">
-      {/* Elementos decorativos de fondo */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+    />
+    
+    {/* Modal container con mejor responsive */}
+    <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-6xl xl:max-w-7xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
       
-      <div className="relative z-10 flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-3xl font-bold tracking-tight">
-            Solicitud #{solicitud.id_solicitud}
-          </h2>
-          <p className="text-blue-100 text-lg">
-            Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md">{solicitud.folio || '-'}</span>
-          </p>
-          <p className="text-blue-200 mt-2">
-            Creada el {formatDateForDisplay(solicitud.fecha_creacion)}
-          </p>
+      {/* Botón de cerrar responsive */}
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 z-30 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+        aria-label="Cerrar"
+      >
+        <X className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+      </button>
+
+      {/* Contenedor con scroll */}
+      <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400">
+        
+        {/* Header responsive */}
+        <div className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+          {/* Elementos decorativos responsivos */}
+          <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8 sm:-translate-y-12 sm:translate-x-12 lg:-translate-y-16 lg:translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white/5 rounded-full translate-y-6 -translate-x-6 sm:translate-y-8 sm:-translate-x-8 lg:translate-y-12 lg:-translate-x-12"></div>
+          
+          {/* Contenido del header responsive */}
+          <div className="relative z-10 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+            <div className="space-y-1 sm:space-y-2">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+                Solicitud #{solicitud.id_solicitud}
+              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 space-y-1 sm:space-y-0">
+                <p className="text-blue-100 text-sm sm:text-base lg:text-lg">
+                  Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md text-xs sm:text-sm">{solicitud.folio || '-'}</span>
+                </p>
+                <p className="text-blue-200 text-sm sm:text-base">
+                  Creada el {formatDateForDisplay(solicitud.fecha_creacion)}
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-start sm:justify-end">
+              <span className={`inline-flex px-3 py-2 sm:px-4 text-sm sm:text-base lg:text-lg font-bold rounded-lg sm:rounded-xl border-2 ${getEstadoColor(solicitud.estado)} backdrop-blur-sm`}> 
+                {solicitud.estado.toUpperCase()}
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="text-right">
-          <span className={`inline-flex px-4 py-2 text-lg font-bold rounded-xl border-2 ${getEstadoColor(solicitud.estado)} backdrop-blur-sm`}> 
-            {solicitud.estado.toUpperCase()}
-          </span>
-        </div>
-      </div>
-    </div>
-  <div className="p-2 sm:p-8 space-y-8">
-        {/* Información Principal con diseño mejorado */}
-  <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-8 mb-8">
-          <Card className="xl:col-span-2 p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+        {/* Contenido principal responsive */}
+        <div className="p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
+          
+          {/* Sección de resumen ejecutivo - Siempre visible y destacado */}
+          <Card className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl rounded-xl sm:rounded-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+              {/* Monto principal */}
+              <div className="lg:col-span-1">
+                <span className="text-xs sm:text-sm uppercase tracking-wider text-blue-100 font-bold block mb-1 sm:mb-2">Monto total</span>
+                <div className="flex items-baseline gap-2 sm:gap-3">
+                  <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">{formatCurrency(solicitud.monto)}</p>
+                  {solicitud.tipo_moneda && (
+                    <span className="text-sm sm:text-base font-bold text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded border border-yellow-400/30">
+                      {solicitud.tipo_moneda.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-16 sm:w-20 lg:w-24"></div>
+              </div>
+              
+              {/* Información clave */}
+              <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+                  <span className="text-xs uppercase tracking-wider text-blue-100 block mb-1">Estado</span>
+                  <p className="font-bold text-white">{solicitud.estado.toUpperCase()}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+                  <span className="text-xs uppercase tracking-wider text-blue-100 block mb-1">Departamento</span>
+                  <p className="font-medium text-white">{solicitud.departamento ? solicitud.departamento.charAt(0).toUpperCase() + solicitud.departamento.slice(1) : '-'}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+                  <span className="text-xs uppercase tracking-wider text-blue-100 block mb-1">Solicitante</span>
+                  <p className="font-medium text-white text-sm">{solicitud.usuario_nombre || `Usuario ${solicitud.id_usuario}`}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+                  <span className="text-xs uppercase tracking-wider text-blue-100 block mb-1">Beneficiario</span>
+                  <p className="font-medium text-white text-sm">{solicitud.nombre_persona || '-'}</p>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Layout principal reorganizado */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            
+            {/* Columna izquierda: Información financiera y concepto */}
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+              
+              {/* Concepto destacado */}
+              <Card className="p-4 sm:p-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200/50 shadow-lg rounded-xl sm:rounded-2xl">
+                <h3 className="text-lg sm:text-xl font-bold text-green-900 mb-3 sm:mb-4 flex items-center">
+                  <div className="p-2 bg-green-100 rounded-lg sm:rounded-xl mr-3">
+                    <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-green-700" />
+                  </div>
+                  Concepto
+                </h3>
+                <div className="bg-white/80 p-3 sm:p-4 rounded-lg border border-green-100">
+                  <p className="text-gray-800 leading-relaxed text-sm sm:text-base font-medium">{solicitud.concepto}</p>
+                </div>
+              </Card>
+
+              {/* Información de pago principal */}
+              <Card className="p-4 sm:p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl sm:rounded-2xl">
+                <h3 className="text-lg sm:text-xl font-bold text-blue-900 mb-4 sm:mb-6 flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-lg sm:rounded-xl mr-3">
+                    <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-blue-700" />
+                  </div>
+                  Información de Pago
+                </h3>
+                
+                {/* Grid de información básica */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Se paga por</span>
+                    <p className="text-blue-900 font-medium text-sm">{solicitud.empresa_a_pagar || '-'}</p>
+                  </div>
+                  
+                  <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                    <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Fecha límite</span>
+                    <p className="text-blue-900 font-medium text-sm">
+                      {solicitud.fecha_limite_pago ? formatDateForDisplay(solicitud.fecha_limite_pago) : '-'}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Información bancaria principal */}
+                <div className="bg-blue-50/40 rounded-lg p-3 sm:p-4 border border-blue-100/80 mb-4">
+                  <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full mr-2"></div>
+                    Datos Bancarios Principales
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="bg-white/80 p-3 rounded border border-blue-100">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de cuenta</span>
+                      <p className="text-blue-900 font-medium text-sm">
+                        {(() => {
+                          const val = solicitud.tipo_cuenta_destino;
+                          if (!val) return '-';
+                          if (val === 'Número de Tarjeta') {
+                            return `Número de Tarjeta${solicitud.tipo_tarjeta ? ' - ' + (solicitud.tipo_tarjeta === 'debito' ? 'Débito' : solicitud.tipo_tarjeta === 'credito' ? 'Crédito' : solicitud.tipo_tarjeta) : ''}`;
+                          }
+                          if (val === 'Tarjeta Institucional' || val === 'Tarjeta Instituciona') {
+                            return 'Tarjeta Institucional';
+                          }
+                          return val.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        })()}
+                      </p>
+                    </div>
+                    
+                    <div className="bg-white/80 p-3 rounded border border-blue-100">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Banco destino</span>
+                      <p className="text-blue-900 font-medium text-sm">
+                        {(() => {
+                          if (!solicitud.banco_destino) return '-';
+                          const banco = bancosMexico.find(b => b.codigo === solicitud.banco_destino);
+                          if (banco) return banco.nombre;
+                          if (solicitud.banco_destino) {
+                            const bancoPorNombre = bancosMexico.find(b =>
+                              b.nombreCorto.toLowerCase() === solicitud.banco_destino!.toLowerCase() ||
+                              b.nombre.toLowerCase() === solicitud.banco_destino!.toLowerCase()
+                            );
+                            if (bancoPorNombre) return bancoPorNombre.nombre;
+                          }
+                          return solicitud.banco_destino.replace(/_/g, ' ');
+                        })()}
+                      </p>
+                    </div>
+                    
+                    <div className="sm:col-span-2 bg-white/80 p-3 rounded border border-blue-100">
+                      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta destino</span>
+                      <p className="font-mono text-blue-900 font-medium text-sm">{solicitud.cuenta_destino ? solicitud.cuenta_destino.replace(/_/g, ' ') : '-'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cuenta adicional si existe */}
+                {!debeOcultarse('cuenta') && !debeOcultarse('banco_cuenta') && (() => {
+                  const cuentaValida = solicitud.cuenta && solicitud.cuenta.trim() !== '';
+                  const bancoValido = solicitud.banco_cuenta && solicitud.banco_cuenta.trim() !== '';
+                  return cuentaValida || bancoValido;
+                })() && (
+                  <div className="bg-purple-50/40 rounded-lg p-3 sm:p-4 border border-purple-100/80 mb-4">
+                    <h4 className="text-sm font-medium text-purple-800 mb-3">Cuenta Adicional</h4>
+                    <div className="bg-white/80 p-3 rounded border border-purple-100">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <p className="font-mono text-purple-900 font-medium text-sm">{solicitud.cuenta || '-'}</p>
+                        {solicitud.banco_cuenta && (
+                          <>
+                            <span className="text-purple-600 hidden sm:inline">|</span>
+                            <span className="text-xs text-purple-600">Banco: {(() => {
+                              const banco = bancosMexico.find(b => b.codigo === solicitud.banco_cuenta);
+                              if (banco) return banco.nombre;
+                              const bancoPorNombre = bancosMexico.find(b =>
+                                b.nombreCorto.toLowerCase() === solicitud.banco_cuenta!.toLowerCase() ||
+                                b.nombre.toLowerCase() === solicitud.banco_cuenta!.toLowerCase()
+                              );
+                              if (bancoPorNombre) return bancoPorNombre.nombre;
+                              return solicitud.banco_cuenta.replace(/_/g, ' ');
+                            })()}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Información de acceso para Tarjeta Institucional */}
+                {(() => {
+                  const esTarjetaInstitucional = solicitud.tipo_cuenta_destino === 'Tarjeta Institucional' || 
+                                               solicitud.tipo_cuenta_destino === 'Tarjeta Instituciona';
+                  const tieneAcceso = solicitud.link_pago || solicitud.usuario_acceso || solicitud.contrasena_acceso;
+                  return esTarjetaInstitucional && tieneAcceso;
+                })() && (
+                  <div className="bg-gradient-to-r from-blue-50/60 to-indigo-50/60 rounded-lg p-3 sm:p-4 border border-blue-200/60 mb-4">
+                    <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mr-2"></div>
+                      Acceso - Tarjeta Institucional
+                    </h4>
+                    
+                    {solicitud.link_pago && (
+                      <div className="bg-white/90 p-3 rounded border border-blue-100 mb-3">
+                        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Link de pago</span>
+                        <p className="text-blue-900 font-medium break-all text-sm">{solicitud.link_pago}</p>
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {solicitud.usuario_acceso && (
+                        <div className="bg-white/90 p-3 rounded border border-blue-100">
+                          <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Usuario</span>
+                          <p className="text-blue-900 font-medium font-mono text-sm">{solicitud.usuario_acceso}</p>
+                        </div>
+                      )}
+                      
+                      {solicitud.contrasena_acceso && (
+                        <div className="bg-white/90 p-3 rounded border border-blue-100">
+                          <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Contraseña</span>
+                          <div className="flex items-center gap-2">
+                            <p className="text-blue-900 font-medium font-mono text-sm flex-1">
+                              {showPassword1 ? solicitud.contrasena_acceso : '••••••••'}
+                            </p>
+                            <button
+                              onClick={() => setShowPassword1(!showPassword1)}
+                              className="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                              title={showPassword1 ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                            >
+                              {showPassword1 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Descripción del tipo de pago */}
+                {solicitud.tipo_pago_descripcion && (
+                  <div className="bg-gray-50/80 p-3 rounded border border-gray-200">
+                    <span className="text-xs uppercase tracking-wider text-gray-700/70 block mb-1 font-medium">Descripción del tipo de pago</span>
+                    <p className="text-gray-900 text-sm">{solicitud.tipo_pago_descripcion}</p>
+                  </div>
+                )}
+              </Card>
+                  </div>
+                </div>
             <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
               <div className="p-2 bg-blue-100 rounded-xl mr-3">
                 <DollarSign className="w-6 h-6 text-blue-700" />
@@ -587,7 +816,7 @@ return (
               )}
             </div>
           )}
-            </Card>
+          
             <Card className="p-6 bg-gradient-to-br from-white to-indigo-50/30 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
               <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
                 <div className="p-2 bg-indigo-100 rounded-xl mr-3">
@@ -991,6 +1220,5 @@ return (
       </div>
     </div>
       </div>
-  </div>
 );
 }
