@@ -41,11 +41,11 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
     return (
       <div key={seccion.id} className="bg-white rounded-2xl border border-blue-400 w-full mb-8 shadow-lg">
         <div className="bg-blue-600 rounded-t-2xl px-4 sm:px-8 py-4">
-          <h3 className="text-xl font-bold text-black">
+          <h3 className="text-xl font-bold text-white">
             {seccion.titulo}
           </h3>
           {seccion.descripcion && (
-            <p className="text-gray-700 text-base mt-1">
+            <p className="text-white/90 text-base mt-1">
               {seccion.descripcion}
             </p>
           )}
@@ -76,10 +76,10 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
             <span className="text-xl text-white">{plantilla.icono || '📋'}</span>
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-black mb-2">
+            <h2 className="text-xl font-bold text-white mb-2">
               {plantilla.nombre}
             </h2>
-            <p className="text-gray-800 mb-3">
+            <p className="text-white/90 mb-3">
               {plantilla.descripcion}
             </p>
             <div className="flex flex-wrap gap-2">
