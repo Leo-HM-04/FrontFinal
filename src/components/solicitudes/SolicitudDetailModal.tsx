@@ -16,6 +16,7 @@ import {
   obtenerDatosPlantilla,
   obtenerEtiquetasPlantilla 
 } from '@/utils/plantillasLabels';
+import { bancosMexico } from '@/data/bancos';
 import '@/styles/modal.css';
 
 interface SolicitudDetailModalProps {
@@ -277,11 +278,29 @@ return (
                 </p>
               </div>
                
+
               <div>
                 <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
                   Banco destino
                 </span>
-                <p className="text-blue-900 font-medium">{solicitud.banco_destino ? solicitud.banco_destino.replace(/_/g, ' ') : '-'}</p>
+                <p className="text-blue-900 font-medium">
+                  {(() => {
+                    if (!solicitud.banco_destino) return '-';
+                    // Buscar por código
+                    const banco = bancosMexico.find(b => b.codigo === solicitud.banco_destino);
+                    if (banco) return banco.nombre;
+                    // Si no es código, buscar por nombre corto o nombre
+                    if (solicitud.banco_destino) {
+                      const bancoPorNombre = bancosMexico.find(b =>
+                        b.nombreCorto.toLowerCase() === solicitud.banco_destino!.toLowerCase() ||
+                        b.nombre.toLowerCase() === solicitud.banco_destino!.toLowerCase()
+                      );
+                      if (bancoPorNombre) return bancoPorNombre.nombre;
+                    }
+                    // Si no se encuentra, mostrar el valor formateado
+                    return solicitud.banco_destino.replace(/_/g, ' ');
+                  })()}
+                </p>
               </div>
               
                <div>
