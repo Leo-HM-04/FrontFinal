@@ -28,14 +28,17 @@ export const MAPEO_PLANTILLAS: Record<string, MapeoPlantilla> = {
       'fecha_limite_pago': 'Fecha Límite de Pago',
       
       // Información general
-      'empresa_a_pagar': 'Empresa/Entidad',
-      'nombre_persona': 'Beneficiario',
+      'empresa_a_pagar': 'Se paga por',
+      'nombre_persona': 'Nombre del Beneficiario',
       'concepto': 'Concepto del Pago',
       'monto': 'Monto Total',
       
       // Campos adicionales que podrían venir de plantilla_datos
       'asunto': 'Asunto',
+      'empresa': 'Se paga por',  // Campo de la plantilla que debe mostrarse como "Se paga por"
       'cliente': 'Cliente',
+      'linea_captura': 'Línea de Captura',
+      'fecha_limite': 'Fecha Límite',
       'numero_empleado': 'Número de Empleado',
       'dias_pagar': 'Días a Pagar',
       'imss': 'IMSS',
@@ -52,13 +55,16 @@ export const MAPEO_PLANTILLAS: Record<string, MapeoPlantilla> = {
       'cuenta_destino': 'Número de Cuenta',
       'fecha_limite_pago': 'Fecha Límite de Pago',
       
-      'empresa_a_pagar': 'Empresa/Entidad',
-      'nombre_persona': 'Beneficiario',
+      'empresa_a_pagar': 'Se paga por',
+      'nombre_persona': 'Nombre del Beneficiario',
       'concepto': 'Concepto del Pago',
       'monto': 'Monto Total',
       
       'asunto': 'Asunto',
+      'empresa': 'Se paga por',  // Campo de la plantilla que debe mostrarse como "Se paga por"
       'cliente': 'Cliente',
+      'linea_captura': 'Línea de Captura',
+      'fecha_limite': 'Fecha Límite',
       'numero_empleado': 'Número de Empleado',
       'dias_pagar': 'Días a Pagar',
       'imss': 'IMSS',

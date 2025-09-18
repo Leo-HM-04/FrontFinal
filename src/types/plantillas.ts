@@ -1,4 +1,5 @@
 // Tipos para el sistema de plantillas de solicitudes
+import { LucideIcon } from 'lucide-react';
 
 export type TipoCampo = 
   | 'texto'
@@ -89,7 +90,7 @@ export type PlantillaSolicitud = {
   descripcion: string;
   version: string;
   activa: boolean;
-  icono?: string;
+  icono?: string | LucideIcon;
   color?: string;
   categoria?: string;
   secciones: SeccionPlantilla[];

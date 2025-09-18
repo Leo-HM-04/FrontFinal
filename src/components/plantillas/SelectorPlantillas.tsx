@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PlantillaSolicitud } from '@/types/plantillas';
+import { FileText } from 'lucide-react';
 
 interface SelectorPlantillasProps {
   plantillas: PlantillaSolicitud[];
@@ -33,7 +34,17 @@ export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <span className="text-base sm:text-lg">
-                {plantillaSeleccionada ? (plantillaSeleccionada.icono || '📋') : '📋'}
+                {plantillaSeleccionada ? (
+                  typeof plantillaSeleccionada.icono === 'string' ? (
+                    plantillaSeleccionada.icono
+                  ) : plantillaSeleccionada.icono ? (
+                    <plantillaSeleccionada.icono className="w-4 h-4 sm:w-5 sm:h-5" />
+                  ) : (
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                  )
+                ) : (
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                )}
               </span>
             </div>
             <div>
@@ -132,7 +143,13 @@ export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
                 <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded flex items-center justify-center ${
                   plantilla.color === 'blue' ? 'bg-blue-100' : 'bg-gray-100'
                 }`}>
-                  <span className="text-sm sm:text-base">{plantilla.icono || '📋'}</span>
+                  {typeof plantilla.icono === 'string' ? (
+                    <span className="text-sm sm:text-base">{plantilla.icono}</span>
+                  ) : plantilla.icono ? (
+                    <plantilla.icono className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
+                  ) : (
+                    <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight truncate">

@@ -1,4 +1,13 @@
 import { PlantillaSolicitud } from '@/types/plantillas';
+import { 
+  CreditCard, 
+  Building, 
+  DollarSign, 
+  FileText, 
+  ArrowLeftRight, 
+  Banknote,
+  Shield
+} from 'lucide-react';
 
 // Plantilla para SOLICITUD DE PAGO TARJETAS N09 Y TOKA
 export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
@@ -7,7 +16,7 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
   descripcion: 'Plantilla especializada para pagos a proveedores de tarjetas N09 y fondeo de tarjeta AVIT',
   version: '1.0',
   activa: true,
-  icono: '💳',
+  icono: CreditCard,
   color: 'blue',
   categoria: 'Pagos Corporativos',
   secciones: [
@@ -48,7 +57,7 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
           nombre: 'cliente',
           tipo: 'texto',
           etiqueta: 'Cliente',
-          placeholder: 'Ej. ROCALLOSA',
+          placeholder: 'Ingrese el nombre del cliente (ej. ROCALLOSA)',
           ayuda: 'Nombre del cliente para el cual se realiza el pago',
           valorPorDefecto: '',
           validaciones: {
@@ -65,8 +74,8 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
           id: 'beneficiario',
           nombre: 'beneficiario',
           tipo: 'texto',
-          etiqueta: 'Beneficiario',
-          placeholder: 'Ej. COMERCIALIZADORA DEDAI SA DE CV',
+          etiqueta: 'Se paga por',
+          placeholder: 'Ingrese el nombre de la empresa o persona beneficiaria del pago',
           ayuda: 'Nombre completo del beneficiario del pago. Para el pago de las tarjetas N09 y TOKA se realiza pago al proveedor de las tarjetas, quien es quien realiza el fondeo a la tarjeta.',
           valorPorDefecto: '',
           validaciones: {
@@ -121,7 +130,7 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
           nombre: 'numero_cuenta',
           tipo: 'cuenta_clabe',
           etiqueta: 'CUENTA/CLABE',
-          placeholder: '646014342400009000 ó 1234567890',
+          placeholder: 'Ingrese CLABE (18 dígitos) o número de cuenta (10 dígitos)',
           ayuda: 'Número de la cuenta destino a realizar el depósito. CLABE: 16 o 18 dígitos. Cuenta: 8 a 10 dígitos.',
           valorPorDefecto: '',
           validaciones: {
@@ -175,8 +184,8 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
           id: 'monto',
           nombre: 'monto',
           tipo: 'moneda',
-          etiqueta: 'Monto',
-          placeholder: '$56,250.36',
+          etiqueta: 'Monto Total',
+          placeholder: 'Ingrese el monto total del pago (ej. $56,250.36)',
           ayuda: 'Monto a pagar al proveedor',
           valorPorDefecto: '',
           validaciones: {
@@ -259,7 +268,7 @@ export const plantillaTarjetasTukash: PlantillaSolicitud = {
   descripcion: 'Plantilla especializada para pagos y fondeo de tarjetas TUKASH',
   version: '1.0',
   activa: true,
-  icono: '🎴',
+  icono: CreditCard,
   color: 'green',
   categoria: 'Pagos Corporativos',
   secciones: [
@@ -295,7 +304,7 @@ export const plantillaTarjetasTukash: PlantillaSolicitud = {
           nombre: 'cliente',
           tipo: 'texto',
           etiqueta: 'Cliente',
-          placeholder: 'Ej. ROCALLOSA',
+          placeholder: 'Ingrese el nombre del cliente correspondiente',
           ayuda: 'Nombre del cliente correspondiente',
           valorPorDefecto: '',
           validaciones: {
@@ -311,8 +320,8 @@ export const plantillaTarjetasTukash: PlantillaSolicitud = {
           id: 'beneficiario_tarjeta',
           nombre: 'beneficiario_tarjeta',
           tipo: 'texto',
-          etiqueta: 'Beneficiario Tarjeta Tukash',
-          placeholder: 'Ej. Juan Domínguez de la Cruz',
+          etiqueta: 'Se paga por',
+          placeholder: 'Ingrese el nombre completo de la persona beneficiaria',
           ayuda: 'Nombre completo del beneficiario de la tarjeta',
           valorPorDefecto: '',
           validaciones: {
@@ -335,8 +344,8 @@ export const plantillaTarjetasTukash: PlantillaSolicitud = {
           id: 'numero_tarjeta',
           nombre: 'numero_tarjeta',
           tipo: 'texto',
-          etiqueta: 'Nº de Tarjeta',
-          placeholder: '1234567890123456',
+          etiqueta: 'Número de Tarjeta',
+          placeholder: 'Ingrese los 16 dígitos de la tarjeta',
           ayuda: 'Número de tarjeta TUKASH (máximo 16 dígitos)',
           valorPorDefecto: '',
           validaciones: {
@@ -361,8 +370,8 @@ export const plantillaTarjetasTukash: PlantillaSolicitud = {
           id: 'monto_total_cliente',
           nombre: 'monto_total_cliente',
           tipo: 'moneda',
-          etiqueta: 'Monto Total Cliente',
-          placeholder: 'Ej. 152.90',
+          etiqueta: 'Monto Total del Cliente',
+          placeholder: 'Ingrese la cantidad a fondear al cliente',
           ayuda: 'Cantidad a fondear al cliente',
           valorPorDefecto: '',
           validaciones: {
@@ -377,8 +386,8 @@ export const plantillaTarjetasTukash: PlantillaSolicitud = {
           id: 'monto_total_tukash',
           nombre: 'monto_total_tukash',
           tipo: 'moneda',
-          etiqueta: 'Monto Total Tukash',
-          placeholder: 'Ej. 153.10',
+          etiqueta: 'Monto Total de Tukash',
+          placeholder: 'Ingrese la cantidad a depositar en TUKASH',
           ayuda: 'Cantidad a depositar en la cuenta TUKASH',
           valorPorDefecto: '',
           validaciones: {
@@ -449,7 +458,7 @@ export const plantillaPagoSuaInternas: PlantillaSolicitud = {
           nombre: 'asunto',
           tipo: 'texto',
           etiqueta: 'Asunto',
-          placeholder: 'PAGO SUA INTERNAS JULIO 2025',
+          placeholder: 'Ingrese el asunto del pago (ej. PAGO SUA INTERNAS JULIO 2025)',
           ayuda: 'Ej. PAGO SUA INTERNAS JULIO 2025',
           valorPorDefecto: '',
           validaciones: {
@@ -466,8 +475,8 @@ export const plantillaPagoSuaInternas: PlantillaSolicitud = {
           id: 'empresa',
           nombre: 'empresa',
           tipo: 'texto',
-          etiqueta: 'Empresa',
-          placeholder: 'MINBERLOC',
+          etiqueta: 'Se paga por',
+          placeholder: 'Ingrese el nombre de la empresa (ej. MINBERLOC)',
           ayuda: 'Identifica a la empresa a la que corresponde el pago del impuesto. Ej. MINBERLOC',
           valorPorDefecto: '',
           validaciones: {
@@ -484,8 +493,8 @@ export const plantillaPagoSuaInternas: PlantillaSolicitud = {
           id: 'monto',
           nombre: 'monto',
           tipo: 'moneda',
-          etiqueta: 'Monto',
-          placeholder: '$56,000.00',
+          etiqueta: 'Monto Total',
+          placeholder: 'Ingrese el monto total conforme a SIPARE',
           ayuda: 'El monto a pagar señalado en SIPARE se encuentra en los documentos contenidos en el archivo ZIP recibido',
           valorPorDefecto: '',
           validaciones: {
@@ -527,7 +536,7 @@ export const plantillaPagoSuaInternas: PlantillaSolicitud = {
           nombre: 'linea_captura',
           tipo: 'texto',
           etiqueta: 'Línea de Captura',
-          placeholder: 'C2RQZ3MN-4C97-2-0BCT-6186-000SRS4-0000000-0000000-0000000-I9OO',
+          placeholder: 'Ingrese la línea de captura proporcionada por el IMSS',
           ayuda: 'Corresponde a la línea de captura proporcionada por el IMSS para realizar el pago del impuesto. Este código se incluirá automáticamente en el concepto del pago.',
           valorPorDefecto: '',
           validaciones: {
@@ -595,7 +604,7 @@ export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
   descripcion: 'Plantilla especializada para pagos de impuestos SUA FRENSHETSI relacionados con el IMSS enviados por el Departamento de Seguridad Social',
   version: '1.0',
   activa: true,
-  icono: '🏢',
+  icono: Building,
   color: 'indigo',
   categoria: 'Pagos Fiscales',
   secciones: [
@@ -609,7 +618,7 @@ export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
           nombre: 'asunto',
           tipo: 'texto',
           etiqueta: 'Asunto',
-          placeholder: 'PAGO SUA FRENSHETSI JULIO 2025',
+          placeholder: 'Ingrese el asunto del pago (ej. PAGO SUA FRENSHETSI JULIO 2025)',
           ayuda: 'Ej. PAGO SUA FRENSHETSI JULIO 2025',
           valorPorDefecto: '',
           validaciones: {
@@ -626,8 +635,8 @@ export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
           id: 'empresa',
           nombre: 'empresa',
           tipo: 'texto',
-          etiqueta: 'Empresa',
-          placeholder: 'FRENSHETSI',
+          etiqueta: 'Se paga por',
+          placeholder: 'Empresa fija: FRENSHETSI',
           ayuda: 'Empresa fija para pagos SUA FRENSHETSI',
           valorPorDefecto: 'FRENSHETSI',
           validaciones: {
@@ -644,7 +653,7 @@ export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
           nombre: 'cliente',
           tipo: 'texto',
           etiqueta: 'Cliente',
-          placeholder: 'ROCALLOSA',
+          placeholder: 'Ingrese el nombre del cliente (ej. ROCALLOSA)',
           ayuda: 'Identifica al cliente correspondiente. Ej. ROCALLOSA',
           valorPorDefecto: '',
           validaciones: {
@@ -661,8 +670,8 @@ export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
           id: 'monto',
           nombre: 'monto',
           tipo: 'moneda',
-          etiqueta: 'Monto',
-          placeholder: '$56,000.00',
+          etiqueta: 'Monto Total',
+          placeholder: 'Ingrese el monto total conforme a SIPARE',
           ayuda: 'El monto a pagar señalado en SIPARE se encuentra en los documentos contenidos en el archivo ZIP recibido',
           valorPorDefecto: '',
           validaciones: {
@@ -704,7 +713,7 @@ export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
           nombre: 'linea_captura',
           tipo: 'texto',
           etiqueta: 'Línea de Captura',
-          placeholder: 'C2RQZ3MN-4C97-2-0BCT-6186-000SRS4-0000000-0000000-0000000-I9OO',
+          placeholder: 'Ingrese la línea de captura proporcionada por el IMSS',
           ayuda: 'Corresponde a la línea de captura proporcionada por el IMSS para realizar el pago del impuesto. Este código se incluirá automáticamente en el concepto del pago.',
           valorPorDefecto: '',
           validaciones: {
@@ -803,7 +812,7 @@ export const plantillaPagoComisiones: PlantillaSolicitud = {
           nombre: 'cliente_comision',
           tipo: 'texto',
           etiqueta: 'Cliente por el cual se genera la comisión',
-          placeholder: 'Nombre del cliente',
+          placeholder: 'Ingrese el nombre del cliente que genera la comisión',
           ayuda: 'Cliente por el cual se genera la comisión',
           valorPorDefecto: '',
           validaciones: {
@@ -820,7 +829,7 @@ export const plantillaPagoComisiones: PlantillaSolicitud = {
           nombre: 'asunto',
           tipo: 'textarea',
           etiqueta: 'Asunto',
-          placeholder: 'Describe el asunto de la comisión',
+          placeholder: 'Ingrese una descripción detallada del asunto de la comisión',
           ayuda: 'Ej. Solicitud de Pago de Comisión Juan Dominguez Banch Services | Movimiento 02 de septiembre 2025',
           valorPorDefecto: '',
           validaciones: {
@@ -837,8 +846,8 @@ export const plantillaPagoComisiones: PlantillaSolicitud = {
           id: 'beneficiario',
           nombre: 'beneficiario',
           tipo: 'texto',
-          etiqueta: 'Beneficiario',
-          placeholder: 'Nombre del beneficiario',
+          etiqueta: 'Se paga por',
+          placeholder: 'Ingrese el nombre completo de quien recibe el pago',
           ayuda: 'Ej. JUAN DOMINGUEZ',
           valorPorDefecto: '',
           validaciones: {
@@ -889,7 +898,7 @@ export const plantillaPagoComisiones: PlantillaSolicitud = {
           id: 'monto',
           nombre: 'monto',
           tipo: 'numero',
-          etiqueta: 'Monto',
+          etiqueta: 'Monto Total',
           placeholder: 'Ej. 56,000.00',
           ayuda: 'Monto a pagar a la cuenta',
           valorPorDefecto: '',
@@ -947,7 +956,7 @@ export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
   version: '1.0.0',
   activa: true,
   categoria: 'pagos',
-  icono: '🛡️',
+  icono: Shield,
   secciones: [
     {
       id: 'datos-generales',
@@ -1052,7 +1061,7 @@ export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
           id: 'monto',
           nombre: 'monto',
           tipo: 'numero',
-          etiqueta: 'Monto',
+          etiqueta: 'Monto Total',
           placeholder: 'Ej. 56,000.00',
           ayuda: 'Monto a pagar al proveedor',
           valorPorDefecto: '',
@@ -1110,7 +1119,7 @@ export const plantillaRegresosTransferencia: PlantillaSolicitud = {
   version: '1.0.0',
   activa: true,
   categoria: 'regresos',
-  icono: '↩️',
+  icono: ArrowLeftRight,
   secciones: [
     {
       id: 'datos-generales',
@@ -1216,7 +1225,7 @@ export const plantillaRegresosEfectivo: PlantillaSolicitud = {
   version: '1.0.0',
   activa: true,
   categoria: 'regresos',
-  icono: '💵',
+  icono: Banknote,
   secciones: [
     {
       id: 'datos-generales',
@@ -1304,7 +1313,7 @@ export const plantillaRegresosEfectivo: PlantillaSolicitud = {
           id: 'monto_efectivo',
           nombre: 'monto_efectivo',
           tipo: 'numero',
-          etiqueta: 'Monto Efectivo',
+          etiqueta: 'Monto Total en Efectivo',
           placeholder: 'Ej. 56,000.00',
           ayuda: 'Monto que tesorería debe entregar en efectivo',
           valorPorDefecto: '',

@@ -1,6 +1,7 @@
 import React from 'react';
 import { PlantillaSolicitud, SeccionPlantilla } from '@/types/plantillas';
 import { CampoFormulario } from './CampoFormulario';
+import { FileText } from 'lucide-react';
 
 interface FormularioPlantillaProps {
   plantilla: PlantillaSolicitud;
@@ -73,7 +74,13 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
       <div className="bg-blue-600 rounded-2xl border border-blue-700 p-4 sm:p-8 mb-8 w-full shadow-lg">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-xl text-white">{plantilla.icono || '📋'}</span>
+            {typeof plantilla.icono === 'string' ? (
+              <span className="text-xl text-white">{plantilla.icono}</span>
+            ) : plantilla.icono ? (
+              <plantilla.icono className="w-6 h-6 text-white" />
+            ) : (
+              <FileText className="w-6 h-6 text-white" />
+            )}
           </div>
           <div className="flex-1">
             <h2 className="text-xl font-bold text-white mb-2">
