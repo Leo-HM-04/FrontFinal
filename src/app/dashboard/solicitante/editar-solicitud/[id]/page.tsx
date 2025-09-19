@@ -13,7 +13,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
-import Image from 'next/image';
+import Image from 'next/image'; 
 import { formatDateForAPI } from '@/utils/dateUtils';
 import { detectarPlantillaId, obtenerDatosPlantilla } from '@/utils/plantillasLabels';
 import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
