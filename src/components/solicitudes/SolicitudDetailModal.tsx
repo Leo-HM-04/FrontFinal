@@ -745,26 +745,20 @@ export function SolicitudDetailModal({
                 )}
 
                 {/* Datos específicos de plantilla */}
-                {plantillaData.mapeoPlantilla && Object.keys(plantillaData.datosPlantilla).length > 0 && (
+                {(plantillaData.plantillaId && plantillaData.datosPlantilla && Object.keys(plantillaData.datosPlantilla).length > 0) ? (
                   <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
                     <h2 className="text-lg sm:text-xl font-bold text-purple-900 mb-4 flex items-center">
                       <div className="p-2 bg-purple-100 rounded-lg sm:rounded-xl mr-3">
                         <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-700" />
                       </div>
-                      {plantillaData.mapeoPlantilla.nombre} - Información Específica
+                      {plantillaData.mapeoPlantilla?.nombre || 'Plantilla personalizada'} - Información Específica
                     </h2>
-                    
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       {Object.entries(plantillaData.datosPlantilla).map(([clave, valor]) => {
-                        const camposYaMostrados = ['concepto', 'monto', 'empresa_a_pagar', 'nombre_persona'];
-                        if (camposYaMostrados.includes(clave)) return null;
-
-                        const etiqueta = obtenerEtiqueta(clave);
-
+                        // Mostrar todos los campos de plantilla, incluso si no están en el mapeo
+                        const etiqueta = obtenerEtiqueta(clave) || clave.replace(/_/g, ' ').toUpperCase();
                         let valorFormateado = valor;
-                        // Mejorar renderizado según tipo de valor
                         if (Array.isArray(valor)) {
-                          // Si es array de archivos
                           if (clave.includes('archivo')) {
                             return (
                               <div key={clave} className="sm:col-span-2">
@@ -777,24 +771,11 @@ export function SolicitudDetailModal({
                               </div>
                             );
                           }
-                          // Si es array de elementos adicionales
-                          if (clave === 'elementos_adicionales') {
-                            valorFormateado = valor.map(elemento => {
-                              if (elemento === 'tarjeta_banorte') return '1 TARJETA BANORTE';
-                              if (elemento === 'token_banorte') return '1 TOKEN BANORTE';
-                              return elemento;
-                            }).join(', ');
-                          } else {
-                            valorFormateado = valor.join(', ');
-                          }
+                          valorFormateado = valor.join(', ');
                         } else if (typeof valor === 'boolean') {
                           valorFormateado = valor ? 'Sí' : 'No';
                         } else if (clave.includes('fecha') && valor) {
-                          try {
-                            valorFormateado = formatDateForDisplay(String(valor));
-                          } catch {
-                            valorFormateado = String(valor);
-                          }
+                          try { valorFormateado = formatDateForDisplay(String(valor)); } catch { valorFormateado = String(valor); }
                         } else if (clave.includes('monto') && valor) {
                           valorFormateado = `${parseFloat(String(valor)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}`;
                         } else if (clave.includes('porcentaje') && valor) {
@@ -802,9 +783,7 @@ export function SolicitudDetailModal({
                         } else {
                           valorFormateado = String(valor);
                         }
-
                         if (!valor || valor === '' || valor === null || valor === undefined) return null;
-
                         return (
                           <InfoField
                             key={clave}
@@ -816,6 +795,20 @@ export function SolicitudDetailModal({
                       })}
                     </div>
                   </Card>
+                ) : (
+                  solicitud?.tipo_pago_descripcion?.startsWith('Plantilla:') && (
+                    <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
+                      <h2 className="text-lg sm:text-xl font-bold text-purple-900 mb-4 flex items-center">
+                        <div className="p-2 bg-purple-100 rounded-lg sm:rounded-xl mr-3">
+                          <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-700" />
+                        </div>
+                        Información de Plantilla
+                      </h2>
+                      <div className="text-purple-700 text-sm bg-purple-50/80 p-3 rounded-lg border border-purple-200">
+                        No se detectaron datos específicos de la plantilla para esta solicitud.
+                      </div>
+                    </Card>
+                  )
                 )}
               </div>
             </div>
