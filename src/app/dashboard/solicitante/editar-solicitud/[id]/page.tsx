@@ -225,6 +225,9 @@ export default function EditarSolicitudPage() {
         // @ts-expect-error - Método puede tener diferentes nombres según implementación
         const solicitudData = await (SolicitudesService.getById?.(solicitudId) ?? (SolicitudesService as Record<string, unknown>).get?.(solicitudId));
         if (!solicitudData) throw new Error('No se encontró la solicitud.');
+        
+        console.log('📥 Datos recibidos del servicio:', solicitudData);
+        console.log('📥 plantilla_datos del servicio:', solicitudData.plantilla_datos);
 
         // Usar directamente la respuesta
         const s = solicitudData as unknown as Record<string, string | number | boolean | null>;
