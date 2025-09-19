@@ -269,6 +269,7 @@ export default function EditarSolicitudPage() {
         // 🔍 DETECTAR Y CONFIGURAR PLANTILLA
         console.log('🔍 Iniciando detección de plantilla...');
         console.log('📊 tipo_pago_descripcion:', s.tipo_pago_descripcion);
+        console.log('📊 plantilla_datos en solicitud:', s.plantilla_datos);
         console.log('📊 Datos completos s:', s);
         
         const plantillaId = detectarPlantillaId(s as unknown as Solicitud);
@@ -292,13 +293,20 @@ export default function EditarSolicitudPage() {
             // Prellenar datos de la plantilla desde plantilla_datos
             const datosPlantilla = obtenerDatosPlantilla(s as unknown as Solicitud);
             console.log('📋 Datos de plantilla a prellenar:', datosPlantilla);
+            console.log('📋 Número de campos a prellenar:', Object.keys(datosPlantilla).length);
             
             // Actualizar campos de la plantilla con los datos existentes
             Object.entries(datosPlantilla).forEach(([campo, valor]) => {
+              console.log(`🔧 Intentando actualizar campo "${campo}" con valor:`, valor);
               if (valor !== null && valor !== undefined && valor !== '') {
+                console.log(`✅ Actualizando campo "${campo}"`);
                 actualizarCampo(campo, valor);
+              } else {
+                console.log(`⚠️ Saltando campo "${campo}" - valor vacío/nulo`);
               }
             });
+            
+            console.log('🎯 Prellenado completado');
           } else {
             console.log('❌ No se encontró la plantilla en disponibles');
           }
