@@ -810,6 +810,17 @@ export function SolicitudDetailModal({
                     </Card>
                   )
                 )}
+
+                {/* Diagnóstico de datos de plantilla */}
+                <Card className="p-3 mb-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                  <h3 className="text-sm font-bold text-yellow-800 mb-2">Diagnóstico de Plantilla</h3>
+                  <div className="text-xs text-yellow-900">
+                    <div><strong>plantillaId:</strong> {String(plantillaData.plantillaId)}</div>
+                    <div><strong>mapeoPlantilla:</strong> {plantillaData.mapeoPlantilla ? JSON.stringify(plantillaData.mapeoPlantilla) : 'null'}</div>
+                    <div><strong>datosPlantilla:</strong> {plantillaData.datosPlantilla ? JSON.stringify(plantillaData.datosPlantilla) : 'null'}</div>
+                    <div><strong>tipo_pago_descripcion:</strong> {String(solicitud?.tipo_pago_descripcion)}</div>
+                  </div>
+                </Card>
               </div>
             </div>
 
