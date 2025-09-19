@@ -758,11 +758,26 @@ export function SolicitudDetailModal({
                       {Object.entries(plantillaData.datosPlantilla).map(([clave, valor]) => {
                         const camposYaMostrados = ['concepto', 'monto', 'empresa_a_pagar', 'nombre_persona'];
                         if (camposYaMostrados.includes(clave)) return null;
-                        
+
                         const etiqueta = obtenerEtiqueta(clave);
-                        
+
                         let valorFormateado = valor;
+                        // Mejorar renderizado según tipo de valor
                         if (Array.isArray(valor)) {
+                          // Si es array de archivos
+                          if (clave.includes('archivo')) {
+                            return (
+                              <div key={clave} className="sm:col-span-2">
+                                <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">{etiqueta}</span>
+                                <div className="flex flex-wrap gap-2">
+                                  {valor.map((file, idx) => (
+                                    <span key={idx} className="bg-purple-100 text-purple-900 px-2 py-1 rounded text-xs border border-purple-200">{typeof file === 'string' ? file : (file?.name || 'Archivo')}</span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+                          // Si es array de elementos adicionales
                           if (clave === 'elementos_adicionales') {
                             valorFormateado = valor.map(elemento => {
                               if (elemento === 'tarjeta_banorte') return '1 TARJETA BANORTE';
@@ -781,7 +796,9 @@ export function SolicitudDetailModal({
                             valorFormateado = String(valor);
                           }
                         } else if (clave.includes('monto') && valor) {
-                          valorFormateado = `${parseFloat(String(valor)).toLocaleString('es-MX')}`;
+                          valorFormateado = `${parseFloat(String(valor)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}`;
+                        } else if (clave.includes('porcentaje') && valor) {
+                          valorFormateado = `${valor}%`;
                         } else {
                           valorFormateado = String(valor);
                         }
