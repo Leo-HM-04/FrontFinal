@@ -360,12 +360,12 @@ export default function EditarSolicitudPage() {
               // 3. Obtener y cargar archivos de la solicitud
               console.log('📎 Cargando archivos de la solicitud...');
               SolicitudArchivosService.obtenerArchivos(solicitudId)
-                .then((archivos: any) => {
+                .then((archivos: unknown) => {
                   console.log('📎 Archivos encontrados:', archivos);
                   
-                  if (archivos && archivos.length > 0) {
+                  if (Array.isArray(archivos) && archivos.length > 0) {
                     // Transformar archivos al formato esperado por la plantilla
-                    const archivosParaPlantilla = archivos.map((archivo: any) => ({
+                    const archivosParaPlantilla = archivos.map((archivo: Record<string, unknown>) => ({
                       id: archivo.id_archivo,
                       nombre: archivo.nombre_archivo,
                       url: archivo.url_archivo,
@@ -377,7 +377,7 @@ export default function EditarSolicitudPage() {
                     actualizarCampo('archivos_adjuntos', archivosParaPlantilla);
                   }
                 })
-                .catch((error: any) => {
+                .catch((error: Error) => {
                   console.error('❌ Error cargando archivos:', error);
                 });
               

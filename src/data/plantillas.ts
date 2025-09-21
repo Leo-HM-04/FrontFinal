@@ -2,8 +2,6 @@ import { PlantillaSolicitud } from '@/types/plantillas';
 import { 
   CreditCard, 
   Building, 
-  DollarSign, 
-  FileText, 
   ArrowLeftRight, 
   Banknote,
   Shield

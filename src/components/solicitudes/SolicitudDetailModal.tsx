@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
-import { X, ExternalLink, DollarSign, Building, FileText, FileCheck, Eye, EyeOff } from 'lucide-react';
+import { X, ExternalLink, DollarSign, FileText, FileCheck, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Solicitud, Comprobante } from '@/types';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 import { SolicitudesService } from '@/services/solicitudes.service';
-import { formatDateForDisplay, formatShortDate } from '@/utils/dateUtils';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 import { 
   detectarPlantillaId, 
   obtenerEtiquetaCampo, 
