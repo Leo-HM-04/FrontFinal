@@ -298,18 +298,91 @@ export default function EditarSolicitudPage() {
             console.log('📋 Datos de plantilla a prellenar:', datosPlantilla);
             console.log('📋 Número de campos a prellenar:', Object.keys(datosPlantilla).length);
             
-            // Actualizar campos de la plantilla con los datos existentes
-            Object.entries(datosPlantilla).forEach(([campo, valor]) => {
-              console.log(`🔧 Intentando actualizar campo "${campo}" con valor:`, valor);
-              if (valor !== null && valor !== undefined && valor !== '') {
-                console.log(`✅ Actualizando campo "${campo}"`);
-                actualizarCampo(campo, valor);
-              } else {
-                console.log(`⚠️ Saltando campo "${campo}" - valor vacío/nulo`);
+            // Usar setTimeout para asegurar que el componente esté montado
+            setTimeout(() => {
+              console.log('⏰ Iniciando prellenado con delay...');
+              
+              // 1. Actualizar campos de la plantilla desde plantilla_datos
+              Object.entries(datosPlantilla).forEach(([campo, valor]) => {
+                console.log(`🔧 Intentando actualizar campo "${campo}" con valor:`, valor);
+                if (valor !== null && valor !== undefined && valor !== '') {
+                  console.log(`✅ Actualizando campo "${campo}"`);
+                  actualizarCampo(campo, valor);
+                } else {
+                  console.log(`⚠️ Saltando campo "${campo}" - valor vacío/nulo`);
+                }
+              });
+              
+              // 2. Obtener datos de métodos de pago de la solicitud original
+              console.log('💳 Obteniendo métodos de pago de la solicitud original...');
+              const metodosPago = [];
+              
+              // Método de pago principal
+              if (s.cuenta_destino || s.banco_destino) {
+                const metodoPrincipal = {
+                  id: 1,
+                  tipo: s.tipo_cuenta_destino || 'CLABE',
+                  cuenta: s.cuenta_destino || '',
+                  banco: s.banco_destino || '',
+                  tarjeta: s.tipo_tarjeta || '',
+                  titular: s.nombre_persona || '',
+                  linkPago: s.link_pago || '',
+                  usuario: s.usuario_acceso || '',
+                  contrasena: s.contrasena_acceso || ''
+                };
+                metodosPago.push(metodoPrincipal);
+                console.log('💳 Método principal encontrado:', metodoPrincipal);
               }
-            });
-            
-            console.log('🎯 Prellenado completado');
+              
+              // Método de pago secundario
+              if (s.tiene_segunda_forma_pago && (s.cuenta_destino_2 || s.banco_destino_2)) {
+                const metodoSecundario = {
+                  id: 2,
+                  tipo: s.tipo_cuenta_destino_2 || 'CLABE',
+                  cuenta: s.cuenta_destino_2 || '',
+                  banco: s.banco_destino_2 || '',
+                  tarjeta: s.tipo_tarjeta_2 || '',
+                  titular: s.nombre_persona || '',
+                  linkPago: s.link_pago_2 || '',
+                  usuario: s.usuario_acceso_2 || '',
+                  contrasena: s.contrasena_acceso_2 || ''
+                };
+                metodosPago.push(metodoSecundario);
+                console.log('💳 Método secundario encontrado:', metodoSecundario);
+              }
+              
+              // Actualizar métodos de pago en la plantilla
+              if (metodosPago.length > 0) {
+                console.log(`💳 Actualizando ${metodosPago.length} métodos de pago`);
+                actualizarCampo('metodos_pago', metodosPago);
+              }
+              
+              // 3. Obtener y cargar archivos de la solicitud
+              console.log('📎 Cargando archivos de la solicitud...');
+              SolicitudArchivosService.obtenerArchivos(solicitudId)
+                .then((archivos: any) => {
+                  console.log('📎 Archivos encontrados:', archivos);
+                  
+                  if (archivos && archivos.length > 0) {
+                    // Transformar archivos al formato esperado por la plantilla
+                    const archivosParaPlantilla = archivos.map((archivo: any) => ({
+                      id: archivo.id_archivo,
+                      nombre: archivo.nombre_archivo,
+                      url: archivo.url_archivo,
+                      tipo: archivo.tipo_archivo,
+                      tamano: archivo.tamano_archivo
+                    }));
+                    
+                    console.log('📎 Actualizando archivos en plantilla:', archivosParaPlantilla);
+                    actualizarCampo('archivos_adjuntos', archivosParaPlantilla);
+                  }
+                })
+                .catch((error: any) => {
+                  console.error('❌ Error cargando archivos:', error);
+                });
+              
+              console.log('🎯 Prellenado completado con delay');
+            }, 100);
           } else {
             console.log('❌ No se encontró la plantilla en disponibles');
           }
