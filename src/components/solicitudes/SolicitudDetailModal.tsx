@@ -745,49 +745,45 @@ export function SolicitudDetailModal({
                 )}
 
                 {/* Datos específicos de plantilla */}
-                {plantillaData.mapeoPlantilla && Object.keys(plantillaData.datosPlantilla).length > 0 && (
+                {(plantillaData.plantillaId && plantillaData.datosPlantilla && Object.keys(plantillaData.datosPlantilla).length > 0) ? (
                   <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
                     <h2 className="text-lg sm:text-xl font-bold text-purple-900 mb-4 flex items-center">
                       <div className="p-2 bg-purple-100 rounded-lg sm:rounded-xl mr-3">
                         <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-700" />
                       </div>
-                      {plantillaData.mapeoPlantilla.nombre} - Información Específica
+                      {plantillaData.mapeoPlantilla?.nombre || 'Plantilla personalizada'} - Información Específica
                     </h2>
-                    
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       {Object.entries(plantillaData.datosPlantilla).map(([clave, valor]) => {
-                        const camposYaMostrados = ['concepto', 'monto', 'empresa_a_pagar', 'nombre_persona'];
-                        if (camposYaMostrados.includes(clave)) return null;
-                        
-                        const etiqueta = obtenerEtiqueta(clave);
-                        
+                        // Mostrar todos los campos de plantilla, incluso si no están en el mapeo
+                        const etiqueta = obtenerEtiqueta(clave) || clave.replace(/_/g, ' ').toUpperCase();
                         let valorFormateado = valor;
                         if (Array.isArray(valor)) {
-                          if (clave === 'elementos_adicionales') {
-                            valorFormateado = valor.map(elemento => {
-                              if (elemento === 'tarjeta_banorte') return '1 TARJETA BANORTE';
-                              if (elemento === 'token_banorte') return '1 TOKEN BANORTE';
-                              return elemento;
-                            }).join(', ');
-                          } else {
-                            valorFormateado = valor.join(', ');
+                          if (clave.includes('archivo')) {
+                            return (
+                              <div key={clave} className="sm:col-span-2">
+                                <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">{etiqueta}</span>
+                                <div className="flex flex-wrap gap-2">
+                                  {valor.map((file, idx) => (
+                                    <span key={idx} className="bg-purple-100 text-purple-900 px-2 py-1 rounded text-xs border border-purple-200">{typeof file === 'string' ? file : (file?.name || 'Archivo')}</span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
                           }
+                          valorFormateado = valor.join(', ');
                         } else if (typeof valor === 'boolean') {
                           valorFormateado = valor ? 'Sí' : 'No';
                         } else if (clave.includes('fecha') && valor) {
-                          try {
-                            valorFormateado = formatDateForDisplay(String(valor));
-                          } catch {
-                            valorFormateado = String(valor);
-                          }
+                          try { valorFormateado = formatDateForDisplay(String(valor)); } catch { valorFormateado = String(valor); }
                         } else if (clave.includes('monto') && valor) {
-                          valorFormateado = `${parseFloat(String(valor)).toLocaleString('es-MX')}`;
+                          valorFormateado = `${parseFloat(String(valor)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}`;
+                        } else if (clave.includes('porcentaje') && valor) {
+                          valorFormateado = `${valor}%`;
                         } else {
                           valorFormateado = String(valor);
                         }
-
                         if (!valor || valor === '' || valor === null || valor === undefined) return null;
-
                         return (
                           <InfoField
                             key={clave}
@@ -799,7 +795,32 @@ export function SolicitudDetailModal({
                       })}
                     </div>
                   </Card>
+                ) : (
+                  solicitud?.tipo_pago_descripcion?.startsWith('Plantilla:') && (
+                    <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
+                      <h2 className="text-lg sm:text-xl font-bold text-purple-900 mb-4 flex items-center">
+                        <div className="p-2 bg-purple-100 rounded-lg sm:rounded-xl mr-3">
+                          <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-700" />
+                        </div>
+                        Información de Plantilla
+                      </h2>
+                      <div className="text-purple-700 text-sm bg-purple-50/80 p-3 rounded-lg border border-purple-200">
+                        No se detectaron datos específicos de la plantilla para esta solicitud.
+                      </div>
+                    </Card>
+                  )
                 )}
+
+                {/* Diagnóstico de datos de plantilla */}
+                <Card className="p-3 mb-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                  <h3 className="text-sm font-bold text-yellow-800 mb-2">Diagnóstico de Plantilla</h3>
+                  <div className="text-xs text-yellow-900">
+                    <div><strong>plantillaId:</strong> {String(plantillaData.plantillaId)}</div>
+                    <div><strong>mapeoPlantilla:</strong> {plantillaData.mapeoPlantilla ? JSON.stringify(plantillaData.mapeoPlantilla) : 'null'}</div>
+                    <div><strong>datosPlantilla:</strong> {plantillaData.datosPlantilla ? JSON.stringify(plantillaData.datosPlantilla) : 'null'}</div>
+                    <div><strong>tipo_pago_descripcion:</strong> {String(solicitud?.tipo_pago_descripcion)}</div>
+                  </div>
+                </Card>
               </div>
             </div>
 
