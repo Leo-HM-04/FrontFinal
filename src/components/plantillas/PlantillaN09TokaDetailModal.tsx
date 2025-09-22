@@ -205,6 +205,17 @@ const FilePreview: React.FC<{
   );
 };
 
+// Utilidad para construir la URL correcta de archivos
+const buildFileUrl = (ruta: string): string => {
+  if (!ruta) return '';
+  if (ruta.startsWith('http')) return ruta;
+  // Elimina cualquier prefijo de /root/PlataformaPagosFinal/BackFinal/uploads/
+  const cleanPath = ruta.replace(/^\/root\/PlataformaPagosFinal\/BackFinal\/uploads\//, '');
+  // Asegura que la ruta comience con /uploads/
+  const uploadsPath = cleanPath.startsWith('uploads/') ? cleanPath : `uploads/${cleanPath.replace(/^uploads\//, '')}`;
+  return `https://bechapra.com.mx/${uploadsPath}`;
+};
+
 export function PlantillaN09TokaDetailModal({ 
   solicitud, 
   isOpen, 
@@ -288,40 +299,40 @@ export function PlantillaN09TokaDetailModal({
   if (!isOpen || !solicitud) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border-2 border-blue-200/50">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sticky top-0 z-10 shadow-lg">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-bold">Plantilla N09 y TOKA</h2>
-              <p className="text-blue-100 text-sm mt-1">
-                Asunto: {solicitud.asunto}
-              </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
+      {/* Overlay similar al modal de solicitudes */}
+      <div
+        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
+        onClick={onClose}
+        role="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal"
+      />
+      {/* Modal container similar a solicitudes */}
+      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+        {/* Botón de cerrar */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 z-30 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-300"
+          aria-label="Cerrar modal"
+        >
+          <X className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+        </button>
+        {/* Contenido con scroll */}
+        <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 p-6">
+          {/* Header */}
+          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
+            <div className="relative z-10 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold">Plantilla N09 y TOKA</h2>
+                <p className="text-blue-100 text-sm mt-1">Asunto: {solicitud.asunto}</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado || 'pendiente')}`}>{solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}</span>
             </div>
-            <div className="flex items-center gap-3">
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado || 'pendiente')}`}>
-                {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
-              </span>
-              <button
-                onClick={onClose}
-                className="text-white hover:text-blue-200 transition-colors p-1 rounded-full hover:bg-blue-800/50"
-                title="Cerrar"
-                aria-label="Cerrar modal"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+          </header>
           {/* Información Principal */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">
-              Información Principal
-            </h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información Principal</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Asunto" value={solicitud.asunto} />
               <InfoField label="Cliente" value={solicitud.cliente} />
@@ -333,12 +344,9 @@ export function PlantillaN09TokaDetailModal({
               <InfoField label="Folio" value={solicitudExtended.folio} />
             </div>
           </div>
-
           {/* Información Bancaria */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">
-              Información Bancaria
-            </h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información Bancaria</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Tipo de Cuenta" value={solicitud.tipo_cuenta_clabe} />
               <InfoField label="Número de Cuenta/CLABE" value={solicitud.numero_cuenta_clabe} variant="mono" />
@@ -346,13 +354,10 @@ export function PlantillaN09TokaDetailModal({
               <InfoField label="Tiene Archivos" value={solicitudExtended.tiene_archivos ? 'Sí' : 'No'} />
             </div>
           </div>
-
           {/* Información de Aprobación */}
           {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">
-                Información de Aprobación
-              </h3>
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
                 <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion ? formatDate(solicitudExtended.fecha_aprobacion) : ''} />
@@ -362,12 +367,9 @@ export function PlantillaN09TokaDetailModal({
               </div>
             </div>
           )}
-
           {/* Información de Seguimiento */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">
-              Información de Seguimiento
-            </h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Seguimiento</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion ? formatDate(solicitud.fecha_creacion) : ''} />
               <InfoField label="Última Actualización" value={solicitud.fecha_actualizacion ? formatDate(solicitud.fecha_actualizacion) : ''} />
@@ -375,21 +377,11 @@ export function PlantillaN09TokaDetailModal({
               <InfoField label="Usuario de Actualización" value={solicitud.usuario_actualizacion} />
             </div>
           </div>
-
           {/* Archivos Adjuntos */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">
-              Archivos Adjuntos
-            </h3>
-            
-            {loading.archivos && (
-              <LoadingSpinner message="Cargando archivos..." />
-            )}
-
-            {errors.archivos && (
-              <ErrorMessage message={errors.archivos} />
-            )}
-
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos</h3>
+            {loading.archivos && (<LoadingSpinner message="Cargando archivos..." />)}
+            {errors.archivos && (<ErrorMessage message={errors.archivos} />)}
             {!loading.archivos && !errors.archivos && (
               <div className="space-y-4">
                 {archivos.length === 0 ? (
@@ -401,11 +393,10 @@ export function PlantillaN09TokaDetailModal({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {archivos.map((archivo) => (
                       <div key={archivo.id_archivo} className="bg-white/90 rounded-lg border border-blue-200 p-4 shadow-sm">
-                        <FilePreview archivo={archivo} baseUrl={baseFileUrl} />
-                        
+                        <FilePreview archivo={{...archivo, ruta_archivo: buildFileUrl(archivo.ruta_archivo)}} baseUrl="" />
                         <div className="mt-3 flex gap-2">
                           <button
-                            onClick={() => window.open(`${baseFileUrl}/${archivo.ruta_archivo}`, '_blank')}
+                            onClick={() => window.open(buildFileUrl(archivo.ruta_archivo), '_blank')}
                             className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
                           >
                             <ExternalLink className="w-4 h-4" />
