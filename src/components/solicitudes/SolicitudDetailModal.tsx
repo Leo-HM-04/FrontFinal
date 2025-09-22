@@ -747,28 +747,28 @@ export function SolicitudDetailModal({
                 )}
 
                 {/* Diagnóstico de datos de plantilla SIEMPRE visible */}
-                <Card className="p-6 mb-6 bg-gradient-to-br from-white to-yellow-50 border border-yellow-200/70 shadow-lg rounded-2xl">
-                  <h2 className="text-lg font-bold text-yellow-900 mb-3 flex items-center">
-                    <FileText className="w-5 h-5 mr-2 text-yellow-700" />
-                    Diagnóstico de Plantilla
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-yellow-900">
-                    <div className="flex flex-col">
-                      <span className="font-semibold">ID de Plantilla:</span>
-                      <span className="font-mono bg-yellow-100/60 rounded px-2 py-1 mt-1">{String(plantillaData.plantillaId)}</span>
+                <Card className="p-6 mb-8 bg-gradient-to-br from-white to-yellow-50 border border-yellow-200/70 shadow-lg rounded-2xl">
+                  <div className="flex items-center mb-4">
+                    <FileText className="w-6 h-6 mr-3 text-yellow-700" />
+                    <h2 className="text-xl font-extrabold text-yellow-900 tracking-tight">Diagnóstico de Plantilla</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base text-yellow-900 mb-4">
+                    <div>
+                      <div className="text-xs font-semibold text-yellow-700 uppercase mb-1">ID de Plantilla</div>
+                      <div className="font-mono bg-yellow-100/80 rounded px-3 py-2 text-base">{String(plantillaData.plantillaId)}</div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="font-semibold">Descripción de Pago:</span>
-                      <span className="font-mono bg-yellow-100/60 rounded px-2 py-1 mt-1">{String(solicitud?.tipo_pago_descripcion)}</span>
+                    <div>
+                      <div className="text-xs font-semibold text-yellow-700 uppercase mb-1">Descripción de Pago</div>
+                      <div className="font-mono bg-yellow-100/80 rounded px-3 py-2 text-base">{String(solicitud?.tipo_pago_descripcion)}</div>
                     </div>
-                    <div className="flex flex-col md:col-span-2">
-                      <span className="font-semibold">Mapeo de Plantilla:</span>
-                      <span className="font-mono bg-yellow-100/60 rounded px-2 py-1 mt-1 break-all">{plantillaData.mapeoPlantilla ? JSON.stringify(plantillaData.mapeoPlantilla) : 'null'}</span>
-                    </div>
-                    <div className="flex flex-col md:col-span-2">
-                      <span className="font-semibold">Datos de Plantilla:</span>
-                      <span className="font-mono bg-yellow-100/60 rounded px-2 py-1 mt-1 break-all">{plantillaData.datosPlantilla ? JSON.stringify(plantillaData.datosPlantilla) : '{}'}</span>
-                    </div>
+                  </div>
+                  <div className="mb-4">
+                    <div className="text-xs font-semibold text-yellow-700 uppercase mb-1">Mapeo de Plantilla</div>
+                    <pre className="font-mono bg-yellow-100/80 rounded px-3 py-2 text-sm whitespace-pre-wrap break-words overflow-x-auto max-h-40 border border-yellow-200/60">{plantillaData.mapeoPlantilla ? JSON.stringify(plantillaData.mapeoPlantilla, null, 2) : 'null'}</pre>
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-yellow-700 uppercase mb-1">Datos de Plantilla</div>
+                    <pre className="font-mono bg-yellow-100/80 rounded px-3 py-2 text-sm whitespace-pre-wrap break-words overflow-x-auto max-h-40 border border-yellow-200/60">{plantillaData.datosPlantilla ? JSON.stringify(plantillaData.datosPlantilla, null, 2) : '{}'}</pre>
                   </div>
                 </Card>
 
