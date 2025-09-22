@@ -5,7 +5,7 @@ import Link from 'next/link';
 import SolicitanteNotifications from '@/components/solicitante/SolicitanteNotifications';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { LogOut, Home, User, Menu, ClipboardList, Repeat, Briefcase, FileText } from 'lucide-react';
+import { LogOut, Home, User, Menu, ClipboardList, Repeat, Briefcase, FileText, PlusCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -168,9 +168,9 @@ export function SolicitanteLayout({ children }: SolicitanteLayoutProps) {
   // Opciones de menú para solicitante (simplificado, sin crear nuevas solicitudes/viáticos, íconos únicos)
   const navItems = [
     { href: '/dashboard/solicitante', label: 'Inicio', icon: <Home className="w-5 h-5" /> },
-    { href: '/dashboard/solicitante/nueva-solicitud', label: 'Nueva Solicitud', icon: <FileText className="w-5 h-5" /> },
+    { href: '/dashboard/solicitante/nueva-solicitud', label: 'Nueva Solicitud', icon: <PlusCircle className="w-5 h-5" /> },
     { href: '/dashboard/solicitante/mis-solicitudes', label: 'Mis Solicitudes', icon: <ClipboardList className="w-5 h-5" /> },
-    { href: '/dashboard/solicitante/nuevo-viatico', label: 'Nuevo Viático', icon: <FileText className="w-5 h-5" /> },
+    { href: '/dashboard/solicitante/nuevo-viatico', label: 'Nuevo Viático', icon: <PlusCircle className="w-5 h-5" /> },
     { href: '/dashboard/solicitante/mis-viaticos', label: 'Mis Viáticos', icon: <ClipboardList className="w-5 h-5" /> },
     { href: '/dashboard/solicitante/mis-recurrentes', label: 'Solicitudes Recurrentes', icon: <Repeat className="w-5 h-5" /> },
     { href: '/dashboard/solicitante/perfil', label: 'Mi Perfil', icon: <User className="w-5 h-5" /> },
