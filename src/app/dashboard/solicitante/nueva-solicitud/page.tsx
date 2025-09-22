@@ -498,6 +498,7 @@ export default function NuevaSolicitudPage() {
           if (archivosParaSubir.length > 0) {
             try {
               console.log('📤 Subiendo TODOS los archivos para N09/TOKA...');
+              console.log('🗂️ Archivos a subir:', archivosParaSubir.map(f => ({ name: f.name, size: f.size, type: f.type })));
               
               // Obtener el ID de la solicitud N09/TOKA creada
               let idSolicitudN09Toka = (responseN09Toka as Record<string, unknown>)?.id_solicitud as number | undefined;
@@ -505,24 +506,35 @@ export default function NuevaSolicitudPage() {
                 idSolicitudN09Toka = ((responseN09Toka as Record<string, unknown>).data as Record<string, unknown>)?.id_solicitud as number | undefined;
               }
               
+              console.log('🆔 ID solicitud N09/TOKA obtenido:', idSolicitudN09Toka);
+              console.log('📋 Response N09/TOKA completa:', responseN09Toka);
+              
               if (idSolicitudN09Toka) {
                 // Subir TODOS los archivos (no solo slice(1))
                 const tiposArchivos = new Array(archivosParaSubir.length).fill('documento');
                 
                 console.log(`📄 Subiendo ${archivosParaSubir.length} archivos COMPLETOS a tabla N09/TOKA`);
+                console.log('🔧 Tipos archivos:', tiposArchivos);
+                console.log('🔄 Llamando a SolicitudN09TokaArchivosService.subirArchivos...');
                 
-                await SolicitudN09TokaArchivosService.subirArchivos(
+                const resultadoArchivos = await SolicitudN09TokaArchivosService.subirArchivos(
                   idSolicitudN09Toka,
                   archivosParaSubir, // TODOS los archivos
                   tiposArchivos
                 );
                 
                 console.log('✅ TODOS los archivos N09/TOKA subidos exitosamente');
+                console.log('📊 Resultado archivos:', resultadoArchivos);
+              } else {
+                console.error('❌ No se pudo obtener el ID de la solicitud N09/TOKA para subir archivos');
               }
             } catch (archivoError) {
               console.error('❌ Error al subir archivos N09/TOKA:', archivoError);
+              console.error('📍 Stack trace:', archivoError);
               // No fallar la solicitud principal por esto
             }
+          } else {
+            console.log('⚠️ No hay archivos para subir a N09/TOKA');
           }
           
           toast.success('Solicitud de tarjetas N09/TOKA creada exitosamente en tabla específica');
