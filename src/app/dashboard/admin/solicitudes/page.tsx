@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
+import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { FileText, Trash2, Eye, Download } from 'lucide-react';
 import { exportSolicitudesPDF, exportSolicitudesExcel, exportSolicitudesCSV } from '@/utils/exportSolicitudes';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
@@ -312,7 +313,7 @@ export default function SolicitudesPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => router.push(`/dashboard/admin/solicitudes/${solicitud.id_solicitud}`)}
+                                onClick={() => setSelectedSolicitud(solicitud)}
                                 className="rounded-full border-blue-200 text-blue-600 hover:bg-blue-900 hover:text-blue-900 transition"
                                 title="Ver detalle"
                               >
@@ -347,6 +348,18 @@ export default function SolicitudesPage() {
               )}
             </div>
           </div>
+
+
+          {/* Modal de Detalle de Solicitud */}
+          {selectedSolicitud && (
+            <SolicitudDetailModal
+              solicitud={selectedSolicitud}
+              isOpen={!!selectedSolicitud}
+              onClose={() => setSelectedSolicitud(null)}
+              userRole="admin"
+              showActions={false}
+            />
+          )}
 
           {/* Delete Confirmation Modal */}
           <ConfirmDeleteSoli
