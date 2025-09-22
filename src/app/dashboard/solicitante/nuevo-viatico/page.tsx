@@ -101,7 +101,7 @@ export default function NuevoViaticoPage() {
       // Si todo está bien, guardar el archivo y limpiar errores
       nuevos[idx].file = file;
       if (nuevos[idx].errors?.file) {
-        const { file: _unused, ...otherErrors } = nuevos[idx].errors;
+  const { /* file: _unused, */ ...otherErrors } = nuevos[idx].errors;
         nuevos[idx].errors = otherErrors;
       }
       setFormularios(nuevos);

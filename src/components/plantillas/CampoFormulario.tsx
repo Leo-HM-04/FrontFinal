@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { CampoPlantilla } from '@/types/plantillas';
 import { NumericFormat } from 'react-number-format';
 import DatePicker from "react-datepicker";
@@ -25,7 +25,7 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
   className = ''
 }) => {
   // Estados para campos especiales
-  const [tipoSeleccionado, setTipoSeleccionado] = useState<string>('');
+  // const [tipoSeleccionado, setTipoSeleccionado] = useState<string>('');
   const bancoOptions = [
     "ACTINVER","AFIRME","albo","ARCUS FI","ASP INTEGRA OPC","AUTOFIN","AZTECA","BaBien","BAJIO","BANAMEX","BANCO COVALTO","BANCOMEXT","BANCOPPEL","BANCO S3","BANCREA","BANJERCITO","BANKAOOL","BANK OF AMERICA","BANK OF CHINA","BANOBRAS","BANORTE","BANREGIO","BANSI","BANXICO","BARCLAYS","BBASE","BBVA MEXICO","BMONEX","CAJA POP MEXICA","CAJA TELEFONIST","CASHI CUENTA","CB INTERCAM","CIBANCO","CI BOLSA","CITI MEXICO","CoDi Valida","COMPARTAMOS","CONSUBANCO","CREDICAPITAL","CREDICLUB","CRISTOBAL COLON","Cuenca","Dep y Pag Dig","DONDE","FINAMEX","FINCOMUN","FINCO PAY","FOMPED","FONDEADORA","FONDO (FIRA)","GBM","HEY BANCO","HIPOTECARIA FED","HSBC","ICBC","INBURSA","INDEVAL","INMOBILIARIO","INTERCAM BANCO","INVEX","JP MORGAN","KLAR","KUSPIT","LIBERTAD","MASARI","Mercado Pago W","MexPago","MIFEL","MIZUHO BANK","MONEXCB","MUFG","MULTIVA BANCO","NAFIN","NU MEXICO","NVIO","PAGATODO","Peibo","PROFUTURO","SABADELL","SANTANDER","SCOTIABANK","SHINHAN","SPIN BY OXXO","STP","TESORED","TRANSFER","UALA","UNAGRA","VALMEX","VALUE","VECTOR","VE POR MAS","VOLKSWAGEN"
   ];
@@ -64,7 +64,7 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
     } focus:ring-2 focus:ring-opacity-50`;
 
     const valorStr = String(valor || '');
-    const valorNum = Number(valor || 0);
+    // const valorNum = Number(valor || 0);
 
     switch (campo.tipo) {
       case 'texto':

@@ -13,7 +13,7 @@ export const usePlantillaSolicitud = () => {
 
   // Función para seleccionar una plantilla
   const seleccionarPlantilla = useCallback((plantilla: PlantillaSolicitud | null) => {
-    setEstado(prev => {
+    setEstado(() => {
       if (!plantilla) {
         return {
           plantillaSeleccionada: null,
@@ -78,70 +78,8 @@ export const usePlantillaSolicitud = () => {
     });
   }, []);
 
-  // Función para actualizar un campo
-  const actualizarCampo = useCallback((campoId: string, valor: unknown) => {
-    setEstado(prev => {
-      const nuevosDatos = { ...prev.datos, [campoId]: valor };
-      const nuevosErrores = { ...prev.errores };
-      
-      // Limpiar error del campo si existe
-      delete nuevosErrores[campoId];
 
-      // Validar el campo en tiempo real si tiene validaciones
-      if (prev.plantillaSeleccionada) {
-        for (const seccion of prev.plantillaSeleccionada.secciones) {
-          const campo = seccion.campos.find(c => c.id === campoId);
-          if (campo && campo.validaciones) {
-            const error = validarCampo(campo, valor, nuevosDatos);
-            if (error) {
-              nuevosErrores[campoId] = error;
-            }
-            break;
-          }
-        }
-      }
 
-      // Actualizar visibilidad de campos dependientes
-      const nuevaCamposVisibles = new Set(prev.camposVisibles);
-      
-      if (prev.plantillaSeleccionada) {
-        prev.plantillaSeleccionada.secciones.forEach(seccion => {
-          seccion.campos.forEach(campo => {
-            if (campo.dependencias && campo.dependencias.some(dep => dep.campo === campoId)) {
-              // Evaluar todas las dependencias de este campo
-              let deberiaEstarVisible = false;
-              
-              campo.dependencias.forEach(dependencia => {
-                const valorCumple = nuevosDatos[dependencia.campo] === dependencia.valor;
-                
-                if (dependencia.accion === 'mostrar' && valorCumple) {
-                  deberiaEstarVisible = true;
-                } else if (dependencia.accion === 'ocultar' && valorCumple) {
-                  deberiaEstarVisible = false;
-                  return; // Si hay una acción ocultar que se cumple, prevalece
-                }
-              });
-              
-              if (deberiaEstarVisible) {
-                nuevaCamposVisibles.add(campo.id);
-              } else {
-                nuevaCamposVisibles.delete(campo.id);
-                // Limpiar valor del campo oculto
-                delete nuevosDatos[campo.id];
-              }
-            }
-          });
-        });
-      }
-
-      return {
-        ...prev,
-        datos: nuevosDatos,
-        errores: nuevosErrores,
-        camposVisibles: nuevaCamposVisibles
-      };
-    });
-  }, []);
 
   // Función para validar un campo
   const validarCampo = useCallback((campo: CampoPlantilla, valor: unknown, datosActuales?: Record<string, unknown>): string | null => {
@@ -214,6 +152,63 @@ export const usePlantillaSolicitud = () => {
 
     return null;
   }, [estado.datos]);
+
+  // Función para actualizar un campo
+  const actualizarCampo = useCallback((campoId: string, valor: unknown) => {
+    setEstado(estadoActual => {
+      const nuevosDatos = { ...estadoActual.datos, [campoId]: valor };
+      const nuevosErrores = { ...estadoActual.errores };
+      // Limpiar error del campo si existe
+      delete nuevosErrores[campoId];
+      // Validar el campo en tiempo real si tiene validaciones
+      if (estadoActual.plantillaSeleccionada) {
+        for (const seccion of estadoActual.plantillaSeleccionada.secciones) {
+          const campo = seccion.campos.find(c => c.id === campoId);
+          if (campo && campo.validaciones) {
+            const error = validarCampo(campo, valor, nuevosDatos);
+            if (error) {
+              nuevosErrores[campoId] = error;
+            }
+            break;
+          }
+        }
+      }
+      // Actualizar visibilidad de campos dependientes
+      const nuevaCamposVisibles = new Set(estadoActual.camposVisibles);
+      if (estadoActual.plantillaSeleccionada) {
+        estadoActual.plantillaSeleccionada.secciones.forEach(seccion => {
+          seccion.campos.forEach(campo => {
+            if (campo.dependencias && campo.dependencias.some(dep => dep.campo === campoId)) {
+              // Evaluar todas las dependencias de este campo
+              let deberiaEstarVisible = false;
+              campo.dependencias.forEach(dependencia => {
+                const valorCumple = nuevosDatos[dependencia.campo] === dependencia.valor;
+                if (dependencia.accion === 'mostrar' && valorCumple) {
+                  deberiaEstarVisible = true;
+                } else if (dependencia.accion === 'ocultar' && valorCumple) {
+                  deberiaEstarVisible = false;
+                  return; // Si hay una acción ocultar que se cumple, prevalece
+                }
+              });
+              if (deberiaEstarVisible) {
+                nuevaCamposVisibles.add(campo.id);
+              } else {
+                nuevaCamposVisibles.delete(campo.id);
+                // Limpiar valor del campo oculto
+                delete nuevosDatos[campo.id];
+              }
+            }
+          });
+        });
+      }
+      return {
+        ...estadoActual,
+        datos: nuevosDatos,
+        errores: nuevosErrores,
+        camposVisibles: nuevaCamposVisibles
+      };
+    });
+  }, [validarCampo]);
 
   // Función para validar todo el formulario
   const validarFormulario = useCallback((): boolean => {

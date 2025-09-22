@@ -132,7 +132,7 @@ export const exportChartsOnly = async (data: EstadoData[]) => {
         pdf.text('Sistema de Gestión de Pagos - Exportación de Gráficas', 15, pageHeight - 5);
         pdf.text('Página 2 de 2', pageWidth - 15, pageHeight - 5, { align: 'right' });
         
-      } catch (canvasError) {
+      } catch {
         const html2canvas = (await import('html2canvas')).default;
         
         const [doughnutCanvas, barCanvas] = await Promise.all([
@@ -500,11 +500,11 @@ export const exportToPDF = async (data: EstadoData[]) => {
         pdf.text('Página 3 de 3', pageWidth - 15, pageHeight - 5, { align: 'right' });
         pdf.text(new Date().toLocaleString('es-MX'), pageWidth / 2, pageHeight - 5, { align: 'center' });
         
-      } catch (canvasError) {
+      } catch {
         // Implementación similar con html2canvas fallback
         const html2canvas = (await import('html2canvas')).default;
         
-        const [doughnutCanvas, barCanvas] = await Promise.all([
+        const [doughnutCanvas ] = await Promise.all([
           html2canvas(doughnutChart.parentElement as HTMLElement, {
             backgroundColor: '#ffffff',
             scale: 4,
@@ -518,7 +518,6 @@ export const exportToPDF = async (data: EstadoData[]) => {
         ]);
         
         const doughnutImgData = doughnutCanvas.toDataURL('image/png', 1.0);
-        const barImgData = barCanvas.toDataURL('image/png', 1.0);
         
         // Repetir el layout completo con fallback (código similar al anterior)
         // Por brevedad, mantengo la estructura principal

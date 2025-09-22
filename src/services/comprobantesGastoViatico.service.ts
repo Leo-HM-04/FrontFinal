@@ -1,5 +1,3 @@
-import api from '@/lib/api';
-
 export class ComprobantesGastoViaticoService {
   static async upload(id_viatico: number, file: File, token?: string) {
     const formData = new FormData();

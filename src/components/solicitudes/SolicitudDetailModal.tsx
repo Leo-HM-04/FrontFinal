@@ -9,13 +9,10 @@ import { SolicitudesService } from '@/services/solicitudes.service';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 import { 
   detectarPlantillaId, 
-  obtenerEtiquetaCampo, 
   esCampoOculto, 
   obtenerDatosPlantilla,
   obtenerEtiquetasPlantilla 
 } from '@/utils/plantillasLabels';
-import { obtenerPlantillaPorId } from '@/data/plantillas';
-import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
 import { bancosMexico } from '@/data/bancos';
 import '@/styles/modal.css';
 
@@ -285,10 +282,6 @@ export function SolicitudDetailModal({
   }, [solicitud]);
 
   // Funciones de utilidad específicas para la plantilla
-  const obtenerEtiqueta = useCallback(
-    (campo: string) => obtenerEtiquetaCampo(plantillaData.plantillaId, campo),
-    [plantillaData.plantillaId]
-  );
 
   const debeOcultarse = useCallback(
     (campo: string) => esCampoOculto(plantillaData.plantillaId, campo),

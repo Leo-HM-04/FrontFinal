@@ -65,8 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       // Verificar que las cookies se están guardando correctamente
       setTimeout(() => {
-        const savedToken = Cookies.get('auth_token');
-        const savedUser = Cookies.get('user_data');
+        // const savedToken = Cookies.get('auth_token');
+        // const savedUser = Cookies.get('user_data');
         // console.log('AuthContext Login - Cookies after save:', { hasToken: !!savedToken, hasUser: !!savedUser });
       }, 100);
       // Los tokens ya se almacenan en AuthService.login() usando Cookies

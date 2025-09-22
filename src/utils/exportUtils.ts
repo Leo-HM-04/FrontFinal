@@ -1591,11 +1591,9 @@ class ExportUtils {
     csvContent += `Total de viáticos: ${viaticos.length}\n\n`;
     csvContent += headers.join(',') + '\n';
 
-    const tresDias = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
     viaticos.forEach(viatico => {
       const fechaLimite = new Date(viatico.fecha_limite_pago);
       const diasRestantes = Math.ceil((fechaLimite.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-      const isUrgent = fechaLimite < tresDias;
 
       const row = [
         `"${(viatico.folio || viatico.id_solicitud?.toString() || '-').toString().replace(/"/g, '""')}"`,

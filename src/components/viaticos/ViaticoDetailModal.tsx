@@ -82,7 +82,7 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
         const token = getAuthToken();
         const data = await ComprobantesGastoViaticoService.list(viatico.id_viatico, token);
         setGastoComprobantes(Array.isArray(data) ? data : []);
-      } catch (error) {
+      } catch {
         setGastoComprobantes([]);
       }
     };
