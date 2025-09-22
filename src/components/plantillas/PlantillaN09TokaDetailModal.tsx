@@ -336,11 +336,9 @@ export function PlantillaN09TokaDetailModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Asunto" value={solicitud.asunto} />
               <InfoField label="Cliente" value={solicitud.cliente} />
-              <InfoField label="Proveedor" value={solicitud.proveedor} />
               <InfoField label="Beneficiario" value={solicitud.beneficiario} />
               <InfoField label="Monto" value={solicitud.monto.toString()} variant="currency" />
               <InfoField label="Tipo de Moneda" value={solicitud.tipo_moneda} />
-              <InfoField label="Fecha Límite de Pago" value={solicitud.fecha_limite_pago ? formatDate(solicitud.fecha_limite_pago) : ''} />
               <InfoField label="Folio" value={solicitudExtended.folio} />
             </div>
           </div>

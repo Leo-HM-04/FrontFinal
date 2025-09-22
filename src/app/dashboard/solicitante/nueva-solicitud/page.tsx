@@ -442,13 +442,11 @@ export default function NuevaSolicitudPage() {
             asunto: (datosN09Toka.asunto || 'TOKA_FONDEO_AVIT') as 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT',
             cliente: datosN09Toka.cliente || '',
             beneficiario: datosN09Toka.beneficiario || solicitudPlantillaData.nombre_persona || '',
-            proveedor: datosN09Toka.proveedor || solicitudPlantillaData.empresa_a_pagar || '',
             tipo_cuenta_clabe: (datosN09Toka.tipo_cuenta_clabe || 'CLABE') as 'CLABE' | 'CUENTA',
             numero_cuenta_clabe: datosN09Toka.numero_cuenta_clabe || solicitudPlantillaData.cuenta_destino || '',
             banco_destino: datosN09Toka.banco_destino || solicitudPlantillaData.banco_destino || 'STP',
             monto: Number(solicitudPlantillaData.monto) || 0,
-            tipo_moneda: (solicitudPlantillaData.tipo_moneda || 'MXN') as 'MXN' | 'USD' | 'EUR',
-            fecha_limite_pago: solicitudPlantillaData.fecha_limite_pago
+            tipo_moneda: (solicitudPlantillaData.tipo_moneda || 'MXN') as 'MXN' | 'USD' | 'EUR'
           };
           
           console.log('� Datos finales para crear N09/TOKA directamente:', datosParaCrear);
