@@ -10,6 +10,7 @@ import { getAuthToken } from '@/utils/auth';
 
 interface ComprobanteViatico {
   id_comprobante: number;
+  id_comprobante_gasto?: number;
   id_viatico: number;
   archivo_url: string;
   fecha_subida: string;
@@ -383,7 +384,7 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                     <div className="text-gray-500 col-span-full">No hay comprobantes de gasto subidos.</div>
                   )}
                   {gastoComprobantes.map((comp) => (
-                    <div key={comp.id_comprobante} className="bg-white p-4 rounded-xl border border-green-100 shadow flex flex-col items-center">
+                    <div key={comp.id_comprobante_gasto || comp.id_comprobante} className="bg-white p-4 rounded-xl border border-green-100 shadow flex flex-col items-center">
                       <div className="flex items-center gap-2 mb-2">
                         <FileText className="w-5 h-5 text-green-600" />
                         <span className="text-green-900 font-medium text-sm truncate max-w-[160px]">{comp.archivo_url.split('/').pop()}</span>
@@ -398,7 +399,7 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                           <ExternalLink className="w-4 h-4 mr-1" /> Ver
                         </a>
                         <button
-                          onClick={() => handleDeleteGastoComprobante(comp.id_comprobante)}
+                          onClick={() => handleDeleteGastoComprobante(comp.id_comprobante_gasto || comp.id_comprobante)}
                           className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-xs font-semibold"
                         >
                           Eliminar

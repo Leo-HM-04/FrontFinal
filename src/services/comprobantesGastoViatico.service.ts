@@ -39,13 +39,21 @@ export class ComprobantesGastoViaticoService {
         throw new Error(errorMessage);
       }
     }
-    return await res.json();
+    // Mapeo: si el backend devuelve id_comprobante_gasto o id_comprobante_gastos, lo renombramos a id_comprobante
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      return data.map((item) => ({
+        ...item,
+        id_comprobante: item.id_comprobante ?? item.id_comprobante_gasto ?? item.id_comprobante_gastos
+      }));
+    }
+    return data;
   }
 
-  static async delete(id_comprobante: number, token?: string) {
+  static async delete(id_comprobante_gasto: number, token?: string) {
     const headers: HeadersInit = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/comprobantes-gasto-viatico/${id_comprobante}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/comprobantes-gasto-viatico/${id_comprobante_gasto}`, {
       method: 'DELETE',
       headers
     });
