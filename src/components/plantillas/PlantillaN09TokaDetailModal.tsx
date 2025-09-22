@@ -209,10 +209,11 @@ const buildFileUrl = (ruta: string): string => {
   if (!ruta) return '';
   if (ruta.startsWith('http')) return ruta;
   // Elimina cualquier prefijo de /root/PlataformaPagosFinal/BackFinal/uploads/
-  const cleanPath = ruta.replace(/^\/root\/PlataformaPagosFinal\/BackFinal\/uploads\//, '');
-  // Asegura que la ruta comience con /uploads/
-  const uploadsPath = cleanPath.startsWith('uploads/') ? cleanPath : `uploads/${cleanPath.replace(/^uploads\//, '')}`;
-  return `https://bechapra.com.mx/${uploadsPath}`;
+  let cleanPath = ruta.replace(/^\/root\/PlataformaPagosFinal\/BackFinal\/uploads\//, '');
+  // Elimina cualquier prefijo extra de 'uploads/'
+  cleanPath = cleanPath.replace(/^uploads\//, '');
+  // Construye la URL final sin duplicar 'uploads/'
+  return `https://bechapra.com.mx/uploads/${cleanPath}`;
 };
 
 export function PlantillaN09TokaDetailModal({ 
