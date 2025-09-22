@@ -901,7 +901,13 @@ function MisSolicitudesContent() {
                                 <button
                                   title="Editar"
                                   className="inline-flex items-center justify-center p-1.5 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
-                                  onClick={() => router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`)}
+                                  onClick={() => {
+                                    if (isN09TokaSolicitud(s)) {
+                                      router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
+                                    } else {
+                                      router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
+                                    }
+                                  }}
                                 >
                                   <Edit className="w-3.5 h-3.5" />
                                 </button>
@@ -1007,7 +1013,13 @@ function MisSolicitudesContent() {
                               <button
                                 title="Editar"
                                 className="flex items-center gap-1 px-3 py-2 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors text-sm font-medium"
-                                onClick={() => router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`)}
+                                onClick={() => {
+                                  if (isN09TokaSolicitud(s)) {
+                                    router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
+                                  } else {
+                                    router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
+                                  }
+                                }}
                               >
                                 <Edit className="w-3.5 h-3.5" />
                                 Editar
