@@ -117,9 +117,10 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
       <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-3xl shadow-2xl w-full max-w-6xl max-h-[92vh] overflow-hidden border border-white/20 backdrop-blur-sm">
         {/* Scroll interno */}
         <div className="overflow-y-auto max-h-[92vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 px-2 md:px-6 pb-8 pt-2">
-          {/* Sección para subir y mostrar comprobantes de gasto (solo si pagado) */}
+
+          {/* SIEMPRE visible arriba si pagada: sección para subir y mostrar comprobantes de gasto */}
           {viatico.estado?.toLowerCase() === 'pagada' && (
-            <div className="mb-8">
+            <div className="w-full p-6 md:p-8 bg-gradient-to-br from-white to-green-50/30 border border-green-200/50 shadow-lg rounded-3xl mb-8">
               <h4 className="text-lg font-semibold text-green-900 mb-2 flex items-center">
                 <CheckCircle className="w-5 h-5 mr-2 text-green-600" /> Comprobantes de Gasto (Viático)
               </h4>
