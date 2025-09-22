@@ -713,7 +713,12 @@ function MisSolicitudesContent() {
     setDeleting(true);
 
     try {
-      await SolicitudesService.deleteSolicitante(solicitudAEliminar.id_solicitud);
+      // Detectar si es N09/TOKA y usar el servicio correcto
+      if (isN09TokaSolicitud(solicitudAEliminar)) {
+        await SolicitudesN09TokaService.eliminar(solicitudAEliminar.id_solicitud);
+      } else {
+        await SolicitudesService.deleteSolicitante(solicitudAEliminar.id_solicitud);
+      }
       const updated = solicitudes.filter(
         (s) => s.id_solicitud !== solicitudAEliminar.id_solicitud
       );
@@ -724,7 +729,6 @@ function MisSolicitudesContent() {
       setSuccess('Solicitud eliminada correctamente.');
       setTimeout(() => setSuccess(''), 3500);
     } catch (err: unknown) {
-  // console.error('Error al eliminar solicitud:', err);
       let backendMsg = 'Error al eliminar la solicitud';
       if (typeof err === 'object' && err !== null) {
         const e = err as {
