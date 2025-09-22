@@ -125,16 +125,19 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                 <CheckCircle className="w-5 h-5 mr-2 text-green-600" /> Comprobantes de Gasto (Viático)
               </h4>
               <form className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
-                <input
-                  type="file"
-                  multiple
-                  accept="application/pdf,image/*"
-                  ref={fileInputRef}
-                  disabled={uploading}
-                  onChange={handleUploadGastoComprobantes}
-                  className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                />
-                {uploading && <span className="text-green-700 animate-pulse">Subiendo...</span>}
+                <label className="inline-block cursor-pointer px-6 py-2 bg-green-600 text-white font-semibold rounded-xl shadow hover:bg-green-700 transition-colors text-base">
+                  Elegir comprobantes
+                  <input
+                    type="file"
+                    multiple
+                    accept="application/pdf,image/*"
+                    ref={fileInputRef}
+                    disabled={uploading}
+                    onChange={handleUploadGastoComprobantes}
+                    className="hidden"
+                  />
+                </label>
+                {uploading && <span className="text-green-700 animate-pulse ml-2">Subiendo...</span>}
               </form>
               {uploadError && <div className="text-red-600 mb-2">{uploadError}</div>}
               {successMsg && <div className="text-green-700 mb-2">{successMsg}</div>}
