@@ -747,41 +747,31 @@ export function SolicitudDetailModal({
                 )}
 
                 {/* Diagnóstico de datos de plantilla SIEMPRE visible */}
-                <Card className="p-6 mb-8 bg-gradient-to-br from-white to-yellow-50 border border-yellow-200/70 shadow-lg rounded-2xl">
-                  <div className="flex items-center mb-4">
-                    <FileText className="w-6 h-6 mr-3 text-yellow-700" />
-                    <h2 className="text-xl font-extrabold text-yellow-900 tracking-tight">Diagnóstico de Plantilla</h2>
+                <Card className="p-5 mb-8 bg-white border border-yellow-300 shadow rounded-xl">
+                  <div className="flex items-center mb-3">
+                    <FileText className="w-5 h-5 mr-2 text-yellow-700" />
+                    <h2 className="text-lg font-bold text-yellow-800">Diagnóstico de Plantilla</h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base text-yellow-900 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-900 mb-2">
                     <div>
-                      <div className="text-xs font-semibold text-yellow-700 uppercase mb-1">ID de Plantilla</div>
-                      <div className="font-mono bg-yellow-100/80 rounded px-3 py-2 text-base">{String(plantillaData.plantillaId)}</div>
+                      <span className="font-semibold">ID de Plantilla:</span>
+                      <span className="ml-2 font-mono text-yellow-900">{String(plantillaData.plantillaId)}</span>
                     </div>
                     <div>
-                      <div className="text-xs font-semibold text-yellow-700 uppercase mb-1">Descripción de Pago</div>
-                      <div className="font-mono bg-yellow-100/80 rounded px-3 py-2 text-base">{String(solicitud?.tipo_pago_descripcion)}</div>
+                      <span className="font-semibold">Descripción de Pago:</span>
+                      <span className="ml-2 font-mono text-yellow-900">{String(solicitud?.tipo_pago_descripcion)}</span>
                     </div>
                   </div>
-                  <div className="mb-4">
-                    <div className="text-xs font-semibold text-yellow-700 uppercase mb-1">Mapeo de Plantilla</div>
-                    <pre className="font-mono bg-yellow-100/80 rounded px-3 py-2 text-sm whitespace-pre-wrap break-words overflow-x-auto max-h-40 border border-yellow-200/60">{plantillaData.mapeoPlantilla ? JSON.stringify(plantillaData.mapeoPlantilla, null, 2) : 'null'}</pre>
+                  <div className="mb-2">
+                    <span className="font-semibold">Mapeo de Plantilla:</span>
+                    <pre className="font-mono bg-yellow-50 rounded px-2 py-1 text-xs whitespace-pre-wrap break-words overflow-x-auto max-h-32 border border-yellow-200 mt-1 text-yellow-900">{plantillaData.mapeoPlantilla ? JSON.stringify(plantillaData.mapeoPlantilla, null, 2) : 'null'}</pre>
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-yellow-700 uppercase mb-1">Datos de Plantilla</div>
-                    <pre className="font-mono bg-yellow-100/80 rounded px-3 py-2 text-sm whitespace-pre-wrap break-words overflow-x-auto max-h-40 border border-yellow-200/60">{plantillaData.datosPlantilla ? JSON.stringify(plantillaData.datosPlantilla, null, 2) : '{}'}</pre>
+                    <span className="font-semibold">Datos de Plantilla:</span>
+                    <pre className="font-mono bg-yellow-50 rounded px-2 py-1 text-xs whitespace-pre-wrap break-words overflow-x-auto max-h-32 border border-yellow-200 mt-1 text-yellow-900">{plantillaData.datosPlantilla ? JSON.stringify(plantillaData.datosPlantilla, null, 2) : '{}'}</pre>
                   </div>
                 </Card>
 
-                {/* Diagnóstico de datos de plantilla */}
-                <Card className="p-3 mb-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                  <h3 className="text-sm font-bold text-yellow-800 mb-2">Diagnóstico de Plantilla</h3>
-                  <div className="text-xs text-yellow-900">
-                    <div><strong>plantillaId:</strong> {String(plantillaData.plantillaId)}</div>
-                    <div><strong>mapeoPlantilla:</strong> {plantillaData.mapeoPlantilla ? JSON.stringify(plantillaData.mapeoPlantilla) : 'null'}</div>
-                    <div><strong>datosPlantilla:</strong> {plantillaData.datosPlantilla ? JSON.stringify(plantillaData.datosPlantilla) : 'null'}</div>
-                    <div><strong>tipo_pago_descripcion:</strong> {String(solicitud?.tipo_pago_descripcion)}</div>
-                  </div>
-                </Card>
               </div>
             </div>
 
