@@ -8,9 +8,11 @@ import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
+import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
 import { FileText, Trash2, Eye, Download } from 'lucide-react';
 import { exportSolicitudesPDF, exportSolicitudesExcel, exportSolicitudesCSV } from '@/utils/exportSolicitudes';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
+import { SolicitudesN09TokaService, SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 import { ExportOptions } from '@/components/common/ExportOptions';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
@@ -18,8 +20,26 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Solicitud } from '@/types';
 import { toast } from 'react-hot-toast';
 
+// Función para detectar si una solicitud es del tipo N09/TOKA
+const isN09TokaSolicitud = (solicitud: Solicitud): boolean => {
+  // Detectar basándose en los campos específicos de plantilla_datos
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = JSON.parse(solicitud.plantilla_datos);
+      return plantillaData.templateType === 'tarjetas-n09-toka' || 
+             plantillaData.beneficiario || 
+             plantillaData.numero_cuenta_clabe || 
+             plantillaData.tipo_cuenta_clabe;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+};
+
 export default function SolicitudesPage() {
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
+  const [selectedN09TokaSolicitud, setSelectedN09TokaSolicitud] = useState<SolicitudN09TokaData | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -47,6 +67,30 @@ export default function SolicitudesPage() {
   const handleDelete = (solicitud: Solicitud) => {
     setSelectedSolicitud(solicitud);
     setShowDeleteModal(true);
+  };
+
+  const handleViewSolicitud = async (solicitud: Solicitud) => {
+    // Verificar si es una solicitud N09/TOKA
+    if (isN09TokaSolicitud(solicitud)) {
+      try {
+        // Obtener los datos completos de la solicitud N09/TOKA
+        const response = await SolicitudesN09TokaService.obtenerPorSolicitudPrincipal(solicitud.id_solicitud);
+        if (response.success && response.data) {
+          setSelectedN09TokaSolicitud(response.data);
+        } else {
+          toast.error('No se encontraron datos de la plantilla N09/TOKA');
+          setSelectedSolicitud(solicitud);
+        }
+      } catch (error) {
+        console.error('Error al obtener solicitud N09/TOKA:', error);
+        toast.error('Error al cargar los detalles de la plantilla N09/TOKA');
+        // Fallback al modal normal
+        setSelectedSolicitud(solicitud);
+      }
+    } else {
+      // Solicitud normal
+      setSelectedSolicitud(solicitud);
+    }
   };
 
   const confirmDelete = async () => {
@@ -311,7 +355,7 @@ export default function SolicitudesPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => setSelectedSolicitud(solicitud)}
+                                onClick={() => handleViewSolicitud(solicitud)}
                                 className="rounded-full border-blue-200 text-blue-600 hover:bg-blue-900 hover:text-blue-900 transition"
                                 title="Ver detalle"
                               >
@@ -356,6 +400,15 @@ export default function SolicitudesPage() {
               onClose={() => setSelectedSolicitud(null)}
               userRole="admin"
               showActions={false}
+            />
+          )}
+
+          {/* Modal de Detalle de Plantilla N09/TOKA */}
+          {selectedN09TokaSolicitud && (
+            <PlantillaN09TokaDetailModal
+              solicitud={selectedN09TokaSolicitud}
+              isOpen={!!selectedN09TokaSolicitud}
+              onClose={() => setSelectedN09TokaSolicitud(null)}
             />
           )}
 
