@@ -7,7 +7,7 @@ export class ComprobantesGastoViaticoService {
     formData.append('id_viatico', String(id_viatico));
     const headers: HeadersInit = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/comprobantes-gasto-viatico/upload`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/comprobantes-gasto-viatico/`, {
       method: 'POST',
       body: formData,
       headers,
