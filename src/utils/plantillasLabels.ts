@@ -203,7 +203,8 @@ export function detectarPlantillaId(solicitud: Solicitud): string | null {
         'PAGO COMISIONES': 'pago-comisiones',
         'PAGO POLIZAS GNP': 'pago-polizas-gnp',
         'REGRESOS EN TRANSFERENCIA': 'regresos-transferencia',
-        'REGRESOS EN EFECTIVO': 'regresos-efectivo'
+        'REGRESOS EN EFECTIVO': 'regresos-efectivo',
+        'SOLICITUD DE PAGO TARJETAS N09 Y TOKA': 'tarjetas-n09-toka'
       };
       
       return nombreAId[plantillaParte] || null;
