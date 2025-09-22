@@ -449,12 +449,30 @@ export default function NuevaSolicitudPage() {
           
           // 1. Crear la solicitud principal sin plantilla_datos
           const solicitudBase = {
-            ...solicitudPlantillaData,
+            departamento: solicitudPlantillaData.departamento,
+            monto: parseFloat(solicitudPlantillaData.monto) || 0,
+            tipo_moneda: solicitudPlantillaData.tipo_moneda,
+            cuenta_destino: solicitudPlantillaData.cuenta_destino,
+            concepto: solicitudPlantillaData.concepto,
+            tipo_pago: solicitudPlantillaData.tipo_pago,
             tipo_pago_descripcion: `Plantilla:${estadoPlantilla.plantillaSeleccionada.id}`,
-            factura: archivosParaSubir[0] || null, // Agregar el campo factura requerido
-            plantilla_datos: undefined // No usar JSON para esta plantilla
+            empresa_a_pagar: solicitudPlantillaData.empresa_a_pagar,
+            nombre_persona: solicitudPlantillaData.nombre_persona,
+            fecha_limite_pago: solicitudPlantillaData.fecha_limite_pago,
+            tipo_cuenta_destino: solicitudPlantillaData.tipo_cuenta_destino,
+            banco_destino: solicitudPlantillaData.banco_destino,
+            factura: archivosParaSubir[0] || null, // Campo requerido por createWithFiles
+            // Campos opcionales para segunda forma de pago
+            tiene_segunda_forma_pago: false,
+            tipo_cuenta_destino_2: '',
+            banco_destino_2: '',
+            cuenta_destino_2: '',
+            tipo_tarjeta_2: '',
+            cuenta_2: '',
+            link_pago_2: '',
+            usuario_acceso_2: '',
+            contrasena_acceso_2: ''
           };
-          delete solicitudBase.plantilla_datos;
           
           console.log('📤 Datos de solicitud base:', solicitudBase);
           
