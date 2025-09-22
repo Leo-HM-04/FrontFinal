@@ -20,17 +20,15 @@ export function ProtectedRoute({
   const [showError, setShowError] = useState(false);
 
   useEffect(() => {
-    console.log('ProtectedRoute - User:', user, 'Required roles:', requiredRoles);
-    
     if (!isLoading) {
       if (!user) {
-        console.log('No user, redirecting to login');
+        // console.log('No user, redirecting to login');
         router.push('/login');
         return;
       }
 
       if (requiredRoles.length > 0 && !requiredRoles.includes(user.rol)) {
-        console.log(`User role "${user.rol}" not in required roles:`, requiredRoles);
+        // console.log(`User role "${user.rol}" not in required roles:`, requiredRoles);
         setShowError(true);
         return;
       }

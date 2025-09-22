@@ -32,15 +32,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Cambiar a usar Cookies en lugar de localStorage para consistencia
       const storedToken = Cookies.get('auth_token');
       const cachedUser = Cookies.get('user_data');
-      
-      console.log('AuthContext InitAuth - Token:', !!storedToken, 'User data:', !!cachedUser);
+      // console.log('AuthContext InitAuth - Token:', !!storedToken, 'User data:', !!cachedUser);
 
       setToken(storedToken ?? null);
       if (storedToken && cachedUser) {
         try {
           const parsedUser = JSON.parse(cachedUser);
-          console.log('AuthContext InitAuth - Parsed user:', parsedUser);
           setUser(parsedUser);
+          // console.log('AuthContext InitAuth - Parsed user:', parsedUser);
         } catch (error) {
           console.error('Error parsing cached user:', error);
           Cookies.remove('auth_token');
@@ -54,26 +53,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (credentials: { email: string; password: string }): Promise<{ success: boolean; user?: User; token?: string; error?: string }> => {
     const result = await AuthService.login(credentials);
-    console.log('AuthContext Login - Result:', { success: result.success, hasUser: !!result.user, hasToken: !!result.token, userRole: result.user?.rol });
-    
+    // console.log('AuthContext Login - Result:', { success: result.success, hasUser: !!result.user, hasToken: !!result.token, userRole: result.user?.rol });
     if (result.success && result.user && result.token) {
       setUser(result.user);
       setToken(result.token);
-      
       // Como respaldo adicional, también guardar en localStorage
       // para casos donde las cookies no funcionen como esperado
       if (typeof window !== 'undefined') {
         localStorage.setItem('auth_token', result.token);
         localStorage.setItem('auth_user', JSON.stringify(result.user));
       }
-      
       // Verificar que las cookies se están guardando correctamente
       setTimeout(() => {
         const savedToken = Cookies.get('auth_token');
         const savedUser = Cookies.get('user_data');
-        console.log('AuthContext Login - Cookies after save:', { hasToken: !!savedToken, hasUser: !!savedUser });
+        // console.log('AuthContext Login - Cookies after save:', { hasToken: !!savedToken, hasUser: !!savedUser });
       }, 100);
-      
       // Los tokens ya se almacenan en AuthService.login() usando Cookies
       // No necesitamos duplicar el almacenamiento aquí
       toast.success(`Bienvenido ${result.user.nombre}`);
