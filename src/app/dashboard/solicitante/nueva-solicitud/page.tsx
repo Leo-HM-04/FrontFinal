@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { FileText, Upload, Calendar, DollarSign, Building, CreditCard, MessageSquare, CheckCircle, X } from 'lucide-react';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { SolicitudArchivosService } from '@/services/solicitudArchivos.service';
+import { SolicitudesN09TokaService } from '@/services/solicitudesN09Toka.service';
 import { toast } from 'react-hot-toast';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -442,12 +443,67 @@ export default function NuevaSolicitudPage() {
   // console.log('Datos completos de la plantilla:', estadoPlantilla.datos);
   // console.log('Plantilla seleccionada:', estadoPlantilla.plantillaSeleccionada?.id);
 
-        // Usar el nuevo servicio específico para plantillas
-        const response = await SolicitudesService.createPlantilla(solicitudPlantillaData);
+        // Para plantilla tarjetas-n09-toka, usar tabla específica
+        if (estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-n09-toka') {
+          console.log('🗃️ Creando solicitud con tabla específica N09/TOKA...');
+          
+          // 1. Crear la solicitud principal sin plantilla_datos
+          const solicitudBase = {
+            ...solicitudPlantillaData,
+            tipo_pago_descripcion: `Plantilla:${estadoPlantilla.plantillaSeleccionada.id}`,
+            factura: archivosParaSubir[0] || null, // Agregar el campo factura requerido
+            plantilla_datos: undefined // No usar JSON para esta plantilla
+          };
+          delete solicitudBase.plantilla_datos;
+          
+          console.log('📤 Datos de solicitud base:', solicitudBase);
+          
+          const responseSolicitud = await SolicitudesService.createWithFiles(solicitudBase);
+          console.log('✅ Solicitud principal creada:', responseSolicitud);
+          
+          // 2. Obtener el ID de la solicitud creada
+          let solicitudId = (responseSolicitud as Record<string, unknown>)?.id_solicitud as number | undefined;
+          if (!solicitudId && (responseSolicitud as Record<string, unknown>)?.data) {
+            solicitudId = ((responseSolicitud as Record<string, unknown>).data as Record<string, unknown>)?.id_solicitud as number | undefined;
+          }
+          
+          if (!solicitudId) {
+            throw new Error('No se pudo obtener el ID de la solicitud creada');
+          }
+          
+          console.log('🔍 ID de solicitud obtenido:', solicitudId);
+          
+          // 3. Convertir y guardar datos específicos en tabla N09/TOKA
+          const datosN09Toka = SolicitudesN09TokaService.convertirDatosPlantilla(estadoPlantilla.datos);
+          console.log('🔄 Datos convertidos para N09/TOKA:', datosN09Toka);
+          
+          const datosParaCrear = {
+            id_solicitud_pago: solicitudId,
+            asunto: (datosN09Toka.asunto || 'PAGO_PROVEEDOR_N09') as 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT',
+            cliente: datosN09Toka.cliente || '',
+            beneficiario: datosN09Toka.beneficiario || '',
+            tipo_cuenta_clabe: (datosN09Toka.tipo_cuenta_clabe || 'CLABE') as 'CLABE' | 'CUENTA',
+            numero_cuenta_clabe: datosN09Toka.numero_cuenta_clabe || '',
+            banco_destino: datosN09Toka.banco_destino || 'STP',
+            monto: datosN09Toka.monto || 0,
+            tipo_moneda: (datosN09Toka.tipo_moneda || 'MXN') as 'MXN' | 'USD' | 'EUR'
+          };
+          
+          console.log('📤 Datos finales para tabla N09/TOKA:', datosParaCrear);
+          
+          const responseN09Toka = await SolicitudesN09TokaService.crear(datosParaCrear);
+          console.log('✅ Datos N09/TOKA guardados:', responseN09Toka);
+          
+          toast.success('Solicitud de tarjetas N09/TOKA creada exitosamente en tabla específica');
+        } else {
+          // Para otras plantillas, usar el método tradicional con plantilla_datos JSON
+          console.log('📝 Creando solicitud con plantilla_datos JSON...');
+          const response = await SolicitudesService.createPlantilla(solicitudPlantillaData);
+          console.log('✅ Solicitud de plantilla creada:', response);
+          
+          toast.success('Solicitud de plantilla creada exitosamente');
+        }
         
-  // console.log('Respuesta del servicio de plantillas:', response);
-
-        toast.success('Solicitud de plantilla creada exitosamente');
         router.push('/dashboard/solicitante/mis-solicitudes');
         
       } catch (error: unknown) {
