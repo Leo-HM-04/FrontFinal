@@ -15,6 +15,8 @@ import {
 } from '@/utils/plantillasLabels';
 import { bancosMexico } from '@/data/bancos';
 import '@/styles/modal.css';
+import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
+import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
@@ -246,6 +248,20 @@ const FilePreview: React.FC<{
   );
 };
 
+// Función para detectar si una solicitud es N09/TOKA
+function isN09TokaSolicitud(solicitud: any): boolean {
+  if (solicitud.tipo_plantilla === 'N09_TOKA') return true;
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      return plantillaData.templateType === 'tarjetas-n09-toka' || plantillaData.isN09Toka === true || plantillaData.beneficiario || plantillaData.numero_cuenta_clabe || plantillaData.tipo_cuenta_clabe;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
 export function SolicitudDetailModal({ 
   solicitud, 
   isOpen, 
@@ -281,6 +297,49 @@ export function SolicitudDetailModal({
     return { plantillaId, mapeoPlantilla, datosPlantilla };
   }, [solicitud]);
 
+  // Detectar si es plantilla N09/TOKA
+  if (isN09TokaSolicitud(solicitud)) {
+    let solicitudN09Toka: SolicitudN09TokaData | null = null;
+    if (solicitud && typeof solicitud === 'object') {
+      // Mapear desde plantilla_datos si existe
+      if (solicitud.plantilla_datos) {
+        try {
+          const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+          solicitudN09Toka = {
+            id_solicitud: solicitud.id_solicitud,
+            asunto: plantillaData.asunto || 'TOKA_FONDEO_AVIT',
+            cliente: plantillaData.cliente || '',
+            beneficiario: plantillaData.beneficiario || '',
+            proveedor: plantillaData.proveedor || '',
+            tipo_cuenta_clabe: plantillaData.tipo_cuenta_clabe || 'CLABE',
+            numero_cuenta_clabe: plantillaData.numero_cuenta_clabe || '',
+            banco_destino: plantillaData.banco_destino || '',
+            monto: Number(plantillaData.monto) || 0,
+            tipo_moneda: (plantillaData.tipo_moneda || 'MXN'),
+            estado: solicitud.estado || '',
+            fecha_creacion: solicitud.fecha_creacion || '',
+            fecha_actualizacion: plantillaData.fecha_actualizacion || solicitud.updated_at || '',
+            fecha_limite_pago: plantillaData.fecha_limite_pago || solicitud.fecha_limite_pago || '',
+            usuario_creacion: plantillaData.usuario_creacion || solicitud.usuario_nombre || '',
+            usuario_actualizacion: plantillaData.usuario_actualizacion || '',
+          };
+        } catch {
+          solicitudN09Toka = null;
+        }
+      }
+    }
+    if (solicitudN09Toka) {
+      return (
+        <PlantillaN09TokaDetailModal
+          solicitud={solicitudN09Toka}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+    // Si no se pudo mapear, mostrar modal estándar
+  }
+
   // Funciones de utilidad específicas para la plantilla
 
   const debeOcultarse = useCallback(
@@ -290,9 +349,9 @@ export function SolicitudDetailModal({
 
   // Función para formatear moneda
   const formatCurrency = useCallback((amount: number) => {
-    return new Intl.NumberFormat('es-CO', {
+    return new Intl.NumberFormat('es-MX', {
       style: 'currency',
-      currency: 'COP',
+      currency: 'MXN',
       minimumFractionDigits: 0
     }).format(amount);
   }, []);
