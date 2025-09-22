@@ -461,7 +461,10 @@ function MisSolicitudesContent() {
 
     const fetchSolicitudes = async () => {
       try {
-        const data = await SolicitudesService.getMySolicitudes();
+        // Usar endpoint unificado para obtener solicitudes normales + N09/TOKA
+        const data = await SolicitudesService.getAllUnified();
+        console.log('🔍 Solicitudes unificadas obtenidas:', data);
+        
         if (isMounted) {
           const sorted = data.sort(
             (a, b) =>
@@ -469,6 +472,13 @@ function MisSolicitudesContent() {
           );
           setSolicitudes(sorted);
           setError('');
+          
+          // Log para debugging
+          const n09TokaCount = sorted.filter(s => {
+            const solicitudExt = s as Solicitud & { tipo_plantilla?: string };
+            return solicitudExt.tipo_plantilla === 'N09_TOKA';
+          }).length;
+          console.log(`📊 Total solicitudes: ${sorted.length}, N09/TOKA: ${n09TokaCount}`);
         }
       } catch {
         if (isMounted) {
