@@ -280,8 +280,8 @@ export default function SolicitudesPendientesPage() {
       toast.success('La solicitud ha sido aprobada correctamente');
       setShowDetailModal(false);
       fetchSolicitudes();
-    } catch (error) {
-  // console.error('Error al aprobar la solicitud:', error);
+    } catch {
+      // console.error('Error al aprobar la solicitud');
       toast.error('Error al aprobar la solicitud');
     } finally {
       setActionLoading(false);
@@ -298,8 +298,8 @@ export default function SolicitudesPendientesPage() {
       toast.success('La solicitud ha sido rechazada');
       setShowDetailModal(false);
       fetchSolicitudes();
-    } catch (error) {
-  // console.error('Error al rechazar la solicitud:', error);
+    } catch {
+      // console.error('Error al rechazar la solicitud');
       toast.error('Error al rechazar la solicitud');
     } finally {
       setActionLoading(false);

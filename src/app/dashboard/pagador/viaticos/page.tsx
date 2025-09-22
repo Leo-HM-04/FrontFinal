@@ -157,7 +157,7 @@ export default function ViaticosPagadorPage() {
       setSelectedGroups(new Set());
       
       addNotification('info', `${data.length} viáticos cargados`);
-    } catch (error) {
+    } catch {
   // console.error('Error cargando viáticos:', error);
       addNotification('error', 'Error al cargar viáticos');
     } finally {
@@ -319,7 +319,7 @@ export default function ViaticosPagadorPage() {
       setSelected(new Set());
       setSelectedGroups(new Set());
       await loadViaticos();
-    } catch (error) {
+    } catch {
   // console.error('Error marcando como pagados:', error);
       addNotification('error', 'Error al marcar como pagados');
     } finally {
@@ -345,7 +345,7 @@ export default function ViaticosPagadorPage() {
       
       exportMisViaticosCSV(viaticosParaExportar, 'filtrados');
       addNotification('success', 'Archivo CSV exportado correctamente');
-    } catch (error) {
+    } catch {
   // console.error('Error exportando CSV:', error);
       addNotification('error', 'Error al exportar CSV');
     } finally {
@@ -364,7 +364,7 @@ export default function ViaticosPagadorPage() {
       
       await exportMisViaticosExcel(viaticosParaExportar, 'filtrados');
       addNotification('success', 'Archivo Excel exportado correctamente');
-    } catch (error) {
+    } catch {
   // console.error('Error exportando Excel:', error);
       addNotification('error', 'Error al exportar Excel');
     } finally {
@@ -383,7 +383,7 @@ export default function ViaticosPagadorPage() {
       
       await exportMisViaticosPDF(viaticosParaExportar, 'filtrados');
       addNotification('success', 'Archivo PDF exportado correctamente');
-    } catch (error) {
+    } catch {
   // console.error('Error exportando PDF:', error);
       addNotification('error', 'Error al exportar PDF');
     } finally {

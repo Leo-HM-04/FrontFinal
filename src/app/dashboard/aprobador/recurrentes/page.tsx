@@ -17,7 +17,6 @@ const [error, setError] = useState<string | null>(null);
 const [accionEnCurso, setAccionEnCurso] = useState<number | null>(null);
 const [mensaje, setMensaje] = useState<string | null>(null);
 const [comentario, setComentario] = useState<string>('');
-const [rechazoId, setRechazoId] = useState<number | null>(null);
 const [confirmarAccion, setConfirmarAccion] = useState<{ tipo: 'aprobar' | 'rechazar', id: number } | null>(null);
 const [modalOpen, setModalOpen] = useState(false);
 const [solicitudSeleccionada, setSolicitudSeleccionada] = useState<PlantillaRecurrente | null>(null);
@@ -133,7 +132,6 @@ const handleRechazar = async (id: number) => {
     await RecurrentesService.rechazar(id, comentarioRechazo);
     setMensaje('Solicitud rechazada correctamente.');
     setComentario('');
-    setRechazoId(null);
     await refreshSolicitudes();
   } catch (err: unknown) {
     if (err && typeof err === 'object' && 'message' in err && typeof (err as { message?: unknown }).message === 'string') {

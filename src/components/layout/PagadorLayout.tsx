@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Home, FileText, Menu, User, Bell, Repeat, CreditCard, FileCheck2 } from 'lucide-react';
+import { LogOut, Home, FileText, Menu, User, Bell, Repeat, CreditCard, FileCheck2, Upload, BarChart2, ClipboardList } from 'lucide-react';
 
 interface PagadorLayoutProps {
   children: React.ReactNode;
@@ -57,15 +57,20 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
   // Definir elementos de navegación en un arreglo para reducir código repetitivo
   const navItems = [
     { href: '/dashboard/pagador', label: 'Inicio', icon: Home },
-    { href: '/dashboard/pagador/viaticos', label: 'Viáticos a Pagar', icon: CreditCard },
-    { href: '/dashboard/pagador/pagos/pendientes', label: 'Pagos Pendientes', icon: CreditCard },
+    { href: '/dashboard/pagador/viaticos', label: 'Viáticos por Autorizar', icon: BriefcaseIcon },
+    { href: '/dashboard/pagador/pagos/pendientes', label: 'Pagos Pendientes de Procesar', icon: ClipboardList },
     { href: '/dashboard/pagador/recurrentes', label: 'Pagos Recurrentes', icon: Repeat },
-    { href: '/dashboard/pagador/pagos/historial', label: 'Historial de Pagos', icon: FileText },
-    { href: '/dashboard/pagador/pagos/subir-comprobante', label: 'Subir Comprobante', icon: FileText },
+    { href: '/dashboard/pagador/pagos/historial', label: 'Historial de Pagos Realizados', icon: FileText },
+    { href: '/dashboard/pagador/pagos/subir-comprobante', label: 'Subir Comprobante de Pago', icon: Upload },
     { href: '/dashboard/pagador/comprobantes-viaticos', label: 'Comprobantes de Viáticos', icon: FileCheck2 },
-    { href: '/dashboard/pagador/graficas', label: 'Gráficas', icon: FileText },
+    { href: '/dashboard/pagador/graficas', label: 'Gráficas', icon: BarChart2 },
     { href: '/dashboard/pagador/perfil', label: 'Mi Perfil', icon: User },
   ];
+
+// Icono de maletín para Viáticos por Autorizar
+function BriefcaseIcon(props: React.SVGProps<SVGSVGElement>) {
+  return <CreditCard {...props} />;
+}
 
   // Manejador para cerrar el menú
   const closeMenu = useCallback(() => {

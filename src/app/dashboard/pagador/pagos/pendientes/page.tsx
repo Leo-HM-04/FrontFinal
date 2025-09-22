@@ -253,16 +253,7 @@ export default function PagosPendientesPage() {
   const exportToPDF = () => {
     setIsExporting(true);
     try {
-      const data = filteredPagos.map(pago => ({
-        Folio: pago.folio,
-        Solicitante: pago.nombre_usuario || pago.usuario_nombre || '-',
-        Departamento: pago.departamento,
-        Monto: formatCurrency(pago.monto),
-        'Fecha Solicitud': new Date(pago.fecha_creacion).toLocaleDateString('es-MX'),
-        'Fecha Límite': new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX'),
-        Estado: pago.estado?.charAt(0).toUpperCase() + pago.estado?.slice(1) || 'Autorizada',
-        Aprobador: pago.aprobador_nombre || '-'
-      }));
+      // const data = filteredPagos.map(pago => ({ ... }));
 
       // Aquí implementarías la lógica de exportación a PDF
   // console.log('Exportando a PDF:', data);
@@ -278,16 +269,7 @@ export default function PagosPendientesPage() {
   const exportToExcel = () => {
     setIsExporting(true);
     try {
-      const data = filteredPagos.map(pago => ({
-        Folio: pago.folio,
-        Solicitante: pago.nombre_usuario || pago.usuario_nombre || '-',
-        Departamento: pago.departamento,
-        Monto: pago.monto,
-        'Fecha Solicitud': new Date(pago.fecha_creacion).toLocaleDateString('es-MX'),
-        'Fecha Límite': new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX'),
-        Estado: pago.estado?.charAt(0).toUpperCase() + pago.estado?.slice(1) || 'Autorizada',
-        Aprobador: pago.aprobador_nombre || '-'
-      }));
+      // const data = filteredPagos.map(pago => ({ ... }));
 
       // Aquí implementarías la lógica de exportación a Excel
   // console.log('Exportando a Excel:', data);

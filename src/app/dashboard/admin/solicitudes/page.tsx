@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/Button';
@@ -20,7 +19,6 @@ import { Solicitud } from '@/types';
 import { toast } from 'react-hot-toast';
 
 export default function SolicitudesPage() {
-  const router = useRouter();
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);

@@ -7,12 +7,14 @@ import AprobadorNotifications from "@/components/aprobador/AprobadorNotification
 import {
   LogOut,
   Home,
-  FileText,
   CheckCircle,
   Menu,
   User,
   Bell,
   Repeat,
+  ClipboardList,
+  BarChart2,
+  Briefcase,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
@@ -179,11 +181,11 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
             <nav className="flex-1 flex flex-col gap-1 px-4 py-4 overflow-y-auto bg-white rounded-xl mx-4 mb-4 shadow">
               {[
                 { href: '/dashboard/aprobador', label: 'Inicio', icon: Home },
-                { href: '/dashboard/aprobador/solicitudes/pendientes', label: 'Solicitudes Pendientes', icon: FileText },
+                { href: '/dashboard/aprobador/solicitudes/pendientes', label: 'Solicitudes Pendientes', icon: ClipboardList },
                 { href: '/dashboard/aprobador/solicitudes/historial', label: 'Historial de Aprobaciones', icon: CheckCircle },
                 { href: '/dashboard/aprobador/recurrentes', label: 'Solicitudes Recurrentes', icon: Repeat },
-                { href: '/dashboard/aprobador/viaticos', label: 'Viáticos', icon: FileText },
-                { href: '/dashboard/aprobador/graficas', label: 'Graficas', icon: FileText },
+                { href: '/dashboard/aprobador/viaticos', label: 'Solicitudes de Viáticos', icon: Briefcase },
+                { href: '/dashboard/aprobador/graficas', label: 'Gráficas', icon: BarChart2 },
                 { href: '/dashboard/aprobador/perfil', label: 'Mi Perfil', icon: User },
               ].map((item) => {
                 const isActive = pathname === item.href || (pathname && pathname.startsWith(item.href));

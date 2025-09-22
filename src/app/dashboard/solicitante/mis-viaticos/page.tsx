@@ -89,7 +89,7 @@ function MisViaticosContent() {
       viaticosToExport = filterViaticosByPeriod(viaticosToExport, period);
       
       exportMisViaticosPDF(viaticosToExport, period);
-    } catch (error) {
+    } catch {
   // console.error('Error exportando PDF:', error);
     } finally {
       setIsExporting(false);
@@ -116,7 +116,7 @@ function MisViaticosContent() {
       viaticosToExport = filterViaticosByPeriod(viaticosToExport, period);
       
       exportMisViaticosExcel(viaticosToExport, period);
-    } catch (error) {
+    } catch {
   // console.error('Error exportando Excel:', error);
     } finally {
       setIsExporting(false);
@@ -143,7 +143,7 @@ function MisViaticosContent() {
       viaticosToExport = filterViaticosByPeriod(viaticosToExport, period);
       
       exportMisViaticosCSV(viaticosToExport, period);
-    } catch (error) {
+    } catch {
   // console.error('Error exportando CSV:', error);
     } finally {
       setIsExporting(false);

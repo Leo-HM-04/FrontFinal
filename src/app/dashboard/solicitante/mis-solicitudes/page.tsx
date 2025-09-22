@@ -28,8 +28,6 @@ import {
   Edit,
   Trash2,
   AlertTriangle,
-  ChevronUp,
-  ChevronDown,
 } from 'lucide-react';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { ExportModal } from '@/components/modals/ExportModal';
@@ -124,62 +122,8 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString('es-MX', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-};
 
 // ========= Subcomponentes a nivel de módulo (memoizados) =========
-const SortableHeader = memo(function SortableHeader({
-  field,
-  children,
-  className = 'px-6 py-4 text-left text-sm font-semibold text-gray-900',
-  sortField,
-  sortOrder,
-  onSort,
-}: {
-  field?: SortField;
-  children: React.ReactNode;
-  className?: string;
-  sortField?: SortField | null;
-  sortOrder?: SortOrder;
-  onSort?: (field: SortField) => void;
-}) {
-  if (!field) {
-    return <th className={className}>{children}</th>;
-  }
-  const handleClick = () => onSort && onSort(field);
-
-  return (
-    <th
-      className={`${className} cursor-pointer hover:bg-gray-100 transition-colors select-none`}
-      onClick={handleClick}
-    >
-      <div className="flex items-center gap-2">
-        {children}
-        <div className="flex flex-col">
-          <ChevronUp
-            className={`w-3 h-3 ${
-              sortField === field && sortOrder === 'asc'
-                ? 'text-blue-600'
-                : 'text-gray-400'
-            }`}
-          />
-          <ChevronDown
-            className={`w-3 h-3 -mt-1 ${
-              sortField === field && sortOrder === 'desc'
-                ? 'text-blue-600'
-                : 'text-gray-400'
-            }`}
-          />
-        </div>
-      </div>
-    </th>
-  );
-});
 
 const EstadisticasCard = memo(function EstadisticasCard({
   estadisticas,
@@ -390,8 +334,8 @@ function MisSolicitudesContent() {
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
 
   // Ordenamiento
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [sortField] = useState<SortField | null>(null);
+  const [sortOrder] = useState<SortOrder>('desc');
 
   // Manejo de parámetros URL para highlighting y modal
   useEffect(() => {
@@ -451,9 +395,9 @@ function MisSolicitudesContent() {
           setSolicitudes(sorted);
           setError('');
         }
-      } catch (err) {
+      } catch {
         if (isMounted) {
-          // console.error('Error al cargar solicitudes:', err);
+          // console.error('Error al cargar solicitudes');
           setError('Error al cargar las solicitudes');
           setSolicitudes([]);
         }
@@ -528,17 +472,6 @@ function MisSolicitudesContent() {
   };
 
   // Ordenamiento
-  const handleSort = useCallback((field: SortField) => {
-    setSortField((prevField) => {
-      if (prevField === field) {
-        setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc'));
-        return prevField;
-      } else {
-        setSortOrder('desc');
-        return field;
-      }
-    });
-  }, []);
 
   const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
     if (sortField && sortOrder) {
@@ -611,8 +544,8 @@ function MisSolicitudesContent() {
       } else if (format === 'csv') {
         exportMisSolicitudesCSV(solicitudesExport, filter);
       }
-    } catch (error) {
-  // console.error('Error al exportar:', error);
+    } catch {
+      // console.error('Error al exportar');
       // Aquí podrías mostrar una notificación de error al usuario
     }
 

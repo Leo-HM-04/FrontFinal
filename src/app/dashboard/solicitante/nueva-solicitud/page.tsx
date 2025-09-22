@@ -261,21 +261,6 @@ export default function NuevaSolicitudPage() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof FormState) => {
-    const file = e.target.files?.[0] || null;
-    if (file) {
-      const valid = validateFile(file);
-      if (!valid) {
-        setErrors((prev) => ({ ...prev, factura_file: 'Archivo no válido' }));
-        return;
-      }
-      dispatch({ type: 'SET_FIELD', field: fieldName, value: file });
-      setErrors((prev) => ({ ...prev, factura_file: undefined }));
-    } else {
-      setErrors((prev) => ({ ...prev, factura_file: 'Este campo es obligatorio' }));
-    }
-  };
-
   const validateFile = (file: File) => {
     const allowedTypes = [
       'application/pdf',

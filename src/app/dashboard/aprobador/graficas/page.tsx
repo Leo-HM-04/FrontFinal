@@ -68,8 +68,8 @@ export default function GraficasAprobador() {
             const tendenciaJson = await resTend.json();
             setTendencia(tendenciaJson);
           }
-        } catch (tendenciaError) {
-          // console.warn('Endpoint de tendencia mensual no disponible:', tendenciaError);
+        } catch {
+          // console.warn('Endpoint de tendencia mensual no disponible');
           // Continúa sin la data de tendencia
         }
       } catch (err) {
@@ -116,8 +116,8 @@ export default function GraficasAprobador() {
         document.head.removeChild(printStyles);
       }, 1000);
       
-    } catch (error) {
-  // console.error('Error en método alternativo:', error);
+    } catch {
+      // console.error('Error en método alternativo');
       alert('Error al abrir el diálogo de impresión');
     }
   };
