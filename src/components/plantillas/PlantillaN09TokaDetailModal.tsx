@@ -210,8 +210,8 @@ const buildFileUrl = (ruta: string): string => {
   if (ruta.startsWith('http')) return ruta;
   // Elimina cualquier prefijo de /root/PlataformaPagosFinal/BackFinal/uploads/
   let cleanPath = ruta.replace(/^\/root\/PlataformaPagosFinal\/BackFinal\/uploads\//, '');
-  // Elimina todos los prefijos 'uploads/' repetidos
-  cleanPath = cleanPath.replace(/^(uploads\/)+/, '');
+  // Elimina todos los prefijos 'uploads/' en cualquier parte de la ruta
+  cleanPath = cleanPath.replace(/\buploads\//g, '');
   // Construye la URL final sin duplicar 'uploads/'
   return `https://bechapra.com.mx/uploads/${cleanPath}`;
 };
