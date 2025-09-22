@@ -501,15 +501,18 @@ export default function NuevaSolicitudPage() {
               console.log('🗂️ Archivos a subir:', archivosParaSubir.map(f => ({ name: f.name, size: f.size, type: f.type })));
               
               // Obtener el ID de la solicitud N09/TOKA creada
-              let idSolicitudN09Toka = (responseN09Toka as Record<string, unknown>)?.id_solicitud as number | undefined;
-              if (!idSolicitudN09Toka && (responseN09Toka as Record<string, unknown>)?.data) {
-                idSolicitudN09Toka = ((responseN09Toka as Record<string, unknown>).data as Record<string, unknown>)?.id_solicitud as number | undefined;
+              let idSolicitudN09Toka = (responseN09Toka as Record<string, unknown>)?.data as Record<string, unknown>;
+              let idFinal: number | undefined;
+              
+              // El backend devuelve { success: true, data: { id, ...datos } }
+              if (idSolicitudN09Toka?.id) {
+                idFinal = idSolicitudN09Toka.id as number;
               }
               
-              console.log('🆔 ID solicitud N09/TOKA obtenido:', idSolicitudN09Toka);
+              console.log('🆔 ID solicitud N09/TOKA obtenido:', idFinal);
               console.log('📋 Response N09/TOKA completa:', responseN09Toka);
               
-              if (idSolicitudN09Toka) {
+              if (idFinal) {
                 // Subir TODOS los archivos (no solo slice(1))
                 const tiposArchivos = new Array(archivosParaSubir.length).fill('documento');
                 
@@ -518,7 +521,7 @@ export default function NuevaSolicitudPage() {
                 console.log('🔄 Llamando a SolicitudN09TokaArchivosService.subirArchivos...');
                 
                 const resultadoArchivos = await SolicitudN09TokaArchivosService.subirArchivos(
-                  idSolicitudN09Toka,
+                  idFinal,
                   archivosParaSubir, // TODOS los archivos
                   tiposArchivos
                 );
