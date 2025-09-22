@@ -377,6 +377,27 @@ export function SolicitudDetailModal({
     }
   }, [isOpen]);
 
+  // Datos computados para el modal
+  const modalData = useMemo(() => {
+    if (!solicitud || !plantillaData.mapeoPlantilla) return null;
+    
+    return Object.entries(plantillaData.datosPlantilla)
+      .filter(([campo]) => !debeOcultarse(campo))
+      .map(([campo, valor]) => ({
+        campo,
+        valor,
+        etiqueta: plantillaData.mapeoPlantilla?.[campo as keyof typeof plantillaData.mapeoPlantilla] || campo
+      }));
+  }, [solicitud, plantillaData, debeOcultarse]);
+
+  const bancoDestinoNombre = useMemo(() => {
+    return solicitud?.banco_destino ? formatBankInfo(solicitud.banco_destino) : '-';
+  }, [solicitud?.banco_destino]);
+
+  const montoFormateado = useMemo(() => {
+    return solicitud?.monto ? formatCurrency(Number(solicitud.monto)) : '-';
+  }, [solicitud?.monto, formatCurrency]);
+
   // Verificaciones adicionales
   const hasCuentaAdicional = useMemo(() => {
     if (!solicitud) return false;

@@ -82,6 +82,8 @@ const DATE_OPTIONS = [
 
 // Función para detectar si una solicitud es del tipo N09/TOKA
 const isN09TokaSolicitud = (solicitud: Solicitud): boolean => {
+  console.log('🔍 [DETECCIÓN] Analizando solicitud ID:', solicitud.id_solicitud);
+  
   // Detectar basándose en tipo_plantilla si está disponible
   const solicitudExtendida = solicitud as Solicitud & {
     tipo_plantilla?: string;
@@ -90,23 +92,45 @@ const isN09TokaSolicitud = (solicitud: Solicitud): boolean => {
     beneficiario?: string;
   };
   
+  console.log('🔍 [DETECCIÓN] tipo_plantilla:', solicitudExtendida.tipo_plantilla);
+  console.log('🔍 [DETECCIÓN] asunto:', solicitudExtendida.asunto);
+  console.log('🔍 [DETECCIÓN] cliente:', solicitudExtendida.cliente);
+  console.log('🔍 [DETECCIÓN] beneficiario:', solicitudExtendida.beneficiario);
+  
   if (solicitudExtendida.tipo_plantilla === 'N09_TOKA') {
+    console.log('✅ [DETECCIÓN] Detectada por tipo_plantilla');
     return true;
   }
   
   // Detectar basándose en los campos específicos de plantilla_datos
+  console.log('🔍 [DETECCIÓN] plantilla_datos existe:', !!solicitud.plantilla_datos);
+  console.log('🔍 [DETECCIÓN] plantilla_datos contenido:', solicitud.plantilla_datos);
+  
   if (solicitud.plantilla_datos) {
     try {
       const plantillaData = JSON.parse(solicitud.plantilla_datos);
-      return plantillaData.templateType === 'tarjetas-n09-toka' || 
+      console.log('🔍 [DETECCIÓN] plantillaData parseado:', plantillaData);
+      console.log('🔍 [DETECCIÓN] templateType:', plantillaData.templateType);
+      console.log('🔍 [DETECCIÓN] isN09Toka:', plantillaData.isN09Toka);
+      console.log('🔍 [DETECCIÓN] beneficiario:', plantillaData.beneficiario);
+      console.log('🔍 [DETECCIÓN] numero_cuenta_clabe:', plantillaData.numero_cuenta_clabe);
+      console.log('🔍 [DETECCIÓN] tipo_cuenta_clabe:', plantillaData.tipo_cuenta_clabe);
+      
+      const esN09Toka = plantillaData.templateType === 'tarjetas-n09-toka' || 
              plantillaData.isN09Toka === true ||
              plantillaData.beneficiario || 
              plantillaData.numero_cuenta_clabe || 
              plantillaData.tipo_cuenta_clabe;
-    } catch {
+      
+      console.log('🔍 [DETECCIÓN] Resultado final por plantilla_datos:', esN09Toka);
+      return esN09Toka;
+    } catch (error) {
+      console.log('❌ [DETECCIÓN] Error parsing plantilla_datos:', error);
       return false;
     }
   }
+  
+  console.log('❌ [DETECCIÓN] No detectada como N09/TOKA');
   return false;
 };
 
