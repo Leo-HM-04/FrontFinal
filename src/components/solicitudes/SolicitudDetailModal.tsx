@@ -58,6 +58,17 @@ const formatBankInfo = (bankCode: string): string => {
   return bancoPorNombre ? bancoPorNombre.nombre : bankCode.replace(/_/g, ' ');
 };
 
+const formatBankInfoAbreviado = (bankCode: string): string => {
+  if (!bankCode) return '-';
+  const banco = bancosMexico.find(b => b.codigo === bankCode);
+  if (banco) return banco.nombreCorto || banco.nombre;
+  const bancoPorNombre = bancosMexico.find(b =>
+    b.nombreCorto.toLowerCase() === bankCode.toLowerCase() ||
+    b.nombre.toLowerCase() === bankCode.toLowerCase()
+  );
+  return bancoPorNombre ? bancoPorNombre.nombreCorto || bancoPorNombre.nombre : bankCode.replace(/_/g, ' ');
+};
+
 const formatAccountType = (tipoStr: string, tipoTarjeta?: string): string => {
   if (!tipoStr) return '-';
   
@@ -649,7 +660,7 @@ export function SolicitudDetailModal({
                       />
                       <InfoField
                         label="Banco destino"
-                        value={solicitud.banco_destino ? formatBankInfo(solicitud.banco_destino) : '-'}
+                        value={solicitud.banco_destino ? formatBankInfoAbreviado(solicitud.banco_destino) : '-'}
                       />
                       <InfoField
                         label="Cuenta destino"
