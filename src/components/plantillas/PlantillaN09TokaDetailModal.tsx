@@ -135,9 +135,8 @@ const InfoField: React.FC<{
 // Componente para previsualización de archivos
 const FilePreview: React.FC<{
   archivo: SolicitudN09TokaArchivo;
-  baseUrl: string;
-}> = ({ archivo, baseUrl }) => {
-  const url = `${baseUrl}/${archivo.ruta_archivo}`;
+}> = ({ archivo }) => {
+  const url = buildFileUrl(archivo.ruta_archivo);
   const isImage = /\.(jpg|jpeg|png|gif)$/i.test(archivo.nombre_archivo);
   const isPdf = /\.pdf$/i.test(archivo.nombre_archivo);
 
@@ -393,7 +392,7 @@ export function PlantillaN09TokaDetailModal({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {archivos.map((archivo) => (
                       <div key={archivo.id_archivo} className="bg-white/90 rounded-lg border border-blue-200 p-4 shadow-sm">
-                        <FilePreview archivo={{...archivo, ruta_archivo: buildFileUrl(archivo.ruta_archivo)}} baseUrl="" />
+                        <FilePreview archivo={archivo} />
                         <div className="mt-3 flex gap-2">
                           <button
                             onClick={() => window.open(buildFileUrl(archivo.ruta_archivo), '_blank')}
