@@ -14,6 +14,8 @@ import {
   obtenerDatosPlantilla,
   obtenerEtiquetasPlantilla 
 } from '@/utils/plantillasLabels';
+import { obtenerPlantillaPorId } from '@/data/plantillas';
+import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
 import { bancosMexico } from '@/data/bancos';
 import '@/styles/modal.css';
 
@@ -744,72 +746,41 @@ export function SolicitudDetailModal({
                   </Card>
                 )}
 
-                {/* Datos específicos de plantilla */}
-                {(plantillaData.plantillaId && plantillaData.datosPlantilla && Object.keys(plantillaData.datosPlantilla).length > 0) ? (
-                  <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
-                    <h2 className="text-lg sm:text-xl font-bold text-purple-900 mb-4 flex items-center">
-                      <div className="p-2 bg-purple-100 rounded-lg sm:rounded-xl mr-3">
-                        <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-700" />
-                      </div>
-                      {plantillaData.mapeoPlantilla?.nombre || 'Plantilla personalizada'} - Información Específica
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                      {Object.entries(plantillaData.datosPlantilla).map(([clave, valor]) => {
-                        // Mostrar todos los campos de plantilla, incluso si no están en el mapeo
-                        const etiqueta = obtenerEtiqueta(clave) || clave.replace(/_/g, ' ').toUpperCase();
-                        let valorFormateado = valor;
-                        if (Array.isArray(valor)) {
-                          if (clave.includes('archivo')) {
-                            return (
-                              <div key={clave} className="sm:col-span-2">
-                                <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">{etiqueta}</span>
-                                <div className="flex flex-wrap gap-2">
-                                  {valor.map((file, idx) => (
-                                    <span key={idx} className="bg-purple-100 text-purple-900 px-2 py-1 rounded text-xs border border-purple-200">{typeof file === 'string' ? file : (file?.name || 'Archivo')}</span>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          }
-                          valorFormateado = valor.join(', ');
-                        } else if (typeof valor === 'boolean') {
-                          valorFormateado = valor ? 'Sí' : 'No';
-                        } else if (clave.includes('fecha') && valor) {
-                          try { valorFormateado = formatDateForDisplay(String(valor)); } catch { valorFormateado = String(valor); }
-                        } else if (clave.includes('monto') && valor) {
-                          valorFormateado = `${parseFloat(String(valor)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}`;
-                        } else if (clave.includes('porcentaje') && valor) {
-                          valorFormateado = `${valor}%`;
-                        } else {
-                          valorFormateado = String(valor);
-                        }
-                        if (!valor || valor === '' || valor === null || valor === undefined) return null;
-                        return (
-                          <InfoField
-                            key={clave}
-                            label={etiqueta}
-                            value={valorFormateado?.toString()}
-                            className="bg-white/80 border-purple-100"
+                {/* Datos específicos de plantilla con layout original */}
+                {plantillaData.plantillaId ? (
+                  (() => {
+                    const plantilla = obtenerPlantillaPorId(plantillaData.plantillaId);
+                    if (plantilla) {
+                      return (
+                        <Card className="p-0 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
+                          <FormularioPlantilla
+                            plantilla={plantilla}
+                            datos={plantillaData.datosPlantilla}
+                            errores={{}}
+                            camposVisibles={new Set(plantilla.secciones.flatMap(s => s.campos.map(c => c.id)))}
+                            onCambiarCampo={() => {}}
+                            className="pointer-events-none select-none opacity-100"
                           />
-                        );
-                      })}
-                    </div>
-                  </Card>
-                ) : (
-                  solicitud?.tipo_pago_descripcion?.startsWith('Plantilla:') && (
-                    <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
-                      <h2 className="text-lg sm:text-xl font-bold text-purple-900 mb-4 flex items-center">
-                        <div className="p-2 bg-purple-100 rounded-lg sm:rounded-xl mr-3">
-                          <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-700" />
-                        </div>
-                        Información de Plantilla
-                      </h2>
-                      <div className="text-purple-700 text-sm bg-purple-50/80 p-3 rounded-lg border border-purple-200">
-                        No se detectaron datos específicos de la plantilla para esta solicitud.
-                      </div>
-                    </Card>
-                  )
-                )}
+                        </Card>
+                      );
+                    } else if (solicitud?.tipo_pago_descripcion?.startsWith('Plantilla:')) {
+                      return (
+                        <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
+                          <h2 className="text-lg sm:text-xl font-bold text-purple-900 mb-4 flex items-center">
+                            <div className="p-2 bg-purple-100 rounded-lg sm:rounded-xl mr-3">
+                              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-700" />
+                            </div>
+                            Información de Plantilla
+                          </h2>
+                          <div className="text-purple-700 text-sm bg-purple-50/80 p-3 rounded-lg border border-purple-200">
+                            No se detectaron datos específicos de la plantilla para esta solicitud.
+                          </div>
+                        </Card>
+                      );
+                    }
+                    return null;
+                  })()
+                ) : null}
 
                 {/* Diagnóstico de datos de plantilla */}
                 <Card className="p-3 mb-4 bg-yellow-50 border border-yellow-200 rounded-xl">
