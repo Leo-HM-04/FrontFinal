@@ -281,7 +281,7 @@ export default function SolicitudesPendientesPage() {
       setShowDetailModal(false);
       fetchSolicitudes();
     } catch (error) {
-      console.error('Error al aprobar la solicitud:', error);
+  // console.error('Error al aprobar la solicitud:', error);
       toast.error('Error al aprobar la solicitud');
     } finally {
       setActionLoading(false);
@@ -299,7 +299,7 @@ export default function SolicitudesPendientesPage() {
       setShowDetailModal(false);
       fetchSolicitudes();
     } catch (error) {
-      console.error('Error al rechazar la solicitud:', error);
+  // console.error('Error al rechazar la solicitud:', error);
       toast.error('Error al rechazar la solicitud');
     } finally {
       setActionLoading(false);

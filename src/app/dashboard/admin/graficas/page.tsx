@@ -671,7 +671,7 @@ function getPromedioCrecimiento(pagosPorMes: PagoMes[]): number {
                     <h2 className="text-xl font-bold text-yellow-700 mb-4">Notificaciones por Usuario (Pie)</h2>
                     <p className="text-slate-500 text-sm mb-2">Cada segmento representa la cantidad de notificaciones que tiene cada usuario. El número indica el ID de usuario y el total de notificaciones. Los colores muestran el porcentaje de cada usuario respecto al total.</p>
                     {/* Depuración rápida: mostrar datos en consola */}
-                    {(() => { console.log('notificacionesPorUsuario', notificacionesPorUsuario); return null; })()}
+                    {/* {(() => { console.log('notificacionesPorUsuario', notificacionesPorUsuario); return null; })()} */}
                     <ResponsiveContainer width="100%" height={260}>
                       {Array.isArray(notificacionesPorUsuario) && notificacionesPorUsuario.length > 0 ? (
                         <PieChart>

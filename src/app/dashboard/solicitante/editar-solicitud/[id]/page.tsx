@@ -226,8 +226,8 @@ export default function EditarSolicitudPage() {
         const solicitudData = await (SolicitudesService.getById?.(solicitudId) ?? (SolicitudesService as Record<string, unknown>).get?.(solicitudId));
         if (!solicitudData) throw new Error('No se encontró la solicitud.');
         
-        console.log('📥 Datos recibidos del servicio:', solicitudData);
-        console.log('📥 plantilla_datos del servicio:', solicitudData.plantilla_datos);
+  // console.log('📥 Datos recibidos del servicio:', solicitudData);
+  // console.log('📥 plantilla_datos del servicio:', solicitudData.plantilla_datos);
 
         // Usar directamente la respuesta
         const s = solicitudData as unknown as Record<string, string | number | boolean | null>;
@@ -270,25 +270,25 @@ export default function EditarSolicitudPage() {
         setFechaLimitePago(fecha);
 
         // 🔍 DETECTAR Y CONFIGURAR PLANTILLA
-        console.log('🔍 Iniciando detección de plantilla...');
-        console.log('📊 tipo_pago_descripcion:', s.tipo_pago_descripcion);
-        console.log('📊 plantilla_datos en solicitud:', s.plantilla_datos);
-        console.log('📊 Datos completos s:', s);
+  // console.log('🔍 Iniciando detección de plantilla...');
+  // console.log('📊 tipo_pago_descripcion:', s.tipo_pago_descripcion);
+  // console.log('📊 plantilla_datos en solicitud:', s.plantilla_datos);
+  // console.log('📊 Datos completos s:', s);
         
         const plantillaId = detectarPlantillaId(s as unknown as Solicitud);
-        console.log('🔍 Resultado detectarPlantillaId:', plantillaId);
+  // console.log('🔍 Resultado detectarPlantillaId:', plantillaId);
         
         if (plantillaId) {
-          console.log('🎯 Plantilla detectada para edición:', plantillaId);
+          // console.log('🎯 Plantilla detectada para edición:', plantillaId);
           
           // Buscar la plantilla en las disponibles
           const plantillaEncontrada = plantillasDisponibles.find(p => p.id === plantillaId);
-          console.log('🔍 Plantilla encontrada en disponibles:', plantillaEncontrada);
+          // console.log('🔍 Plantilla encontrada en disponibles:', plantillaEncontrada);
           
           if (plantillaEncontrada) {
             setPlantillaDetectada(plantillaEncontrada);
             setEsEdicionPlantilla(true);
-            console.log('✅ Configurando edición de plantilla:', plantillaEncontrada.nombre);
+            // console.log('✅ Configurando edición de plantilla:', plantillaEncontrada.nombre);
             
             // Cargar plantilla en el hook
             seleccionarPlantilla(plantillaEncontrada);

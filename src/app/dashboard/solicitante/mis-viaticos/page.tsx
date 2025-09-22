@@ -90,7 +90,7 @@ function MisViaticosContent() {
       
       exportMisViaticosPDF(viaticosToExport, period);
     } catch (error) {
-      console.error('Error exportando PDF:', error);
+  // console.error('Error exportando PDF:', error);
     } finally {
       setIsExporting(false);
     }
@@ -117,7 +117,7 @@ function MisViaticosContent() {
       
       exportMisViaticosExcel(viaticosToExport, period);
     } catch (error) {
-      console.error('Error exportando Excel:', error);
+  // console.error('Error exportando Excel:', error);
     } finally {
       setIsExporting(false);
     }
@@ -144,7 +144,7 @@ function MisViaticosContent() {
       
       exportMisViaticosCSV(viaticosToExport, period);
     } catch (error) {
-      console.error('Error exportando CSV:', error);
+  // console.error('Error exportando CSV:', error);
     } finally {
       setIsExporting(false);
     }

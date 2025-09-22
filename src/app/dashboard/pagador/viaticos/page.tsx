@@ -158,7 +158,7 @@ export default function ViaticosPagadorPage() {
       
       addNotification('info', `${data.length} viáticos cargados`);
     } catch (error) {
-      console.error('Error cargando viáticos:', error);
+  // console.error('Error cargando viáticos:', error);
       addNotification('error', 'Error al cargar viáticos');
     } finally {
       setLoading(false);
@@ -320,7 +320,7 @@ export default function ViaticosPagadorPage() {
       setSelectedGroups(new Set());
       await loadViaticos();
     } catch (error) {
-      console.error('Error marcando como pagados:', error);
+  // console.error('Error marcando como pagados:', error);
       addNotification('error', 'Error al marcar como pagados');
     } finally {
       setProcessing(false);
@@ -346,7 +346,7 @@ export default function ViaticosPagadorPage() {
       exportMisViaticosCSV(viaticosParaExportar, 'filtrados');
       addNotification('success', 'Archivo CSV exportado correctamente');
     } catch (error) {
-      console.error('Error exportando CSV:', error);
+  // console.error('Error exportando CSV:', error);
       addNotification('error', 'Error al exportar CSV');
     } finally {
       setProcessing(false);
@@ -365,7 +365,7 @@ export default function ViaticosPagadorPage() {
       await exportMisViaticosExcel(viaticosParaExportar, 'filtrados');
       addNotification('success', 'Archivo Excel exportado correctamente');
     } catch (error) {
-      console.error('Error exportando Excel:', error);
+  // console.error('Error exportando Excel:', error);
       addNotification('error', 'Error al exportar Excel');
     } finally {
       setProcessing(false);
@@ -384,7 +384,7 @@ export default function ViaticosPagadorPage() {
       await exportMisViaticosPDF(viaticosParaExportar, 'filtrados');
       addNotification('success', 'Archivo PDF exportado correctamente');
     } catch (error) {
-      console.error('Error exportando PDF:', error);
+  // console.error('Error exportando PDF:', error);
       addNotification('error', 'Error al exportar PDF');
     } finally {
       setProcessing(false);

@@ -69,7 +69,7 @@ export default function GraficasAprobador() {
             setTendencia(tendenciaJson);
           }
         } catch (tendenciaError) {
-          console.warn('Endpoint de tendencia mensual no disponible:', tendenciaError);
+          // console.warn('Endpoint de tendencia mensual no disponible:', tendenciaError);
           // Continúa sin la data de tendencia
         }
       } catch (err) {
@@ -88,7 +88,7 @@ export default function GraficasAprobador() {
   // Función alternativa más simple para casos problemáticos
   const downloadSimplePDF = async () => {
     try {
-      console.log('Usando método alternativo simple...');
+  // console.log('Usando método alternativo simple...');
       
       // Usar window.print() nativo con estilos CSS para PDF
       const originalTitle = document.title;
@@ -117,7 +117,7 @@ export default function GraficasAprobador() {
       }, 1000);
       
     } catch (error) {
-      console.error('Error en método alternativo:', error);
+  // console.error('Error en método alternativo:', error);
       alert('Error al abrir el diálogo de impresión');
     }
   };

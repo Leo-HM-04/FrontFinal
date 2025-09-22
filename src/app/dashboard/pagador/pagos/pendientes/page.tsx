@@ -265,7 +265,7 @@ export default function PagosPendientesPage() {
       }));
 
       // Aquí implementarías la lógica de exportación a PDF
-      console.log('Exportando a PDF:', data);
+  // console.log('Exportando a PDF:', data);
       toast.success('PDF exportado correctamente');
     } catch {
       toast.error('Error al exportar PDF');
@@ -290,7 +290,7 @@ export default function PagosPendientesPage() {
       }));
 
       // Aquí implementarías la lógica de exportación a Excel
-      console.log('Exportando a Excel:', data);
+  // console.log('Exportando a Excel:', data);
       toast.success('Excel exportado correctamente');
     } catch {
       toast.error('Error al exportar Excel');

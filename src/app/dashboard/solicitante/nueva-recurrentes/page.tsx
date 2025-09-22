@@ -190,7 +190,7 @@ export default function NuevaRecurrentePage() {
       toast.success(successMsg);
       router.push('/dashboard/solicitante/mis-recurrentes');
     } catch (error: unknown) {
-      console.error('Error:', error);
+  // console.error('Error:', error);
       let errorMsg = 'Error al crear plantilla recurrente';
       if (typeof error === 'object' && error !== null) {
         const errObj = error as { response?: { data?: { error?: string } } };

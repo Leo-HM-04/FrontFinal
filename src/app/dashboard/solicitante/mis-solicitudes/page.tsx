@@ -453,7 +453,7 @@ function MisSolicitudesContent() {
         }
       } catch (err) {
         if (isMounted) {
-          console.error('Error al cargar solicitudes:', err);
+          // console.error('Error al cargar solicitudes:', err);
           setError('Error al cargar las solicitudes');
           setSolicitudes([]);
         }
@@ -612,7 +612,7 @@ function MisSolicitudesContent() {
         exportMisSolicitudesCSV(solicitudesExport, filter);
       }
     } catch (error) {
-      console.error('Error al exportar:', error);
+  // console.error('Error al exportar:', error);
       // Aquí podrías mostrar una notificación de error al usuario
     }
 
@@ -640,7 +640,7 @@ function MisSolicitudesContent() {
       setSuccess('Solicitud eliminada correctamente.');
       setTimeout(() => setSuccess(''), 3500);
     } catch (err: unknown) {
-      console.error('Error al eliminar solicitud:', err);
+  // console.error('Error al eliminar solicitud:', err);
       let backendMsg = 'Error al eliminar la solicitud';
       if (typeof err === 'object' && err !== null) {
         const e = err as {

@@ -590,18 +590,18 @@ function EditarViaticoPageInner() {
                               formData.append('nombre_persona', String(form.nombre_persona || ''));
                               formData.append('viatico_file', file);
                               
-                              console.log('Enviando actualización con archivo...');
+                              // console.log('Enviando actualización con archivo...');
                               const actualizado = await ViaticosService.updateWithFiles(
                                 Number(viatico.id_viatico ?? viatico.id),
                                 formData
                               );
-                              console.log('Respuesta del servidor:', actualizado);
+                              // console.log('Respuesta del servidor:', actualizado);
                               
                               // Actualizar el estado local con la respuesta del servidor
                               setViatico(actualizado);
                               setMensaje('Archivo actualizado correctamente.');
                             } catch (err) {
-                              console.error('Error al subir archivo:', err);
+                              // console.error('Error al subir archivo:', err);
                               // @ts-expect-error: Puede no tener response
                               setMensaje(err?.response?.data?.error || 'Error al subir el archivo.');
                             }

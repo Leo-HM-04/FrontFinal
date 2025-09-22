@@ -374,18 +374,18 @@ export default function NuevaSolicitudPage() {
 
         // Procesar archivos de la plantilla
         let archivosParaSubir: File[] = [];
-        console.log('Verificando archivos en estadoPlantilla.datos:', estadoPlantilla.datos);
+  // console.log('Verificando archivos en estadoPlantilla.datos:', estadoPlantilla.datos);
         
         if (estadoPlantilla.datos.archivos_adjuntos && Array.isArray(estadoPlantilla.datos.archivos_adjuntos)) {
           archivosParaSubir = estadoPlantilla.datos.archivos_adjuntos;
-          console.log('Archivos encontrados:', archivosParaSubir.length, archivosParaSubir.map(f => f.name));
+          // console.log('Archivos encontrados:', archivosParaSubir.length, archivosParaSubir.map(f => f.name));
         } else {
-          console.log('No se encontraron archivos o no es un array:', estadoPlantilla.datos.archivos_adjuntos);
+          // console.log('No se encontraron archivos o no es un array:', estadoPlantilla.datos.archivos_adjuntos);
         }
 
         // Validar que hay al menos un archivo
         if (archivosParaSubir.length === 0) {
-          console.error('No hay archivos para subir. Datos completos:', estadoPlantilla.datos);
+          // console.error('No hay archivos para subir. Datos completos:', estadoPlantilla.datos);
           throw new Error('Debe adjuntar al menos un archivo para la plantilla');
         }
 
@@ -437,31 +437,32 @@ export default function NuevaSolicitudPage() {
           archivos: archivosParaSubir
         };
 
-        console.log('Datos de plantilla para enviar al nuevo servicio:', solicitudPlantillaData);
-        console.log('Archivos a enviar:', archivosParaSubir.map(f => ({ name: f.name, size: f.size, type: f.type })));
-        console.log('Datos completos de la plantilla:', estadoPlantilla.datos);
-        console.log('Plantilla seleccionada:', estadoPlantilla.plantillaSeleccionada?.id);
+  // console.log('Datos de plantilla para enviar al nuevo servicio:', solicitudPlantillaData);
+  // console.log('Archivos a enviar:', archivosParaSubir.map(f => ({ name: f.name, size: f.size, type: f.type })));
+  // console.log('Datos completos de la plantilla:', estadoPlantilla.datos);
+  // console.log('Plantilla seleccionada:', estadoPlantilla.plantillaSeleccionada?.id);
 
         // Usar el nuevo servicio específico para plantillas
         const response = await SolicitudesService.createPlantilla(solicitudPlantillaData);
         
-        console.log('Respuesta del servicio de plantillas:', response);
+  // console.log('Respuesta del servicio de plantillas:', response);
 
         toast.success('Solicitud de plantilla creada exitosamente');
         router.push('/dashboard/solicitante/mis-solicitudes');
         
       } catch (error: unknown) {
-        console.error('Error al crear solicitud con plantilla:', error);
+  // console.error('Error al crear solicitud con plantilla:', error);
         
         // Log más detallado del error
-        if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as { response?: { data?: unknown; status?: number; statusText?: string } };
-          console.error('Detalles del error del servidor:', {
-            status: axiosError.response?.status,
-            statusText: axiosError.response?.statusText,
-            data: axiosError.response?.data
-          });
-        }
+        // Si necesitas depurar detalles del error del servidor, descomenta el siguiente bloque:
+        // if (error && typeof error === 'object' && 'response' in error) {
+        //   const axiosError = error as { response?: { data?: unknown; status?: number; statusText?: string } };
+        //   console.error('Detalles del error del servidor:', {
+        //     status: axiosError.response?.status,
+        //     statusText: axiosError.response?.statusText,
+        //     data: axiosError.response?.data
+        //   });
+        // }
         
         const errorMessage = error instanceof Error ? error.message : 'Error al crear la solicitud de plantilla';
         toast.error(errorMessage);
@@ -642,7 +643,7 @@ export default function NuevaSolicitudPage() {
         throw new Error('Debe subir al menos un documento.');
       }
       
-      console.log('FormData antes de enviar:', formData);
+  // console.log('FormData antes de enviar:', formData);
       
       // Generar concepto basado en tipo_concepto
       let conceptoGenerado: string;
@@ -663,12 +664,7 @@ export default function NuevaSolicitudPage() {
         conceptoGenerado = 'Pago de factura'; // Fallback
       }
       
-      console.log('🔍 Debugging concepto:', {
-        tipo_concepto: formData.tipo_concepto,
-        concepto_original: formData.concepto,
-        concepto_generado: conceptoGenerado,
-        concepto_length: conceptoGenerado.length
-      });
+
       
       const solicitudData = {
       departamento: formData.departamento,
@@ -706,15 +702,15 @@ export default function NuevaSolicitudPage() {
       };
       
       const response = await SolicitudesService.createWithFiles(solicitudData);
-      console.log('✅ Solicitud principal creada, response:', response);
-      console.log('🔍 DEBUGGING RESPONSE:');
-      console.log('📋 typeof response:', typeof response);
-      console.log('📋 response keys:', response ? Object.keys(response as Record<string, unknown>) : 'response is null/undefined');
-      console.log('📋 response.id_solicitud:', (response as Record<string, unknown>)?.id_solicitud);
-      console.log('📋 response data:', JSON.stringify(response, null, 2));
+  // console.log('✅ Solicitud principal creada, response:', response);
+  // console.log('🔍 DEBUGGING RESPONSE:');
+  // console.log('📋 typeof response:', typeof response);
+  // console.log('📋 response keys:', response ? Object.keys(response as Record<string, unknown>) : 'response is null/undefined');
+  // console.log('📋 response.id_solicitud:', (response as Record<string, unknown>)?.id_solicitud);
+  // console.log('📋 response data:', JSON.stringify(response, null, 2));
       
       // Debug: verificar archivos adicionales
-      console.log('🔍 VERIFICANDO ARCHIVOS ADICIONALES:');
+  // console.log('🔍 VERIFICANDO ARCHIVOS ADICIONALES:');
       console.log('📋 formData.archivos_adicionales:', formData.archivos_adicionales);
       console.log('📋 Length:', formData.archivos_adicionales.length);
       console.log('📋 formData.tipos_archivos_adicionales:', formData.tipos_archivos_adicionales);

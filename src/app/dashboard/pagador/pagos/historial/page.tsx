@@ -142,7 +142,7 @@ export default function HistorialPagosPage() {
       document.body.removeChild(link);
       toast.success('Archivo CSV descargado exitosamente');
     } catch (error) {
-      console.error('Error al exportar CSV:', error);
+  // console.error('Error al exportar CSV:', error);
       toast.error('Error al exportar CSV');
     }
   };
@@ -191,7 +191,7 @@ export default function HistorialPagosPage() {
       doc.save(`historial_pagos_${new Date().toISOString().split('T')[0]}.pdf`);
       toast.success('Archivo PDF descargado exitosamente');
     } catch (error) {
-      console.error('Error al exportar PDF:', error);
+  // console.error('Error al exportar PDF:', error);
       toast.error('Error al exportar PDF');
     }
   };
@@ -266,7 +266,7 @@ export default function HistorialPagosPage() {
       
       toast.success('Archivo Excel descargado exitosamente');
     } catch (error) {
-      console.error('Error al exportar a Excel:', error);
+  // console.error('Error al exportar a Excel:', error);
       toast.error('Error al exportar a Excel');
     }
   };
