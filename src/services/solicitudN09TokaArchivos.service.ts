@@ -71,7 +71,7 @@ class SolicitudN09TokaArchivosService {
       });
       
       const response = await fetch(
-        `${API_URL}/api/solicitudes-n09-toka-archivos/${idSolicitudN09Toka}/archivos`, 
+        `${API_URL}/solicitudes-n09-toka-archivos/${idSolicitudN09Toka}/archivos`, 
         {
           method: 'POST',
           headers: {
@@ -104,7 +104,7 @@ class SolicitudN09TokaArchivosService {
       console.log('📋 Obteniendo archivos N09/TOKA para solicitud:', idSolicitudN09Toka);
       
       const response = await fetch(
-        `${API_URL}/api/solicitudes-n09-toka-archivos/${idSolicitudN09Toka}/archivos`,
+        `${API_URL}/solicitudes-n09-toka-archivos/${idSolicitudN09Toka}/archivos`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -136,7 +136,7 @@ class SolicitudN09TokaArchivosService {
       console.log('🗑️ Eliminando archivo N09/TOKA:', idArchivo);
       
       const response = await fetch(
-        `${API_URL}/api/solicitudes-n09-toka-archivos/archivos/${idArchivo}`,
+        `${API_URL}/solicitudes-n09-toka-archivos/archivos/${idArchivo}`,
         {
           method: 'DELETE',
           headers: {
