@@ -180,6 +180,8 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
               </div>
             </div>
           )}
+
+          {/* Eliminar duplicados: solo debe haber UNA sección de comprobantes de gasto en el modal */}
           {/* Botón cerrar flotante */}
           <button
             onClick={onClose}
@@ -333,112 +335,6 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                 </div>
                 Documentos y Comprobantes
               </h3>
-
-              {/* Sección para subir y mostrar comprobantes de gasto (solo si pagado) */}
-              {viatico.estado?.toLowerCase() === 'pagada' && (
-                <div className="mb-8">
-                  <h4 className="text-lg font-semibold text-green-900 mb-2 flex items-center">
-                    <CheckCircle className="w-5 h-5 mr-2 text-green-600" /> Comprobantes de Gasto (Viático)
-                  </h4>
-                  <form className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
-                    <input
-                      type="file"
-                      multiple
-                      accept="application/pdf,image/*"
-                      ref={fileInputRef}
-                      disabled={uploading}
-                      onChange={handleUploadGastoComprobantes}
-                      className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                    />
-                    {uploading && <span className="text-green-700 animate-pulse">Subiendo...</span>}
-                  </form>
-                  {uploadError && <div className="text-red-600 mb-2">{uploadError}</div>}
-                  {successMsg && <div className="text-green-700 mb-2">{successMsg}</div>}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {gastoComprobantes.length === 0 && (
-                      <div className="text-gray-500 col-span-full">No hay comprobantes de gasto subidos.</div>
-                    )}
-                    {gastoComprobantes.map((comp) => (
-                      <div key={comp.id_comprobante} className="bg-white p-4 rounded-xl border border-green-100 shadow flex flex-col items-center">
-                        <div className="flex items-center gap-2 mb-2">
-                          <FileText className="w-5 h-5 text-green-600" />
-                          <span className="text-green-900 font-medium text-sm truncate max-w-[160px]">{comp.archivo_url.split('/').pop()}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <a
-                            href={`/uploads/comprobantes_gasto_viatico/${comp.archivo_url.split('/').pop()}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs font-semibold"
-                          >
-                            <ExternalLink className="w-4 h-4 mr-1" /> Ver
-                          </a>
-                          <button
-                            onClick={() => handleDeleteGastoComprobante(comp.id_comprobante)}
-                            className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-xs font-semibold"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                        <div className="text-xs text-gray-400 mt-1">Subido: {formatDateForDisplay(comp.fecha_subida)}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* NUEVO: Comprobantes de Gasto Viático */}
-              {viatico.estado?.toLowerCase() === 'pagada' && (
-                <div className="mb-8">
-                  <h4 className="text-lg font-semibold text-green-900 mb-2 flex items-center">
-                    <CheckCircle className="w-5 h-5 mr-2 text-green-600" /> Comprobantes de Gasto (Viático)
-                  </h4>
-                  <form className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
-                    <input
-                      type="file"
-                      multiple
-                      accept="application/pdf,image/*"
-                      ref={fileInputRef}
-                      disabled={uploading}
-                      onChange={handleUploadGastoComprobantes}
-                      className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                    />
-                    {uploading && <span className="text-green-700 animate-pulse">Subiendo...</span>}
-                  </form>
-                  {uploadError && <div className="text-red-600 mb-2">{uploadError}</div>}
-                  {successMsg && <div className="text-green-700 mb-2">{successMsg}</div>}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {gastoComprobantes.length === 0 && (
-                      <div className="text-gray-500 col-span-full">No hay comprobantes de gasto subidos.</div>
-                    )}
-                    {gastoComprobantes.map((comp) => (
-                      <div key={comp.id_comprobante} className="bg-white p-4 rounded-xl border border-green-100 shadow flex flex-col items-center">
-                        <div className="flex items-center gap-2 mb-2">
-                          <FileText className="w-5 h-5 text-green-600" />
-                          <span className="text-green-900 font-medium text-sm truncate max-w-[160px]">{comp.archivo_url.split('/').pop()}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <a
-                            href={`/uploads/comprobantes_gasto_viatico/${comp.archivo_url.split('/').pop()}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs font-semibold"
-                          >
-                            <ExternalLink className="w-4 h-4 mr-1" /> Ver
-                          </a>
-                          <button
-                            onClick={() => handleDeleteGastoComprobante(comp.id_comprobante)}
-                            className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-xs font-semibold"
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                        <div className="text-xs text-gray-400 mt-1">Subido: {formatDateForDisplay(comp.fecha_subida)}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Archivo del Solicitante */}
