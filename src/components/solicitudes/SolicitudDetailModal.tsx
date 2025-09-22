@@ -249,17 +249,11 @@ const FilePreview: React.FC<{
 };
 
 // Función para detectar si una solicitud es N09/TOKA
-<<<<<<< HEAD
-function isN09TokaSolicitud(solicitud: Solicitud): boolean {
-  const solicitudExtendida = solicitud as Solicitud & { tipo_plantilla?: string };
-  if (solicitudExtendida.tipo_plantilla === 'N09_TOKA') return true;
-=======
 function isN09TokaSolicitud(solicitud: Solicitud | null): boolean {
   if (!solicitud) return false;
   // Use plantillaId detection instead of tipo_plantilla
   const plantillaId = detectarPlantillaId(solicitud);
   if (plantillaId === 'N09_TOKA') return true;
->>>>>>> 84dabe504d2922186227a950bd3b0d2655c8337b
   if (solicitud.plantilla_datos) {
     try {
       const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
@@ -304,15 +298,12 @@ export function SolicitudDetailModal({
     return { plantillaId, mapeoPlantilla, datosPlantilla };
   }, [solicitud]);
 
-<<<<<<< HEAD
-=======
   // Funciones de utilidad específicas para la plantilla
   const debeOcultarse = useCallback(
     (campo: string) => esCampoOculto(plantillaData.plantillaId, campo),
     [plantillaData.plantillaId]
   );
 
->>>>>>> 84dabe504d2922186227a950bd3b0d2655c8337b
   // Función para formatear moneda
   const formatCurrency = useCallback((amount: number) => {
     return new Intl.NumberFormat('es-MX', {
@@ -386,12 +377,6 @@ export function SolicitudDetailModal({
     }
   }, [isOpen]);
 
-  // Funciones de utilidad específicas para la plantilla
-  const debeOcultarse = useCallback(
-    (campo: string) => esCampoOculto(plantillaData.plantillaId, campo),
-    [plantillaData.plantillaId]
-  );
-
   // Datos computados para el modal
   const modalData = useMemo(() => {
     if (!solicitud || !plantillaData.mapeoPlantilla) return null;
@@ -450,37 +435,6 @@ export function SolicitudDetailModal({
     };
   }, [isOpen, onClose]);
 
-<<<<<<< HEAD
-  // Detectar si es plantilla N09/TOKA y retornar el modal correspondiente
-  if (solicitud && isN09TokaSolicitud(solicitud)) {
-    let solicitudN09Toka: SolicitudN09TokaData | null = null;
-    if (solicitud && typeof solicitud === 'object') {
-      // Mapear desde plantilla_datos si existe
-      if (solicitud.plantilla_datos) {
-        try {
-          const plantillaDataN09 = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-          solicitudN09Toka = {
-            id_solicitud: solicitud.id_solicitud,
-            asunto: plantillaDataN09.asunto || 'TOKA_FONDEO_AVIT',
-            cliente: plantillaDataN09.cliente || '',
-            beneficiario: plantillaDataN09.beneficiario || '',
-            proveedor: plantillaDataN09.proveedor || '',
-            tipo_cuenta_clabe: plantillaDataN09.tipo_cuenta_clabe || 'CLABE',
-            numero_cuenta_clabe: plantillaDataN09.numero_cuenta_clabe || '',
-            banco_destino: plantillaDataN09.banco_destino || '',
-            monto: Number(plantillaDataN09.monto) || 0,
-            tipo_moneda: (plantillaDataN09.tipo_moneda || 'MXN'),
-            estado: solicitud.estado || '',
-            fecha_creacion: solicitud.fecha_creacion || '',
-            fecha_actualizacion: plantillaDataN09.fecha_actualizacion || solicitud.updated_at || '',
-            fecha_limite_pago: plantillaDataN09.fecha_limite_pago || solicitud.fecha_limite_pago || '',
-            usuario_creacion: plantillaDataN09.usuario_creacion || solicitud.usuario_nombre || '',
-            usuario_actualizacion: plantillaDataN09.usuario_actualizacion || '',
-          };
-        } catch {
-          solicitudN09Toka = null;
-        }
-=======
   // Renderizado condicional del modal N09/TOKA
   if (isOpen && solicitud && isN09TokaSolicitud(solicitud)) {
     let solicitudN09Toka: SolicitudN09TokaData | null = null;
@@ -507,7 +461,6 @@ export function SolicitudDetailModal({
         };
       } catch {
         solicitudN09Toka = null;
->>>>>>> 84dabe504d2922186227a950bd3b0d2655c8337b
       }
     }
     if (solicitudN09Toka) {
@@ -519,11 +472,7 @@ export function SolicitudDetailModal({
         />
       );
     }
-<<<<<<< HEAD
-    // Si no se pudo mapear, continuar con el modal estándar
-=======
     // Si no se pudo mapear, mostrar modal estándar
->>>>>>> 84dabe504d2922186227a950bd3b0d2655c8337b
   }
 
   if (!isOpen || !solicitud) return null;
