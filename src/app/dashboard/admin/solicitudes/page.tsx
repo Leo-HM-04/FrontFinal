@@ -13,6 +13,28 @@ import { FileText, Trash2, Eye, Download } from 'lucide-react';
 import { exportSolicitudesPDF, exportSolicitudesExcel, exportSolicitudesCSV } from '@/utils/exportSolicitudes';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { SolicitudesN09TokaService, SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
+
+// Tipo extendido para solicitudes que pueden incluir datos N09/TOKA
+interface SolicitudUnificada extends Omit<Solicitud, 'monto'> {
+  tipo_plantilla?: string;
+  // Campos específicos de N09/TOKA que pueden estar presentes
+  asunto?: 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT';
+  cliente?: string;
+  beneficiario?: string;
+  proveedor?: string;
+  tipo_cuenta_clabe?: 'CLABE' | 'CUENTA';
+  numero_cuenta_clabe?: string;
+  banco_destino?: string;
+  monto?: number | string;
+  tipo_moneda?: 'MXN' | 'USD' | 'EUR';
+  folio?: string;
+  tiene_archivos?: boolean;
+  id_aprobador?: number;
+  fecha_aprobacion?: string;
+  comentarios_aprobacion?: string;
+  usuario_creacion?: string;
+  usuario_actualizacion?: string;
+}
 import { ExportOptions } from '@/components/common/ExportOptions';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
@@ -22,11 +44,24 @@ import { toast } from 'react-hot-toast';
 
 // Función para detectar si una solicitud es del tipo N09/TOKA
 const isN09TokaSolicitud = (solicitud: Solicitud): boolean => {
+  const solicitudExtendida = solicitud as Solicitud & {
+    tipo_plantilla?: string;
+    asunto?: string;
+    cliente?: string;
+    beneficiario?: string;
+  };
+  
+  // Verificar si tiene el campo tipo_plantilla específico
+  if (solicitudExtendida.tipo_plantilla === 'N09_TOKA') {
+    return true;
+  }
+  
   // Detectar basándose en los campos específicos de plantilla_datos
   if (solicitud.plantilla_datos) {
     try {
       const plantillaData = JSON.parse(solicitud.plantilla_datos);
       return plantillaData.templateType === 'tarjetas-n09-toka' || 
+             plantillaData.isN09Toka === true ||
              plantillaData.beneficiario || 
              plantillaData.numero_cuenta_clabe || 
              plantillaData.tipo_cuenta_clabe;
@@ -73,13 +108,38 @@ export default function SolicitudesPage() {
     // Verificar si es una solicitud N09/TOKA
     if (isN09TokaSolicitud(solicitud)) {
       try {
-        // Obtener los datos completos de la solicitud N09/TOKA
-        const response = await SolicitudesN09TokaService.obtenerPorSolicitudPrincipal(solicitud.id_solicitud);
-        if (response.success && response.data) {
-          setSelectedN09TokaSolicitud(response.data);
+        // Para solicitudes N09/TOKA transformadas, ya tenemos los datos en plantilla_datos
+        const solicitudUnificada = solicitud as SolicitudUnificada;
+        if (solicitudUnificada.tipo_plantilla === 'N09_TOKA') {
+          // Convertir los datos de la solicitud al formato esperado por el modal
+          const solicitudN09Toka: SolicitudN09TokaData = {
+            id_solicitud: solicitud.id_solicitud,
+            asunto: (solicitudUnificada.asunto as 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT') || 'PAGO_PROVEEDOR_N09',
+            cliente: solicitudUnificada.cliente || '',
+            beneficiario: solicitudUnificada.beneficiario || '',
+            proveedor: solicitudUnificada.proveedor,
+            tipo_cuenta_clabe: (solicitudUnificada.tipo_cuenta_clabe as 'CLABE' | 'CUENTA') || 'CLABE',
+            numero_cuenta_clabe: solicitudUnificada.numero_cuenta_clabe || '',
+            banco_destino: solicitudUnificada.banco_destino || '',
+            monto: parseFloat(solicitudUnificada.monto?.toString() || '0'),
+            tipo_moneda: (solicitudUnificada.tipo_moneda as 'MXN' | 'USD' | 'EUR') || 'MXN',
+            estado: solicitudUnificada.estado || '',
+            fecha_creacion: solicitudUnificada.fecha_creacion,
+            fecha_actualizacion: (solicitudUnificada as unknown as Record<string, unknown>).fecha_actualizacion as string,
+            fecha_limite_pago: solicitudUnificada.fecha_limite_pago,
+            usuario_creacion: solicitudUnificada.usuario_creacion,
+            usuario_actualizacion: solicitudUnificada.usuario_actualizacion
+          };
+          setSelectedN09TokaSolicitud(solicitudN09Toka);
         } else {
-          toast.error('No se encontraron datos de la plantilla N09/TOKA');
-          setSelectedSolicitud(solicitud);
+          // Fallback: intentar obtener desde el servicio
+          const response = await SolicitudesN09TokaService.obtenerPorSolicitudPrincipal(solicitud.id_solicitud);
+          if (response.success && response.data) {
+            setSelectedN09TokaSolicitud(response.data);
+          } else {
+            toast.error('No se encontraron datos de la plantilla N09/TOKA');
+            setSelectedSolicitud(solicitud);
+          }
         }
       } catch (error) {
         console.error('Error al obtener solicitud N09/TOKA:', error);

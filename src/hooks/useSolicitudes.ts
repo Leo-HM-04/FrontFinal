@@ -12,7 +12,7 @@ export function useSolicitudes() {
     try {
       setLoading(true);
       setError(null);
-      const data = await SolicitudesService.getAll();
+      const data = await SolicitudesService.getAllUnified();
       // Ordena por id_solicitud descendente (más reciente primero)
       const sorted = [...data].sort((a, b) => b.id_solicitud - a.id_solicitud);
       setSolicitudes(sorted);

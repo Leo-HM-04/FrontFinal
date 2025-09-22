@@ -81,6 +81,29 @@ export class SolicitudesService {
     }
   }
 
+  static async getAllUnified(): Promise<Solicitud[]> {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await api.get<Solicitud[]>('/solicitudes/unificadas', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      return response.data;
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null) {
+        const errObj = error as { message?: string; response?: { status?: number }; config?: { url?: string }; };
+        console.error('SolicitudesService.getAllUnified error:', {
+          message: errObj.message,
+          status: errObj.response?.status,
+          url: errObj.config?.url,
+          baseURL: api.defaults.baseURL,
+        });
+      } else {
+        console.error('SolicitudesService.getAllUnified error:', error);
+      }
+      throw error;
+    }
+  }
+
   static async getById(id: number): Promise<Solicitud> {
     const token = localStorage.getItem('token');
     const response = await api.get<Solicitud>(`/solicitudes/${id}`, {

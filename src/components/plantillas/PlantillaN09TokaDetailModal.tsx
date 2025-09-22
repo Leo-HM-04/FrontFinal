@@ -1,11 +1,20 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { X, FileText, Eye, EyeOff, ExternalLink, Download } from 'lucide-react';
+import { X, FileText, ExternalLink } from 'lucide-react';
 import { PlantillaN09TokaModalProps, LoadingStateN09Toka, ErrorStateN09Toka } from '@/types/plantillaN09Toka';
 import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 import SolicitudN09TokaArchivosService, { type SolicitudN09TokaArchivo } from '@/services/solicitudN09TokaArchivos.service';
+
+// Tipo extendido para solicitudes N09/TOKA que incluye campos adicionales
+interface SolicitudN09TokaExtended extends SolicitudN09TokaData {
+  folio?: string;
+  tiene_archivos?: boolean | number;
+  id_aprobador?: number;
+  fecha_aprobacion?: string;
+  comentarios_aprobacion?: string;
+}
 
 // Función para formatear moneda en pesos mexicanos
 const formatCurrency = (amount: number): string => {
@@ -220,6 +229,9 @@ export function PlantillaN09TokaDetailModal({
   // URL base para archivos
   const baseFileUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bechapra.com.mx:8443/api';
 
+  // Cast de la solicitud para acceder a campos adicionales
+  const solicitudExtended = solicitud as SolicitudN09TokaExtended;
+
   // Función para obtener archivos
   const fetchArchivos = useCallback(async () => {
     if (!solicitud) return;
@@ -311,12 +323,14 @@ export function PlantillaN09TokaDetailModal({
               Información Principal
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoField label="Asunto" value={solicitud.asunto} />
               <InfoField label="Cliente" value={solicitud.cliente} />
-              <InfoField label="Beneficiario" value={solicitud.beneficiario} />
               <InfoField label="Proveedor" value={solicitud.proveedor} />
+              <InfoField label="Beneficiario" value={solicitud.beneficiario} />
               <InfoField label="Monto" value={solicitud.monto.toString()} variant="currency" />
               <InfoField label="Tipo de Moneda" value={solicitud.tipo_moneda} />
               <InfoField label="Fecha Límite de Pago" value={solicitud.fecha_limite_pago ? formatDate(solicitud.fecha_limite_pago) : ''} />
+              <InfoField label="Folio" value={solicitudExtended.folio} />
             </div>
           </div>
 
@@ -329,8 +343,25 @@ export function PlantillaN09TokaDetailModal({
               <InfoField label="Tipo de Cuenta" value={solicitud.tipo_cuenta_clabe} />
               <InfoField label="Número de Cuenta/CLABE" value={solicitud.numero_cuenta_clabe} variant="mono" />
               <InfoField label="Banco Destino" value={solicitud.banco_destino} />
+              <InfoField label="Tiene Archivos" value={solicitudExtended.tiene_archivos ? 'Sí' : 'No'} />
             </div>
           </div>
+
+          {/* Información de Aprobación */}
+          {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">
+                Información de Aprobación
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
+                <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion ? formatDate(solicitudExtended.fecha_aprobacion) : ''} />
+                <div className="md:col-span-2">
+                  <InfoField label="Comentarios de Aprobación" value={solicitudExtended.comentarios_aprobacion} />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Información de Seguimiento */}
           <div className="mb-6">
