@@ -462,9 +462,9 @@ export default function NuevaSolicitudPage() {
           console.log('✅ Solicitud principal creada:', responseSolicitud);
           
           // 2. Obtener el ID de la solicitud creada
-          let solicitudId = (responseSolicitud as any)?.id_solicitud as number | undefined;
-          if (!solicitudId && (responseSolicitud as any)?.data) {
-            solicitudId = (responseSolicitud as any)?.data?.id_solicitud as number | undefined;
+          let solicitudId = (responseSolicitud as Record<string, unknown>)?.id_solicitud as number | undefined;
+          if (!solicitudId && (responseSolicitud as Record<string, unknown>)?.data) {
+            solicitudId = ((responseSolicitud as Record<string, unknown>)?.data as Record<string, unknown>)?.id_solicitud as number | undefined;
           }
           
           if (!solicitudId) {
