@@ -501,7 +501,7 @@ export default function NuevaSolicitudPage() {
               console.log('🗂️ Archivos a subir:', archivosParaSubir.map(f => ({ name: f.name, size: f.size, type: f.type })));
               
               // Obtener el ID de la solicitud N09/TOKA creada
-              let idSolicitudN09Toka = (responseN09Toka as Record<string, unknown>)?.data as Record<string, unknown>;
+              const idSolicitudN09Toka = (responseN09Toka as Record<string, unknown>)?.data as Record<string, unknown>;
               let idFinal: number | undefined;
               
               // El backend devuelve { success: true, data: { id, ...datos } }
