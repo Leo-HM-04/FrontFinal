@@ -8,6 +8,8 @@ interface SolicitudArchivo {
   fecha_subida: string;
 }
 
+import { getAuthToken } from '@/utils/auth';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 interface SolicitudN09TokaArchivo {
@@ -48,7 +50,7 @@ class SolicitudN09TokaArchivosService {
     tiposArchivos?: string[]
   ): Promise<UploadResponse> {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       
       const formData = new FormData();
       
@@ -99,7 +101,7 @@ class SolicitudN09TokaArchivosService {
   // 📋 Obtener archivos de solicitud N09/TOKA
   static async obtenerArchivos(idSolicitudN09Toka: number): Promise<SolicitudN09TokaArchivo[]> {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       
       console.log('📋 Obteniendo archivos N09/TOKA para solicitud:', idSolicitudN09Toka);
       
@@ -131,7 +133,7 @@ class SolicitudN09TokaArchivosService {
   // 🗑️ Eliminar archivo específico
   static async eliminarArchivo(idArchivo: number): Promise<void> {
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       
       console.log('🗑️ Eliminando archivo N09/TOKA:', idArchivo);
       
