@@ -746,41 +746,31 @@ export function SolicitudDetailModal({
                   </Card>
                 )}
 
-                {/* Datos específicos de plantilla con layout original */}
-                {plantillaData.plantillaId ? (
-                  (() => {
-                    const plantilla = obtenerPlantillaPorId(plantillaData.plantillaId);
-                    if (plantilla) {
-                      return (
-                        <Card className="p-0 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
-                          <FormularioPlantilla
-                            plantilla={plantilla}
-                            datos={plantillaData.datosPlantilla}
-                            errores={{}}
-                            camposVisibles={new Set(plantilla.secciones.flatMap(s => s.campos.map(c => c.id)))}
-                            onCambiarCampo={() => {}}
-                            className="pointer-events-none select-none opacity-100"
-                          />
-                        </Card>
-                      );
-                    } else if (solicitud?.tipo_pago_descripcion?.startsWith('Plantilla:')) {
-                      return (
-                        <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50 shadow-lg rounded-xl sm:rounded-2xl">
-                          <h2 className="text-lg sm:text-xl font-bold text-purple-900 mb-4 flex items-center">
-                            <div className="p-2 bg-purple-100 rounded-lg sm:rounded-xl mr-3">
-                              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-700" />
-                            </div>
-                            Información de Plantilla
-                          </h2>
-                          <div className="text-purple-700 text-sm bg-purple-50/80 p-3 rounded-lg border border-purple-200">
-                            No se detectaron datos específicos de la plantilla para esta solicitud.
-                          </div>
-                        </Card>
-                      );
-                    }
-                    return null;
-                  })()
-                ) : null}
+                {/* Diagnóstico de datos de plantilla SIEMPRE visible */}
+                <Card className="p-6 mb-6 bg-gradient-to-br from-white to-yellow-50 border border-yellow-200/70 shadow-lg rounded-2xl">
+                  <h2 className="text-lg font-bold text-yellow-900 mb-3 flex items-center">
+                    <FileText className="w-5 h-5 mr-2 text-yellow-700" />
+                    Diagnóstico de Plantilla
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-yellow-900">
+                    <div className="flex flex-col">
+                      <span className="font-semibold">ID de Plantilla:</span>
+                      <span className="font-mono bg-yellow-100/60 rounded px-2 py-1 mt-1">{String(plantillaData.plantillaId)}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold">Descripción de Pago:</span>
+                      <span className="font-mono bg-yellow-100/60 rounded px-2 py-1 mt-1">{String(solicitud?.tipo_pago_descripcion)}</span>
+                    </div>
+                    <div className="flex flex-col md:col-span-2">
+                      <span className="font-semibold">Mapeo de Plantilla:</span>
+                      <span className="font-mono bg-yellow-100/60 rounded px-2 py-1 mt-1 break-all">{plantillaData.mapeoPlantilla ? JSON.stringify(plantillaData.mapeoPlantilla) : 'null'}</span>
+                    </div>
+                    <div className="flex flex-col md:col-span-2">
+                      <span className="font-semibold">Datos de Plantilla:</span>
+                      <span className="font-mono bg-yellow-100/60 rounded px-2 py-1 mt-1 break-all">{plantillaData.datosPlantilla ? JSON.stringify(plantillaData.datosPlantilla) : '{}'}</span>
+                    </div>
+                  </div>
+                </Card>
 
                 {/* Diagnóstico de datos de plantilla */}
                 <Card className="p-3 mb-4 bg-yellow-50 border border-yellow-200 rounded-xl">
