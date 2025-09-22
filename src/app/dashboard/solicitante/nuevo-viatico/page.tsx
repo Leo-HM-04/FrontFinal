@@ -596,16 +596,12 @@ export default function NuevoViaticoPage() {
                   <div className="text-center lg:text-left">
                     <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2 flex items-center justify-center lg:justify-start gap-1 sm:gap-2">
                       <FaClipboardList className="text-white" /> 
-                      <span className="text-white">Plantilla Profesional Mejorada</span>
+                      <span className="text-white">Plantilla de Viáticos</span>
                     </h3>
                     <p className="text-blue-100 text-xs sm:text-base leading-relaxed">
-                      <strong className="text-white">Nueva plantilla completa con formato profesional</strong>, 
-                      incluye todos los campos requeridos según estándares empresariales.
+                      <strong className="text-white">Plantilla de Viáticos</strong>, 
+                      incluye todos los campos requeridos.
                       <br />
-                      <small className="text-blue-200">
-                        ✨ <strong>Mejoradas:</strong> Información del viaje, desglose detallado de gastos, 
-                        justificación, firmas de autorización y notas importantes
-                      </small>
                     </p>
                   </div>
                 </div>
@@ -617,16 +613,14 @@ export default function NuevoViaticoPage() {
                     className="w-full lg:w-auto bg-white text-blue-600 font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg shadow-md hover:bg-blue-50 transition-colors duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
                   >
                     <FaDownload className="text-base sm:text-lg" />
-                    <span>Descargar Plantilla Mejorada</span>
+                    <span>Descargar Plantilla de Viáticos</span>
                   </button>
                 </div>
               </div>
               
               <div className="mt-3 sm:mt-4 text-center">
                 <div className="inline-flex items-center bg-white/10 rounded-lg px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm">
-                  <FaBolt className="mr-1 sm:mr-2 text-yellow-200" />
-                  <span className="font-medium text-white">¡NUEVA VERSIÓN!</span>
-                  <span className="ml-1 sm:ml-2 text-blue-100">Plantilla profesional con desglose completo, información del viaje y autorizaciones</span>
+                  <span className="ml-1 sm:ml-2 text-blue-100">Plantilla de Viáticos con desglose completo, información del viaje y autorizaciones</span>
                 </div>
               </div>
             </div>
