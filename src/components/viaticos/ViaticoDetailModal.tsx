@@ -37,7 +37,10 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
     const fetchComprobantes = async () => {
       if (!viatico || viatico.estado?.toLowerCase() !== 'pagada') return;
       try {
-        const response = await fetch(`/api/comprobantes-viaticos/${viatico.id_viatico}`);
+        const token = getAuthToken();
+        const response = await fetch(`/api/comprobantes-viaticos/${viatico.id_viatico}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
         if (response.ok) {
           const data = await response.json();
           setComprobantes(Array.isArray(data) ? data : []);
