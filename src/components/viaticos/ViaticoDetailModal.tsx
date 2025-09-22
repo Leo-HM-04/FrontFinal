@@ -357,7 +357,7 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                           {comprobante.archivo_url ? comprobante.archivo_url.split('/').pop() : 'Sin archivo'}
                         </div>
                         <a
-                          href={`/uploads/comprobantes-viaticos/${comprobante.archivo_url.split('/').pop()}`}
+                          href={`/uploads/comprobante-viaticos/${comprobante.archivo_url.split('/').pop()}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 text-sm font-semibold shadow-md hover:shadow-lg"
