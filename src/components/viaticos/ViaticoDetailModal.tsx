@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Viatico } from '@/hooks/useViaticos';
 import { CreditCard, FileText, Building, ExternalLink, MapPin, Calendar, DollarSign, X, CheckCircle } from 'lucide-react';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+
+import { ComprobantesGastoViaticoService } from '@/services/comprobantesGastoViatico.service';
 
 interface ComprobanteViatico {
   id_comprobante: number;
@@ -20,29 +22,79 @@ interface ViaticoDetailModalProps {
   onClose: () => void;
 }
 
+
 export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailModalProps) {
   const [comprobantes, setComprobantes] = useState<ComprobanteViatico[]>([]);
+  const [gastoComprobantes, setGastoComprobantes] = useState<ComprobanteViatico[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Cargar comprobantes de pago si el viático está pagado
+  // Cargar comprobantes de pago (pagador)
   useEffect(() => {
     const fetchComprobantes = async () => {
       if (!viatico || viatico.estado?.toLowerCase() !== 'pagada') return;
-      
       try {
         const response = await fetch(`/api/comprobantes-viaticos/${viatico.id_viatico}`);
         if (response.ok) {
           const data = await response.json();
           setComprobantes(Array.isArray(data) ? data : []);
         }
-      } catch (error) {
-        console.error('Error al cargar comprobantes:', error);
+      } catch {
+        // Error silenciado
       }
     };
-
-    if (isOpen && viatico) {
-      fetchComprobantes();
-    }
+    if (isOpen && viatico) fetchComprobantes();
   }, [isOpen, viatico]);
+
+  // Cargar comprobantes de gasto (nuevo módulo)
+  useEffect(() => {
+    const fetchGastoComprobantes = async () => {
+      if (!viatico || viatico.estado?.toLowerCase() !== 'pagada') return;
+      try {
+        const data = await ComprobantesGastoViaticoService.list(viatico.id_viatico);
+        setGastoComprobantes(Array.isArray(data) ? data : []);
+      } catch (error) {
+        setGastoComprobantes([]);
+      }
+    };
+    if (isOpen && viatico) fetchGastoComprobantes();
+  }, [isOpen, viatico, successMsg]);
+
+  const handleUploadGastoComprobantes = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!viatico || !e.target.files) return;
+    setUploading(true);
+    setUploadError(null);
+    setSuccessMsg(null);
+    const files = Array.from(e.target.files);
+    let successCount = 0;
+    for (const file of files) {
+      try {
+        await ComprobantesGastoViaticoService.upload(viatico.id_viatico, file);
+        successCount++;
+      } catch (err: unknown) {
+        const errorMsg = err instanceof Error ? err.message : 'Error al subir comprobante';
+        setUploadError(errorMsg);
+      }
+    }
+    setUploading(false);
+    if (successCount > 0) {
+      setSuccessMsg(`${successCount} comprobante(s) subido(s) correctamente.`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeleteGastoComprobante = async (id_comprobante: number) => {
+    if (!window.confirm('¿Seguro que deseas eliminar este comprobante de gasto?')) return;
+    try {
+      await ComprobantesGastoViaticoService.delete(id_comprobante);
+      setSuccessMsg('Comprobante eliminado correctamente.');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Error al eliminar comprobante';
+      setUploadError(errorMsg);
+    }
+  };
 
   if (!isOpen || !viatico) return null;
 
@@ -218,6 +270,59 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                 </div>
                 Documentos y Comprobantes
               </h3>
+
+              {/* NUEVO: Comprobantes de Gasto Viático */}
+              {viatico.estado?.toLowerCase() === 'pagada' && (
+                <div className="mb-8">
+                  <h4 className="text-lg font-semibold text-green-900 mb-2 flex items-center">
+                    <CheckCircle className="w-5 h-5 mr-2 text-green-600" /> Comprobantes de Gasto (Viático)
+                  </h4>
+                  <form className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
+                    <input
+                      type="file"
+                      multiple
+                      accept="application/pdf,image/*"
+                      ref={fileInputRef}
+                      disabled={uploading}
+                      onChange={handleUploadGastoComprobantes}
+                      className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                    />
+                    {uploading && <span className="text-green-700 animate-pulse">Subiendo...</span>}
+                  </form>
+                  {uploadError && <div className="text-red-600 mb-2">{uploadError}</div>}
+                  {successMsg && <div className="text-green-700 mb-2">{successMsg}</div>}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {gastoComprobantes.length === 0 && (
+                      <div className="text-gray-500 col-span-full">No hay comprobantes de gasto subidos.</div>
+                    )}
+                    {gastoComprobantes.map((comp) => (
+                      <div key={comp.id_comprobante} className="bg-white p-4 rounded-xl border border-green-100 shadow flex flex-col items-center">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="w-5 h-5 text-green-600" />
+                          <span className="text-green-900 font-medium text-sm truncate max-w-[160px]">{comp.archivo_url.split('/').pop()}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <a
+                            href={`/uploads/comprobantes_gasto_viatico/${comp.archivo_url.split('/').pop()}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs font-semibold"
+                          >
+                            <ExternalLink className="w-4 h-4 mr-1" /> Ver
+                          </a>
+                          <button
+                            onClick={() => handleDeleteGastoComprobante(comp.id_comprobante)}
+                            className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-xs font-semibold"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">Subido: {formatDateForDisplay(comp.fecha_subida)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Archivo del Solicitante */}
