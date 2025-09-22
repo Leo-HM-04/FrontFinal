@@ -8,7 +8,7 @@ interface SolicitudArchivo {
   fecha_subida: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://46.202.177.106:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 interface SolicitudN09TokaArchivo {
   id_archivo: number;
