@@ -429,123 +429,82 @@ export default function NuevaSolicitudPage() {
   // console.log('Datos completos de la plantilla:', estadoPlantilla.datos);
   // console.log('Plantilla seleccionada:', estadoPlantilla.plantillaSeleccionada?.id);
 
-        // Para plantilla tarjetas-n09-toka, usar tabla específica
+        // Para plantilla tarjetas-n09-toka, usar SOLO tabla específica (sin duplicado)
         if (estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-n09-toka') {
-          console.log('🗃️ Creando solicitud con tabla específica N09/TOKA...');
+          console.log('🗃️ Creando solicitud N09/TOKA usando SOLO tabla específica (sin duplicados)...');
           
-          // 1. Crear la solicitud principal sin archivos (irán a tabla específica)
-          const solicitudBase = {
-            departamento: solicitudPlantillaData.departamento,
-            monto: solicitudPlantillaData.monto,
-            tipo_moneda: solicitudPlantillaData.tipo_moneda,
-            cuenta_destino: solicitudPlantillaData.cuenta_destino,
-            concepto: solicitudPlantillaData.concepto,
-            tipo_pago: solicitudPlantillaData.tipo_pago,
-            tipo_cuenta_destino: solicitudPlantillaData.tipo_cuenta_destino,
-            banco_destino: solicitudPlantillaData.banco_destino,
-            nombre_persona: solicitudPlantillaData.nombre_persona,
-            empresa_a_pagar: solicitudPlantillaData.empresa_a_pagar,
-            fecha_limite_pago: solicitudPlantillaData.fecha_limite_pago,
-            
-            // Datos específicos de plantilla
-            plantilla_id: solicitudPlantillaData.plantilla_id,
-            plantilla_version: solicitudPlantillaData.plantilla_version,
-            plantilla_datos: solicitudPlantillaData.plantilla_datos,
-            
-            // NO subir archivos aquí - irán a tabla específica N09/TOKA
-            archivos: []
-          };
-          
-          console.log('📤 Datos de solicitud base:', solicitudBase);
-          
-          const responseSolicitud = await SolicitudesService.createPlantilla(solicitudBase);
-          console.log('✅ Solicitud principal creada:', responseSolicitud);
-          
-          // 2. Obtener el ID de la solicitud creada
-          let solicitudId = (responseSolicitud as Record<string, unknown>)?.id_solicitud as number | undefined;
-          if (!solicitudId && (responseSolicitud as Record<string, unknown>)?.data) {
-            solicitudId = ((responseSolicitud as Record<string, unknown>)?.data as Record<string, unknown>)?.id_solicitud as number | undefined;
-          }
-          
-          if (!solicitudId) {
-            throw new Error('No se pudo obtener el ID de la solicitud creada');
-          }
-          
-          console.log('🔍 ID de solicitud obtenido:', solicitudId);
-          
-          // 3. Convertir y guardar datos específicos en tabla N09/TOKA
+          // Convertir datos de plantilla a formato N09/TOKA
           const datosN09Toka = SolicitudesN09TokaService.convertirDatosPlantilla(estadoPlantilla.datos);
           console.log('🔄 Datos convertidos para N09/TOKA:', datosN09Toka);
           
+          // Crear datos finales para N09/TOKA (SIN crear solicitud duplicada primero)
           const datosParaCrear = {
-            id_solicitud_pago: solicitudId,
-            asunto: (datosN09Toka.asunto || 'PAGO_PROVEEDOR_N09') as 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT',
+            asunto: (datosN09Toka.asunto || 'TOKA_FONDEO_AVIT') as 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT',
             cliente: datosN09Toka.cliente || '',
-            beneficiario: datosN09Toka.beneficiario || '',
+            beneficiario: datosN09Toka.beneficiario || solicitudPlantillaData.nombre_persona || '',
+            proveedor: datosN09Toka.proveedor || solicitudPlantillaData.empresa_a_pagar || '',
             tipo_cuenta_clabe: (datosN09Toka.tipo_cuenta_clabe || 'CLABE') as 'CLABE' | 'CUENTA',
-            numero_cuenta_clabe: datosN09Toka.numero_cuenta_clabe || '',
-            banco_destino: datosN09Toka.banco_destino || 'STP',
-            monto: datosN09Toka.monto || 0,
-            tipo_moneda: (datosN09Toka.tipo_moneda || 'MXN') as 'MXN' | 'USD' | 'EUR'
+            numero_cuenta_clabe: datosN09Toka.numero_cuenta_clabe || solicitudPlantillaData.cuenta_destino || '',
+            banco_destino: datosN09Toka.banco_destino || solicitudPlantillaData.banco_destino || 'STP',
+            monto: Number(solicitudPlantillaData.monto) || 0,
+            tipo_moneda: (solicitudPlantillaData.tipo_moneda || 'MXN') as 'MXN' | 'USD' | 'EUR',
+            fecha_limite_pago: solicitudPlantillaData.fecha_limite_pago
           };
           
-          console.log('📤 Datos finales para tabla N09/TOKA:', datosParaCrear);
+          console.log('� Datos finales para crear N09/TOKA directamente:', datosParaCrear);
           
+          // Crear DIRECTAMENTE en tabla N09/TOKA (sin pasar por solicitudes_pago)
           const responseN09Toka = await SolicitudesN09TokaService.crear(datosParaCrear);
-          console.log('✅ Datos N09/TOKA guardados:', responseN09Toka);
+          console.log('✅ Solicitud N09/TOKA creada directamente:', responseN09Toka);
           
-          // 4. Subir TODOS los archivos a tabla específica de N09/TOKA
-          if (archivosParaSubir.length > 0) {
-            try {
-              console.log('📤 Subiendo TODOS los archivos para N09/TOKA...');
-              console.log('🗂️ Archivos a subir:', archivosParaSubir.map(f => ({ name: f.name, size: f.size, type: f.type })));
-              
-              // Obtener el ID de la solicitud N09/TOKA creada
-              const idSolicitudN09Toka = (responseN09Toka as Record<string, unknown>)?.data as Record<string, unknown>;
-              let idFinal: number | undefined;
-              
-              // El backend devuelve { success: true, data: { id, ...datos } }
-              if (idSolicitudN09Toka?.id) {
-                idFinal = idSolicitudN09Toka.id as number;
-              }
-              
-              console.log('🆔 ID solicitud N09/TOKA obtenido:', idFinal);
-              console.log('📋 Response N09/TOKA completa:', responseN09Toka);
-              
-              if (idFinal) {
-                // Subir TODOS los archivos (no solo slice(1))
-                const tiposArchivos = new Array(archivosParaSubir.length).fill('documento');
-                
-                console.log(`📄 Subiendo ${archivosParaSubir.length} archivos COMPLETOS a tabla N09/TOKA`);
-                console.log('🔧 Tipos archivos:', tiposArchivos);
-                console.log('🔄 Llamando a SolicitudN09TokaArchivosService.subirArchivos...');
-                
-                const resultadoArchivos = await SolicitudN09TokaArchivosService.subirArchivos(
-                  idFinal,
-                  archivosParaSubir, // TODOS los archivos
-                  tiposArchivos
-                );
-                
-                console.log('✅ TODOS los archivos N09/TOKA subidos exitosamente');
-                console.log('📊 Resultado archivos:', resultadoArchivos);
-              } else {
-                console.error('❌ No se pudo obtener el ID de la solicitud N09/TOKA para subir archivos');
-              }
-            } catch (archivoError) {
-              console.error('❌ Error al subir archivos N09/TOKA:', archivoError);
-              console.error('📍 Stack trace:', archivoError);
-              // No fallar la solicitud principal por esto
-            }
-          } else {
-            console.log('⚠️ No hay archivos para subir a N09/TOKA');
+          // Obtener el ID de la solicitud N09/TOKA creada
+          let idFinal: number | undefined;
+          if (responseN09Toka.success && responseN09Toka.data) {
+            idFinal = responseN09Toka.data.id_solicitud;
           }
           
-          toast.success('Solicitud de tarjetas N09/TOKA creada exitosamente en tabla específica');
+          console.log('� ID de solicitud N09/TOKA creada:', idFinal);
+          
+          // Subir archivos a tabla específica de N09/TOKA
+          if (idFinal && archivosParaSubir.length > 0) {
+          // Subir archivos a tabla específica de N09/TOKA
+          if (idFinal && archivosParaSubir.length > 0) {
+            console.log(`📎 Subiendo ${archivosParaSubir.length} archivos a N09/TOKA...`);
+            
+            try {
+              const tiposArchivos = new Array(archivosParaSubir.length).fill('documento');
+              
+              const resultadoArchivos = await SolicitudN09TokaArchivosService.subirArchivos(
+                idFinal,
+                archivosParaSubir,
+                tiposArchivos
+              );
+              
+              console.log('✅ Archivos N09/TOKA subidos:', resultadoArchivos);
+            } catch (error) {
+              console.error('❌ Error subiendo archivos N09/TOKA:', error);
+              throw error;
+            }
+          }
+          
+          toast.success('Solicitud N09/TOKA creada exitosamente (tabla única)');
+          
         } else {
-          // Para otras plantillas, usar el método tradicional con plantilla_datos JSON
-          console.log('📝 Creando solicitud con plantilla_datos JSON...');
-          const response = await SolicitudesService.createPlantilla(solicitudPlantillaData);
-          console.log('✅ Solicitud de plantilla creada:', response);
+          // Para plantillas normales (NON N09/TOKA), usar flujo estándar  
+          console.log('📋 Creando solicitud de plantilla normal...');
+          
+          const solicitudCompleta = {
+            ...solicitudPlantillaData,
+            archivos: archivosParaSubir
+          };
+          
+          console.log('� Datos de solicitud normal:', solicitudCompleta);
+          
+          const response = await SolicitudesService.createPlantilla(solicitudCompleta);
+          console.log('✅ Solicitud normal creada:', response);
+          
+          toast.success('Solicitud de plantilla creada exitosamente');
+        }
           
           toast.success('Solicitud de plantilla creada exitosamente');
         }
