@@ -174,7 +174,7 @@ const {
 ## 📝 Plantilla Actual: Tarjetas N09 y TOKA
 
 ### Descripción
-Plantilla especializada para solicitudes de pago a proveedores de tarjetas N09 y fondeo de tarjeta AVIT mediante TOKA.
+Plantilla especializada para solicitudes de pago a proveedores de tarjetas N09 y fondeo de tarjeta TOKA mediante TOKA.
 
 ### Estructura
 

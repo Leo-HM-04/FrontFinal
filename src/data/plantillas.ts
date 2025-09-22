@@ -11,7 +11,7 @@ import {
 export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
   id: 'tarjetas-n09-toka',
   nombre: 'SOLICITUD DE PAGO TARJETAS N09 Y TOKA',
-  descripcion: 'Plantilla especializada para pagos a proveedores de tarjetas N09 y fondeo de tarjeta AVIT',
+  descripcion: 'Plantilla especializada para pagos a proveedores de tarjetas N09 y fondeo de tarjeta TOKA',
   version: '1.0',
   activa: true,
   icono: CreditCard,
