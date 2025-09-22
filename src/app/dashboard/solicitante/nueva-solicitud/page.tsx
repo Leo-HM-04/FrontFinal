@@ -9,6 +9,7 @@ import { FileText, Upload, Calendar, DollarSign, Building, CreditCard, MessageSq
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { SolicitudArchivosService } from '@/services/solicitudArchivos.service';
 import { SolicitudesN09TokaService } from '@/services/solicitudesN09Toka.service';
+import SolicitudN09TokaArchivosService from '@/services/solicitudN09TokaArchivos.service';
 import { toast } from 'react-hot-toast';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -511,6 +512,38 @@ export default function NuevaSolicitudPage() {
           
           const responseN09Toka = await SolicitudesN09TokaService.crear(datosParaCrear);
           console.log('✅ Datos N09/TOKA guardados:', responseN09Toka);
+          
+          // 4. Subir archivos adicionales a tabla específica de N09/TOKA
+          if (archivosParaSubir.length > 1) { // Más archivos además de la factura principal
+            try {
+              console.log('📤 Subiendo archivos adicionales para N09/TOKA...');
+              
+              // Obtener el ID de la solicitud N09/TOKA creada
+              let idSolicitudN09Toka = (responseN09Toka as Record<string, unknown>)?.id_solicitud as number | undefined;
+              if (!idSolicitudN09Toka && (responseN09Toka as Record<string, unknown>)?.data) {
+                idSolicitudN09Toka = ((responseN09Toka as Record<string, unknown>).data as Record<string, unknown>)?.id_solicitud as number | undefined;
+              }
+              
+              if (idSolicitudN09Toka) {
+                // Obtener archivos adicionales (excluyendo el primer archivo que es la factura principal)
+                const archivosAdicionales = archivosParaSubir.slice(1);
+                const tiposAdicionales = new Array(archivosAdicionales.length).fill('documento');
+                
+                console.log(`📄 Subiendo ${archivosAdicionales.length} archivos adicionales a tabla N09/TOKA`);
+                
+                await SolicitudN09TokaArchivosService.subirArchivos(
+                  idSolicitudN09Toka,
+                  archivosAdicionales,
+                  tiposAdicionales
+                );
+                
+                console.log('✅ Archivos adicionales N09/TOKA subidos exitosamente');
+              }
+            } catch (archivoError) {
+              console.error('❌ Error al subir archivos adicionales N09/TOKA:', archivoError);
+              // No fallar la solicitud principal por esto
+            }
+          }
           
           toast.success('Solicitud de tarjetas N09/TOKA creada exitosamente en tabla específica');
         } else {
