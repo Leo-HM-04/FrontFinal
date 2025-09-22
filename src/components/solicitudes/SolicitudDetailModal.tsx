@@ -752,7 +752,7 @@ export function SolicitudDetailModal({
                     <FileText className="w-5 h-5 mr-2 text-yellow-700" />
                     <h2 className="text-lg font-bold text-yellow-800">Diagnóstico de Plantilla</h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-900 mb-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-900 mb-4">
                     <div>
                       <span className="font-semibold">ID de Plantilla:</span>
                       <span className="ml-2 font-mono text-yellow-900">{String(plantillaData.plantillaId)}</span>
@@ -763,12 +763,34 @@ export function SolicitudDetailModal({
                     </div>
                   </div>
                   <div className="mb-2">
-                    <span className="font-semibold">Mapeo de Plantilla:</span>
-                    <pre className="font-mono bg-yellow-50 rounded px-2 py-1 text-xs whitespace-pre-wrap break-words overflow-x-auto max-h-32 border border-yellow-200 mt-1 text-yellow-900">{plantillaData.mapeoPlantilla ? JSON.stringify(plantillaData.mapeoPlantilla, null, 2) : 'null'}</pre>
+                    <span className="font-semibold block mb-1">Mapeo de Plantilla:</span>
+                    {plantillaData.mapeoPlantilla && typeof plantillaData.mapeoPlantilla === 'object' ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-yellow-50 rounded p-3 border border-yellow-200">
+                        {Object.entries(plantillaData.mapeoPlantilla.etiquetas || {}).map(([campo, etiqueta]) => (
+                          <div key={campo} className="flex flex-col mb-1">
+                            <span className="text-xs text-yellow-700 font-semibold">{campo.replace(/_/g, ' ').toUpperCase()}</span>
+                            <span className="text-sm text-yellow-900">{String(etiqueta)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="italic text-yellow-700">No disponible</span>
+                    )}
                   </div>
                   <div>
-                    <span className="font-semibold">Datos de Plantilla:</span>
-                    <pre className="font-mono bg-yellow-50 rounded px-2 py-1 text-xs whitespace-pre-wrap break-words overflow-x-auto max-h-32 border border-yellow-200 mt-1 text-yellow-900">{plantillaData.datosPlantilla ? JSON.stringify(plantillaData.datosPlantilla, null, 2) : '{}'}</pre>
+                    <span className="font-semibold block mb-1">Datos de Plantilla:</span>
+                    {plantillaData.datosPlantilla && typeof plantillaData.datosPlantilla === 'object' && Object.keys(plantillaData.datosPlantilla).length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-yellow-50 rounded p-3 border border-yellow-200">
+                        {Object.entries(plantillaData.datosPlantilla).map(([campo, valor]) => (
+                          <div key={campo} className="flex flex-col mb-1">
+                            <span className="text-xs text-yellow-700 font-semibold">{campo.replace(/_/g, ' ').toUpperCase()}</span>
+                            <span className="text-sm text-yellow-900">{String(valor)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="italic text-yellow-700">No disponible</span>
+                    )}
                   </div>
                 </Card>
 
