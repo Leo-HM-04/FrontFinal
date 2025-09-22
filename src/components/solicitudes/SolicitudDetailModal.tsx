@@ -251,17 +251,28 @@ const FilePreview: React.FC<{
 // Función para detectar si una solicitud es N09/TOKA
 function isN09TokaSolicitud(solicitud: Solicitud | null): boolean {
   if (!solicitud) return false;
-  // Use plantillaId detection instead of tipo_plantilla
+  
+  // 1. Verificar si tiene el campo tipo_plantilla directamente
+  const solicitudExtendida = solicitud as Solicitud & { tipo_plantilla?: string };
+  if (solicitudExtendida.tipo_plantilla === 'N09_TOKA') return true;
+  
+  // 2. Usar la función de detección de plantilla existente
   const plantillaId = detectarPlantillaId(solicitud);
   if (plantillaId === 'N09_TOKA') return true;
+  
+  // 3. Verificar en plantilla_datos
   if (solicitud.plantilla_datos) {
     try {
       const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-      return plantillaData.templateType === 'tarjetas-n09-toka' || plantillaData.isN09Toka === true || plantillaData.beneficiario || plantillaData.numero_cuenta_clabe || plantillaData.tipo_cuenta_clabe;
+      return plantillaData.templateType === 'tarjetas-n09-toka' || 
+             plantillaData.isN09Toka === true || 
+             (plantillaData.beneficiario && plantillaData.numero_cuenta_clabe) ||
+             (plantillaData.tipo_cuenta_clabe && plantillaData.asunto);
     } catch {
       return false;
     }
   }
+  
   return false;
 }
 
