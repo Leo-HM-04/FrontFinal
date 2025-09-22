@@ -6,6 +6,7 @@ import { CreditCard, FileText, Building, ExternalLink, MapPin, Calendar, DollarS
 import { formatDateForDisplay } from '@/utils/dateUtils';
 
 import { ComprobantesGastoViaticoService } from '@/services/comprobantesGastoViatico.service';
+import { getAuthToken } from '@/utils/auth';
 
 interface ComprobanteViatico {
   id_comprobante: number;
@@ -53,7 +54,8 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
     const fetchGastoComprobantes = async () => {
       if (!viatico || viatico.estado?.toLowerCase() !== 'pagada') return;
       try {
-        const data = await ComprobantesGastoViaticoService.list(viatico.id_viatico);
+        const token = getAuthToken();
+        const data = await ComprobantesGastoViaticoService.list(viatico.id_viatico, token);
         setGastoComprobantes(Array.isArray(data) ? data : []);
       } catch (error) {
         setGastoComprobantes([]);
@@ -69,9 +71,10 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
     setSuccessMsg(null);
     const files = Array.from(e.target.files);
     let successCount = 0;
+    const token = getAuthToken();
     for (const file of files) {
       try {
-        await ComprobantesGastoViaticoService.upload(viatico.id_viatico, file);
+        await ComprobantesGastoViaticoService.upload(viatico.id_viatico, file, token);
         successCount++;
       } catch (err: unknown) {
         const errorMsg = err instanceof Error ? err.message : 'Error al subir comprobante';
@@ -88,7 +91,8 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
   const handleDeleteGastoComprobante = async (id_comprobante: number) => {
     if (!window.confirm('¿Seguro que deseas eliminar este comprobante de gasto?')) return;
     try {
-      await ComprobantesGastoViaticoService.delete(id_comprobante);
+      const token = getAuthToken();
+      await ComprobantesGastoViaticoService.delete(id_comprobante, token);
       setSuccessMsg('Comprobante eliminado correctamente.');
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Error al eliminar comprobante';
