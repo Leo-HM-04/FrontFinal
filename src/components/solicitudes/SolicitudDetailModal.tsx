@@ -249,8 +249,9 @@ const FilePreview: React.FC<{
 };
 
 // Función para detectar si una solicitud es N09/TOKA
-function isN09TokaSolicitud(solicitud: any): boolean {
-  if (solicitud.tipo_plantilla === 'N09_TOKA') return true;
+function isN09TokaSolicitud(solicitud: Solicitud): boolean {
+  const solicitudExtendida = solicitud as Solicitud & { tipo_plantilla?: string };
+  if (solicitudExtendida.tipo_plantilla === 'N09_TOKA') return true;
   if (solicitud.plantilla_datos) {
     try {
       const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
@@ -296,56 +297,6 @@ export function SolicitudDetailModal({
     
     return { plantillaId, mapeoPlantilla, datosPlantilla };
   }, [solicitud]);
-
-  // Detectar si es plantilla N09/TOKA
-  if (isN09TokaSolicitud(solicitud)) {
-    let solicitudN09Toka: SolicitudN09TokaData | null = null;
-    if (solicitud && typeof solicitud === 'object') {
-      // Mapear desde plantilla_datos si existe
-      if (solicitud.plantilla_datos) {
-        try {
-          const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-          solicitudN09Toka = {
-            id_solicitud: solicitud.id_solicitud,
-            asunto: plantillaData.asunto || 'TOKA_FONDEO_AVIT',
-            cliente: plantillaData.cliente || '',
-            beneficiario: plantillaData.beneficiario || '',
-            proveedor: plantillaData.proveedor || '',
-            tipo_cuenta_clabe: plantillaData.tipo_cuenta_clabe || 'CLABE',
-            numero_cuenta_clabe: plantillaData.numero_cuenta_clabe || '',
-            banco_destino: plantillaData.banco_destino || '',
-            monto: Number(plantillaData.monto) || 0,
-            tipo_moneda: (plantillaData.tipo_moneda || 'MXN'),
-            estado: solicitud.estado || '',
-            fecha_creacion: solicitud.fecha_creacion || '',
-            fecha_actualizacion: plantillaData.fecha_actualizacion || solicitud.updated_at || '',
-            fecha_limite_pago: plantillaData.fecha_limite_pago || solicitud.fecha_limite_pago || '',
-            usuario_creacion: plantillaData.usuario_creacion || solicitud.usuario_nombre || '',
-            usuario_actualizacion: plantillaData.usuario_actualizacion || '',
-          };
-        } catch {
-          solicitudN09Toka = null;
-        }
-      }
-    }
-    if (solicitudN09Toka) {
-      return (
-        <PlantillaN09TokaDetailModal
-          solicitud={solicitudN09Toka}
-          isOpen={isOpen}
-          onClose={onClose}
-        />
-      );
-    }
-    // Si no se pudo mapear, mostrar modal estándar
-  }
-
-  // Funciones de utilidad específicas para la plantilla
-
-  const debeOcultarse = useCallback(
-    (campo: string) => esCampoOculto(plantillaData.plantillaId, campo),
-    [plantillaData.plantillaId]
-  );
 
   // Función para formatear moneda
   const formatCurrency = useCallback((amount: number) => {
@@ -424,6 +375,33 @@ export function SolicitudDetailModal({
     }
   }, [isOpen]);
 
+  // Funciones de utilidad específicas para la plantilla
+  const debeOcultarse = useCallback(
+    (campo: string) => esCampoOculto(plantillaData.plantillaId, campo),
+    [plantillaData.plantillaId]
+  );
+
+  // Datos computados para el modal
+  const modalData = useMemo(() => {
+    if (!solicitud || !plantillaData.mapeoPlantilla) return null;
+    
+    return Object.entries(plantillaData.datosPlantilla)
+      .filter(([campo]) => !debeOcultarse(campo))
+      .map(([campo, valor]) => ({
+        campo,
+        valor,
+        etiqueta: plantillaData.mapeoPlantilla?.[campo as keyof typeof plantillaData.mapeoPlantilla] || campo
+      }));
+  }, [solicitud, plantillaData, debeOcultarse]);
+
+  const bancoDestinoNombre = useMemo(() => {
+    return solicitud?.banco_destino ? formatBankInfo(solicitud.banco_destino) : '-';
+  }, [solicitud?.banco_destino]);
+
+  const montoFormateado = useMemo(() => {
+    return solicitud?.monto ? formatCurrency(Number(solicitud.monto)) : '-';
+  }, [solicitud?.monto, formatCurrency]);
+
   // Verificaciones adicionales
   const hasCuentaAdicional = useMemo(() => {
     if (!solicitud) return false;
@@ -464,6 +442,49 @@ export function SolicitudDetailModal({
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
+
+  // Detectar si es plantilla N09/TOKA y retornar el modal correspondiente
+  if (solicitud && isN09TokaSolicitud(solicitud)) {
+    let solicitudN09Toka: SolicitudN09TokaData | null = null;
+    if (solicitud && typeof solicitud === 'object') {
+      // Mapear desde plantilla_datos si existe
+      if (solicitud.plantilla_datos) {
+        try {
+          const plantillaDataN09 = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+          solicitudN09Toka = {
+            id_solicitud: solicitud.id_solicitud,
+            asunto: plantillaDataN09.asunto || 'TOKA_FONDEO_AVIT',
+            cliente: plantillaDataN09.cliente || '',
+            beneficiario: plantillaDataN09.beneficiario || '',
+            proveedor: plantillaDataN09.proveedor || '',
+            tipo_cuenta_clabe: plantillaDataN09.tipo_cuenta_clabe || 'CLABE',
+            numero_cuenta_clabe: plantillaDataN09.numero_cuenta_clabe || '',
+            banco_destino: plantillaDataN09.banco_destino || '',
+            monto: Number(plantillaDataN09.monto) || 0,
+            tipo_moneda: (plantillaDataN09.tipo_moneda || 'MXN'),
+            estado: solicitud.estado || '',
+            fecha_creacion: solicitud.fecha_creacion || '',
+            fecha_actualizacion: plantillaDataN09.fecha_actualizacion || solicitud.updated_at || '',
+            fecha_limite_pago: plantillaDataN09.fecha_limite_pago || solicitud.fecha_limite_pago || '',
+            usuario_creacion: plantillaDataN09.usuario_creacion || solicitud.usuario_nombre || '',
+            usuario_actualizacion: plantillaDataN09.usuario_actualizacion || '',
+          };
+        } catch {
+          solicitudN09Toka = null;
+        }
+      }
+    }
+    if (solicitudN09Toka) {
+      return (
+        <PlantillaN09TokaDetailModal
+          solicitud={solicitudN09Toka}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+    // Si no se pudo mapear, continuar con el modal estándar
+  }
 
   if (!isOpen || !solicitud) return null;
 
