@@ -467,8 +467,6 @@ export default function NuevaSolicitudPage() {
           
           // Subir archivos a tabla específica de N09/TOKA
           if (idFinal && archivosParaSubir.length > 0) {
-          // Subir archivos a tabla específica de N09/TOKA
-          if (idFinal && archivosParaSubir.length > 0) {
             console.log(`📎 Subiendo ${archivosParaSubir.length} archivos a N09/TOKA...`);
             
             try {
@@ -502,9 +500,6 @@ export default function NuevaSolicitudPage() {
           
           const response = await SolicitudesService.createPlantilla(solicitudCompleta);
           console.log('✅ Solicitud normal creada:', response);
-          
-          toast.success('Solicitud de plantilla creada exitosamente');
-        }
           
           toast.success('Solicitud de plantilla creada exitosamente');
         }
