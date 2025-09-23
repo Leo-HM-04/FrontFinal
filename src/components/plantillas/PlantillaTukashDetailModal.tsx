@@ -4,7 +4,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { X, FileText, ExternalLink } from 'lucide-react';
 import { PlantillaTukashModalProps, LoadingStateTukash, ErrorStateTukash } from '@/types/plantillaTukash';
-import { SolicitudTukashData, SolicitudTukashArchivo } from '@/types/plantillaTukash';
+import { SolicitudTukashData } from '@/types/plantillaTukash';
+import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 
 // Tipo extendido para solicitudes TUKASH que incluye campos adicionales
 interface SolicitudTukashExtended extends SolicitudTukashData {
@@ -43,7 +44,7 @@ const formatDate = (dateString: string): string => {
 const getEstadoColor = (estado: string) => {
   switch (estado.toLowerCase()) {
     case 'aprobada':
-      return 'bg-green-100 text-green-800 border-green-300';
+      return 'bg-blue-100 text-blue-800 border-blue-300';
     case 'rechazada':
       return 'bg-red-100 text-red-800 border-red-300';
     case 'pagada':
@@ -75,9 +76,9 @@ const useErrorHandler = () => {
 
 // Componente de loading
 const LoadingSpinner: React.FC<{ message?: string }> = ({ message }) => (
-  <div className="flex flex-col items-center justify-center p-6 bg-green-50/50 rounded-lg border border-green-100">
-    <div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
-    {message && <p className="mt-2 text-green-700 text-sm">{message}</p>}
+  <div className="flex flex-col items-center justify-center p-6 bg-blue-50/50 rounded-lg border border-blue-100">
+    <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+    {message && <p className="mt-2 text-blue-700 text-sm">{message}</p>}
   </div>
 );
 
@@ -105,13 +106,13 @@ const InfoField: React.FC<{
   }
 
   return (
-    <div className={`bg-white/80 p-3 rounded border border-green-100 ${className}`}>
-      <span className="text-xs uppercase tracking-wider text-green-700/70 block mb-1 font-medium">
+    <div className={`bg-white/80 p-3 rounded border border-blue-100 ${className}`}>
+      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
         {label}
       </span>
-      <p className={`text-green-900 font-medium text-sm ${
+      <p className={`text-blue-900 font-medium text-sm ${
         variant === 'mono' ? 'font-mono' : 
-        variant === 'currency' ? 'text-green-700 font-semibold' : ''
+        variant === 'currency' ? 'text-blue-700 font-semibold' : ''
       }`}>
         {displayValue}
       </p>
@@ -121,33 +122,36 @@ const InfoField: React.FC<{
 
 // Componente para previsualización de archivos
 const FilePreview: React.FC<{
-  archivo: SolicitudTukashArchivo;
+  archivo: SolicitudArchivo;
 }> = ({ archivo }) => {
-  const url = buildFileUrl(archivo.ruta_archivo);
-  const isImage = /\.(jpg|jpeg|png|gif)$/i.test(archivo.nombre_archivo);
-  const isPdf = /\.pdf$/i.test(archivo.nombre_archivo);
+  const url = buildFileUrl(archivo.archivo_url);
+  const fileName = archivo.archivo_url.split('/').pop() || 'archivo';
+  const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+  const isPdf = /\.pdf$/i.test(fileName);
 
   if (isImage) {
     return (
-      <div className="relative w-full h-40 group overflow-hidden rounded border border-green-200 shadow-sm bg-white/90">
-        <div className="absolute inset-0 bg-gradient-to-b from-green-50 to-green-100 animate-pulse" />
+      <div className="relative w-full h-40 group overflow-hidden rounded border border-blue-200 shadow-sm bg-white/90">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-blue-100 animate-pulse" />
         <Image
           src={url}
-          alt={archivo.nombre_archivo}
+          alt={fileName}
           fill
-          className="object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+          className="object-cover transition-opacity duration-300 opacity-0"
           onLoad={(e) => {
             const target = e.target as HTMLImageElement;
             target.style.opacity = '1';
+            const loadingBg = target.parentElement?.querySelector('div');
+            if (loadingBg) loadingBg.classList.add('opacity-0');
           }}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-green-900/90 to-transparent text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <p className="truncate font-medium">{archivo.nombre_archivo}</p>
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-blue-900/90 to-transparent text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <p className="truncate font-medium">{fileName}</p>
         </div>
       </div>
     );
@@ -155,14 +159,14 @@ const FilePreview: React.FC<{
 
   if (isPdf) {
     return (
-      <div className="w-full rounded border border-green-200 overflow-hidden shadow-sm bg-white">
+      <div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
         <iframe 
           src={url} 
-          title={archivo.nombre_archivo}
+          title={fileName}
           className="w-full" 
           style={{ height: '200px' }} 
         />
-        <div className="bg-green-50/80 p-2 text-xs text-center text-green-700">
+        <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-700">
           Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
         </div>
       </div>
@@ -170,27 +174,30 @@ const FilePreview: React.FC<{
   }
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-green-200">
-      <FileText className="w-6 h-6 text-green-600 flex-shrink-0" />
+    <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+      <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
       <div className="flex-1">
-        <p className="text-green-900 font-medium text-sm break-words">
-          Archivo: {archivo.nombre_archivo}
+        <p className="text-blue-900 font-medium text-sm break-words">
+          Archivo: {fileName}
         </p>
-        <p className="text-green-600 text-xs mt-1">
-          Tipo: {archivo.tipo_archivo || 'Desconocido'}
+        <p className="text-xs text-gray-600 mt-1">
+          Tipo: {archivo.tipo || 'Desconocido'}
         </p>
       </div>
     </div>
   );
 };
 
-// Servicio simulado para archivos de TUKASH
-const SolicitudTukashArchivosService = {
-  obtenerArchivos: async (idSolicitud: number): Promise<SolicitudTukashArchivo[]> => {
-    // Por ahora retornamos array vacío ya que no tenemos servicio específico
-    // TODO: Implementar servicio real para archivos de TUKASH
-    console.log(`Obteniendo archivos para solicitud TUKASH ID: ${idSolicitud}`);
-    return [];
+// Servicio para obtener archivos
+const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudArchivo[]> => {
+  try {
+    console.log(`🔍 [TUKASH ARCHIVOS] Obteniendo archivos para solicitud ID: ${idSolicitud}`);
+    const archivos = await SolicitudArchivosService.obtenerArchivos(idSolicitud);
+    console.log(`✅ [TUKASH ARCHIVOS] Archivos obtenidos:`, archivos);
+    return archivos;
+  } catch (error) {
+    console.error('❌ [TUKASH ARCHIVOS] Error al obtener archivos:', error);
+    throw error;
   }
 };
 
@@ -200,7 +207,7 @@ export function PlantillaTukashDetailModal({
   onClose
 }: PlantillaTukashModalProps) {
   // Estados
-  const [archivos, setArchivos] = useState<SolicitudTukashArchivo[]>([]);
+  const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
   
   const [loading, setLoading] = useState<LoadingStateTukash>({
     archivos: false,
@@ -226,7 +233,7 @@ export function PlantillaTukashDetailModal({
     setErrors(prev => ({ ...prev, archivos: null }));
     
     try {
-      const data = await SolicitudTukashArchivosService.obtenerArchivos(solicitud.id_solicitud || 0);
+      const data = await obtenerArchivosSolicitud(solicitud.id_solicitud || 0);
       setArchivos(data);
     } catch (error) {
       const errorMessage = handleError(error);
@@ -273,20 +280,18 @@ export function PlantillaTukashDetailModal({
 
   if (!isOpen || !solicitud) return null;
 
-  const solicitudExtendida = solicitud as SolicitudTukashExtended;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
       {/* Overlay similar al modal de solicitudes */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-green-900/80 to-emerald-900/70 backdrop-blur-md transition-all duration-500"
+        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
         onClick={onClose}
         role="button"
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
       {/* Modal container similar a solicitudes */}
-      <div className="relative bg-gradient-to-br from-white via-green-50/30 to-emerald-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
         {/* Botón de cerrar */}
         <button
           onClick={onClose}
@@ -296,13 +301,16 @@ export function PlantillaTukashDetailModal({
           <X className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
         </button>
         {/* Contenido con scroll */}
-        <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-green-50 scrollbar-thumb-green-300 hover:scrollbar-thumb-green-400 p-6">
+        <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 p-6">
           {/* Header */}
-          <header className="bg-gradient-to-r from-green-800 via-green-700 to-emerald-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
+          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
             <div className="relative z-10 flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold">Plantilla Tarjetas TUKASH</h2>
-                <p className="text-green-100 text-sm mt-1">Asunto: {solicitud.asunto}</p>
+                <p className="text-blue-100 text-sm mt-1">Asunto: {solicitud.asunto}</p>
+                {solicitudExtended.folio && (
+                  <p className="text-blue-100 text-sm mt-1">Folio: {solicitudExtended.folio}</p>
+                )}
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado || 'pendiente')}`}>{solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}</span>
             </div>
@@ -310,27 +318,18 @@ export function PlantillaTukashDetailModal({
           
           {/* Información Principal */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-green-900 mb-4 pb-2 border-b border-green-200">Información Principal</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información Principal</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Asunto" value={solicitud.asunto} />
               <InfoField label="Cliente" value={solicitud.cliente} />
               <InfoField label="Beneficiario de Tarjeta" value={solicitud.beneficiario_tarjeta} />
-              <InfoField label="Folio" value={solicitudExtended.folio} />
-            </div>
-          </div>
-          
-          {/* Información de Tarjeta */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-green-900 mb-4 pb-2 border-b border-green-200">Información de Tarjeta</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Número de Tarjeta" value={solicitud.numero_tarjeta} variant="mono" />
-              <InfoField label="Tiene Archivos" value={solicitudExtended.tiene_archivos ? 'Sí' : 'No'} />
             </div>
           </div>
 
           {/* Información de Montos */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-green-900 mb-4 pb-2 border-b border-green-200">Montos</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Montos</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Monto Total Cliente" value={solicitud.monto_total_cliente?.toString()} variant="currency" />
               <InfoField label="Monto Total TUKASH" value={solicitud.monto_total_tukash?.toString()} variant="currency" />
@@ -340,7 +339,7 @@ export function PlantillaTukashDetailModal({
           {/* Información de Aprobación */}
           {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-green-900 mb-4 pb-2 border-b border-green-200">Información de Aprobación</h3>
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
                 <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion ? formatDate(solicitudExtended.fecha_aprobacion) : ''} />
@@ -353,7 +352,7 @@ export function PlantillaTukashDetailModal({
           
           {/* Información de Seguimiento */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-green-900 mb-4 pb-2 border-b border-green-200">Información de Seguimiento</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Seguimiento</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion ? formatDate(solicitud.fecha_creacion) : ''} />
               <InfoField label="Última Actualización" value={solicitud.fecha_actualizacion ? formatDate(solicitud.fecha_actualizacion) : ''} />
@@ -364,7 +363,7 @@ export function PlantillaTukashDetailModal({
           
           {/* Archivos Adjuntos */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-green-900 mb-4 pb-2 border-b border-green-200">Archivos Adjuntos</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos</h3>
             {loading.archivos && (<LoadingSpinner message="Cargando archivos..." />)}
             {errors.archivos && (<ErrorMessage message={errors.archivos} />)}
             {!loading.archivos && !errors.archivos && (
@@ -377,12 +376,12 @@ export function PlantillaTukashDetailModal({
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {archivos.map((archivo) => (
-                      <div key={archivo.id_archivo} className="bg-white/90 rounded-lg border border-green-200 p-4 shadow-sm">
+                      <div key={archivo.id} className="bg-white/90 rounded-lg border border-blue-200 p-4 shadow-sm">
                         <FilePreview archivo={archivo} />
                         <div className="mt-3 flex gap-2">
                           <button
-                            onClick={() => window.open(buildFileUrl(archivo.ruta_archivo), '_blank')}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm"
+                            onClick={() => window.open(buildFileUrl(archivo.archivo_url), '_blank')}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
                           >
                             <ExternalLink className="w-4 h-4" />
                             Ver completo
