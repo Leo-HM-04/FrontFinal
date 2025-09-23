@@ -20,6 +20,9 @@ export interface SolicitudTukashData {
   fecha_actualizacion?: string;
   usuario_creacion?: string;
   usuario_actualizacion?: string;
+  
+  // Campos adicionales para compatibilidad con solicitud normal
+  folio?: string;
 }
 
 export interface SolicitudTukashArchivo {

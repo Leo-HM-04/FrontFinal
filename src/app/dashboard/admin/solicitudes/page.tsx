@@ -253,7 +253,7 @@ export default function SolicitudesPage() {
           const asunto = solicitud.concepto?.includes('TUKASH') ? 'TUKASH' : 'TUKASH';
           const cliente = solicitud.empresa_a_pagar || '';
           const beneficiario_tarjeta = solicitud.nombre_persona || '';
-          const numero_tarjeta = ''; // No disponible en solicitud básica
+          const numero_tarjeta = solicitud.cuenta_destino || solicitud.cuenta || ''; // Usar cuenta_destino o cuenta como número de tarjeta
           const monto_total_cliente = Number(solicitud.monto) || 0;
           const monto_total_tukash = Number(solicitud.monto) || 0; // Usar el mismo monto si no hay específico
           
@@ -270,6 +270,8 @@ export default function SolicitudesPage() {
             fecha_actualizacion: solicitud.updated_at || '',
             usuario_creacion: solicitud.usuario_nombre || '',
             usuario_actualizacion: '',
+            // Campos adicionales
+            folio: solicitud.folio || '',
           };
           
           console.log('🔧 [ADMIN TUKASH] Datos construidos:', solicitudTukash);
