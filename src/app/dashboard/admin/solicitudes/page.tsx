@@ -9,10 +9,12 @@ import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
+import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTukashDetailModal';
 import { FileText, Trash2, Eye, Download } from 'lucide-react';
 import { exportSolicitudesPDF, exportSolicitudesExcel, exportSolicitudesCSV } from '@/utils/exportSolicitudes';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { SolicitudesN09TokaService, SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
+import { SolicitudTukashData } from '@/types/plantillaTukash';
 
 // Tipo extendido para solicitudes que pueden incluir datos N09/TOKA
 interface SolicitudUnificada extends Omit<Solicitud, 'monto'> {
@@ -72,9 +74,40 @@ const isN09TokaSolicitud = (solicitud: Solicitud): boolean => {
   return false;
 };
 
+// Función para detectar si una solicitud es del tipo TUKASH
+const isTukashSolicitud = (solicitud: Solicitud): boolean => {
+  const solicitudExtendida = solicitud as Solicitud & {
+    tipo_plantilla?: string;
+    asunto?: string;
+    cliente?: string;
+    beneficiario_tarjeta?: string;
+  };
+  
+  // Verificar si tiene el campo tipo_plantilla específico
+  if (solicitudExtendida.tipo_plantilla === 'TUKASH') {
+    return true;
+  }
+  
+  // Detectar basándose en los campos específicos de plantilla_datos
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = JSON.parse(solicitud.plantilla_datos);
+      return plantillaData.templateType === 'tarjetas-tukash' || 
+             plantillaData.isTukash === true ||
+             (plantillaData.numero_tarjeta && plantillaData.beneficiario_tarjeta) ||
+             (plantillaData.monto_total_cliente && plantillaData.monto_total_tukash) ||
+             (plantillaData.asunto === 'TUKASH');
+    } catch {
+      return false;
+    }
+  }
+  return false;
+};
+
 export default function SolicitudesPage() {
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [selectedN09TokaSolicitud, setSelectedN09TokaSolicitud] = useState<SolicitudN09TokaData | null>(null);
+  const [selectedTukashSolicitud, setSelectedTukashSolicitud] = useState<SolicitudTukashData | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -101,6 +134,8 @@ export default function SolicitudesPage() {
 
   const handleDelete = (solicitud: Solicitud) => {
     setSelectedSolicitud(solicitud);
+    setSelectedN09TokaSolicitud(null);
+    setSelectedTukashSolicitud(null);
     setShowDeleteModal(true);
   };
 
@@ -145,6 +180,35 @@ export default function SolicitudesPage() {
         console.error('Error al obtener solicitud N09/TOKA:', error);
         toast.error('Error al cargar los detalles de la plantilla N09/TOKA');
         // Fallback al modal normal
+        setSelectedSolicitud(solicitud);
+      }
+    } else if (isTukashSolicitud(solicitud)) {
+      // Verificar si es una solicitud TUKASH
+      try {
+        if (solicitud.plantilla_datos) {
+          const plantillaData = JSON.parse(solicitud.plantilla_datos);
+          const solicitudTukash: SolicitudTukashData = {
+            id_solicitud: solicitud.id_solicitud,
+            asunto: plantillaData.asunto || 'TUKASH',
+            cliente: plantillaData.cliente || '',
+            beneficiario_tarjeta: plantillaData.beneficiario_tarjeta || '',
+            numero_tarjeta: plantillaData.numero_tarjeta || '',
+            monto_total_cliente: plantillaData.monto_total_cliente || 0,
+            monto_total_tukash: plantillaData.monto_total_tukash || 0,
+            estado: (solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+            fecha_creacion: solicitud.fecha_creacion,
+            fecha_actualizacion: solicitud.updated_at || '',
+            usuario_creacion: solicitud.usuario_nombre || '',
+            usuario_actualizacion: '',
+          };
+          setSelectedTukashSolicitud(solicitudTukash);
+        } else {
+          toast.error('No se encontraron datos de la plantilla TUKASH');
+          setSelectedSolicitud(solicitud);
+        }
+      } catch (error) {
+        console.error('Error al procesar solicitud TUKASH:', error);
+        toast.error('Error al cargar los detalles de la plantilla TUKASH');
         setSelectedSolicitud(solicitud);
       }
     } else {
@@ -469,6 +533,15 @@ export default function SolicitudesPage() {
               solicitud={selectedN09TokaSolicitud}
               isOpen={!!selectedN09TokaSolicitud}
               onClose={() => setSelectedN09TokaSolicitud(null)}
+            />
+          )}
+
+          {/* Modal de Detalle de Plantilla TUKASH */}
+          {selectedTukashSolicitud && (
+            <PlantillaTukashDetailModal
+              solicitud={selectedTukashSolicitud}
+              isOpen={!!selectedTukashSolicitud}
+              onClose={() => setSelectedTukashSolicitud(null)}
             />
           )}
 

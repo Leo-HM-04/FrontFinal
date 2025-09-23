@@ -17,6 +17,8 @@ import { bancosMexico } from '@/data/bancos';
 import '@/styles/modal.css';
 import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
 import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
+import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTukashDetailModal';
+import { SolicitudTukashData } from '@/types/plantillaTukash';
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
@@ -287,6 +289,35 @@ function isN09TokaSolicitud(solicitud: Solicitud | null): boolean {
   return false;
 }
 
+// Función para detectar si una solicitud es TUKASH
+function isTukashSolicitud(solicitud: Solicitud | null): boolean {
+  if (!solicitud) return false;
+  
+  // 1. Verificar si tiene el campo tipo_plantilla directamente
+  const solicitudExtendida = solicitud as Solicitud & { tipo_plantilla?: string };
+  if (solicitudExtendida.tipo_plantilla === 'TUKASH') return true;
+  
+  // 2. Usar la función de detección de plantilla existente
+  const plantillaId = detectarPlantillaId(solicitud);
+  if (plantillaId === 'tarjetas-tukash') return true;
+  
+  // 3. Verificar en plantilla_datos
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      return plantillaData.templateType === 'tarjetas-tukash' || 
+             plantillaData.isTukash === true || 
+             (plantillaData.numero_tarjeta && plantillaData.beneficiario_tarjeta) ||
+             (plantillaData.monto_total_cliente && plantillaData.monto_total_tukash) ||
+             (plantillaData.asunto === 'TUKASH');
+    } catch {
+      return false;
+    }
+  }
+  
+  return false;
+}
+
 export function SolicitudDetailModal({ 
   solicitud, 
   isOpen, 
@@ -489,6 +520,42 @@ export function SolicitudDetailModal({
       return (
         <PlantillaN09TokaDetailModal
           solicitud={solicitudN09Toka}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+    // Si no se pudo mapear, mostrar modal estándar
+  }
+
+  // Renderizado condicional del modal TUKASH
+  if (isOpen && solicitud && isTukashSolicitud(solicitud)) {
+    let solicitudTukash: SolicitudTukashData | null = null;
+    if (typeof solicitud === 'object' && solicitud.plantilla_datos) {
+      try {
+        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        solicitudTukash = {
+          id_solicitud: solicitud.id_solicitud,
+          asunto: plantillaData.asunto || 'TUKASH',
+          cliente: plantillaData.cliente || '',
+          beneficiario_tarjeta: plantillaData.beneficiario_tarjeta || '',
+          numero_tarjeta: plantillaData.numero_tarjeta || '',
+          monto_total_cliente: plantillaData.monto_total_cliente || 0,
+          monto_total_tukash: plantillaData.monto_total_tukash || 0,
+          estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+          fecha_creacion: solicitud.fecha_creacion || '',
+          fecha_actualizacion: solicitud.updated_at || '',
+          usuario_creacion: solicitud.usuario_nombre || '',
+          usuario_actualizacion: '',
+        };
+      } catch {
+        solicitudTukash = null;
+      }
+    }
+    if (solicitudTukash) {
+      return (
+        <PlantillaTukashDetailModal
+          solicitud={solicitudTukash}
           isOpen={isOpen}
           onClose={onClose}
         />
