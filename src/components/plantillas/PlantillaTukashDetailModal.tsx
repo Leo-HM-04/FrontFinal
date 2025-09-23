@@ -56,7 +56,8 @@ const getEstadoColor = (estado: string) => {
 
 // Función para construir URL de archivos
 const buildFileUrl = (rutaArchivo: string): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bechapra.com.mx:8443/api';
+  // Para archivos de solicitud, usar la URL base correcta sin puerto ni /api
+  const baseUrl = 'https://bechapra.com.mx';
   if (rutaArchivo.startsWith('http')) return rutaArchivo;
   return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
 };
