@@ -45,7 +45,7 @@ export default function EditarTukashPage() {
       }
     }
     if (solicitudId) fetchSolicitud();
-  }, [solicitudId, seleccionarPlantilla, actualizarCampo]);
+  }, [solicitudId]);
 
   // Renderizar el formulario de edición TUKASH
   return (
