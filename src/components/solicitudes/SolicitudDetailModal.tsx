@@ -293,28 +293,71 @@ function isN09TokaSolicitud(solicitud: Solicitud | null): boolean {
 function isTukashSolicitud(solicitud: Solicitud | null): boolean {
   if (!solicitud) return false;
   
+  console.log(`🔍 [TUKASH DETECCIÓN] Analizando solicitud ID: ${solicitud.id_solicitud}`);
+  
   // 1. Verificar si tiene el campo tipo_plantilla directamente
   const solicitudExtendida = solicitud as Solicitud & { tipo_plantilla?: string };
-  if (solicitudExtendida.tipo_plantilla === 'TUKASH') return true;
+  console.log(`🔍 [TUKASH DETECCIÓN] tipo_plantilla: ${solicitudExtendida.tipo_plantilla}`);
+  if (solicitudExtendida.tipo_plantilla === 'TUKASH') {
+    console.log('✅ [TUKASH DETECCIÓN] Detectada por tipo_plantilla = TUKASH');
+    return true;
+  }
   
   // 2. Usar la función de detección de plantilla existente
   const plantillaId = detectarPlantillaId(solicitud);
-  if (plantillaId === 'tarjetas-tukash') return true;
+  console.log(`🔍 [TUKASH DETECCIÓN] plantillaId detectado: ${plantillaId}`);
+  if (plantillaId === 'tarjetas-tukash') {
+    console.log('✅ [TUKASH DETECCIÓN] Detectada por plantillaId = tarjetas-tukash');
+    return true;
+  }
   
   // 3. Verificar en plantilla_datos
+  console.log(`🔍 [TUKASH DETECCIÓN] plantilla_datos existe: ${!!solicitud.plantilla_datos}`);
   if (solicitud.plantilla_datos) {
     try {
       const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-      return plantillaData.templateType === 'tarjetas-tukash' || 
+      console.log(`🔍 [TUKASH DETECCIÓN] plantilla_datos contenido:`, plantillaData);
+      
+      const esTukash = plantillaData.templateType === 'tarjetas-tukash' || 
              plantillaData.isTukash === true || 
              (plantillaData.numero_tarjeta && plantillaData.beneficiario_tarjeta) ||
              (plantillaData.monto_total_cliente && plantillaData.monto_total_tukash) ||
              (plantillaData.asunto === 'TUKASH');
+      
+      if (esTukash) {
+        console.log('✅ [TUKASH DETECCIÓN] Detectada por datos de plantilla');
+        return true;
+      }
     } catch {
+      console.log('❌ [TUKASH DETECCIÓN] Error parseando plantilla_datos');
       return false;
     }
   }
   
+  // 4. Detección adicional por tipo_pago_descripcion
+  console.log(`🔍 [TUKASH DETECCIÓN] tipo_pago_descripcion: ${solicitud.tipo_pago_descripcion}`);
+  if (solicitud.tipo_pago_descripcion && solicitud.tipo_pago_descripcion.includes('tarjetas-tukash')) {
+    console.log('✅ [TUKASH DETECCIÓN] Detectada por tipo_pago_descripcion contiene tarjetas-tukash');
+    return true;
+  }
+  
+  // 5. Detección por concepto que contenga TUKASH
+  console.log(`🔍 [TUKASH DETECCIÓN] concepto: ${solicitud.concepto}`);
+  if (solicitud.concepto && solicitud.concepto.toUpperCase().includes('TUKASH')) {
+    console.log('✅ [TUKASH DETECCIÓN] Detectada por concepto contiene TUKASH');
+    return true;
+  }
+  
+  // 6. Detección por nombre_persona o empresa_a_pagar que contenga TUKASH
+  console.log(`🔍 [TUKASH DETECCIÓN] nombre_persona: ${solicitud.nombre_persona}`);
+  console.log(`🔍 [TUKASH DETECCIÓN] empresa_a_pagar: ${solicitud.empresa_a_pagar}`);
+  if ((solicitud.nombre_persona && solicitud.nombre_persona.toUpperCase().includes('TUKASH')) ||
+      (solicitud.empresa_a_pagar && solicitud.empresa_a_pagar.toUpperCase().includes('TUKASH'))) {
+    console.log('✅ [TUKASH DETECCIÓN] Detectada por nombre_persona o empresa_a_pagar contiene TUKASH');
+    return true;
+  }
+  
+  console.log('❌ [TUKASH DETECCIÓN] No detectada como TUKASH');
   return false;
 }
 
