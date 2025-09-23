@@ -574,6 +574,8 @@ export function SolicitudDetailModal({
   // Renderizado condicional del modal TUKASH
   if (isOpen && solicitud && isTukashSolicitud(solicitud)) {
     let solicitudTukash: SolicitudTukashData | null = null;
+    
+    // Intentar obtener datos de plantilla_datos primero
     if (typeof solicitud === 'object' && solicitud.plantilla_datos) {
       try {
         const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
@@ -595,7 +597,39 @@ export function SolicitudDetailModal({
         solicitudTukash = null;
       }
     }
+    
+    // Si no hay plantilla_datos o falló el parsing, construir desde campos básicos de la solicitud
+    if (!solicitudTukash) {
+      console.log('🔧 [TUKASH] Construyendo datos desde campos básicos de la solicitud');
+      
+      // Extraer información de TUKASH desde campos básicos
+      const asunto = solicitud.concepto?.includes('TUKASH') ? 'TUKASH' : 'TUKASH';
+      const cliente = solicitud.empresa_a_pagar || '';
+      const beneficiario_tarjeta = solicitud.nombre_persona || '';
+      const numero_tarjeta = ''; // No disponible en solicitud básica
+      const monto_total_cliente = Number(solicitud.monto) || 0;
+      const monto_total_tukash = Number(solicitud.monto) || 0; // Usar el mismo monto si no hay específico
+      
+      solicitudTukash = {
+        id_solicitud: solicitud.id_solicitud,
+        asunto,
+        cliente,
+        beneficiario_tarjeta,
+        numero_tarjeta,
+        monto_total_cliente,
+        monto_total_tukash,
+        estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+        fecha_creacion: solicitud.fecha_creacion || '',
+        fecha_actualizacion: solicitud.updated_at || '',
+        usuario_creacion: solicitud.usuario_nombre || '',
+        usuario_actualizacion: '',
+      };
+      
+      console.log('🔧 [TUKASH] Datos construidos:', solicitudTukash);
+    }
+    
     if (solicitudTukash) {
+      console.log('✅ [TUKASH] Mostrando modal TUKASH con datos:', solicitudTukash);
       return (
         <PlantillaTukashDetailModal
           solicitud={solicitudTukash}
