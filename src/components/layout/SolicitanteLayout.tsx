@@ -5,7 +5,7 @@ import Link from 'next/link';
 import SolicitanteNotifications from '@/components/solicitante/SolicitanteNotifications';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { LogOut, Home, User, Menu, ClipboardList, Repeat, Briefcase, FileText, PlusCircle } from 'lucide-react';
+import { LogOut, Home, User, Menu, ClipboardList, Repeat, PlusCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';

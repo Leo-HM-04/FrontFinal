@@ -5,7 +5,7 @@ import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ViaticosService } from '@/services/viaticos.service';
-import { FaTrash, FaDownload, FaFileWord, FaClipboardList, FaBolt } from 'react-icons/fa';
+import { FaTrash, FaDownload, FaFileWord, FaClipboardList } from 'react-icons/fa';
 import { formatDateForAPI, getCurrentUTC6Date } from '@/utils/dateUtils';
 
 // Si no existe el tipo Viatico, defínelo aquí o impórtalo desde '@/types/viatico'

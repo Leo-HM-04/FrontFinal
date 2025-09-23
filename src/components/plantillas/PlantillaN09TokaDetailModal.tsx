@@ -238,7 +238,7 @@ export function PlantillaN09TokaDetailModal({
   const { handleError } = useErrorHandler();
 
   // URL base para archivos
-  const baseFileUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bechapra.com.mx:8443/api';
+  // const baseFileUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bechapra.com.mx:8443/api';
 
   // Cast de la solicitud para acceder a campos adicionales
   const solicitudExtended = solicitud as SolicitudN09TokaExtended;
