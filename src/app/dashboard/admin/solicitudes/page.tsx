@@ -98,13 +98,14 @@ const isTukashSolicitud = (solicitud: Solicitud): boolean => {
     try {
       const plantillaData = JSON.parse(solicitud.plantilla_datos);
       console.log(`🔍 [ADMIN TUKASH DETECCIÓN] plantilla_datos contenido:`, plantillaData);
-      
+      console.log(`🔍 [ADMIN TUKASH DETECCIÓN] asunto:`, plantillaData.asunto);
+      console.log(`🔍 [ADMIN TUKASH DETECCIÓN] cliente:`, plantillaData.cliente);
+      console.log(`🔍 [ADMIN TUKASH DETECCIÓN] beneficiario_tarjeta:`, plantillaData.beneficiario_tarjeta);
       const esTukash = plantillaData.templateType === 'tarjetas-tukash' || 
              plantillaData.isTukash === true ||
              (plantillaData.numero_tarjeta && plantillaData.beneficiario_tarjeta) ||
              (plantillaData.monto_total_cliente && plantillaData.monto_total_tukash) ||
              (plantillaData.asunto === 'TUKASH');
-      
       if (esTukash) {
         console.log('✅ [ADMIN TUKASH DETECCIÓN] Detectada por datos de plantilla');
         return true;
