@@ -393,49 +393,19 @@ export default function EditarSolicitudPage() {
             // Para plantilla tarjetas-n09-toka, cargar datos desde tabla específica
             if (plantillaId === 'tarjetas-n09-toka') {
               console.log('🗃️ Cargando datos de tabla específica para tarjetas-n09-toka...');
-              
               SolicitudesN09TokaService.obtenerPorSolicitudPrincipal(solicitudId)
                 .then((datosN09Toka: unknown) => {
                   console.log('🗃️ Datos de tabla N09/TOKA recibidos:', datosN09Toka);
-                  
                   if (datosN09Toka && typeof datosN09Toka === 'object') {
                     const datos = datosN09Toka as Record<string, unknown>;
-                    
-                    // Usar setTimeout para asegurar que el componente esté montado
                     setTimeout(() => {
                       console.log('⏰ Iniciando prellenado con datos de tabla N09/TOKA...');
-                      
-                      // Actualizar campos específicos de la plantilla
-                      if (datos.asunto) {
-                        console.log('🔧 Actualizando asunto:', datos.asunto);
-                        actualizarCampo('asunto', datos.asunto);
-                      }
-                      
-                      if (datos.cliente) {
-                        console.log('🔧 Actualizando cliente:', datos.cliente);
-                        actualizarCampo('cliente', datos.cliente);
-                      }
-                      
-                      if (datos.beneficiario) {
-                        console.log('� Actualizando beneficiario:', datos.beneficiario);
-                        actualizarCampo('beneficiario', datos.beneficiario);
-                      }
-                      
-                      if (datos.metodos_pago) {
-                        console.log('🔧 Actualizando métodos de pago:', datos.metodos_pago);
-                        actualizarCampo('metodos_pago', datos.metodos_pago);
-                      }
-                      
-                      if (datos.archivos_adjuntos) {
-                        console.log('🔧 Actualizando archivos adjuntos:', datos.archivos_adjuntos);
-                        actualizarCampo('archivos_adjuntos', datos.archivos_adjuntos);
-                      }
-                      
-                      if (datos.observaciones) {
-                        console.log('� Actualizando observaciones:', datos.observaciones);
-                        actualizarCampo('observaciones', datos.observaciones);
-                      }
-                      
+                      if (datos.asunto) actualizarCampo('asunto', datos.asunto);
+                      if (datos.cliente) actualizarCampo('cliente', datos.cliente);
+                      if (datos.beneficiario) actualizarCampo('beneficiario', datos.beneficiario);
+                      if (datos.metodos_pago) actualizarCampo('metodos_pago', datos.metodos_pago);
+                      if (datos.archivos_adjuntos) actualizarCampo('archivos_adjuntos', datos.archivos_adjuntos);
+                      if (datos.observaciones) actualizarCampo('observaciones', datos.observaciones);
                       console.log('🎯 Prellenado completado desde tabla N09/TOKA');
                     }, 100);
                   }
@@ -443,10 +413,34 @@ export default function EditarSolicitudPage() {
                 .catch((error: Error) => {
                   console.error('❌ Error cargando datos de tabla N09/TOKA:', error);
                   console.log('🔄 Fallback: usando plantilla_datos JSON...');
-                  
-                  // Fallback: usar datos de plantilla_datos
                   cargarDatosPlantillaJSON(s as unknown as Solicitud, actualizarCampo);
                 });
+            } else if (plantillaId === 'tarjetas-tukash') {
+              // Para plantilla TUKASH, prellenar desde plantilla_datos
+              console.log('🗃️ Cargando datos de plantilla TUKASH...');
+              let datosTukash: Record<string, unknown> = {};
+              if (s.plantilla_datos) {
+                try {
+                  datosTukash = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
+                } catch (err) {
+                  console.error('❌ Error parseando plantilla_datos TUKASH:', err);
+                }
+              }
+              setTimeout(() => {
+                console.log('⏰ Iniciando prellenado con datos de plantilla TUKASH...', datosTukash);
+                if (datosTukash.asunto) actualizarCampo('asunto', datosTukash.asunto);
+                if (datosTukash.cliente) actualizarCampo('cliente', datosTukash.cliente);
+                if (datosTukash.beneficiario_tarjeta) actualizarCampo('beneficiario_tarjeta', datosTukash.beneficiario_tarjeta);
+                if (datosTukash.numero_tarjeta) actualizarCampo('numero_tarjeta', datosTukash.numero_tarjeta);
+                if (datosTukash.monto_total_cliente) actualizarCampo('monto_total_cliente', datosTukash.monto_total_cliente);
+                if (datosTukash.monto_total_tukash) actualizarCampo('monto_total_tukash', datosTukash.monto_total_tukash);
+                if (datosTukash.estado) actualizarCampo('estado', datosTukash.estado);
+                if (datosTukash.fecha_creacion) actualizarCampo('fecha_creacion', datosTukash.fecha_creacion);
+                if (datosTukash.fecha_actualizacion) actualizarCampo('fecha_actualizacion', datosTukash.fecha_actualizacion);
+                if (datosTukash.usuario_creacion) actualizarCampo('usuario_creacion', datosTukash.usuario_creacion);
+                if (datosTukash.usuario_actualizacion) actualizarCampo('usuario_actualizacion', datosTukash.usuario_actualizacion);
+                console.log('🎯 Prellenado completado desde plantilla TUKASH');
+              }, 100);
             } else {
               // Para otras plantillas, usar el método tradicional con plantilla_datos
               cargarDatosPlantillaJSON(s as unknown as Solicitud, actualizarCampo);
