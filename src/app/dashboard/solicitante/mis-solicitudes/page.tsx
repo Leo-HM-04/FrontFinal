@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, {
   useState,
@@ -57,6 +57,47 @@ type SortOrder = 'asc' | 'desc';
 const ITEMS_PER_PAGE = 5;
 const LOAD_TIMEOUT = 10000;
 
+
+// Función para detectar si una solicitud es del tipo TUKASH
+const isTukashSolicitud = (solicitud: Solicitud): boolean => {
+  const solicitudExtendida = solicitud as Solicitud & {
+    tipo_plantilla?: string;
+    asunto?: string;
+    cliente?: string;
+    beneficiario_tarjeta?: string;
+    concepto?: string;
+    nombre_persona?: string;
+    empresa_a_pagar?: string;
+  };
+  // 1. Verificar si tiene el campo tipo_plantilla específico
+  if (solicitudExtendida.tipo_plantilla === 'TUKASH') {
+    return true;
+  }
+  // 2. Detectar basándose en los campos específicos de plantilla_datos
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      const esTukash = plantillaData.templateType === 'tarjetas-tukash' || 
+        plantillaData.isTukash === true ||
+        (plantillaData.numero_tarjeta && plantillaData.beneficiario_tarjeta) ||
+        (plantillaData.monto_total_cliente && plantillaData.monto_total_tukash) ||
+        (plantillaData.asunto === 'TUKASH');
+      return !!esTukash;
+    } catch {
+      return false;
+    }
+  }
+  // 3. Detección adicional por concepto que contenga TUKASH
+  if (solicitudExtendida.concepto && String(solicitudExtendida.concepto).toUpperCase().includes('TUKASH')) {
+    return true;
+  }
+  // 4. Detección por nombre_persona o empresa_a_pagar que contenga TUKASH
+  if ((solicitudExtendida.nombre_persona && String(solicitudExtendida.nombre_persona).toUpperCase().includes('TUKASH')) ||
+      (solicitudExtendida.empresa_a_pagar && String(solicitudExtendida.empresa_a_pagar).toUpperCase().includes('TUKASH'))) {
+    return true;
+  }
+  return false;
+};
 const ESTADO_ORDEN = {
   pendiente: 1,
   autorizadas: 2,
@@ -904,6 +945,8 @@ function MisSolicitudesContent() {
                                   onClick={() => {
                                     if (isN09TokaSolicitud(s)) {
                                       router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
+                                    } else if (isTukashSolicitud(s)) {
+                                      router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
                                     } else {
                                       router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
                                     }
@@ -1016,6 +1059,8 @@ function MisSolicitudesContent() {
                                 onClick={() => {
                                   if (isN09TokaSolicitud(s)) {
                                     router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
+                                  } else if (isTukashSolicitud(s)) {
+                                    router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
                                   } else {
                                     router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
                                   }
