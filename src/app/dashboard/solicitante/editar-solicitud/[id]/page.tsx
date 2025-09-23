@@ -18,6 +18,8 @@ import Image from 'next/image';
 import { formatDateForAPI } from '@/utils/dateUtils';
 import { detectarPlantillaId, obtenerDatosPlantilla } from '@/utils/plantillasLabels';
 import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
+import EditarN09Toka from '@/components/plantillas/EditarN09Toka';
+import EditarTukash from '@/components/plantillas/EditarTukash';
 import { plantillasDisponibles } from '@/data/plantillas';
 import type { PlantillaSolicitud } from '@/types/plantillas';
 import type { Solicitud } from '@/types';
@@ -1002,13 +1004,25 @@ export default function EditarSolicitudPage() {
                   </div>
                 </div>
                 
-                <FormularioPlantilla
-                  plantilla={plantillaDetectada}
-                  datos={estadoPlantilla.datos}
-                  errores={estadoPlantilla.errores}
-                  camposVisibles={estadoPlantilla.camposVisibles}
-                  onCambiarCampo={actualizarCampo}
-                />
+                {plantillaDetectada.id === 'tarjetas-n09-toka' ? (
+                  <EditarN09Toka
+                    plantilla={plantillaDetectada}
+                    datosPlantilla={estadoPlantilla.datos}
+                  />
+                ) : plantillaDetectada.id === 'tarjetas-tukash' ? (
+                  <EditarTukash
+                    plantilla={plantillaDetectada}
+                    datosPlantilla={estadoPlantilla.datos}
+                  />
+                ) : (
+                  <FormularioPlantilla
+                    plantilla={plantillaDetectada}
+                    datos={estadoPlantilla.datos}
+                    errores={estadoPlantilla.errores}
+                    camposVisibles={estadoPlantilla.camposVisibles}
+                    onCambiarCampo={actualizarCampo}
+                  />
+                )}
               </div>
             ) : (
             <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 md:space-y-10 max-w-full">
