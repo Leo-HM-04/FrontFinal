@@ -21,7 +21,7 @@ import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTuk
 import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { PlantillaSuaInternasDetailModal } from '@/components/plantillas/PlantillaSuaInternasDetailModal';
 import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
-import { PlantillaSuaFrenshetsiDetailModal } from '@/components/plantillas/PlantillaSuaFrenshetsiDetailModal';
+import { PlantillaSuaFrenshetsiDetailModal } from '../plantillas/PlantillaSuaFrenshetsiDetailModal';
 import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
 
 interface SolicitudDetailModalProps {
