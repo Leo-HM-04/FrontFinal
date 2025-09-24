@@ -269,6 +269,20 @@ export default function EditarSolicitudPage() {
     }
   }, [formData.tipo_concepto]);
 
+  // Redirección automática si se detecta plantilla TUKASH o N09/TOKA
+  useEffect(() => {
+    if (plantillaDetectada && solicitudId) {
+      if (plantillaDetectada.id === 'tarjetas-tukash') {
+        router.push(`/dashboard/solicitante/editar-tukash/${solicitudId}`);
+        return;
+      }
+      if (plantillaDetectada.id === 'tarjetas-n09-toka') {
+        router.push(`/dashboard/solicitante/editar-n09-toka/${solicitudId}`);
+        return;
+      }
+    }
+  }, [plantillaDetectada, solicitudId, router]);
+
   // Configuración dinámica para cuenta destino
   let cuentaConfig;
   if (formData.tipo_cuenta_destino === 'Número de Tarjeta') {
