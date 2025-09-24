@@ -10,11 +10,13 @@ import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
 import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTukashDetailModal';
+import { PlantillaSuaInternasDetailModal } from '@/components/plantillas/PlantillaSuaInternasDetailModal';
 import { FileText, Trash2, Eye, Download } from 'lucide-react';
 import { exportSolicitudesPDF, exportSolicitudesExcel, exportSolicitudesCSV } from '@/utils/exportSolicitudes';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
 import { SolicitudesN09TokaService, SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 import { SolicitudTukashData } from '@/types/plantillaTukash';
+import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
 
 // Tipo extendido para solicitudes que pueden incluir datos N09/TOKA
 interface SolicitudUnificada extends Omit<Solicitud, 'monto'> {
@@ -143,10 +145,74 @@ const isTukashSolicitud = (solicitud: Solicitud): boolean => {
   return false;
 };
 
+const isSuaInternasSolicitud = (solicitud: Solicitud): boolean => {
+  console.log(`🔍 [ADMIN SUA INTERNAS DETECCIÓN] Analizando solicitud ID: ${solicitud.id_solicitud}`);
+  
+  const solicitudExtendida = solicitud as Solicitud & {
+    tipo_plantilla?: string;
+    empresa?: string;
+    linea_captura?: string;
+  };
+  
+  // 1. Verificar si tiene el campo tipo_plantilla específico
+  console.log(`🔍 [ADMIN SUA INTERNAS DETECCIÓN] tipo_plantilla: ${solicitudExtendida.tipo_plantilla}`);
+  if (solicitudExtendida.tipo_plantilla === 'SUA_INTERNAS' || solicitudExtendida.tipo_plantilla === 'pago-sua-internas') {
+    console.log('✅ [ADMIN SUA INTERNAS DETECCIÓN] Detectada por tipo_plantilla');
+    return true;
+  }
+  
+  // 2. Detectar basándose en los campos específicos de plantilla_datos
+  console.log(`🔍 [ADMIN SUA INTERNAS DETECCIÓN] plantilla_datos existe: ${!!solicitud.plantilla_datos}`);
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = JSON.parse(solicitud.plantilla_datos);
+      console.log(`🔍 [ADMIN SUA INTERNAS DETECCIÓN] plantilla_datos contenido:`, plantillaData);
+      
+      const esSuaInternas = plantillaData.templateType === 'pago-sua-internas' || 
+             plantillaData.isSuaInternas === true ||
+             (plantillaData.empresa && plantillaData.linea_captura) ||
+             (plantillaData.asunto && plantillaData.asunto.includes('SUA INTERNAS'));
+      
+      if (esSuaInternas) {
+        console.log('✅ [ADMIN SUA INTERNAS DETECCIÓN] Detectada por datos de plantilla');
+        return true;
+      }
+    } catch {
+      console.log('❌ [ADMIN SUA INTERNAS DETECCIÓN] Error parseando plantilla_datos');
+      return false;
+    }
+  }
+  
+  // 3. Detección adicional por tipo_pago_descripcion
+  console.log(`🔍 [ADMIN SUA INTERNAS DETECCIÓN] tipo_pago_descripcion: ${solicitud.tipo_pago_descripcion}`);
+  if (solicitud.tipo_pago_descripcion && solicitud.tipo_pago_descripcion.includes('pago-sua-internas')) {
+    console.log('✅ [ADMIN SUA INTERNAS DETECCIÓN] Detectada por tipo_pago_descripcion contiene pago-sua-internas');
+    return true;
+  }
+  
+  // 4. Detección por concepto que contenga SUA INTERNAS
+  console.log(`🔍 [ADMIN SUA INTERNAS DETECCIÓN] concepto: ${solicitud.concepto}`);
+  if (solicitud.concepto && solicitud.concepto.toUpperCase().includes('SUA INTERNAS')) {
+    console.log('✅ [ADMIN SUA INTERNAS DETECCIÓN] Detectada por concepto contiene SUA INTERNAS');
+    return true;
+  }
+  
+  // 5. Detección por empresa_a_pagar específica de IMSS
+  console.log(`🔍 [ADMIN SUA INTERNAS DETECCIÓN] empresa_a_pagar: ${solicitud.empresa_a_pagar}`);
+  if (solicitud.empresa_a_pagar && (solicitud.empresa_a_pagar.includes('IMSS') || solicitud.empresa_a_pagar.includes('SISTEMA_IMSS'))) {
+    console.log('✅ [ADMIN SUA INTERNAS DETECCIÓN] Detectada por empresa_a_pagar relacionada con IMSS');
+    return true;
+  }
+  
+  console.log('❌ [ADMIN SUA INTERNAS DETECCIÓN] No detectada como SUA INTERNAS');
+  return false;
+};
+
 export default function SolicitudesPage() {
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [selectedN09TokaSolicitud, setSelectedN09TokaSolicitud] = useState<SolicitudN09TokaData | null>(null);
   const [selectedTukashSolicitud, setSelectedTukashSolicitud] = useState<SolicitudTukashData | null>(null);
+  const [selectedSuaInternasSolicitud, setSelectedSuaInternasSolicitud] = useState<SolicitudSuaInternasData | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -289,6 +355,81 @@ export default function SolicitudesPage() {
       } catch (error) {
         console.error('Error al procesar solicitud TUKASH:', error);
         toast.error('Error al cargar los detalles de la plantilla TUKASH');
+        setSelectedSolicitud(solicitud);
+      }
+    } else if (isSuaInternasSolicitud(solicitud)) {
+      // Verificar si es una solicitud SUA INTERNAS
+      try {
+        let solicitudSuaInternas: SolicitudSuaInternasData | null = null;
+        
+        // Intentar obtener datos de plantilla_datos primero
+        if (solicitud.plantilla_datos) {
+          const plantillaData = JSON.parse(solicitud.plantilla_datos);
+          // Usar datos de plantilla si están disponibles, sino usar campos de la base de datos
+          solicitudSuaInternas = {
+            id_solicitud: solicitud.id_solicitud,
+            asunto: plantillaData.asunto || '',
+            empresa: plantillaData.empresa || '',
+            monto: plantillaData.monto || Number(solicitud.monto) || 0,
+            fecha_limite: plantillaData.fecha_limite || '',
+            linea_captura: plantillaData.linea_captura || '',
+            archivos_adjuntos: plantillaData.archivos_adjuntos || [],
+            estado: (solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+            fecha_creacion: solicitud.fecha_creacion,
+            fecha_actualizacion: solicitud.updated_at || '',
+            usuario_creacion: solicitud.usuario_nombre || '',
+            usuario_actualizacion: '',
+          };
+        }
+        
+        // Si no hay plantilla_datos, construir desde campos básicos de la solicitud
+        if (!solicitudSuaInternas) {
+          console.log('🔧 [ADMIN SUA INTERNAS] Construyendo datos desde campos básicos de la solicitud');
+          
+          // Extraer información de SUA INTERNAS desde campos básicos
+          const asunto = solicitud.concepto || '';
+          const empresa = solicitud.empresa_a_pagar || solicitud.nombre_persona || '';
+          const monto = Number(solicitud.monto) || 0;
+          const fecha_limite = solicitud.fecha_limite_pago || '';
+          // Intentar extraer línea de captura del concepto si está presente
+          let linea_captura = '';
+          if (solicitud.concepto && solicitud.concepto.includes('Línea de Captura:')) {
+            const match = solicitud.concepto.match(/Línea de Captura:\s*([A-Z0-9-]+)/);
+            if (match) {
+              linea_captura = match[1];
+            }
+          }
+          
+          solicitudSuaInternas = {
+            id_solicitud: solicitud.id_solicitud,
+            asunto,
+            empresa,
+            monto,
+            fecha_limite,
+            linea_captura,
+            archivos_adjuntos: [],
+            estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+            fecha_creacion: solicitud.fecha_creacion,
+            fecha_actualizacion: solicitud.updated_at || '',
+            usuario_creacion: solicitud.usuario_nombre || '',
+            usuario_actualizacion: '',
+            // Campos adicionales
+            folio: solicitud.folio || '',
+          };
+          
+          console.log('🔧 [ADMIN SUA INTERNAS] Datos construidos:', solicitudSuaInternas);
+        }
+        
+        if (solicitudSuaInternas) {
+          console.log('✅ [ADMIN SUA INTERNAS] Configurando modal SUA INTERNAS con datos:', solicitudSuaInternas);
+          setSelectedSuaInternasSolicitud(solicitudSuaInternas);
+        } else {
+          toast.error('No se pudieron procesar los datos de la plantilla SUA INTERNAS');
+          setSelectedSolicitud(solicitud);
+        }
+      } catch (error) {
+        console.error('Error al procesar solicitud SUA INTERNAS:', error);
+        toast.error('Error al cargar los detalles de la plantilla SUA INTERNAS');
         setSelectedSolicitud(solicitud);
       }
     } else {
@@ -622,6 +763,15 @@ export default function SolicitudesPage() {
               solicitud={selectedTukashSolicitud}
               isOpen={!!selectedTukashSolicitud}
               onClose={() => setSelectedTukashSolicitud(null)}
+            />
+          )}
+
+          {/* Modal de Detalle de Plantilla SUA INTERNAS */}
+          {selectedSuaInternasSolicitud && (
+            <PlantillaSuaInternasDetailModal
+              solicitud={selectedSuaInternasSolicitud}
+              isOpen={!!selectedSuaInternasSolicitud}
+              onClose={() => setSelectedSuaInternasSolicitud(null)}
             />
           )}
 
