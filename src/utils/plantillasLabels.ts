@@ -185,7 +185,19 @@ export function esCampoOculto(plantillaId: string | null, campo: string): boolea
 
 // Función para detectar el ID de plantilla desde tipo_pago_descripcion
 export function detectarPlantillaId(solicitud: Solicitud): string | null {
-  // 1. Detectar por tipo_pago_descripcion
+  // 1. Detectar por plantilla_datos.templateType si existe y es válido
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      if (plantillaData.templateType && typeof plantillaData.templateType === 'string' && plantillaData.templateType !== 'NORMAL') {
+        return plantillaData.templateType;
+      }
+    } catch (e) {
+      // Si falla el parseo, ignorar
+    }
+  }
+
+  // 2. Detectar por tipo_pago_descripcion
   if (solicitud.tipo_pago_descripcion && solicitud.tipo_pago_descripcion.startsWith('Plantilla:')) {
     const plantillaParte = solicitud.tipo_pago_descripcion.split('Plantilla:')[1]?.trim();
     if (plantillaParte) {
@@ -202,18 +214,6 @@ export function detectarPlantillaId(solicitud: Solicitud): string | null {
         'SOLICITUD DE PAGO TARJETAS N09 Y TOKA': 'tarjetas-n09-toka'
       };
       return nombreAId[plantillaParte] || null;
-    }
-  }
-
-  // 2. Detectar por plantilla_datos.templateType si existe
-  if (solicitud.plantilla_datos) {
-    try {
-      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-      if (plantillaData.templateType && typeof plantillaData.templateType === 'string') {
-        return plantillaData.templateType;
-      }
-    } catch (e) {
-      // Si falla el parseo, ignorar
     }
   }
 
