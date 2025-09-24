@@ -121,59 +121,21 @@ const isN09TokaSolicitud = (solicitud: Solicitud): boolean => {
     beneficiario?: string;
   };
   const solicitudExt = solicitud as SolicitudExtendida;
-  let tipoPlantillaDetectada = solicitudExt.tipo_plantilla;
+  const tipoPlantillaDetectada = solicitudExt.tipo_plantilla;
   if (solicitud.plantilla_datos) {
     try {
       const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-      if (plantillaData.templateType) {
-        tipoPlantillaDetectada = plantillaData.templateType;
+      if (plantillaData.templateType === 'tarjetas-n09-toka' || plantillaData.templateType === 'N09_TOKA') {
+        return true;
+      }
+      if (plantillaData.isN09Toka === true) {
+        return true;
       }
     } catch {}
   }
-  console.log('🔍 [DETECCIÓN] tipo_plantilla:', tipoPlantillaDetectada);
-  if (solicitudExt.asunto !== undefined) {
-    console.log('🔍 [DETECCIÓN] asunto:', solicitudExt.asunto);
-  }
-  if (solicitudExt.cliente !== undefined) {
-    console.log('🔍 [DETECCIÓN] cliente:', solicitudExt.cliente);
-  }
-  if (solicitudExt.beneficiario !== undefined) {
-    console.log('🔍 [DETECCIÓN] beneficiario:', solicitudExt.beneficiario);
-  }
   if (tipoPlantillaDetectada === 'N09_TOKA' || tipoPlantillaDetectada === 'tarjetas-n09-toka') {
-    console.log('✅ [DETECCIÓN] Detectada por tipo_plantilla');
     return true;
   }
-  
-  // Detectar basándose en los campos específicos de plantilla_datos
-  console.log('🔍 [DETECCIÓN] plantilla_datos existe:', !!solicitud.plantilla_datos);
-  console.log('🔍 [DETECCIÓN] plantilla_datos contenido:', solicitud.plantilla_datos);
-  
-  if (solicitud.plantilla_datos) {
-    try {
-      const plantillaData = JSON.parse(solicitud.plantilla_datos);
-      console.log('🔍 [DETECCIÓN] plantillaData parseado:', plantillaData);
-      console.log('🔍 [DETECCIÓN] templateType:', plantillaData.templateType);
-      console.log('🔍 [DETECCIÓN] isN09Toka:', plantillaData.isN09Toka);
-      console.log('🔍 [DETECCIÓN] beneficiario:', plantillaData.beneficiario);
-      console.log('🔍 [DETECCIÓN] numero_cuenta_clabe:', plantillaData.numero_cuenta_clabe);
-      console.log('🔍 [DETECCIÓN] tipo_cuenta_clabe:', plantillaData.tipo_cuenta_clabe);
-      
-      const esN09Toka = plantillaData.templateType === 'tarjetas-n09-toka' || 
-             plantillaData.isN09Toka === true ||
-             plantillaData.beneficiario || 
-             plantillaData.numero_cuenta_clabe || 
-             plantillaData.tipo_cuenta_clabe;
-      
-      console.log('🔍 [DETECCIÓN] Resultado final por plantilla_datos:', esN09Toka);
-      return esN09Toka;
-    } catch (error) {
-      console.log('❌ [DETECCIÓN] Error parsing plantilla_datos:', error);
-      return false;
-    }
-  }
-  
-  console.log('❌ [DETECCIÓN] No detectada como N09/TOKA');
   return false;
 };
 
