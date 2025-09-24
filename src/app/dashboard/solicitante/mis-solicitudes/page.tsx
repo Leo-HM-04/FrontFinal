@@ -113,20 +113,34 @@ const DATE_OPTIONS = [
 const isN09TokaSolicitud = (solicitud: Solicitud): boolean => {
   console.log('🔍 [DETECCIÓN] Analizando solicitud ID:', solicitud.id_solicitud);
   
-  // Detectar basándose en tipo_plantilla si está disponible
-  const solicitudExtendida = solicitud as Solicitud & {
+  // Detectar y mostrar tipo_plantilla real desde plantilla_datos si existe
+  type SolicitudExtendida = Solicitud & {
     tipo_plantilla?: string;
     asunto?: string;
     cliente?: string;
     beneficiario?: string;
   };
-  
-  console.log('🔍 [DETECCIÓN] tipo_plantilla:', solicitudExtendida.tipo_plantilla);
-  console.log('🔍 [DETECCIÓN] asunto:', solicitudExtendida.asunto);
-  console.log('🔍 [DETECCIÓN] cliente:', solicitudExtendida.cliente);
-  console.log('🔍 [DETECCIÓN] beneficiario:', solicitudExtendida.beneficiario);
-  
-  if (solicitudExtendida.tipo_plantilla === 'N09_TOKA') {
+  const solicitudExt = solicitud as SolicitudExtendida;
+  let tipoPlantillaDetectada = solicitudExt.tipo_plantilla;
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      if (plantillaData.templateType) {
+        tipoPlantillaDetectada = plantillaData.templateType;
+      }
+    } catch {}
+  }
+  console.log('🔍 [DETECCIÓN] tipo_plantilla:', tipoPlantillaDetectada);
+  if (solicitudExt.asunto !== undefined) {
+    console.log('🔍 [DETECCIÓN] asunto:', solicitudExt.asunto);
+  }
+  if (solicitudExt.cliente !== undefined) {
+    console.log('🔍 [DETECCIÓN] cliente:', solicitudExt.cliente);
+  }
+  if (solicitudExt.beneficiario !== undefined) {
+    console.log('🔍 [DETECCIÓN] beneficiario:', solicitudExt.beneficiario);
+  }
+  if (tipoPlantillaDetectada === 'N09_TOKA' || tipoPlantillaDetectada === 'tarjetas-n09-toka') {
     console.log('✅ [DETECCIÓN] Detectada por tipo_plantilla');
     return true;
   }
