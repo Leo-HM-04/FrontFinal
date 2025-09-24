@@ -946,11 +946,11 @@ export const plantillaPagoComisiones: PlantillaSolicitud = {
   }
 };
 
-// Plantilla para PAGO POLIZAS GNP
+// Plantilla para PAGO POLIZAS
 export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
   id: 'pago-polizas-gnp',
-  nombre: 'PAGO POLIZAS GNP',
-  descripcion: 'Plantilla para solicitudes de pago de pólizas GNP y otras aseguradoras',
+  nombre: 'PAGO POLIZAS',
+  descripcion: 'Plantilla para solicitudes de pago de pólizas y otras aseguradoras',
   version: '1.0.0',
   activa: true,
   categoria: 'pagos',
