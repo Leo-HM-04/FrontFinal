@@ -21,6 +21,8 @@ import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTuk
 import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { PlantillaSuaInternasDetailModal } from '@/components/plantillas/PlantillaSuaInternasDetailModal';
 import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
+import { PlantillaSuaFrenshetsiDetailModal } from '@/components/plantillas/PlantillaSuaFrenshetsiDetailModal';
+import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
@@ -432,6 +434,75 @@ function isSuaInternasSolicitud(solicitud: Solicitud | null): boolean {
   return false;
 }
 
+// Función para detectar si una solicitud es SUA FRENSHETSI
+function isSuaFrenshetsiSolicitud(solicitud: Solicitud | null): boolean {
+  if (!solicitud) return false;
+  
+  console.log(`🔍 [SUA FRENSHETSI DETECCIÓN] Analizando solicitud ID: ${solicitud.id_solicitud}`);
+  
+  // 1. Verificar si tiene el campo tipo_plantilla directamente
+  const solicitudExtendida = solicitud as Solicitud & { tipo_plantilla?: string };
+  console.log(`🔍 [SUA FRENSHETSI DETECCIÓN] tipo_plantilla: ${solicitudExtendida.tipo_plantilla}`);
+  if (solicitudExtendida.tipo_plantilla === 'SUA_FRENSHETSI' || solicitudExtendida.tipo_plantilla === 'pago-sua-frenshetsi') {
+    console.log('✅ [SUA FRENSHETSI DETECCIÓN] Detectada por tipo_plantilla');
+    return true;
+  }
+  
+  // 2. Usar la función de detección de plantilla existente
+  const plantillaId = detectarPlantillaId(solicitud);
+  console.log(`🔍 [SUA FRENSHETSI DETECCIÓN] plantillaId detectado: ${plantillaId}`);
+  if (plantillaId === 'pago-sua-frenshetsi') {
+    console.log('✅ [SUA FRENSHETSI DETECCIÓN] Detectada por plantillaId = pago-sua-frenshetsi');
+    return true;
+  }
+  
+  // 3. Verificar en plantilla_datos
+  console.log(`🔍 [SUA FRENSHETSI DETECCIÓN] plantilla_datos existe: ${!!solicitud.plantilla_datos}`);
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      console.log(`🔍 [SUA FRENSHETSI DETECCIÓN] plantilla_datos contenido:`, plantillaData);
+      
+      const esSuaFrenshetsi = plantillaData.templateType === 'pago-sua-frenshetsi' || 
+             plantillaData.isSuaFrenshetsi === true || 
+             (plantillaData.empresa === 'FRENSHETSI' && plantillaData.linea_captura) ||
+             (plantillaData.asunto && plantillaData.asunto.includes('FRENSHETSI'));
+      
+      if (esSuaFrenshetsi) {
+        console.log('✅ [SUA FRENSHETSI DETECCIÓN] Detectada por datos de plantilla');
+        return true;
+      }
+    } catch {
+      console.log('❌ [SUA FRENSHETSI DETECCIÓN] Error parseando plantilla_datos');
+    }
+  }
+  
+  // 4. Verificar por tipo_pago_descripcion
+  console.log(`🔍 [SUA FRENSHETSI DETECCIÓN] tipo_pago_descripcion: ${solicitud.tipo_pago_descripcion}`);
+  if (solicitud.tipo_pago_descripcion && solicitud.tipo_pago_descripcion.includes('FRENSHETSI')) {
+    console.log('✅ [SUA FRENSHETSI DETECCIÓN] Detectada por tipo_pago_descripcion');
+    return true;
+  }
+  
+  // 5. Verificar por concepto que contenga FRENSHETSI
+  console.log(`🔍 [SUA FRENSHETSI DETECCIÓN] concepto: ${solicitud.concepto}`);
+  if (solicitud.concepto && solicitud.concepto.includes('FRENSHETSI')) {
+    console.log('✅ [SUA FRENSHETSI DETECCIÓN] Detectada por concepto');
+    return true;
+  }
+  
+  // 6. Verificar si empresa_a_pagar es FRENSHETSI
+  const solicitudConEmpresa = solicitud as Solicitud & { empresa_a_pagar?: string };
+  console.log(`🔍 [SUA FRENSHETSI DETECCIÓN] empresa_a_pagar: ${solicitudConEmpresa.empresa_a_pagar}`);
+  if (solicitudConEmpresa.empresa_a_pagar === 'FRENSHETSI') {
+    console.log('✅ [SUA FRENSHETSI DETECCIÓN] Detectada por empresa_a_pagar = FRENSHETSI');
+    return true;
+  }
+  
+  console.log('❌ [SUA FRENSHETSI DETECCIÓN] No se detectó como SUA FRENSHETSI');
+  return false;
+}
+
 export function SolicitudDetailModal({ 
   solicitud, 
   isOpen, 
@@ -794,6 +865,77 @@ export function SolicitudDetailModal({
       return (
         <PlantillaSuaInternasDetailModal
           solicitud={solicitudSuaInternas}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+    // Si no se pudo mapear, mostrar modal estándar
+  }
+
+  // Verificar si es una solicitud SUA FRENSHETSI
+  if (isSuaFrenshetsiSolicitud(solicitud)) {
+    console.log('🎯 [SUA FRENSHETSI] Detectada solicitud SUA FRENSHETSI, procesando datos...');
+    
+    let solicitudSuaFrenshetsi: SolicitudSuaFrenshetsiData | null = null;
+    
+    // Verificar que solicitud no sea null
+    if (!solicitud) return null;
+    
+    // Intentar mapear los datos desde plantilla_datos primero
+    if (typeof solicitud === 'object' && solicitud.plantilla_datos) {
+      try {
+        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        console.log('📄 [SUA FRENSHETSI] Datos de plantilla encontrados:', plantillaData);
+        
+        // Usar datos de plantilla si están disponibles, sino usar campos de la base de datos
+        solicitudSuaFrenshetsi = {
+          id_solicitud: solicitud.id_solicitud,
+          asunto: plantillaData.asunto || '',
+          empresa: plantillaData.empresa || 'FRENSHETSI',
+          cliente: plantillaData.cliente || '',
+          monto: plantillaData.monto || Number(solicitud.monto) || 0,
+          fecha_limite: plantillaData.fecha_limite || '',
+          linea_captura: plantillaData.linea_captura || '',
+          archivos_adjuntos: plantillaData.archivos_adjuntos || [],
+          estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+          fecha_creacion: solicitud.fecha_creacion || '',
+          fecha_actualizacion: solicitud.updated_at || '',
+          usuario_creacion: solicitud.usuario_nombre || '',
+          usuario_actualizacion: '',
+        };
+      } catch {
+        console.log('❌ [SUA FRENSHETSI] Error parseando plantilla_datos, usando datos base');
+      }
+    }
+    
+    // Si no se pudo mapear desde plantilla_datos, usar datos básicos de la solicitud
+    if (!solicitudSuaFrenshetsi) {
+      console.log('🔄 [SUA FRENSHETSI] Construyendo desde datos básicos de solicitud...');
+      solicitudSuaFrenshetsi = {
+        id_solicitud: solicitud.id_solicitud,
+        asunto: solicitud.concepto || 'PAGO SUA FRENSHETSI',
+        empresa: 'FRENSHETSI',
+        cliente: '',
+        monto: Number(solicitud.monto) || 0,
+        fecha_limite: solicitud.fecha_limite_pago || '',
+        linea_captura: '',
+        archivos_adjuntos: [],
+        estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+        fecha_creacion: solicitud.fecha_creacion || '',
+        fecha_actualizacion: solicitud.updated_at || '',
+        usuario_creacion: solicitud.usuario_nombre || '',
+        usuario_actualizacion: '',
+      };
+      
+      console.log('🔧 [SUA FRENSHETSI] Datos construidos:', solicitudSuaFrenshetsi);
+    }
+    
+    if (solicitudSuaFrenshetsi) {
+      console.log('✅ [SUA FRENSHETSI] Mostrando modal SUA FRENSHETSI con datos:', solicitudSuaFrenshetsi);
+      return (
+        <PlantillaSuaFrenshetsiDetailModal
+          solicitud={solicitudSuaFrenshetsi}
           isOpen={isOpen}
           onClose={onClose}
         />
