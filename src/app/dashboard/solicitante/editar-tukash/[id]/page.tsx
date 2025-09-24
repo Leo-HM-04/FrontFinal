@@ -34,6 +34,18 @@ export default function EditarTukashPage() {
               console.error('❌ Error parseando plantilla_datos TUKASH:', err);
             }
           }
+          // Mapear beneficiario si viene como 'beneficiario' (N09/TOKA) a 'beneficiario_tarjeta' (TUKASH)
+          if (datosTukash.beneficiario && !datosTukash.beneficiario_tarjeta) {
+            datosTukash.beneficiario_tarjeta = datosTukash.beneficiario;
+          }
+          // Mapear monto si viene como 'monto' y no como 'monto_total_tukash'
+          if (datosTukash.monto && !datosTukash.monto_total_tukash) {
+            datosTukash.monto_total_tukash = datosTukash.monto;
+          }
+          // Mapear cliente si viene como 'cliente'
+          if (datosTukash.cliente) {
+            datosTukash.cliente = datosTukash.cliente;
+          }
           setTimeout(() => {
             Object.entries(datosTukash).forEach(([campo, valor]) => {
               actualizarCampo(campo, valor);
