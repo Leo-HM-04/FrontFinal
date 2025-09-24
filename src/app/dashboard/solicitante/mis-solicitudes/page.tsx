@@ -70,7 +70,7 @@ const isTukashSolicitud = (solicitud: Solicitud): boolean => {
     } catch {}
   }
   // Detectar por tipo_plantilla
-  if ((solicitud as any).tipo_plantilla === 'TUKASH') {
+  if ('tipo_plantilla' in solicitud && solicitud.tipo_plantilla === 'TUKASH') {
     return true;
   }
   // Detectar por concepto
@@ -78,10 +78,10 @@ const isTukashSolicitud = (solicitud: Solicitud): boolean => {
     return true;
   }
   // Detectar por nombre_persona o empresa_a_pagar
-  if ((solicitud as any).nombre_persona && String((solicitud as any).nombre_persona).toUpperCase().includes('TUKASH')) {
+  if ('nombre_persona' in solicitud && solicitud.nombre_persona && String(solicitud.nombre_persona).toUpperCase().includes('TUKASH')) {
     return true;
   }
-  if ((solicitud as any).empresa_a_pagar && String((solicitud as any).empresa_a_pagar).toUpperCase().includes('TUKASH')) {
+  if ('empresa_a_pagar' in solicitud && solicitud.empresa_a_pagar && String(solicitud.empresa_a_pagar).toUpperCase().includes('TUKASH')) {
     return true;
   }
   return false;
