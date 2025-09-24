@@ -133,40 +133,90 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   const extension = archivo.archivo_url?.split('.').pop()?.toLowerCase() || '';
   const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
   const isPdf = extension === 'pdf';
+  const isZip = ['zip', 'rar', '7z'].includes(extension);
+  const isOffice = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(extension);
+
+  // Función para obtener el nombre del archivo desde la URL
+  const getFileName = () => {
+    const urlParts = archivo.archivo_url.split('/');
+    const fileName = urlParts[urlParts.length - 1];
+    return fileName || `Archivo ${archivo.id}`;
+  };
+
+  // Función para obtener el tamaño estimado del tipo de archivo
+  const getFileTypeDescription = () => {
+    if (isPdf) return 'Documento PDF';
+    if (isZip) return 'Archivo comprimido';
+    if (isOffice) return 'Documento Office';
+    if (isImage) return 'Imagen';
+    return archivo.tipo || 'Archivo';
+  };
 
   return (
-    <div className="border rounded-lg p-3 bg-gray-50">
-      <div className="flex items-center gap-3">
+    <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+      {/* Preview area */}
+      <div className="relative h-32 bg-gray-50 flex items-center justify-center">
         {isImage ? (
           <Image
             src={fileUrl}
-            alt="Archivo adjunto"
-            width={60}
-            height={60}
-            className="object-cover rounded border"
+            alt="Preview del archivo"
+            width={120}
+            height={120}
+            className="object-contain max-h-full max-w-full rounded"
             onError={(e) => {
               console.error('❌ [SUA INTERNAS ARCHIVOS] Error cargando imagen:', fileUrl);
               e.currentTarget.style.display = 'none';
+              // Mostrar icono por defecto si falla la imagen
+              e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
             }}
           />
+        ) : isPdf ? (
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <FileText className="w-8 h-8 text-red-600" />
+            </div>
+            <p className="text-xs text-gray-600 font-medium">PDF</p>
+          </div>
+        ) : isZip ? (
+          <div className="text-center">
+            <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <FileText className="w-8 h-8 text-yellow-600" />
+            </div>
+            <p className="text-xs text-gray-600 font-medium">ZIP</p>
+          </div>
+        ) : isOffice ? (
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <FileText className="w-8 h-8 text-blue-600" />
+            </div>
+            <p className="text-xs text-gray-600 font-medium">Office</p>
+          </div>
         ) : (
-          <div className="w-12 h-12 bg-blue-100 rounded flex items-center justify-center">
-            {isPdf ? (
-              <FileText className="w-6 h-6 text-red-500" />
-            ) : (
-              <FileText className="w-6 h-6 text-blue-500" />
-            )}
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <FileText className="w-8 h-8 text-gray-500" />
+            </div>
+            <p className="text-xs text-gray-600 font-medium">Archivo</p>
           </div>
         )}
         
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">
-            {`Archivo ${archivo.id}` || 'Sin nombre'}
-          </p>
-          <p className="text-xs text-gray-500">
-            {archivo.tipo || 'Tipo desconocido'}
-          </p>
+        {/* Icono de fallback para imágenes que fallan al cargar */}
+        <div className="fallback-icon hidden text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <FileText className="w-8 h-8 text-gray-500" />
+          </div>
+          <p className="text-xs text-gray-600 font-medium">Imagen</p>
         </div>
+      </div>
+      
+      {/* File info */}
+      <div className="p-3">
+        <p className="text-sm font-medium text-gray-900 truncate mb-1">
+          {getFileName()}
+        </p>
+        <p className="text-xs text-gray-500">
+          {getFileTypeDescription()}
+        </p>
       </div>
     </div>
   );
