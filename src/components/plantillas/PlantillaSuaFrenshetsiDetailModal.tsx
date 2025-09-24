@@ -3,14 +3,74 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, Factory } from 'lucide-react';
-import { PlantillaSuaFrenshetsiModalProps, LoadingStateSuaFrenshetsi, ErrorStateSuaFrenshetsi } from '@/types/plantillaSuaFrenshetsi';
 import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 
+// Interfaz para props del modal
+interface PlantillaSuaFrenshetsiDetailModalProps {
+  solicitud: SolicitudSuaFrenshetsiData;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+// Estados de loading y error
+interface LoadingStateSuaFrenshetsi {
+  archivos: boolean;
+  general: boolean;
+}
+
+interface ErrorStateSuaFrenshetsi {
+  archivos: string | null;
+  general: string | null;
+}
+
 // Tipo extendido para solicitudes SUA FRENSHETSI que incluye campos adicionales
 interface SolicitudSuaFrenshetsiExtended extends SolicitudSuaFrenshetsiData {
-  archivos?: SolicitudArchivo[];
+  folio?: string;
+  tiene_archivos?: boolean | number;
+  id_aprobador?: number;
+  fecha_aprobacion?: string;
+  comentarios_aprobacion?: string;
 }
+
+// Función para formatear moneda en pesos mexicanos
+const formatCurrency = (amount: number | string): string => {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(numAmount)) return '$0.00 MXN';
+  
+  return new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    minimumFractionDigits: 2
+  }).format(numAmount);
+};
+
+// Función para formatear fecha
+const formatDate = (dateString: string): string => {
+  if (!dateString) return 'No especificada';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-MX', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+// Función para obtener colores del estado
+const getEstadoColor = (estado: string) => {
+  switch (estado.toLowerCase()) {
+    case 'aprobada':
+      return 'bg-green-100 text-green-800 border-green-300';
+    case 'rechazada':
+      return 'bg-red-100 text-red-800 border-red-300';
+    case 'pagada':
+      return 'bg-blue-100 text-blue-800 border-blue-300';
+    default:
+      return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+  }
+};
 
 // Función auxiliar para construir URLs de archivos
 function buildFileUrl(path: string): string {
@@ -22,32 +82,86 @@ function buildFileUrl(path: string): string {
   return `${API_URL}/${cleanPath}`;
 }
 
-// Componente para mostrar información en formato clave-valor
-const InfoField: React.FC<{ label: string; value: string | number; className?: string }> = ({ 
+// Hook personalizado para manejo de errores
+const useErrorHandler = () => {
+  const handleError = useCallback((error: unknown): string => {
+    console.error('Error:', error);
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return 'Ha ocurrido un error inesperado';
+  }, []);
+
+  return { handleError };
+};
+
+// Componente InfoField mejorado
+interface InfoFieldProps {
+  label: string;
+  value: string | number | null | undefined;
+  variant?: 'default' | 'currency' | 'mono' | 'date';
+  className?: string;
+}
+
+const InfoField: React.FC<InfoFieldProps> = ({ 
   label, 
   value, 
-  className = "" 
-}) => (
-  <div className={`space-y-1 ${className}`}>
-    <dt className="text-sm font-medium text-indigo-600">{label}</dt>
-    <dd className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-md border">
-      {value || 'No especificado'}
-    </dd>
-  </div>
-);
+  variant = 'default',
+  className = ''
+}) => {
+  const formatValue = () => {
+    if (value === null || value === undefined || value === '') {
+      return 'No especificado';
+    }
 
-// Componente para preview de archivos
+    switch (variant) {
+      case 'currency':
+        return formatCurrency(value);
+      case 'date':
+        return formatDate(value.toString());
+      case 'mono':
+        return value.toString();
+      default:
+        return value.toString();
+    }
+  };
+
+  const getValueClassName = () => {
+    let baseClass = "text-gray-900 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-200";
+    
+    if (variant === 'mono') {
+      baseClass += " font-mono text-sm";
+    }
+    if (variant === 'currency') {
+      baseClass += " font-semibold text-green-700";
+    }
+    
+    return baseClass;
+  };
+
+  return (
+    <div className={`space-y-2 ${className}`}>
+      <label className="block text-sm font-semibold text-indigo-800">{label}</label>
+      <div className={getValueClassName()}>
+        {formatValue()}
+      </div>
+    </div>
+  );
+};
+
+// Componente para preview de archivos mejorado
 const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
+  const [imageError, setImageError] = useState(false);
   
   console.log('🖼️ [SUA FRENSHETSI ARCHIVOS] Renderizando preview para archivo ID:', archivo.id);
   
   if (!archivo.archivo_url) {
     console.log('⚠️ [SUA FRENSHETSI ARCHIVOS] No hay URL de archivo');
     return (
-      <div className="text-center p-3 bg-gray-50 rounded border">
-        <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-        <p className="text-sm text-gray-500">No disponible</p>
+      <div className="text-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">Archivo no disponible</p>
       </div>
     );
   }
@@ -68,20 +182,20 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
 
   if (isPdf) {
     return (
-      <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
         {/* PDF Preview */}
         <div className="relative">
           {!showPdfViewer ? (
             // Vista previa limitada
-            <div className="h-40 bg-gray-50 border-b">
+            <div className="h-48 bg-gray-50 border-b relative">
               <iframe
                 src={`${fileUrl}#view=FitH&toolbar=0&navpanes=0&scrollbar=0&page=1`}
                 className="w-full h-full"
                 style={{ pointerEvents: 'none' }}
                 title="Vista previa PDF"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-10 flex items-end justify-center pb-2">
-                <div className="bg-white bg-opacity-90 px-3 py-1 rounded text-xs text-gray-600">
+              <div className="absolute inset-0 bg-black bg-opacity-10 flex items-end justify-center pb-3">
+                <div className="bg-white bg-opacity-95 px-4 py-2 rounded-lg text-xs text-gray-700 shadow-lg">
                   Vista previa limitada - Haga clic en &quot;Ver completo&quot; para el PDF completo
                 </div>
               </div>
@@ -99,15 +213,15 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
         </div>
         
         {/* File info and actions */}
-        <div className="p-3">
-          <p className="text-sm font-medium text-gray-900 truncate mb-2">
+        <div className="p-4">
+          <p className="text-sm font-semibold text-gray-900 truncate mb-1">
             {getFileName()}
           </p>
           <p className="text-xs text-gray-500 mb-3">Documento PDF</p>
           
           <button
             onClick={() => setShowPdfViewer(!showPdfViewer)}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >
             <ExternalLink className="w-4 h-4" />
             {showPdfViewer ? 'Vista previa' : 'Ver completo'}
@@ -119,37 +233,36 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
 
   // Para otros tipos de archivo (imágenes, etc.)
   return (
-    <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       {/* Preview area */}
-      <div className="relative h-32 bg-gray-50 flex items-center justify-center">
-        {isImage ? (
+      <div className="relative h-40 bg-gray-50 flex items-center justify-center">
+        {isImage && !imageError ? (
           <Image
             src={fileUrl}
             alt="Preview del archivo"
-            width={120}
-            height={120}
+            width={150}
+            height={150}
             className="object-contain max-h-full max-w-full rounded"
-            onError={(e) => {
-              console.error('❌ [SUA FRENSHETSI ARCHIVOS] Error cargando imagen:', fileUrl);
-              e.currentTarget.style.display = 'none';
-            }}
+            onError={() => setImageError(true)}
           />
         ) : (
           <div className="text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <FileText className="w-8 h-8 text-gray-500" />
+            <div className="w-16 h-16 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <FileText className="w-8 h-8 text-indigo-600" />
             </div>
-            <p className="text-xs text-gray-600 font-medium">Archivo</p>
+            <p className="text-xs text-gray-600 font-medium">
+              {isPdf ? 'PDF' : isImage ? 'Imagen' : 'Archivo'}
+            </p>
           </div>
         )}
       </div>
       
       {/* File info */}
-      <div className="p-3">
-        <p className="text-sm font-medium text-gray-900 truncate mb-1">
+      <div className="p-4">
+        <p className="text-sm font-semibold text-gray-900 truncate mb-1">
           {getFileName()}
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 mb-3">
           {archivo.tipo || 'Archivo'}
         </p>
         
@@ -157,7 +270,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
           href={fileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
         >
           <ExternalLink className="w-4 h-4" />
           Ver completo
@@ -167,240 +280,237 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   );
 };
 
-// Componente principal del modal
-export const PlantillaSuaFrenshetsiDetailModal: React.FC<PlantillaSuaFrenshetsiModalProps> = ({
-  solicitud,
-  isOpen,
+// Función para obtener archivos de solicitud
+const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudArchivo[]> => {
+  console.log('📁 [SUA FRENSHETSI ARCHIVOS] Obteniendo archivos para solicitud:', idSolicitud);
+  
+  try {
+    const archivos = await SolicitudArchivosService.obtenerArchivos(idSolicitud);
+    console.log('✅ [SUA FRENSHETSI ARCHIVOS] Archivos obtenidos exitosamente:', archivos);
+    return archivos || [];
+  } catch (error) {
+    console.error('❌ [SUA FRENSHETSI ARCHIVOS] Error al obtener archivos:', error);
+    throw error;
+  }
+};
+
+export function PlantillaSuaFrenshetsiDetailModal({ 
+  solicitud, 
+  isOpen, 
   onClose
-  // Removemos loadingState y errorState ya que manejamos el loading internamente
-}) => {
-  const [solicitudConArchivos, setSolicitudConArchivos] = useState<SolicitudSuaFrenshetsiExtended | null>(null);
+}: PlantillaSuaFrenshetsiDetailModalProps) {
+  // Estados
+  const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
+  
   const [loading, setLoading] = useState<LoadingStateSuaFrenshetsi>({
-    archivos: false
+    archivos: false,
+    general: false,
   });
-  const [error, setError] = useState<ErrorStateSuaFrenshetsi>({
+  
+  const [errors, setErrors] = useState<ErrorStateSuaFrenshetsi>({
+    archivos: null,
     general: null,
-    archivos: null
   });
 
-  console.log('🚀 [SUA FRENSHETSI MODAL] Modal abierto, solicitud:', solicitud);
+  // Hooks personalizados
+  const { handleError } = useErrorHandler();
 
-  // Función para cargar archivos
-  const cargarArchivos = useCallback(async (idSolicitud: number) => {
-    console.log('📁 [SUA FRENSHETSI MODAL] Cargando archivos para solicitud:', idSolicitud);
+  // Cast de la solicitud para acceder a campos adicionales
+  const solicitudExtended = solicitud as SolicitudSuaFrenshetsiExtended;
+
+  // Función para obtener archivos
+  const fetchArchivos = useCallback(async () => {
+    if (!solicitud) return;
     
-    setLoading({ archivos: true });
-    setError({ general: null, archivos: null });
-
+    setLoading(prev => ({ ...prev, archivos: true }));
+    setErrors(prev => ({ ...prev, archivos: null }));
+    
     try {
-      const archivos = await SolicitudArchivosService.obtenerArchivos(idSolicitud);
-      console.log('✅ [SUA FRENSHETSI MODAL] Archivos cargados:', archivos);
-      
-      setSolicitudConArchivos({
-        ...solicitud,
-        archivos: archivos || []
-      });
-    } catch (err) {
-      console.error('❌ [SUA FRENSHETSI MODAL] Error cargando archivos:', err);
-      setError({ 
-        general: null,
-        archivos: 'Error al cargar los archivos adjuntos' 
-      });
-      setSolicitudConArchivos({
-        ...solicitud,
-        archivos: []
-      });
+      const data = await obtenerArchivosSolicitud(solicitud.id_solicitud || 0);
+      setArchivos(data);
+    } catch (error) {
+      const errorMessage = handleError(error);
+      setErrors(prev => ({ ...prev, archivos: errorMessage }));
     } finally {
-      setLoading({ archivos: false });
+      setLoading(prev => ({ ...prev, archivos: false }));
     }
-  }, [solicitud]);
+  }, [solicitud, handleError]);
 
-  // Efecto para cargar archivos cuando se abre el modal
+  // Efectos
   useEffect(() => {
-    if (isOpen && solicitud && solicitud.id_solicitud) {
-      console.log('🔄 [SUA FRENSHETSI MODAL] Modal abierto, cargando datos...');
-      cargarArchivos(solicitud.id_solicitud);
-    } else if (!isOpen) {
-      // Limpiar datos cuando se cierra el modal
-      setSolicitudConArchivos(null);
-      setError({
-        general: null,
-        archivos: null
-      });
+    if (isOpen && solicitud) {
+      fetchArchivos();
     }
-  }, [isOpen, solicitud, cargarArchivos]);
+  }, [isOpen, solicitud, fetchArchivos]);
 
-  // Función para formatear fechas
-  const formatearFecha = (fecha: string) => {
-    if (!fecha) return 'No especificada';
-    try {
-      const date = new Date(fecha);
-      return date.toLocaleDateString('es-MX', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return fecha;
+  // Resetear estados al cerrar
+  useEffect(() => {
+    if (!isOpen) {
+      setArchivos([]);
+      setLoading({ archivos: false, general: false });
+      setErrors({ archivos: null, general: null });
     }
-  };
+  }, [isOpen]);
 
-  // Función para formatear moneda
-  const formatearMoneda = (monto: number) => {
-    if (!monto) return '$0.00';
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN'
-    }).format(monto);
-  };
+  // Función para manejar teclas de escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen || !solicitud) return null;
 
-  const solicitudFinal = solicitudConArchivos || solicitud;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-indigo-600 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Factory className="w-6 h-6 text-white" />
-            <div>
-              <h2 className="text-xl font-bold text-white">PAGO SUA FRENSHETSI</h2>
-              <p className="text-indigo-100 text-sm">
-                Solicitud #{solicitud.id_solicitud}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-indigo-100 hover:text-white transition-colors"
-            aria-label="Cerrar modal"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-8">
-            
-            {/* Información General */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-indigo-100">
-                Información General
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoField 
-                  label="Asunto" 
-                  value={solicitudFinal.asunto} 
-                  className="md:col-span-2"
-                />
-                <InfoField 
-                  label="Se paga por" 
-                  value={solicitudFinal.empresa} 
-                />
-                <InfoField 
-                  label="Cliente" 
-                  value={solicitudFinal.cliente} 
-                />
-                <InfoField 
-                  label="Monto Total" 
-                  value={formatearMoneda(solicitudFinal.monto)} 
-                />
-                <InfoField 
-                  label="Fecha Límite" 
-                  value={formatearFecha(solicitudFinal.fecha_limite)} 
-                />
-              </div>
-            </section>
-
-            {/* Línea de Captura */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-indigo-100">
-                Línea de Captura IMSS
-              </h3>
-              <InfoField 
-                label="Línea de Captura" 
-                value={solicitudFinal.linea_captura}
-                className="font-mono bg-indigo-50"
-              />
-            </section>
-
-            {/* Archivos Adjuntos */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-indigo-100">
-                Archivos Adjuntos
-              </h3>
-              
-              {loading.archivos && (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-                  <p className="mt-4 text-gray-600">Cargando archivos...</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
+      {/* Overlay similar al modal de solicitudes */}
+      <div
+        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-indigo-900/80 to-purple-900/70 backdrop-blur-md transition-all duration-500"
+        onClick={onClose}
+        role="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal"
+      />
+      {/* Modal container similar a solicitudes */}
+      <div className="relative bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+        {/* Botón de cerrar */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 z-30 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-300"
+          aria-label="Cerrar modal"
+        >
+          <X className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+        </button>
+        {/* Contenido con scroll */}
+        <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-indigo-50 scrollbar-thumb-indigo-300 hover:scrollbar-thumb-indigo-400 p-6">
+          {/* Header */}
+          <header className="bg-gradient-to-r from-indigo-800 via-indigo-700 to-purple-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
+            <div className="absolute inset-0 bg-white/10 transform -skew-y-1"></div>
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/20 p-3 rounded-lg">
+                  <Factory className="w-8 h-8 text-white" />
                 </div>
-              )}
-
-              {error.archivos && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-                  <p className="text-red-600">{error.archivos}</p>
-                </div>
-              )}
-
-              {!loading.archivos && !error.archivos && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {(solicitudFinal as SolicitudSuaFrenshetsiExtended).archivos && (solicitudFinal as SolicitudSuaFrenshetsiExtended).archivos!.length > 0 ? (
-                    (solicitudFinal as SolicitudSuaFrenshetsiExtended).archivos!.map((archivo: SolicitudArchivo) => (
-                      <FilePreview key={archivo.id} archivo={archivo} />
-                    ))
-                  ) : (
-                    <div className="col-span-full text-center py-8 text-gray-500">
-                      <FileText className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                      <p>No hay archivos adjuntos disponibles</p>
-                    </div>
+                <div>
+                  <h2 className="text-xl font-bold">PAGO SUA FRENSHETSI</h2>
+                  <p className="text-indigo-100 text-sm mt-1">Solicitud #{solicitud.id_solicitud}</p>
+                  {solicitudExtended.folio && (
+                    <p className="text-indigo-100 text-sm mt-1">Folio: {solicitudExtended.folio}</p>
                   )}
                 </div>
-              )}
-            </section>
-
-            {/* Información de Auditoría */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-indigo-100">
-                Información de Auditoría
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoField 
-                  label="Estado" 
-                  value={solicitudFinal.estado?.toUpperCase()} 
-                />
-                <InfoField 
-                  label="Usuario Creación" 
-                  value={solicitudFinal.usuario_creacion} 
-                />
-                <InfoField 
-                  label="Fecha Creación" 
-                  value={formatearFecha(solicitudFinal.fecha_creacion)} 
-                />
-                <InfoField 
-                  label="Fecha Actualización" 
-                  value={formatearFecha(solicitudFinal.fecha_actualizacion)} 
-                />
               </div>
-            </section>
+              <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${getEstadoColor(solicitud.estado || 'pendiente')}`}>
+                {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
+              </span>
+            </div>
+          </header>
+          
+          {/* Información Principal */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Información Principal</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-2" />
+              <InfoField label="Se paga por" value={solicitud.empresa} />
+              <InfoField label="Cliente" value={solicitud.cliente} />
+              <InfoField label="Monto Total" value={solicitud.monto} variant="currency" />
+              <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
+            </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="border-t bg-gray-50 px-6 py-4 flex justify-end">
-          <button
-            onClick={onClose}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-          >
-            Cerrar
-          </button>
+          {/* Línea de Captura */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Línea de Captura IMSS</h3>
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-200">
+              <InfoField 
+                label="Línea de Captura" 
+                value={solicitud.linea_captura} 
+                variant="mono"
+                className="bg-white/50 p-4 rounded-lg"
+              />
+            </div>
+          </div>
+          
+          {/* Información de Aprobación */}
+          {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Información de Aprobación</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
+                <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion} variant="date" />
+                <div className="md:col-span-2">
+                  <InfoField label="Comentarios de Aprobación" value={solicitudExtended.comentarios_aprobacion} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Archivos Adjuntos */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Archivos Adjuntos</h3>
+            
+            {loading.archivos && (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+                <p className="text-gray-600 font-medium">Cargando archivos...</p>
+              </div>
+            )}
+
+            {errors.archivos && (
+              <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <X className="h-5 w-5 text-red-400" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-800">{errors.archivos}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!loading.archivos && !errors.archivos && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {archivos && archivos.length > 0 ? (
+                  archivos.map((archivo) => (
+                    <FilePreview key={archivo.id} archivo={archivo} />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                    <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
+                    <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Información de Auditoría */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Información de Auditoría</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion} variant="date" />
+              <InfoField label="Fecha de Actualización" value={solicitud.fecha_actualizacion} variant="date" />
+              <InfoField label="Usuario de Creación" value={solicitud.usuario_creacion} />
+              <InfoField label="Usuario de Actualización" value={solicitud.usuario_actualizacion} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default PlantillaSuaFrenshetsiDetailModal;
