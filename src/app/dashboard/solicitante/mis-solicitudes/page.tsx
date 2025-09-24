@@ -60,40 +60,28 @@ const LOAD_TIMEOUT = 10000;
 
 // Función para detectar si una solicitud es del tipo TUKASH
 const isTukashSolicitud = (solicitud: Solicitud): boolean => {
-  const solicitudExtendida = solicitud as Solicitud & {
-    tipo_plantilla?: string;
-    asunto?: string;
-    cliente?: string;
-    beneficiario_tarjeta?: string;
-    concepto?: string;
-    nombre_persona?: string;
-    empresa_a_pagar?: string;
-  };
-  // 1. Verificar si tiene el campo tipo_plantilla específico
-  if (solicitudExtendida.tipo_plantilla === 'TUKASH') {
-    return true;
-  }
-  // 2. Detectar basándose en los campos específicos de plantilla_datos
+  // Detectar por plantilla_datos.templateType
   if (solicitud.plantilla_datos) {
     try {
       const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-      const esTukash = plantillaData.templateType === 'tarjetas-tukash' || 
-        plantillaData.isTukash === true ||
-        (plantillaData.numero_tarjeta && plantillaData.beneficiario_tarjeta) ||
-        (plantillaData.monto_total_cliente && plantillaData.monto_total_tukash) ||
-        (plantillaData.asunto === 'TUKASH');
-      return !!esTukash;
-    } catch {
-      return false;
-    }
+      if (plantillaData.templateType === 'tarjetas-tukash') {
+        return true;
+      }
+    } catch {}
   }
-  // 3. Detección adicional por concepto que contenga TUKASH
-  if (solicitudExtendida.concepto && String(solicitudExtendida.concepto).toUpperCase().includes('TUKASH')) {
+  // Detectar por tipo_plantilla
+  if ((solicitud as any).tipo_plantilla === 'TUKASH') {
     return true;
   }
-  // 4. Detección por nombre_persona o empresa_a_pagar que contenga TUKASH
-  if ((solicitudExtendida.nombre_persona && String(solicitudExtendida.nombre_persona).toUpperCase().includes('TUKASH')) ||
-      (solicitudExtendida.empresa_a_pagar && String(solicitudExtendida.empresa_a_pagar).toUpperCase().includes('TUKASH'))) {
+  // Detectar por concepto
+  if (solicitud.concepto && String(solicitud.concepto).toUpperCase().includes('TUKASH')) {
+    return true;
+  }
+  // Detectar por nombre_persona o empresa_a_pagar
+  if ((solicitud as any).nombre_persona && String((solicitud as any).nombre_persona).toUpperCase().includes('TUKASH')) {
+    return true;
+  }
+  if ((solicitud as any).empresa_a_pagar && String((solicitud as any).empresa_a_pagar).toUpperCase().includes('TUKASH')) {
     return true;
   }
   return false;
