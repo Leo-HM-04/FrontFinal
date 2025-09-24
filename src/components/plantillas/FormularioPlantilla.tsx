@@ -22,6 +22,18 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
   className = '',
   onGuardar
 }) => {
+  const [guardando, setGuardando] = React.useState(false);
+
+  const handleGuardar = async () => {
+    if (typeof onGuardar === 'function') {
+      setGuardando(true);
+      await Promise.resolve(onGuardar());
+      setGuardando(false);
+    } else {
+      alert('Función de guardar no implementada');
+    }
+  };
+
   const renderSeccion = (seccion: SeccionPlantilla) => {
     const camposVisiblesEnSeccion = seccion.campos.filter(campo => 
       camposVisibles.has(campo.id)
@@ -106,7 +118,7 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
         </div>
       </div>
 
-  {/* Indicador de progreso */}
+      {/* Indicador de progreso */}
       <div className="bg-white rounded-2xl border border-blue-400 p-4 sm:p-8 mb-8 w-full">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-black">Progreso del formulario</span>
@@ -167,20 +179,26 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
           </div>
         </div>
       )}
-      {/* Botón Cancelar */}
+
+      {/* Botón Guardar y Cancelar */}
       <div className="flex justify-end mt-8 gap-4">
         <button
           type="button"
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow transition-all duration-200"
-          onClick={() => {
-            if (typeof onGuardar === 'function') {
-              onGuardar();
-            } else {
-              alert('Función de guardar no implementada');
-            }
-          }}
+          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow transition-all duration-200 flex items-center gap-2"
+          disabled={guardando}
+          onClick={handleGuardar}
         >
-          Guardar
+          {guardando ? (
+            <>
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+              </svg>
+              Guardando cambios...
+            </>
+          ) : (
+            <>Guardar</>
+          )}
         </button>
         <button
           type="button"

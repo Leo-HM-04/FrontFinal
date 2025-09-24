@@ -86,7 +86,13 @@ export default function EditarTukashPage() {
       <h1 className="text-2xl font-bold mb-6">Editar Solicitud TUKASH</h1>
       <EditarTukash
         plantilla={plantillasDisponibles.find(p => p.id === 'tarjetas-tukash')!}
-        datosPlantilla={estado.datos}
+        datosPlantilla={
+          solicitud && solicitud.plantilla_datos
+            ? (typeof solicitud.plantilla_datos === 'string'
+                ? JSON.parse(solicitud.plantilla_datos)
+                : solicitud.plantilla_datos)
+            : estado.datos
+        }
         onGuardar={handleGuardar}
       />
     </div>
