@@ -10,6 +10,7 @@ interface FormularioPlantillaProps {
   camposVisibles: Set<string>;
   onCambiarCampo: (campoId: string, valor: unknown) => void;
   className?: string;
+  onGuardar?: () => void;
 }
 
 export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
@@ -18,7 +19,8 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
   errores,
   camposVisibles,
   onCambiarCampo,
-  className = ''
+  className = '',
+  onGuardar
 }) => {
   const renderSeccion = (seccion: SeccionPlantilla) => {
     const camposVisiblesEnSeccion = seccion.campos.filter(campo => 
@@ -166,7 +168,20 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
         </div>
       )}
       {/* Botón Cancelar */}
-      <div className="flex justify-end mt-8">
+      <div className="flex justify-end mt-8 gap-4">
+        <button
+          type="button"
+          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow transition-all duration-200"
+          onClick={() => {
+            if (typeof onGuardar === 'function') {
+              onGuardar();
+            } else {
+              alert('Función de guardar no implementada');
+            }
+          }}
+        >
+          Guardar
+        </button>
         <button
           type="button"
           className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl shadow transition-all duration-200"

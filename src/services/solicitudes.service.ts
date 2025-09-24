@@ -3,6 +3,12 @@ import api from '@/lib/api';
 import { Solicitud, CreateSolicitudData, UpdateEstadoData, Comprobante } from '@/types';
 
 export class SolicitudesService {
+  static async updatePlantilla({ id, plantilla_datos }: { id: number; plantilla_datos: string }): Promise<void> {
+    const token = localStorage.getItem('token');
+    await api.put(`/solicitudes/${id}/plantilla`, { plantilla_datos }, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+  }
   static async getComprobantes(id_solicitud: number, token?: string): Promise<Comprobante[]> {
     try {
       // Si no se proporciona token, intentamos obtenerlo del localStorage

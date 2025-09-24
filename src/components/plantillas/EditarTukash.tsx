@@ -1,14 +1,15 @@
+
 import { useEffect } from 'react';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
 import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
 import { PlantillaSolicitud } from '@/types/plantillas';
-
 interface EditarTukashProps {
   plantilla: PlantillaSolicitud;
   datosPlantilla: Record<string, unknown>;
+  onGuardar?: () => void;
 }
 
-export default function EditarTukash({ plantilla, datosPlantilla }: EditarTukashProps) {
+export default function EditarTukash({ plantilla, datosPlantilla, onGuardar }: EditarTukashProps) {
   const {
     estado,
     seleccionarPlantilla,
@@ -35,6 +36,7 @@ export default function EditarTukash({ plantilla, datosPlantilla }: EditarTukash
       errores={estado.errores}
       camposVisibles={estado.camposVisibles}
       onCambiarCampo={actualizarCampo}
+      onGuardar={onGuardar}
     />
   );
 }

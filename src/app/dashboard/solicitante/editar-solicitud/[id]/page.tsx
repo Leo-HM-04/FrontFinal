@@ -1005,6 +1005,15 @@ export default function EditarSolicitudPage() {
                   <EditarTukash
                     plantilla={plantillaDetectada}
                     datosPlantilla={estadoPlantilla.datos}
+                    onGuardar={() => {
+                      // Guardar cambios de la plantilla TUKASH
+                      SolicitudesService.updatePlantilla({
+                        id: solicitudId,
+                        plantilla_datos: JSON.stringify(estadoPlantilla.datos)
+                      })
+                        .then(() => toast.success('Cambios guardados correctamente'))
+                        .catch(() => toast.error('Error al guardar los cambios'));
+                    }}
                   />
                 ) : (
                   <FormularioPlantilla

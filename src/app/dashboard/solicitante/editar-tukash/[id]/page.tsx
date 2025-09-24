@@ -64,6 +64,22 @@ export default function EditarTukashPage() {
       if (solicitudId) fetchSolicitud();
     }, [solicitudId]);
 
+  // Handler para guardar cambios
+  const handleGuardar = async () => {
+    try {
+      // Actualizar la solicitud en el backend
+      await SolicitudesService.updatePlantilla({
+        id: solicitudId,
+        plantilla_datos: JSON.stringify(estado.datos)
+      });
+      alert('Cambios guardados correctamente');
+      router.push('/dashboard/solicitante/mis-solicitudes');
+    } catch (err) {
+      alert('Error al guardar los cambios');
+      console.error('Error al guardar solicitud TUKASH:', err);
+    }
+  };
+
   // Renderizar el formulario de edición TUKASH
   return (
     <div className="max-w-4xl mx-auto py-8">
@@ -71,6 +87,7 @@ export default function EditarTukashPage() {
       <EditarTukash
         plantilla={plantillasDisponibles.find(p => p.id === 'tarjetas-tukash')!}
         datosPlantilla={estado.datos}
+        onGuardar={handleGuardar}
       />
     </div>
   );
