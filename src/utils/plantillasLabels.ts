@@ -47,6 +47,28 @@ export const MAPEO_PLANTILLAS: Record<string, MapeoPlantilla> = {
     camposOcultos: ['cuenta', 'banco_cuenta'] // No mostrar cuenta adicional
   },
 
+  'tukash': {
+    nombre: 'SOLICITUD DE PAGO TUKASH',
+    etiquetas: {
+      'tipo_cuenta_destino': 'Tipo de Tarjeta',
+      'banco_destino': 'Banco Emisor',
+      'cuenta_destino': 'Número de Tarjeta',
+      'fecha_limite_pago': 'Fecha Límite de Pago',
+      'empresa_a_pagar': 'Empresa que Solicita',
+      'nombre_persona': 'Titular de la Tarjeta',
+      'concepto': 'Concepto del Pago',
+      'monto': 'Monto a Pagar',
+      'asunto': 'Asunto',
+      'cliente': 'Cliente',
+      'numero_empleado': 'Número de Empleado',
+      'dias_pagar': 'Días a Pagar',
+      'tarjeta_tipo': 'Tipo de Tarjeta',
+      'tarjeta_numero': 'Número de Tarjeta',
+      'tarjeta_banco': 'Banco Emisor',
+      'tarjeta_monto': 'Monto de la Tarjeta'
+    },
+    camposOcultos: ['cuenta', 'banco_cuenta']
+  },
   'pago-sua-frenshetsi': {
     nombre: 'PAGO SUA FRENSHETSI',
     etiquetas: {
@@ -94,8 +116,8 @@ export const MAPEO_PLANTILLAS: Record<string, MapeoPlantilla> = {
     camposOcultos: ['cuenta', 'banco_cuenta']
   },
 
-  'pago-polizas-gnp': {
-    nombre: 'PAGO PÓLIZAS GNP',
+  'pago-polizasp': {
+    nombre: 'PAGO PÓLIZAS',
     etiquetas: {
       'tipo_cuenta_destino': 'Método de Pago Principal',
       'banco_destino': 'Banco Principal',
@@ -208,10 +230,11 @@ export function detectarPlantillaId(solicitud: Solicitud): string | null {
         'PAGO SUA INTERNAS': 'pago-sua-internas',
         'PAGO SUA FRENSHETSI': 'pago-sua-frenshetsi',
         'PAGO COMISIONES': 'pago-comisiones',
-        'PAGO POLIZAS': 'pago-polizas-gnp',
+        'PAGO POLIZAS': 'pago-polizas',
         'REGRESOS EN TRANSFERENCIA': 'regresos-transferencia',
         'REGRESOS EN EFECTIVO': 'regresos-efectivo',
-        'SOLICITUD DE PAGO TARJETAS N09 Y TOKA': 'tarjetas-n09-toka'
+        'SOLICITUD DE PAGO TARJETAS N09 Y TOKA': 'tarjetas-n09-toka',
+        'PAGO TUKASH': 'tukash'
       };
       return nombreAId[plantillaParte] || null;
     }
