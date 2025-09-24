@@ -272,12 +272,13 @@ export default function EditarSolicitudPage() {
   // Redirección automática si se detecta plantilla TUKASH o N09/TOKA
   useEffect(() => {
     if (plantillaDetectada && solicitudId) {
-      if (plantillaDetectada.id === 'tarjetas-tukash') {
-        router.push(`/dashboard/solicitante/editar-tukash/${solicitudId}`);
+      // Si la ruta actual NO es la de tukash y la plantilla es tukash, redirige
+      if (plantillaDetectada.id === 'tarjetas-tukash' && !window.location.pathname.includes('/editar-tukash/')) {
+        router.replace(`/dashboard/solicitante/editar-tukash/${solicitudId}`);
         return;
       }
-      if (plantillaDetectada.id === 'tarjetas-n09-toka') {
-        router.push(`/dashboard/solicitante/editar-n09-toka/${solicitudId}`);
+      if (plantillaDetectada.id === 'tarjetas-n09-toka' && !window.location.pathname.includes('/editar-n09-toka/')) {
+        router.replace(`/dashboard/solicitante/editar-n09-toka/${solicitudId}`);
         return;
       }
     }
