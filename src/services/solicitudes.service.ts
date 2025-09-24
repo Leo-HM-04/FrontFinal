@@ -184,6 +184,8 @@ export class SolicitudesService {
     link_pago_2?: string | null;
     usuario_acceso_2?: string | null;
     contrasena_acceso_2?: string | null;
+    // Datos de la plantilla TUKASH
+    plantilla_datos?: string | object;
   }): Promise<unknown> {
     const token = localStorage.getItem('token');
     
@@ -225,6 +227,11 @@ export class SolicitudesService {
       formData.append('link_pago_2', data.link_pago_2 || '');
       formData.append('usuario_acceso_2', data.usuario_acceso_2 || '');
       formData.append('contrasena_acceso_2', data.contrasena_acceso_2 || '');
+    }
+
+    // Agregar datos de la plantilla TUKASH si existen
+    if (data.plantilla_datos) {
+      formData.append('plantilla_datos', typeof data.plantilla_datos === 'string' ? data.plantilla_datos : JSON.stringify(data.plantilla_datos));
     }
     
     const response = await api.post('/solicitudes', formData, {
