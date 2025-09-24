@@ -196,7 +196,7 @@ export function detectarPlantillaId(solicitud: Solicitud): string | null {
         'PAGO SUA INTERNAS': 'pago-sua-internas',
         'PAGO SUA FRENSHETSI': 'pago-sua-frenshetsi',
         'PAGO COMISIONES': 'pago-comisiones',
-        'PAGO POLIZAS GNP': 'pago-polizas-gnp',
+        'PAGO POLIZAS': 'pago-polizas-gnp',
         'REGRESOS EN TRANSFERENCIA': 'regresos-transferencia',
         'REGRESOS EN EFECTIVO': 'regresos-efectivo',
         'SOLICITUD DE PAGO TARJETAS N09 Y TOKA': 'tarjetas-n09-toka'

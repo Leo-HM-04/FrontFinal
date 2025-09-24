@@ -242,6 +242,8 @@ export default function EditarSolicitudPage() {
   // Estados para manejo de plantillas
   const [plantillaDetectada, setPlantillaDetectada] = useState<PlantillaSolicitud | null>(null);
   const [esEdicionPlantilla, setEsEdicionPlantilla] = useState(false);
+  // Estado para guardar la solicitud cargada
+  const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
   
   // Hook para manejo de plantillas
   const {
@@ -320,14 +322,12 @@ export default function EditarSolicitudPage() {
 
         // 1) Trae la solicitud (ajusta el método si tu service usa otro nombre)
         // @ts-expect-error - Método puede tener diferentes nombres según implementación
-        const solicitudData = await (SolicitudesService.getById?.(solicitudId) ?? (SolicitudesService as Record<string, unknown>).get?.(solicitudId));
-        if (!solicitudData) throw new Error('No se encontró la solicitud.');
-        
-  // console.log('📥 Datos recibidos del servicio:', solicitudData);
-  // console.log('📥 plantilla_datos del servicio:', solicitudData.plantilla_datos);
-
-        // Usar directamente la respuesta
-        const s = solicitudData as unknown as Record<string, string | number | boolean | null>;
+    const solicitudData = await (SolicitudesService.getById?.(solicitudId) ?? (SolicitudesService as Record<string, unknown>).get?.(solicitudId));
+    if (!solicitudData) throw new Error('No se encontró la solicitud.');
+    // Guardar la solicitud en el estado
+    setSolicitud(solicitudData as Solicitud);
+    // Usar directamente la respuesta
+    const s = solicitudData as unknown as Record<string, string | number | boolean | null>;
 
         // Derivar tipo_concepto si no viene explícito
         let tipo_concepto = (s.tipo_concepto as string) || 'pago_factura';
@@ -1011,7 +1011,13 @@ export default function EditarSolicitudPage() {
                 ) : (
                   <FormularioPlantilla
                     plantilla={plantillaDetectada}
-                    datos={estadoPlantilla.datos}
+                    datos={
+                      solicitud && solicitud.plantilla_datos
+                        ? (typeof solicitud.plantilla_datos === 'string'
+                            ? JSON.parse(solicitud.plantilla_datos)
+                            : solicitud.plantilla_datos)
+                        : estadoPlantilla.datos
+                    }
                     errores={estadoPlantilla.errores}
                     camposVisibles={estadoPlantilla.camposVisibles}
                     onCambiarCampo={actualizarCampo}
