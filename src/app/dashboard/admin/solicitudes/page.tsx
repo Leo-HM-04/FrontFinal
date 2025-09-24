@@ -229,14 +229,15 @@ export default function SolicitudesPage() {
         // Intentar obtener datos de plantilla_datos primero
         if (solicitud.plantilla_datos) {
           const plantillaData = JSON.parse(solicitud.plantilla_datos);
+          // Usar datos de plantilla si están disponibles, sino usar campos de la base de datos
           solicitudTukash = {
             id_solicitud: solicitud.id_solicitud,
             asunto: plantillaData.asunto || 'TUKASH',
             cliente: plantillaData.cliente || '',
             beneficiario_tarjeta: plantillaData.beneficiario_tarjeta || '',
             numero_tarjeta: plantillaData.numero_tarjeta || '',
-            monto_total_cliente: plantillaData.monto_total_cliente || 0,
-            monto_total_tukash: plantillaData.monto_total_tukash || 0,
+            monto_total_cliente: plantillaData.monto_total_cliente || Number(solicitud.monto) || 0,
+            monto_total_tukash: plantillaData.monto_total_tukash || Number(solicitud.monto2) || Number(solicitud.monto) || 0,
             estado: (solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
             fecha_creacion: solicitud.fecha_creacion,
             fecha_actualizacion: solicitud.updated_at || '',
@@ -255,7 +256,8 @@ export default function SolicitudesPage() {
           const beneficiario_tarjeta = solicitud.nombre_persona || '';
           const numero_tarjeta = solicitud.cuenta_destino || solicitud.cuenta || ''; // Usar cuenta_destino o cuenta como número de tarjeta
           const monto_total_cliente = Number(solicitud.monto) || 0;
-          const monto_total_tukash = Number(solicitud.monto) || 0; // Usar el mismo monto si no hay específico
+          // Usar monto2 para el monto TUKASH si está disponible, sino usar monto
+          const monto_total_tukash = Number(solicitud.monto2) || Number(solicitud.monto) || 0;
           
           solicitudTukash = {
             id_solicitud: solicitud.id_solicitud,

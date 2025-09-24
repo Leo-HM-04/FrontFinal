@@ -34,6 +34,7 @@ export interface Solicitud {
   id_usuario: number;
   departamento: string;
   monto: number;
+  monto2?: number; // Campo para segundo monto (TUKASH)
   tipo_moneda?: string;
   cuenta_destino: string;
   factura_url: string;
