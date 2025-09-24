@@ -912,14 +912,44 @@ export function SolicitudDetailModal({
     // Si no se pudo mapear desde plantilla_datos, usar datos básicos de la solicitud
     if (!solicitudSuaFrenshetsi) {
       console.log('🔄 [SUA FRENSHETSI] Construyendo desde datos básicos de solicitud...');
+      
+      // Extraer información del concepto si está presente
+      const asunto = solicitud.concepto || 'PAGO SUA FRENSHETSI';
+      let cliente = '';
+      let linea_captura = '';
+      
+      // Intentar extraer cliente y línea de captura del concepto
+      if (solicitud.concepto) {
+        console.log('🔍 [SUA FRENSHETSI] Analizando concepto:', solicitud.concepto);
+        
+        // Buscar Cliente: en el concepto
+        const clienteMatch = solicitud.concepto.match(/Cliente:\s*([^,\n]+)/i);
+        if (clienteMatch) {
+          cliente = clienteMatch[1].trim();
+          console.log('✅ [SUA FRENSHETSI] Cliente encontrado:', cliente);
+        }
+        
+        // Buscar Línea de Captura: en el concepto
+        const lineaMatch = solicitud.concepto.match(/Línea de Captura:\s*([A-Z0-9-]+)/i);
+        if (lineaMatch) {
+          linea_captura = lineaMatch[1];
+          console.log('✅ [SUA FRENSHETSI] Línea de captura encontrada:', linea_captura);
+        }
+      }
+      
+      // Si no se encontraron en el concepto, usar campos alternativos
+      if (!cliente) {
+        cliente = solicitud.empresa_a_pagar || solicitud.nombre_persona || '';
+      }
+      
       solicitudSuaFrenshetsi = {
         id_solicitud: solicitud.id_solicitud,
-        asunto: solicitud.concepto || 'PAGO SUA FRENSHETSI',
+        asunto,
         empresa: 'FRENSHETSI',
-        cliente: '',
+        cliente,
         monto: Number(solicitud.monto) || 0,
         fecha_limite: solicitud.fecha_limite_pago || '',
-        linea_captura: '',
+        linea_captura,
         archivos_adjuntos: [],
         estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
         fecha_creacion: solicitud.fecha_creacion || '',

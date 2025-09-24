@@ -127,7 +127,7 @@ const InfoField: React.FC<InfoFieldProps> = ({
   };
 
   const getValueClassName = () => {
-    let baseClass = "text-gray-900 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-200";
+    let baseClass = "text-gray-900 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200";
     
     if (variant === 'mono') {
       baseClass += " font-mono text-sm";
@@ -141,7 +141,7 @@ const InfoField: React.FC<InfoFieldProps> = ({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <label className="block text-sm font-semibold text-indigo-800">{label}</label>
+      <label className="block text-sm font-semibold text-blue-800">{label}</label>
       <div className={getValueClassName()}>
         {formatValue()}
       </div>
@@ -221,7 +221,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
           
           <button
             onClick={() => setShowPdfViewer(!showPdfViewer)}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >
             <ExternalLink className="w-4 h-4" />
             {showPdfViewer ? 'Vista previa' : 'Ver completo'}
@@ -247,8 +247,8 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
           />
         ) : (
           <div className="text-center">
-            <div className="w-16 h-16 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <FileText className="w-8 h-8 text-indigo-600" />
+            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <FileText className="w-8 h-8 text-blue-600" />
             </div>
             <p className="text-xs text-gray-600 font-medium">
               {isPdf ? 'PDF' : isImage ? 'Imagen' : 'Archivo'}
@@ -270,7 +270,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
           href={fileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
         >
           <ExternalLink className="w-4 h-4" />
           Ver completo
@@ -394,9 +394,9 @@ export function PlantillaSuaFrenshetsiDetailModal({
           <X className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
         </button>
         {/* Contenido con scroll */}
-        <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-indigo-50 scrollbar-thumb-indigo-300 hover:scrollbar-thumb-indigo-400 p-6">
+        <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 p-6">
           {/* Header */}
-          <header className="bg-gradient-to-r from-indigo-800 via-indigo-700 to-purple-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
+          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-blue-600 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
             <div className="absolute inset-0 bg-white/10 transform -skew-y-1"></div>
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -405,9 +405,9 @@ export function PlantillaSuaFrenshetsiDetailModal({
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">PAGO SUA FRENSHETSI</h2>
-                  <p className="text-indigo-100 text-sm mt-1">Solicitud #{solicitud.id_solicitud}</p>
+                  <p className="text-blue-100 text-sm mt-1">Solicitud #{solicitud.id_solicitud}</p>
                   {solicitudExtended.folio && (
-                    <p className="text-indigo-100 text-sm mt-1">Folio: {solicitudExtended.folio}</p>
+                    <p className="text-blue-100 text-sm mt-1">Folio: {solicitudExtended.folio}</p>
                   )}
                 </div>
               </div>
@@ -419,7 +419,7 @@ export function PlantillaSuaFrenshetsiDetailModal({
           
           {/* Información Principal */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Información Principal</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información Principal</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-2" />
               <InfoField label="Se paga por" value={solicitud.empresa} />
@@ -431,8 +431,8 @@ export function PlantillaSuaFrenshetsiDetailModal({
 
           {/* Línea de Captura */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Línea de Captura IMSS</h3>
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-200">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Línea de Captura IMSS</h3>
+            <div className="bg-gradient-to-r from-blue-50 to-blue-50 p-4 rounded-xl border border-blue-200">
               <InfoField 
                 label="Línea de Captura" 
                 value={solicitud.linea_captura} 
@@ -445,7 +445,7 @@ export function PlantillaSuaFrenshetsiDetailModal({
           {/* Información de Aprobación */}
           {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Información de Aprobación</h3>
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
                 <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion} variant="date" />
@@ -458,11 +458,11 @@ export function PlantillaSuaFrenshetsiDetailModal({
 
           {/* Archivos Adjuntos */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Archivos Adjuntos</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos</h3>
             
             {loading.archivos && (
               <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
                 <p className="text-gray-600 font-medium">Cargando archivos...</p>
               </div>
             )}
@@ -499,7 +499,7 @@ export function PlantillaSuaFrenshetsiDetailModal({
 
           {/* Información de Auditoría */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-indigo-900 mb-4 pb-2 border-b border-indigo-200">Información de Auditoría</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Auditoría</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion} variant="date" />
               <InfoField label="Fecha de Actualización" value={solicitud.fecha_actualizacion} variant="date" />
