@@ -42,8 +42,17 @@ export default function EditarTukashPage() {
                 datosTukash.monto_total_tukash = datosTukash.monto;
               }
               setTimeout(() => {
+                // Prellenado robusto de campos clave TUKASH
+                if (datosTukash.asunto) actualizarCampo('asunto', datosTukash.asunto);
+                if (datosTukash.numero_tarjeta) actualizarCampo('numero_tarjeta', datosTukash.numero_tarjeta);
+                if (datosTukash.monto_total_cliente) actualizarCampo('monto_total_cliente', datosTukash.monto_total_cliente);
+                if (datosTukash.monto_total_tukash) actualizarCampo('monto_total_tukash', datosTukash.monto_total_tukash);
+                if (datosTukash.archivos_adjuntos) actualizarCampo('archivos_adjuntos', datosTukash.archivos_adjuntos);
+                // Prellenar el resto de campos
                 Object.entries(datosTukash).forEach(([campo, valor]) => {
-                  actualizarCampo(campo, valor);
+                  if (!["asunto","numero_tarjeta","monto_total_cliente","monto_total_tukash","archivos_adjuntos"].includes(campo)) {
+                    actualizarCampo(campo, valor);
+                  }
                 });
               }, 100);
             }
