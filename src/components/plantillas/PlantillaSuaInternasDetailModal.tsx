@@ -159,7 +159,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
               />
               <div className="absolute inset-0 bg-black bg-opacity-10 flex items-end justify-center pb-2">
                 <div className="bg-white bg-opacity-90 px-3 py-1 rounded text-xs text-gray-600">
-                  Vista previa limitada - Haga clic en "Ver completo" para el PDF completo
+                  Vista previa limitada - Haga clic en &quot;Ver completo&quot; para el PDF completo
                 </div>
               </div>
             </div>
