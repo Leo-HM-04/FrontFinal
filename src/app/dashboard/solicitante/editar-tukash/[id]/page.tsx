@@ -16,16 +16,12 @@ export default function EditarTukashPage() {
 
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
 
-  useEffect(() => {
-    async function fetchSolicitud() {
-      try {
-        const s = await SolicitudesService.getById(solicitudId);
-        setSolicitud(s);
-        // Detectar plantilla TUKASH
-        const plantillaTukash = plantillasDisponibles.find(p => p.id === 'tarjetas-tukash');
-        if (plantillaTukash) {
-          seleccionarPlantilla(plantillaTukash);
-          // Prellenar datos desde plantilla_datos
+    useEffect(() => {
+      async function fetchSolicitud() {
+        try {
+          const s = await SolicitudesService.getById(solicitudId);
+          setSolicitud(s);
+          // Forzar plantilla TUKASH si templateType es tarjetas-tukash
           let datosTukash: Record<string, unknown> = {};
           if (s.plantilla_datos) {
             try {
@@ -34,30 +30,30 @@ export default function EditarTukashPage() {
               console.error('❌ Error parseando plantilla_datos TUKASH:', err);
             }
           }
-          // Mapear beneficiario si viene como 'beneficiario' (N09/TOKA) a 'beneficiario_tarjeta' (TUKASH)
-          if (datosTukash.beneficiario && !datosTukash.beneficiario_tarjeta) {
-            datosTukash.beneficiario_tarjeta = datosTukash.beneficiario;
+          if (datosTukash.templateType === 'tarjetas-tukash') {
+            const plantillaTukash = plantillasDisponibles.find(p => p.id === 'tarjetas-tukash');
+            if (plantillaTukash) {
+              seleccionarPlantilla(plantillaTukash);
+              // Mapeo robusto de campos
+              if (datosTukash.beneficiario && !datosTukash.beneficiario_tarjeta) {
+                datosTukash.beneficiario_tarjeta = datosTukash.beneficiario;
+              }
+              if (datosTukash.monto && !datosTukash.monto_total_tukash) {
+                datosTukash.monto_total_tukash = datosTukash.monto;
+              }
+              setTimeout(() => {
+                Object.entries(datosTukash).forEach(([campo, valor]) => {
+                  actualizarCampo(campo, valor);
+                });
+              }, 100);
+            }
           }
-          // Mapear monto si viene como 'monto' y no como 'monto_total_tukash'
-          if (datosTukash.monto && !datosTukash.monto_total_tukash) {
-            datosTukash.monto_total_tukash = datosTukash.monto;
-          }
-          // Mapear cliente si viene como 'cliente'
-          if (datosTukash.cliente) {
-            datosTukash.cliente = datosTukash.cliente;
-          }
-          setTimeout(() => {
-            Object.entries(datosTukash).forEach(([campo, valor]) => {
-              actualizarCampo(campo, valor);
-            });
-          }, 100);
+        } catch (err) {
+          console.error('❌ Error obteniendo solicitud:', err);
         }
-      } catch (err) {
-        console.error('❌ Error obteniendo solicitud:', err);
       }
-    }
-    if (solicitudId) fetchSolicitud();
-  }, [solicitudId]);
+      if (solicitudId) fetchSolicitud();
+    }, [solicitudId]);
 
   // Renderizar el formulario de edición TUKASH
   return (
