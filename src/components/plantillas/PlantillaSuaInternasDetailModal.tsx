@@ -115,6 +115,8 @@ const InfoField: React.FC<{
 
 // Componente para preview de archivos
 const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
+  
   console.log('🖼️ [SUA INTERNAS ARCHIVOS] Renderizando preview para archivo ID:', archivo.id);
   
   if (!archivo.archivo_url) {
@@ -133,8 +135,6 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   const extension = archivo.archivo_url?.split('.').pop()?.toLowerCase() || '';
   const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
   const isPdf = extension === 'pdf';
-  const isZip = ['zip', 'rar', '7z'].includes(extension);
-  const isOffice = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(extension);
 
   // Función para obtener el nombre del archivo desde la URL
   const getFileName = () => {
@@ -143,15 +143,58 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
     return fileName || `Archivo ${archivo.id}`;
   };
 
-  // Función para obtener el tamaño estimado del tipo de archivo
-  const getFileTypeDescription = () => {
-    if (isPdf) return 'Documento PDF';
-    if (isZip) return 'Archivo comprimido';
-    if (isOffice) return 'Documento Office';
-    if (isImage) return 'Imagen';
-    return archivo.tipo || 'Archivo';
-  };
+  if (isPdf) {
+    return (
+      <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+        {/* PDF Preview */}
+        <div className="relative">
+          {!showPdfViewer ? (
+            // Vista previa limitada
+            <div className="h-40 bg-gray-50 border-b">
+              <iframe
+                src={`${fileUrl}#view=FitH&toolbar=0&navpanes=0&scrollbar=0&page=1`}
+                className="w-full h-full"
+                style={{ pointerEvents: 'none' }}
+                title="Vista previa PDF"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-10 flex items-end justify-center pb-2">
+                <div className="bg-white bg-opacity-90 px-3 py-1 rounded text-xs text-gray-600">
+                  Vista previa limitada - Haga clic en "Ver completo" para el PDF completo
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Viewer completo
+            <div className="h-96">
+              <iframe
+                src={fileUrl}
+                className="w-full h-full border-0"
+                title="PDF Viewer"
+              />
+            </div>
+          )}
+        </div>
+        
+        {/* File info and actions */}
+        <div className="p-3">
+          <p className="text-sm font-medium text-gray-900 truncate mb-2">
+            {getFileName()}
+          </p>
+          <p className="text-xs text-gray-500 mb-3">Documento PDF</p>
+          
+          <button
+            onClick={() => setShowPdfViewer(!showPdfViewer)}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+          >
+            <ExternalLink className="w-4 h-4" />
+            {showPdfViewer ? 'Vista previa' : 'Ver completo'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
+  // Para otros tipos de archivo (imágenes, etc.)
   return (
     <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
       {/* Preview area */}
@@ -166,31 +209,8 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
             onError={(e) => {
               console.error('❌ [SUA INTERNAS ARCHIVOS] Error cargando imagen:', fileUrl);
               e.currentTarget.style.display = 'none';
-              // Mostrar icono por defecto si falla la imagen
-              e.currentTarget.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
             }}
           />
-        ) : isPdf ? (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <FileText className="w-8 h-8 text-red-600" />
-            </div>
-            <p className="text-xs text-gray-600 font-medium">PDF</p>
-          </div>
-        ) : isZip ? (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <FileText className="w-8 h-8 text-yellow-600" />
-            </div>
-            <p className="text-xs text-gray-600 font-medium">ZIP</p>
-          </div>
-        ) : isOffice ? (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <FileText className="w-8 h-8 text-blue-600" />
-            </div>
-            <p className="text-xs text-gray-600 font-medium">Office</p>
-          </div>
         ) : (
           <div className="text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -199,14 +219,6 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
             <p className="text-xs text-gray-600 font-medium">Archivo</p>
           </div>
         )}
-        
-        {/* Icono de fallback para imágenes que fallan al cargar */}
-        <div className="fallback-icon hidden text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-            <FileText className="w-8 h-8 text-gray-500" />
-          </div>
-          <p className="text-xs text-gray-600 font-medium">Imagen</p>
-        </div>
       </div>
       
       {/* File info */}
@@ -215,8 +227,18 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
           {getFileName()}
         </p>
         <p className="text-xs text-gray-500">
-          {getFileTypeDescription()}
+          {archivo.tipo || 'Archivo'}
         </p>
+        
+        <a
+          href={fileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+        >
+          <ExternalLink className="w-4 h-4" />
+          Ver completo
+        </a>
       </div>
     </div>
   );
