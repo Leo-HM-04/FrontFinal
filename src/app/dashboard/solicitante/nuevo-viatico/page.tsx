@@ -494,11 +494,12 @@ const generateImprovedTemplate = () => {
 </head>
 <body>
   <div class="container">
-    <!-- Logo -->
+    <!-- 
     <div class="logo">
       <img src="https://bechapra.com/wp-content/uploads/2022/11/b-bechapra-09-1024x973.png" alt="Bechapra logo" />
     </div>
-    
+    -->
+
     <!-- Título principal -->
     <div class="title">Solicitud y Desglose de Viáticos</div>
     
