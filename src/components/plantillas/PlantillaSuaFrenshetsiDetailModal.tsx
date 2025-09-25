@@ -151,7 +151,6 @@ const InfoField: React.FC<InfoFieldProps> = ({
 
 // Componente para preview de archivos mejorado
 const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
-  const [showPdfViewer, setShowPdfViewer] = useState(false);
   const [imageError, setImageError] = useState(false);
   
   console.log('🖼️ [SUA FRENSHETSI ARCHIVOS] Renderizando preview para archivo ID:', archivo.id);
@@ -183,33 +182,17 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   if (isPdf) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-        {/* PDF Preview */}
-        <div className="relative">
-          {!showPdfViewer ? (
-            // Vista previa limitada
-            <div className="h-48 bg-gray-50 border-b relative">
-              <iframe
-                src={`${fileUrl}#view=FitH&toolbar=0&navpanes=0&scrollbar=0&page=1`}
-                className="w-full h-full"
-                style={{ pointerEvents: 'none' }}
-                title="Vista previa PDF"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-10 flex items-end justify-center pb-3">
-                <div className="bg-white bg-opacity-95 px-4 py-2 rounded-lg text-xs text-gray-700 shadow-lg">
-                  Vista previa limitada - Haga clic en &quot;Ver completo&quot; para el PDF completo
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Viewer completo
-            <div className="h-96">
-              <iframe
-                src={fileUrl}
-                className="w-full h-full border-0"
-                title="PDF Viewer"
-              />
-            </div>
-          )}
+        {/* PDF Preview simplificado */}
+        <div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
+          <iframe 
+            src={fileUrl} 
+            title={getFileName()}
+            className="w-full" 
+            style={{ height: '200px' }} 
+          />
+          <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-700">
+            Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
+          </div>
         </div>
         
         {/* File info and actions */}
@@ -219,13 +202,15 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
           </p>
           <p className="text-xs text-gray-500 mb-3">Documento PDF</p>
           
-          <button
-            onClick={() => setShowPdfViewer(!showPdfViewer)}
+          <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >
             <ExternalLink className="w-4 h-4" />
-            {showPdfViewer ? 'Vista previa' : 'Ver completo'}
-          </button>
+            Ver completo
+          </a>
         </div>
       </div>
     );
@@ -377,14 +362,14 @@ export function PlantillaSuaFrenshetsiDetailModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
       {/* Overlay similar al modal de solicitudes */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-indigo-900/80 to-purple-900/70 backdrop-blur-md transition-all duration-500"
+        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
         onClick={onClose}
         role="button"
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
       {/* Modal container similar a solicitudes */}
-      <div className="relative bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
         {/* Botón de cerrar */}
         <button
           onClick={onClose}
@@ -396,7 +381,7 @@ export function PlantillaSuaFrenshetsiDetailModal({
         {/* Contenido con scroll */}
         <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 p-6">
           {/* Header */}
-          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-blue-600 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
+          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
             <div className="absolute inset-0 bg-white/10 transform -skew-y-1"></div>
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-4">

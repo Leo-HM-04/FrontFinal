@@ -914,7 +914,7 @@ export function SolicitudDetailModal({
       console.log('🔄 [SUA FRENSHETSI] Construyendo desde datos básicos de solicitud...');
       
       // Extraer información del concepto si está presente
-      const asunto = solicitud.concepto || 'PAGO SUA FRENSHETSI';
+      let asunto = solicitud.concepto || 'PAGO SUA FRENSHETSI';
       let cliente = '';
       let linea_captura = '';
       
@@ -922,15 +922,22 @@ export function SolicitudDetailModal({
       if (solicitud.concepto) {
         console.log('🔍 [SUA FRENSHETSI] Analizando concepto:', solicitud.concepto);
         
-        // Buscar Cliente: en el concepto
-        const clienteMatch = solicitud.concepto.match(/Cliente:\s*([^,\n]+)/i);
+        // Extraer solo el asunto principal (primera parte antes de " - Cliente:")
+        const asuntoMatch = solicitud.concepto.match(/^([^-]+)(?:\s*-\s*Cliente:)?/);
+        if (asuntoMatch) {
+          asunto = asuntoMatch[1].trim();
+          console.log('✅ [SUA FRENSHETSI] Asunto extraído:', asunto);
+        }
+        
+        // Buscar Cliente: en el concepto (solo el nombre, sin línea de captura)
+        const clienteMatch = solicitud.concepto.match(/Cliente:\s*([^-\n]+?)(?:\s*-\s*Línea de Captura:|$)/i);
         if (clienteMatch) {
           cliente = clienteMatch[1].trim();
           console.log('✅ [SUA FRENSHETSI] Cliente encontrado:', cliente);
         }
         
         // Buscar Línea de Captura: en el concepto
-        const lineaMatch = solicitud.concepto.match(/Línea de Captura:\s*([A-Z0-9-]+)/i);
+        const lineaMatch = solicitud.concepto.match(/Línea de Captura:\s*([A-Z0-9]+)/i);
         if (lineaMatch) {
           linea_captura = lineaMatch[1];
           console.log('✅ [SUA FRENSHETSI] Línea de captura encontrada:', linea_captura);
