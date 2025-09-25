@@ -1032,44 +1032,46 @@ function MisSolicitudesContent() {
                             >
                               <Eye className="w-3.5 h-3.5" />
                             </button>
-                            {String(s.estado).toLowerCase() === 'pendiente' && (
-                              <>
-                                <button
-                                  title="Editar"
-                                  className="inline-flex items-center justify-center p-1.5 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
-                                  onClick={() => {
-                                    // Detección por plantilla robusta
-                                    const templateType = getTemplateType(s);
-                                    if (isN09TokaSolicitud(s)) {
-                                      router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
-                                    } else if (isTukashSolicitud(s)) {
-                                      router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
-                                    } else if (isSuaInternasSolicitud(s)) {
-                                      router.push(`/dashboard/solicitante/editar-sua-internas/${s.id_solicitud}`);
-                                    } else if (isSuaFrenshetsiSolicitud(s)) {
-                                      router.push(`/dashboard/solicitante/editar-sua-frenshetsi/${s.id_solicitud}`);
-                                    } else if (isComisionesSolicitud(s)) {
-                                      router.push(`/dashboard/solicitante/editar-comisiones/${s.id_solicitud}`);
-                                    } else if (isPolizasSolicitud(s)) {
-                                      router.push(`/dashboard/solicitante/editar-polizas/${s.id_solicitud}`);
-                                    } else if (isRegresosTransferenciaSolicitud(s)) {
-                                      router.push(`/dashboard/solicitante/editar-regresos-transferencia/${s.id_solicitud}`);
-                                    } else {
-                                      router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
-                                    }
-                                  }}
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  title="Eliminar"
-                                  className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
-                                  onClick={() => { setSolicitudAEliminar(s); setDeleteModalOpen(true); }}
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </>
-                            )}
+                              {String(s.estado).toLowerCase() === 'pendiente' && (
+                                <>
+                                  {/*
+                                  <button
+                                    title="Editar"
+                                    className="inline-flex items-center justify-center p-1.5 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
+                                    onClick={() => {
+                                      // Detección por plantilla robusta
+                                      const templateType = getTemplateType(s);
+                                      if (isN09TokaSolicitud(s)) {
+                                        router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
+                                      } else if (isTukashSolicitud(s)) {
+                                        router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
+                                      } else if (isSuaInternasSolicitud(s)) {
+                                        router.push(`/dashboard/solicitante/editar-sua-internas/${s.id_solicitud}`);
+                                      } else if (isSuaFrenshetsiSolicitud(s)) {
+                                        router.push(`/dashboard/solicitante/editar-sua-frenshetsi/${s.id_solicitud}`);
+                                      } else if (isComisionesSolicitud(s)) {
+                                        router.push(`/dashboard/solicitante/editar-comisiones/${s.id_solicitud}`);
+                                      } else if (isPolizasSolicitud(s)) {
+                                        router.push(`/dashboard/solicitante/editar-polizas/${s.id_solicitud}`);
+                                      } else if (isRegresosTransferenciaSolicitud(s)) {
+                                        router.push(`/dashboard/solicitante/editar-regresos-transferencia/${s.id_solicitud}`);
+                                      } else {
+                                        router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
+                                      }
+                                    }}
+                                  >
+                                    <Edit className="w-3.5 h-3.5" />
+                                  </button>
+                                  */}
+                                  <button
+                                    title="Eliminar"
+                                    className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                                    onClick={() => { setSolicitudAEliminar(s); setDeleteModalOpen(true); }}
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </>
+                              )}
                           </div>
                         </td>
                       </tr>
@@ -1158,47 +1160,49 @@ function MisSolicitudesContent() {
                             <Eye className="w-3.5 h-3.5" />
                             Ver
                           </button>
-                          {String(s.estado).toLowerCase() === 'pendiente' && (
-                            <>
-                              <button
-                                title="Editar"
-                                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors text-sm font-medium"
-                                onClick={() => {
-                                  // Detección por plantilla robusta
-                                  const templateTypeMobile = getTemplateType(s);
-                                  const templateType = getTemplateType(s);
-                                  if (isN09TokaSolicitud(s)) {
-                                    router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
-                                  } else if (isTukashSolicitud(s)) {
-                                    router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
-                                  } else if (isSuaInternasSolicitud(s)) {
-                                    router.push(`/dashboard/solicitante/editar-sua-internas/${s.id_solicitud}`);
-                                  } else if (isSuaFrenshetsiSolicitud(s)) {
-                                    router.push(`/dashboard/solicitante/editar-sua-frenshetsi/${s.id_solicitud}`);
-                                  } else if (isComisionesSolicitud(s)) {
-                                    router.push(`/dashboard/solicitante/editar-comisiones/${s.id_solicitud}`);
-                                  } else if (isPolizasSolicitud(s)) {
-                                    router.push(`/dashboard/solicitante/editar-polizas/${s.id_solicitud}`);
-                                  } else if (isRegresosTransferenciaSolicitud(s)) {
-                                    router.push(`/dashboard/solicitante/editar-regresos-transferencia/${s.id_solicitud}`);
-                                  } else {
-                                    router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
-                                  }
-                                }}
-                              >
-                                <Edit className="w-3.5 h-3.5" />
-                                Editar
-                              </button>
-                              <button
-                                title="Eliminar"
-                                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors text-sm font-medium"
-                                onClick={() => { setSolicitudAEliminar(s); setDeleteModalOpen(true); }}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                Eliminar
-                              </button>
-                            </>
-                          )}
+                            {String(s.estado).toLowerCase() === 'pendiente' && (
+                              <>
+                                {/*
+                                <button
+                                  title="Editar"
+                                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors text-sm font-medium"
+                                  onClick={() => {
+                                    // Detección por plantilla robusta
+                                    const templateTypeMobile = getTemplateType(s);
+                                    const templateType = getTemplateType(s);
+                                    if (isN09TokaSolicitud(s)) {
+                                      router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
+                                    } else if (isTukashSolicitud(s)) {
+                                      router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
+                                    } else if (isSuaInternasSolicitud(s)) {
+                                      router.push(`/dashboard/solicitante/editar-sua-internas/${s.id_solicitud}`);
+                                    } else if (isSuaFrenshetsiSolicitud(s)) {
+                                      router.push(`/dashboard/solicitante/editar-sua-frenshetsi/${s.id_solicitud}`);
+                                    } else if (isComisionesSolicitud(s)) {
+                                      router.push(`/dashboard/solicitante/editar-comisiones/${s.id_solicitud}`);
+                                    } else if (isPolizasSolicitud(s)) {
+                                      router.push(`/dashboard/solicitante/editar-polizas/${s.id_solicitud}`);
+                                    } else if (isRegresosTransferenciaSolicitud(s)) {
+                                      router.push(`/dashboard/solicitante/editar-regresos-transferencia/${s.id_solicitud}`);
+                                    } else {
+                                      router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
+                                    }
+                                  }}
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                  Editar
+                                </button>
+                                */}
+                                <button
+                                  title="Eliminar"
+                                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors text-sm font-medium"
+                                  onClick={() => { setSolicitudAEliminar(s); setDeleteModalOpen(true); }}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  Eliminar
+                                </button>
+                              </>
+                            )}
                         </div>
                       </div>
                     );

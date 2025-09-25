@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Shield, Calendar, DollarSign, Building2, User, FileText, Eye, ExternalLink } from 'lucide-react';
+import { X, Shield, Calendar, DollarSign, Building2, User, FileText, Eye, ExternalLink, FileCheck } from 'lucide-react';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
+import { SolicitudesService } from '@/services/solicitudes.service';
+import { Comprobante } from '@/types';
 import Image from 'next/image';
+import { error } from 'console';
 
 // Tipos específicos para la plantilla de Pólizas
 export interface SolicitudPolizasData {
@@ -42,6 +45,34 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
   const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
   const [loadingArchivos, setLoadingArchivos] = useState(false);
   const [archivoPreview, setArchivoPreview] = useState<SolicitudArchivo | null>(null);
+  const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
+  const [loadingComprobantes, setLoadingComprobantes] = useState(false);
+  const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
+  // Cargar comprobantes si la solicitud está pagada
+  const fetchComprobantes = useCallback(async () => {
+    setLoadingComprobantes(true);
+    setErrorComprobantes(null);
+    try {
+      const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
+      setComprobantes(data);
+    } catch (error) {
+      let msg = 'Error al cargar comprobantes';
+      if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        msg = (error as { message: string }).message;
+      }
+      setErrorComprobantes(msg);
+    } finally {
+      setLoadingComprobantes(false);
+    }
+  }, [solicitud.id_solicitud]);
+
+  useEffect(() => {
+    if (isOpen && solicitud?.estado === 'pagada') {
+      fetchComprobantes();
+    } else {
+      setComprobantes([]);
+    }
+  }, [isOpen, solicitud?.estado, fetchComprobantes]);
 
   const cargarArchivos = useCallback(async () => {
     try {
@@ -330,7 +361,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                     No hay archivos adjuntos disponibles
                   </div>
                 )}
-                {/* Previsualización grande */}
+                {/* Previsualización grande única */}
                 <div className="mt-6">
                   <h3 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
                     <FileText className="w-5 h-5 mr-2 text-blue-600" />
@@ -341,6 +372,78 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Comprobantes de Pago */}
+            <div className="mt-4 pt-4 border-t border-blue-100">
+              <h3 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
+                <FileCheck className="w-5 h-5 mr-2 text-blue-600" />
+                Comprobantes de Pago
+              </h3>
+              {loadingComprobantes ? (
+                <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3" />
+                  <span className="text-blue-600 text-sm">Cargando comprobantes...</span>
+                </div>
+              ) : errorComprobantes ? (
+                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorComprobantes}</div>
+              ) : comprobantes.length === 0 ? (
+                <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                      <FileCheck className="w-8 h-8 text-blue-600" />
+                    </div>
+                  </div>
+                  <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
+                  <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
+                    El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
+                  </p>
+                  <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
+                    <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {comprobantes.map((comprobante) => {
+                    const comprobanteUrl = comprobante.ruta_archivo;
+                    const fileName = comprobante.nombre_archivo || comprobanteUrl.split('/').pop() || '';
+                    return (
+                      <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                              <span className="text-xs text-blue-800 font-semibold">
+                                {comprobante.nombre_usuario || `Usuario ${comprobante.usuario_subio}`}
+                              </span>
+                            </div>
+                            {comprobante.comentario && (
+                              <div className="mt-2 bg-white/60 p-2 rounded border-l-3 border-blue-300">
+                                <p className="text-xs text-gray-700 italic">&ldquo;{comprobante.comentario}&rdquo;</p>
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => window.open(comprobanteUrl, '_blank')}
+                            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3 text-xs"
+                            disabled={!comprobanteUrl}
+                          >
+                            Ver completo
+                          </button>
+                        </div>
+                        {/* Previsualización comprobante */}
+                        {comprobanteUrl.match(/\.(pdf)$/i) ? (
+                          <iframe src={comprobanteUrl} title={fileName} className="w-full h-36 rounded border border-blue-200 bg-white" />
+                        ) : comprobanteUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i) ? (
+                          <div className="relative w-full h-36 rounded border border-blue-200 bg-white overflow-hidden"><Image src={comprobanteUrl} alt={fileName} fill className="object-contain" /></div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-blue-600"><FileText className="w-5 h-5" /> {fileName}</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </main>
         </div>
