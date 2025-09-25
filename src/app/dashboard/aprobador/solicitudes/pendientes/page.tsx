@@ -333,28 +333,33 @@ export default function SolicitudesPendientesPage() {
   };
 
   // Formato de fecha amigable para usuario: 'd de mes de año' (ejemplo: 2 de agosto de 2025)
+  // Formato de fecha amigable para usuario: 'd de mes de año' (ejemplo: 2 de agosto de 2025), SIEMPRE en horario de CDMX
   const formatDate = (date: string | Date) => {
     if (!date) return '-';
     try {
       const d = new Date(date);
-      const day = d.getDate();
-      const month = d.toLocaleString('es-ES', { month: 'long' });
-      const year = d.getFullYear();
-      return `${day} de ${month.toLowerCase()} de ${year}`;
+      // Usar toLocaleDateString con zona horaria de México
+      return d.toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: 'America/Mexico_City'
+      });
     } catch {
       return '-';
     }
   };
 
-  // Función para formatear solo la hora
+  // Función para formatear solo la hora, SIEMPRE en horario de CDMX
   const formatTime = (date: string | Date) => {
     if (!date) return '-';
     try {
       const d = new Date(date);
-      return d.toLocaleTimeString('es-MX', { 
-        hour: '2-digit', 
+      return d.toLocaleTimeString('es-MX', {
+        hour: '2-digit',
         minute: '2-digit',
-        hour12: false 
+        hour12: false,
+        timeZone: 'America/Mexico_City'
       });
     } catch {
       return '-';
