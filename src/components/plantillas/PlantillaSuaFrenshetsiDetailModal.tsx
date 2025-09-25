@@ -73,14 +73,12 @@ const getEstadoColor = (estado: string) => {
 };
 
 // Función auxiliar para construir URLs de archivos
-function buildFileUrl(path: string): string {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
-  }
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-  return `${API_URL}/${cleanPath}`;
-}
+// Unificado con otros modales: siempre usa la URL de producción
+const buildFileUrl = (rutaArchivo: string): string => {
+  const baseUrl = 'https://bechapra.com.mx';
+  if (rutaArchivo.startsWith('http')) return rutaArchivo;
+  return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
+};
 
 // Hook personalizado para manejo de errores
 const useErrorHandler = () => {
