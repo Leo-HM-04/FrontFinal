@@ -47,6 +47,21 @@ export default function EditarN09TokaPage() {
     if (solicitudId) fetchSolicitud();
   }, [solicitudId]);
 
+  // Handler para guardar cambios
+  const handleGuardar = async () => {
+    try {
+      await SolicitudesService.updatePlantilla({
+        id: solicitudId,
+        plantilla_datos: JSON.stringify(estado.datos)
+      });
+      alert('Cambios guardados correctamente');
+      router.push('/dashboard/solicitante/mis-solicitudes');
+    } catch (err) {
+      alert('Error al guardar los cambios');
+      console.error('Error al guardar solicitud N09/TOKA:', err);
+    }
+  };
+
   // Renderizar el formulario de edición N09/TOKA
   return (
     <SolicitanteLayout>
@@ -57,6 +72,7 @@ export default function EditarN09TokaPage() {
           datosPlantilla={estado.datos}
           estado={estado}
           actualizarCampo={actualizarCampo}
+          onGuardar={handleGuardar}
         />
       </div>
     </SolicitanteLayout>

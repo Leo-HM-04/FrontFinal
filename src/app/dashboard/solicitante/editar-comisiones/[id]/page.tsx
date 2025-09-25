@@ -51,6 +51,21 @@ export default function EditarComisionesPage() {
     if (solicitudId) fetchSolicitud();
   }, [solicitudId]);
 
+  // Handler para guardar cambios
+  const handleGuardar = async () => {
+    try {
+      await SolicitudesService.updatePlantilla({
+        id: solicitudId,
+        plantilla_datos: JSON.stringify(estado.datos)
+      });
+      alert('Cambios guardados correctamente');
+      router.push('/dashboard/solicitante/mis-solicitudes');
+    } catch (err) {
+      alert('Error al guardar los cambios');
+      console.error('Error al guardar solicitud COMISIONES:', err);
+    }
+  };
+
   return (
     <SolicitanteLayout>
       <div className="max-w-4xl mx-auto py-8">
@@ -60,6 +75,7 @@ export default function EditarComisionesPage() {
           datosPlantilla={estado.datos}
           estado={estado}
           actualizarCampo={actualizarCampo}
+          onGuardar={handleGuardar}
         />
       </div>
     </SolicitanteLayout>
