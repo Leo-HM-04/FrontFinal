@@ -986,7 +986,7 @@ function MisSolicitudesContent() {
                                       router.push(`/dashboard/solicitante/editar-sua-frenshetsi/${s.id_solicitud}`);
                                     } else if (templateType === 'pago-comisiones') {
                                       router.push(`/dashboard/solicitante/editar-comisiones/${s.id_solicitud}`);
-                                    } else if (templateType === 'pago-polizas') {
+                                    } else if (templateType === 'pago-polizas-gnp') {
                                       router.push(`/dashboard/solicitante/editar-polizas/${s.id_solicitud}`);
                                     } else if (templateType === 'regresos-transferencia') {
                                       router.push(`/dashboard/solicitante/editar-regresos-transferencia/${s.id_solicitud}`);
