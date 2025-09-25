@@ -606,7 +606,14 @@ function MisSolicitudesContent() {
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, solicitudesOrdenadas.length);
   const currentSolicitudes = solicitudesOrdenadas.slice(startIndex, endIndex);
   // Mapear datos para mostrar info de TUKASH si los campos principales están vacíos
-  const currentSolicitudesMapped = currentSolicitudes.map((s) => {
+  type SolicitudTukashExtendida = Solicitud & {
+    cliente?: string;
+    beneficiario_tarjeta?: string;
+    numero_tarjeta?: string;
+    monto_total_cliente?: string | number;
+    monto_total_tukash?: string | number;
+  };
+  const currentSolicitudesMapped: SolicitudTukashExtendida[] = currentSolicitudes.map((s) => {
     type PlantillaDatos = {
       concepto?: string;
       asunto?: string;
@@ -615,8 +622,11 @@ function MisSolicitudesContent() {
       numero_tarjeta?: string;
       monto?: string | number;
       monto_total_cliente?: string | number;
+      monto_total_tukash?: string | number;
       tipo_moneda?: string;
       fecha_limite_pago?: string;
+      cliente?: string;
+      beneficiario_tarjeta?: string;
     };
     let plantilla: PlantillaDatos = {};
     if (s.plantilla_datos) {
@@ -634,6 +644,8 @@ function MisSolicitudesContent() {
     } else if (plantilla.monto_total_cliente !== undefined && plantilla.monto_total_cliente !== null && plantilla.monto_total_cliente !== '') {
       montoVal = Number(plantilla.monto_total_cliente);
     }
+    // Mapear campos personalizados de TUKASH
+    const sExt = s as SolicitudTukashExtendida;
     return {
       ...s,
       concepto: s.concepto || plantilla.concepto || plantilla.asunto || '',
@@ -642,6 +654,11 @@ function MisSolicitudesContent() {
       monto: montoVal,
       tipo_moneda: s.tipo_moneda || plantilla.tipo_moneda || '',
       fecha_limite_pago: s.fecha_limite_pago || plantilla.fecha_limite_pago || '',
+      cliente: sExt.cliente || plantilla.cliente || '',
+      beneficiario_tarjeta: sExt.beneficiario_tarjeta || plantilla.beneficiario_tarjeta || '',
+      numero_tarjeta: sExt.numero_tarjeta || plantilla.numero_tarjeta || '',
+      monto_total_cliente: sExt.monto_total_cliente || plantilla.monto_total_cliente || '',
+      monto_total_tukash: sExt.monto_total_tukash || plantilla.monto_total_tukash || '',
     };
   });
 
