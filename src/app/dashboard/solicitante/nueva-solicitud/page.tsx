@@ -359,6 +359,11 @@ export default function NuevaSolicitudPage() {
           throw new Error('Error al obtener datos de la plantilla');
         }
 
+        // Debug: mostrar datos de la plantilla antes del procesamiento
+        console.log('🔍 [DEBUG MONTO] Datos de estadoPlantilla.datos:', estadoPlantilla.datos);
+        console.log('🔍 [DEBUG MONTO] Monto encontrado:', estadoPlantilla.datos.monto);
+        console.log('🔍 [DEBUG MONTO] Tipo de monto:', typeof estadoPlantilla.datos.monto);
+
         // Procesar archivos de la plantilla
         let archivosParaSubir: File[] = [];
   // console.log('Verificando archivos en estadoPlantilla.datos:', estadoPlantilla.datos);
@@ -380,11 +385,26 @@ export default function NuevaSolicitudPage() {
         const solicitudPlantillaData = {
           // Datos básicos de la solicitud - mapeo dinámico según la plantilla
           departamento: 'Finanzas',
-          monto: String(
-            estadoPlantilla.datos.monto_total_cliente || 
-            estadoPlantilla.datos.monto || 
-            '0'
-          ),
+          monto: (() => {
+            // Proceso más robusto para obtener el monto
+            const montoRaw = estadoPlantilla.datos.monto_total_cliente || 
+                            estadoPlantilla.datos.monto || 
+                            estadoPlantilla.datos.monto_total || 
+                            '0';
+            
+            console.log('🔍 [DEBUG MONTO] Monto raw:', montoRaw, 'tipo:', typeof montoRaw);
+            
+            // Convertir a string limpio
+            let montoString = String(montoRaw);
+            
+            // Si viene con formato de moneda, limpiarlo
+            if (typeof montoRaw === 'string') {
+              montoString = montoRaw.replace(/[$,\s]/g, '');
+            }
+            
+            console.log('🔍 [DEBUG MONTO] Monto procesado:', montoString);
+            return montoString;
+          })(),
           tipo_moneda: String(estadoPlantilla.datos.moneda || 'MXN'),
           cuenta_destino: String(
             estadoPlantilla.datos.numero_tarjeta ||
@@ -445,7 +465,11 @@ export default function NuevaSolicitudPage() {
             tipo_cuenta_clabe: (datosN09Toka.tipo_cuenta_clabe || 'CLABE') as 'CLABE' | 'CUENTA',
             numero_cuenta_clabe: datosN09Toka.numero_cuenta_clabe || solicitudPlantillaData.cuenta_destino || '',
             banco_destino: datosN09Toka.banco_destino || solicitudPlantillaData.banco_destino || 'STP',
-            monto: Number(solicitudPlantillaData.monto) || 0,
+            monto: (() => {
+              const montoFinal = Number(solicitudPlantillaData.monto) || 0;
+              console.log('🔍 [DEBUG MONTO] Monto final para N09/TOKA:', montoFinal);
+              return montoFinal;
+            })(),
             tipo_moneda: (solicitudPlantillaData.tipo_moneda || 'MXN') as 'MXN' | 'USD' | 'EUR'
           };
           

@@ -84,6 +84,27 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
         );
 
       case 'numero':
+        // Si el campo tiene formato de moneda, usar NumericFormat
+        if (campo.estilos?.formato === 'moneda') {
+          return (
+            <NumericFormat
+              value={valorStr}
+              onValueChange={(values) => {
+                console.log('🔍 [DEBUG CAMPO MONTO] Valor ingresado:', values.value);
+                onChange(values.value);
+              }}
+              thousandSeparator=","
+              decimalSeparator="."
+              prefix="$"
+              placeholder={campo.placeholder || "$0.00"}
+              className={`${baseClasses} px-3 py-2`}
+              allowNegative={false}
+              decimalScale={2}
+              aria-describedby={error ? `${campo.id}-error` : undefined}
+            />
+          );
+        }
+        // Para números normales
         return (
           <input
             type="number"
