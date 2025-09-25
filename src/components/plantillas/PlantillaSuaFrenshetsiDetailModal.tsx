@@ -366,125 +366,131 @@ export function PlantillaSuaFrenshetsiDetailModal({
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
-      {/* Modal container */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl max-h-[98vh] flex flex-col border border-blue-100">
+      {/* Modal container: más horizontal y ancho */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100">
         {/* Botón de cerrar */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
           aria-label="Cerrar modal"
         >
-          <X className="w-5 h-5" />
+          <X className="w-6 h-6" />
         </button>
-        {/* Contenido con scroll */}
-        <div className="overflow-y-auto max-h-[98vh] p-4 sm:p-6">
-          {/* Header */}
-          <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-md">
-            <div className="flex items-center gap-4">
+        {/* Contenido con scroll, layout horizontal en desktop */}
+        <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
+          {/* Columna izquierda: info principal y auditoría */}
+          <div className="flex-1 min-w-0">
+            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
               <div className="bg-white/20 p-3 rounded-lg">
                 <Factory className="w-8 h-8 text-white" />
               </div>
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">PAGO SUA FRENSHETSI</h2>
-                <p className="text-blue-100 text-sm mt-1">Solicitud #{solicitud.id_solicitud}</p>
-                {solicitudExtended.folio && (
-                  <p className="text-blue-100 text-sm mt-1">Folio: {solicitudExtended.folio}</p>
-                )}
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                  <span>PAGO SUA FRENSHETSI</span>
+                </h2>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  <span className="inline-flex items-center gap-1 text-blue-100 text-sm"><FileText className="w-4 h-4" />Solicitud #{solicitud.id_solicitud}</span>
+                  {solicitudExtended.folio && (
+                    <span className="inline-flex items-center gap-1 text-blue-100 text-sm"><Factory className="w-4 h-4" />Folio: {solicitudExtended.folio}</span>
+                  )}
+                </div>
               </div>
-            </div>
-            <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 bg-white/80 text-blue-700 border-blue-300 shadow-sm`}> 
-              {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
-            </span>
-          </header>
-          
-          {/* Información Principal */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información Principal</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-2" />
-              <InfoField label="Se paga por" value={solicitud.empresa} />
-              <InfoField label="Cliente" value={solicitud.cliente} />
-              <InfoField label="Monto Total" value={solicitud.monto} variant="currency" />
-              <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
-            </div>
-          </div>
-
-          {/* Línea de Captura */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Línea de Captura IMSS</h3>
-            <div className="bg-gradient-to-r from-blue-50 to-blue-50 p-4 rounded-xl border border-blue-200">
-              <InfoField 
-                label="Línea de Captura" 
-                value={solicitud.linea_captura} 
-                variant="mono"
-                className="bg-white/50 p-4 rounded-lg"
-              />
-            </div>
-          </div>
-          
-          {/* Información de Aprobación */}
-          {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
+              <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 bg-white/80 text-blue-700 border-blue-300 shadow-sm flex items-center gap-2`}>
+                <Factory className="w-4 h-4" />
+                {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
+              </span>
+            </header>
+            {/* Información Principal */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
-                <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion} variant="date" />
-                <div className="md:col-span-2">
-                  <InfoField label="Comentarios de Aprobación" value={solicitudExtended.comentarios_aprobacion} />
-                </div>
+                <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-2" />
+                <InfoField label="Se paga por" value={solicitud.empresa} />
+                <InfoField label="Cliente" value={solicitud.cliente} />
+                <InfoField label="Monto Total" value={solicitud.monto} variant="currency" />
+                <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
               </div>
             </div>
-          )}
-
-          {/* Archivos Adjuntos */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos</h3>
-            
-            {loading.archivos && (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 font-medium">Cargando archivos...</p>
+            {/* Línea de Captura */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Línea de Captura IMSS</h3>
+              <div className="bg-gradient-to-r from-blue-50 to-blue-50 p-4 rounded-xl border border-blue-200">
+                <InfoField 
+                  label="Línea de Captura" 
+                  value={solicitud.linea_captura} 
+                  variant="mono"
+                  className="bg-white/50 p-4 rounded-lg"
+                />
               </div>
-            )}
-
-            {errors.archivos && (
-              <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <X className="h-5 w-5 text-red-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-800">{errors.archivos}</p>
+            </div>
+            {/* Información de Aprobación */}
+            {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
+                  <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion} variant="date" />
+                  <div className="md:col-span-2">
+                    <InfoField label="Comentarios de Aprobación" value={solicitudExtended.comentarios_aprobacion} />
                   </div>
                 </div>
               </div>
             )}
-
-            {!loading.archivos && !errors.archivos && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {archivos && archivos.length > 0 ? (
-                  archivos.map((archivo) => (
-                    <FilePreview key={archivo.id} archivo={archivo} />
-                  ))
-                ) : (
-                  <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                    <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
-                    <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
-                  </div>
-                )}
+            {/* Información de Auditoría */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información de Auditoría</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion} variant="date" />
+                <InfoField label="Fecha de Actualización" value={solicitud.fecha_actualizacion} variant="date" />
+                <InfoField label="Usuario de Creación" value={solicitud.usuario_creacion} />
+                <InfoField label="Usuario de Actualización" value={solicitud.usuario_actualizacion} />
               </div>
-            )}
+            </div>
           </div>
-
-          {/* Información de Auditoría */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Auditoría</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion} variant="date" />
-              <InfoField label="Fecha de Actualización" value={solicitud.fecha_actualizacion} variant="date" />
-              <InfoField label="Usuario de Creación" value={solicitud.usuario_creacion} />
-              <InfoField label="Usuario de Actualización" value={solicitud.usuario_actualizacion} />
+          {/* Columna derecha: archivos adjuntos */}
+          <div className="w-full lg:w-[420px] flex-shrink-0">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
+              {loading.archivos && (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Cargando archivos...</p>
+                </div>
+              )}
+              {errors.archivos && (
+                <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <X className="h-5 w-5 text-red-400" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{errors.archivos}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!loading.archivos && !errors.archivos && (
+                <div className="flex flex-col items-center justify-center w-full">
+                  {archivos && archivos.length > 0 ? (
+                    archivos.map((archivo) => (
+                      <div key={archivo.id} className="w-full flex justify-center">
+                        <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
+                          {/* Preview area grande */}
+                          <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                            <FilePreview archivo={archivo} />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
+                      <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

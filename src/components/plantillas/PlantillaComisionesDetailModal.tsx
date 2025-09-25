@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { X, FileText, ExternalLink, CreditCard } from 'lucide-react';
+import { X, FileText, ExternalLink, CreditCard, Building2, Calendar, DollarSign, User, Clock } from 'lucide-react';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 
@@ -68,25 +68,22 @@ const formatPercentage = (percentage: number | undefined): string => {
 const getEstadoColor = (estado: string) => {
   switch (estado.toLowerCase()) {
     case 'aprobada':
-      return 'bg-green-100 text-green-800 border-green-300';
+      return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
     case 'rechazada':
-      return 'bg-red-100 text-red-800 border-red-300';
+      return 'bg-red-50 text-red-700 border border-red-200';
     case 'pagada':
-      return 'bg-blue-100 text-blue-800 border-blue-300';
+      return 'bg-blue-50 text-blue-700 border border-blue-200';
     default:
-      return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      return 'bg-amber-50 text-amber-700 border border-amber-200';
   }
 };
 
-// Función auxiliar para construir URLs de archivos
-function buildFileUrl(path: string): string {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
-  }
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-  return `${API_URL}/${cleanPath}`;
-}
+// Unificado con otros modales: siempre usa la URL de producción
+const buildFileUrl = (rutaArchivo: string): string => {
+  const baseUrl = 'https://bechapra.com.mx';
+  if (rutaArchivo.startsWith('http')) return rutaArchivo;
+  return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
+};
 
 // Hook personalizado para manejo de errores
 const useErrorHandler = () => {
@@ -101,19 +98,21 @@ const useErrorHandler = () => {
   return { handleError };
 };
 
-// Componente InfoField mejorado
+// Componente InfoField mejorado con estilo BECHAPRA
 interface InfoFieldProps {
   label: string;
   value: string | number | null | undefined;
   variant?: 'default' | 'currency' | 'mono' | 'date' | 'percentage';
   className?: string;
+  icon?: React.ReactNode;
 }
 
 const InfoField: React.FC<InfoFieldProps> = ({ 
   label, 
   value, 
   variant = 'default',
-  className = ''
+  className = '',
+  icon
 }) => {
   const formatValue = () => {
     if (value === null || value === undefined || value === '') {
@@ -135,24 +134,27 @@ const InfoField: React.FC<InfoFieldProps> = ({
   };
 
   const getValueClassName = () => {
-    let baseClass = "text-gray-900 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200";
+    let baseClass = "text-slate-800 bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md";
     
     if (variant === 'mono') {
       baseClass += " font-mono text-sm";
     }
     if (variant === 'currency') {
-      baseClass += " font-semibold text-green-700";
+      baseClass += " font-bold text-emerald-600";
     }
     if (variant === 'percentage') {
-      baseClass += " font-semibold text-blue-700";
+      baseClass += " font-semibold text-blue-600";
     }
     
     return baseClass;
   };
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      <label className="block text-sm font-semibold text-blue-800">{label}</label>
+    <div className={`space-y-3 ${className}`}>
+      <label className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+        {icon}
+        {label}
+      </label>
       <div className={getValueClassName()}>
         {formatValue()}
       </div>
@@ -160,7 +162,7 @@ const InfoField: React.FC<InfoFieldProps> = ({
   );
 };
 
-// Componente para preview de archivos
+// Componente para preview de archivos con estilo BECHAPRA
 const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   const [imageError, setImageError] = useState(false);
   
@@ -169,9 +171,9 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   if (!archivo.archivo_url) {
     console.log('⚠️ [COMISIONES ARCHIVOS] No hay URL de archivo');
     return (
-      <div className="text-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-        <p className="text-sm text-gray-500">Archivo no disponible</p>
+      <div className="text-center p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300">
+        <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+        <p className="text-sm text-slate-500 font-medium">Archivo no disponible</p>
       </div>
     );
   }
@@ -192,32 +194,39 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
 
   if (isPdf) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-        {/* PDF Preview simplificado */}
-        <div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        {/* PDF Preview mejorado */}
+        <div className="w-full rounded-t-2xl border-b border-slate-200 overflow-hidden bg-white">
           <iframe 
             src={fileUrl} 
             title={getFileName()}
-            className="w-full" 
-            style={{ height: '200px' }} 
+            className="w-full border-0" 
+            style={{ height: '220px' }} 
           />
-          <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-700">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 text-xs text-center text-blue-700 font-medium border-t border-blue-100">
             Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
           </div>
         </div>
         
         {/* File info and actions */}
-        <div className="p-4">
-          <p className="text-sm font-semibold text-gray-900 truncate mb-1">
-            {getFileName()}
-          </p>
-          <p className="text-xs text-gray-500 mb-3">Documento PDF</p>
+        <div className="p-5">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="bg-red-100 p-2 rounded-lg flex-shrink-0">
+              <FileText className="w-5 h-5 text-red-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-slate-900 truncate">
+                {getFileName()}
+              </p>
+              <p className="text-xs text-slate-500 mt-1">Documento PDF</p>
+            </div>
+          </div>
           
           <a
             href={fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             <ExternalLink className="w-4 h-4" />
             Ver completo
@@ -229,24 +238,24 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
 
   // Para otros tipos de archivo (imágenes, etc.)
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
       {/* Preview area */}
-      <div className="relative h-40 bg-gray-50 flex items-center justify-center">
+      <div className="relative h-48 bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center border-b border-slate-200">
         {isImage && !imageError ? (
           <Image
             src={fileUrl}
             alt="Preview del archivo"
-            width={150}
-            height={150}
-            className="object-contain max-h-full max-w-full rounded"
+            width={180}
+            height={180}
+            className="object-contain max-h-full max-w-full rounded-lg shadow-sm"
             onError={() => setImageError(true)}
           />
         ) : (
           <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <FileText className="w-8 h-8 text-blue-600" />
+            <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+              <FileText className="w-10 h-10 text-blue-600" />
             </div>
-            <p className="text-xs text-gray-600 font-medium">
+            <p className="text-sm text-slate-600 font-semibold">
               {isPdf ? 'PDF' : isImage ? 'Imagen' : 'Archivo'}
             </p>
           </div>
@@ -254,19 +263,26 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
       </div>
       
       {/* File info */}
-      <div className="p-4">
-        <p className="text-sm font-semibold text-gray-900 truncate mb-1">
-          {getFileName()}
-        </p>
-        <p className="text-xs text-gray-500 mb-3">
-          {archivo.tipo || 'Archivo'}
-        </p>
+      <div className="p-5">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+            <FileText className="w-5 h-5 text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-slate-900 truncate">
+              {getFileName()}
+            </p>
+            <p className="text-xs text-slate-500 mt-1">
+              {archivo.tipo || 'Archivo'}
+            </p>
+          </div>
+        </div>
         
         <a
           href={fileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           <ExternalLink className="w-4 h-4" />
           Ver completo
@@ -370,144 +386,252 @@ export function PlantillaComisionesDetailModal({
   if (!isOpen || !solicitud) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
-      {/* Overlay */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+      {/* Overlay mejorado */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
+        className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-blue-900/90 to-indigo-900/85 backdrop-blur-sm transition-all duration-500"
         onClick={onClose}
         role="button"
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
-      {/* Modal container */}
-      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
-        {/* Botón de cerrar */}
+      
+      {/* Modal container mejorado */}
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-[95vw] sm:max-w-5xl xl:max-w-6xl max-h-[95vh] overflow-hidden border border-slate-200">
+        {/* Botón de cerrar mejorado */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 z-30 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-300"
+          className="absolute top-6 right-6 z-30 bg-white hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border border-slate-200 hover:border-red-200"
           aria-label="Cerrar modal"
         >
-          <X className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+          <X className="w-6 h-6" />
         </button>
-        {/* Contenido con scroll */}
-        <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 p-6">
-          {/* Header */}
-          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
-            <div className="absolute inset-0 bg-white/10 transform -skew-y-1"></div>
+
+        {/* Contenido con scroll mejorado */}
+        <div className="overflow-y-auto max-h-[95vh] scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-blue-400 hover:scrollbar-thumb-blue-500">
+          
+          {/* Header BECHAPRA mejorado */}
+          <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white p-8 relative overflow-hidden">
+            {/* Elementos decorativos */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
+            
             <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 p-3 rounded-lg">
-                  <CreditCard className="w-8 h-8 text-white" />
+              <div className="flex items-center gap-6">
+                <div className="bg-white/20 backdrop-blur-sm p-4 rounded-2xl shadow-lg">
+                  <CreditCard className="w-10 h-10 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">PAGO COMISIONES</h2>
-                  <p className="text-blue-100 text-sm mt-1">Solicitud #{solicitud.id_solicitud}</p>
-                  {solicitudExtended.folio && (
-                    <p className="text-blue-100 text-sm mt-1">Folio: {solicitudExtended.folio}</p>
-                  )}
+                  <h1 className="text-3xl font-bold mb-1">PAGO COMISIONES</h1>
+                  <div className="flex items-center gap-4 text-blue-100">
+                    <span className="text-lg font-semibold">Solicitud #{solicitud.id_solicitud}</span>
+                    {solicitudExtended.folio && (
+                      <>
+                        <span className="w-1 h-1 bg-blue-300 rounded-full"></span>
+                        <span>Folio: {solicitudExtended.folio}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${getEstadoColor(solicitud.estado || 'pendiente')}`}>
+              <div className={`px-6 py-3 rounded-2xl text-base font-bold shadow-lg ${getEstadoColor(solicitud.estado || 'pendiente')}`}>
                 {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
-              </span>
+              </div>
             </div>
           </header>
           
-          {/* Información Principal */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información Principal</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-2" />
-              <InfoField label="Empresa" value={solicitud.empresa} />
-              <InfoField label="Cliente/Concepto" value={solicitud.cliente} />
-              <InfoField label="Monto Total" value={solicitud.monto} variant="currency" />
-              <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
-            </div>
-          </div>
-
-          {/* Información de Comisión */}
-          {(solicitud.porcentaje_comision || solicitud.periodo_comision) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Detalles de Comisión</h3>
-              <div className="bg-gradient-to-r from-blue-50 to-blue-50 p-4 rounded-xl border border-blue-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InfoField 
-                    label="Porcentaje de Comisión" 
-                    value={solicitud.porcentaje_comision} 
-                    variant="percentage"
-                  />
-                  <InfoField 
-                    label="Periodo de Comisión" 
-                    value={solicitud.periodo_comision}
-                  />
+          <div className="p-8">
+            {/* Información Principal mejorada */}
+            <div className="mb-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-blue-600" />
                 </div>
+                <h2 className="text-2xl font-bold text-slate-800">Información Principal</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-2xl border border-slate-200">
+                <InfoField 
+                  label="Asunto" 
+                  value={solicitud.asunto} 
+                  className="md:col-span-2" 
+                  icon={<FileText className="w-4 h-4 text-slate-500" />}
+                />
+                <InfoField 
+                  label="Empresa" 
+                  value={solicitud.empresa} 
+                  icon={<Building2 className="w-4 h-4 text-slate-500" />}
+                />
+                <InfoField 
+                  label="Cliente/Concepto" 
+                  value={solicitud.cliente} 
+                  icon={<User className="w-4 h-4 text-slate-500" />}
+                />
+                <InfoField 
+                  label="Monto Total" 
+                  value={solicitud.monto} 
+                  variant="currency" 
+                  icon={<DollarSign className="w-4 h-4 text-slate-500" />}
+                />
+                <InfoField 
+                  label="Fecha Límite" 
+                  value={solicitud.fecha_limite} 
+                  variant="date" 
+                  icon={<Calendar className="w-4 h-4 text-slate-500" />}
+                />
               </div>
             </div>
-          )}
-          
-          {/* Información de Aprobación */}
-          {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
-                <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion} variant="date" />
-                <div className="md:col-span-2">
-                  <InfoField label="Comentarios de Aprobación" value={solicitudExtended.comentarios_aprobacion} />
+
+            {/* Información de Comisión mejorada */}
+            {(solicitud.porcentaje_comision || solicitud.periodo_comision) && (
+              <div className="mb-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-800">Detalles de Comisión</h2>
+                </div>
+                
+                <div className="p-6 bg-gradient-to-br from-emerald-50 to-green-50/50 rounded-2xl border border-emerald-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InfoField 
+                      label="Porcentaje de Comisión" 
+                      value={solicitud.porcentaje_comision} 
+                      variant="percentage"
+                      icon={<DollarSign className="w-4 h-4 text-slate-500" />}
+                    />
+                    <InfoField 
+                      label="Periodo de Comisión" 
+                      value={solicitud.periodo_comision}
+                      icon={<Calendar className="w-4 h-4 text-slate-500" />}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Archivos Adjuntos */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos</h3>
+            )}
             
-            {loading.archivos && (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 font-medium">Cargando archivos...</p>
-              </div>
-            )}
-
-            {errors.archivos && (
-              <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <X className="h-5 w-5 text-red-400" />
+            {/* Información de Aprobación mejorada */}
+            {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
+              <div className="mb-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                    <User className="w-5 h-5 text-indigo-600" />
                   </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-800">{errors.archivos}</p>
+                  <h2 className="text-2xl font-bold text-slate-800">Información de Aprobación</h2>
+                </div>
+                
+                <div className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50/50 rounded-2xl border border-indigo-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InfoField 
+                      label="ID Aprobador" 
+                      value={solicitudExtended.id_aprobador?.toString()} 
+                      icon={<User className="w-4 h-4 text-slate-500" />}
+                    />
+                    <InfoField 
+                      label="Fecha de Aprobación" 
+                      value={solicitudExtended.fecha_aprobacion} 
+                      variant="date" 
+                      icon={<Calendar className="w-4 h-4 text-slate-500" />}
+                    />
+                    <div className="md:col-span-2">
+                      <InfoField 
+                        label="Comentarios de Aprobación" 
+                        value={solicitudExtended.comentarios_aprobacion} 
+                        icon={<FileText className="w-4 h-4 text-slate-500" />}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {!loading.archivos && !errors.archivos && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {archivos && archivos.length > 0 ? (
-                  archivos.map((archivo) => (
-                    <FilePreview key={archivo.id} archivo={archivo} />
-                  ))
-                ) : (
-                  <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                    <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
-                    <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
-                  </div>
-                )}
+            {/* Archivos Adjuntos mejorados */}
+            <div className="mb-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-purple-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800">Archivos Adjuntos</h2>
               </div>
-            )}
-          </div>
+              
+              {loading.archivos && (
+                <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-slate-200">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-6">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-blue-600"></div>
+                  </div>
+                  <p className="text-slate-600 font-semibold text-lg">Cargando archivos...</p>
+                  <p className="text-slate-500 text-sm mt-2">Por favor espere un momento</p>
+                </div>
+              )}
 
-          {/* Información de Auditoría */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Auditoría</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion} variant="date" />
-              <InfoField label="Fecha de Actualización" value={solicitud.fecha_actualizacion} variant="date" />
-              <InfoField label="Usuario de Creación" value={solicitud.usuario_creacion} />
-              <InfoField label="Usuario de Actualización" value={solicitud.usuario_actualizacion} />
+              {errors.archivos && (
+                <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-2xl shadow-sm">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <X className="h-6 w-6 text-red-500" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-base font-semibold text-red-800">Error al cargar archivos</p>
+                      <p className="text-sm text-red-700 mt-1">{errors.archivos}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!loading.archivos && !errors.archivos && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {archivos && archivos.length > 0 ? (
+                    archivos.map((archivo) => (
+                      <FilePreview key={archivo.id} archivo={archivo} />
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-16 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border-2 border-dashed border-slate-300">
+                      <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-full mb-6">
+                        <FileText className="w-10 h-10 text-slate-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-slate-700 mb-2">No hay archivos adjuntos</h3>
+                      <p className="text-slate-500 max-w-md mx-auto">Los documentos aparecerán aquí cuando sean cargados por el solicitante</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Información de Auditoría mejorada */}
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-slate-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800">Información de Auditoría</h2>
+              </div>
+              
+              <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-2xl border border-slate-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <InfoField 
+                    label="Fecha de Creación" 
+                    value={solicitud.fecha_creacion} 
+                    variant="date" 
+                    icon={<Calendar className="w-4 h-4 text-slate-500" />}
+                  />
+                  <InfoField 
+                    label="Fecha de Actualización" 
+                    value={solicitud.fecha_actualizacion} 
+                    variant="date" 
+                    icon={<Calendar className="w-4 h-4 text-slate-500" />}
+                  />
+                  <InfoField 
+                    label="Usuario de Creación" 
+                    value={solicitud.usuario_creacion} 
+                    icon={<User className="w-4 h-4 text-slate-500" />}
+                  />
+                  <InfoField 
+                    label="Usuario de Actualización" 
+                    value={solicitud.usuario_actualizacion} 
+                    icon={<User className="w-4 h-4 text-slate-500" />}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
