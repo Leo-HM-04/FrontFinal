@@ -562,10 +562,7 @@ const generateImprovedTemplate = () => {
       <div class="section-text">
         Inserta aquí la fotografía del comprobante o adjunta el archivo correspondiente.
       </div>
-      <div class="comprobante-box">
-        <div class="comprobante-box-top"></div>
-        <div class="comprobante-box-bottom"></div>
-      </div>
+      <div style="border: 1px solid #000; background: #fff; width: 100%; height: 220px; margin: 18px 0 24px 0;"></div>
     </div>
     
     <!-- Advertencias -->
