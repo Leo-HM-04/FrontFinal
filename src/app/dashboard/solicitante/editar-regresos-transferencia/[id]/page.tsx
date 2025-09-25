@@ -29,17 +29,17 @@ export default function EditarRegresosTransferenciaPage() {
             console.error('❌ Error parseando plantilla_datos REGRESOS:', err);
           }
         }
-        if (
-          plantillaRegresos &&
-          datosRegresos.templateType === 'regresos-transferencia' &&
-          Object.keys(estado.datos).length === 0
-        ) {
-          seleccionarPlantilla(plantillaRegresos);
+        if (plantillaRegresos && datosRegresos.templateType === 'regresos-transferencia') {
+          // Limpiar y seleccionar plantilla SIEMPRE antes de prellenar
+          seleccionarPlantilla(null); // Limpia el estado
           setTimeout(() => {
-            Object.entries(datosRegresos).forEach(([campo, valor]) => {
-              actualizarCampo(campo, valor);
-            });
-          }, 100);
+            seleccionarPlantilla(plantillaRegresos);
+            setTimeout(() => {
+              Object.entries(datosRegresos).forEach(([campo, valor]) => {
+                actualizarCampo(campo, valor);
+              });
+            }, 100);
+          }, 50);
         }
       } catch (err) {
         console.error('❌ Error obteniendo solicitud:', err);

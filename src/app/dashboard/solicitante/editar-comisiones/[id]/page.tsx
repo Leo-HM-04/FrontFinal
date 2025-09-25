@@ -23,21 +23,25 @@ export default function EditarComisionesPage() {
         // Detectar plantilla COMISIONES
         const plantilla = plantillasDisponibles.find(p => p.id === 'pago-comisiones');
         if (plantilla) {
-          seleccionarPlantilla(plantilla);
-          // Prellenar datos desde plantilla_datos
-          let datos: Record<string, unknown> = {};
-          if (s.plantilla_datos) {
-            try {
-              datos = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
-            } catch (err) {
-              console.error('❌ Error parseando plantilla_datos COMISIONES:', err);
-            }
-          }
+          // Limpiar y seleccionar plantilla SIEMPRE antes de prellenar
+          seleccionarPlantilla(null); // Limpia el estado
           setTimeout(() => {
-            Object.entries(datos).forEach(([campo, valor]) => {
-              actualizarCampo(campo, valor);
-            });
-          }, 100);
+            seleccionarPlantilla(plantilla);
+            // Prellenar datos desde plantilla_datos
+            let datos: Record<string, unknown> = {};
+            if (s.plantilla_datos) {
+              try {
+                datos = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
+              } catch (err) {
+                console.error('❌ Error parseando plantilla_datos COMISIONES:', err);
+              }
+            }
+            setTimeout(() => {
+              Object.entries(datos).forEach(([campo, valor]) => {
+                actualizarCampo(campo, valor);
+              });
+            }, 100);
+          }, 50);
         }
       } catch (err) {
         console.error('❌ Error obteniendo solicitud:', err);
