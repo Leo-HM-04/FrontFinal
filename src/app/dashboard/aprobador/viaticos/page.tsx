@@ -352,10 +352,12 @@ const Viaticos: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
+                  {/*
                   <div className="flex-1 min-w-0">
                     <p className="text-2xl font-bold text-white">{viaticos.length}</p>
                     <p className="text-blue-100 text-sm">Total Pendientes</p>
                   </div>
+                  */}
                 </div>
               </div>
             </div>
