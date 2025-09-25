@@ -10,7 +10,11 @@ import { error } from 'console';
 export interface SolicitudPolizasData {
   id_solicitud: number;
   asunto: string;
-  titular_poliza: string; // aseguradora
+  titular_poliza: string; // aseguradora (titular de la cuenta)
+  empresa_emisora?: string; // empresa emisora del pago
+  banco_destino?: string; // banco destino
+  convenio?: string; // convenio
+  referencia?: string; // referencia
   numero_poliza: string;
   monto: number;
   tipo_movimiento: string;
@@ -212,174 +216,131 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
         </button>
         {/* Contenedor con scroll */}
         <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400">
-          {/* Header */}
-          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8 sm:-translate-y-12 sm:translate-x-12 lg:-translate-y-16 lg:translate-x-16" />
-            <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white/5 rounded-full translate-y-6 -translate-x-6 sm:translate-y-8 sm:-translate-x-8 lg:translate-y-12 lg:-translate-x-12" />
-            <div className="relative z-10 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
-              <div className="space-y-1 sm:space-y-2">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight flex items-center gap-2">
+          {/* Header similar al de Tukash */}
+          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
+            <div className="relative z-10 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold flex items-center gap-2">
                   <Shield className="w-7 h-7 text-white mr-2" />
                   {titulo}
-                </h1>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 space-y-1 sm:space-y-0">
-                  <p className="text-blue-100 text-sm sm:text-base lg:text-lg">
-                    Folio: <span className="font-mono text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded-md text-xs sm:text-sm">{solicitud.folio || '-'}</span>
-                  </p>
-                  <time className="text-blue-200 text-sm sm:text-base">
-                    Creada el {formatDate(solicitud.fecha_creacion)}
-                  </time>
-                </div>
+                </h2>
+                <p className="text-blue-100 text-sm mt-1">Asunto: {solicitud.asunto || solicitud.concepto}</p>
+                {solicitud.folio && (
+                  <p className="text-blue-100 text-sm mt-1">Folio: {solicitud.folio}</p>
+                )}
               </div>
-              <div className="flex justify-start sm:justify-end">
-                <span className={`inline-flex px-3 py-2 sm:px-4 text-sm sm:text-base lg:text-lg font-bold rounded-lg sm:rounded-xl border-2 border-blue-200 backdrop-blur-sm text-white bg-blue-700/40`}> 
-                  {solicitud.estado?.toUpperCase() || 'PENDIENTE'}
-                </span>
-              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium border bg-blue-100 text-blue-800 border-blue-300`}>
+                {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
+              </span>
             </div>
           </header>
-          {/* Contenido principal */}
-          <main className="p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
-            {/* Resumen ejecutivo */}
-            <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl rounded-xl sm:rounded-2xl">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-                <div className="lg:col-span-1">
-                  <span className="text-xs sm:text-sm uppercase tracking-wider text-blue-100 font-bold block mb-1 sm:mb-2">
-                    Monto total
-                  </span>
-                  <div className="flex items-baseline gap-2 sm:gap-3">
-                    <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
-                      {formatCurrency(solicitud.monto)}
-                    </p>
-                  </div>
-                  <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-16 sm:w-20 lg:w-24" />
-                </div>
-                <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <InfoField label="Estado" value={solicitud.estado?.toUpperCase()} className="bg-blue-50/50 border-blue-100" />
-                  <InfoField label="Departamento" value={solicitud.departamento} className="bg-blue-50/50 border-blue-100" />
-                  <InfoField label="Solicitante" value={solicitud.nombre_solicitante} className="bg-blue-50/50 border-blue-100" />
-                  <InfoField label="Aseguradora" value={getTitularLabel(solicitud.titular_poliza)} className="bg-blue-50/50 border-blue-100" />
-                </div>
-              </div>
+          
+          {/* Información Principal - Solo campos específicos */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información Principal</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoField label="Asunto" value={solicitud.asunto || solicitud.concepto} icon={<FileText className="w-4 h-4" />} />
+              <InfoField label="Titular de la Cuenta (Aseguradora)" value={getTitularLabel(solicitud.titular_poliza)} icon={<Shield className="w-4 h-4" />} />
+              <InfoField label="Empresa Emisora del Pago" value={solicitud.empresa_emisora} icon={<Building2 className="w-4 h-4" />} />
+              <InfoField label="Banco Destino" value={solicitud.banco_destino} icon={<Building2 className="w-4 h-4" />} />
+              <InfoField label="Convenio" value={solicitud.convenio} icon={<FileText className="w-4 h-4" />} />
+              <InfoField label="Referencia" value={solicitud.referencia} icon={<FileText className="w-4 h-4" />} />
             </div>
-            {/* Concepto */}
-            <div className="p-4 sm:p-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200/50 shadow-lg rounded-xl sm:rounded-2xl">
-              <h2 className="text-lg sm:text-xl font-bold text-green-900 mb-3 sm:mb-4 flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg sm:rounded-xl mr-3">
-                  <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-green-700" />
-                </div>
-                Concepto
-              </h2>
-              <div className="bg-white/80 p-3 sm:p-4 rounded-lg border border-green-100">
-                <p className="text-gray-800 leading-relaxed text-sm sm:text-base font-medium">
-                  {solicitud.concepto}
+          </div>
+
+          {/* Información de Montos */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Monto Total</h3>
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-xl">
+              <div className="flex items-baseline gap-2">
+                <DollarSign className="w-6 h-6 text-yellow-300" />
+                <p className="text-2xl font-bold text-white tracking-tight">
+                  {formatCurrency(solicitud.monto)}
                 </p>
               </div>
+              <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-20" />
             </div>
-            {/* Información de la póliza */}
-            <div className="p-4 sm:p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl sm:rounded-2xl">
-              <h2 className="text-lg sm:text-xl font-bold text-blue-900 mb-4 sm:mb-6 flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg sm:rounded-xl mr-3">
-                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-blue-700" />
-                </div>
-                Información de la Póliza
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <InfoField label="Asunto" value={solicitud.asunto} icon={<FileText className="w-4 h-4" />} />
-                <InfoField label="Número de Póliza" value={solicitud.numero_poliza} icon={<Shield className="w-4 h-4" />} />
-                <InfoField label="Tipo de Movimiento" value={solicitud.tipo_movimiento} icon={<Calendar className="w-4 h-4" />} />
-                <InfoField label="Fecha de Creación" value={formatDate(solicitud.fecha_creacion)} icon={<Calendar className="w-4 h-4" />} />
+          </div>
+          
+          {/* Archivos Adjuntos - Estilo simplificado como Tukash */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos</h3>
+            {loadingArchivos && (
+              <div className="flex items-center justify-center p-6 bg-blue-50/50 rounded-lg border border-blue-100">
+                <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <p className="ml-3 text-blue-700 text-sm">Cargando archivos...</p>
               </div>
-              {solicitud.observaciones && (
-                <div className="bg-white/80 p-3 rounded border border-blue-100">
-                  <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Observaciones</span>
-                  <p className="text-blue-900 font-medium text-sm">{solicitud.observaciones}</p>
-                </div>
-              )}
-            </div>
-            {/* Información del solicitante */}
-            <div className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-200/50 shadow-lg rounded-xl sm:rounded-2xl">
-              <h2 className="text-lg sm:text-xl font-bold text-blue-900 mb-4 flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg sm:rounded-xl mr-3">
-                  <User className="w-5 h-5 sm:w-6 sm:h-6 text-blue-700" />
-                </div>
-                Información del Solicitante
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <InfoField label="Nombre" value={solicitud.nombre_solicitante} icon={<User className="w-4 h-4" />} />
-                <InfoField label="Gerencia" value={solicitud.gerencia_solicitante} icon={<Building2 className="w-4 h-4" />} />
-                <InfoField label="Email" value={solicitud.email_solicitante} icon={<FileText className="w-4 h-4" />} />
-                <InfoField label="Departamento" value={solicitud.departamento} icon={<Building2 className="w-4 h-4" />} />
+            )}
+            {!loadingArchivos && archivos.length === 0 ? (
+              <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600">No hay archivos adjuntos</p>
               </div>
-            </div>
-            {/* Archivos Adjuntos */}
-            <div className="p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
-                <div className="p-2 bg-blue-100 rounded-xl mr-3">
-                  <ExternalLink className="w-6 h-6 text-blue-700" />
-                </div>
-                Archivos Adjuntos
-              </h2>
-              <div className="space-y-4">
-                {archivos.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {archivos.map((archivo, index) => {
-                      const url = archivo.archivo_url;
-                      const fileName = url.split('/').pop() || '';
-                      return (
-                        <div key={index} className={`bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm ${archivoPreview?.archivo_url === archivo.archivo_url ? 'ring-2 ring-blue-400' : ''}`}
-                          onClick={() => setArchivoPreview(archivo)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs text-blue-800 font-semibold">
-                              {archivo.tipo || 'Archivo'}
-                            </span>
-                            <button 
-                              onClick={e => { e.stopPropagation(); window.open(url, '_blank'); }}
-                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl rounded-xl px-4 py-2 ml-3 transition-all duration-300 text-xs flex items-center gap-1"
-                            >
-                              <Eye className="w-4 h-4" /> Ver completo
-                            </button>
-                          </div>
-                          {/* Previsualización mini */}
-                          {(() => {
-                            if (url.match(/\.(pdf)$/i)) {
-                              return <iframe src={url} title={fileName} className="w-full h-32 rounded border border-blue-200 bg-white" />;
-                            }
-                            if (url.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i)) {
-                              return <div className="relative w-full h-32 rounded border border-blue-200 bg-white overflow-hidden"><Image src={url} alt={fileName} fill className="object-contain" /></div>;
-                            }
-                            return <div className="flex items-center gap-2 text-blue-600"><FileText className="w-5 h-5" /> {fileName}</div>;
-                          })()}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">
-                    No hay archivos adjuntos disponibles
-                  </div>
-                )}
-                {/* Previsualización grande única */}
-                <div className="mt-6">
-                  <h3 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
-                    <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                    Previsualización
-                  </h3>
-                  <div className="w-full max-w-2xl mx-auto">
-                    {renderPreview()}
-                  </div>
-                </div>
-              </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {archivos.map((archivo, index) => {
+                  const url = archivo.archivo_url;
+                  const fileName = url.split('/').pop() || 'archivo';
+                  const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+                  const isPdf = /\.pdf$/i.test(fileName);
 
-            {/* Comprobantes de Pago */}
-            <div className="mt-4 pt-4 border-t border-blue-100">
-              <h3 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
-                <FileCheck className="w-5 h-5 mr-2 text-blue-600" />
-                Comprobantes de Pago
-              </h3>
+                  return (
+                    <div key={index} className="bg-white/90 rounded-lg border border-blue-200 p-4 shadow-sm">
+                      {/* Preview del archivo */}
+                      {isImage ? (
+                        <div className="relative w-full h-40 rounded border border-blue-200 overflow-hidden bg-white">
+                          <Image
+                            src={url}
+                            alt={fileName}
+                            fill
+                            className="object-contain"
+                            onError={() => console.log('Error cargando imagen')}
+                          />
+                        </div>
+                      ) : isPdf ? (
+                        <div className="w-full rounded border border-blue-200 overflow-hidden bg-white">
+                          <iframe 
+                            src={url} 
+                            title={fileName}
+                            className="w-full" 
+                            style={{ height: '200px' }} 
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+                          <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-blue-900 font-medium text-sm">
+                              {fileName}
+                            </p>
+                            <p className="text-xs text-gray-600 mt-1">
+                              Tipo: {archivo.tipo || 'Archivo'}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Botón Ver completo */}
+                      <div className="mt-3">
+                        <button
+                          onClick={() => window.open(url, '_blank')}
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Ver completo
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Comprobantes de Pago */}
+          {solicitud.estado === 'pagada' && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobantes de Pago</h3>
               {loadingComprobantes ? (
                 <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3" />
@@ -388,20 +349,9 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
               ) : errorComprobantes ? (
                 <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorComprobantes}</div>
               ) : comprobantes.length === 0 ? (
-                <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
-                  <div className="flex justify-center mb-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
-                      <FileCheck className="w-8 h-8 text-blue-600" />
-                    </div>
-                  </div>
-                  <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
-                  <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
-                    El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
-                  </p>
-                  <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
-                    <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
-                  </div>
+                <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                  <FileCheck className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-600">No hay comprobantes disponibles</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -431,21 +381,13 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                             Ver completo
                           </button>
                         </div>
-                        {/* Previsualización comprobante */}
-                        {comprobanteUrl.match(/\.(pdf)$/i) ? (
-                          <iframe src={comprobanteUrl} title={fileName} className="w-full h-36 rounded border border-blue-200 bg-white" />
-                        ) : comprobanteUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i) ? (
-                          <div className="relative w-full h-36 rounded border border-blue-200 bg-white overflow-hidden"><Image src={comprobanteUrl} alt={fileName} fill className="object-contain" /></div>
-                        ) : (
-                          <div className="flex items-center gap-2 text-blue-600"><FileText className="w-5 h-5" /> {fileName}</div>
-                        )}
                       </div>
                     );
                   })}
                 </div>
               )}
             </div>
-          </main>
+          )}
         </div>
       </div>
     </div>
