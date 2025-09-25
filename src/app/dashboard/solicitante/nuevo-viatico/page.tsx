@@ -366,7 +366,11 @@ const generateImprovedTemplate = () => {
       <div style="text-align:justify; font-size:11pt; margin-bottom:15px; line-height:1.5;">
         Inserta aquí la fotografía del comprobante o adjunta el archivo correspondiente.
       </div>
-      <div style="border:2px solid #000; background:#fff; width:100%; height:220px; margin:18px 0 24px 0;"></div>
+      <table style="width:100%; border-collapse:collapse; margin:18px 0 24px 0;">
+        <tr>
+          <td style="border:2px solid #000; background:#fff; height:220px;">&nbsp;</td>
+        </tr>
+      </table>
     </div>
     <div style="margin-top:25px; margin-bottom:30px;">
       <div style="font-weight:bold; margin-bottom:10px; font-size:11pt;">Advertencias para el envío de comprobantes:</div>
