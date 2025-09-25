@@ -524,6 +524,13 @@ const Viaticos: React.FC = () => {
                       Se {modalConfirm === 'aprobar' ? 'aprobarán' : 'rechazarán'} <b>{selectedViaticos.length}</b> viáticos. ¿Estás seguro?
                     </p>
                     <div className="flex gap-4">
+                    {/*
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20 lg:flex-shrink-0">
+                      <p className="text-white/90 text-sm font-medium">
+                        Total: <span className="text-white font-semibold">{viaticosPendientes.length}</span> viáticos
+                      </p>
+                    </div>
+                    */}
                       <button
                         className="px-4 py-2 rounded font-semibold bg-blue-200 hover:bg-blue-300 text-blue-900 transition"
                         onClick={() => setModalConfirm(null)}
