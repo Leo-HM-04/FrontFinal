@@ -1151,7 +1151,129 @@ export function SolicitudDetailModal({
     // Si no se pudo mapear, mostrar modal estándar
   }
 
-  // Verificar si es una solicitud PAGO POLIZAS
+  // Función para convertir código de banco a nombre
+function obtenerNombreBanco(codigoBanco: string): string {
+  if (!codigoBanco) return '';
+  
+  const bancos: Record<string, string> = {
+    '002': 'BANAMEX',
+    '012': 'BBVA BANCOMER',
+    '014': 'SANTANDER',
+    '019': 'BANJERCITO',
+    '021': 'HSBC',
+    '030': 'BAJIO',
+    '032': 'IXE',
+    '036': 'INBURSA',
+    '037': 'INTERACCIONES',
+    '042': 'MIFEL',
+    '044': 'SCOTIABANK',
+    '058': 'BANREGIO',
+    '059': 'INVEX',
+    '060': 'BANSI',
+    '062': 'AFIRME',
+    '072': 'BANORTE',
+    '102': 'THE ROYAL BANK',
+    '103': 'AMERICAN EXPRESS',
+    '106': 'BAMSA',
+    '108': 'TOKYO',
+    '110': 'JP MORGAN',
+    '112': 'BMONEX',
+    '113': 'VE POR MAS',
+    '116': 'CREDIT SUISSE',
+    '124': 'DEUTSCHE',
+    '126': 'CREDIT AGRICOLE',
+    '127': 'AZTECA',
+    '128': 'AUTOFIN',
+    '129': 'BARCLAYS',
+    '130': 'COMPARTAMOS',
+    '131': 'BANCO FAMSA',
+    '132': 'BMULTIVA',
+    '133': 'ACTINVER',
+    '134': 'WAL-MART',
+    '135': 'NAFIN',
+    '136': 'INTERBANCO',
+    '137': 'BANCOPPEL',
+    '138': 'ABC CAPITAL',
+    '139': 'UBS BANK',
+    '140': 'CONSUBANCO',
+    '141': 'VOLKSWAGEN',
+    '143': 'CIBANCO',
+    '145': 'BBASE',
+    '147': 'BANKAOOL',
+    '148': 'PAGATODO',
+    '149': 'INMOBILIARIO',
+    '150': 'DONDE',
+    '151': 'BANCREA',
+    '152': 'BANCO AHORRO FAMSA',
+    '154': 'BANCO COVALTO',
+    '155': 'ICBC',
+    '156': 'SABADELL',
+    '157': 'SHINHAN',
+    '158': 'MIZUHO BANK',
+    '159': 'BANCO S3',
+    '160': 'BANK OF CHINA',
+    '166': 'BANCO BICENTENARIO'
+  };
+
+  const nombreBanco = bancos[codigoBanco.padStart(3, '0')];
+  if (nombreBanco) {
+    console.log(`🏦 [BANCO] Código ${codigoBanco} -> ${nombreBanco}`);
+    return nombreBanco;
+  }
+
+  console.log(`⚠️ [BANCO] Código ${codigoBanco} no encontrado, retornando código original`);
+  return codigoBanco; // Si no se encuentra, devolver el código original
+}
+
+// Función para extraer información del concepto de pólizas
+function extraerDatosDelConcepto(concepto: string) {
+  const datos = {
+    asunto: concepto,
+    empresa_emisora: '',
+    convenio: ''
+  };
+
+  if (!concepto) return datos;
+
+  console.log('🔍 [POLIZAS EXTRACCION] Analizando concepto:', concepto);
+
+  // Patrón para detectar: "Asunto - Empresa - Convenio: número"
+  const patronCompleto = /^(.+?)\s*-\s*([^-]+?)\s*-\s*Convenio:\s*(.+)$/i;
+  const matchCompleto = concepto.match(patronCompleto);
+  
+  if (matchCompleto) {
+    datos.asunto = matchCompleto[1].trim();
+    datos.empresa_emisora = matchCompleto[2].trim();
+    datos.convenio = matchCompleto[3].trim();
+    console.log('✅ [POLIZAS EXTRACCION] Patrón completo detectado:', datos);
+    return datos;
+  }
+
+  // Patrón alternativo para: "Asunto - Empresa"
+  const patronEmpresa = /^(.+?)\s*-\s*([^-]+)$/;
+  const matchEmpresa = concepto.match(patronEmpresa);
+  
+  if (matchEmpresa) {
+    datos.asunto = matchEmpresa[1].trim();
+    datos.empresa_emisora = matchEmpresa[2].trim();
+    console.log('✅ [POLIZAS EXTRACCION] Patrón empresa detectado:', datos);
+    return datos;
+  }
+
+  // Si no match ningún patrón, solo buscar convenio
+  const patronConvenio = /Convenio:\s*(.+?)(?:\s|$)/i;
+  const matchConvenio = concepto.match(patronConvenio);
+  
+  if (matchConvenio) {
+    datos.convenio = matchConvenio[1].trim();
+    datos.asunto = concepto.replace(patronConvenio, '').trim();
+    console.log('✅ [POLIZAS EXTRACCION] Solo convenio detectado:', datos);
+  }
+
+  return datos;
+}
+
+// Verificar si es una solicitud PAGO POLIZAS
   if (solicitud && isPolizasSolicitud(solicitud)) {
     console.log('🎯 [POLIZAS] Detectada solicitud PAGO POLIZAS, procesando datos...');
     
@@ -1163,14 +1285,18 @@ export function SolicitudDetailModal({
         const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
         console.log('📄 [POLIZAS] Datos de plantilla encontrados:', plantillaData);
         
+        // Extraer datos del concepto si no están en plantilla_datos
+        const datosExtraidos = extraerDatosDelConcepto(solicitud.concepto || '');
+        console.log('📄 [POLIZAS EXTRACCION] Datos extraídos del concepto:', datosExtraidos);
+        
         // Usar datos de plantilla si están disponibles
         solicitudPolizas = {
           id_solicitud: solicitud.id_solicitud,
-          asunto: plantillaData.asunto || solicitud.concepto || '',
+          asunto: plantillaData.asunto || datosExtraidos.asunto || '',
           titular_poliza: plantillaData.titular_poliza || plantillaData.aseguradora || solicitud.empresa_a_pagar || '',
-          empresa_emisora: plantillaData.empresa_emisora || '',
-          banco_destino: plantillaData.metodos_pago?.[0]?.banco_destino || solicitud.banco_destino || '',
-          convenio: plantillaData.metodos_pago?.[0]?.convenio || '',
+          empresa_emisora: plantillaData.empresa_emisora || datosExtraidos.empresa_emisora || '',
+          banco_destino: obtenerNombreBanco(plantillaData.metodos_pago?.[0]?.banco_destino || solicitud.banco_destino || ''),
+          convenio: plantillaData.metodos_pago?.[0]?.convenio || datosExtraidos.convenio || '',
           referencia: plantillaData.metodos_pago?.[0]?.referencia || solicitud.cuenta_destino || '',
           numero_poliza: plantillaData.numero_poliza || '',
           monto: plantillaData.monto || Number(solicitud.monto) || 0,
@@ -1201,13 +1327,18 @@ export function SolicitudDetailModal({
     // Si no tenemos datos de plantilla o falló el parsing, usar datos base
     if (!solicitudPolizas) {
       console.log('📋 [POLIZAS] Usando datos base de la solicitud...');
+      
+      // Extraer datos del concepto
+      const datosExtraidos = extraerDatosDelConcepto(solicitud.concepto || '');
+      console.log('📄 [POLIZAS EXTRACCION FALLBACK] Datos extraídos del concepto:', datosExtraidos);
+      
       solicitudPolizas = {
         id_solicitud: solicitud.id_solicitud,
-        asunto: solicitud.concepto || '',
+        asunto: datosExtraidos.asunto || '',
         titular_poliza: solicitud.empresa_a_pagar || '',
-        empresa_emisora: '',
-        banco_destino: solicitud.banco_destino || '',
-        convenio: '',
+        empresa_emisora: datosExtraidos.empresa_emisora || '',
+        banco_destino: obtenerNombreBanco(solicitud.banco_destino || ''),
+        convenio: datosExtraidos.convenio || '',
         referencia: solicitud.cuenta_destino || '',
         numero_poliza: '',
         monto: Number(solicitud.monto) || 0,
