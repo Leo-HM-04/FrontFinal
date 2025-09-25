@@ -311,266 +311,210 @@ export default function NuevoViaticoPage() {
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud y Desglose de Viáticos</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 30px;
-            line-height: 1.4;
-            color: #000;
-            background-color: white;
-            position: relative;
-        }
-        
-        /* Imagen de fondo Bechapra */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 600px;
-            height: 600px;
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjYwMCIgdmlld0JveD0iMCAwIDYwMCA2MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPCEtLSBJbWFnZW4gZGUgZm9uZG8gQmVjaGFwcmEgLS0+CiAgPGNpcmNsZSBjeD0iMzAwIiBjeT0iMjUwIiByPSIxNDAiIGZpbGw9IiNmOGY5ZmEiIGZpbGwtb3BhY2l0eT0iMC4wMyIvPgogIDx0ZXh0IHg9IjMwMCIgeT0iMjcwIiBmb250LWZhbWlseT0iR2VvcmdpYSwgc2VyaWYiIGZvbnQtc2l6ZT0iMTQwIiBmb250LXdlaWdodD0iMzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjM0E3NUJEIiBvcGFjaXR5PSIwLjA0Ij5CPC90ZXh0PgogIDx0ZXh0IHg9IjMwMCIgeT0iMzYwIiBmb250LWZhbWlseT0iR2VvcmdpYSwgc2VyaWYiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI0MDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzQTc1QkQiIG9wYWNpdHk9IjAuMDUiPkJlY2hhcHJhPC90ZXh0Pgo8L3N2Zz4K');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            z-index: 0;
-            pointer-events: none;
-        }
-        
-        .document-container {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-        }
-        
-        .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #000;
-        }
-        
-        .document-title {
-            font-size: 18px;
-            font-weight: bold;
-            text-transform: uppercase;
-            color: #000;
-        }
-        
-        .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            margin: 20px 0 10px 0;
-            color: #000;
-            text-transform: uppercase;
-        }
-        
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        
-        .info-table td {
-            border: 1px solid #000;
-            padding: 8px;
-            vertical-align: top;
-        }
-        
-        .label {
-            font-weight: bold;
-            width: 30%;
-        }
-        
-        .field {
-            border-bottom: 1px solid #000;
-            min-height: 20px;
-        }
-        
-        .signature-section {
-            margin-top: 40px;
-        }
-        
-        .signature-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .signature-table td {
-            border: 1px solid #000;
-            padding: 30px 15px;
-            text-align: center;
-            vertical-align: bottom;
-            width: 50%;
-        }
-        
-        .signature-line {
-            border-bottom: 1px solid #000;
-            margin-bottom: 5px;
-            height: 20px;
-        }
-        
-        @media print {
-            body {
-                margin: 0;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitud y Desglose de Viáticos</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #222;
+      background: #fff;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 40px 40px 30px 40px;
+      box-sizing: border-box;
+      min-height: 100vh;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .logo img {
+      max-width: 180px;
+      margin-bottom: 10px;
+    }
+    .title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+    .desc {
+      text-align: left;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 18px;
+    }
+    .table th, .table td {
+      border: 1px solid #888;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    .table th {
+      background: #f3f6fa;
+      font-weight: bold;
+      text-align: left;
+    }
+    .table .cat {
+      width: 35%;
+    }
+    .table .monto {
+      width: 20%;
+      text-align: right;
+    }
+    .table .coment {
+      width: 45%;
+    }
+    .comprobante {
+      border: 1px solid #888;
+      min-height: 120px;
+      margin-bottom: 18px;
+      padding: 12px;
+      background: #fafbfc;
+    }
+    .advert {
+      background: #fff8dc;
+      border: 1px solid #e0c97f;
+      padding: 16px 18px;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .advert ul {
+      margin: 0 0 0 18px;
+      padding: 0;
+    }
+    .advert li {
+      margin-bottom: 8px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-top: 40px;
+      border-top: 1.5px solid #3A75BD;
+      padding-top: 10px;
+    }
+    .firma-section {
+      margin-top: 30px;
+    }
+    .firmas-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .firmas-table td {
+      border: 1px solid #888;
+      height: 70px;
+      text-align: center;
+      vertical-align: bottom;
+      font-size: 13px;
+    }
+    .firma-label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .firma-line {
+      border-bottom: 1px solid #888;
+      width: 80%;
+      margin: 0 auto 5px auto;
+      height: 18px;
+      display: block;
+    }
+  </style>
 </head>
 <body>
-    <div class="document-container">
-        <div class="header">
-            <div class="company-name">Bechapra</div>
-            <div class="document-title">Solicitud y Desglose de Viáticos</div>
-        </div>
-
-        <!-- DATOS DEL SOLICITANTE -->
-        <div class="section-title">DATOS DEL SOLICITANTE</div>
-        <table class="info-table">
-            <tr>
-                <td class="label">NOMBRE:</td>
-                <td class="field">_________________________________________________</td>
-            </tr>
-            <tr>
-                <td class="label">PUESTO:</td>
-                <td class="field">_________________________________________________</td>
-            </tr>
-            <tr>
-                <td class="label">DEPARTAMENTO:</td>
-                <td class="field">_________________________________________________</td>
-            </tr>
-            <tr>
-                <td class="label">FECHA:</td>
-                <td class="field">_________________________________________________</td>
-            </tr>
-        </table>
-
-        <!-- DATOS DEL VIAJE -->
-        <div class="section-title">DATOS DEL VIAJE</div>
-        <table class="info-table">
-            <tr>
-                <td class="label">DESTINO:</td>
-                <td class="field">_________________________________________________</td>
-            </tr>
-            <tr>
-                <td class="label">FECHA DE SALIDA:</td>
-                <td class="field">_________________________________________________</td>
-            </tr>
-            <tr>
-                <td class="label">FECHA DE REGRESO:</td>
-                <td class="field">_________________________________________________</td>
-            </tr>
-            <tr>
-                <td class="label">MOTIVO DEL VIAJE:</td>
-                <td class="field" style="height: 60px;">_________________________________________________</td>
-            </tr>
-        </table>
-
-        <!-- DESGLOSE DE GASTOS -->
-        <div class="section-title">DESGLOSE DE GASTOS</div>
-        <table class="info-table">
-            <tr>
-                <td class="label">CONCEPTO</td>
-                <td class="label">IMPORTE</td>
-            </tr>
-            <tr>
-                <td>Hospedaje</td>
-                <td class="field">$ ___________________</td>
-            </tr>
-            <tr>
-                <td>Alimentación</td>
-                <td class="field">$ ___________________</td>
-            </tr>
-            <tr>
-                <td>Transporte</td>
-                <td class="field">$ ___________________</td>
-            </tr>
-            <tr>
-                <td>Combustible</td>
-                <td class="field">$ ___________________</td>
-            </tr>
-            <tr>
-                <td>Otros gastos:</td>
-                <td class="field">$ ___________________</td>
-            </tr>
-            <tr>
-                <td><strong>TOTAL</strong></td>
-                <td class="field"><strong>$ ___________________</strong></td>
-            </tr>
-        </table>
-
-        <!-- COMPROBANTE -->
-        <div class="section-title">COMPROBANTE</div>
-        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #000; background-color: #f8f9fa;">
-            <p style="margin: 0 0 10px 0; font-weight: normal; color: #000;">
-                Inserta aquí la fotografía del comprobante o adjunta el archivo correspondiente.
-            </p>
-            <div style="border: 1px solid #000; height: 200px; background-color: white; display: flex; align-items: center; justify-content: center; color: #666;">
-                <div style="text-align: center; font-size: 14px;">
-                    <div style="font-size: 60px; margin-bottom: 10px; color: #ddd;">📄</div>
-                    <p style="margin: 0;">Espacio para comprobante</p>
-                    <p style="margin: 5px 0 0 0; font-size: 12px;">(Fotografía o archivo adjunto)</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- ADVERTENCIAS -->
-        <div class="section-title">ADVERTENCIAS PARA EL ENVÍO DE COMPROBANTES</div>
-        <div style="margin-bottom: 30px; padding: 15px; border: 1px solid #000; background-color: #fff8dc;">
-            <ul style="margin: 0; padding-left: 20px; list-style-type: disc; color: #000;">
-                <li style="margin-bottom: 10px; line-height: 1.4;">
-                    <strong>Si el comprobante es un documento (PDF, Word, Excel), adjúntalo aparte de esta plantilla.</strong>
-                </li>
-                <li style="margin-bottom: 10px; line-height: 1.4;">
-                    <strong>Cuida la presentación y la legibilidad:</strong> enfoca, recorta bordes y confirma que se lean monto, fecha y conceptos.
-                </li>
-                <li style="margin-bottom: 10px; line-height: 1.4;">
-                    <strong>Evita fotos a la pantalla o capturas sin recortar;</strong> no envíes mensajes de WhatsApp difíciles de leer.
-                </li>
-                <li style="margin-bottom: 0; line-height: 1.4;">
-                    <strong>Incluye contexto suficiente</strong> (proveedor, concepto, fecha, monto desglosado e información de pago). Evita enviar una imagen borrosa o un mensaje suelto; agrega una nota breve en 'Comentarios' si aplica.
-                </li>
-            </ul>
-        </div>
-
-        <!-- FIRMAS -->
-        <div class="signature-section">
-            <div class="section-title">AUTORIZACIÓN</div>
-            <table class="signature-table">
-                <tr>
-                    <td>
-                        <strong>SOLICITANTE</strong><br/><br/><br/>
-                        <div class="signature-line"></div>
-                        Firma
-                    </td>
-                    <td>
-                        <strong>AUTORIZA</strong><br/><br/><br/>
-                        <div class="signature-line"></div>
-                        Firma
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <!-- PIE DE PÁGINA CORPORATIVO -->
-        <div style="margin-top: 40px; text-align: center; padding: 15px; border-top: 2px solid #3A75BD; background-color: #f8f9fa;">
-            <div style="font-weight: bold; color: #3A75BD; font-size: 16px; margin-bottom: 5px;">Bechapra</div>
-            <div style="font-size: 11px; color: #666; line-height: 1.3;">
-                Solicitud de Viáticos - Documento oficial<br/>
-                Av. Insurgentes Sur 1079, Col del Valle Sur, Benito Juárez, Ciudad de México 03720, México<br/>
-                @bechapra | bechapra.com
-            </div>
-        </div>
+  <div class="container">
+    <div class="logo">
+      <img src="https://bechapra.com/wp-content/uploads/2023/07/Logo-Bechapra-azul.png" alt="Bechapra logo" />
     </div>
+    <div class="title">Solicitud y Desglose de Viáticos</div>
+    <div class="subtitle">Formato oficial para solicitud y desglose de viáticos</div>
+    <div class="desc">
+      Este formato permite describir con claridad a qué está destinado cada solicitud de viático, respetando el proceso previamente implementado por el Departamento de Tesorería (TESO).<br>
+      Si se requieren varios viáticos para el mismo evento o periodo, este mismo documento puede adjuntarse en cada solicitud.
+    </div>
+    <div class="desc"><b>Motivo del viático:</b><br>Ej. Reunión con cliente CDMX</div>
+    <div class="desc"><b>Resumen por categoría:</b></div>
+    <table class="table">
+      <tr>
+        <th class="cat">Categoría</th>
+        <th class="monto">Monto (MXN)</th>
+        <th class="coment">Comentarios / Ejemplo</th>
+      </tr>
+      <tr>
+        <td>Ej. Transporte</td>
+        <td>$</td>
+        <td>Ej.: Uber ida y regreso Santa Fe</td>
+      </tr>
+      <tr>
+        <td>Ej. Hospedaje</td>
+        <td>$___</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Alimentos</td>
+        <td>$___</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Otros (especificar)</td>
+        <td>$___</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><b>TOTAL</b></td>
+        <td><b>$___</b></td>
+        <td></td>
+      </tr>
+    </table>
+    <div class="desc"><b>Comprobante:</b><br>Inserta aquí la fotografía del comprobante o adjunta el archivo correspondiente.</div>
+    <div class="comprobante"></div>
+    <div class="advert">
+      <b>Advertencias para el envío de comprobantes:</b>
+      <ul>
+        <li>Si el comprobante es un documento (PDF, Word, Excel), adjúntalo aparte de esta plantilla.</li>
+        <li>Cuida la presentación y la legibilidad: enfoca, recorta bordes y confirma que se lean monto, fecha y conceptos.</li>
+        <li>Evita fotos a la pantalla o capturas sin recortar; no envíes mensajes de WhatsApp difíciles de leer.</li>
+        <li>Incluye contexto suficiente (proveedor, concepto, fecha, monto desglosado e información de pago). Evita enviar una imagen borrosa o un mensaje suelto; agrega una nota breve en 'Comentarios' si aplica.</li>
+      </ul>
+    </div>
+    <div class="firma-section">
+      <table class="firmas-table">
+        <tr>
+          <td>
+            <span class="firma-label">Solicitante</span>
+            <span class="firma-line"></span>
+            Firma
+          </td>
+          <td>
+            <span class="firma-label">Autoriza</span>
+            <span class="firma-line"></span>
+            Firma
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="footer">
+      Av. Insurgentes Sur 1079, Col del Valle Sur, Benito Juárez, Ciudad de México 03720, México<br>
+      <b>@bechapra | bechapra.com</b>
+    </div>
+  </div>
 </body>
 </html>
     `;
