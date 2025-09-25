@@ -1,15 +1,4 @@
-
 "use client";
-// Utilidad global para obtener el templateType de una solicitud
-const getTemplateType = (solicitud: Solicitud): string => {
-  if (solicitud.plantilla_datos) {
-    try {
-      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-      return plantillaData.templateType || '';
-    } catch {}
-  }
-  return '';
-};
 
 import React, {
   useState,
@@ -68,6 +57,81 @@ type SortOrder = 'asc' | 'desc';
 const ITEMS_PER_PAGE = 5;
 const LOAD_TIMEOUT = 10000;
 
+// Detección robusta de plantillas especiales
+const isSuaInternasSolicitud = (solicitud: Solicitud): boolean => {
+  if (getTemplateType(solicitud) === 'pago-sua-internas') return true;
+  if (
+    typeof solicitud.tipo_pago_descripcion === 'string' &&
+    solicitud.tipo_pago_descripcion.toLowerCase().includes('pago-sua-internas')
+  ) return true;
+  if (
+    typeof solicitud.concepto === 'string' &&
+    solicitud.concepto.toLowerCase().includes('sua internas')
+  ) return true;
+  return false;
+};
+
+const isSuaFrenshetsiSolicitud = (solicitud: Solicitud): boolean => {
+  if (getTemplateType(solicitud) === 'pago-sua-frenshetsi') return true;
+  if (
+    typeof solicitud.tipo_pago_descripcion === 'string' &&
+    solicitud.tipo_pago_descripcion.toLowerCase().includes('pago-sua-frenshetsi')
+  ) return true;
+  if (
+    typeof solicitud.concepto === 'string' &&
+    solicitud.concepto.toLowerCase().includes('sua frenshetsi')
+  ) return true;
+  return false;
+};
+
+const isComisionesSolicitud = (solicitud: Solicitud): boolean => {
+  if (getTemplateType(solicitud) === 'pago-comisiones') return true;
+  if (
+    typeof solicitud.tipo_pago_descripcion === 'string' &&
+    solicitud.tipo_pago_descripcion.toLowerCase().includes('pago-comisiones')
+  ) return true;
+  if (
+    typeof solicitud.concepto === 'string' &&
+    solicitud.concepto.toLowerCase().includes('comision')
+  ) return true;
+  return false;
+};
+
+const isPolizasSolicitud = (solicitud: Solicitud): boolean => {
+  if (getTemplateType(solicitud) === 'pago-polizas-gnp') return true;
+  if (
+    typeof solicitud.tipo_pago_descripcion === 'string' &&
+    solicitud.tipo_pago_descripcion.toLowerCase().includes('pago-polizas-gnp')
+  ) return true;
+  if (
+    typeof solicitud.concepto === 'string' &&
+    solicitud.concepto.toLowerCase().includes('poliza')
+  ) return true;
+  return false;
+};
+
+const isRegresosTransferenciaSolicitud = (solicitud: Solicitud): boolean => {
+  if (getTemplateType(solicitud) === 'regresos-transferencia') return true;
+  if (
+    typeof solicitud.tipo_pago_descripcion === 'string' &&
+    solicitud.tipo_pago_descripcion.toLowerCase().includes('regresos-transferencia')
+  ) return true;
+  if (
+    typeof solicitud.concepto === 'string' &&
+    solicitud.concepto.toLowerCase().includes('regreso transferencia')
+  ) return true;
+  return false;
+};
+// Utilidad global para obtener el templateType de una solicitud
+const getTemplateType = (solicitud: Solicitud): string => {
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      return plantillaData.templateType || '';
+    } catch {}
+  }
+  return '';
+};
 
 // Función para detectar si una solicitud es del tipo TUKASH
 const isTukashSolicitud = (solicitud: Solicitud): boolean => {
@@ -980,15 +1044,15 @@ function MisSolicitudesContent() {
                                       router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
                                     } else if (isTukashSolicitud(s)) {
                                       router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
-                                    } else if (templateType === 'pago-sua-internas') {
+                                    } else if (isSuaInternasSolicitud(s)) {
                                       router.push(`/dashboard/solicitante/editar-sua-internas/${s.id_solicitud}`);
-                                    } else if (templateType === 'pago-sua-frenshetsi') {
+                                    } else if (isSuaFrenshetsiSolicitud(s)) {
                                       router.push(`/dashboard/solicitante/editar-sua-frenshetsi/${s.id_solicitud}`);
-                                    } else if (templateType === 'pago-comisiones') {
+                                    } else if (isComisionesSolicitud(s)) {
                                       router.push(`/dashboard/solicitante/editar-comisiones/${s.id_solicitud}`);
-                                    } else if (templateType === 'pago-polizas-gnp') {
+                                    } else if (isPolizasSolicitud(s)) {
                                       router.push(`/dashboard/solicitante/editar-polizas/${s.id_solicitud}`);
-                                    } else if (templateType === 'regresos-transferencia') {
+                                    } else if (isRegresosTransferenciaSolicitud(s)) {
                                       router.push(`/dashboard/solicitante/editar-regresos-transferencia/${s.id_solicitud}`);
                                     } else {
                                       router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
@@ -1107,15 +1171,15 @@ function MisSolicitudesContent() {
                                     router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
                                   } else if (isTukashSolicitud(s)) {
                                     router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
-                                  } else if (templateTypeMobile === 'pago-sua-internas') {
+                                  } else if (isSuaInternasSolicitud(s)) {
                                     router.push(`/dashboard/solicitante/editar-sua-internas/${s.id_solicitud}`);
-                                  } else if (templateTypeMobile === 'pago-sua-frenshetsi') {
+                                  } else if (isSuaFrenshetsiSolicitud(s)) {
                                     router.push(`/dashboard/solicitante/editar-sua-frenshetsi/${s.id_solicitud}`);
-                                  } else if (templateTypeMobile === 'pago-comisiones') {
+                                  } else if (isComisionesSolicitud(s)) {
                                     router.push(`/dashboard/solicitante/editar-comisiones/${s.id_solicitud}`);
-                                  } else if (templateTypeMobile === 'pago-polizas-gnp') {
+                                  } else if (isPolizasSolicitud(s)) {
                                     router.push(`/dashboard/solicitante/editar-polizas/${s.id_solicitud}`);
-                                  } else if (templateTypeMobile === 'regresos-transferencia') {
+                                  } else if (isRegresosTransferenciaSolicitud(s)) {
                                     router.push(`/dashboard/solicitante/editar-regresos-transferencia/${s.id_solicitud}`);
                                   } else {
                                     router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
