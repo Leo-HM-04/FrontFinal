@@ -625,7 +625,8 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
           tipo_cuenta: string,
           numero_cuenta: string,
           banco_destino: string,
-          monto: string
+          monto: string,
+          tipo_tarjeta?: string
         }> : [];
         const maximoCuentas = campo.estilos?.maximo || 3;
 
@@ -636,7 +637,8 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
               tipo_cuenta: '',
               numero_cuenta: '',
               banco_destino: '',
-              monto: ''
+              monto: '',
+              tipo_tarjeta: ''
             }];
             onChange(nuevasCuentas);
           }
@@ -716,7 +718,8 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
                           nuevasCuentas[index] = {
                             ...nuevasCuentas[index], 
                             tipo_cuenta: e.target.value,
-                            numero_cuenta: '' // Limpiar número al cambiar tipo
+                            numero_cuenta: '', // Limpiar número al cambiar tipo
+                            tipo_tarjeta: '' // Limpiar tipo de tarjeta también
                           };
                           onChange(nuevasCuentas);
                         }}
@@ -759,27 +762,65 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
                       </p>
                     </div>
 
-                    {/* Monto (movido a la derecha) */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Monto <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={cuenta.monto}
-                        onChange={(e) => {
-                          // Formato de moneda básico
-                          const valor = e.target.value.replace(/[^\d.,]/g, '');
-                          actualizarCuentaTransferencia(index, 'monto', valor);
-                        }}
-                        placeholder="Ej. 56,000.00"
-                        className={`${baseClasses} px-3 py-2 w-full`}
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Ej. 56,000.00</p>
-                    </div>
+                    {/* Tipo de Tarjeta (solo visible cuando es tarjeta) */}
+                    {cuenta.tipo_cuenta === 'tarjeta' ? (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Tipo de Tarjeta <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={cuenta.tipo_tarjeta || ''}
+                          onChange={(e) => actualizarCuentaTransferencia(index, 'tipo_tarjeta', e.target.value)}
+                          className={`${baseClasses} px-3 py-2 w-full`}
+                        >
+                          <option value="">Seleccione tipo</option>
+                          <option value="debito">Débito</option>
+                          <option value="credito">Crédito</option>
+                        </select>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Monto <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={cuenta.monto}
+                          onChange={(e) => {
+                            // Formato de moneda básico
+                            const valor = e.target.value.replace(/[^\d.,]/g, '');
+                            actualizarCuentaTransferencia(index, 'monto', valor);
+                          }}
+                          placeholder="Ej. 56,000.00"
+                          className={`${baseClasses} px-3 py-2 w-full`}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Ej. 56,000.00</p>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Fila 3: Banco Destino */}
+                  {/* Fila 3: Monto (cuando es tarjeta) */}
+                  {cuenta.tipo_cuenta === 'tarjeta' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Monto <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={cuenta.monto}
+                          onChange={(e) => {
+                            // Formato de moneda básico
+                            const valor = e.target.value.replace(/[^\d.,]/g, '');
+                            actualizarCuentaTransferencia(index, 'monto', valor);
+                          }}
+                          placeholder="Ej. 56,000.00"
+                          className={`${baseClasses} px-3 py-2 w-full`}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Ej. 56,000.00</p>
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Banco Destino <span className="text-red-500">*</span>

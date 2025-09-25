@@ -994,7 +994,9 @@ export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
             { valor: 'gnp', etiqueta: 'GNP' },
             { valor: 'zurich', etiqueta: 'ZURICH' },
             { valor: 'axa', etiqueta: 'AXA' },
-            { valor: 'seguros_monterrey', etiqueta: 'Seguros Monterrey' }
+            { valor: 'seguros_monterrey', etiqueta: 'Seguros Monterrey' },
+            { valor: 'qualitas', etiqueta: 'Qualitas' },
+            { valor: 'allianz', etiqueta: 'Allianz' }
           ],
           estilos: {
             ancho: 'medio'
@@ -1286,7 +1288,7 @@ export const plantillaRegresosEfectivo: PlantillaSolicitud = {
           nombre: 'fecha_entrega',
           tipo: 'fecha',
           etiqueta: 'Fecha de Entrega',
-          ayuda: 'Fecha en la que se acordó la entrega del efectivo al cliente',
+          ayuda: 'Fecha de entrega de efectivo de Tesorería a Atención a Clientes',
           valorPorDefecto: '',
           validaciones: {
             requerido: true,
@@ -1357,19 +1359,17 @@ export const plantillaRegresosEfectivo: PlantillaSolicitud = {
         {
           id: 'elementos_adicionales',
           nombre: 'elementos_adicionales',
-          tipo: 'checkbox',
+          tipo: 'textarea',
           etiqueta: 'Adicionales',
-          ayuda: 'Son elementos adicionales de manera opcional que se entregan junto con el efectivo',
-          valorPorDefecto: [],
+          placeholder: 'Ej. 1 TARJETA BANORTE, 1 TOKEN BANORTE, Cheque de viaje',
+          ayuda: 'Describa los elementos adicionales que se entregan junto con el efectivo (opcional)',
+          valorPorDefecto: '',
           validaciones: {
             requerido: false
           },
-          opciones: [
-            { valor: 'tarjeta_banorte', etiqueta: '1 TARJETA BANORTE' },
-            { valor: 'token_banorte', etiqueta: '1 TOKEN BANORTE' }
-          ],
           estilos: {
-            ancho: 'completo'
+            ancho: 'completo',
+            filas: 3
           }
         }
       ],
