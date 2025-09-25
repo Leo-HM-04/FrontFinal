@@ -605,6 +605,45 @@ function MisSolicitudesContent() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, solicitudesOrdenadas.length);
   const currentSolicitudes = solicitudesOrdenadas.slice(startIndex, endIndex);
+  // Mapear datos para mostrar info de TUKASH si los campos principales están vacíos
+  const currentSolicitudesMapped = currentSolicitudes.map((s) => {
+    type PlantillaDatos = {
+      concepto?: string;
+      asunto?: string;
+      departamento?: string;
+      cuenta_destino?: string;
+      numero_tarjeta?: string;
+      monto?: string | number;
+      monto_total_cliente?: string | number;
+      tipo_moneda?: string;
+      fecha_limite_pago?: string;
+    };
+    let plantilla: PlantillaDatos = {};
+    if (s.plantilla_datos) {
+      try {
+        plantilla = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
+      } catch {}
+    }
+    let montoVal: number = 0;
+    if (typeof s.monto === 'number' && s.monto !== 0) {
+      montoVal = s.monto;
+    } else if (typeof s.monto === 'string' && s.monto !== '0.00' && s.monto !== '0' && s.monto !== '') {
+      montoVal = Number(s.monto);
+    } else if (plantilla.monto !== undefined && plantilla.monto !== null && plantilla.monto !== '') {
+      montoVal = Number(plantilla.monto);
+    } else if (plantilla.monto_total_cliente !== undefined && plantilla.monto_total_cliente !== null && plantilla.monto_total_cliente !== '') {
+      montoVal = Number(plantilla.monto_total_cliente);
+    }
+    return {
+      ...s,
+      concepto: s.concepto || plantilla.concepto || plantilla.asunto || '',
+      departamento: s.departamento || plantilla.departamento || '',
+      cuenta_destino: s.cuenta_destino || plantilla.cuenta_destino || plantilla.numero_tarjeta || '',
+      monto: montoVal,
+      tipo_moneda: s.tipo_moneda || plantilla.tipo_moneda || '',
+      fecha_limite_pago: s.fecha_limite_pago || plantilla.fecha_limite_pago || '',
+    };
+  });
 
   // Handlers
   const clearFilters = useCallback(() => {
@@ -841,7 +880,7 @@ function MisSolicitudesContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-blue-100">
-                  {currentSolicitudes.length === 0 ? (
+                  {currentSolicitudesMapped.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="px-6 py-12 text-center text-blue-900/80">
                         <FileText className="w-12 h-12 mx-auto mb-4 text-blue-300" />
@@ -854,7 +893,7 @@ function MisSolicitudesContent() {
                       </td>
                     </tr>
                   ) :
-                    currentSolicitudes.map((s) => {
+                    currentSolicitudesMapped.map((s) => {
                       const estadoConfig = getEstadoConfig(s.estado);
                       const isHighlighted = highlightedId === s.id_solicitud;
                       return (
