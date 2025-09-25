@@ -25,6 +25,7 @@ import { PlantillaSuaFrenshetsiDetailModal } from '../plantillas/PlantillaSuaFre
 import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
 import { PlantillaComisionesDetailModal } from '../plantillas/PlantillaComisionesDetailModal';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
+import { PlantillaPolizasDetailModal, SolicitudPolizasData } from '@/components/plantillas/PlantillaPolizasDetailModal';
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
@@ -574,6 +575,83 @@ function isComisionesSolicitud(solicitud: Solicitud | null): boolean {
   return false;
 }
 
+// Función auxiliar para detectar si es PAGO POLIZAS
+function isPolizasSolicitud(solicitud: Solicitud & { tipo_plantilla?: string }): boolean {
+  console.log(`🔍 [POLIZAS DETECCIÓN] Iniciando detección para solicitud ${solicitud.id_solicitud}`);
+  
+  // 1. Verificar por plantilla_id directamente
+  const plantillaId = detectarPlantillaId(solicitud);
+  console.log(`🔍 [POLIZAS DETECCIÓN] plantillaId detectado: ${plantillaId}`);
+  
+  if (plantillaId === 'pago-polizas-gnp') {
+    console.log('✅ [POLIZAS DETECCIÓN] Detectada por plantillaId = pago-polizas-gnp');
+    return true;
+  }
+
+  // 2. Verificar por tipo_plantilla
+  console.log(`🔍 [POLIZAS DETECCIÓN] tipo_plantilla: ${solicitud.tipo_plantilla}`);
+  if (solicitud.tipo_plantilla === 'PAGO_POLIZAS' || solicitud.tipo_plantilla === 'pago-polizas-gnp') {
+    console.log('✅ [POLIZAS DETECCIÓN] Detectada por tipo_plantilla');
+    return true;
+  }
+
+  // 3. Verificar por análisis de plantilla_datos
+  console.log(`🔍 [POLIZAS DETECCIÓN] plantilla_datos: ${solicitud.plantilla_datos}`);
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' 
+        ? JSON.parse(solicitud.plantilla_datos) 
+        : solicitud.plantilla_datos;
+      
+      console.log('🔍 [POLIZAS DETECCIÓN] Datos parseados de plantilla_datos:', plantillaData);
+      
+      // Buscar indicadores de pólizas
+      const esPolizas = plantillaData.templateType === 'pago-polizas-gnp' || 
+             plantillaData.isPolizas === true || 
+             (plantillaData.titular_cuenta && plantillaData.empresa_emisora) ||
+             plantillaData.tipo_poliza;
+      
+      if (esPolizas) {
+        console.log('✅ [POLIZAS DETECCIÓN] Detectada por análisis de plantilla_datos');
+        return true;
+      }
+    } catch (error) {
+      console.log('⚠️ [POLIZAS DETECCIÓN] Error parseando plantilla_datos:', error);
+    }
+  }
+  
+  // 4. Verificar por tipo_pago_descripcion
+  console.log(`🔍 [POLIZAS DETECCIÓN] tipo_pago_descripcion: ${solicitud.tipo_pago_descripcion}`);
+  if (solicitud.tipo_pago_descripcion && (
+      solicitud.tipo_pago_descripcion.includes('POLIZA') || 
+      solicitud.tipo_pago_descripcion.includes('POLIZAS') ||
+      solicitud.tipo_pago_descripcion.includes('GNP') ||
+      solicitud.tipo_pago_descripcion.includes('ZURICH') ||
+      solicitud.tipo_pago_descripcion.includes('AXA')
+    )) {
+    console.log('✅ [POLIZAS DETECCIÓN] Detectada por tipo_pago_descripcion');
+    return true;
+  }
+  
+  // 5. Verificar por concepto que contenga POLIZA o aseguradoras
+  console.log(`🔍 [POLIZAS DETECCIÓN] concepto: ${solicitud.concepto}`);
+  if (solicitud.concepto && (
+      solicitud.concepto.includes('POLIZA') || 
+      solicitud.concepto.includes('POLIZAS') ||
+      solicitud.concepto.includes('GNP') ||
+      solicitud.concepto.includes('ZURICH') ||
+      solicitud.concepto.includes('AXA') ||
+      solicitud.concepto.includes('QUALITAS') ||
+      solicitud.concepto.includes('ALLIANZ')
+    )) {
+    console.log('✅ [POLIZAS DETECCIÓN] Detectada por concepto');
+    return true;
+  }
+  
+  console.log('❌ [POLIZAS DETECCIÓN] No se detectó como PAGO POLIZAS');
+  return false;
+}
+
 export function SolicitudDetailModal({ 
   solicitud, 
   isOpen, 
@@ -1065,6 +1143,91 @@ export function SolicitudDetailModal({
       return (
         <PlantillaComisionesDetailModal
           solicitud={solicitudComisiones}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+    // Si no se pudo mapear, mostrar modal estándar
+  }
+
+  // Verificar si es una solicitud PAGO POLIZAS
+  if (solicitud && isPolizasSolicitud(solicitud)) {
+    console.log('🎯 [POLIZAS] Detectada solicitud PAGO POLIZAS, procesando datos...');
+    
+    let solicitudPolizas: SolicitudPolizasData | null = null;
+    
+    // Intentar mapear los datos desde plantilla_datos primero
+    if (typeof solicitud === 'object' && solicitud.plantilla_datos) {
+      try {
+        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        console.log('📄 [POLIZAS] Datos de plantilla encontrados:', plantillaData);
+        
+        // Usar datos de plantilla si están disponibles
+        solicitudPolizas = {
+          id_solicitud: solicitud.id_solicitud,
+          asunto: plantillaData.asunto || solicitud.concepto || '',
+          titular_poliza: plantillaData.titular_poliza || plantillaData.aseguradora || '',
+          numero_poliza: plantillaData.numero_poliza || '',
+          monto: plantillaData.monto || Number(solicitud.monto) || 0,
+          tipo_movimiento: plantillaData.tipo_movimiento || '',
+          nombre_solicitante: plantillaData.nombre_solicitante || solicitud.usuario_nombre || '',
+          email_solicitante: plantillaData.email_solicitante || '',
+          gerencia_solicitante: plantillaData.gerencia_solicitante || '',
+          // Campos de la base de datos
+          folio: solicitud.folio || '',
+          departamento: solicitud.departamento || '',
+          estado: solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada' || 'pendiente',
+          concepto: solicitud.concepto || '',
+          observaciones: solicitud.comentario_aprobador || '',
+          // Campos de auditoría
+          fecha_creacion: solicitud.fecha_creacion || '',
+          fecha_actualizacion: solicitud.updated_at || '',
+          usuario_creacion: solicitud.usuario_nombre || '',
+          usuario_actualizacion: solicitud.aprobador_nombre || '',
+        };
+        
+        console.log('🔧 [POLIZAS] Datos construidos desde plantilla:', solicitudPolizas);
+      } catch (error) {
+        console.error('❌ [POLIZAS] Error al parsear plantilla_datos:', error);
+        // Fallback a datos base si falla el parsing
+      }
+    }
+    
+    // Si no tenemos datos de plantilla o falló el parsing, usar datos base
+    if (!solicitudPolizas) {
+      console.log('📋 [POLIZAS] Usando datos base de la solicitud...');
+      solicitudPolizas = {
+        id_solicitud: solicitud.id_solicitud,
+        asunto: solicitud.concepto || '',
+        titular_poliza: '',
+        numero_poliza: '',
+        monto: Number(solicitud.monto) || 0,
+        tipo_movimiento: '',
+        nombre_solicitante: solicitud.usuario_nombre || '',
+        email_solicitante: '',
+        gerencia_solicitante: '',
+        // Campos de la base de datos
+        folio: solicitud.folio || '',
+        departamento: solicitud.departamento || '',
+        estado: solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada' || 'pendiente',
+        concepto: solicitud.concepto || '',
+        observaciones: solicitud.comentario_aprobador || '',
+        // Campos de auditoría
+        fecha_creacion: solicitud.fecha_creacion || '',
+        fecha_actualizacion: solicitud.updated_at || '',
+        usuario_creacion: solicitud.usuario_nombre || '',
+        usuario_actualizacion: solicitud.aprobador_nombre || '',
+      };
+      
+      console.log('🔧 [POLIZAS] Datos construidos:', solicitudPolizas);
+    }
+    
+    if (solicitudPolizas) {
+      console.log('✅ [POLIZAS] Mostrando modal PAGO POLIZAS con datos:', solicitudPolizas);
+      return (
+        <PlantillaPolizasDetailModal
+          solicitud={solicitudPolizas}
           isOpen={isOpen}
           onClose={onClose}
         />
