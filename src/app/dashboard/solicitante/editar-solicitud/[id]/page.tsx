@@ -1000,11 +1000,15 @@ export default function EditarSolicitudPage() {
                   <EditarN09Toka
                     plantilla={plantillaDetectada}
                     datosPlantilla={estadoPlantilla.datos}
+                    estado={estadoPlantilla}
+                    actualizarCampo={actualizarCampo}
                   />
                 ) : plantillaDetectada.id === 'tarjetas-tukash' ? (
                   <EditarTukash
                     plantilla={plantillaDetectada}
                     datosPlantilla={estadoPlantilla.datos}
+                    estado={estadoPlantilla}
+                    actualizarCampo={actualizarCampo}
                     onGuardar={() => {
                       // Guardar cambios de la plantilla TUKASH
                       SolicitudesService.updatePlantilla({

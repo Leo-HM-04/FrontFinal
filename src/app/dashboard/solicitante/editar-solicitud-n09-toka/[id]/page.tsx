@@ -53,6 +53,8 @@ export default function EditarN09TokaPage() {
       <EditarN09Toka
         plantilla={plantillasDisponibles.find(p => p.id === 'tarjetas-n09-toka')!}
         datosPlantilla={estado.datos}
+        estado={estado}
+        actualizarCampo={actualizarCampo}
       />
     </div>
   );
