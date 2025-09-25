@@ -169,6 +169,10 @@ const Viaticos: React.FC = () => {
   const { viaticos = [], loading, error, refetch } = useViaticos();
   const tresDiasDespues = useMemo(() => new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000), []);
 
+  // Solo viáticos pendientes
+  const viaticosPendientes = useMemo(() => viaticos.filter(v => v.estado === 'pendiente'), [viaticos]);
+  const urgentesPendientes = useMemo(() => viaticosPendientes.filter(v => new Date(v.fecha_limite_pago) < tresDiasDespues), [viaticosPendientes, tresDiasDespues]);
+
   const [selectedViaticos, setSelectedViaticos] = React.useState<number[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedViatico, setSelectedViatico] = useState<Solicitud | null>(null);
@@ -321,7 +325,7 @@ const Viaticos: React.FC = () => {
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20 lg:flex-shrink-0">
                 <p className="text-white/90 text-sm font-medium">
-                  Total: <span className="text-white font-semibold">{viaticos.length}</span> viáticos
+                  Total: <span className="text-white font-semibold">{viaticosPendientes.length}</span> viáticos
                 </p>
               </div>
             </div>
@@ -335,9 +339,7 @@ const Viaticos: React.FC = () => {
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-2xl font-bold text-white">
-                      {viaticos.filter(v => new Date(v.fecha_limite_pago) < tresDiasDespues).length}
-                    </p>
+                    <p className="text-2xl font-bold text-white">{urgentesPendientes.length}</p>
                     <p className="text-red-100 text-sm">Urgentes</p>
                   </div>
                 </div>
