@@ -1223,7 +1223,7 @@ export const plantillaRegresosEfectivo: PlantillaSolicitud = {
   nombre: 'REGRESOS EN EFECTIVO',
   descripcion: 'Plantilla para solicitudes de regreso en efectivo',
   version: '1.0.0',
-  activa: true,
+  activa: false,
   categoria: 'regresos',
   icono: Banknote,
   secciones: [
