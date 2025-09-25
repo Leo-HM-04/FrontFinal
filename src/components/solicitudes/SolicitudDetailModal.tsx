@@ -950,14 +950,19 @@ export function SolicitudDetailModal({
     if (typeof solicitud === 'object' && solicitud.plantilla_datos) {
       try {
         const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        
+        // Extraer datos del concepto si no están en plantilla_datos
+        const datosExtraidos = extraerDatosSuaDelConcepto(solicitud.concepto || '');
+        console.log('📄 [SUA INTERNAS EXTRACCION] Datos extraídos del concepto:', datosExtraidos);
+        
         // Usar datos de plantilla si están disponibles, sino usar campos de la base de datos
         solicitudSuaInternas = {
           id_solicitud: solicitud.id_solicitud,
-          asunto: plantillaData.asunto || '',
-          empresa: plantillaData.empresa || '',
+          asunto: plantillaData.asunto || datosExtraidos.asunto || '',
+          empresa: plantillaData.empresa || datosExtraidos.empresa || '',
           monto: plantillaData.monto || Number(solicitud.monto) || 0,
           fecha_limite: plantillaData.fecha_limite || '',
-          linea_captura: plantillaData.linea_captura || '',
+          linea_captura: plantillaData.linea_captura || datosExtraidos.linea_captura || '',
           archivos_adjuntos: plantillaData.archivos_adjuntos || [],
           estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
           fecha_creacion: solicitud.fecha_creacion || '',
@@ -974,19 +979,15 @@ export function SolicitudDetailModal({
     if (!solicitudSuaInternas) {
       console.log('🔧 [SUA INTERNAS] Construyendo datos desde campos básicos de la solicitud');
       
-      // Extraer información de SUA INTERNAS desde campos básicos
-      const asunto = solicitud.concepto || '';
-      const empresa = solicitud.empresa_a_pagar || solicitud.nombre_persona || '';
+      // Extraer información de SUA INTERNAS desde campos básicos usando la función de extracción
+      const datosExtraidos = extraerDatosSuaDelConcepto(solicitud.concepto || '');
+      console.log('📄 [SUA INTERNAS FALLBACK] Datos extraídos del concepto:', datosExtraidos);
+      
+      const asunto = datosExtraidos.asunto || '';
+      const empresa = datosExtraidos.empresa || solicitud.empresa_a_pagar || solicitud.nombre_persona || '';
       const monto = Number(solicitud.monto) || 0;
       const fecha_limite = solicitud.fecha_limite_pago || '';
-      // Intentar extraer línea de captura del concepto si está presente
-      let linea_captura = '';
-      if (solicitud.concepto && solicitud.concepto.includes('Línea de Captura:')) {
-        const match = solicitud.concepto.match(/Línea de Captura:\s*([A-Z0-9-]+)/);
-        if (match) {
-          linea_captura = match[1];
-        }
-      }
+      const linea_captura = datosExtraidos.linea_captura || '';
       
       // Crear solicitud extendida con campos adicionales
       solicitudSuaInternas = {
@@ -1151,7 +1152,54 @@ export function SolicitudDetailModal({
     // Si no se pudo mapear, mostrar modal estándar
   }
 
-  // Función para convertir código de banco a nombre
+  // Función para extraer información del concepto de SUA (Internas y Frenshetsi)
+function extraerDatosSuaDelConcepto(concepto: string) {
+  const datos = {
+    asunto: concepto,
+    empresa: '',
+    linea_captura: ''
+  };
+
+  if (!concepto) return datos;
+
+  console.log('🔍 [SUA EXTRACCION] Analizando concepto:', concepto);
+
+  // Patrón para detectar: "Asunto - Línea de Captura: número"
+  const patronLineaCaptura = /^(.+?)\s*-\s*Línea de Captura:\s*(.+)$/i;
+  const matchLineaCaptura = concepto.match(patronLineaCaptura);
+  
+  if (matchLineaCaptura) {
+    datos.asunto = matchLineaCaptura[1].trim();
+    datos.linea_captura = matchLineaCaptura[2].trim();
+    console.log('✅ [SUA EXTRACCION] Patrón línea de captura detectado:', datos);
+    return datos;
+  }
+
+  // Patrón alternativo para: "Asunto - Cliente: nombre"
+  const patronCliente = /^(.+?)\s*-\s*Cliente:\s*(.+)$/i;
+  const matchCliente = concepto.match(patronCliente);
+  
+  if (matchCliente) {
+    datos.asunto = matchCliente[1].trim();
+    datos.empresa = matchCliente[2].trim();
+    console.log('✅ [SUA EXTRACCION] Patrón cliente detectado:', datos);
+    return datos;
+  }
+
+  // Si no match ningún patrón, buscar solo línea de captura dentro del texto
+  const patronSoloLineaCaptura = /Línea de Captura:\s*([A-Z0-9-]+)/i;
+  const matchSoloLinea = concepto.match(patronSoloLineaCaptura);
+  
+  if (matchSoloLinea) {
+    datos.linea_captura = matchSoloLinea[1].trim();
+    datos.asunto = concepto.replace(patronSoloLineaCaptura, '').trim().replace(/\s*-\s*$/, '');
+    console.log('✅ [SUA EXTRACCION] Solo línea de captura detectada:', datos);
+  }
+
+  return datos;
+}
+
+// Función para convertir código de banco a nombre
 function obtenerNombreBanco(codigoBanco: string): string {
   if (!codigoBanco) return '';
   
@@ -1390,15 +1438,19 @@ function extraerDatosDelConcepto(concepto: string) {
         const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
         console.log('📄 [SUA FRENSHETSI] Datos de plantilla encontrados:', plantillaData);
         
+        // Extraer datos del concepto si no están en plantilla_datos
+        const datosExtraidos = extraerDatosSuaDelConcepto(solicitud.concepto || '');
+        console.log('📄 [SUA FRENSHETSI EXTRACCION] Datos extraídos del concepto:', datosExtraidos);
+        
         // Usar datos de plantilla si están disponibles, sino usar campos de la base de datos
         solicitudSuaFrenshetsi = {
           id_solicitud: solicitud.id_solicitud,
-          asunto: plantillaData.asunto || '',
+          asunto: plantillaData.asunto || datosExtraidos.asunto || '',
           empresa: plantillaData.empresa || 'FRENSHETSI',
-          cliente: plantillaData.cliente || '',
+          cliente: plantillaData.cliente || datosExtraidos.empresa || '',
           monto: plantillaData.monto || Number(solicitud.monto) || 0,
           fecha_limite: plantillaData.fecha_limite || '',
-          linea_captura: plantillaData.linea_captura || '',
+          linea_captura: plantillaData.linea_captura || datosExtraidos.linea_captura || '',
           archivos_adjuntos: plantillaData.archivos_adjuntos || [],
           estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
           fecha_creacion: solicitud.fecha_creacion || '',
@@ -1415,41 +1467,13 @@ function extraerDatosDelConcepto(concepto: string) {
     if (!solicitudSuaFrenshetsi) {
       console.log('🔄 [SUA FRENSHETSI] Construyendo desde datos básicos de solicitud...');
       
-      // Extraer información del concepto si está presente
-      let asunto = solicitud.concepto || 'PAGO SUA FRENSHETSI';
-      let cliente = '';
-      let linea_captura = '';
+      // Extraer información del concepto usando la función unificada
+      const datosExtraidos = extraerDatosSuaDelConcepto(solicitud.concepto || '');
+      console.log('� [SUA FRENSHETSI FALLBACK] Datos extraídos del concepto:', datosExtraidos);
       
-      // Intentar extraer cliente y línea de captura del concepto
-      if (solicitud.concepto) {
-        console.log('🔍 [SUA FRENSHETSI] Analizando concepto:', solicitud.concepto);
-        
-        // Extraer solo el asunto principal (primera parte antes de " - Cliente:")
-        const asuntoMatch = solicitud.concepto.match(/^([^-]+)(?:\s*-\s*Cliente:)?/);
-        if (asuntoMatch) {
-          asunto = asuntoMatch[1].trim();
-          console.log('✅ [SUA FRENSHETSI] Asunto extraído:', asunto);
-        }
-        
-        // Buscar Cliente: en el concepto (solo el nombre, sin línea de captura)
-        const clienteMatch = solicitud.concepto.match(/Cliente:\s*([^-\n]+?)(?:\s*-\s*Línea de Captura:|$)/i);
-        if (clienteMatch) {
-          cliente = clienteMatch[1].trim();
-          console.log('✅ [SUA FRENSHETSI] Cliente encontrado:', cliente);
-        }
-        
-        // Buscar Línea de Captura: en el concepto
-        const lineaMatch = solicitud.concepto.match(/Línea de Captura:\s*([A-Z0-9]+)/i);
-        if (lineaMatch) {
-          linea_captura = lineaMatch[1];
-          console.log('✅ [SUA FRENSHETSI] Línea de captura encontrada:', linea_captura);
-        }
-      }
-      
-      // Si no se encontraron en el concepto, usar campos alternativos
-      if (!cliente) {
-        cliente = solicitud.empresa_a_pagar || solicitud.nombre_persona || '';
-      }
+      const asunto = datosExtraidos.asunto || 'PAGO SUA FRENSHETSI';
+      const cliente = datosExtraidos.empresa || solicitud.empresa_a_pagar || solicitud.nombre_persona || '';
+      const linea_captura = datosExtraidos.linea_captura || '';
       
       solicitudSuaFrenshetsi = {
         id_solicitud: solicitud.id_solicitud,
