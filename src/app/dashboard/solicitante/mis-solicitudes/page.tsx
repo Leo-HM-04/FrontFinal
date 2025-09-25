@@ -1,4 +1,15 @@
+
 "use client";
+// Utilidad global para obtener el templateType de una solicitud
+const getTemplateType = (solicitud: Solicitud): string => {
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      return plantillaData.templateType || '';
+    } catch {}
+  }
+  return '';
+};
 
 import React, {
   useState,
@@ -963,10 +974,22 @@ function MisSolicitudesContent() {
                                   title="Editar"
                                   className="inline-flex items-center justify-center p-1.5 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
                                   onClick={() => {
+                                    // Detección por plantilla robusta
+                                    const templateType = getTemplateType(s);
                                     if (isN09TokaSolicitud(s)) {
                                       router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
                                     } else if (isTukashSolicitud(s)) {
                                       router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
+                                    } else if (templateType === 'pago-sua-internas') {
+                                      router.push(`/dashboard/solicitante/editar-sua-internas/${s.id_solicitud}`);
+                                    } else if (templateType === 'pago-sua-frenshetsi') {
+                                      router.push(`/dashboard/solicitante/editar-sua-frenshetsi/${s.id_solicitud}`);
+                                    } else if (templateType === 'pago-comisiones') {
+                                      router.push(`/dashboard/solicitante/editar-comisiones/${s.id_solicitud}`);
+                                    } else if (templateType === 'pago-polizas') {
+                                      router.push(`/dashboard/solicitante/editar-polizas/${s.id_solicitud}`);
+                                    } else if (templateType === 'regresos-transferencia') {
+                                      router.push(`/dashboard/solicitante/editar-regresos-transferencia/${s.id_solicitud}`);
                                     } else {
                                       router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
                                     }
@@ -1077,10 +1100,23 @@ function MisSolicitudesContent() {
                                 title="Editar"
                                 className="flex items-center gap-1 px-3 py-2 rounded-lg bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors text-sm font-medium"
                                 onClick={() => {
+                                  // Detección por plantilla robusta
+                                  const templateTypeMobile = getTemplateType(s);
+                                  const templateType = getTemplateType(s);
                                   if (isN09TokaSolicitud(s)) {
                                     router.push(`/dashboard/solicitante/editar-solicitud-n09-toka/${s.id_solicitud}`);
                                   } else if (isTukashSolicitud(s)) {
                                     router.push(`/dashboard/solicitante/editar-tukash/${s.id_solicitud}`);
+                                  } else if (templateTypeMobile === 'pago-sua-internas') {
+                                    router.push(`/dashboard/solicitante/editar-sua-internas/${s.id_solicitud}`);
+                                  } else if (templateTypeMobile === 'pago-sua-frenshetsi') {
+                                    router.push(`/dashboard/solicitante/editar-sua-frenshetsi/${s.id_solicitud}`);
+                                  } else if (templateTypeMobile === 'pago-comisiones') {
+                                    router.push(`/dashboard/solicitante/editar-comisiones/${s.id_solicitud}`);
+                                  } else if (templateTypeMobile === 'pago-polizas-gnp') {
+                                    router.push(`/dashboard/solicitante/editar-polizas/${s.id_solicitud}`);
+                                  } else if (templateTypeMobile === 'regresos-transferencia') {
+                                    router.push(`/dashboard/solicitante/editar-regresos-transferencia/${s.id_solicitud}`);
                                   } else {
                                     router.push(`/dashboard/solicitante/editar-solicitud/${s.id_solicitud}`);
                                   }
