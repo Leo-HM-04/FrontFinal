@@ -1,4 +1,5 @@
 "use client";
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 
@@ -82,17 +83,19 @@ export default function EditarTukashPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Editar Solicitud TUKASH</h1>
-      {plantillaTukash && (
-        <EditarTukash
-          plantilla={plantillaTukash}
-          datosPlantilla={estado.datos}
-          onGuardar={handleGuardar}
-          actualizarCampo={actualizarCampo}
-          estado={estado}
-        />
-      )}
-    </div>
+    <SolicitanteLayout>
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6">Editar Solicitud TUKASH</h1>
+        {plantillaTukash && (
+          <EditarTukash
+            plantilla={plantillaTukash}
+            datosPlantilla={estado.datos}
+            onGuardar={handleGuardar}
+            actualizarCampo={actualizarCampo}
+            estado={estado}
+          />
+        )}
+      </div>
+    </SolicitanteLayout>
   );
 }

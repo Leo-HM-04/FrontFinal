@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditarRegresosTransferencia from '@/components/plantillas/EditarRegresosTransferencia';
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
 import type { Solicitud } from '@/types';
@@ -64,17 +65,19 @@ export default function EditarRegresosTransferenciaPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Editar Solicitud REGRESOS EN TRANSFERENCIA</h1>
-      {plantillaRegresos && (
-        <EditarRegresosTransferencia
-          plantilla={plantillaRegresos}
-          datosPlantilla={estado.datos}
-          onGuardar={handleGuardar}
-          actualizarCampo={actualizarCampo}
-          estado={estado}
-        />
-      )}
-    </div>
+    <SolicitanteLayout>
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6">Editar Solicitud REGRESOS EN TRANSFERENCIA</h1>
+        {plantillaRegresos && (
+          <EditarRegresosTransferencia
+            plantilla={plantillaRegresos}
+            datosPlantilla={estado.datos}
+            onGuardar={handleGuardar}
+            actualizarCampo={actualizarCampo}
+            estado={estado}
+          />
+        )}
+      </div>
+    </SolicitanteLayout>
   );
 }

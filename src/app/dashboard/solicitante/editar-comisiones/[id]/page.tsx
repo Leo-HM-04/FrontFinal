@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditarComisiones from '@/components/plantillas/EditarComisiones';
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
 import type { Solicitud } from '@/types';
@@ -51,14 +52,16 @@ export default function EditarComisionesPage() {
   }, [solicitudId]);
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Editar Pago de Comisiones</h1>
-      <EditarComisiones
-        plantilla={plantillasDisponibles.find(p => p.id === 'pago-comisiones')!}
-        datosPlantilla={estado.datos}
-        estado={estado}
-        actualizarCampo={actualizarCampo}
-      />
-    </div>
+    <SolicitanteLayout>
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6">Editar Pago de Comisiones</h1>
+        <EditarComisiones
+          plantilla={plantillasDisponibles.find(p => p.id === 'pago-comisiones')!}
+          datosPlantilla={estado.datos}
+          estado={estado}
+          actualizarCampo={actualizarCampo}
+        />
+      </div>
+    </SolicitanteLayout>
   );
 }

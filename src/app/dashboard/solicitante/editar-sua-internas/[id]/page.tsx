@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditarSuaInternas from '@/components/plantillas/EditarSuaInternas';
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
 import type { Solicitud } from '@/types';
@@ -51,14 +52,16 @@ export default function EditarSuaInternasPage() {
   }, [solicitudId]);
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Editar Pago SUA INTERNAS</h1>
-      <EditarSuaInternas
-        plantilla={plantillasDisponibles.find(p => p.id === 'pago-sua-internas')!}
-        datosPlantilla={estado.datos}
-        estado={estado}
-        actualizarCampo={actualizarCampo}
-      />
-    </div>
+    <SolicitanteLayout>
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6">Editar Pago SUA INTERNAS</h1>
+        <EditarSuaInternas
+          plantilla={plantillasDisponibles.find(p => p.id === 'pago-sua-internas')!}
+          datosPlantilla={estado.datos}
+          estado={estado}
+          actualizarCampo={actualizarCampo}
+        />
+      </div>
+    </SolicitanteLayout>
   );
 }

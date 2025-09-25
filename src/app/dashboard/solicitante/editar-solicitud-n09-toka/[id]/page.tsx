@@ -1,4 +1,5 @@
 "use client";
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditarN09Toka from '@/components/plantillas/EditarN09Toka';
@@ -48,14 +49,16 @@ export default function EditarN09TokaPage() {
 
   // Renderizar el formulario de edición N09/TOKA
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Editar Solicitud N09/TOKA</h1>
-      <EditarN09Toka
-        plantilla={plantillasDisponibles.find(p => p.id === 'tarjetas-n09-toka')!}
-        datosPlantilla={estado.datos}
-        estado={estado}
-        actualizarCampo={actualizarCampo}
-      />
-    </div>
+    <SolicitanteLayout>
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-2xl font-bold mb-6">Editar Solicitud N09/TOKA</h1>
+        <EditarN09Toka
+          plantilla={plantillasDisponibles.find(p => p.id === 'tarjetas-n09-toka')!}
+          datosPlantilla={estado.datos}
+          estado={estado}
+          actualizarCampo={actualizarCampo}
+        />
+      </div>
+    </SolicitanteLayout>
   );
 }
