@@ -305,9 +305,9 @@ export default function NuevoViaticoPage() {
     }
   };
 
-  // Función para generar la plantilla HTML mejorada
-  const generateImprovedTemplate = () => {
-    return `
+// Función para generar la plantilla HTML mejorada que se parece al Word
+const generateImprovedTemplate = () => {
+  return `
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -316,177 +316,246 @@ export default function NuevoViaticoPage() {
   <title>Solicitud y Desglose de Viáticos</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'Calibri', 'Arial', sans-serif;
       margin: 0;
-      padding: 0;
-      color: #222;
+      padding: 20px;
+      color: #000;
       background: #fff;
+      line-height: 1.4;
+      font-size: 11pt;
     }
     .container {
-      max-width: 800px;
+      max-width: 210mm;
       margin: 0 auto;
       background: #fff;
-      padding: 40px 40px 30px 40px;
+      padding: 25mm 20mm;
       box-sizing: border-box;
-      min-height: 100vh;
+      min-height: 297mm;
     }
     .logo {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
     .logo img {
-      max-width: 180px;
-      margin-bottom: 10px;
+      max-width: 200px;
+      height: auto;
     }
     .title {
       text-align: center;
-      font-size: 28px;
+      font-size: 18pt;
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+      text-decoration: underline;
     }
-    .subtitle {
-      text-align: center;
-      font-size: 18px;
-      font-weight: 500;
-      margin-bottom: 24px;
+    .section-text {
+      text-align: justify;
+      font-size: 11pt;
+      margin-bottom: 15px;
+      line-height: 1.5;
     }
-    .desc {
-      text-align: left;
-      font-size: 14px;
-      margin-bottom: 18px;
+    .section-label {
+      font-weight: bold;
+      font-size: 11pt;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    .example-text {
+      font-style: italic;
+      color: #666;
+      margin-bottom: 15px;
     }
     .table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 18px;
+      margin: 15px 0;
+      font-size: 11pt;
     }
     .table th, .table td {
-      border: 1px solid #888;
-      padding: 8px 10px;
-      font-size: 14px;
+      border: 1px solid #000;
+      padding: 8px 6px;
+      text-align: left;
+      vertical-align: top;
     }
     .table th {
-      background: #f3f6fa;
+      background: #f0f0f0;
       font-weight: bold;
-      text-align: left;
     }
-    .table .cat {
-      width: 35%;
+    .table .col-categoria {
+      width: 30%;
     }
-    .table .monto {
-      width: 20%;
-      text-align: right;
+    .table .col-monto {
+      width: 25%;
+      text-align: center;
     }
-    .table .coment {
+    .table .col-comentarios {
       width: 45%;
     }
-    .comprobante {
-      border: 1px solid #888;
-      min-height: 120px;
-      margin-bottom: 18px;
-      padding: 12px;
-      background: #fafbfc;
+    .table .total-row {
+      font-weight: bold;
     }
-    .advert {
-      background: #fff8dc;
-      border: 1px solid #e0c97f;
-      padding: 16px 18px;
-      margin-bottom: 24px;
-      font-size: 14px;
+    .comprobante-section {
+      margin: 20px 0;
     }
-    .advert ul {
-      margin: 0 0 0 18px;
+    .comprobante-box {
+      border: 1px solid #000;
+      min-height: 100px;
+      margin: 10px 0;
+      padding: 10px;
+      background: #fff;
+    }
+    .advertencias {
+      margin-top: 25px;
+      margin-bottom: 30px;
+    }
+    .advertencias-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 11pt;
+    }
+    .advertencias ul {
+      margin: 0 0 0 20px;
       padding: 0;
     }
-    .advert li {
+    .advertencias li {
       margin-bottom: 8px;
+      text-align: justify;
+      line-height: 1.4;
     }
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #888;
+    .firmas-section {
       margin-top: 40px;
-      border-top: 1.5px solid #3A75BD;
-      padding-top: 10px;
-    }
-    .firma-section {
-      margin-top: 30px;
+      margin-bottom: 30px;
     }
     .firmas-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 20px;
     }
     .firmas-table td {
-      border: 1px solid #888;
-      height: 70px;
+      border: 1px solid #000;
+      height: 80px;
       text-align: center;
       vertical-align: bottom;
-      font-size: 13px;
+      width: 50%;
+      padding: 10px;
     }
     .firma-label {
       font-weight: bold;
-      margin-bottom: 8px;
+      margin-bottom: 40px;
       display: block;
     }
     .firma-line {
-      border-bottom: 1px solid #888;
-      width: 80%;
-      margin: 0 auto 5px auto;
+      border-bottom: 1px solid #000;
+      width: 70%;
+      margin: 0 auto 8px auto;
+      height: 1px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 9pt;
+      color: #555;
+      margin-top: 30px;
+      border-top: 2px solid #3A75BD;
+      padding-top: 10px;
+    }
+    .underline-field {
+      border-bottom: 1px solid #000;
+      display: inline-block;
+      min-width: 400px;
       height: 18px;
-      display: block;
+      margin-left: 5px;
+    }
+    
+    /* Estilos para impresión */
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        margin: 0;
+        padding: 20mm;
+        max-width: none;
+        width: 100%;
+        min-height: auto;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Logo -->
     <div class="logo">
       <img src="https://bechapra.com/wp-content/uploads/2023/07/Logo-Bechapra-azul.png" alt="Bechapra logo" />
     </div>
+    
+    <!-- Título principal -->
     <div class="title">Solicitud y Desglose de Viáticos</div>
-    <div class="subtitle">Formato oficial para solicitud y desglose de viáticos</div>
-    <div class="desc">
-      Este formato permite describir con claridad a qué está destinado cada solicitud de viático, respetando el proceso previamente implementado por el Departamento de Tesorería (TESO).<br>
-      Si se requieren varios viáticos para el mismo evento o periodo, este mismo documento puede adjuntarse en cada solicitud.
+    
+    <!-- Descripción inicial -->
+    <div class="section-text">
+      Este formato permite describir con claridad a qué está destinado cada solicitud de viático, 
+      respetando el proceso previamente implementado por el Departamento de Tesorería (TESO). 
+      Si se requieren varios viáticos para el mismo evento o periodo, este mismo documento puede 
+      adjuntarse en cada solicitud.
     </div>
-    <div class="desc"><b>Motivo del viático:</b><br>Ej. Reunión con cliente CDMX</div>
-    <div class="desc"><b>Resumen por categoría:</b></div>
+    
+    <!-- Motivo del viático -->
+    <div class="section-label">Motivo del viático:</div>
+    <div class="example-text">Ej. Reunión con cliente CDMX</div>
+    <div class="underline-field"></div>
+    
+    <!-- Resumen por categoría -->
+    <div class="section-label">Resumen por categoría:</div>
+    
     <table class="table">
-      <tr>
-        <th class="cat">Categoría</th>
-        <th class="monto">Monto (MXN)</th>
-        <th class="coment">Comentarios / Ejemplo</th>
-      </tr>
-      <tr>
-        <td>Ej. Transporte</td>
-        <td>$</td>
-        <td>Ej.: Uber ida y regreso Santa Fe</td>
-      </tr>
-      <tr>
-        <td>Ej. Hospedaje</td>
-        <td>$___</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>Alimentos</td>
-        <td>$___</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>Otros (especificar)</td>
-        <td>$___</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><b>TOTAL</b></td>
-        <td><b>$___</b></td>
-        <td></td>
-      </tr>
+      <thead>
+        <tr>
+          <th class="col-categoria">Categoría</th>
+          <th class="col-monto">Monto (MXN)</th>
+          <th class="col-comentarios">Comentarios / Ejemplo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ej. Transporte</td>
+          <td>$</td>
+          <td>Ej.: Uber ida y regreso Santa Fe</td>
+        </tr>
+        <tr>
+          <td>Ej. Hospedaje</td>
+          <td>$___</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Alimentos</td>
+          <td>$___</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Otros (especificar)</td>
+          <td>$___</td>
+          <td></td>
+        </tr>
+        <tr class="total-row">
+          <td><strong>TOTAL</strong></td>
+          <td><strong>$___</strong></td>
+          <td></td>
+        </tr>
+      </tbody>
     </table>
-    <div class="desc"><b>Comprobante:</b><br>Inserta aquí la fotografía del comprobante o adjunta el archivo correspondiente.</div>
-    <div class="comprobante"></div>
-    <div class="advert">
-      <b>Advertencias para el envío de comprobantes:</b>
+    
+    <!-- Comprobante -->
+    <div class="comprobante-section">
+      <div class="section-label">Comprobante:</div>
+      <div class="section-text">
+        Inserta aquí la fotografía del comprobante o adjunta el archivo correspondiente.
+      </div>
+      <div class="comprobante-box"></div>
+    </div>
+    
+    <!-- Advertencias -->
+    <div class="advertencias">
+      <div class="advertencias-title">Advertencias para el envío de comprobantes:</div>
       <ul>
         <li>Si el comprobante es un documento (PDF, Word, Excel), adjúntalo aparte de esta plantilla.</li>
         <li>Cuida la presentación y la legibilidad: enfoca, recorta bordes y confirma que se lean monto, fecha y conceptos.</li>
@@ -494,31 +563,17 @@ export default function NuevoViaticoPage() {
         <li>Incluye contexto suficiente (proveedor, concepto, fecha, monto desglosado e información de pago). Evita enviar una imagen borrosa o un mensaje suelto; agrega una nota breve en 'Comentarios' si aplica.</li>
       </ul>
     </div>
-    <div class="firma-section">
-      <table class="firmas-table">
-        <tr>
-          <td>
-            <span class="firma-label">Solicitante</span>
-            <span class="firma-line"></span>
-            Firma
-          </td>
-          <td>
-            <span class="firma-label">Autoriza</span>
-            <span class="firma-line"></span>
-            Firma
-          </td>
-        </tr>
-      </table>
-    </div>
+    
+    <!-- Footer -->
     <div class="footer">
       Av. Insurgentes Sur 1079, Col del Valle Sur, Benito Juárez, Ciudad de México 03720, México<br>
-      <b>@bechapra | bechapra.com</b>
+      <strong>@bechapra | bechapra.com</strong>
     </div>
   </div>
 </body>
 </html>
-    `;
-  };
+  `;
+};
 
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
