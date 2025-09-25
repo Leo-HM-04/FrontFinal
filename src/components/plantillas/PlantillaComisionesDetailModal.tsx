@@ -306,37 +306,22 @@ const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudA
   }
 };
 
-export function PlantillaComisionesDetailModal({ 
-  solicitud, 
-  isOpen, 
-  onClose
-}: PlantillaComisionesDetailModalProps) {
+
+export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: PlantillaComisionesDetailModalProps) {
   // Estados
   const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
-  
-  const [loading, setLoading] = useState<LoadingStateComisiones>({
-    archivos: false,
-    general: false,
-  });
-  
-  const [errors, setErrors] = useState<ErrorStateComisiones>({
-    archivos: null,
-    general: null,
-  });
+  const [loading, setLoading] = useState<LoadingStateComisiones>({ archivos: false, general: false });
+  const [errors, setErrors] = useState<ErrorStateComisiones>({ archivos: null, general: null });
 
   // Hooks personalizados
   const { handleError } = useErrorHandler();
-
-  // Cast de la solicitud para acceder a campos adicionales
   const solicitudExtended = solicitud as SolicitudComisionesExtended;
 
   // Función para obtener archivos
   const fetchArchivos = useCallback(async () => {
     if (!solicitud) return;
-    
     setLoading(prev => ({ ...prev, archivos: true }));
     setErrors(prev => ({ ...prev, archivos: null }));
-    
     try {
       const data = await obtenerArchivosSolicitud(solicitud.id_solicitud || 0);
       setArchivos(data);
@@ -348,14 +333,12 @@ export function PlantillaComisionesDetailModal({
     }
   }, [solicitud, handleError]);
 
-  // Efectos
   useEffect(() => {
     if (isOpen && solicitud) {
       fetchArchivos();
     }
   }, [isOpen, solicitud, fetchArchivos]);
 
-  // Resetear estados al cerrar
   useEffect(() => {
     if (!isOpen) {
       setArchivos([]);
@@ -364,19 +347,16 @@ export function PlantillaComisionesDetailModal({
     }
   }, [isOpen]);
 
-  // Función para manejar teclas de escape
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
-
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
     }
-
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
@@ -386,252 +366,138 @@ export function PlantillaComisionesDetailModal({
   if (!isOpen || !solicitud) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-      {/* Overlay mejorado */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-blue-900/60 backdrop-blur-sm">
+      {/* Overlay */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-blue-900/90 to-indigo-900/85 backdrop-blur-sm transition-all duration-500"
+        className="absolute inset-0"
         onClick={onClose}
         role="button"
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
-      
-      {/* Modal container mejorado */}
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-[95vw] sm:max-w-5xl xl:max-w-6xl max-h-[95vh] overflow-hidden border border-slate-200">
-        {/* Botón de cerrar mejorado */}
+      {/* Modal container: igual SUA Frenshetsi */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100">
+        {/* Botón de cerrar */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 z-30 bg-white hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border border-slate-200 hover:border-red-200"
+          className="absolute top-3 right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
           aria-label="Cerrar modal"
         >
           <X className="w-6 h-6" />
         </button>
-
-        {/* Contenido con scroll mejorado */}
-        <div className="overflow-y-auto max-h-[95vh] scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-blue-400 hover:scrollbar-thumb-blue-500">
-          
-          {/* Header BECHAPRA mejorado */}
-          <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white p-8 relative overflow-hidden">
-            {/* Elementos decorativos */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
-            
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="bg-white/20 backdrop-blur-sm p-4 rounded-2xl shadow-lg">
-                  <CreditCard className="w-10 h-10 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold mb-1">PAGO COMISIONES</h1>
-                  <div className="flex items-center gap-4 text-blue-100">
-                    <span className="text-lg font-semibold">Solicitud #{solicitud.id_solicitud}</span>
-                    {solicitudExtended.folio && (
-                      <>
-                        <span className="w-1 h-1 bg-blue-300 rounded-full"></span>
-                        <span>Folio: {solicitudExtended.folio}</span>
-                      </>
-                    )}
-                  </div>
+        {/* Layout horizontal */}
+        <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
+          {/* Columna izquierda: info principal y auditoría */}
+          <div className="flex-1 min-w-0">
+            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
+              <div className="bg-white/20 p-3 rounded-lg">
+                <CreditCard className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                  <span>PAGO COMISIONES</span>
+                </h2>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  <span className="inline-flex items-center gap-1 text-blue-100 text-sm"><FileText className="w-4 h-4" />Solicitud #{solicitud.id_solicitud}</span>
+                  {solicitudExtended.folio && (
+                    <span className="inline-flex items-center gap-1 text-blue-100 text-sm"><CreditCard className="w-4 h-4" />Folio: {solicitudExtended.folio}</span>
+                  )}
                 </div>
               </div>
-              <div className={`px-6 py-3 rounded-2xl text-base font-bold shadow-lg ${getEstadoColor(solicitud.estado || 'pendiente')}`}>
+              <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 bg-white/80 text-blue-700 border-blue-300 shadow-sm flex items-center gap-2`}>
+                <CreditCard className="w-4 h-4" />
                 {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
+              </span>
+            </header>
+            {/* Información Principal */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-2" />
+                <InfoField label="Empresa" value={solicitud.empresa} />
+                <InfoField label="Cliente/Concepto" value={solicitud.cliente} />
+                <InfoField label="Monto Total" value={solicitud.monto} variant="currency" />
+                <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
               </div>
             </div>
-          </header>
-          
-          <div className="p-8">
-            {/* Información Principal mejorada */}
-            <div className="mb-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-slate-800">Información Principal</h2>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-2xl border border-slate-200">
-                <InfoField 
-                  label="Asunto" 
-                  value={solicitud.asunto} 
-                  className="md:col-span-2" 
-                  icon={<FileText className="w-4 h-4 text-slate-500" />}
-                />
-                <InfoField 
-                  label="Empresa" 
-                  value={solicitud.empresa} 
-                  icon={<Building2 className="w-4 h-4 text-slate-500" />}
-                />
-                <InfoField 
-                  label="Cliente/Concepto" 
-                  value={solicitud.cliente} 
-                  icon={<User className="w-4 h-4 text-slate-500" />}
-                />
-                <InfoField 
-                  label="Monto Total" 
-                  value={solicitud.monto} 
-                  variant="currency" 
-                  icon={<DollarSign className="w-4 h-4 text-slate-500" />}
-                />
-                <InfoField 
-                  label="Fecha Límite" 
-                  value={solicitud.fecha_limite} 
-                  variant="date" 
-                  icon={<Calendar className="w-4 h-4 text-slate-500" />}
-                />
-              </div>
-            </div>
-
-            {/* Información de Comisión mejorada */}
+            {/* Detalles de Comisión */}
             {(solicitud.porcentaje_comision || solicitud.periodo_comision) && (
-              <div className="mb-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-emerald-600" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-slate-800">Detalles de Comisión</h2>
-                </div>
-                
-                <div className="p-6 bg-gradient-to-br from-emerald-50 to-green-50/50 rounded-2xl border border-emerald-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InfoField 
-                      label="Porcentaje de Comisión" 
-                      value={solicitud.porcentaje_comision} 
-                      variant="percentage"
-                      icon={<DollarSign className="w-4 h-4 text-slate-500" />}
-                    />
-                    <InfoField 
-                      label="Periodo de Comisión" 
-                      value={solicitud.periodo_comision}
-                      icon={<Calendar className="w-4 h-4 text-slate-500" />}
-                    />
-                  </div>
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><DollarSign className="w-5 h-5 text-blue-500" />Detalles de Comisión</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoField label="Porcentaje de Comisión" value={solicitud.porcentaje_comision} variant="percentage" />
+                  <InfoField label="Periodo de Comisión" value={solicitud.periodo_comision} />
                 </div>
               </div>
             )}
-            
-            {/* Información de Aprobación mejorada */}
+            {/* Información de Aprobación */}
             {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
-              <div className="mb-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                    <User className="w-5 h-5 text-indigo-600" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-slate-800">Información de Aprobación</h2>
-                </div>
-                
-                <div className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50/50 rounded-2xl border border-indigo-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InfoField 
-                      label="ID Aprobador" 
-                      value={solicitudExtended.id_aprobador?.toString()} 
-                      icon={<User className="w-4 h-4 text-slate-500" />}
-                    />
-                    <InfoField 
-                      label="Fecha de Aprobación" 
-                      value={solicitudExtended.fecha_aprobacion} 
-                      variant="date" 
-                      icon={<Calendar className="w-4 h-4 text-slate-500" />}
-                    />
-                    <div className="md:col-span-2">
-                      <InfoField 
-                        label="Comentarios de Aprobación" 
-                        value={solicitudExtended.comentarios_aprobacion} 
-                        icon={<FileText className="w-4 h-4 text-slate-500" />}
-                      />
-                    </div>
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
+                  <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion} variant="date" />
+                  <div className="md:col-span-2">
+                    <InfoField label="Comentarios de Aprobación" value={solicitudExtended.comentarios_aprobacion} />
                   </div>
                 </div>
               </div>
             )}
-
-            {/* Archivos Adjuntos mejorados */}
-            <div className="mb-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-purple-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-slate-800">Archivos Adjuntos</h2>
+            {/* Información de Auditoría */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información de Auditoría</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion} variant="date" />
+                <InfoField label="Fecha de Actualización" value={solicitud.fecha_actualizacion} variant="date" />
+                <InfoField label="Usuario de Creación" value={solicitud.usuario_creacion} />
+                <InfoField label="Usuario de Actualización" value={solicitud.usuario_actualizacion} />
               </div>
-              
+            </div>
+          </div>
+          {/* Columna derecha: archivos adjuntos */}
+          <div className="w-full lg:w-[420px] flex-shrink-0">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
               {loading.archivos && (
-                <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-slate-200">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-6">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-blue-600"></div>
-                  </div>
-                  <p className="text-slate-600 font-semibold text-lg">Cargando archivos...</p>
-                  <p className="text-slate-500 text-sm mt-2">Por favor espere un momento</p>
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Cargando archivos...</p>
                 </div>
               )}
-
               {errors.archivos && (
-                <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-2xl shadow-sm">
+                <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
                   <div className="flex">
                     <div className="flex-shrink-0">
-                      <X className="h-6 w-6 text-red-500" />
+                      <X className="h-5 w-5 text-red-400" />
                     </div>
-                    <div className="ml-4">
-                      <p className="text-base font-semibold text-red-800">Error al cargar archivos</p>
-                      <p className="text-sm text-red-700 mt-1">{errors.archivos}</p>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{errors.archivos}</p>
                     </div>
                   </div>
                 </div>
               )}
-
               {!loading.archivos && !errors.archivos && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="flex flex-col items-center justify-center w-full">
                   {archivos && archivos.length > 0 ? (
                     archivos.map((archivo) => (
-                      <FilePreview key={archivo.id} archivo={archivo} />
+                      <div key={archivo.id} className="w-full flex justify-center">
+                        <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
+                          {/* Preview area grande */}
+                          <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                            <FilePreview archivo={archivo} />
+                          </div>
+                        </div>
+                      </div>
                     ))
                   ) : (
-                    <div className="col-span-full text-center py-16 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border-2 border-dashed border-slate-300">
-                      <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-full mb-6">
-                        <FileText className="w-10 h-10 text-slate-400" />
-                      </div>
-                      <h3 className="text-xl font-bold text-slate-700 mb-2">No hay archivos adjuntos</h3>
-                      <p className="text-slate-500 max-w-md mx-auto">Los documentos aparecerán aquí cuando sean cargados por el solicitante</p>
+                    <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
+                      <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
                     </div>
                   )}
                 </div>
               )}
-            </div>
-
-            {/* Información de Auditoría mejorada */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-slate-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-slate-800">Información de Auditoría</h2>
-              </div>
-              
-              <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-2xl border border-slate-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InfoField 
-                    label="Fecha de Creación" 
-                    value={solicitud.fecha_creacion} 
-                    variant="date" 
-                    icon={<Calendar className="w-4 h-4 text-slate-500" />}
-                  />
-                  <InfoField 
-                    label="Fecha de Actualización" 
-                    value={solicitud.fecha_actualizacion} 
-                    variant="date" 
-                    icon={<Calendar className="w-4 h-4 text-slate-500" />}
-                  />
-                  <InfoField 
-                    label="Usuario de Creación" 
-                    value={solicitud.usuario_creacion} 
-                    icon={<User className="w-4 h-4 text-slate-500" />}
-                  />
-                  <InfoField 
-                    label="Usuario de Actualización" 
-                    value={solicitud.usuario_actualizacion} 
-                    icon={<User className="w-4 h-4 text-slate-500" />}
-                  />
-                </div>
-              </div>
             </div>
           </div>
         </div>

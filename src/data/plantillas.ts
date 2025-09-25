@@ -952,7 +952,7 @@ export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
   nombre: 'PAGO POLIZAS',
   descripcion: 'Plantilla para solicitudes de pago de pólizas y otras aseguradoras',
   version: '1.0.0',
-  activa: true,
+  activa: false,
   categoria: 'pagos',
   icono: Shield,
   secciones: [
@@ -1117,7 +1117,7 @@ export const plantillaRegresosTransferencia: PlantillaSolicitud = {
   nombre: 'REGRESOS EN TRANSFERENCIA',
   descripcion: 'Plantilla para solicitudes de regreso de transferencias bancarias',
   version: '1.0.0',
-  activa: true,
+  activa: false,
   categoria: 'regresos',
   icono: ArrowLeftRight,
   secciones: [

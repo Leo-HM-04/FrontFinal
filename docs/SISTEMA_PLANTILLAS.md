@@ -181,7 +181,7 @@ Plantilla especializada para solicitudes de pago a proveedores de tarjetas N09 y
 #### Sección 1: Información Básica
 - **Asunto:** Radio buttons para elegir entre:
   - "PAGO A PROVEEDOR DE TARJETA N09"
-  - "TOKA PARA FONDEO TARJETA AVIT 020925"
+  - "TOKA PARA FONDEO TARJETA"
 - **Beneficiario:** Campo de texto para el nombre del beneficiario
 
 #### Sección 2: Datos Bancarios
