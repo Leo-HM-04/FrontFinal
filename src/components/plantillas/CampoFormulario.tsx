@@ -317,9 +317,9 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
               selected={fechaValue}
               onChange={(date: Date | null) => {
                 if (date) {
-                  // Ajustar la fecha para compensar la zona horaria local y evitar desfase
+                  // Sumar el offset de zona horaria para que la fecha guardada sea la seleccionada
                   const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-                  const localDate = new Date(date.getTime() - userTimezoneOffset);
+                  const localDate = new Date(date.getTime() + userTimezoneOffset);
                   onChange(formatDateForAPI(localDate));
                 } else {
                   onChange('');
