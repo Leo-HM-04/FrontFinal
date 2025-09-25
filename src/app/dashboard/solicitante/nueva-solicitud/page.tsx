@@ -833,6 +833,14 @@ export default function NuevaSolicitudPage() {
     }
   };
 
+  // Handler para guardar desde FormularioPlantilla (sin evento)
+  const handleGuardarPlantilla = async () => {
+    const syntheticEvent = {
+      preventDefault: () => {}
+    } as React.FormEvent;
+    await handleSubmit(syntheticEvent);
+  };
+
   return (
     <ProtectedRoute requiredRoles={['solicitante']}>
       <SolicitanteLayout>
@@ -868,6 +876,7 @@ export default function NuevaSolicitudPage() {
                 errores={estadoPlantilla.errores}
                 camposVisibles={estadoPlantilla.camposVisibles}
                 onCambiarCampo={actualizarCampo}
+                onGuardar={handleGuardarPlantilla}
               />
               
               {/* Botón de envío para plantilla */}
