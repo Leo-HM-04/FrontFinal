@@ -23,6 +23,8 @@ import { PlantillaSuaInternasDetailModal } from '@/components/plantillas/Plantil
 import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
 import { PlantillaSuaFrenshetsiDetailModal } from '../plantillas/PlantillaSuaFrenshetsiDetailModal';
 import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
+import { PlantillaComisionesDetailModal } from '../plantillas/PlantillaComisionesDetailModal';
+import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
@@ -503,6 +505,75 @@ function isSuaFrenshetsiSolicitud(solicitud: Solicitud | null): boolean {
   return false;
 }
 
+// Función para detectar si una solicitud es PAGO COMISIONES
+function isComisionesSolicitud(solicitud: Solicitud | null): boolean {
+  if (!solicitud) return false;
+  
+  console.log(`🔍 [COMISIONES DETECCIÓN] Analizando solicitud ID: ${solicitud.id_solicitud}`);
+  
+  // Cast para acceder a campos extendidos
+  const solicitudExtendida = solicitud as Solicitud & { tipo_plantilla?: string };
+  
+  // 1. Verificar por tipo_plantilla
+  console.log(`🔍 [COMISIONES DETECCIÓN] tipo_plantilla: ${solicitudExtendida.tipo_plantilla}`);
+  if (solicitudExtendida.tipo_plantilla === 'PAGO_COMISIONES' || solicitudExtendida.tipo_plantilla === 'pago-comisiones') {
+    console.log('✅ [COMISIONES DETECCIÓN] Detectada por tipo_plantilla');
+    return true;
+  }
+  
+  // 2. Verificar por plantillaId en plantilla_datos
+  const plantillaId = detectarPlantillaId(solicitud);
+  console.log(`🔍 [COMISIONES DETECCIÓN] plantillaId detectado: ${plantillaId}`);
+  if (plantillaId === 'pago-comisiones') {
+    console.log('✅ [COMISIONES DETECCIÓN] Detectada por plantillaId = pago-comisiones');
+    return true;
+  }
+  
+  // 3. Verificar por contenido de plantilla_datos
+  console.log(`🔍 [COMISIONES DETECCIÓN] plantilla_datos existe: ${!!solicitud.plantilla_datos}`);
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = JSON.parse(solicitud.plantilla_datos);
+      console.log(`🔍 [COMISIONES DETECCIÓN] plantilla_datos contenido:`, plantillaData);
+      
+      const esComisiones = plantillaData.templateType === 'pago-comisiones' || 
+             plantillaData.isComisiones === true || 
+             (plantillaData.porcentaje_comision && plantillaData.periodo_comision) ||
+             plantillaData.tipo_comision;
+      
+      if (esComisiones) {
+        console.log('✅ [COMISIONES DETECCIÓN] Detectada por análisis de plantilla_datos');
+        return true;
+      }
+    } catch (error) {
+      console.log('⚠️ [COMISIONES DETECCIÓN] Error parseando plantilla_datos:', error);
+    }
+  }
+  
+  // 4. Verificar por tipo_pago_descripcion
+  console.log(`🔍 [COMISIONES DETECCIÓN] tipo_pago_descripcion: ${solicitud.tipo_pago_descripcion}`);
+  if (solicitud.tipo_pago_descripcion && (
+      solicitud.tipo_pago_descripcion.includes('COMISION') || 
+      solicitud.tipo_pago_descripcion.includes('COMISIONES')
+    )) {
+    console.log('✅ [COMISIONES DETECCIÓN] Detectada por tipo_pago_descripcion');
+    return true;
+  }
+  
+  // 5. Verificar por concepto que contenga COMISION o COMISIONES
+  console.log(`🔍 [COMISIONES DETECCIÓN] concepto: ${solicitud.concepto}`);
+  if (solicitud.concepto && (
+      solicitud.concepto.includes('COMISION') || 
+      solicitud.concepto.includes('COMISIONES')
+    )) {
+    console.log('✅ [COMISIONES DETECCIÓN] Detectada por concepto');
+    return true;
+  }
+  
+  console.log('❌ [COMISIONES DETECCIÓN] No se detectó como PAGO COMISIONES');
+  return false;
+}
+
 export function SolicitudDetailModal({ 
   solicitud, 
   isOpen, 
@@ -865,6 +936,135 @@ export function SolicitudDetailModal({
       return (
         <PlantillaSuaInternasDetailModal
           solicitud={solicitudSuaInternas}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+    // Si no se pudo mapear, mostrar modal estándar
+  }
+
+  // Verificar si es una solicitud PAGO COMISIONES
+  if (isComisionesSolicitud(solicitud)) {
+    console.log('🎯 [COMISIONES] Detectada solicitud PAGO COMISIONES, procesando datos...');
+    
+    let solicitudComisiones: SolicitudComisionesData | null = null;
+    
+    // Verificar que solicitud no sea null
+    if (!solicitud) return null;
+    
+    // Intentar obtener datos desde plantilla_datos
+    if (solicitud.plantilla_datos) {
+      try {
+        const plantillaData = JSON.parse(solicitud.plantilla_datos);
+        console.log('📝 [COMISIONES] Datos de plantilla encontrados:', plantillaData);
+        
+        // Usar datos de plantilla si están disponibles
+        solicitudComisiones = {
+          id_solicitud: solicitud.id_solicitud,
+          asunto: plantillaData.asunto || '',
+          empresa: plantillaData.empresa || '',
+          cliente: plantillaData.cliente || '',
+          monto: plantillaData.monto || Number(solicitud.monto) || 0,
+          porcentaje_comision: plantillaData.porcentaje_comision,
+          fecha_limite: plantillaData.fecha_limite || '',
+          periodo_comision: plantillaData.periodo_comision,
+          archivos_adjuntos: plantillaData.archivos_adjuntos || [],
+          estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+          fecha_creacion: solicitud.fecha_creacion || '',
+          fecha_actualizacion: solicitud.updated_at || '',
+          usuario_creacion: solicitud.usuario_nombre || '',
+          usuario_actualizacion: '',
+        };
+      } catch {
+        console.log('❌ [COMISIONES] Error parseando plantilla_datos, usando datos base');
+      }
+    }
+    
+    // Si no se pudo mapear desde plantilla_datos, usar datos básicos de la solicitud
+    if (!solicitudComisiones) {
+      console.log('🔄 [COMISIONES] Construyendo desde datos básicos de solicitud...');
+      
+      // Extraer información del concepto si está presente
+      let asunto = solicitud.concepto || 'PAGO COMISIONES';
+      let cliente = '';
+      let empresa = '';
+      let porcentaje_comision: number | undefined;
+      let periodo_comision = '';
+      
+      // Intentar extraer información del concepto
+      if (solicitud.concepto) {
+        console.log('🔍 [COMISIONES] Analizando concepto:', solicitud.concepto);
+        
+        // Extraer solo el asunto principal (primera parte)
+        const asuntoMatch = solicitud.concepto.match(/^([^-]+)(?:\s*-)?/);
+        if (asuntoMatch) {
+          asunto = asuntoMatch[1].trim();
+          console.log('✅ [COMISIONES] Asunto extraído:', asunto);
+        }
+        
+        // Buscar Cliente: en el concepto
+        const clienteMatch = solicitud.concepto.match(/Cliente:\s*([^-\n,]+)/i);
+        if (clienteMatch) {
+          cliente = clienteMatch[1].trim();
+          console.log('✅ [COMISIONES] Cliente encontrado:', cliente);
+        }
+        
+        // Buscar Empresa: en el concepto
+        const empresaMatch = solicitud.concepto.match(/Empresa:\s*([^-\n,]+)/i);
+        if (empresaMatch) {
+          empresa = empresaMatch[1].trim();
+          console.log('✅ [COMISIONES] Empresa encontrada:', empresa);
+        }
+        
+        // Buscar porcentaje de comisión
+        const porcentajeMatch = solicitud.concepto.match(/(\d+(?:\.\d+)?)%/);
+        if (porcentajeMatch) {
+          porcentaje_comision = parseFloat(porcentajeMatch[1]);
+          console.log('✅ [COMISIONES] Porcentaje encontrado:', porcentaje_comision);
+        }
+        
+        // Buscar periodo (mensual, trimestral, etc.)
+        const periodoMatch = solicitud.concepto.match(/periodo:\s*([^-\n,]+)/i);
+        if (periodoMatch) {
+          periodo_comision = periodoMatch[1].trim();
+          console.log('✅ [COMISIONES] Periodo encontrado:', periodo_comision);
+        }
+      }
+      
+      // Si no se encontraron en el concepto, usar campos alternativos
+      if (!cliente) {
+        cliente = solicitud.empresa_a_pagar || solicitud.nombre_persona || '';
+      }
+      if (!empresa) {
+        empresa = solicitud.empresa_a_pagar || '';
+      }
+      
+      solicitudComisiones = {
+        id_solicitud: solicitud.id_solicitud,
+        asunto,
+        empresa,
+        cliente,
+        monto: Number(solicitud.monto) || 0,
+        porcentaje_comision,
+        fecha_limite: solicitud.fecha_limite_pago || '',
+        periodo_comision,
+        archivos_adjuntos: [],
+        estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+        fecha_creacion: solicitud.fecha_creacion || '',
+        fecha_actualizacion: solicitud.updated_at || '',
+        usuario_creacion: solicitud.usuario_nombre || '',
+        usuario_actualizacion: '',
+      };
+      
+      console.log('🔧 [COMISIONES] Datos construidos:', solicitudComisiones);
+    }
+    
+    if (solicitudComisiones) {
+      console.log('✅ [COMISIONES] Mostrando modal PAGO COMISIONES con datos:', solicitudComisiones);
+      return (
+        <PlantillaComisionesDetailModal
+          solicitud={solicitudComisiones}
           isOpen={isOpen}
           onClose={onClose}
         />
