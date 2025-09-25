@@ -337,7 +337,7 @@ const generateImprovedTemplate = () => {
       margin-bottom: 20px;
     }
     .logo img {
-      max-width: 200px;
+      max-width: 120px;
       height: auto;
     }
     .title {
@@ -398,10 +398,21 @@ const generateImprovedTemplate = () => {
     }
     .comprobante-box {
       border: 1px solid #000;
-      min-height: 100px;
-      margin: 10px 0;
-      padding: 10px;
+      min-height: 150px;
+      margin: 10px 0 20px 0;
+      padding: 0;
       background: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+    .comprobante-box-top {
+      border-bottom: 1px solid #000;
+      height: 75px;
+      width: 100%;
+    }
+    .comprobante-box-bottom {
+      height: 75px;
+      width: 100%;
     }
     .advertencias {
       margin-top: 25px;
@@ -485,7 +496,7 @@ const generateImprovedTemplate = () => {
   <div class="container">
     <!-- Logo -->
     <div class="logo">
-      <img src="https://bechapra.com/wp-content/uploads/2023/07/Logo-Bechapra-azul.png" alt="Bechapra logo" />
+      <img src="https://bechapra.com/wp-content/uploads/2022/11/b-bechapra-09-1024x973.png" alt="Bechapra logo" />
     </div>
     
     <!-- Título principal -->
@@ -550,7 +561,10 @@ const generateImprovedTemplate = () => {
       <div class="section-text">
         Inserta aquí la fotografía del comprobante o adjunta el archivo correspondiente.
       </div>
-      <div class="comprobante-box"></div>
+      <div class="comprobante-box">
+        <div class="comprobante-box-top"></div>
+        <div class="comprobante-box-bottom"></div>
+      </div>
     </div>
     
     <!-- Advertencias -->
