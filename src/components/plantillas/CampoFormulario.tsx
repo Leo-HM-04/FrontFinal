@@ -316,7 +316,14 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
             <DatePicker
               selected={fechaValue}
               onChange={(date: Date | null) => {
-                onChange(date ? formatDateForAPI(date) : '');
+                if (date) {
+                  // Ajustar la fecha para compensar la zona horaria local y evitar desfase
+                  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+                  const localDate = new Date(date.getTime() - userTimezoneOffset);
+                  onChange(formatDateForAPI(localDate));
+                } else {
+                  onChange('');
+                }
               }}
               dateFormat="yyyy-MM-dd"
               minDate={new Date()}
