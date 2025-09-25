@@ -288,6 +288,10 @@ export class SolicitudesService {
     formData.append('nombre_persona', (data.nombre_persona !== undefined && data.nombre_persona !== null) ? String(data.nombre_persona) : '');
     formData.append('cuenta', data.cuenta || '');
     formData.append('banco_cuenta', data.banco_cuenta || '');
+    // Agregar plantilla_datos si existe (igual que en createWithFiles)
+    if ('plantilla_datos' in data && data.plantilla_datos) {
+      formData.append('plantilla_datos', typeof data.plantilla_datos === 'string' ? data.plantilla_datos : JSON.stringify(data.plantilla_datos));
+    }
     // DEBUG: log FormData
     // for (let pair of formData.entries()) {
     //   console.log(pair[0]+ ': ' + pair[1]);
