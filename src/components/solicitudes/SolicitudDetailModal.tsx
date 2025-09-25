@@ -1677,7 +1677,8 @@ export function SolicitudDetailModal({
                   </Card>
                 )}
 
-                {/* Diagnóstico de datos de plantilla SIEMPRE visible */}
+                {/*
+                Diagnóstico de datos de plantilla SIEMPRE visible
                 <Card className="p-5 mb-8 bg-white border border-yellow-300 shadow rounded-xl">
                   <div className="flex items-center mb-3">
                     <FileText className="w-5 h-5 mr-2 text-yellow-700" />
@@ -1724,6 +1725,7 @@ export function SolicitudDetailModal({
                     )}
                   </div>
                 </Card>
+                */}
 
               </div>
             </div>
