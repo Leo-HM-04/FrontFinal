@@ -357,47 +357,44 @@ export function PlantillaSuaFrenshetsiDetailModal({
   if (!isOpen || !solicitud) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
-      {/* Overlay similar al modal de solicitudes */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-blue-900/60 backdrop-blur-sm">
+      {/* Overlay */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
+        className="absolute inset-0"
         onClick={onClose}
         role="button"
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
-      {/* Modal container similar a solicitudes */}
-      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+      {/* Modal container */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl max-h-[98vh] flex flex-col border border-blue-100">
         {/* Botón de cerrar */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 z-30 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-300"
+          className="absolute top-3 right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
           aria-label="Cerrar modal"
         >
-          <X className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+          <X className="w-5 h-5" />
         </button>
         {/* Contenido con scroll */}
-        <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 p-6">
+        <div className="overflow-y-auto max-h-[98vh] p-4 sm:p-6">
           {/* Header */}
-          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
-            <div className="absolute inset-0 bg-white/10 transform -skew-y-1"></div>
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 p-3 rounded-lg">
-                  <Factory className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">PAGO SUA FRENSHETSI</h2>
-                  <p className="text-blue-100 text-sm mt-1">Solicitud #{solicitud.id_solicitud}</p>
-                  {solicitudExtended.folio && (
-                    <p className="text-blue-100 text-sm mt-1">Folio: {solicitudExtended.folio}</p>
-                  )}
-                </div>
+          <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 p-3 rounded-lg">
+                <Factory className="w-8 h-8 text-white" />
               </div>
-              <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${getEstadoColor(solicitud.estado || 'pendiente')}`}>
-                {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
-              </span>
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">PAGO SUA FRENSHETSI</h2>
+                <p className="text-blue-100 text-sm mt-1">Solicitud #{solicitud.id_solicitud}</p>
+                {solicitudExtended.folio && (
+                  <p className="text-blue-100 text-sm mt-1">Folio: {solicitudExtended.folio}</p>
+                )}
+              </div>
             </div>
+            <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 bg-white/80 text-blue-700 border-blue-300 shadow-sm`}> 
+              {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
+            </span>
           </header>
           
           {/* Información Principal */}
