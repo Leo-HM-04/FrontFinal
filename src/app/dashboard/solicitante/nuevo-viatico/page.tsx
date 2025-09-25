@@ -312,272 +312,72 @@ const generateImprovedTemplate = () => {
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solicitud y Desglose de Viáticos</title>
-  <style>
-    body {
-      font-family: 'Calibri', 'Arial', sans-serif;
-      margin: 0;
-      padding: 20px;
-      color: #000;
-      background: #fff;
-      line-height: 1.4;
-      font-size: 11pt;
-    }
-    .container {
-      max-width: 210mm;
-      margin: 0 auto;
-      background: #fff;
-      padding: 25mm 20mm;
-      box-sizing: border-box;
-      min-height: 297mm;
-    }
-    .logo {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .logo img {
-      max-width: 120px;
-      height: auto;
-    }
-    .title {
-      text-align: center;
-      font-size: 18pt;
-      font-weight: bold;
-      margin-bottom: 20px;
-      text-decoration: underline;
-    }
-    .section-text {
-      text-align: justify;
-      font-size: 11pt;
-      margin-bottom: 15px;
-      line-height: 1.5;
-    }
-    .section-label {
-      font-weight: bold;
-      font-size: 11pt;
-      margin-top: 20px;
-      margin-bottom: 8px;
-    }
-    .example-text {
-      font-style: italic;
-      color: #666;
-      margin-bottom: 15px;
-    }
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 15px 0;
-      font-size: 11pt;
-    }
-    .table th, .table td {
-      border: 1px solid #000;
-      padding: 8px 6px;
-      text-align: left;
-      vertical-align: top;
-    }
-    .table th {
-      background: #f0f0f0;
-      font-weight: bold;
-    }
-    .table .col-categoria {
-      width: 30%;
-    }
-    .table .col-monto {
-      width: 25%;
-      text-align: center;
-    }
-    .table .col-comentarios {
-      width: 45%;
-    }
-    .table .total-row {
-      font-weight: bold;
-    }
-    .comprobante-section {
-      margin: 20px 0;
-    }
-    .comprobante-box {
-      border: 1px solid #000;
-      min-height: 150px;
-      margin: 10px 0 20px 0;
-      padding: 0;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-    }
-    .comprobante-box-top {
-      border-bottom: 1px solid #000;
-      height: 75px;
-      width: 100%;
-    }
-    .comprobante-box-bottom {
-      height: 75px;
-      width: 100%;
-    }
-    .advertencias {
-      margin-top: 25px;
-      margin-bottom: 30px;
-    }
-    .advertencias-title {
-      font-weight: bold;
-      margin-bottom: 10px;
-      font-size: 11pt;
-    }
-    .advertencias ul {
-      margin: 0 0 0 20px;
-      padding: 0;
-    }
-    .advertencias li {
-      margin-bottom: 8px;
-      text-align: justify;
-      line-height: 1.4;
-    }
-    .firmas-section {
-      margin-top: 40px;
-      margin-bottom: 30px;
-    }
-    .firmas-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    .firmas-table td {
-      border: 1px solid #000;
-      height: 80px;
-      text-align: center;
-      vertical-align: bottom;
-      width: 50%;
-      padding: 10px;
-    }
-    .firma-label {
-      font-weight: bold;
-      margin-bottom: 40px;
-      display: block;
-    }
-    .firma-line {
-      border-bottom: 1px solid #000;
-      width: 70%;
-      margin: 0 auto 8px auto;
-      height: 1px;
-    }
-    .footer {
-      text-align: center;
-      font-size: 9pt;
-      color: #555;
-      margin-top: 30px;
-      border-top: 2px solid #3A75BD;
-      padding-top: 10px;
-    }
-    .underline-field {
-      border-bottom: 1px solid #000;
-      display: inline-block;
-      min-width: 400px;
-      height: 18px;
-      margin-left: 5px;
-    }
-    
-    /* Estilos para impresión */
-    @media print {
-      body {
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        margin: 0;
-        padding: 20mm;
-        max-width: none;
-        width: 100%;
-        min-height: auto;
-      }
-    }
-  </style>
 </head>
-<body>
-  <div class="container">
-    <!-- 
-    <div class="logo">
-      <img src="https://bechapra.com/wp-content/uploads/2022/11/b-bechapra-09-1024x973.png" alt="Bechapra logo" />
+<body style="font-family:Calibri,Arial,sans-serif; margin:0; padding:20px; color:#000; background:#fff; font-size:11pt;">
+  <div style="max-width:210mm; margin:0 auto; background:#fff; padding:25mm 20mm; box-sizing:border-box; min-height:297mm;">
+    <div style="text-align:center; font-size:18pt; font-weight:bold; margin-bottom:20px; text-decoration:underline;">Solicitud y Desglose de Viáticos</div>
+    <div style="text-align:justify; font-size:11pt; margin-bottom:15px; line-height:1.5;">
+      Este formato permite describir con claridad a qué está destinado cada solicitud de viático, respetando el proceso previamente implementado por el Departamento de Tesorería (TESO). Si se requieren varios viáticos para el mismo evento o periodo, este mismo documento puede adjuntarse en cada solicitud.
     </div>
-    -->
-
-    <!-- Título principal -->
-    <div class="title">Solicitud y Desglose de Viáticos</div>
-    
-    <!-- Descripción inicial -->
-    <div class="section-text">
-      Este formato permite describir con claridad a qué está destinado cada solicitud de viático, 
-      respetando el proceso previamente implementado por el Departamento de Tesorería (TESO). 
-      Si se requieren varios viáticos para el mismo evento o periodo, este mismo documento puede 
-      adjuntarse en cada solicitud.
-    </div>
-    
-    <!-- Motivo del viático -->
-    <div class="section-label">Motivo del viático:</div>
-    <div class="example-text">Ej. Reunión con cliente CDMX</div>
-    <div class="underline-field"></div>
-    
-    <!-- Resumen por categoría -->
-    <div class="section-label">Resumen por categoría:</div>
-    
-    <table class="table">
+    <div style="font-weight:bold; font-size:11pt; margin-top:20px; margin-bottom:8px;">Motivo del viático:</div>
+    <div style="font-style:italic; color:#666; margin-bottom:15px;">Ej. Reunión con cliente CDMX</div>
+    <div style="border-bottom:1px solid #000; display:inline-block; min-width:400px; height:18px; margin-left:5px;"></div>
+    <div style="font-weight:bold; font-size:11pt; margin-top:20px; margin-bottom:8px;">Resumen por categoría:</div>
+    <table style="width:100%; border-collapse:collapse; margin:15px 0; font-size:11pt;">
       <thead>
         <tr>
-          <th class="col-categoria">Categoría</th>
-          <th class="col-monto">Monto (MXN)</th>
-          <th class="col-comentarios">Comentarios / Ejemplo</th>
+          <th style="border:1px solid #000; padding:8px 6px; background:#f0f0f0; font-weight:bold; width:30%;">Categoría</th>
+          <th style="border:1px solid #000; padding:8px 6px; background:#f0f0f0; font-weight:bold; width:25%; text-align:center;">Monto (MXN)</th>
+          <th style="border:1px solid #000; padding:8px 6px; background:#f0f0f0; font-weight:bold; width:45%;">Comentarios / Ejemplo</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>Ej. Transporte</td>
-          <td>$</td>
-          <td>Ej.: Uber ida y regreso Santa Fe</td>
+          <td style="border:1px solid #000; padding:8px 6px;">Ej. Transporte</td>
+          <td style="border:1px solid #000; padding:8px 6px; text-align:center;">$</td>
+          <td style="border:1px solid #000; padding:8px 6px;">Ej.: Uber ida y regreso Santa Fe</td>
         </tr>
         <tr>
-          <td>Ej. Hospedaje</td>
-          <td>$___</td>
-          <td></td>
+          <td style="border:1px solid #000; padding:8px 6px;">Ej. Hospedaje</td>
+          <td style="border:1px solid #000; padding:8px 6px; text-align:center;">$___</td>
+          <td style="border:1px solid #000; padding:8px 6px;"></td>
         </tr>
         <tr>
-          <td>Alimentos</td>
-          <td>$___</td>
-          <td></td>
+          <td style="border:1px solid #000; padding:8px 6px;">Alimentos</td>
+          <td style="border:1px solid #000; padding:8px 6px; text-align:center;">$___</td>
+          <td style="border:1px solid #000; padding:8px 6px;"></td>
         </tr>
         <tr>
-          <td>Otros (especificar)</td>
-          <td>$___</td>
-          <td></td>
+          <td style="border:1px solid #000; padding:8px 6px;">Otros (especificar)</td>
+          <td style="border:1px solid #000; padding:8px 6px; text-align:center;">$___</td>
+          <td style="border:1px solid #000; padding:8px 6px;"></td>
         </tr>
-        <tr class="total-row">
-          <td><strong>TOTAL</strong></td>
-          <td><strong>$___</strong></td>
-          <td></td>
+        <tr>
+          <td style="border:1px solid #000; padding:8px 6px; font-weight:bold;">TOTAL</td>
+          <td style="border:1px solid #000; padding:8px 6px; font-weight:bold; text-align:center;">$___</td>
+          <td style="border:1px solid #000; padding:8px 6px;"></td>
         </tr>
       </tbody>
     </table>
-    
     <!-- Comprobante -->
-    <div class="comprobante-section">
-      <div class="section-label">Comprobante:</div>
-      <div class="section-text">
+    <div style="margin:20px 0;">
+      <div style="font-weight:bold; font-size:11pt; margin-bottom:8px;">Comprobante:</div>
+      <div style="text-align:justify; font-size:11pt; margin-bottom:15px; line-height:1.5;">
         Inserta aquí la fotografía del comprobante o adjunta el archivo correspondiente.
       </div>
-      <div style="border: 1px solid #000; background: #fff; width: 100%; height: 220px; margin: 18px 0 24px 0;"></div>
+      <div style="border:2px solid #000; background:#fff; width:100%; height:220px; margin:18px 0 24px 0;"></div>
     </div>
-    
-    <!-- Advertencias -->
-    <div class="advertencias">
-      <div class="advertencias-title">Advertencias para el envío de comprobantes:</div>
-      <ul>
-        <li>Si el comprobante es un documento (PDF, Word, Excel), adjúntalo aparte de esta plantilla.</li>
-        <li>Cuida la presentación y la legibilidad: enfoca, recorta bordes y confirma que se lean monto, fecha y conceptos.</li>
-        <li>Evita fotos a la pantalla o capturas sin recortar; no envíes mensajes de WhatsApp difíciles de leer.</li>
-        <li>Incluye contexto suficiente (proveedor, concepto, fecha, monto desglosado e información de pago). Evita enviar una imagen borrosa o un mensaje suelto; agrega una nota breve en 'Comentarios' si aplica.</li>
+    <div style="margin-top:25px; margin-bottom:30px;">
+      <div style="font-weight:bold; margin-bottom:10px; font-size:11pt;">Advertencias para el envío de comprobantes:</div>
+      <ul style="margin:0 0 0 20px; padding:0;">
+        <li style="margin-bottom:8px; text-align:justify; line-height:1.4;">Si el comprobante es un documento (PDF, Word, Excel), adjúntalo aparte de esta plantilla.</li>
+        <li style="margin-bottom:8px; text-align:justify; line-height:1.4;">Cuida la presentación y la legibilidad: enfoca, recorta bordes y confirma que se lean monto, fecha y conceptos.</li>
+        <li style="margin-bottom:8px; text-align:justify; line-height:1.4;">Evita fotos a la pantalla o capturas sin recortar; no envíes mensajes de WhatsApp difíciles de leer.</li>
+        <li style="margin-bottom:8px; text-align:justify; line-height:1.4;">Incluye contexto suficiente (proveedor, concepto, fecha, monto desglosado e información de pago). Evita enviar una imagen borrosa o un mensaje suelto; agrega una nota breve en 'Comentarios' si aplica.</li>
       </ul>
     </div>
-    
-    <!-- Footer -->
-    <div class="footer">
+    <div style="text-align:center; font-size:9pt; color:#555; margin-top:30px; border-top:2px solid #3A75BD; padding-top:10px;">
       Av. Insurgentes Sur 1079, Col del Valle Sur, Benito Juárez, Ciudad de México 03720, México<br>
       <strong>@bechapra | bechapra.com</strong>
     </div>
