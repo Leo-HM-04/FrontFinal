@@ -18,7 +18,13 @@ export default function EditarTukash({ plantilla, datosPlantilla, onGuardar }: E
 
   // Selecciona la plantilla y prellena los datos al montar
   useEffect(() => {
-    if (plantilla && datosPlantilla && Object.keys(datosPlantilla).length > 0) {
+    // Solo prellenar si el estado está vacío (no hay datos previos del usuario)
+    if (
+      plantilla &&
+      datosPlantilla &&
+      Object.keys(datosPlantilla).length > 0 &&
+      Object.keys(estado.datos).length === 0
+    ) {
       seleccionarPlantilla(plantilla);
       setTimeout(() => {
         Object.entries(datosPlantilla).forEach(([campo, valor]) => {
@@ -27,7 +33,7 @@ export default function EditarTukash({ plantilla, datosPlantilla, onGuardar }: E
       }, 100);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plantilla, datosPlantilla]);
+  }, [plantilla, datosPlantilla, estado.datos]);
 
   return (
     <FormularioPlantilla

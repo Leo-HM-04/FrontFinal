@@ -17,7 +17,13 @@ export default function EditarN09Toka({ plantilla, datosPlantilla }: EditarN09To
 
   // Selecciona la plantilla y prellena los datos al montar
   useEffect(() => {
-    if (plantilla) {
+    // Solo prellenar si el estado está vacío (no hay datos previos del usuario)
+    if (
+      plantilla &&
+      datosPlantilla &&
+      Object.keys(datosPlantilla).length > 0 &&
+      Object.keys(estado.datos).length === 0
+    ) {
       seleccionarPlantilla(plantilla);
       setTimeout(() => {
         Object.entries(datosPlantilla).forEach(([campo, valor]) => {
@@ -26,7 +32,7 @@ export default function EditarN09Toka({ plantilla, datosPlantilla }: EditarN09To
       }, 100);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plantilla]);
+  }, [plantilla, datosPlantilla, estado.datos]);
 
   return (
     <FormularioPlantilla
