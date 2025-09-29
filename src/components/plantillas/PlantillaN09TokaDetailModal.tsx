@@ -57,8 +57,17 @@ const getEstadoColor = (estado: string) => {
 // Función para construir URL de archivos
 const buildFileUrl = (rutaArchivo: string): string => {
   const baseUrl = 'https://bechapra.com.mx';
+  if (!rutaArchivo) return '';
   if (rutaArchivo.startsWith('http')) return rutaArchivo;
-  return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
+  // Si la ruta contiene /uploads/ en cualquier parte, extraer desde ahí
+  const uploadsIdx = rutaArchivo.indexOf('/uploads/');
+  let rutaPublica = rutaArchivo;
+  if (uploadsIdx !== -1) {
+    rutaPublica = rutaArchivo.substring(uploadsIdx);
+  }
+  // Normalizar backslash a slash
+  rutaPublica = rutaPublica.replace(/\\/g, '/');
+  return `${baseUrl}${rutaPublica.startsWith('/') ? '' : '/'}${rutaPublica}`;
 };
 
 // Hook personalizado para manejo de errores
