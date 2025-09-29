@@ -1,3 +1,6 @@
+import React from 'react';
+import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
+
 import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
 import { PlantillaSolicitud, EstadoPlantilla } from '@/types/plantillas';
 
@@ -11,7 +14,8 @@ interface EditarComisionesProps {
 
 export default function EditarComisiones({ plantilla, datosPlantilla, onGuardar, actualizarCampo, estado }: EditarComisionesProps) {
   return (
-    <FormularioPlantilla
+    <SolicitanteLayout>
+      <FormularioPlantilla
       plantilla={plantilla}
       datos={estado.datos}
       errores={estado.errores}
@@ -19,5 +23,6 @@ export default function EditarComisiones({ plantilla, datosPlantilla, onGuardar,
       onCambiarCampo={actualizarCampo}
       onGuardar={onGuardar}
     />
+      </SolicitanteLayout>
   );
 }
