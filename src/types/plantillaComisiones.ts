@@ -20,6 +20,8 @@ export interface SolicitudComisionesData {
   cuenta_destino?: string;
   tipo_cuenta_destino?: string;
   beneficiario?: string;
+  // Campo adicional para extraer información del concepto original
+  concepto?: string;
 }
 
 export interface PlantillaComisionesDetailModalProps {

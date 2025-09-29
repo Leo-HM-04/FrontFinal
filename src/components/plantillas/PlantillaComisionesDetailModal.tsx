@@ -36,6 +36,7 @@ interface SolicitudComisionesExtended extends SolicitudComisionesData {
   cuenta_destino?: string;
   tipo_cuenta_destino?: string;
   beneficiario?: string;
+  concepto?: string; // Campo del concepto original de la base de datos
 }
 
 // Función para formatear moneda en pesos mexicanos
@@ -287,6 +288,58 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   );
 };
 
+// Función para extraer el asunto del concepto
+const extraerAsuntoDelConcepto = (concepto: string): string => {
+  if (!concepto) return '';
+  
+  // Formato esperado: "Pago de Comisión - Cliente: Test - Prueba plantilla"
+  // Necesitamos extraer "Prueba plantilla"
+  const partes = concepto.split(' - ');
+  
+  if (partes.length >= 3) {
+    // El asunto está en la última parte después del último " - "
+    return partes[partes.length - 1].trim();
+  }
+  
+  // Si no sigue el formato esperado, devolver el concepto completo
+  return concepto;
+};
+
+// Función para extraer el cliente del concepto
+const extraerClienteDelConcepto = (concepto: string): string => {
+  if (!concepto) return '';
+  
+  // Formato esperado: "Pago de Comisión - Cliente: Test - Prueba plantilla"
+  // Necesitamos extraer "Test"
+  const match = concepto.match(/Cliente:\s*([^-]+)/);
+  
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+  
+  return '';
+};
+
+// Función para formatear el tipo de cuenta correctamente
+const formatearTipoCuenta = (tipoCuenta: string): string => {
+  if (!tipoCuenta) return 'No especificado';
+  
+  // Mapeo correcto según la selección del usuario
+  const tipoNormalizado = tipoCuenta.toLowerCase();
+  
+  switch (tipoNormalizado) {
+    case 'clabe':
+      return 'CLABE';
+    case 'cuenta':
+      return 'Cuenta';
+    case 'tarjeta':
+      return 'Tarjeta';
+    default:
+      // Si viene "CLABE" pero el usuario seleccionó "cuenta", corregir
+      return tipoCuenta.charAt(0).toUpperCase() + tipoCuenta.slice(1).toLowerCase();
+  }
+};
+
 // Función para obtener archivos de solicitud
 const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudArchivo[]> => {
   console.log('📁 [COMISIONES ARCHIVOS] Obteniendo archivos para solicitud:', idSolicitud);
@@ -410,9 +463,29 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-2" />
-                <InfoField label="Empresa" value={solicitud.empresa} />
-                <InfoField label="Cliente/Concepto" value={solicitud.cliente} />
+                <InfoField 
+                  label="Tipo de Pago" 
+                  value="Pago de Comisión" 
+                />
+                <InfoField 
+                  label="Cliente" 
+                  value={(() => {
+                    const concepto = solicitudExtended.concepto || solicitud.asunto || '';
+                    return extraerClienteDelConcepto(concepto) || solicitud.cliente || 'No especificado';
+                  })()} 
+                />
+                <InfoField 
+                  label="Asunto" 
+                  value={(() => {
+                    const concepto = solicitudExtended.concepto || solicitud.asunto || '';
+                    return extraerAsuntoDelConcepto(concepto) || solicitud.asunto || 'No especificado';
+                  })()} 
+                  className="md:col-span-2" 
+                />
+                <InfoField 
+                  label="Se paga por" 
+                  value={solicitud.empresa || 'No especificado'} 
+                />
                 <InfoField label="Monto Total" value={solicitud.monto} variant="currency" />
                 <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
               </div>
@@ -440,11 +513,10 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 />
                 <InfoField 
                   label="Tipo de Cuenta" 
-                  value={solicitudExtended.tipo_cuenta_destino || solicitud.tipo_cuenta_destino || 'No especificado'} 
-                />
-                <InfoField 
-                  label="Beneficiario" 
-                  value={solicitudExtended.beneficiario || solicitud.beneficiario || 'No especificado'} 
+                  value={(() => {
+                    const tipoCuenta = solicitudExtended.tipo_cuenta_destino || solicitud.tipo_cuenta_destino;
+                    return formatearTipoCuenta(tipoCuenta || '');
+                  })()} 
                 />
               </div>
             </div>

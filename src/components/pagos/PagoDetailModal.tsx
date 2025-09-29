@@ -94,6 +94,8 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
           cuenta_destino: plantillaData.cuenta_destino || pago.cuenta_destino || '',
           tipo_cuenta_destino: plantillaData.tipo_cuenta_destino || pago.tipo_cuenta_destino || '',
           beneficiario: plantillaData.beneficiario || pago.nombre_persona || '',
+          // Campo adicional para extraer información
+          concepto: pago.concepto || '',
         };
       } catch {
         // Error parseando plantilla_datos, usar datos base
@@ -170,6 +172,8 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
         cuenta_destino: pago.cuenta_destino || '',
         tipo_cuenta_destino: pago.tipo_cuenta_destino || '',
         beneficiario: pago.nombre_persona || '',
+        // Campo adicional para extraer información
+        concepto: pago.concepto || '',
       };
     }
     
