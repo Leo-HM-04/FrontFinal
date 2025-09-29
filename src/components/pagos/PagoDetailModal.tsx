@@ -5,6 +5,10 @@ import type { Solicitud } from '@/types/index';
 import { CreditCard, FileText, Building, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+import { detectarPlantillaId } from '@/utils/plantillasLabels';
+import { PlantillaComisionesDetailModal } from '@/components/plantillas/PlantillaComisionesDetailModal';
+import { SolicitudComisionesData } from '@/types/plantillaComisiones';
+import { obtenerNombreBanco } from '@/utils/bancos';
 
 interface PagoDetailModalProps {
   isOpen: boolean;
@@ -14,6 +18,171 @@ interface PagoDetailModalProps {
 
 export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps) {
   if (!isOpen || !pago) return null;
+
+
+
+  // Función para detectar si es una solicitud PAGO COMISIONES
+  function isComisionesSolicitud(solicitud: Solicitud): boolean {
+    // 1. Verificar por plantillaId en plantilla_datos
+    const plantillaId = detectarPlantillaId(solicitud);
+    if (plantillaId === 'pago-comisiones') {
+      return true;
+    }
+    
+    // 2. Verificar por contenido de plantilla_datos
+    if (solicitud.plantilla_datos) {
+      try {
+        const plantillaData = JSON.parse(solicitud.plantilla_datos);
+        const esComisiones = plantillaData.templateType === 'pago-comisiones' ||
+               plantillaData.isComisiones === true ||
+               (plantillaData.porcentaje_comision && plantillaData.periodo_comision) ||
+               plantillaData.tipo_comision;
+        if (esComisiones) {
+          return true;
+        }
+      } catch (error) {
+        // Error parseando plantilla_datos, continuar con otras validaciones
+      }
+    }
+    
+    // 3. Verificar por tipo_pago_descripcion
+    if (solicitud.tipo_pago_descripcion && (
+        solicitud.tipo_pago_descripcion.includes('COMISION') ||
+        solicitud.tipo_pago_descripcion.includes('COMISIONES')
+      )) {
+      return true;
+    }
+    
+    // 4. Verificar por concepto que contenga COMISION o COMISIONES
+    if (solicitud.concepto && (
+        solicitud.concepto.includes('COMISION') ||
+        solicitud.concepto.includes('COMISIONES')
+      )) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  // Verificar si es una solicitud PAGO COMISIONES y mostrar modal específico
+  if (isComisionesSolicitud(pago)) {
+    let solicitudComisiones: SolicitudComisionesData | null = null;
+    
+    // Intentar obtener datos desde plantilla_datos
+    if (pago.plantilla_datos) {
+      try {
+        const plantillaData = JSON.parse(pago.plantilla_datos);
+        
+        // Usar datos de plantilla si están disponibles
+        solicitudComisiones = {
+          id_solicitud: pago.id_solicitud,
+          asunto: plantillaData.asunto || '',
+          empresa: plantillaData.empresa || '',
+          cliente: plantillaData.cliente || '',
+          monto: plantillaData.monto || Number(pago.monto) || 0,
+          porcentaje_comision: plantillaData.porcentaje_comision,
+          fecha_limite: plantillaData.fecha_limite || '',
+          periodo_comision: plantillaData.periodo_comision,
+          archivos_adjuntos: plantillaData.archivos_adjuntos || [],
+          estado: 'pagada', // En el contexto del pagador, la solicitud ya está pagada
+          fecha_creacion: pago.fecha_creacion || '',
+          fecha_actualizacion: pago.updated_at || '',
+          usuario_creacion: pago.usuario_nombre || '',
+          usuario_actualizacion: '',
+          // Información bancaria
+          banco_destino: plantillaData.banco_destino || pago.banco_destino || '',
+          cuenta_destino: plantillaData.cuenta_destino || pago.cuenta_destino || '',
+          tipo_cuenta_destino: plantillaData.tipo_cuenta_destino || pago.tipo_cuenta_destino || '',
+          beneficiario: plantillaData.beneficiario || pago.nombre_persona || '',
+        };
+      } catch {
+        // Error parseando plantilla_datos, usar datos base
+      }
+    }
+    
+    // Si no se pudo mapear desde plantilla_datos, usar datos básicos de la solicitud
+    if (!solicitudComisiones) {
+      // Extraer información del concepto si está presente
+      let asunto = pago.concepto || 'PAGO COMISIONES';
+      let cliente = '';
+      let empresa = '';
+      let porcentaje_comision: number | undefined;
+      let periodo_comision = '';
+      
+      // Intentar extraer información del concepto
+      if (pago.concepto) {
+        // Extraer solo el asunto principal (primera parte)
+        const asuntoMatch = pago.concepto.match(/^([^-]+)(?:\s*-)?/);
+        if (asuntoMatch) {
+          asunto = asuntoMatch[1].trim();
+        }
+        
+        // Buscar Cliente: en el concepto
+        const clienteMatch = pago.concepto.match(/Cliente:\s*([^-\n,]+)/i);
+        if (clienteMatch) {
+          cliente = clienteMatch[1].trim();
+        }
+        
+        // Buscar Empresa: en el concepto
+        const empresaMatch = pago.concepto.match(/Empresa:\s*([^-\n,]+)/i);
+        if (empresaMatch) {
+          empresa = empresaMatch[1].trim();
+        }
+        
+        // Buscar porcentaje de comisión
+        const porcentajeMatch = pago.concepto.match(/(\d+(?:\.\d+)?)%/);
+        if (porcentajeMatch) {
+          porcentaje_comision = parseFloat(porcentajeMatch[1]);
+        }
+        
+        // Buscar periodo (mensual, trimestral, etc.)
+        const periodoMatch = pago.concepto.match(/periodo:\s*([^-\n,]+)/i);
+        if (periodoMatch) {
+          periodo_comision = periodoMatch[1].trim();
+        }
+      }
+      
+      // Si no se encontraron en el concepto, usar campos alternativos
+      if (!cliente) {
+        cliente = pago.empresa_a_pagar || pago.nombre_persona || '';
+      }
+      if (!empresa) {
+        empresa = pago.empresa_a_pagar || '';
+      }
+      
+      solicitudComisiones = {
+        id_solicitud: pago.id_solicitud,
+        asunto,
+        empresa,
+        cliente,
+        monto: Number(pago.monto) || 0,
+        porcentaje_comision,
+        fecha_limite: pago.fecha_limite_pago || '',
+        periodo_comision,
+        archivos_adjuntos: [],
+        estado: 'pagada', // En el contexto del pagador, la solicitud ya está pagada
+        fecha_creacion: pago.fecha_creacion || '',
+        fecha_actualizacion: pago.updated_at || '',
+        usuario_creacion: pago.usuario_nombre || '',
+        usuario_actualizacion: '',
+        // Información bancaria
+        banco_destino: pago.banco_destino || '',
+        cuenta_destino: pago.cuenta_destino || '',
+        tipo_cuenta_destino: pago.tipo_cuenta_destino || '',
+        beneficiario: pago.nombre_persona || '',
+      };
+    }
+    
+    if (solicitudComisiones) {
+      return (
+        <PlantillaComisionesDetailModal
+          solicitud={solicitudComisiones}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -131,7 +300,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                       </div>
                       <div>
                         <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Banco</span>
-                        <p className="text-blue-900 font-medium">{pago.banco_destino || '-'}</p>
+                        <p className="text-blue-900 font-medium">{pago.banco_destino ? obtenerNombreBanco(pago.banco_destino) : '-'}</p>
                       </div>
                       <div>
                         <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Cuenta destino</span>

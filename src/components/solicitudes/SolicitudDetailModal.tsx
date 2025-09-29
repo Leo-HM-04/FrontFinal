@@ -14,6 +14,7 @@ import {
   obtenerEtiquetasPlantilla 
 } from '@/utils/plantillasLabels';
 import { bancosMexico } from '@/data/bancos';
+import { obtenerNombreBanco } from '@/utils/bancos';
 import '@/styles/modal.css';
 import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
 import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
@@ -1054,6 +1055,11 @@ export function SolicitudDetailModal({
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: '',
+          // Información bancaria
+          banco_destino: plantillaData.banco_destino || solicitud.banco_destino || '',
+          cuenta_destino: plantillaData.cuenta_destino || solicitud.cuenta_destino || '',
+          tipo_cuenta_destino: plantillaData.tipo_cuenta_destino || solicitud.tipo_cuenta_destino || '',
+          beneficiario: plantillaData.beneficiario || solicitud.nombre_persona || '',
         };
       } catch {
         console.log('❌ [COMISIONES] Error parseando plantilla_datos, usando datos base');
@@ -1134,6 +1140,11 @@ export function SolicitudDetailModal({
         fecha_actualizacion: solicitud.updated_at || '',
         usuario_creacion: solicitud.usuario_nombre || '',
         usuario_actualizacion: '',
+        // Información bancaria
+        banco_destino: solicitud.banco_destino || '',
+        cuenta_destino: solicitud.cuenta_destino || '',
+        tipo_cuenta_destino: solicitud.tipo_cuenta_destino || '',
+        beneficiario: solicitud.nombre_persona || '',
       };
       
       console.log('🔧 [COMISIONES] Datos construidos:', solicitudComisiones);
@@ -1199,79 +1210,7 @@ function extraerDatosSuaDelConcepto(concepto: string) {
   return datos;
 }
 
-// Función para convertir código de banco a nombre
-function obtenerNombreBanco(codigoBanco: string): string {
-  if (!codigoBanco) return '';
-  
-  const bancos: Record<string, string> = {
-    '002': 'BANAMEX',
-    '012': 'BBVA BANCOMER',
-    '014': 'SANTANDER',
-    '019': 'BANJERCITO',
-    '021': 'HSBC',
-    '030': 'BAJIO',
-    '032': 'IXE',
-    '036': 'INBURSA',
-    '037': 'INTERACCIONES',
-    '042': 'MIFEL',
-    '044': 'SCOTIABANK',
-    '058': 'BANREGIO',
-    '059': 'INVEX',
-    '060': 'BANSI',
-    '062': 'AFIRME',
-    '072': 'BANORTE',
-    '102': 'THE ROYAL BANK',
-    '103': 'AMERICAN EXPRESS',
-    '106': 'BAMSA',
-    '108': 'TOKYO',
-    '110': 'JP MORGAN',
-    '112': 'BMONEX',
-    '113': 'VE POR MAS',
-    '116': 'CREDIT SUISSE',
-    '124': 'DEUTSCHE',
-    '126': 'CREDIT AGRICOLE',
-    '127': 'AZTECA',
-    '128': 'AUTOFIN',
-    '129': 'BARCLAYS',
-    '130': 'COMPARTAMOS',
-    '131': 'BANCO FAMSA',
-    '132': 'BMULTIVA',
-    '133': 'ACTINVER',
-    '134': 'WAL-MART',
-    '135': 'NAFIN',
-    '136': 'INTERBANCO',
-    '137': 'BANCOPPEL',
-    '138': 'ABC CAPITAL',
-    '139': 'UBS BANK',
-    '140': 'CONSUBANCO',
-    '141': 'VOLKSWAGEN',
-    '143': 'CIBANCO',
-    '145': 'BBASE',
-    '147': 'BANKAOOL',
-    '148': 'PAGATODO',
-    '149': 'INMOBILIARIO',
-    '150': 'DONDE',
-    '151': 'BANCREA',
-    '152': 'BANCO AHORRO FAMSA',
-    '154': 'BANCO COVALTO',
-    '155': 'ICBC',
-    '156': 'SABADELL',
-    '157': 'SHINHAN',
-    '158': 'MIZUHO BANK',
-    '159': 'BANCO S3',
-    '160': 'BANK OF CHINA',
-    '166': 'BANCO BICENTENARIO'
-  };
 
-  const nombreBanco = bancos[codigoBanco.padStart(3, '0')];
-  if (nombreBanco) {
-    console.log(`🏦 [BANCO] Código ${codigoBanco} -> ${nombreBanco}`);
-    return nombreBanco;
-  }
-
-  console.log(`⚠️ [BANCO] Código ${codigoBanco} no encontrado, retornando código original`);
-  return codigoBanco; // Si no se encuentra, devolver el código original
-}
 
 // Función para extraer información del concepto de pólizas
 function extraerDatosDelConcepto(concepto: string) {

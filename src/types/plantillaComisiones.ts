@@ -15,6 +15,11 @@ export interface SolicitudComisionesData {
   fecha_actualizacion: string;
   usuario_creacion: string;
   usuario_actualizacion: string;
+  // Información bancaria
+  banco_destino?: string;
+  cuenta_destino?: string;
+  tipo_cuenta_destino?: string;
+  beneficiario?: string;
 }
 
 export interface PlantillaComisionesDetailModalProps {

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { X, FileText, ExternalLink, CreditCard, Building2, Calendar, DollarSign, User, Clock } from 'lucide-react';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
+import { obtenerNombreBanco } from '@/utils/bancos';
 
 // Interfaz para props del modal
 interface PlantillaComisionesDetailModalProps {
@@ -31,6 +32,10 @@ interface SolicitudComisionesExtended extends SolicitudComisionesData {
   id_aprobador?: number;
   fecha_aprobacion?: string;
   comentarios_aprobacion?: string;
+  banco_destino?: string;
+  cuenta_destino?: string;
+  tipo_cuenta_destino?: string;
+  beneficiario?: string;
 }
 
 // Función para formatear moneda en pesos mexicanos
@@ -97,6 +102,8 @@ const useErrorHandler = () => {
 
   return { handleError };
 };
+
+
 
 // Componente InfoField mejorado con estilo BECHAPRA
 interface InfoFieldProps {
@@ -420,6 +427,38 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
               </div>
             </div>
+
+            {/* Información Bancaria */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-blue-500" />
+                Información Bancaria
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField 
+                  label="Banco Destino" 
+                  value={solicitudExtended.banco_destino 
+                    ? obtenerNombreBanco(solicitudExtended.banco_destino)
+                    : ((solicitud as any).banco_destino 
+                      ? obtenerNombreBanco((solicitud as any).banco_destino)
+                      : 'No especificado')} 
+                />
+                <InfoField 
+                  label="Cuenta/CLABE" 
+                  value={solicitudExtended.cuenta_destino || (solicitud as any).cuenta_destino || 'No especificado'} 
+                  variant="mono" 
+                />
+                <InfoField 
+                  label="Tipo de Cuenta" 
+                  value={solicitudExtended.tipo_cuenta_destino || (solicitud as any).tipo_cuenta_destino || 'No especificado'} 
+                />
+                <InfoField 
+                  label="Beneficiario" 
+                  value={solicitudExtended.beneficiario || (solicitud as any).beneficiario || 'No especificado'} 
+                />
+              </div>
+            </div>
+
             {/* Detalles de Comisión */}
             {(solicitud.porcentaje_comision || solicitud.periodo_comision) && (
               <div className="mb-6">
