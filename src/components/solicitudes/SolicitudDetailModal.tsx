@@ -1256,40 +1256,37 @@ function extraerDatosDelConcepto(concepto: string) {
       try {
         const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
         console.log('📄 [POLIZAS] Datos de plantilla encontrados:', plantillaData);
-        
-        // Extraer datos del concepto si no están en plantilla_datos
+        // Extraer datos del concepto solo si el campo no existe en plantilla_datos
         const datosExtraidos = extraerDatosDelConcepto(solicitud.concepto || '');
         console.log('📄 [POLIZAS EXTRACCION] Datos extraídos del concepto:', datosExtraidos);
-        
-        // Usar datos de plantilla si están disponibles
+        // Usar SIEMPRE los datos de plantilla_datos si existen, solo usar base si no existe el campo
         solicitudPolizas = {
           id_solicitud: solicitud.id_solicitud,
-          asunto: plantillaData.asunto || datosExtraidos.asunto || '',
-          titular_poliza: plantillaData.titular_poliza || plantillaData.aseguradora || solicitud.empresa_a_pagar || '',
-          empresa_emisora: plantillaData.empresa_emisora || datosExtraidos.empresa_emisora || '',
-          banco_destino: obtenerNombreBanco(plantillaData.metodos_pago?.[0]?.banco_destino || solicitud.banco_destino || ''),
-          convenio: plantillaData.metodos_pago?.[0]?.convenio || datosExtraidos.convenio || '',
-          referencia: plantillaData.metodos_pago?.[0]?.referencia || solicitud.cuenta_destino || '',
-          numero_poliza: plantillaData.numero_poliza || '',
-          monto: plantillaData.monto || Number(solicitud.monto) || 0,
-          tipo_movimiento: plantillaData.tipo_movimiento || '',
-          nombre_solicitante: plantillaData.nombre_solicitante || solicitud.usuario_nombre || '',
-          email_solicitante: plantillaData.email_solicitante || '',
-          gerencia_solicitante: plantillaData.gerencia_solicitante || '',
+          asunto: plantillaData.asunto ?? datosExtraidos.asunto ?? '',
+          titular_poliza: plantillaData.titular_poliza ?? plantillaData.aseguradora ?? solicitud.empresa_a_pagar ?? '',
+          empresa_emisora: plantillaData.empresa_emisora ?? datosExtraidos.empresa_emisora ?? '',
+          banco_destino: plantillaData.metodos_pago?.[0]?.banco_destino ? obtenerNombreBanco(plantillaData.metodos_pago[0].banco_destino) : (solicitud.banco_destino ? obtenerNombreBanco(solicitud.banco_destino) : ''),
+          convenio: plantillaData.metodos_pago?.[0]?.convenio ?? datosExtraidos.convenio ?? '',
+          referencia: plantillaData.metodos_pago?.[0]?.referencia ?? solicitud.cuenta_destino ?? '',
+          numero_poliza: plantillaData.numero_poliza ?? '',
+          monto: plantillaData.monto ?? (solicitud.monto !== undefined ? Number(solicitud.monto) : 0),
+          tipo_movimiento: plantillaData.tipo_movimiento ?? '',
+          nombre_solicitante: plantillaData.nombre_solicitante ?? solicitud.usuario_nombre ?? '',
+          email_solicitante: plantillaData.email_solicitante ?? '',
+          gerencia_solicitante: plantillaData.gerencia_solicitante ?? '',
           // Campos de la base de datos
-          folio: solicitud.folio || '',
-          departamento: solicitud.departamento || '',
-          estado: solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada' || 'pendiente',
-          concepto: solicitud.concepto || '',
-          observaciones: solicitud.comentario_aprobador || '',
+          folio: solicitud.folio ?? '',
+          departamento: solicitud.departamento ?? '',
+          estado: (solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') ?? 'pendiente',
+          concepto: solicitud.concepto ?? '',
+          observaciones: solicitud.comentario_aprobador ?? '',
           // Campos de auditoría
-          fecha_creacion: solicitud.fecha_creacion || '',
-          fecha_actualizacion: solicitud.updated_at || '',
-          usuario_creacion: solicitud.usuario_nombre || '',
-          usuario_actualizacion: solicitud.aprobador_nombre || '',
+          fecha_creacion: solicitud.fecha_creacion ?? '',
+          fecha_actualizacion: solicitud.updated_at ?? '',
+          usuario_creacion: solicitud.usuario_nombre ?? '',
+          usuario_actualizacion: solicitud.aprobador_nombre ?? '',
         };
-        
-        console.log('🔧 [POLIZAS] Datos construidos desde plantilla:', solicitudPolizas);
+        console.log('🔧 [POLIZAS] Datos construidos desde plantilla (prioridad plantilla_datos):', solicitudPolizas);
       } catch (error) {
         console.error('❌ [POLIZAS] Error al parsear plantilla_datos:', error);
         // Fallback a datos base si falla el parsing
@@ -1853,7 +1850,7 @@ function extraerDatosDelConcepto(concepto: string) {
                     </div>
                   )
                 )}
-                
+
                 {/* Botones de acción para documentos principales */}
                 <div className="flex w-full justify-end mt-6">
                   {(solicitud.factura_url || solicitud.soporte_url) ? (
