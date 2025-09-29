@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { X, FileText, ExternalLink, CreditCard, Building2, Calendar, DollarSign, User, Clock } from 'lucide-react';
+import { X, FileText, ExternalLink, CreditCard, DollarSign } from 'lucide-react';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 import { obtenerNombreBanco } from '@/utils/bancos';
@@ -69,19 +69,7 @@ const formatPercentage = (percentage: number | undefined): string => {
   return `${percentage}%`;
 };
 
-// Función para obtener colores del estado
-const getEstadoColor = (estado: string) => {
-  switch (estado.toLowerCase()) {
-    case 'aprobada':
-      return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
-    case 'rechazada':
-      return 'bg-red-50 text-red-700 border border-red-200';
-    case 'pagada':
-      return 'bg-blue-50 text-blue-700 border border-blue-200';
-    default:
-      return 'bg-amber-50 text-amber-700 border border-amber-200';
-  }
-};
+
 
 // Unificado con otros modales: siempre usa la URL de producción
 const buildFileUrl = (rutaArchivo: string): string => {
@@ -439,22 +427,22 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                   label="Banco Destino" 
                   value={solicitudExtended.banco_destino 
                     ? obtenerNombreBanco(solicitudExtended.banco_destino)
-                    : ((solicitud as any).banco_destino 
-                      ? obtenerNombreBanco((solicitud as any).banco_destino)
+                    : (solicitud.banco_destino 
+                      ? obtenerNombreBanco(solicitud.banco_destino)
                       : 'No especificado')} 
                 />
                 <InfoField 
                   label="Cuenta/CLABE" 
-                  value={solicitudExtended.cuenta_destino || (solicitud as any).cuenta_destino || 'No especificado'} 
+                  value={solicitudExtended.cuenta_destino || solicitud.cuenta_destino || 'No especificado'} 
                   variant="mono" 
                 />
                 <InfoField 
                   label="Tipo de Cuenta" 
-                  value={solicitudExtended.tipo_cuenta_destino || (solicitud as any).tipo_cuenta_destino || 'No especificado'} 
+                  value={solicitudExtended.tipo_cuenta_destino || solicitud.tipo_cuenta_destino || 'No especificado'} 
                 />
                 <InfoField 
                   label="Beneficiario" 
-                  value={solicitudExtended.beneficiario || (solicitud as any).beneficiario || 'No especificado'} 
+                  value={solicitudExtended.beneficiario || solicitud.beneficiario || 'No especificado'} 
                 />
               </div>
             </div>
