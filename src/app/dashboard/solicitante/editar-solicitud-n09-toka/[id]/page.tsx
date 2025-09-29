@@ -34,11 +34,9 @@ export default function EditarN09TokaPage() {
               console.error('❌ Error parseando plantilla_datos N09/TOKA:', err);
             }
           }
-          setTimeout(() => {
-            Object.entries(datosN09Toka).forEach(([campo, valor]) => {
-              actualizarCampo(campo, valor);
-            });
-          }, 100);
+          Object.entries(datosN09Toka).forEach(([campo, valor]) => {
+            actualizarCampo(campo, valor);
+          });
         }
       } catch (err) {
         console.error('❌ Error obteniendo solicitud:', err);
