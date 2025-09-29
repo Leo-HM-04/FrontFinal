@@ -56,27 +56,12 @@ const buildFileUrl = (url: string): string => {
 // Utilidades para formateo de datos bancarios
 const formatBankInfo = (bankCode: string): string => {
   if (!bankCode) return '-';
-  
-  const banco = bancosMexico.find(b => b.codigo === bankCode);
-  if (banco) return banco.nombre;
-  
-  const bancoPorNombre = bancosMexico.find(b =>
-    b.nombreCorto.toLowerCase() === bankCode.toLowerCase() ||
-    b.nombre.toLowerCase() === bankCode.toLowerCase()
-  );
-  
-  return bancoPorNombre ? bancoPorNombre.nombre : bankCode.replace(/_/g, ' ');
+  return obtenerNombreBanco(bankCode);
 };
 
 const formatBankInfoAbreviado = (bankCode: string): string => {
   if (!bankCode) return '-';
-  const banco = bancosMexico.find(b => b.codigo === bankCode);
-  if (banco) return banco.nombreCorto || banco.nombre;
-  const bancoPorNombre = bancosMexico.find(b =>
-    b.nombreCorto.toLowerCase() === bankCode.toLowerCase() ||
-    b.nombre.toLowerCase() === bankCode.toLowerCase()
-  );
-  return bancoPorNombre ? bancoPorNombre.nombreCorto || bancoPorNombre.nombre : bankCode.replace(/_/g, ' ');
+  return obtenerNombreBanco(bankCode);
 };
 
 const formatAccountType = (tipoStr: string, tipoTarjeta?: string): string => {

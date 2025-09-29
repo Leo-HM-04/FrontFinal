@@ -15,6 +15,7 @@ import { toast } from 'react-hot-toast';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
 import { Solicitud } from '@/types';
+import { obtenerNombreBanco } from '@/utils/bancos';
 
 export default function HistorialSolicitudesPage() {
   const { solicitudes: allSolicitudes, loading } = useSolicitudes();
@@ -448,7 +449,7 @@ export default function HistorialSolicitudesPage() {
                                     {solicitud.tipo_tarjeta ? ` / ${solicitud.tipo_tarjeta}` : ''}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {solicitud.banco_destino || ''}
+                                    {solicitud.banco_destino ? obtenerNombreBanco(solicitud.banco_destino) : ''}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <Button 
@@ -567,7 +568,7 @@ export default function HistorialSolicitudesPage() {
                                   {solicitud.banco_destino && (
                                     <div>
                                       <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Banco</span>
-                                      <p className="text-sm text-blue-900/90 mt-1">{solicitud.banco_destino}</p>
+                                      <p className="text-sm text-blue-900/90 mt-1">{obtenerNombreBanco(solicitud.banco_destino)}</p>
                                     </div>
                                   )}
                                 </div>

@@ -3,6 +3,7 @@ import { FileCheck, Building, BadgeDollarSign, CreditCard, StickyNote, Repeat2, 
 import Image from 'next/image';
 import Cookies from 'js-cookie';
 import '@/styles/modal.css';
+import { obtenerNombreBanco } from '@/utils/bancos';
 
 interface RecurrenteDetalleModalProps {
   open: boolean;
@@ -345,7 +346,7 @@ export const RecurrenteDetalleModal: React.FC<RecurrenteDetalleModalProps> = ({ 
                     )}
                     <div className="flex-1">
                       <span className="text-xs uppercase tracking-wider text-purple-700/70 block mb-1 font-medium">Banco</span>
-                      <p className="text-purple-900 font-medium">{recurrente.banco_destino || 'No especificado'}</p>
+                      <p className="text-purple-900 font-medium">{recurrente.banco_destino ? obtenerNombreBanco(recurrente.banco_destino) : 'No especificado'}</p>
                     </div>
                   </div>
                 </div>

@@ -312,6 +312,8 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
   const { handleError } = useErrorHandler();
   const solicitudExtended = solicitud as SolicitudComisionesExtended;
 
+
+
   // Función para obtener archivos
   const fetchArchivos = useCallback(async () => {
     if (!solicitud) return;
@@ -425,11 +427,11 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoField 
                   label="Banco Destino" 
-                  value={solicitudExtended.banco_destino 
-                    ? obtenerNombreBanco(solicitudExtended.banco_destino)
-                    : (solicitud.banco_destino 
-                      ? obtenerNombreBanco(solicitud.banco_destino)
-                      : 'No especificado')} 
+                  value={(() => {
+                    const codigoBanco = solicitudExtended.banco_destino || solicitud.banco_destino;
+                    if (!codigoBanco) return 'No especificado';
+                    return obtenerNombreBanco(codigoBanco);
+                  })()} 
                 />
                 <InfoField 
                   label="Cuenta/CLABE" 

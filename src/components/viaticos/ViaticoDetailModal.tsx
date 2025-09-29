@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { Viatico } from '@/hooks/useViaticos';
 import { CreditCard, FileText, Building, ExternalLink, MapPin, Calendar, DollarSign, X, CheckCircle } from 'lucide-react';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+import { obtenerNombreBanco } from '@/utils/bancos';
 
 import { ComprobantesGastoViaticoService } from '@/services/comprobantesGastoViatico.service';
 import { getAuthToken } from '@/utils/auth';
@@ -260,7 +261,7 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                         </div>
                         <div className="bg-white p-3 rounded-md border border-green-100">
                           <span className="text-xs uppercase tracking-wider text-green-700/70 block mb-1 font-medium">Banco destino</span>
-                          <p className="text-green-900 font-medium">{viatico.banco_destino || '-'}</p>
+                          <p className="text-green-900 font-medium">{viatico.banco_destino ? obtenerNombreBanco(viatico.banco_destino) : '-'}</p>
                         </div>
                         <div className="bg-white p-3 rounded-md border border-green-100 md:col-span-2">
                           <span className="text-xs uppercase tracking-wider text-green-700/70 block mb-1 font-medium">Cuenta destino</span>
