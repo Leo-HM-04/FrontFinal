@@ -31,16 +31,10 @@ export default function EditarRegresosTransferenciaPage() {
           }
         }
         if (plantillaRegresos && datosRegresos.templateType === 'regresos-transferencia') {
-          // Limpiar y seleccionar plantilla SIEMPRE antes de prellenar
-          seleccionarPlantilla(null); // Limpia el estado
-          setTimeout(() => {
-            seleccionarPlantilla(plantillaRegresos);
-            setTimeout(() => {
-              Object.entries(datosRegresos).forEach(([campo, valor]) => {
-                actualizarCampo(campo, valor);
-              });
-            }, 100);
-          }, 50);
+          seleccionarPlantilla(plantillaRegresos);
+          Object.entries(datosRegresos).forEach(([campo, valor]) => {
+            actualizarCampo(campo, valor);
+          });
         }
       } catch (err) {
         console.error('❌ Error obteniendo solicitud:', err);
