@@ -1853,56 +1853,6 @@ function extraerDatosDelConcepto(concepto: string) {
                     </div>
                   )
                 )}
-
-                {/* Archivos de solicitud_archivos */}
-                <div className="mt-6">
-                  <h3 className="text-md font-semibold text-blue-800 mb-3 flex items-center">
-                    <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                    {solicitud.tipo_pago_descripcion?.startsWith('Plantilla:') 
-                      ? 'Archivos de la plantilla' 
-                      : 'Archivos adjuntos de la solicitud'}
-                  </h3>
-                  
-                  {loading.archivos ? (
-                    <LoadingSpinner message="Cargando archivos..." />
-                  ) : errors.archivos ? (
-                    <ErrorMessage message={errors.archivos} />
-                  ) : archivos.length === 0 ? (
-                    <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">
-                      No hay archivos adjuntos disponibles
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {archivos.map((archivo) => {
-                        const url = buildFileUrl(archivo.archivo_url);
-                        const fileName = url.split('/').pop() || '';
-                        
-                        return (
-                          <div key={archivo.id} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-xs text-blue-800 font-semibold">
-                                {archivo.tipo || 'Archivo'}
-                              </span>
-                              <Button 
-                                size="sm" 
-                                onClick={() => window.open(url, '_blank')} 
-                                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl rounded-xl px-4 py-2 ml-3 transition-all duration-300"
-                              >
-                                Ver completo
-                              </Button>
-                            </div>
-                            <FilePreview 
-                              url={url}
-                              fileName={fileName}
-                              alt={`${archivo.tipo || 'Archivo'}: ${fileName}`}
-                              height="h-32"
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
                 
                 {/* Botones de acción para documentos principales */}
                 <div className="flex w-full justify-end mt-6">

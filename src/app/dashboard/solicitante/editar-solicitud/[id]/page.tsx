@@ -407,23 +407,30 @@ export default function EditarSolicitudPage() {
             setPlantillaDetectada(plantillaEncontrada);
             setEsEdicionPlantilla(true);
             seleccionarPlantilla(plantillaEncontrada);
+            // Prefill all fields from plantilla_datos (or N09Toka service) into usePlantillaSolicitud state
+            let datosParaPrefill: Record<string, unknown> = {};
             if (plantillaIdDetectada === 'tarjetas-n09-toka') {
+              // Prefer datos from N09Toka service if available
               SolicitudesN09TokaService.obtenerPorSolicitudPrincipal(solicitudId)
                 .then((datosN09Toka: unknown) => {
                   if (datosN09Toka && typeof datosN09Toka === 'object') {
-                    const datos = datosN09Toka as Record<string, unknown>;
-                    setTimeout(() => {
-                      if (datos.asunto) actualizarCampo('asunto', datos.asunto);
-                      if (datos.cliente) actualizarCampo('cliente', datos.cliente);
-                      if (datos.beneficiario) actualizarCampo('beneficiario', datos.beneficiario);
-                      if (datos.metodos_pago) actualizarCampo('metodos_pago', datos.metodos_pago);
-                      if (datos.archivos_adjuntos) actualizarCampo('archivos_adjuntos', datos.archivos_adjuntos);
-                      if (datos.observaciones) actualizarCampo('observaciones', datos.observaciones);
-                    }, 100);
+                    datosParaPrefill = datosN09Toka as Record<string, unknown>;
                   }
+                  // Prefill all fields
+                  Object.entries(datosParaPrefill).forEach(([campo, valor]) => {
+                    if (valor !== null && valor !== undefined && valor !== '') {
+                      actualizarCampo(campo, valor);
+                    }
+                  });
                 })
                 .catch((error: Error) => {
-                  cargarDatosPlantillaJSON(s as unknown as Solicitud, actualizarCampo);
+                  // Fallback to plantilla_datos JSON
+                  const datosPlantilla = obtenerDatosPlantilla(s as unknown as Solicitud);
+                  Object.entries(datosPlantilla).forEach(([campo, valor]) => {
+                    if (valor !== null && valor !== undefined && valor !== '') {
+                      actualizarCampo(campo, valor);
+                    }
+                  });
                 });
             } else if (plantillaIdDetectada === 'tarjetas-tukash') {
               let datosTukash: Record<string, unknown> = {};
@@ -432,21 +439,19 @@ export default function EditarSolicitudPage() {
                   datosTukash = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
                 } catch (err) {}
               }
-              setTimeout(() => {
-                if (datosTukash.asunto) actualizarCampo('asunto', datosTukash.asunto);
-                if (datosTukash.cliente) actualizarCampo('cliente', datosTukash.cliente);
-                if (datosTukash.beneficiario_tarjeta) actualizarCampo('beneficiario_tarjeta', datosTukash.beneficiario_tarjeta);
-                if (datosTukash.numero_tarjeta) actualizarCampo('numero_tarjeta', datosTukash.numero_tarjeta);
-                if (datosTukash.monto_total_cliente) actualizarCampo('monto_total_cliente', datosTukash.monto_total_cliente);
-                if (datosTukash.monto_total_tukash) actualizarCampo('monto_total_tukash', datosTukash.monto_total_tukash);
-                if (datosTukash.estado) actualizarCampo('estado', datosTukash.estado);
-                if (datosTukash.fecha_creacion) actualizarCampo('fecha_creacion', datosTukash.fecha_creacion);
-                if (datosTukash.fecha_actualizacion) actualizarCampo('fecha_actualizacion', datosTukash.fecha_actualizacion);
-                if (datosTukash.usuario_creacion) actualizarCampo('usuario_creacion', datosTukash.usuario_creacion);
-                if (datosTukash.usuario_actualizacion) actualizarCampo('usuario_actualizacion', datosTukash.usuario_actualizacion);
-              }, 100);
+              Object.entries(datosTukash).forEach(([campo, valor]) => {
+                if (valor !== null && valor !== undefined && valor !== '') {
+                  actualizarCampo(campo, valor);
+                }
+              });
             } else {
-              cargarDatosPlantillaJSON(s as unknown as Solicitud, actualizarCampo);
+              // Generic plantilla: prefill all fields from plantilla_datos
+              const datosPlantilla = obtenerDatosPlantilla(s as unknown as Solicitud);
+              Object.entries(datosPlantilla).forEach(([campo, valor]) => {
+                if (valor !== null && valor !== undefined && valor !== '') {
+                  actualizarCampo(campo, valor);
+                }
+              });
             }
           } else {
             setEsEdicionPlantilla(false);
