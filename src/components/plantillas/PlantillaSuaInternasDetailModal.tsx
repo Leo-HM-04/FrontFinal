@@ -10,6 +10,7 @@ import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 
 // Tipo extendido para solicitudes SUA INTERNAS que incluye campos adicionales
+
 interface SolicitudSuaInternasExtended extends SolicitudSuaInternasData {
   folio?: string;
   tiene_archivos?: boolean | number;
@@ -18,11 +19,10 @@ interface SolicitudSuaInternasExtended extends SolicitudSuaInternasData {
   comentarios_aprobacion?: string;
 }
 
-// Función para formatear moneda en pesos mexicanos
+// Helpers
 const formatCurrency = (amount: number | string): string => {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
   if (isNaN(numAmount)) return '$0.00 MXN';
-  
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: 'MXN',
@@ -30,8 +30,8 @@ const formatCurrency = (amount: number | string): string => {
   }).format(numAmount);
 };
 
-// Función para formatear fecha
 const formatDate = (dateString: string): string => {
+  if (!dateString) return 'No especificada';
   const date = new Date(dateString);
   return date.toLocaleDateString('es-MX', {
     year: 'numeric',
@@ -42,11 +42,10 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-// Función para obtener colores del estado
 const getEstadoColor = (estado: string) => {
-  switch (estado.toLowerCase()) {
+  switch ((estado || '').toLowerCase()) {
     case 'aprobada':
-      return 'bg-blue-100 text-blue-800 border-blue-300';
+      return 'bg-green-100 text-green-800 border-green-300';
     case 'rechazada':
       return 'bg-red-100 text-red-800 border-red-300';
     case 'pagada':
@@ -56,208 +55,129 @@ const getEstadoColor = (estado: string) => {
   }
 };
 
-// Función para construir URL de archivos
 const buildFileUrl = (rutaArchivo: string): string => {
   const baseUrl = 'https://bechapra.com.mx';
+  if (!rutaArchivo) return '';
   if (rutaArchivo.startsWith('http')) return rutaArchivo;
   return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
 };
 
-// Hook para manejo de errores
 const useErrorHandler = () => {
   const handleError = useCallback((error: unknown): string => {
-    console.error('Error en PlantillaSuaInternasDetailModal:', error);
+    console.error('Error:', error);
     if (error instanceof Error) {
       return error.message;
     }
     return 'Ha ocurrido un error inesperado';
   }, []);
-
   return { handleError };
 };
 
-// Componente de loading
-const LoadingSpinner: React.FC<{ message?: string }> = ({ message }) => (
-  <div className="flex flex-col items-center justify-center p-6 bg-blue-50/50 rounded-lg border border-blue-100">
-    <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-    {message && <p className="mt-2 text-blue-700 text-sm">{message}</p>}
-  </div>
-);
-
-// Componente de error
-const ErrorMessage: React.FC<{ message: string }> = ({ message }) => (
-  <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
-    {message}
-  </div>
-);
-
-// Componente para campos de información
-const InfoField: React.FC<{
+interface InfoFieldProps {
   label: string;
-  value: string | null | undefined;
-  variant?: 'default' | 'mono' | 'currency';
+  value: string | number | null | undefined;
+  variant?: 'default' | 'currency' | 'mono' | 'date';
   className?: string;
-}> = ({ label, value, variant = 'default', className = '' }) => {
-  let displayValue = value || '-';
-  
-  if (variant === 'currency' && value) {
-    const numValue = parseFloat(value);
-    displayValue = isNaN(numValue) ? value : formatCurrency(numValue);
-  }
+}
 
+const InfoField: React.FC<InfoFieldProps> = ({
+  label,
+  value,
+  variant = 'default',
+  className = ''
+}) => {
+  const formatValue = () => {
+    if (value === null || value === undefined || value === '') {
+      return 'No especificado';
+    }
+    switch (variant) {
+      case 'currency':
+        return formatCurrency(value);
+      case 'date':
+        return formatDate(value.toString());
+      case 'mono':
+        return value.toString();
+      default:
+        return value.toString();
+    }
+  };
+  const getValueClassName = () => {
+    let baseClass = 'text-gray-900 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200';
+    if (variant === 'mono') baseClass += ' font-mono text-sm';
+    if (variant === 'currency') baseClass += ' font-semibold text-green-700';
+    return baseClass;
+  };
   return (
-    <div className={`bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-blue-200/50 ${className}`}>
-      <div className="text-blue-700 text-sm font-medium mb-2">{label}</div>
-      <div className={`text-gray-900 ${variant === 'mono' ? 'font-mono text-sm' : ''} ${variant === 'currency' ? 'font-semibold text-blue-800' : ''}`}>
-        {displayValue}
-      </div>
+    <div className={`space-y-2 ${className}`}>
+      <label className="block text-sm font-semibold text-blue-800">{label}</label>
+      <div className={getValueClassName()}>{formatValue()}</div>
     </div>
   );
 };
 
-// Componente para preview de archivos
 const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
-  const [showPdfViewer, setShowPdfViewer] = useState(false);
-  
-  console.log('🖼️ [SUA INTERNAS ARCHIVOS] Renderizando preview para archivo ID:', archivo.id);
-  
+  const [imageError, setImageError] = useState(false);
   if (!archivo.archivo_url) {
-    console.log('⚠️ [SUA INTERNAS ARCHIVOS] No hay URL de archivo');
     return (
-      <div className="text-center p-3 bg-gray-50 rounded border">
-        <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-        <p className="text-sm text-gray-500">No disponible</p>
+      <div className="text-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">Archivo no disponible</p>
       </div>
     );
   }
-
   const fileUrl = buildFileUrl(archivo.archivo_url);
-  console.log('🔗 [SUA INTERNAS ARCHIVOS] URL construida:', fileUrl);
-
   const extension = archivo.archivo_url?.split('.').pop()?.toLowerCase() || '';
   const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
   const isPdf = extension === 'pdf';
-
-  // Función para obtener el nombre del archivo desde la URL
   const getFileName = () => {
     const urlParts = archivo.archivo_url.split('/');
     const fileName = urlParts[urlParts.length - 1];
     return fileName || `Archivo ${archivo.id}`;
   };
-
   if (isPdf) {
     return (
-      <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
-        {/* PDF Preview */}
-        <div className="relative">
-          {!showPdfViewer ? (
-            // Vista previa limitada
-            <div className="h-40 bg-gray-50 border-b">
-              <iframe
-                src={`${fileUrl}#view=FitH&toolbar=0&navpanes=0&scrollbar=0&page=1`}
-                className="w-full h-full"
-                style={{ pointerEvents: 'none' }}
-                title="Vista previa PDF"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-10 flex items-end justify-center pb-2">
-                <div className="bg-white bg-opacity-90 px-3 py-1 rounded text-xs text-gray-600">
-                  Vista previa limitada - Haga clic en &quot;Ver completo&quot; para el PDF completo
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Viewer completo
-            <div className="h-96">
-              <iframe
-                src={fileUrl}
-                className="w-full h-full border-0"
-                title="PDF Viewer"
-              />
-            </div>
-          )}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
+          <iframe src={fileUrl} title={getFileName()} className="w-full" style={{ height: '200px' }} />
+          <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-700">
+            Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
+          </div>
         </div>
-        
-        {/* File info and actions */}
-        <div className="p-3">
-          <p className="text-sm font-medium text-gray-900 truncate mb-2">
-            {getFileName()}
-          </p>
+        <div className="p-4">
+          <p className="text-sm font-semibold text-gray-900 truncate mb-1">{getFileName()}</p>
           <p className="text-xs text-gray-500 mb-3">Documento PDF</p>
-          
-          <button
-            onClick={() => setShowPdfViewer(!showPdfViewer)}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
-          >
-            <ExternalLink className="w-4 h-4" />
-            {showPdfViewer ? 'Vista previa' : 'Ver completo'}
-          </button>
+          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+            <ExternalLink className="w-4 h-4" />Ver completo
+          </a>
         </div>
       </div>
     );
   }
-
-  // Para otros tipos de archivo (imágenes, etc.)
   return (
-    <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
-      {/* Preview area */}
-      <div className="relative h-32 bg-gray-50 flex items-center justify-center">
-        {isImage ? (
-          <Image
-            src={fileUrl}
-            alt="Preview del archivo"
-            width={120}
-            height={120}
-            className="object-contain max-h-full max-w-full rounded"
-            onError={(e) => {
-              console.error('❌ [SUA INTERNAS ARCHIVOS] Error cargando imagen:', fileUrl);
-              e.currentTarget.style.display = 'none';
-            }}
-          />
+    <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+      <div className="relative h-40 bg-gray-50 flex items-center justify-center">
+        {isImage && !imageError ? (
+          <Image src={fileUrl} alt="Preview del archivo" width={150} height={150} className="object-contain max-h-full max-w-full rounded" onError={() => setImageError(true)} />
         ) : (
           <div className="text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <FileText className="w-8 h-8 text-gray-500" />
+            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <FileText className="w-8 h-8 text-blue-600" />
             </div>
-            <p className="text-xs text-gray-600 font-medium">Archivo</p>
+            <p className="text-xs text-gray-600 font-medium">{isPdf ? 'PDF' : isImage ? 'Imagen' : 'Archivo'}</p>
           </div>
         )}
       </div>
-      
-      {/* File info */}
-      <div className="p-3">
-        <p className="text-sm font-medium text-gray-900 truncate mb-1">
-          {getFileName()}
-        </p>
-        <p className="text-xs text-gray-500">
-          {archivo.tipo || 'Archivo'}
-        </p>
-        
-        <a
-          href={fileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
-        >
-          <ExternalLink className="w-4 h-4" />
-          Ver completo
+      <div className="p-4">
+        <p className="text-sm font-semibold text-gray-900 truncate mb-1">{getFileName()}</p>
+        <p className="text-xs text-gray-500 mb-3">{archivo.tipo || 'Archivo'}</p>
+        <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+          <ExternalLink className="w-4 h-4" />Ver completo
         </a>
       </div>
     </div>
   );
 };
 
-// Función para obtener archivos de solicitud
-const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudArchivo[]> => {
-  try {
-    console.log('📁 [SUA INTERNAS ARCHIVOS] Obteniendo archivos para solicitud:', idSolicitud);
-    const data = await SolicitudArchivosService.obtenerArchivos(idSolicitud);
-    console.log('✅ [SUA INTERNAS ARCHIVOS] Archivos obtenidos exitosamente:', data.length);
-    return data;
-  } catch (error) {
-    console.error('❌ [SUA INTERNAS ARCHIVOS] Error al obtener archivos:', error);
-    throw error;
-  }
-};
 
 export function PlantillaSuaInternasDetailModal({ 
   solicitud, 
@@ -296,8 +216,8 @@ export function PlantillaSuaInternasDetailModal({
     setErrors(prev => ({ ...prev, archivos: null }));
     
     try {
-      const data = await obtenerArchivosSolicitud(solicitud.id_solicitud || 0);
-      setArchivos(data);
+  const archivos = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud || 0);
+  setArchivos(archivos || []);
     } catch (error) {
       const errorMessage = handleError(error);
       setErrors(prev => ({ ...prev, archivos: errorMessage }));
@@ -314,7 +234,7 @@ export function PlantillaSuaInternasDetailModal({
     try {
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
       setComprobantes(data);
-    } catch (error) {
+    } catch {
       setErrorComprobantes('Error al cargar comprobantes');
     } finally {
       setLoadingComprobantes(false);
@@ -327,7 +247,7 @@ export function PlantillaSuaInternasDetailModal({
       fetchArchivos();
       fetchComprobantes();
     }
-  }, [isOpen, solicitud, fetchArchivos]);
+  }, [isOpen, solicitud, fetchArchivos, fetchComprobantes]);
 
   // Resetear estados al cerrar
   useEffect(() => {
@@ -451,8 +371,24 @@ export function PlantillaSuaInternasDetailModal({
           {/* Archivos Adjuntos */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos (ZIP con documentos IMSS)</h3>
-            {loading.archivos && (<LoadingSpinner message="Cargando archivos..." />)}
-            {errors.archivos && (<ErrorMessage message={errors.archivos} />)}
+            {loading.archivos && (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600 font-medium">Cargando archivos...</p>
+              </div>
+            )}
+            {errors.archivos && (
+              <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <X className="h-5 w-5 text-red-400" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-800">{errors.archivos}</p>
+                  </div>
+                </div>
+              </div>
+            )}
             {!loading.archivos && !errors.archivos && (
               <div className="space-y-4">
                 {archivos.length === 0 ? (
