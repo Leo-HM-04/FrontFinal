@@ -40,6 +40,7 @@ export default function EditarTukashPage() {
           datosTukash.monto_total_tukash = datosTukash.monto;
         }
         if (plantillaTukash && Object.keys(estado.datos).length === 0) {
+          console.log('Datos TUKASH para autocompletar:', datosTukash);
           seleccionarPlantilla(plantillaTukash, datosTukash);
         }
       } catch (err) {
