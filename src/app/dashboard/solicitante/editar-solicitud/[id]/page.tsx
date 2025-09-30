@@ -392,12 +392,13 @@ export default function EditarSolicitudPage() {
         
         if (plantillaId) {
           let plantillaIdDetectada = plantillaId;
+          let datosPlantillaGuardados: Record<string, unknown> = {};
           if (s && s.plantilla_datos) {
             try {
-              const plantillaData = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
-              if (plantillaData.templateType === 'tarjetas-tukash') {
+              datosPlantillaGuardados = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
+              if (datosPlantillaGuardados.templateType === 'tarjetas-tukash') {
                 plantillaIdDetectada = 'tarjetas-tukash';
-              } else if (plantillaData.templateType === 'tarjetas-n09-toka') {
+              } else if (datosPlantillaGuardados.templateType === 'tarjetas-n09-toka') {
                 plantillaIdDetectada = 'tarjetas-n09-toka';
               }
             } catch {}
@@ -407,52 +408,15 @@ export default function EditarSolicitudPage() {
             setPlantillaDetectada(plantillaEncontrada);
             setEsEdicionPlantilla(true);
             seleccionarPlantilla(plantillaEncontrada);
-            // Prefill all fields from plantilla_datos (or N09Toka service) into usePlantillaSolicitud state
-            let datosParaPrefill: Record<string, unknown> = {};
-            if (plantillaIdDetectada === 'tarjetas-n09-toka') {
-              // Prefer datos from N09Toka service if available
-              SolicitudesN09TokaService.obtenerPorSolicitudPrincipal(solicitudId)
-                .then((datosN09Toka: unknown) => {
-                  if (datosN09Toka && typeof datosN09Toka === 'object') {
-                    datosParaPrefill = datosN09Toka as Record<string, unknown>;
-                  }
-                  // Prefill all fields
-                  Object.entries(datosParaPrefill).forEach(([campo, valor]) => {
-                    if (valor !== null && valor !== undefined && valor !== '') {
-                      actualizarCampo(campo, valor);
-                    }
-                  });
-                })
-                .catch((error: Error) => {
-                  // Fallback to plantilla_datos JSON
-                  const datosPlantilla = obtenerDatosPlantilla(s as unknown as Solicitud);
-                  Object.entries(datosPlantilla).forEach(([campo, valor]) => {
-                    if (valor !== null && valor !== undefined && valor !== '') {
-                      actualizarCampo(campo, valor);
-                    }
-                  });
-                });
-            } else if (plantillaIdDetectada === 'tarjetas-tukash') {
-              let datosTukash: Record<string, unknown> = {};
-              if (s.plantilla_datos) {
-                try {
-                  datosTukash = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
-                } catch (err) {}
-              }
-              Object.entries(datosTukash).forEach(([campo, valor]) => {
+            // Esperar a que el estado se inicialice antes de sobrescribir los datos
+            setTimeout(() => {
+              // Sobrescribir los datos de la plantilla con los guardados
+              Object.entries(datosPlantillaGuardados).forEach(([campo, valor]) => {
                 if (valor !== null && valor !== undefined && valor !== '') {
                   actualizarCampo(campo, valor);
                 }
               });
-            } else {
-              // Generic plantilla: prefill all fields from plantilla_datos
-              const datosPlantilla = obtenerDatosPlantilla(s as unknown as Solicitud);
-              Object.entries(datosPlantilla).forEach(([campo, valor]) => {
-                if (valor !== null && valor !== undefined && valor !== '') {
-                  actualizarCampo(campo, valor);
-                }
-              });
-            }
+            }, 100);
           } else {
             setEsEdicionPlantilla(false);
             setPlantillaDetectada(null);
