@@ -398,7 +398,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
     try {
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
       setComprobantes(data);
-    } catch (error) {
+    } catch  {
       setErrorComprobantes('Error al cargar comprobantes');
     } finally {
       setLoadingComprobantes(false);

@@ -11,7 +11,7 @@ interface EditarTukashProps {
   estado: EstadoPlantilla;
 }
 
-export default function EditarTukash({ plantilla, datosPlantilla, onGuardar, actualizarCampo, estado }: EditarTukashProps) {
+export default function EditarTukash({ plantilla, onGuardar, actualizarCampo, estado }: EditarTukashProps) {
   return (
     <FormularioPlantilla
       plantilla={plantilla}

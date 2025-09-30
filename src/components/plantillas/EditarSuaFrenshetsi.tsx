@@ -10,7 +10,7 @@ interface EditarSuaFrenshetsiProps {
   estado: EstadoPlantilla;
 }
 
-export default function EditarSuaFrenshetsi({ plantilla, datosPlantilla, onGuardar, actualizarCampo, estado }: EditarSuaFrenshetsiProps) {
+export default function EditarSuaFrenshetsi({ plantilla, onGuardar, actualizarCampo, estado }: EditarSuaFrenshetsiProps) {
   return (
     <SolicitanteLayout>
       <FormularioPlantilla

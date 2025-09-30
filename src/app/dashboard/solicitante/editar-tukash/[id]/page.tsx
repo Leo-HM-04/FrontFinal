@@ -6,7 +6,6 @@ import { useRouter, useParams } from 'next/navigation';
 import EditarTukash from '@/components/plantillas/EditarTukash';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
-import { obtenerDatosPlantilla } from '@/utils/plantillasLabels';
 import type { Solicitud } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
 

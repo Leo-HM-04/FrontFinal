@@ -43,18 +43,7 @@ const formatDate = (dateString: string): string => {
 };
 
 // Función para obtener colores del estado
-const getEstadoColor = (estado: string) => {
-  switch ((estado || '').toLowerCase()) {
-    case 'aprobada':
-      return 'bg-green-100 text-green-800 border-green-300';
-    case 'rechazada':
-      return 'bg-red-100 text-red-800 border-red-300';
-    case 'pagada':
-      return 'bg-blue-100 text-blue-800 border-blue-300';
-    default:
-      return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-  }
-};
+
 
 // Función para construir URL de archivos
 const buildFileUrl = (rutaArchivo: string): string => {
@@ -74,10 +63,10 @@ const buildFileUrl = (rutaArchivo: string): string => {
 
 // Hook personalizado para manejo de errores
 const useErrorHandler = () => {
-  const handleError = useCallback((error: unknown): string => {
-    console.error('Error:', error);
-    if (error instanceof Error) {
-      return error.message;
+  const handleError = useCallback((_error: unknown): string => {
+    // console.error('Error:', _error);
+    if (_error instanceof Error) {
+      return _error.message;
     }
     return 'Ha ocurrido un error inesperado';
   }, []);
@@ -250,8 +239,8 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     try {
       const data = await SolicitudN09TokaArchivosService.obtenerArchivos(solicitud.id_solicitud || 0);
       setArchivos(data);
-    } catch (error) {
-      const errorMessage = handleError(error);
+    } catch (_error) {
+      const errorMessage = handleError(_error);
       setErrors(prev => ({ ...prev, archivos: errorMessage }));
     } finally {
       setLoading(prev => ({ ...prev, archivos: false }));
@@ -266,7 +255,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     try {
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
       setComprobantes(data);
-    } catch (error) {
+    } catch {
       setErrorComprobantes('Error al cargar comprobantes');
     } finally {
       setLoadingComprobantes(false);

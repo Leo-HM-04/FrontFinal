@@ -214,7 +214,7 @@ export function detectarPlantillaId(solicitud: Solicitud): string | null {
       if (plantillaData.templateType && typeof plantillaData.templateType === 'string' && plantillaData.templateType !== 'NORMAL') {
         return plantillaData.templateType;
       }
-    } catch (e) {
+    } catch {
       // Si falla el parseo, ignorar
     }
   }

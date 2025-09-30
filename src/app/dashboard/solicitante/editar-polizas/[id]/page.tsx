@@ -1,11 +1,10 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditarPolizas from '@/components/plantillas/EditarPolizas';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
-import type { Solicitud } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
 
 export default function EditarPolizasPage() {
@@ -14,13 +13,12 @@ export default function EditarPolizasPage() {
   const solicitudId = Number(params?.id ?? 0);
   const { estado, seleccionarPlantilla, actualizarCampo } = usePlantillaSolicitud();
 
-  const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
+
 
   useEffect(() => {
     async function fetchSolicitud() {
       try {
         const s = await SolicitudesService.getById(solicitudId);
-        setSolicitud(s);
         // Detectar plantilla POLIZAS
         const plantilla = plantillasDisponibles.find(p => p.id === 'pago-polizas-gnp');
         if (plantilla) {
@@ -43,7 +41,7 @@ export default function EditarPolizasPage() {
       }
     }
     if (solicitudId) fetchSolicitud();
-  }, [solicitudId]);
+  }, [solicitudId, actualizarCampo, seleccionarPlantilla]);
 
   // Handler para guardar cambios
   const handleGuardar = async () => {

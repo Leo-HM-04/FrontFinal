@@ -1,11 +1,10 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditarRegresosTransferencia from '@/components/plantillas/EditarRegresosTransferencia';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
-import type { Solicitud } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
 
 export default function EditarRegresosTransferenciaPage() {
@@ -15,13 +14,13 @@ export default function EditarRegresosTransferenciaPage() {
   const plantillaRegresos = plantillasDisponibles.find(p => p.id === 'regresos-transferencia');
   const plantillaHook = usePlantillaSolicitud();
   const { estado, seleccionarPlantilla, actualizarCampo } = plantillaHook;
-  const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
+
 
   useEffect(() => {
     async function fetchSolicitud() {
       try {
         const s = await SolicitudesService.getById(solicitudId);
-        setSolicitud(s);
+
         let datosRegresos: Record<string, unknown> = {};
         if (s.plantilla_datos) {
           try {

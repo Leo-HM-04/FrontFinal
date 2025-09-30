@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Shield, Calendar, DollarSign, Building2, User, FileText, Eye, ExternalLink, FileCheck } from 'lucide-react';
+import { X, Shield, DollarSign, Building2, FileText, ExternalLink, FileCheck } from 'lucide-react';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
 import Image from 'next/image';
-import { error } from 'console';
 
 // Tipos específicos para la plantilla de Pólizas
 export interface SolicitudPolizasData {
@@ -113,18 +112,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
     }).format(numAmount || 0);
   };
 
-  const formatDate = (dateString: string): string => {
-    if (!dateString) return 'No especificada';
-    try {
-      return new Date(dateString).toLocaleDateString('es-MX', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return dateString;
-    }
-  };
+
 
   const getTitularLabel = (titular: string): string => {
     const aseguradoras: Record<string, string> = {

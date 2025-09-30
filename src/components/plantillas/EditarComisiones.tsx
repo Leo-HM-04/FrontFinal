@@ -12,7 +12,7 @@ interface EditarComisionesProps {
   estado: EstadoPlantilla;
 }
 
-export default function EditarComisiones({ plantilla, datosPlantilla, onGuardar, actualizarCampo, estado }: EditarComisionesProps) {
+export default function EditarComisiones({ plantilla, onGuardar, actualizarCampo, estado }: EditarComisionesProps) {
   return (
     <SolicitanteLayout>
       <FormularioPlantilla

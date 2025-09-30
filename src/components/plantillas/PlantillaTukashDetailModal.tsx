@@ -6,7 +6,7 @@ import { Comprobante } from '@/types';
 import Image from 'next/image';
 import { X, FileText, ExternalLink } from 'lucide-react';
 import { PlantillaTukashModalProps, LoadingStateTukash, ErrorStateTukash } from '@/types/plantillaTukash';
-import { SolicitudTukashData } from '@/types/plantillaTukash';
+// import { SolicitudTukashData } from '@/types/plantillaTukash'; // Removed unused import
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 
 
@@ -174,7 +174,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
 			try {
 				const archivosRes = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
 				setArchivos(archivosRes);
-			} catch (err) {
+			} catch {
 				setErrors((prev) => ({ ...prev, archivos: 'Error al cargar archivos adjuntos' }));
 			} finally {
 				setLoading((prev) => ({ ...prev, archivos: false }));
@@ -189,7 +189,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
 		try {
 			const comprobantesRes = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
 			setComprobantes(comprobantesRes);
-		} catch (err) {
+		} catch {
 			setErrorComprobantes('Error al cargar comprobantes de pago');
 		} finally {
 			setLoadingComprobantes(false);

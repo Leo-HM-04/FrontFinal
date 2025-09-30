@@ -12,7 +12,7 @@ interface EditarRegresosTransferenciaProps {
   estado: EstadoPlantilla;
 }
 
-export default function EditarRegresosTransferencia({ plantilla, datosPlantilla, onGuardar, actualizarCampo, estado }: EditarRegresosTransferenciaProps) {
+export default function EditarRegresosTransferencia({ plantilla, onGuardar, actualizarCampo, estado }: EditarRegresosTransferenciaProps) {
   return (
     <SolicitanteLayout>
       <FormularioPlantilla

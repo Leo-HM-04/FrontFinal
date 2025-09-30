@@ -10,7 +10,7 @@ interface EditarPolizasProps {
   estado: EstadoPlantilla;
 }
 
-export default function EditarPolizas({ plantilla, datosPlantilla, onGuardar, actualizarCampo, estado }: EditarPolizasProps) {
+export default function EditarPolizas({ plantilla, onGuardar, actualizarCampo, estado }: EditarPolizasProps) {
   return (
     <SolicitanteLayout>
       <FormularioPlantilla

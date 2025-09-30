@@ -40,7 +40,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
         if (esComisiones) {
           return true;
         }
-      } catch (error) {
+      } catch {
         // Error parseando plantilla_datos, continuar con otras validaciones
       }
     }

@@ -11,7 +11,7 @@ interface EditarN09TokaProps {
   estado: EstadoPlantilla;
 }
 
-export default function EditarN09Toka({ plantilla, datosPlantilla, onGuardar, actualizarCampo, estado }: EditarN09TokaProps) {
+export default function EditarN09Toka({ plantilla, onGuardar, actualizarCampo, estado }: EditarN09TokaProps) {
   return (
     <SolicitanteLayout>
       <FormularioPlantilla

@@ -10,7 +10,7 @@ interface EditarSuaInternasProps {
   estado: EstadoPlantilla;
 }
 
-export default function EditarSuaInternas({ plantilla, datosPlantilla, onGuardar, actualizarCampo, estado }: EditarSuaInternasProps) {
+export default function EditarSuaInternas({ plantilla, onGuardar, actualizarCampo, estado }: EditarSuaInternasProps) {
   return (
     <SolicitanteLayout>
       <FormularioPlantilla
