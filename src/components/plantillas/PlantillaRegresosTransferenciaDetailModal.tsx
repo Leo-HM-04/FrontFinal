@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { SolicitudesService } from '@/services/solicitudes.service';
+import { Comprobante } from '@/types';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, Banknote } from 'lucide-react';
 
@@ -82,16 +84,38 @@ export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegres
   const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
   const [loadingArchivos, setLoadingArchivos] = useState(false);
 
+  // Comprobantes de pago
+  const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
+  const [loadingComprobantes, setLoadingComprobantes] = useState(false);
+  const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
+
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && solicitud) {
       setLoadingArchivos(true);
       // Simula fetch de archivos
       setTimeout(() => {
         setArchivos([]); // Reemplaza con fetch real
         setLoadingArchivos(false);
       }, 500);
+
+      // Fetch comprobantes
+      setLoadingComprobantes(true);
+      setErrorComprobantes(null);
+      if (solicitud.id_solicitud) {
+        SolicitudesService.getComprobantes(solicitud.id_solicitud)
+          .then((data) => setComprobantes(data))
+          .catch(() => setErrorComprobantes('Error al cargar comprobantes'))
+          .finally(() => setLoadingComprobantes(false));
+      } else {
+        setComprobantes([]);
+        setLoadingComprobantes(false);
+      }
+    } else {
+      setComprobantes([]);
+      setLoadingComprobantes(false);
+      setErrorComprobantes(null);
     }
-  }, [isOpen]);
+  }, [isOpen, solicitud]);
 
   if (!isOpen) return null;
 
@@ -202,6 +226,52 @@ export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegres
               </div>
             )}
           </div>
+          {/* Comprobantes de Pago */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobantes de Pago</h3>
+            {loadingComprobantes ? (
+              <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3" />
+                <span className="text-blue-600 text-sm">Cargando comprobantes...</span>
+              </div>
+            ) : errorComprobantes ? (
+              <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorComprobantes}</div>
+            ) : comprobantes.length === 0 ? (
+              <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600 font-semibold">AÚN NO HAY COMPROBANTE</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {comprobantes.map((comprobante) => (
+                  <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                          <span className="text-xs text-blue-800 font-semibold">
+                            {comprobante.nombre_usuario || `Usuario ${comprobante.usuario_subio}`}
+                          </span>
+                        </div>
+                        {comprobante.comentario && (
+                          <div className="mt-2 bg-white/60 p-2 rounded border-l-3 border-blue-300">
+                            <p className="text-xs text-gray-700 italic">&ldquo;{comprobante.comentario}&rdquo;</p>
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => window.open(comprobante.ruta_archivo, '_blank')}
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3 text-xs"
+                        disabled={!comprobante.ruta_archivo}
+                      >
+                        Ver completo
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Información de Auditoría */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Auditoría</h3>
