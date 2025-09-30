@@ -28,7 +28,7 @@ export default function EditarTukashPage() {
           try {
             datosTukash = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
           } catch (err) {
-            console.error('❌ Error parseando plantilla_datos TUKASH:', err);
+            // Si hay error, datosTukash queda vacío
           }
         }
         // Mapeo robusto de campos
@@ -43,7 +43,7 @@ export default function EditarTukashPage() {
           seleccionarPlantilla(plantillaTukash, datosTukash);
         }
       } catch (err) {
-        console.error('❌ Error obteniendo solicitud:', err);
+        // Si hay error, no autocompleta
       }
     }
     if (solicitudId) fetchSolicitud();
