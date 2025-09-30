@@ -1034,6 +1034,7 @@ function MisSolicitudesContent() {
                             </button>
                               {String(s.estado).toLowerCase() === 'pendiente' && (
                                 <>
+                                  {/*
                                   <button
                                     title="Editar"
                                     className="inline-flex items-center justify-center p-1.5 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
@@ -1060,7 +1061,7 @@ function MisSolicitudesContent() {
                                     }}
                                   >
                                     <Edit className="w-3.5 h-3.5" />
-                                  </button>
+                                  </button>*/}
                                   <button
                                     title="Eliminar"
                                     className="inline-flex items-center justify-center p-1.5 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"

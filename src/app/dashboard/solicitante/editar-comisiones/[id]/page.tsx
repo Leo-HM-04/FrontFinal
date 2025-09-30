@@ -22,19 +22,15 @@ export default function EditarComisionesPage() {
         // Detectar plantilla COMISIONES
         const plantilla = plantillasDisponibles.find(p => p.id === 'pago-comisiones');
         if (plantilla) {
-          seleccionarPlantilla(plantilla);
-          // Prellenar datos desde plantilla_datos
           let datos: Record<string, unknown> = {};
           if (s.plantilla_datos) {
             try {
               datos = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
             } catch (err) {
-              console.error('\u274c Error parseando plantilla_datos COMISIONES:', err);
+              // Si hay error, datos queda vacío
             }
           }
-          Object.entries(datos).forEach(([campo, valor]) => {
-            actualizarCampo(campo, valor);
-          });
+          seleccionarPlantilla(plantilla, datos);
         }
       } catch (err) {
         console.error('❌ Error obteniendo solicitud:', err);

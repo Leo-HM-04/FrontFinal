@@ -31,14 +31,6 @@ export default function EditarTukashPage() {
             // Si hay error, datosTukash queda vacío
           }
         }
-        // Mapeo robusto de campos
-        if (datosTukash.beneficiario && !datosTukash.beneficiario_tarjeta) {
-          datosTukash.beneficiario_tarjeta = datosTukash.beneficiario;
-        }
-        if (datosTukash.monto && !datosTukash.monto_total_tukash) {
-          datosTukash.monto_total_tukash = datosTukash.monto;
-        }
-        // Siempre autocompletar el formulario con los datos de la plantilla
         if (plantillaTukash) {
           seleccionarPlantilla(plantillaTukash, datosTukash);
         }
@@ -47,8 +39,7 @@ export default function EditarTukashPage() {
       }
     }
     if (solicitudId) fetchSolicitud();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [solicitudId]);
+  }, [solicitudId, plantillaTukash, seleccionarPlantilla]);
 
   // Handler para guardar cambios
   const handleGuardar = async () => {
