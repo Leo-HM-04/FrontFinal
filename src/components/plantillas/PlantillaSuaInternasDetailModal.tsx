@@ -451,7 +451,11 @@ export function PlantillaSuaInternasDetailModal({
                         )}
                       </div>
                       <button
-                        onClick={() => window.open(comprobante.ruta_archivo, '_blank')}
+                        onClick={() => {
+                          const fileName = comprobante.ruta_archivo.split('/').pop();
+                          const url = `https://bechapra.com.mx/uploads/comprobantes/${fileName}`;
+                          window.open(url, '_blank');
+                        }}
                         className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3 text-xs"
                         disabled={!comprobante.ruta_archivo}
                       >

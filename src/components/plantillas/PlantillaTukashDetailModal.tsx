@@ -89,10 +89,10 @@ const getEstadoColor = (estado: string) => {
 };
 
 const buildFileUrl = (rutaArchivo: string): string => {
-	const baseUrl = 'https://bechapra.com.mx';
+	// Always use the standardized comprobante URL pattern
 	if (!rutaArchivo) return '';
-	if (rutaArchivo.startsWith('http')) return rutaArchivo;
-	return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
+	const fileName = rutaArchivo.split('/').pop();
+	return `https://bechapra.com.mx/uploads/comprobantes/${fileName}`;
 };
 
 const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {

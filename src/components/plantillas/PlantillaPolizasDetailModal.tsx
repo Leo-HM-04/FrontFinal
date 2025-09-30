@@ -270,8 +270,8 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                 ) : (
                   <div className="space-y-4">
                     {comprobantes.map((comprobante) => {
-                      const comprobanteUrl = comprobante.ruta_archivo;
-                      const fileName = comprobante.nombre_archivo || comprobanteUrl.split('/').pop() || '';
+                      const fileName = comprobante.ruta_archivo.split('/').pop() || '';
+                      const comprobanteUrl = `https://bechapra.com.mx/uploads/comprobantes/${fileName}`;
                       return (
                         <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
                           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-3">
