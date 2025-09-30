@@ -463,7 +463,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
         </button>
         {/* Layout horizontal */}
         <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
-          {/* Columna izquierda: info principal y auditoría */}
+          {/* Columna izquierda: info principal, auditoría y comprobantes */}
           <div className="flex-1 min-w-0">
             <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
               <div className="bg-white/20 p-3 rounded-lg">
@@ -580,7 +580,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 <InfoField label="Usuario de Actualización" value={solicitud.usuario_actualizacion} />
               </div>
             </div>
-            {/* Comprobantes de Pago - ahora debajo de Auditoría */}
+            {/* Comprobantes de Pago - debajo de Auditoría */}
             <div className="mb-6 w-full">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobantes de Pago</h3>
               {loadingComprobantes ? (
@@ -627,6 +627,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 </div>
               )}
             </div>
+          </div>
           {/* Columna derecha: archivos adjuntos */}
           <div className="w-full lg:w-[420px] flex-shrink-0">
             <div className="mb-6">
@@ -675,7 +676,6 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
           </div>
         </div>
       </div>
-    </div>
     </div>
   );
 }
