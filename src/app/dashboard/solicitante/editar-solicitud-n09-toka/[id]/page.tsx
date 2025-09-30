@@ -12,7 +12,7 @@ export default function EditarN09TokaPage() {
   const router = useRouter();
   const params = useParams() ?? {};
   const solicitudId = Number(params?.id ?? 0);
-  const { estado, seleccionarPlantilla, actualizarCampo } = usePlantillaSolicitud();
+  const { estado, seleccionarPlantilla, actualizarCampo, ocultarCampo } = usePlantillaSolicitud();
 
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
 
@@ -25,6 +25,8 @@ export default function EditarN09TokaPage() {
         const plantillaN09Toka = plantillasDisponibles.find(p => p.id === 'tarjetas-n09-toka');
         if (plantillaN09Toka) {
           seleccionarPlantilla(plantillaN09Toka);
+          // Ocultar campo de archivos_adjuntos para solicitante
+          ocultarCampo && ocultarCampo('archivos_adjuntos');
           // Prellenar datos desde plantilla_datos
           let datosN09Toka: Record<string, unknown> = {};
           if (s.plantilla_datos) {

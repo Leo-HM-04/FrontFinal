@@ -227,8 +227,8 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
           id: 'archivos_adjuntos',
           nombre: 'archivos_adjuntos',
           tipo: 'archivo',
-          etiqueta: 'Documentos',
-          ayuda: 'Dos archivos: un excel con el cálculo de las comisiones y una imagen o pdf con el comprobante del pago.',
+          etiqueta: 'Documentos de soporte',
+          ayuda: 'Adjunta solo documentos de soporte (ejemplo: cotizaciones, facturas, contratos, excel de cálculo, etc). El comprobante de pago solo lo sube el pagador cuando la solicitud está pagada.',
           valorPorDefecto: [],
           validaciones: {
             requerido: true,

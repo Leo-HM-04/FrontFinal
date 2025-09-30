@@ -3,6 +3,17 @@ import { PlantillaSolicitud, DatosFormularioPlantilla, EstadoPlantilla, CampoPla
 
 // Hook personalizado para manejar plantillas de solicitudes
 export const usePlantillaSolicitud = () => {
+  // Función para ocultar un campo manualmente
+  const ocultarCampo = useCallback((campoId: string) => {
+    setEstado(estadoActual => {
+      const nuevaCamposVisibles = new Set(estadoActual.camposVisibles);
+      nuevaCamposVisibles.delete(campoId);
+      return {
+        ...estadoActual,
+        camposVisibles: nuevaCamposVisibles
+      };
+    });
+  }, []);
   const [estado, setEstado] = useState<EstadoPlantilla>({
     plantillaSeleccionada: null,
     datos: {},
@@ -275,6 +286,7 @@ export const usePlantillaSolicitud = () => {
     validarFormulario,
     resetearFormulario,
     obtenerDatosParaEnvio,
-    validarCampo
+    validarCampo,
+    ocultarCampo
   };
 };
