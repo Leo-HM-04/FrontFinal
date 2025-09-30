@@ -16,6 +16,7 @@ import { SolicitudesService } from '@/services/solicitudes.service';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
 import Modal from '@/components/ui/Modal';
+import RejectModal from '@/components/ui/RejectModal';
 import { Solicitud } from '@/types';
 import { obtenerNombreBanco } from '@/utils/bancos';
 
@@ -32,7 +33,8 @@ export default function SolicitudesPendientesPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   //const [search, setSearch] = useState('');
-  const [confirmModal, setConfirmModal] = useState<{ open: boolean; solicitud: Solicitud | null; action: 'approve' | 'reject' | null }>({ open: false, solicitud: null, action: null });
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; solicitud: Solicitud | null; action: 'approve' | null }>({ open: false, solicitud: null, action: null });
+  const [rejectModal, setRejectModal] = useState<{ open: boolean; solicitud: Solicitud | null }>({ open: false, solicitud: null });
   
   // Estados para ordenamiento
   const [sortField, setSortField] = useState<string>('');
@@ -369,25 +371,38 @@ export default function SolicitudesPendientesPage() {
     }
   };
 
-  // Nuevo: abrir modal de confirmación
-  const openConfirmModal = (solicitud: Solicitud, action: 'approve' | 'reject') => {
-    setConfirmModal({ open: true, solicitud, action });
+  // Nuevo: abrir modal de confirmación de aprobación
+  const openConfirmModal = (solicitud: Solicitud) => {
+    setConfirmModal({ open: true, solicitud, action: 'approve' });
   };
 
-  // Nuevo: cerrar modal de confirmación
+  // Nuevo: cerrar modal de confirmación de aprobación
   const closeConfirmModal = () => {
     setConfirmModal({ open: false, solicitud: null, action: null });
   };
 
-  // Nuevo: confirmar acción
+  // Nuevo: abrir modal de rechazo con comentario
+  const openRejectModal = (solicitud: Solicitud) => {
+    setRejectModal({ open: true, solicitud });
+  };
+
+  // Nuevo: cerrar modal de rechazo
+  const closeRejectModal = () => {
+    setRejectModal({ open: false, solicitud: null });
+  };
+
+  // Nuevo: confirmar aprobación
   const confirmAction = async () => {
-    if (!confirmModal.solicitud || !confirmModal.action) return;
-    if (confirmModal.action === 'approve') {
-      await handleApprove(confirmModal.solicitud.id_solicitud);
-    } else {
-      await handleReject(confirmModal.solicitud.id_solicitud);
-    }
+    if (!confirmModal.solicitud || confirmModal.action !== 'approve') return;
+    await handleApprove(confirmModal.solicitud.id_solicitud);
     closeConfirmModal();
+  };
+
+  // Nuevo: confirmar rechazo con comentario
+  const confirmReject = async (comentario: string) => {
+    if (!rejectModal.solicitud) return;
+    await handleReject(rejectModal.solicitud.id_solicitud, comentario);
+    closeRejectModal();
   };
 
   return (
@@ -804,8 +819,8 @@ export default function SolicitudesPendientesPage() {
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div className="flex flex-wrap gap-2">
                                       <Button variant="outline" size="sm" onClick={() => handleViewDetail(s)} style={{ color: '#3B82F6', borderColor: '#3B82F6' }} className="hover:bg-blue-50"><Eye className="w-4 h-4 mr-1" /> Ver</Button>
-                                      <Button variant="outline" size="sm" disabled={actionLoading} onClick={() => openConfirmModal(s, 'approve')} style={{ color: '#16A34A', borderColor: '#16A34A' }} className="hover:bg-green-50 flex items-center">{actionLoading ? (<span className="loader border-green-500 mr-2"></span>) : (<CheckCircle className="w-4 h-4 mr-1" />)}Aprobar</Button>
-                                      <Button variant="outline" size="sm" disabled={actionLoading} onClick={() => openConfirmModal(s, 'reject')} style={{ color: '#DC2626', borderColor: '#DC2626' }} className="hover:bg-red-50 flex items-center">{actionLoading ? (<span className="loader border-red-500 mr-2"></span>) : (<XCircle className="w-4 h-4 mr-1" />)}Rechazar</Button>
+                                      <Button variant="outline" size="sm" disabled={actionLoading} onClick={() => openConfirmModal(s)} style={{ color: '#16A34A', borderColor: '#16A34A' }} className="hover:bg-green-50 flex items-center">{actionLoading ? (<span className="loader border-green-500 mr-2"></span>) : (<CheckCircle className="w-4 h-4 mr-1" />)}Aprobar</Button>
+                                      <Button variant="outline" size="sm" disabled={actionLoading} onClick={() => openRejectModal(s)} style={{ color: '#DC2626', borderColor: '#DC2626' }} className="hover:bg-red-50 flex items-center">{actionLoading ? (<span className="loader border-red-500 mr-2"></span>) : (<XCircle className="w-4 h-4 mr-1" />)}Rechazar</Button>
                                     </div>
                                   </td>
                                 </tr>
@@ -920,7 +935,7 @@ export default function SolicitudesPendientesPage() {
                                   <div className="flex gap-2">
                                     <button
                                       disabled={actionLoading}
-                                      onClick={() => openConfirmModal(s, 'approve')}
+                                      onClick={() => openConfirmModal(s)}
                                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors text-sm font-medium disabled:opacity-50"
                                     >
                                       {actionLoading ? (
@@ -932,7 +947,7 @@ export default function SolicitudesPendientesPage() {
                                     </button>
                                     <button
                                       disabled={actionLoading}
-                                      onClick={() => openConfirmModal(s, 'reject')}
+                                      onClick={() => openRejectModal(s)}
                                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors text-sm font-medium disabled:opacity-50"
                                     >
                                       {actionLoading ? (
@@ -986,19 +1001,28 @@ export default function SolicitudesPendientesPage() {
           itemCount={filteredSolicitudes.length}
         />
 
-        {/* Modal de confirmación para aprobar/rechazar */}
+        {/* Modal de confirmación para aprobar */}
         {confirmModal.open && confirmModal.solicitud && (
           <Modal
             isOpen={confirmModal.open}
-            title={confirmModal.action === 'approve' ? '¿Confirmar aprobación?' : '¿Confirmar rechazo?'}
-            message={confirmModal.action === 'approve'
-              ? 'Esta acción autorizará la solicitud y notificará al solicitante.'
-              : 'Esta acción rechazará la solicitud y notificará al solicitante.'}
-            warning={confirmModal.action === 'reject' ? 'Advertencia: Esta acción no se puede deshacer.' : undefined}
-            confirmText={confirmModal.action === 'approve' ? 'Aprobar' : 'Rechazar'}
+            title="¿Confirmar aprobación?"
+            message="Esta acción autorizará la solicitud y notificará al solicitante."
+            confirmText="Aprobar"
             cancelText="Cancelar"
             onConfirm={confirmAction}
             onCancel={closeConfirmModal}
+          />
+        )}
+
+        {/* Modal de rechazo con comentario obligatorio */}
+        {rejectModal.open && rejectModal.solicitud && (
+          <RejectModal
+            isOpen={rejectModal.open}
+            title="¿Confirmar rechazo?"
+            solicitudId={rejectModal.solicitud.id_solicitud}
+            onConfirm={confirmReject}
+            onCancel={closeRejectModal}
+            isLoading={actionLoading}
           />
         )}
       </AprobadorLayout>
