@@ -85,8 +85,8 @@ const RejectModal: React.FC<RejectModalProps> = ({
             value={comentario}
             onChange={handleComentarioChange}
             placeholder="Explica el motivo por el cual se está rechazando esta solicitud..."
-            className={`w-full px-4 py-3 border rounded-lg resize-none focus:ring-2 focus:ring-red-200 focus:border-red-300 transition-colors ${
-              error ? "border-red-300 bg-red-50" : "border-gray-300"
+            className={`w-full px-4 py-3 border rounded-lg resize-none focus:ring-2 focus:ring-red-200 focus:border-red-300 transition-colors text-gray-900 placeholder-gray-500 ${
+              error ? "border-red-300 bg-red-50" : "border-gray-300 bg-white"
             }`}
             rows={4}
             maxLength={500}
