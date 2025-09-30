@@ -17,7 +17,7 @@ export default function EditarTukashPage() {
   const plantillaHook = usePlantillaSolicitud();
   const { estado, seleccionarPlantilla, actualizarCampo } = plantillaHook;
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
-  // Prellenado solo si el estado está vacío
+
   useEffect(() => {
     async function fetchSolicitud() {
       try {
@@ -38,8 +38,8 @@ export default function EditarTukashPage() {
         if (datosTukash.monto && !datosTukash.monto_total_tukash) {
           datosTukash.monto_total_tukash = datosTukash.monto;
         }
-        if (plantillaTukash && Object.keys(estado.datos).length === 0) {
-          console.log('Datos TUKASH para autocompletar:', datosTukash);
+        // Siempre autocompletar el formulario con los datos de la plantilla
+        if (plantillaTukash) {
           seleccionarPlantilla(plantillaTukash, datosTukash);
         }
       } catch (err) {
