@@ -207,32 +207,23 @@ export function PlantillaTukashDetailModal({
   isOpen, 
   onClose
 }: PlantillaTukashModalProps) {
+
   // Estados
   const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
-  
-  const [loading, setLoading] = useState<LoadingStateTukash>({
-    archivos: false,
-    general: false,
-  });
-  
-  const [errors, setErrors] = useState<ErrorStateTukash>({
-    archivos: null,
-    general: null,
-  });
+  const [loading, setLoading] = useState<LoadingStateTukash>({ archivos: false, general: false });
+  const [errors, setErrors] = useState<ErrorStateTukash>({ archivos: null, general: null });
 
   // Hooks personalizados
   const { handleError } = useErrorHandler();
 
-  // Cast de la solicitud para acceder a campos adicionales
+  // Cast extendido para campos adicionales
   const solicitudExtended = solicitud as SolicitudTukashExtended;
 
   // Función para obtener archivos
   const fetchArchivos = useCallback(async () => {
     if (!solicitud) return;
-    
     setLoading(prev => ({ ...prev, archivos: true }));
     setErrors(prev => ({ ...prev, archivos: null }));
-    
     try {
       const data = await obtenerArchivosSolicitud(solicitud.id_solicitud || 0);
       setArchivos(data);
@@ -244,7 +235,7 @@ export function PlantillaTukashDetailModal({
     }
   }, [solicitud, handleError]);
 
-  // Efectos
+  // Efectos para cargar archivos al abrir
   useEffect(() => {
     if (isOpen && solicitud) {
       fetchArchivos();
@@ -260,19 +251,17 @@ export function PlantillaTukashDetailModal({
     }
   }, [isOpen]);
 
-  // Función para manejar teclas de escape
+  // Escape para cerrar
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
-
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
     }
-
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
@@ -282,18 +271,15 @@ export function PlantillaTukashDetailModal({
   if (!isOpen || !solicitud) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
-      {/* Overlay similar al modal de solicitudes */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-blue-900/60 backdrop-blur-sm">
       <div
-        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
+        className="absolute inset-0"
         onClick={onClose}
         role="button"
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
-      {/* Modal container similar a solicitudes */}
       <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
-        {/* Botón de cerrar */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 z-30 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-300"
@@ -301,9 +287,7 @@ export function PlantillaTukashDetailModal({
         >
           <X className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
         </button>
-        {/* Contenido con scroll */}
         <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 p-6">
-          {/* Header */}
           <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
             <div className="relative z-10 flex items-center justify-between">
               <div>
@@ -316,7 +300,6 @@ export function PlantillaTukashDetailModal({
               <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado || 'pendiente')}`}>{solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}</span>
             </div>
           </header>
-          
           {/* Información Principal */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información Principal</h3>
@@ -327,7 +310,6 @@ export function PlantillaTukashDetailModal({
               <InfoField label="Número de Tarjeta" value={solicitud.numero_tarjeta} variant="mono" />
             </div>
           </div>
-
           {/* Información de Montos */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Montos</h3>
@@ -336,21 +318,6 @@ export function PlantillaTukashDetailModal({
               <InfoField label="Monto Total TUKASH" value={solicitud.monto_total_tukash?.toString()} variant="currency" />
             </div>
           </div>
-          
-          {/* Información de Aprobación */}
-          {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
-                <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion ? formatDate(solicitudExtended.fecha_aprobacion) : ''} />
-                <div className="md:col-span-2">
-                  <InfoField label="Comentarios de Aprobación" value={solicitudExtended.comentarios_aprobacion} />
-                </div>
-              </div>
-            </div>
-          )}
-          
           {/* Información de Seguimiento */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Seguimiento</h3>
@@ -361,7 +328,6 @@ export function PlantillaTukashDetailModal({
               <InfoField label="Usuario de Actualización" value={solicitud.usuario_actualizacion} />
             </div>
           </div>
-          
           {/* Archivos Adjuntos */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos</h3>
