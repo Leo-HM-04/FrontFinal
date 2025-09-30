@@ -23,7 +23,7 @@ export const usePlantillaSolicitud = () => {
   });
 
   // Función para seleccionar una plantilla
-  const seleccionarPlantilla = useCallback((plantilla: PlantillaSolicitud | null) => {
+  const seleccionarPlantilla = useCallback((plantilla: PlantillaSolicitud | null, datosPrecargados?: DatosFormularioPlantilla) => {
     setEstado(() => {
       if (!plantilla) {
         return {
@@ -35,17 +35,18 @@ export const usePlantillaSolicitud = () => {
         };
       }
 
-      // Inicializar datos con valores por defecto
+      // Inicializar datos con valores por defecto o precargados
       const datosIniciales: DatosFormularioPlantilla = {};
       const camposVisiblesIniciales = new Set<string>();
 
       plantilla.secciones.forEach(seccion => {
         seccion.campos.forEach(campo => {
-          // Establecer valor por defecto
-          if (campo.valorPorDefecto !== undefined) {
+          // Si hay datos precargados, usarlos; si no, valor por defecto
+          if (datosPrecargados && datosPrecargados[campo.id] !== undefined) {
+            datosIniciales[campo.id] = datosPrecargados[campo.id];
+          } else if (campo.valorPorDefecto !== undefined) {
             datosIniciales[campo.id] = campo.valorPorDefecto;
           }
-
           // Determinar visibilidad inicial
           if (!campo.dependencias || campo.dependencias.length === 0) {
             camposVisiblesIniciales.add(campo.id);
@@ -53,15 +54,13 @@ export const usePlantillaSolicitud = () => {
         });
       });
 
-      // Evaluar dependencias iniciales con valores por defecto
+      // Evaluar dependencias iniciales con valores actuales
       plantilla.secciones.forEach(seccion => {
         seccion.campos.forEach(campo => {
           if (campo.dependencias && campo.dependencias.length > 0) {
             let deberiaEstarVisible = false;
-            
             campo.dependencias.forEach(dependencia => {
               const valorCumple = datosIniciales[dependencia.campo] === dependencia.valor;
-              
               if (dependencia.accion === 'mostrar' && valorCumple) {
                 deberiaEstarVisible = true;
               } else if (dependencia.accion === 'ocultar' && valorCumple) {
@@ -69,7 +68,6 @@ export const usePlantillaSolicitud = () => {
                 return; // Si hay una acción ocultar que se cumple, prevalece
               }
             });
-            
             if (deberiaEstarVisible) {
               camposVisiblesIniciales.add(campo.id);
             } else {

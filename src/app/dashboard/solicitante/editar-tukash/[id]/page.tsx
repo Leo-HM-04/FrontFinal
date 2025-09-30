@@ -32,25 +32,15 @@ export default function EditarTukashPage() {
             console.error('❌ Error parseando plantilla_datos TUKASH:', err);
           }
         }
+        // Mapeo robusto de campos
+        if (datosTukash.beneficiario && !datosTukash.beneficiario_tarjeta) {
+          datosTukash.beneficiario_tarjeta = datosTukash.beneficiario;
+        }
+        if (datosTukash.monto && !datosTukash.monto_total_tukash) {
+          datosTukash.monto_total_tukash = datosTukash.monto;
+        }
         if (plantillaTukash && Object.keys(estado.datos).length === 0) {
-          seleccionarPlantilla(plantillaTukash);
-          // Mapeo robusto de campos
-          if (datosTukash.beneficiario && !datosTukash.beneficiario_tarjeta) {
-            datosTukash.beneficiario_tarjeta = datosTukash.beneficiario;
-          }
-          if (datosTukash.monto && !datosTukash.monto_total_tukash) {
-            datosTukash.monto_total_tukash = datosTukash.monto;
-          }
-          if (datosTukash.asunto) actualizarCampo('asunto', datosTukash.asunto);
-          if (datosTukash.numero_tarjeta) actualizarCampo('numero_tarjeta', datosTukash.numero_tarjeta);
-          if (datosTukash.monto_total_cliente) actualizarCampo('monto_total_cliente', datosTukash.monto_total_cliente);
-          if (datosTukash.monto_total_tukash) actualizarCampo('monto_total_tukash', datosTukash.monto_total_tukash);
-          if (datosTukash.archivos_adjuntos) actualizarCampo('archivos_adjuntos', datosTukash.archivos_adjuntos);
-          Object.entries(datosTukash).forEach(([campo, valor]) => {
-            if (!["asunto","numero_tarjeta","monto_total_cliente","monto_total_tukash","archivos_adjuntos"].includes(campo)) {
-              actualizarCampo(campo, valor);
-            }
-          });
+          seleccionarPlantilla(plantillaTukash, datosTukash);
         }
       } catch (err) {
         console.error('❌ Error obteniendo solicitud:', err);
