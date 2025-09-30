@@ -9,7 +9,6 @@ import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
 import type { Solicitud } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
 
-
 export default function EditarTukashPage() {
   const router = useRouter();
   const params = useParams() ?? {};
@@ -54,6 +53,7 @@ export default function EditarTukashPage() {
   // Handler para guardar cambios
   const handleGuardar = async () => {
     try {
+      console.log('Datos que se guardarán en plantilla_datos:', estado.datos);
       await SolicitudesService.updatePlantilla({
         id: solicitudId,
         plantilla_datos: JSON.stringify(estado.datos)
