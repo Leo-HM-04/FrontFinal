@@ -76,11 +76,9 @@ const formatPercentage = (percentage: number | undefined): string => {
 
 // Unificado con otros modales: siempre usa la URL de producción
 const buildFileUrl = (rutaArchivo: string): string => {
-  // Always use the standardized comprobante URL pattern
-  // Extract filename (with extension) from rutaArchivo
-  if (!rutaArchivo) return '';
-  const fileName = rutaArchivo.split('/').pop();
-  return `https://bechapra.com.mx/uploads/comprobantes/${fileName}`;
+  const baseUrl = 'https://bechapra.com.mx';
+  if (rutaArchivo.startsWith('http')) return rutaArchivo;
+  return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
 };
 
 // Hook personalizado para manejo de errores
@@ -616,11 +614,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                         </div>
                         <div className="w-full md:w-auto flex justify-end">
                           <button
-                            onClick={() => {
-                              const fileName = comprobante.ruta_archivo.split('/').pop();
-                              const url = `https://bechapra.com.mx/uploads/comprobantes/${fileName}`;
-                              window.open(url, '_blank');
-                            }}
+                            onClick={() => window.open(comprobante.ruta_archivo, '_blank')}
                             className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs w-full md:w-auto"
                             disabled={!comprobante.ruta_archivo}
                           >

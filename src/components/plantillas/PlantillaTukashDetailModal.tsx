@@ -1,336 +1,402 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { SolicitudesService } from '@/services/solicitudes.service';
-import { Comprobante } from '@/types';
 import Image from 'next/image';
 import { X, FileText, ExternalLink } from 'lucide-react';
 import { PlantillaTukashModalProps, LoadingStateTukash, ErrorStateTukash } from '@/types/plantillaTukash';
-// import { SolicitudTukashData } from '@/types/plantillaTukash'; // Removed unused import
+import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 
+// Tipo extendido para solicitudes TUKASH que incluye campos adicionales
+interface SolicitudTukashExtended extends SolicitudTukashData {
+  folio?: string;
+  tiene_archivos?: boolean | number;
+  id_aprobador?: number;
+  fecha_aprobacion?: string;
+  comentarios_aprobacion?: string;
+}
 
-// Helpers (reuse from other modals if needed)
-
-// Helpers and UI components (inlined from PlantillaSuaInternasDetailModal)
+// Función para formatear moneda en pesos mexicanos
 const formatCurrency = (amount: number | string): string => {
-	const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-	if (isNaN(numAmount)) return '$0.00 MXN';
-	return new Intl.NumberFormat('es-MX', {
-		style: 'currency',
-		currency: 'MXN',
-		minimumFractionDigits: 2
-	}).format(numAmount);
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(numAmount)) return '$0.00 MXN';
+  
+  return new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    minimumFractionDigits: 2
+  }).format(numAmount);
 };
 
+// Función para formatear fecha
 const formatDate = (dateString: string): string => {
-	if (!dateString) return 'No especificada';
-	const date = new Date(dateString);
-	return date.toLocaleDateString('es-MX', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit'
-	});
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-MX', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
-const InfoField: React.FC<{
-	label: string;
-	value: string | number | null | undefined;
-	variant?: 'default' | 'currency' | 'mono' | 'date' | 'estado';
-	className?: string;
-}> = ({ label, value, variant = 'default', className = '' }) => {
-	const formatValue = () => {
-		if (value === null || value === undefined || value === '') {
-			return 'No especificado';
-		}
-		switch (variant) {
-			case 'currency':
-				return formatCurrency(value);
-			case 'date':
-				return formatDate(value.toString());
-			case 'mono':
-				return value.toString();
-			case 'estado':
-				return (
-					<span className={`px-2 py-1 rounded-lg border text-xs font-semibold ${getEstadoColor(value.toString())}`}>{value}</span>
-				);
-			default:
-				return value.toString();
-		}
-	};
-	const getValueClassName = () => {
-		let baseClass = 'text-gray-900 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200';
-		if (variant === 'mono') baseClass += ' font-mono text-sm';
-		if (variant === 'currency') baseClass += ' font-semibold text-green-700';
-		if (variant === 'estado') baseClass += ' p-0 border-0 bg-transparent';
-		return baseClass;
-	};
-	return (
-		<div className={`space-y-2 ${className}`}>
-			<label className="block text-sm font-semibold text-blue-800">{label}</label>
-			<div className={getValueClassName()}>{formatValue()}</div>
-		</div>
-	);
-};
-
+// Función para obtener colores del estado
 const getEstadoColor = (estado: string) => {
-	switch ((estado || '').toLowerCase()) {
-		case 'aprobada':
-			return 'bg-green-100 text-green-800 border-green-300';
-		case 'rechazada':
-			return 'bg-red-100 text-red-800 border-red-300';
-		case 'pagada':
-			return 'bg-blue-100 text-blue-800 border-blue-300';
-		default:
-			return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-	}
+  switch (estado.toLowerCase()) {
+    case 'aprobada':
+      return 'bg-blue-100 text-blue-800 border-blue-300';
+    case 'rechazada':
+      return 'bg-red-100 text-red-800 border-red-300';
+    case 'pagada':
+      return 'bg-blue-100 text-blue-800 border-blue-300';
+    default:
+      return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+  }
 };
 
+// Función para construir URL de archivos
 const buildFileUrl = (rutaArchivo: string): string => {
-	// Always use the standardized comprobante URL pattern
-	if (!rutaArchivo) return '';
-	const fileName = rutaArchivo.split('/').pop();
-	return `https://bechapra.com.mx/uploads/comprobantes/${fileName}`;
+  // Para archivos de solicitud, usar la URL base correcta sin puerto ni /api
+  const baseUrl = 'https://bechapra.com.mx';
+  if (rutaArchivo.startsWith('http')) return rutaArchivo;
+  return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
 };
 
-const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
-	const [imageError, setImageError] = useState(false);
-	if (!archivo.archivo_url) {
-		return (
-			<div className="text-center p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-				<FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-				<p className="text-sm text-gray-500">Archivo no disponible</p>
-			</div>
-		);
-	}
-	const fileUrl = buildFileUrl(archivo.archivo_url);
-	const extension = archivo.archivo_url?.split('.').pop()?.toLowerCase() || '';
-	const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
-	const isPdf = extension === 'pdf';
-	const getFileName = () => {
-		const urlParts = archivo.archivo_url.split('/');
-		const fileName = urlParts[urlParts.length - 1];
-		return fileName || `Archivo ${archivo.id}`;
-	};
-	if (isPdf) {
-		return (
-			<div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-				<div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
-					<iframe src={fileUrl} title={getFileName()} className="w-full" style={{ height: '200px' }} />
-					<div className="bg-blue-50/80 p-2 text-xs text-center text-blue-700">
-						Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
-					</div>
-				</div>
-				<div className="p-4">
-					<p className="text-sm font-semibold text-gray-900 truncate mb-1">{getFileName()}</p>
-					<p className="text-xs text-gray-500 mb-3">Documento PDF</p>
-					<a href={fileUrl} target="_blank" rel="noopener noreferrer" className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
-						<ExternalLink className="w-4 h-4" />Ver completo
-					</a>
-				</div>
-			</div>
-		);
-	}
-	return (
-		<div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-			<div className="relative h-40 bg-gray-50 flex items-center justify-center">
-				{isImage && !imageError ? (
-					<Image src={fileUrl} alt="Preview del archivo" width={150} height={150} className="object-contain max-h-full max-w-full rounded" onError={() => setImageError(true)} />
-				) : (
-					<div className="text-center">
-						<div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-							<FileText className="w-8 h-8 text-blue-600" />
-						</div>
-						<p className="text-xs text-gray-600 font-medium">{isPdf ? 'PDF' : isImage ? 'Imagen' : 'Archivo'}</p>
-					</div>
-				)}
-			</div>
-			<div className="p-4">
-				<p className="text-sm font-semibold text-gray-900 truncate mb-1">{getFileName()}</p>
-				<p className="text-xs text-gray-500 mb-3">{archivo.tipo || 'Archivo'}</p>
-				<a href={fileUrl} target="_blank" rel="noopener noreferrer" className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
-					<ExternalLink className="w-4 h-4" />Ver completo
-				</a>
-			</div>
-		</div>
-	);
+// Hook para manejo de errores
+const useErrorHandler = () => {
+  const handleError = useCallback((error: unknown): string => {
+    console.error('Error en PlantillaTukashDetailModal:', error);
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return 'Ha ocurrido un error inesperado';
+  }, []);
+
+  return { handleError };
 };
 
-export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: PlantillaTukashModalProps) {
-	const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
-	const [loading, setLoading] = useState<LoadingStateTukash>({ archivos: false, general: false });
-	const [errors, setErrors] = useState<ErrorStateTukash>({ archivos: null, general: null });
-	const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
-	const [loadingComprobantes, setLoadingComprobantes] = useState(false);
-	const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
+// Componente de loading
+const LoadingSpinner: React.FC<{ message?: string }> = ({ message }) => (
+  <div className="flex flex-col items-center justify-center p-6 bg-blue-50/50 rounded-lg border border-blue-100">
+    <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+    {message && <p className="mt-2 text-blue-700 text-sm">{message}</p>}
+  </div>
+);
 
-	// Fetch archivos adjuntos
-		const fetchArchivos = useCallback(async () => {
-			if (!solicitud?.id_solicitud) return;
-			setLoading((prev) => ({ ...prev, archivos: true }));
-			setErrors((prev) => ({ ...prev, archivos: null }));
-			try {
-				const archivosRes = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
-				setArchivos(archivosRes);
-			} catch {
-				setErrors((prev) => ({ ...prev, archivos: 'Error al cargar archivos adjuntos' }));
-			} finally {
-				setLoading((prev) => ({ ...prev, archivos: false }));
-			}
-		}, [solicitud?.id_solicitud]);
+// Componente de error
+const ErrorMessage: React.FC<{ message: string }> = ({ message }) => (
+  <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+    {message}
+  </div>
+);
 
-	// Fetch comprobantes de pago
-	const fetchComprobantes = useCallback(async () => {
-		if (!solicitud?.id_solicitud) return;
-		setLoadingComprobantes(true);
-		setErrorComprobantes(null);
-		try {
-			const comprobantesRes = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-			setComprobantes(comprobantesRes);
-		} catch {
-			setErrorComprobantes('Error al cargar comprobantes de pago');
-		} finally {
-			setLoadingComprobantes(false);
-		}
-	}, [solicitud?.id_solicitud]);
+// Componente para campos de información
+const InfoField: React.FC<{
+  label: string;
+  value: string | null | undefined;
+  variant?: 'default' | 'mono' | 'currency';
+  className?: string;
+}> = ({ label, value, variant = 'default', className = '' }) => {
+  let displayValue = value || '-';
+  
+  if (variant === 'currency' && value) {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (!isNaN(numValue)) {
+      displayValue = formatCurrency(numValue);
+    }
+  }
 
-	useEffect(() => {
-		if (isOpen && solicitud) {
-			fetchArchivos();
-			fetchComprobantes();
-		}
-	}, [isOpen, solicitud, fetchArchivos, fetchComprobantes]);
+  return (
+    <div className={`bg-white/80 p-3 rounded border border-blue-100 ${className}`}>
+      <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">
+        {label}
+      </span>
+      <p className={`text-blue-900 font-medium text-sm ${
+        variant === 'mono' ? 'font-mono' : 
+        variant === 'currency' ? 'text-blue-700 font-semibold' : ''
+      }`}>
+        {displayValue}
+      </p>
+    </div>
+  );
+};
 
-	// Reset states on close
-	useEffect(() => {
-		if (!isOpen) {
-			setArchivos([]);
-			setLoading({ archivos: false, general: false });
-			setErrors({ archivos: null, general: null });
-			setComprobantes([]);
-			setLoadingComprobantes(false);
-			setErrorComprobantes(null);
-		}
-	}, [isOpen]);
+// Componente para previsualización de archivos
+const FilePreview: React.FC<{
+  archivo: SolicitudArchivo;
+}> = ({ archivo }) => {
+  const url = buildFileUrl(archivo.archivo_url);
+  const fileName = archivo.archivo_url.split('/').pop() || 'archivo';
+  const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+  const isPdf = /\.pdf$/i.test(fileName);
 
-	// Escape key handler
-	useEffect(() => {
-		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape' && isOpen) {
-				onClose();
-			}
-		};
-		if (isOpen) {
-			document.addEventListener('keydown', handleEscape);
-			document.body.style.overflow = 'hidden';
-		}
-		return () => {
-			document.removeEventListener('keydown', handleEscape);
-			document.body.style.overflow = '';
-		};
-	}, [isOpen, onClose]);
+  if (isImage) {
+    return (
+      <div className="relative w-full h-40 group overflow-hidden rounded border border-blue-200 shadow-sm bg-white/90">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-blue-100 animate-pulse" />
+        <Image
+          src={url}
+          alt={fileName}
+          fill
+          className="object-cover transition-opacity duration-300 opacity-0"
+          onLoad={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.opacity = '1';
+            const loadingBg = target.parentElement?.querySelector('div');
+            if (loadingBg) loadingBg.classList.add('opacity-0');
+          }}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-blue-900/90 to-transparent text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <p className="truncate font-medium">{fileName}</p>
+        </div>
+      </div>
+    );
+  }
 
-	if (!isOpen || !solicitud) return null;
+  if (isPdf) {
+    return (
+      <div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
+        <iframe 
+          src={url} 
+          title={fileName}
+          className="w-full" 
+          style={{ height: '200px' }} 
+        />
+        <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-700">
+          Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
+        </div>
+      </div>
+    );
+  }
 
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-blue-900/60 backdrop-blur-sm">
-			{/* Overlay */}
-			<div
-				className="absolute inset-0"
-				onClick={onClose}
-				role="button"
-				tabIndex={-1}
-				aria-label="Cerrar modal"
-			/>
-			{/* Modal container */}
-			<div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100">
-				{/* Close button */}
-				<button
-					onClick={onClose}
-					className="absolute top-3 right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
-					aria-label="Cerrar modal"
-				>
-					<X className="w-6 h-6" />
-				</button>
-				{/* Content */}
-				<div className="flex-1 flex flex-col lg:flex-row overflow-y-auto">
-					{/* Left: Main info and comprobantes */}
-					<div className="flex-1 min-w-0 p-6 flex flex-col gap-6 border-r border-blue-100">
-						{/* Main info */}
-						<div>
-							<h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-2" />
-								<InfoField label="Cliente" value={solicitud.cliente} />
-								<InfoField label="Beneficiario Tarjeta" value={solicitud.beneficiario_tarjeta} />
-								<InfoField label="Número Tarjeta" value={solicitud.numero_tarjeta} />
-								<InfoField label="Monto Cliente" value={solicitud.monto_total_cliente} variant="currency" />
-								<InfoField label="Monto Tukash" value={solicitud.monto_total_tukash} variant="currency" />
-								<InfoField label="Estado" value={solicitud.estado} variant="estado" />
-								<InfoField label="Folio" value={solicitud.folio} />
-								<InfoField label="Fecha Creación" value={solicitud.fecha_creacion} variant="date" />
-								<InfoField label="Fecha Actualización" value={solicitud.fecha_actualizacion} variant="date" />
-								<InfoField label="Usuario Creación" value={solicitud.usuario_creacion} />
-								<InfoField label="Usuario Actualización" value={solicitud.usuario_actualizacion} />
-							</div>
-						</div>
-						{/* Comprobantes de pago */}
-						<div>
-							<h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Comprobantes de Pago</h3>
-							{loadingComprobantes ? (
-								<div className="text-blue-600">Cargando comprobantes...</div>
-							) : errorComprobantes ? (
-								<div className="text-red-600">{errorComprobantes}</div>
-							) : comprobantes.length === 0 ? (
-								<div className="text-gray-500 italic">No hay comprobantes de pago</div>
-							) : (
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									{comprobantes.map((comprobante) => (
-										<div key={comprobante.id_comprobante} className="bg-blue-50 rounded-lg p-3 flex flex-col gap-2 border border-blue-100 shadow-sm">
-											<div className="flex items-center gap-2">
-												<FileText className="w-4 h-4 text-blue-500" />
-												<span className="font-medium text-blue-900">{comprobante.nombre_archivo}</span>
-											</div>
-											<div className="flex gap-2 items-center">
-												<a
-													href={comprobante.ruta_archivo}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-												>
-													<ExternalLink className="w-4 h-4" />
-													Ver completo
-												</a>
-											</div>
-										</div>
-									))}
-								</div>
-							)}
-						</div>
-					</div>
-					{/* Right: Archivos adjuntos */}
-					<div className="w-full lg:w-[420px] flex-shrink-0 p-6 flex flex-col gap-6">
-						<div>
-							<h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
-							{loading.archivos ? (
-								<div className="text-blue-600">Cargando archivos adjuntos...</div>
-							) : errors.archivos ? (
-								<div className="text-red-600">{errors.archivos}</div>
-							) : archivos.length === 0 ? (
-								<div className="text-gray-500 italic">No hay archivos adjuntos</div>
-							) : (
-								<div className="grid grid-cols-1 gap-4">
-														{archivos.map((archivo) => (
-															<FilePreview key={archivo.id} archivo={archivo} />
-														))}
-								</div>
-							)}
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+  return (
+    <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+      <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+      <div className="flex-1">
+        <p className="text-blue-900 font-medium text-sm break-words">
+          Archivo: {fileName}
+        </p>
+        <p className="text-xs text-gray-600 mt-1">
+          Tipo: {archivo.tipo || 'Desconocido'}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Servicio para obtener archivos
+const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudArchivo[]> => {
+  try {
+    console.log(`🔍 [TUKASH ARCHIVOS] Obteniendo archivos para solicitud ID: ${idSolicitud}`);
+    const archivos = await SolicitudArchivosService.obtenerArchivos(idSolicitud);
+    console.log(`✅ [TUKASH ARCHIVOS] Archivos obtenidos:`, archivos);
+    return archivos;
+  } catch (error) {
+    console.error('❌ [TUKASH ARCHIVOS] Error al obtener archivos:', error);
+    throw error;
+  }
+};
+
+export function PlantillaTukashDetailModal({ 
+  solicitud, 
+  isOpen, 
+  onClose
+}: PlantillaTukashModalProps) {
+  // Estados
+  const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
+  
+  const [loading, setLoading] = useState<LoadingStateTukash>({
+    archivos: false,
+    general: false,
+  });
+  
+  const [errors, setErrors] = useState<ErrorStateTukash>({
+    archivos: null,
+    general: null,
+  });
+
+  // Hooks personalizados
+  const { handleError } = useErrorHandler();
+
+  // Cast de la solicitud para acceder a campos adicionales
+  const solicitudExtended = solicitud as SolicitudTukashExtended;
+
+  // Función para obtener archivos
+  const fetchArchivos = useCallback(async () => {
+    if (!solicitud) return;
+    
+    setLoading(prev => ({ ...prev, archivos: true }));
+    setErrors(prev => ({ ...prev, archivos: null }));
+    
+    try {
+      const data = await obtenerArchivosSolicitud(solicitud.id_solicitud || 0);
+      setArchivos(data);
+    } catch (error) {
+      const errorMessage = handleError(error);
+      setErrors(prev => ({ ...prev, archivos: errorMessage }));
+    } finally {
+      setLoading(prev => ({ ...prev, archivos: false }));
+    }
+  }, [solicitud, handleError]);
+
+  // Efectos
+  useEffect(() => {
+    if (isOpen && solicitud) {
+      fetchArchivos();
+    }
+  }, [isOpen, solicitud, fetchArchivos]);
+
+  // Resetear estados al cerrar
+  useEffect(() => {
+    if (!isOpen) {
+      setArchivos([]);
+      setLoading({ archivos: false, general: false });
+      setErrors({ archivos: null, general: null });
+    }
+  }, [isOpen]);
+
+  // Función para manejar teclas de escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !solicitud) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
+      {/* Overlay similar al modal de solicitudes */}
+      <div
+        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
+        onClick={onClose}
+        role="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal"
+      />
+      {/* Modal container similar a solicitudes */}
+      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl xl:max-w-5xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+        {/* Botón de cerrar */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 z-30 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-300"
+          aria-label="Cerrar modal"
+        >
+          <X className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+        </button>
+        {/* Contenido con scroll */}
+        <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400 p-6">
+          {/* Header */}
+          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden rounded-xl mb-6">
+            <div className="relative z-10 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold">Plantilla Tarjetas TUKASH</h2>
+                <p className="text-blue-100 text-sm mt-1">Asunto: {solicitud.asunto}</p>
+                {solicitudExtended.folio && (
+                  <p className="text-blue-100 text-sm mt-1">Folio: {solicitudExtended.folio}</p>
+                )}
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getEstadoColor(solicitud.estado || 'pendiente')}`}>{solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}</span>
+            </div>
+          </header>
+          
+          {/* Información Principal */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información Principal</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoField label="Asunto" value={solicitud.asunto} />
+              <InfoField label="Cliente" value={solicitud.cliente} />
+              <InfoField label="Beneficiario de Tarjeta" value={solicitud.beneficiario_tarjeta} />
+              <InfoField label="Número de Tarjeta" value={solicitud.numero_tarjeta} variant="mono" />
+            </div>
+          </div>
+
+          {/* Información de Montos */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Montos</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoField label="Monto Total Cliente" value={solicitud.monto_total_cliente?.toString()} variant="currency" />
+              <InfoField label="Monto Total TUKASH" value={solicitud.monto_total_tukash?.toString()} variant="currency" />
+            </div>
+          </div>
+          
+          {/* Información de Aprobación */}
+          {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
+                <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion ? formatDate(solicitudExtended.fecha_aprobacion) : ''} />
+                <div className="md:col-span-2">
+                  <InfoField label="Comentarios de Aprobación" value={solicitudExtended.comentarios_aprobacion} />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Información de Seguimiento */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Seguimiento</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion ? formatDate(solicitud.fecha_creacion) : ''} />
+              <InfoField label="Última Actualización" value={solicitud.fecha_actualizacion ? formatDate(solicitud.fecha_actualizacion) : ''} />
+              <InfoField label="Usuario de Creación" value={solicitud.usuario_creacion} />
+              <InfoField label="Usuario de Actualización" value={solicitud.usuario_actualizacion} />
+            </div>
+          </div>
+          
+          {/* Archivos Adjuntos */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos</h3>
+            {loading.archivos && (<LoadingSpinner message="Cargando archivos..." />)}
+            {errors.archivos && (<ErrorMessage message={errors.archivos} />)}
+            {!loading.archivos && !errors.archivos && (
+              <div className="space-y-4">
+                {archivos.length === 0 ? (
+                  <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-600">No hay archivos adjuntos</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {archivos.map((archivo) => (
+                      <div key={archivo.id} className="bg-white/90 rounded-lg border border-blue-200 p-4 shadow-sm">
+                        <FilePreview archivo={archivo} />
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            onClick={() => window.open(buildFileUrl(archivo.archivo_url), '_blank')}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Ver completo
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

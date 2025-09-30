@@ -47,10 +47,18 @@ const formatDate = (dateString: string): string => {
 
 // Función para construir URL de archivos
 const buildFileUrl = (rutaArchivo: string): string => {
-  // Always use the standardized comprobante URL pattern
+  const baseUrl = 'https://bechapra.com.mx';
   if (!rutaArchivo) return '';
-  const fileName = rutaArchivo.split('/').pop();
-  return `https://bechapra.com.mx/uploads/comprobantes/${fileName}`;
+  if (rutaArchivo.startsWith('http')) return rutaArchivo;
+  // Si la ruta contiene /uploads/ en cualquier parte, extraer desde ahí
+  const uploadsIdx = rutaArchivo.indexOf('/uploads/');
+  let rutaPublica = rutaArchivo;
+  if (uploadsIdx !== -1) {
+    rutaPublica = rutaArchivo.substring(uploadsIdx);
+  }
+  // Normalizar backslash a slash
+  rutaPublica = rutaPublica.replace(/\\/g, '/');
+  return `${baseUrl}${rutaPublica.startsWith('/') ? '' : '/'}${rutaPublica}`;
 };
 
 // Hook personalizado para manejo de errores
@@ -413,11 +421,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                         )}
                       </div>
                       <button
-                        onClick={() => {
-                          const fileName = comprobante.ruta_archivo.split('/').pop();
-                          const url = `https://bechapra.com.mx/uploads/comprobantes/${fileName}`;
-                          window.open(url, '_blank');
-                        }}
+                        onClick={() => window.open(comprobante.ruta_archivo, '_blank')}
                         className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3 text-xs"
                         disabled={!comprobante.ruta_archivo}
                       >

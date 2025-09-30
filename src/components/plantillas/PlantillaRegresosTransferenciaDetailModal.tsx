@@ -80,12 +80,6 @@ const InfoField: React.FC<{
 };
 
 export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegresosTransferenciaDetailModalProps> = ({ solicitud, isOpen, onClose }) => {
-  // Helper for comprobante URL
-  const buildComprobanteUrl = (rutaArchivo: string): string => {
-    if (!rutaArchivo) return '';
-    const fileName = rutaArchivo.split('/').pop();
-    return `https://bechapra.com.mx/uploads/comprobantes/${fileName}`;
-  };
   // Simulación de archivos adjuntos (ajusta para tu lógica real)
   const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
   const [loadingArchivos, setLoadingArchivos] = useState(false);
@@ -214,10 +208,7 @@ export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegres
                         </div>
                         <div className="w-full md:w-auto flex justify-end">
                           <button
-                            onClick={() => {
-                              const url = buildComprobanteUrl(comprobante.ruta_archivo);
-                              window.open(url, '_blank');
-                            }}
+                            onClick={() => window.open(comprobante.ruta_archivo, '_blank')}
                             className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs w-full md:w-auto"
                             disabled={!comprobante.ruta_archivo}
                           >
