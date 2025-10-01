@@ -315,30 +315,32 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
               </div>
             </div>
           </div>
-          {/* Columna derecha: archivos adjuntos */}
+          {/* Columna derecha: comprobante de pago */}
           <div className="w-full lg:w-[420px] flex-shrink-0">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
-              {loadingArchivos ? (
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileCheck className="w-5 h-5 text-blue-500" />Comprobante de Pago</h3>
+              {loadingComprobantes ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600 font-medium">Cargando archivos...</p>
+                  <p className="text-gray-600 font-medium">Cargando comprobante...</p>
                 </div>
-              ) : archivos.length === 0 ? (
+              ) : comprobantes.length === 0 ? (
                 <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
-                  <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
+                  <FileCheck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 font-medium">No hay comprobante disponible</p>
+                  <p className="text-gray-500 text-sm mt-2">El comprobante aparecerá aquí cuando sea cargado</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center w-full">
-                  {archivos.map((archivo, index) => {
-                    const url = archivo.archivo_url;
-                    const fileName = url.split('/').pop() || 'archivo';
+                  {(() => {
+                    const comprobante = comprobantes[0];
+                    if (!comprobante) return null;
+                    const url = comprobante.ruta_archivo;
+                    const fileName = url.split('/').pop() || 'comprobante';
                     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
                     return (
-                      <div key={index} className="w-full flex justify-center">
+                      <div className="w-full flex justify-center">
                         <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
                           <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
                             {isImage ? (
@@ -358,13 +360,13 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                               />
                             ) : (
                               <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
-                                <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                                <FileCheck className="w-6 h-6 text-blue-600 flex-shrink-0" />
                                 <div className="flex-1">
                                   <p className="text-blue-900 font-medium text-sm">
                                     {fileName}
                                   </p>
                                   <p className="text-xs text-gray-600 mt-1">
-                                    Tipo: {archivo.tipo || 'Archivo'}
+                                    Tipo: Comprobante
                                   </p>
                                 </div>
                               </div>
@@ -382,7 +384,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                         </div>
                       </div>
                     );
-                  })}
+                  })()}
                 </div>
               )}
             </div>

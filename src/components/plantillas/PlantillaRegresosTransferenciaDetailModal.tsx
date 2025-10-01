@@ -176,11 +176,11 @@ export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegres
             </div>
             {/* Comprobantes de Pago */}
             <div className="mb-6 w-full">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobantes de Pago</h3>
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobante de Pago</h3>
               {loadingComprobantes ? (
                 <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3" />
-                  <span className="text-blue-600 text-sm">Cargando comprobantes...</span>
+                  <span className="text-blue-600 text-sm">Cargando comprobante...</span>
                 </div>
               ) : errorComprobantes ? (
                 <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorComprobantes}</div>
@@ -190,10 +190,16 @@ export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegres
                   <p className="text-gray-600 font-semibold">AÚN NO HAY COMPROBANTE</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {comprobantes.map((comprobante) => (
-                    <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
-                      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-3">
+                (() => {
+                  const comprobante = comprobantes[0];
+                  if (!comprobante) return null;
+                  const url = comprobante.ruta_archivo;
+                  const fileName = url.split('/').pop() || 'comprobante';
+                  const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+                  const isPdf = /\.pdf$/i.test(fileName);
+                  return (
+                    <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                      <div className="flex flex-col gap-3 mb-3">
                         <div className="flex-1">
                           <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
                             <span className="text-xs text-blue-800 font-semibold">
@@ -206,19 +212,38 @@ export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegres
                             </div>
                           )}
                         </div>
-                        <div className="w-full md:w-auto flex justify-end">
-                          <button
-                            onClick={() => window.open(comprobante.ruta_archivo, '_blank')}
-                            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs w-full md:w-auto"
-                            disabled={!comprobante.ruta_archivo}
-                          >
-                            Ver completo
-                          </button>
+                        <div className="w-full flex justify-center">
+                          <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
+                            <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                              {isImage ? (
+                                <Image src={url} alt={fileName} fill className="object-contain" />
+                              ) : isPdf ? (
+                                <iframe src={url} title={fileName} className="w-full" style={{ height: '200px' }} />
+                              ) : (
+                                <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+                                  <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                                  <div className="flex-1">
+                                    <p className="text-blue-900 font-medium text-sm">{fileName}</p>
+                                    <p className="text-xs text-gray-600 mt-1">Tipo: Comprobante</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="mt-3">
+                              <button
+                                onClick={() => window.open(url, '_blank')}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                                Ver completo
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })()
               )}
             </div>
             {/* Información de Auditoría */}

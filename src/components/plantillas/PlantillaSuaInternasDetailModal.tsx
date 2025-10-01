@@ -114,135 +114,6 @@ const InfoField: React.FC<{
 };
 
 // Componente para preview de archivos
-const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
-  const [showPdfViewer, setShowPdfViewer] = useState(false);
-  
-  console.log('🖼️ [SUA INTERNAS ARCHIVOS] Renderizando preview para archivo ID:', archivo.id);
-  
-  if (!archivo.archivo_url) {
-    console.log('⚠️ [SUA INTERNAS ARCHIVOS] No hay URL de archivo');
-    return (
-      <div className="text-center p-3 bg-gray-50 rounded border">
-        <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-        <p className="text-sm text-gray-500">No disponible</p>
-      </div>
-    );
-  }
-
-  const fileUrl = buildFileUrl(archivo.archivo_url);
-  console.log('🔗 [SUA INTERNAS ARCHIVOS] URL construida:', fileUrl);
-
-  const extension = archivo.archivo_url?.split('.').pop()?.toLowerCase() || '';
-  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
-  const isPdf = extension === 'pdf';
-
-  // Función para obtener el nombre del archivo desde la URL
-  const getFileName = () => {
-    const urlParts = archivo.archivo_url.split('/');
-    const fileName = urlParts[urlParts.length - 1];
-    return fileName || `Archivo ${archivo.id}`;
-  };
-
-  if (isPdf) {
-    return (
-      <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
-        {/* PDF Preview */}
-        <div className="relative">
-          {!showPdfViewer ? (
-            // Vista previa limitada
-            <div className="h-40 bg-gray-50 border-b">
-              <iframe
-                src={`${fileUrl}#view=FitH&toolbar=0&navpanes=0&scrollbar=0&page=1`}
-                className="w-full h-full"
-                style={{ pointerEvents: 'none' }}
-                title="Vista previa PDF"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-10 flex items-end justify-center pb-2">
-                <div className="bg-white bg-opacity-90 px-3 py-1 rounded text-xs text-gray-600">
-                  Vista previa limitada - Haga clic en &quot;Ver completo&quot; para el PDF completo
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Viewer completo
-            <div className="h-96">
-              <iframe
-                src={fileUrl}
-                className="w-full h-full border-0"
-                title="PDF Viewer"
-              />
-            </div>
-          )}
-        </div>
-        
-        {/* File info and actions */}
-        <div className="p-3">
-          <p className="text-sm font-medium text-gray-900 truncate mb-2">
-            {getFileName()}
-          </p>
-          <p className="text-xs text-gray-500 mb-3">Documento PDF</p>
-          
-          <button
-            onClick={() => setShowPdfViewer(!showPdfViewer)}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
-          >
-            <ExternalLink className="w-4 h-4" />
-            {showPdfViewer ? 'Vista previa' : 'Ver completo'}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Para otros tipos de archivo (imágenes, etc.)
-  return (
-    <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
-      {/* Preview area */}
-      <div className="relative h-32 bg-gray-50 flex items-center justify-center">
-        {isImage ? (
-          <Image
-            src={fileUrl}
-            alt="Preview del archivo"
-            width={120}
-            height={120}
-            className="object-contain max-h-full max-w-full rounded"
-            onError={(e) => {
-              console.error('❌ [SUA INTERNAS ARCHIVOS] Error cargando imagen:', fileUrl);
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-        ) : (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <FileText className="w-8 h-8 text-gray-500" />
-            </div>
-            <p className="text-xs text-gray-600 font-medium">Archivo</p>
-          </div>
-        )}
-      </div>
-      
-      {/* File info */}
-      <div className="p-3">
-        <p className="text-sm font-medium text-gray-900 truncate mb-1">
-          {getFileName()}
-        </p>
-        <p className="text-xs text-gray-500">
-          {archivo.tipo || 'Archivo'}
-        </p>
-        
-        <a
-          href={fileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
-        >
-          <ExternalLink className="w-4 h-4" />
-          Ver completo
-        </a>
-      </div>
-    </div>
-  );
-};
 
 // Función para obtener archivos de solicitud
 const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudArchivo[]> => {
@@ -262,58 +133,42 @@ export function PlantillaSuaInternasDetailModal({
   isOpen, 
   onClose
 }: PlantillaSuaInternasModalProps) {
-  // Estados
-  const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
-  
-  const [loading, setLoading] = useState<LoadingStateSuaInternas>({
-    archivos: false,
-    general: false,
-  });
-  
-  const [errors, setErrors] = useState<ErrorStateSuaInternas>({
-    archivos: null,
-    general: null,
-  });
-
-  // Hooks personalizados
-  const { handleError } = useErrorHandler();
+  // Comprobante de pago
+  const [comprobantes, setComprobantes] = useState<import('@/types').Comprobante[]>([]);
+  const [loadingComprobantes, setLoadingComprobantes] = useState(false);
+  const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
 
   // Cast de la solicitud para acceder a campos adicionales
   const solicitudExtended = solicitud as SolicitudSuaInternasExtended;
 
-  // Función para obtener archivos
-  const fetchArchivos = useCallback(async () => {
-    if (!solicitud) return;
-    
-    setLoading(prev => ({ ...prev, archivos: true }));
-    setErrors(prev => ({ ...prev, archivos: null }));
-    
+  // Función para obtener comprobantes de pago
+  const fetchComprobantes = useCallback(async () => {
+    setLoadingComprobantes(true);
+    setErrorComprobantes(null);
     try {
-      const data = await obtenerArchivosSolicitud(solicitud.id_solicitud || 0);
-      setArchivos(data);
+      const id = typeof solicitud.id_solicitud === 'number' ? solicitud.id_solicitud : 0;
+      const data = await import('@/services/solicitudes.service').then(mod => mod.SolicitudesService.getComprobantes(id));
+      setComprobantes(data);
     } catch (error) {
-      const errorMessage = handleError(error);
-      setErrors(prev => ({ ...prev, archivos: errorMessage }));
+      let msg = 'Error al cargar comprobantes';
+      if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        msg = (error as { message: string }).message;
+      }
+      setErrorComprobantes(msg);
     } finally {
-      setLoading(prev => ({ ...prev, archivos: false }));
+      setLoadingComprobantes(false);
     }
-  }, [solicitud, handleError]);
+  }, [solicitud.id_solicitud]);
 
-  // Efectos
   useEffect(() => {
-    if (isOpen && solicitud) {
-      fetchArchivos();
+    if (isOpen && solicitud?.estado === 'pagada') {
+      fetchComprobantes();
+    } else {
+      setComprobantes([]);
     }
-  }, [isOpen, solicitud, fetchArchivos]);
+  }, [isOpen, solicitud?.estado, fetchComprobantes]);
 
-  // Resetear estados al cerrar
-  useEffect(() => {
-    if (!isOpen) {
-      setArchivos([]);
-      setLoading({ archivos: false, general: false });
-      setErrors({ archivos: null, general: null });
-    }
-  }, [isOpen]);
+  // ...existing code...
 
   // Función para manejar teclas de escape
   useEffect(() => {
@@ -422,37 +277,73 @@ export function PlantillaSuaInternasDetailModal({
             </div>
           </div>
           
-          {/* Archivos Adjuntos */}
+          {/* Comprobante de Pago */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Archivos Adjuntos (ZIP con documentos IMSS)</h3>
-            {loading.archivos && (<LoadingSpinner message="Cargando archivos..." />)}
-            {errors.archivos && (<ErrorMessage message={errors.archivos} />)}
-            {!loading.archivos && !errors.archivos && (
-              <div className="space-y-4">
-                {archivos.length === 0 ? (
-                  <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
-                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600">No hay archivos adjuntos</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {archivos.map((archivo) => (
-                      <div key={archivo.id} className="bg-white/90 rounded-lg border border-blue-200 p-4 shadow-sm">
-                        <FilePreview archivo={archivo} />
-                        <div className="mt-3 flex gap-2">
-                          <button
-                            onClick={() => window.open(buildFileUrl(archivo.archivo_url), '_blank')}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            Ver completo
-                          </button>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobante de Pago</h3>
+            {loadingComprobantes ? (
+              <LoadingSpinner message="Cargando comprobante..." />
+            ) : errorComprobantes ? (
+              <ErrorMessage message={errorComprobantes} />
+            ) : comprobantes.length === 0 ? (
+              <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600 font-semibold">AÚN NO HAY COMPROBANTE</p>
+              </div>
+            ) : (
+              (() => {
+                const comprobante = comprobantes[0];
+                if (!comprobante) return null;
+                const url = comprobante.ruta_archivo;
+                const fileName = url.split('/').pop() || 'comprobante';
+                const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+                const isPdf = /\.pdf$/i.test(fileName);
+                return (
+                  <div className="bg-white/90 rounded-lg border border-blue-200 p-4 shadow-sm">
+                    <div className="flex flex-col gap-3 mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                          <span className="text-xs text-blue-800 font-semibold">
+                            {comprobante.nombre_usuario || `Usuario ${comprobante.usuario_subio}`}
+                          </span>
+                        </div>
+                        {comprobante.comentario && (
+                          <div className="mt-2 bg-white/60 p-2 rounded border-l-3 border-blue-300">
+                            <p className="text-xs text-gray-700 italic">&ldquo;{comprobante.comentario}&rdquo;</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="w-full flex justify-center">
+                        <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
+                          <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                            {isImage ? (
+                              <Image src={url} alt={fileName} fill className="object-contain" />
+                            ) : isPdf ? (
+                              <iframe src={url} title={fileName} className="w-full" style={{ height: '200px' }} />
+                            ) : (
+                              <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+                                <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <p className="text-blue-900 font-medium text-sm">{fileName}</p>
+                                  <p className="text-xs text-gray-600 mt-1">Tipo: Comprobante</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="mt-3">
+                            <button
+                              onClick={() => window.open(url, '_blank')}
+                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                              Ver completo
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                )}
-              </div>
+                );
+              })()
             )}
           </div>
         </div>
