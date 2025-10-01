@@ -250,11 +250,31 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
   // Función para obtener comprobantes
   const fetchComprobantes = useCallback(async () => {
     if (!solicitud || !solicitud.id_solicitud) return;
+    
+    // Solo cargar comprobantes si la solicitud está pagada
+    const estadoPagado = solicitud.estado?.toLowerCase();
+    if (estadoPagado !== 'pagada') {
+      setComprobantes([]);
+      setLoadingComprobantes(false);
+      setErrorComprobantes(null);
+      return;
+    }
+    
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
     try {
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-      setComprobantes(data);
+      
+      // Filtrar comprobantes que puedan ser de solicitudes normales con el mismo ID
+      // Solo incluir comprobantes que fueron subidos DESPUÉS de la creación de esta solicitud N09/TOKA
+      const fechaCreacionSolicitud = new Date(solicitud.fecha_creacion || '').getTime();
+      const comprobantesFiltrados = data.filter(comprobante => {
+        const fechaComprobante = new Date(comprobante.fecha_subida).getTime();
+        return fechaComprobante >= fechaCreacionSolicitud;
+      });
+      
+      console.log(`🔍 Comprobantes N09/TOKA filtrados: ${comprobantesFiltrados.length}/${data.length} (después de ${solicitud.fecha_creacion})`);
+      setComprobantes(comprobantesFiltrados);
     } catch {
       setErrorComprobantes('Error al cargar comprobantes');
     } finally {
@@ -400,7 +420,18 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
               ) : comprobantes.length === 0 ? (
                 <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
                   <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-600 font-semibold">AÚN NO HAY COMPROBANTE</p>
+                  {(() => {
+                    const estado = solicitud.estado?.toLowerCase();
+                    if (estado === 'pendiente') {
+                      return <p className="text-gray-600 font-semibold">La solicitud debe ser autorizada y pagada para mostrar comprobantes</p>;
+                    } else if (estado === 'autorizada') {
+                      return <p className="text-gray-600 font-semibold">La solicitud está autorizada. Los comprobantes aparecerán cuando sea pagada</p>;
+                    } else if (estado === 'rechazada') {
+                      return <p className="text-gray-600 font-semibold">La solicitud fue rechazada. No se generarán comprobantes</p>;
+                    } else {
+                      return <p className="text-gray-600 font-semibold">AÚN NO HAY COMPROBANTE</p>;
+                    }
+                  })()}
                 </div>
               ) : (
                 (() => {

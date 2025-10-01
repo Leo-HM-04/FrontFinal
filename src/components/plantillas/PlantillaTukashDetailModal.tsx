@@ -190,10 +190,29 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
   useEffect(() => {
     async function fetchComprobante() {
       if (!solicitud?.id_solicitud) return setComprobanteUrl(null);
+      
+      // Solo cargar comprobantes si la solicitud está pagada
+      const estadoPagado = solicitud.estado?.toLowerCase();
+      if (estadoPagado !== 'pagada') {
+        setComprobanteUrl(null);
+        return;
+      }
+      
       try {
         const comprobantes = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-        if (comprobantes && comprobantes.length > 0 && comprobantes[0].ruta_archivo) {
-          setComprobanteUrl(comprobantes[0].ruta_archivo);
+        
+        // Filtrar comprobantes que puedan ser de solicitudes normales con el mismo ID
+        // Solo incluir comprobantes que fueron subidos DESPUÉS de la creación de esta solicitud
+        const fechaCreacionSolicitud = new Date(solicitud.fecha_creacion || '').getTime();
+        const comprobantesFiltrados = comprobantes.filter(comprobante => {
+          const fechaComprobante = new Date(comprobante.fecha_subida).getTime();
+          return fechaComprobante >= fechaCreacionSolicitud;
+        });
+        
+        console.log(`🔍 Comprobantes Tukash filtrados: ${comprobantesFiltrados.length}/${comprobantes.length} (después de ${solicitud.fecha_creacion})`);
+        
+        if (comprobantesFiltrados && comprobantesFiltrados.length > 0 && comprobantesFiltrados[0].ruta_archivo) {
+          setComprobanteUrl(comprobantesFiltrados[0].ruta_archivo);
         } else {
           setComprobanteUrl(null);
         }
@@ -342,7 +361,18 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
                 ) : (
                   <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full">
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600 font-medium">No hay comprobante disponible</p>
+                    {(() => {
+                      const estado = solicitud.estado?.toLowerCase();
+                      if (estado === 'pendiente') {
+                        return <p className="text-gray-600 font-medium">La solicitud debe ser autorizada y pagada para mostrar comprobantes</p>;
+                      } else if (estado === 'autorizada') {
+                        return <p className="text-gray-600 font-medium">La solicitud está autorizada. Los comprobantes aparecerán cuando sea pagada</p>;
+                      } else if (estado === 'rechazada') {
+                        return <p className="text-gray-600 font-medium">La solicitud fue rechazada. No se generarán comprobantes</p>;
+                      } else {
+                        return <p className="text-gray-600 font-medium">No hay comprobante disponible</p>;
+                      }
+                    })()}
                   </div>
                 )}
               </div>
