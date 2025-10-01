@@ -15,6 +15,7 @@ interface SolicitudTukashExtended extends SolicitudTukashData {
   banco_destino?: string;
   cuenta_destino?: string;
   tipo_cuenta_destino?: string;
+  ruta_archivo?: string; // <-- Agregado para comprobante
 }
 
 const formatCurrency = (amount: number | string): string => {
@@ -299,23 +300,26 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
             {/* Comprobantes de Pago - debajo de Auditoría */}
             <div className="mb-6 w-full">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobantes de Pago</h3>
-              <div className="space-y-4">
-                <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
-                        <span className="text-xs text-blue-800 font-semibold">Comprobante</span>
-                      </div>
-                    </div>
-                    <div className="w-full md:w-auto flex justify-end">
+              <div className="flex flex-col items-center justify-center w-full">
+                <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
+                  <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                    <img
+                      src={solicitudExtended.ruta_archivo ? solicitudExtended.ruta_archivo : ''}
+                      alt="Comprobante de Pago"
+                      className="object-contain w-full h-full rounded-lg shadow-sm"
+                      style={{ maxHeight: '420px', width: '100%' }}
+                    />
+                  </div>
+                  {solicitudExtended.ruta_archivo && (
+                    <div className="p-5 flex justify-end">
                       <button
-                        onClick={() => window.open('https://bechapra.com.mx/uploads/comprobantes/1759333990453-506589775.jpg', '_blank')}
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs w-full md:w-auto"
+                        onClick={() => window.open(solicitudExtended.ruta_archivo, '_blank')}
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
                       >
                         Ver completo
                       </button>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
