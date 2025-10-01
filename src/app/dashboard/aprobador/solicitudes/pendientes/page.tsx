@@ -281,7 +281,7 @@ export default function SolicitudesPendientesPage() {
       
       // Buscar la solicitud para verificar si es N09/TOKA
       const solicitud = solicitudes.find(s => s.id_solicitud === id);
-      const isN09Toka = solicitud && (solicitud as any).isN09Toka === true;
+      const isN09Toka = solicitud && (solicitud as Solicitud & { isN09Toka?: boolean }).isN09Toka === true;
       
       if (isN09Toka) {
         // Usar endpoint específico para N09/TOKA
@@ -330,7 +330,7 @@ export default function SolicitudesPendientesPage() {
       
       // Buscar la solicitud para verificar si es N09/TOKA
       const solicitud = solicitudes.find(s => s.id_solicitud === id);
-      const isN09Toka = solicitud && (solicitud as any).isN09Toka === true;
+      const isN09Toka = solicitud && (solicitud as Solicitud & { isN09Toka?: boolean }).isN09Toka === true;
       
       if (isN09Toka) {
         // Usar endpoint específico para N09/TOKA
