@@ -200,14 +200,15 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-blue-900/60 backdrop-blur-sm">
       <div className="absolute inset-0" onClick={onClose} role="button" tabIndex={-1} aria-label="Cerrar modal" />
-  <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100 text-black">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100">
         <button onClick={onClose} className="absolute top-3 right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300" aria-label="Cerrar modal">
           <span className="sr-only">Cerrar</span>
           ×
         </button>
-        <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
+        <div className="flex flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
+          {/* Columna izquierda: Información */}
           <div className="flex-1 min-w-0">
-            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-black p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
+            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
               <div className="bg-white/20 p-3 rounded-lg">
                 <CreditCard className="w-8 h-8 text-white" />
               </div>
@@ -250,13 +251,22 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                 <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Estado: {pago.estado ? pago.estado.charAt(0).toUpperCase() + pago.estado.slice(1) : '-'}</div>
               </div>
             </div>
-            {/* Documentos Adjuntos */}
-            <div className="mb-6 w-full">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Factura Adjunta</h3>
-              <div className="flex flex-col items-center justify-center w-full">
-                {pago.factura_url ? (
-                  <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
-                    <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+          </div>
+          {/* Columna derecha: Previsualización de factura */}
+          <div className="flex-1 min-w-0 flex flex-col items-center justify-start">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 w-full">Factura Adjunta</h3>
+            <div className="w-full flex flex-col items-center justify-center">
+              {pago.factura_url ? (
+                <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
+                  <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                    {pago.factura_url.endsWith('.pdf') ? (
+                      <iframe
+                        src={pago.factura_url}
+                        title="Factura PDF"
+                        className="w-full h-full rounded-lg border border-blue-200"
+                        style={{ minHeight: '420px', height: '420px' }}
+                      />
+                    ) : (
                       <img
                         src={pago.factura_url}
                         alt="Factura Adjunta"
@@ -264,23 +274,23 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                         style={{ maxHeight: '420px', width: '100%' }}
                         onError={e => { e.currentTarget.style.display = 'none'; }}
                       />
-                    </div>
-                    <div className="p-5 flex justify-end">
-                      <button
-                        onClick={() => window.open(pago.factura_url, '_blank')}
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
-                      >
-                        Ver completo
-                      </button>
-                    </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full">
-                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-600 font-medium">No hay factura adjunta</p>
+                  <div className="p-5 flex justify-end">
+                    <button
+                      onClick={() => window.open(pago.factura_url, '_blank')}
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
+                    >
+                      Ver completo
+                    </button>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full">
+                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-600 font-medium">No hay factura adjunta</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
