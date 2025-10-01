@@ -301,16 +301,17 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
             <div className="mb-6 w-full">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobantes de Pago</h3>
               <div className="flex flex-col items-center justify-center w-full">
-                <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
-                  <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
-                    <img
-                      src={solicitudExtended.ruta_archivo ? solicitudExtended.ruta_archivo : ''}
-                      alt="Comprobante de Pago"
-                      className="object-contain w-full h-full rounded-lg shadow-sm"
-                      style={{ maxHeight: '420px', width: '100%' }}
-                    />
-                  </div>
-                  {solicitudExtended.ruta_archivo && (
+                {solicitudExtended.ruta_archivo ? (
+                  <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
+                    <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                      <img
+                        src={solicitudExtended.ruta_archivo}
+                        alt="Comprobante de Pago"
+                        className="object-contain w-full h-full rounded-lg shadow-sm"
+                        style={{ maxHeight: '420px', width: '100%' }}
+                        onError={e => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    </div>
                     <div className="p-5 flex justify-end">
                       <button
                         onClick={() => window.open(solicitudExtended.ruta_archivo, '_blank')}
@@ -319,8 +320,13 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
                         Ver completo
                       </button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full">
+                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-600 font-medium">No hay comprobante disponible</p>
+                  </div>
+                )}
               </div>
             </div>
             {/* Aquí podrías agregar comprobantes si aplica para TUKASH */}
