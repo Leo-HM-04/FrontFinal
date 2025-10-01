@@ -94,14 +94,14 @@ export const VerComprobanteModal: React.FC<VerComprobanteModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-blue-900/60 backdrop-blur-sm">
       <div className="absolute inset-0" onClick={onClose} role="button" tabIndex={-1} aria-label="Cerrar modal" />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100">
+  <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100 text-black">
         <button onClick={onClose} className="absolute top-3 right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300" aria-label="Cerrar modal">
           <span className="sr-only">Cerrar</span>
           <X className="w-6 h-6" />
         </button>
         <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
           <div className="flex-1 min-w-0">
-            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
+            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-black p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
               <div className="bg-white/20 p-3 rounded-lg">
                 <FileBadge className="w-8 h-8 text-white" />
               </div>
@@ -120,11 +120,11 @@ export const VerComprobanteModal: React.FC<VerComprobanteModalProps> = ({
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Monto: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Cuenta destino: {pago.cuenta_destino}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Solicitante: {pago.nombre_usuario || pago.usuario_nombre || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Aprobador: {pago.aprobador_nombre || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Concepto: {pago.concepto || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Monto: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(pago.monto)}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Cuenta destino: {pago.cuenta_destino}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Solicitante: {pago.nombre_usuario || pago.usuario_nombre || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Aprobador: {pago.aprobador_nombre || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Concepto: {pago.concepto || '-'}</div>
               </div>
             </div>
             {/* Comprobante de Pago */}

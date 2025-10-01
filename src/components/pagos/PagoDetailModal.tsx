@@ -200,14 +200,14 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-blue-900/60 backdrop-blur-sm">
       <div className="absolute inset-0" onClick={onClose} role="button" tabIndex={-1} aria-label="Cerrar modal" />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100">
+  <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100 text-black">
         <button onClick={onClose} className="absolute top-3 right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300" aria-label="Cerrar modal">
           <span className="sr-only">Cerrar</span>
           ×
         </button>
         <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
           <div className="flex-1 min-w-0">
-            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
+            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-black p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
               <div className="bg-white/20 p-3 rounded-lg">
                 <CreditCard className="w-8 h-8 text-white" />
               </div>
@@ -226,28 +226,28 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Concepto</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">{pago.concepto || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">{pago.tipo_pago_descripcion || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">{pago.concepto || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">{pago.tipo_pago_descripcion || '-'}</div>
               </div>
             </div>
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><CreditCard className="w-5 h-5 text-blue-500" />Información Financiera</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Monto: {formatCurrency(pago.monto)}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Beneficiario: {pago.nombre_persona || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Solicitante: {pago.nombre_usuario || pago.usuario_nombre || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Departamento: {pago.departamento || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Banco: {pago.banco_destino || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Cuenta destino: {pago.cuenta_destino || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Tipo de cuenta: {pago.tipo_cuenta_destino || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Fecha límite: {pago.fecha_limite_pago ? formatDateForDisplay(pago.fecha_limite_pago) : '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Monto: {formatCurrency(pago.monto)}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Beneficiario: {pago.nombre_persona || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Solicitante: {pago.nombre_usuario || pago.usuario_nombre || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Departamento: {pago.departamento || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Banco: {pago.banco_destino || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Cuenta destino: {pago.cuenta_destino || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Tipo de cuenta: {pago.tipo_cuenta_destino || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Fecha límite: {pago.fecha_limite_pago ? formatDateForDisplay(pago.fecha_limite_pago) : '-'}</div>
               </div>
             </div>
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Organizacional</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Aprobador: {pago.aprobador_nombre || '-'}</div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">Estado: {pago.estado ? pago.estado.charAt(0).toUpperCase() + pago.estado.slice(1) : '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Aprobador: {pago.aprobador_nombre || '-'}</div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-black">Estado: {pago.estado ? pago.estado.charAt(0).toUpperCase() + pago.estado.slice(1) : '-'}</div>
               </div>
             </div>
             {/* Documentos Adjuntos */}
