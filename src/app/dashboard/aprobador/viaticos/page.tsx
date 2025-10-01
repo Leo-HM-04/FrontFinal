@@ -14,6 +14,7 @@ import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { exportViaticosToCSV, exportViaticosToExcel, exportViaticosToPDF } from '@/utils/exportUtils';
 import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
+import RejectModal from '@/components/ui/RejectModal';
 import { toast } from 'react-hot-toast';
 
 import { Solicitud } from '@/types';
@@ -263,7 +264,8 @@ const Viaticos: React.FC = () => {
   const [mensajeAccion, setMensajeAccion] = useState<string | null>(null);
   const [errorAccion, setErrorAccion] = useState<string | null>(null);
 
-  const [modalConfirm, setModalConfirm] = useState<null | 'aprobar' | 'rechazar'>(null);
+  const [modalConfirm, setModalConfirm] = useState<null | 'aprobar'>(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
 
   const aprobarSeleccionados = async () => {
     setModalConfirm(null);
@@ -288,23 +290,28 @@ const Viaticos: React.FC = () => {
     }
   };
 
-  const rechazarSeleccionados = async () => {
-    setModalConfirm(null);
+  const rechazarSeleccionados = async (comentario: string) => {
+    setShowRejectModal(false);
     setAccionCargando('rechazar');
     setMensajeAccion(null);
     setErrorAccion(null);
     try {
       const response = await api.post('/viaticos/rechazar-lote', {
         ids: selectedViaticos,
+        comentario_aprobador: comentario
       });
       setMensajeAccion(response.data.message || 'Viáticos rechazados correctamente');
       setSelectedViaticos([]);
       if (typeof refetch === 'function') refetch();
+      toast.success('Viáticos rechazados correctamente');
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setErrorAccion(err.response?.data?.error || 'Error al rechazar viáticos');
+        const errorMsg = err.response?.data?.error || 'Error al rechazar viáticos';
+        setErrorAccion(errorMsg);
+        toast.error(errorMsg);
       } else {
         setErrorAccion('Error inesperado al rechazar viáticos');
+        toast.error('Error inesperado al rechazar viáticos');
       }
     } finally {
       setAccionCargando(null);
@@ -445,7 +452,7 @@ const Viaticos: React.FC = () => {
                         
                         <button
                           className="group relative w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-red-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
-                          onClick={() => setModalConfirm('rechazar')}
+                          onClick={() => setShowRejectModal(true)}
                           disabled={accionCargando === 'rechazar'}
                         >
                           <div className="flex items-center justify-center gap-2">
@@ -540,13 +547,11 @@ const Viaticos: React.FC = () => {
                         Cancelar
                       </button>
                       <button
-                        className={modalConfirm === 'aprobar'
-                          ? 'px-4 py-2 rounded font-semibold bg-green-500 hover:bg-green-600 text-white transition'
-                          : 'px-4 py-2 rounded font-semibold bg-red-500 hover:bg-red-600 text-white transition'}
-                        onClick={modalConfirm === 'aprobar' ? aprobarSeleccionados : rechazarSeleccionados}
+                        className="px-4 py-2 rounded font-semibold bg-green-500 hover:bg-green-600 text-white transition"
+                        onClick={aprobarSeleccionados}
                         autoFocus
                       >
-                        {modalConfirm === 'aprobar' ? 'Sí, aprobar' : 'Sí, rechazar'}
+                        Sí, aprobar
                       </button>
                     </div>
                   </div>
@@ -782,6 +787,15 @@ const Viaticos: React.FC = () => {
             }}
           />
         )}
+
+        {/* Modal de rechazo con comentario obligatorio para viáticos */}
+        <RejectModal
+          isOpen={showRejectModal}
+          title="¿Confirmar rechazo de viáticos?"
+          onConfirm={rechazarSeleccionados}
+          onCancel={() => setShowRejectModal(false)}
+          isLoading={accionCargando === 'rechazar'}
+        />
       </AprobadorLayout>
     </ProtectedRoute>
   );

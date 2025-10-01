@@ -298,6 +298,23 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                         <p className="text-blue-900 font-medium leading-relaxed">{viatico.concepto || '-'}</p>
                       </div>
                     </div>
+
+                    {/* Comentario del Aprobador - Solo cuando está rechazado */}
+                    {viatico.estado?.toLowerCase() === 'rechazada' && viatico.comentario_aprobador && (
+                      <div className="bg-red-50 border border-red-200 rounded-xl p-5 mt-6">
+                        <h4 className="text-lg font-bold text-red-800 mb-3 flex items-center">
+                          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          Motivo del Rechazo
+                        </h4>
+                        <div className="bg-white border border-red-300 rounded-lg p-4">
+                          <p className="text-red-900 text-base leading-relaxed font-medium">
+                            {viatico.comentario_aprobador}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Descripción del tipo de pago */}
                     {viatico.tipo_pago_descripcion && (
