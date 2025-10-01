@@ -1,4 +1,3 @@
-// ...existing code...
 import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, CreditCard } from 'lucide-react';
@@ -301,11 +300,11 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
             <div className="mb-6 w-full">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobantes de Pago</h3>
               <div className="flex flex-col items-center justify-center w-full">
-                {solicitudExtended.ruta_archivo ? (
+                {solicitud.ruta_archivo ? (
                   <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
                     <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
                       <img
-                        src={solicitudExtended.ruta_archivo}
+                        src={solicitud.ruta_archivo}
                         alt="Comprobante de Pago"
                         className="object-contain w-full h-full rounded-lg shadow-sm"
                         style={{ maxHeight: '420px', width: '100%' }}
@@ -314,7 +313,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
                     </div>
                     <div className="p-5 flex justify-end">
                       <button
-                        onClick={() => window.open(solicitudExtended.ruta_archivo, '_blank')}
+                        onClick={() => window.open(solicitud.ruta_archivo, '_blank')}
                         className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
                       >
                         Ver completo
