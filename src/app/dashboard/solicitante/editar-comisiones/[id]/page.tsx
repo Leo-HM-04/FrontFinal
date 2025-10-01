@@ -13,8 +13,6 @@ export default function EditarComisionesPage() {
   const solicitudId = Number(params?.id ?? 0);
   const { estado, seleccionarPlantilla, actualizarCampo } = usePlantillaSolicitud();
 
-
-
   useEffect(() => {
     async function fetchSolicitud() {
       try {
