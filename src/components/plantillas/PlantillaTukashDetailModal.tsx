@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { SolicitudesService } from '@/services/solicitudes.service';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, CreditCard } from 'lucide-react';
 import { PlantillaTukashModalProps, LoadingStateTukash, ErrorStateTukash } from '@/types/plantillaTukash';
@@ -184,6 +185,24 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
   const [errors, setErrors] = useState<ErrorStateTukash>({ archivos: null, general: null });
   const { handleError } = useErrorHandler();
   const solicitudExtended = solicitud as SolicitudTukashExtended;
+  // Estado para comprobante
+  const [comprobanteUrl, setComprobanteUrl] = useState<string | null>(null);
+  useEffect(() => {
+    async function fetchComprobante() {
+      if (!solicitud?.id_solicitud) return setComprobanteUrl(null);
+      try {
+        const comprobantes = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
+        if (comprobantes && comprobantes.length > 0 && comprobantes[0].ruta_archivo) {
+          setComprobanteUrl(comprobantes[0].ruta_archivo);
+        } else {
+          setComprobanteUrl(null);
+        }
+      } catch {
+        setComprobanteUrl(null);
+      }
+    }
+    fetchComprobante();
+  }, [solicitud?.id_solicitud]);
   const fetchArchivos = useCallback(async () => {
     if (!solicitud) return;
     setLoading(prev => ({ ...prev, archivos: true }));
@@ -300,11 +319,11 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
             <div className="mb-6 w-full">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobantes de Pago</h3>
               <div className="flex flex-col items-center justify-center w-full">
-                {solicitud.ruta_archivo ? (
+                {comprobanteUrl ? (
                   <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
                     <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
                       <img
-                        src={solicitud.ruta_archivo}
+                        src={comprobanteUrl}
                         alt="Comprobante de Pago"
                         className="object-contain w-full h-full rounded-lg shadow-sm"
                         style={{ maxHeight: '420px', width: '100%' }}
@@ -313,7 +332,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
                     </div>
                     <div className="p-5 flex justify-end">
                       <button
-                        onClick={() => window.open(solicitud.ruta_archivo, '_blank')}
+                        onClick={() => window.open(comprobanteUrl, '_blank')}
                         className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
                       >
                         Ver completo
