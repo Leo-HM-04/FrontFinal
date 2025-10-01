@@ -278,15 +278,46 @@ export default function SolicitudesPendientesPage() {
   const handleApprove = async (id: number, comentario?: string) => {
     try {
       setActionLoading(true);
-      await SolicitudesService.updateEstado(id, {
-        estado: 'autorizada',
-        comentario_aprobador: comentario || 'Solicitud aprobada'
-      });
+      
+      // Buscar la solicitud para verificar si es N09/TOKA
+      const solicitud = solicitudes.find(s => s.id_solicitud === id);
+      const isN09Toka = solicitud && (solicitud as any).isN09Toka === true;
+      
+      if (isN09Toka) {
+        // Usar endpoint específico para N09/TOKA
+        console.log(`🔄 Aprobando solicitud N09/TOKA ID: ${id}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/solicitudes-n09-toka/${id}/estado`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+          },
+          body: JSON.stringify({
+            estado: 'autorizada',
+            comentarios: comentario || 'Solicitud aprobada'
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Error al aprobar solicitud N09/TOKA');
+        }
+        
+        console.log(`✅ Solicitud N09/TOKA ${id} aprobada exitosamente`);
+      } else {
+        // Usar endpoint normal para solicitudes regulares
+        await SolicitudesService.updateEstado(id, {
+          estado: 'autorizada',
+          comentario_aprobador: comentario || 'Solicitud aprobada'
+        });
+      }
+      
       toast.success('La solicitud ha sido aprobada correctamente');
       setShowDetailModal(false);
       fetchSolicitudes();
-    } catch {
-      // console.error('Error al aprobar la solicitud');
+    } catch (error) {
+      console.error('Error al aprobar la solicitud:', error);
       toast.error('Error al aprobar la solicitud');
     } finally {
       setActionLoading(false);
@@ -296,15 +327,46 @@ export default function SolicitudesPendientesPage() {
   const handleReject = async (id: number, comentario?: string) => {
     try {
       setActionLoading(true);
-      await SolicitudesService.updateEstado(id, {
-        estado: 'rechazada',
-        comentario_aprobador: comentario || 'Solicitud rechazada'
-      });
+      
+      // Buscar la solicitud para verificar si es N09/TOKA
+      const solicitud = solicitudes.find(s => s.id_solicitud === id);
+      const isN09Toka = solicitud && (solicitud as any).isN09Toka === true;
+      
+      if (isN09Toka) {
+        // Usar endpoint específico para N09/TOKA
+        console.log(`❌ Rechazando solicitud N09/TOKA ID: ${id}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/solicitudes-n09-toka/${id}/estado`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+          },
+          body: JSON.stringify({
+            estado: 'rechazada',
+            comentarios: comentario || 'Solicitud rechazada'
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Error al rechazar solicitud N09/TOKA');
+        }
+        
+        console.log(`✅ Solicitud N09/TOKA ${id} rechazada exitosamente`);
+      } else {
+        // Usar endpoint normal para solicitudes regulares
+        await SolicitudesService.updateEstado(id, {
+          estado: 'rechazada',
+          comentario_aprobador: comentario || 'Solicitud rechazada'
+        });
+      }
+      
       toast.success('La solicitud ha sido rechazada');
       setShowDetailModal(false);
       fetchSolicitudes();
-    } catch {
-      // console.error('Error al rechazar la solicitud');
+    } catch (error) {
+      console.error('Error al rechazar la solicitud:', error);
       toast.error('Error al rechazar la solicitud');
     } finally {
       setActionLoading(false);
