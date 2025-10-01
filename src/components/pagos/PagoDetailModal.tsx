@@ -1,5 +1,4 @@
-'use client';
-
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import type { Solicitud } from '@/types/index';
 import { CreditCard, FileText, Building, ExternalLink } from 'lucide-react';
@@ -9,6 +8,7 @@ import { detectarPlantillaId } from '@/utils/plantillasLabels';
 import { PlantillaComisionesDetailModal } from '@/components/plantillas/PlantillaComisionesDetailModal';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { obtenerNombreBanco } from '@/utils/bancos';
+import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 
 interface PagoDetailModalProps {
   isOpen: boolean;
@@ -17,9 +17,35 @@ interface PagoDetailModalProps {
 }
 
 export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps) {
+  const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
+  const [loadingArchivos, setLoadingArchivos] = useState(false);
+  const [errorArchivos, setErrorArchivos] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchArchivos() {
+      if (!pago) return;
+      setLoadingArchivos(true);
+      setErrorArchivos(null);
+      try {
+        const data = await SolicitudArchivosService.obtenerArchivos(pago.id_solicitud);
+        setArchivos(data);
+      } catch (error) {
+        setErrorArchivos('Error al cargar archivos adjuntos');
+      } finally {
+        setLoadingArchivos(false);
+      }
+    }
+    if (isOpen && pago) {
+      fetchArchivos();
+    }
+    if (!isOpen) {
+      setArchivos([]);
+      setLoadingArchivos(false);
+      setErrorArchivos(null);
+    }
+  }, [isOpen, pago]);
+
   if (!isOpen || !pago) return null;
-
-
 
   // Función para detectar si es una solicitud PAGO COMISIONES
   function isComisionesSolicitud(solicitud: Solicitud): boolean {
@@ -252,43 +278,113 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
               </div>
             </div>
           </div>
-          {/* Columna derecha: Previsualización de factura */}
+          {/* Columna derecha: Previsualización de factura y archivos adjuntos */}
           <div className="flex-1 min-w-0 flex flex-col items-center justify-start">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 w-full">Factura Adjunta</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 w-full">Archivos Adjuntos</h3>
             <div className="w-full flex flex-col items-center justify-center">
-              {pago.factura_url ? (
-                <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
-                  <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
-                    {pago.factura_url.endsWith('.pdf') ? (
-                      <iframe
-                        src={pago.factura_url}
-                        title="Factura PDF"
-                        className="w-full h-full rounded-lg border border-blue-200"
-                        style={{ minHeight: '420px', height: '420px' }}
-                      />
-                    ) : (
-                      <img
-                        src={pago.factura_url}
-                        alt="Factura Adjunta"
-                        className="object-contain w-full h-full rounded-lg shadow-sm"
-                        style={{ maxHeight: '420px', width: '100%' }}
-                        onError={e => { e.currentTarget.style.display = 'none'; }}
-                      />
-                    )}
-                  </div>
-                  <div className="p-5 flex justify-end">
-                    <button
-                      onClick={() => window.open(pago.factura_url, '_blank')}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
-                    >
-                      Ver completo
-                    </button>
+              {loadingArchivos && (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Cargando archivos...</p>
+                </div>
+              )}
+              {errorArchivos && (
+                <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <FileText className="h-5 w-5 text-red-400" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{errorArchivos}</p>
+                    </div>
                   </div>
                 </div>
-              ) : (
-                <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full">
-                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-600 font-medium">No hay factura adjunta</p>
+              )}
+              {!loadingArchivos && !errorArchivos && (
+                <div className="flex flex-col items-center justify-center w-full">
+                  {/* Mostrar factura adjunta si existe */}
+                  {pago.factura_url && (
+                    <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full mb-6">
+                      <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                        {pago.factura_url.endsWith('.pdf') ? (
+                          <iframe
+                            src={pago.factura_url}
+                            title="Factura PDF"
+                            className="w-full h-full rounded-lg border border-blue-200"
+                            style={{ minHeight: '420px', height: '420px' }}
+                          />
+                        ) : (
+                          <img
+                            src={pago.factura_url}
+                            alt="Factura Adjunta"
+                            className="object-contain w-full h-full rounded-lg shadow-sm"
+                            style={{ maxHeight: '420px', width: '100%' }}
+                            onError={e => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        )}
+                      </div>
+                      <div className="p-5 flex justify-end">
+                        <button
+                          onClick={() => window.open(pago.factura_url, '_blank')}
+                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
+                        >
+                          Ver completo
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {/* Mostrar otros archivos adjuntos */}
+                  {archivos && archivos.length > 0 ? (
+                    archivos.map((archivo) => {
+                      const extension = archivo.archivo_url?.split('.').pop()?.toLowerCase() || '';
+                      const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
+                      const isPdf = extension === 'pdf';
+                      const fileUrl = archivo.archivo_url.startsWith('http') ? archivo.archivo_url : `https://bechapra.com.mx${archivo.archivo_url.startsWith('/') ? '' : '/'}${archivo.archivo_url}`;
+                      return (
+                        <div key={archivo.id} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full mb-6">
+                          <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                            {isPdf ? (
+                              <iframe
+                                src={fileUrl}
+                                title={archivo.tipo || 'Archivo PDF'}
+                                className="w-full h-full rounded-lg border border-blue-200"
+                                style={{ minHeight: '420px', height: '420px' }}
+                              />
+                            ) : isImage ? (
+                              <img
+                                src={fileUrl}
+                                alt={archivo.tipo || 'Archivo adjunto'}
+                                className="object-contain w-full h-full rounded-lg shadow-sm"
+                                style={{ maxHeight: '420px', width: '100%' }}
+                                onError={e => { e.currentTarget.style.display = 'none'; }}
+                              />
+                            ) : (
+                              <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full">
+                                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                                <p className="text-gray-600 font-medium">No se puede previsualizar este archivo</p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-5 flex justify-end">
+                            <button
+                              onClick={() => window.open(fileUrl, '_blank')}
+                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
+                            >
+                              Ver completo
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    !pago.factura_url && (
+                      <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full">
+                        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                        <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
+                        <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </div>
