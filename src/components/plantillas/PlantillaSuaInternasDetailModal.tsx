@@ -143,6 +143,11 @@ export function PlantillaSuaInternasDetailModal({
   const [loadingComprobantes, setLoadingComprobantes] = useState(false);
   const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
 
+  // Archivos adjuntos
+  const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
+  const [loadingArchivos, setLoadingArchivos] = useState(false);
+  const [errorArchivos, setErrorArchivos] = useState<string | null>(null);
+
   // Cast de la solicitud para acceder a campos adicionales
   const solicitudExtended = solicitud as SolicitudSuaInternasExtended;
 
@@ -165,6 +170,25 @@ export function PlantillaSuaInternasDetailModal({
     }
   }, [solicitud.id_solicitud]);
 
+  // Función para obtener archivos adjuntos
+  const fetchArchivos = useCallback(async () => {
+    setLoadingArchivos(true);
+    setErrorArchivos(null);
+    try {
+      const id = typeof solicitud.id_solicitud === 'number' ? solicitud.id_solicitud : 0;
+      const data = await SolicitudArchivosService.obtenerArchivos(id);
+      setArchivos(data);
+    } catch (error) {
+      let msg = 'Error al cargar archivos adjuntos';
+      if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        msg = (error as { message: string }).message;
+      }
+      setErrorArchivos(msg);
+    } finally {
+      setLoadingArchivos(false);
+    }
+  }, [solicitud.id_solicitud]);
+
   useEffect(() => {
     if (isOpen && solicitud?.estado === 'pagada') {
       fetchComprobantes();
@@ -172,6 +196,14 @@ export function PlantillaSuaInternasDetailModal({
       setComprobantes([]);
     }
   }, [isOpen, solicitud?.estado, fetchComprobantes]);
+
+  useEffect(() => {
+    if (isOpen && solicitud?.id_solicitud) {
+      fetchArchivos();
+    } else {
+      setArchivos([]);
+    }
+  }, [isOpen, solicitud?.id_solicitud, fetchArchivos]);
 
   // Función para manejar teclas de escape
   useEffect(() => {
@@ -310,21 +342,19 @@ export function PlantillaSuaInternasDetailModal({
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
               {/* Loading y error de archivos */}
-              {/* Renderizado de archivos adjuntos */}
               <div className="flex flex-col items-center justify-center w-full">
-                {loadingComprobantes ? (
-                  <LoadingSpinner message="Cargando archivos..." />
-                ) : errorComprobantes ? (
-                  <ErrorMessage message={errorComprobantes} />
-                ) : comprobantes.length > 0 ? (
-                  comprobantes.map((archivo, idx) => {
-                    // Usar solo ruta_archivo, igual que en TUKASH
-                    const url = buildFileUrl(archivo.ruta_archivo);
+                {loadingArchivos ? (
+                  <LoadingSpinner message="Cargando archivos adjuntos..." />
+                ) : errorArchivos ? (
+                  <ErrorMessage message={errorArchivos} />
+                ) : archivos.length > 0 ? (
+                  archivos.map((archivo, idx) => {
+                    const url = buildFileUrl(archivo.archivo_url);
                     const fileName = url.split('/').pop() || `archivo-${idx}`;
                     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
                     return (
-                      <div key={archivo.id_comprobante || idx} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full mb-4">
+                      <div key={archivo.id || idx} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full mb-4">
                         <div className="relative h-[220px] bg-gray-50 flex items-center justify-center">
                           {isImage ? (
                             <Image src={url} alt={fileName} fill className="object-contain" />
