@@ -43,7 +43,18 @@ api.interceptors.response.use(
     }
 
     // Manejo de errores globales
-    if (response?.status === 401 && !isLoginRequest) {
+    if (response?.status === 413) {
+      toast.error('El archivo que intentaste subir es demasiado grande. Por favor selecciona un archivo más pequeño (máximo 10MB).', {
+        duration: 6000,
+        style: {
+          background: '#fbbf24',
+          color: '#222',
+          fontWeight: 'bold',
+          fontSize: '1.1rem',
+          border: '2px solid #f59e42'
+        }
+      });
+    } else if (response?.status === 401 && !isLoginRequest) {
       // Limpiar ambos almacenamientos para asegurar limpieza completa
       Cookies.remove('auth_token');
       Cookies.remove('user_data');

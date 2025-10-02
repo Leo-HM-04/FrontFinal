@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, CreditCard } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import { PlantillaTukashModalProps, LoadingStateTukash, ErrorStateTukash } from '@/types/plantillaTukash';
 import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
@@ -296,23 +297,16 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField label="Asunto" value={solicitud.asunto} />
-                <InfoField label="Cliente" value={solicitud.cliente} />
-                <InfoField label="Beneficiario de Tarjeta" value={solicitud.beneficiario_tarjeta} />
-                <InfoField label="Número de Tarjeta" value={solicitud.numero_tarjeta} variant="mono" />
-                <InfoField label="Monto Total Cliente" value={solicitud.monto_total_cliente} variant="currency" />
-                <InfoField label="Monto Total TUKASH" value={solicitud.monto_total_tukash} variant="currency" />
+                <InfoField label="Asunto" value={solicitud.asunto} icon={<FileText className="w-4 h-4 text-blue-500" />} />
+                <InfoField label="Cliente" value={solicitud.cliente} icon={<CreditCard className="w-4 h-4 text-emerald-600" />} />
+                <InfoField label="Beneficiario de Tarjeta" value={solicitud.beneficiario_tarjeta} icon={<CreditCard className="w-4 h-4 text-blue-700" />} />
+                <InfoField label="Número de Tarjeta" value={solicitud.numero_tarjeta} variant="mono" icon={<CreditCard className="w-4 h-4 text-indigo-600" />} />
+                <InfoField label="Monto Total Cliente" value={solicitud.monto_total_cliente} variant="currency" icon={<DollarSign className="w-4 h-4 text-emerald-600" />} />
+                <InfoField label="Monto Total TUKASH" value={solicitud.monto_total_tukash} variant="currency" icon={<DollarSign className="w-4 h-4 text-blue-600" />} />
                 {/* <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" /> */}
               </div>
             </div>
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><CreditCard className="w-5 h-5 text-blue-500" />Información Bancaria</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField label="Banco Destino" value={solicitudExtended.banco_destino || 'No especificado'} />
-                <InfoField label="Cuenta/CLABE" value={solicitudExtended.cuenta_destino || 'No especificado'} variant="mono" />
-                <InfoField label="Tipo de Cuenta" value={solicitudExtended.tipo_cuenta_destino || 'No especificado'} />
-              </div>
-            </div>
+            {/* Información Bancaria removida por solicitud del usuario */}
             {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>

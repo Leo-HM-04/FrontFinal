@@ -61,18 +61,24 @@ export default function HistorialPagosPage() {
       // 2. Solicitudes de plantillas pagadas
       const plantillas = await SolicitudesService.getAllUnified();
       const plantillasPagadas = plantillas.filter((p) => p.estado === 'pagada');
-      // 3. Unir ambas listas
-      const todasSolicitudes = [...data.filter((p) => p.estado === 'pagada' || p.estado === 'autorizada'), ...plantillasPagadas];
-      todasSolicitudes.sort((a, b) => {
+      // 3. Unir ambas listas y eliminar duplicados por id_solicitud
+      const solicitudesCombinadas = [...data.filter((p) => p.estado === 'pagada' || p.estado === 'autorizada'), ...plantillasPagadas];
+      const solicitudesUnicas = Object.values(
+        solicitudesCombinadas.reduce((acc, solicitud) => {
+          acc[solicitud.id_solicitud] = solicitud;
+          return acc;
+        }, {} as { [id: number]: Solicitud })
+      );
+      solicitudesUnicas.sort((a, b) => {
         const fechaA = new Date(a.fecha_pago || a.fecha_limite_pago || 0).getTime();
         const fechaB = new Date(b.fecha_pago || b.fecha_limite_pago || 0).getTime();
         return fechaB - fechaA;
       });
-      setPagos(todasSolicitudes);
+      setPagos(solicitudesUnicas);
       // Consultar comprobantes para cada solicitud pagada
       const comprobantesObj: { [id: number]: null } = {};
       await Promise.all(
-        todasSolicitudes.map(async (pago) => {
+        solicitudesUnicas.map(async (pago: Solicitud) => {
           if (pago.estado === 'pagada') {
             try {
               const comprobantes = await ComprobantesService.getBySolicitud(pago.id_solicitud, token);
