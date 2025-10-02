@@ -361,7 +361,7 @@ export default function PagosPendientesPage() {
   }
 
   return (
-    <ProtectedRoute requiredRoles={['pagador']}>
+    <ProtectedRoute requiredRoles={['pagador', 'pagador_banca']}>
       <PagadorLayout>
         <div className="container mx-auto px-4 py-8">
          {/* Header */}
