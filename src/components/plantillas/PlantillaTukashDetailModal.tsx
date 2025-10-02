@@ -305,14 +305,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
                 {/* <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" /> */}
               </div>
             </div>
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><CreditCard className="w-5 h-5 text-blue-500" />Información Bancaria</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField label="Banco Destino" value={solicitudExtended.banco_destino || 'No especificado'} />
-                <InfoField label="Cuenta/CLABE" value={solicitudExtended.cuenta_destino || 'No especificado'} variant="mono" />
-                <InfoField label="Tipo de Cuenta" value={solicitudExtended.tipo_cuenta_destino || 'No especificado'} />
-              </div>
-            </div>
+            {/* Información Bancaria removida por solicitud del usuario */}
             {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
