@@ -19,8 +19,18 @@ import { obtenerNombreBanco } from '@/utils/bancos';
 
 export default function HistorialSolicitudesPage() {
   const { solicitudes: allSolicitudes, loading } = useSolicitudes();
-  // Filtrar solo las solicitudes procesadas (autorizadas, pagadas o rechazadas)
+  
+  // DEBUG: Revisar qué solicitudes llegan
+  console.log('🔍 [HISTORIAL DEBUG] Total solicitudes recibidas:', allSolicitudes.length);
+  console.log('🔍 [HISTORIAL DEBUG] Solicitudes N09/TOKA:', allSolicitudes.filter(s => s.tipo_plantilla === 'N09_TOKA'));
+  console.log('🔍 [HISTORIAL DEBUG] Estados únicos:', [...new Set(allSolicitudes.map(s => s.estado))]);
+  console.log('🔍 [HISTORIAL DEBUG] Solicitudes con estado aprobada:', allSolicitudes.filter(s => s.estado === 'aprobada'));
+  
+  // Filtrar solo las solicitudes procesadas (autorizadas, aprobadas, pagadas o rechazadas)
   const solicitudes = allSolicitudes.filter(s => s.estado !== 'pendiente');
+  
+  console.log('🔍 [HISTORIAL DEBUG] Después de filtrar pendientes:', solicitudes.length);
+  console.log('🔍 [HISTORIAL DEBUG] N09/TOKA después del filtro:', solicitudes.filter(s => s.tipo_plantilla === 'N09_TOKA'));
 
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);

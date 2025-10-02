@@ -50,6 +50,7 @@ export interface Solicitud {
   usuario_nombre?: string;
   aprobador_nombre?: string;
   tipo_pago?: string; // <-- agregado para edición
+  tipo_plantilla?: string; // <-- agregado para identificar N09/TOKA
   nombre_usuario?: string; // <-- Campo agregado
   fecha_pago?: string; // <-- Campo agregado para historial
   tipo_tarjeta?: string;
