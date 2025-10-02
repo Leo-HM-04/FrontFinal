@@ -12,8 +12,11 @@ import { getPagosPendientes, marcarPagoComoPagado, subirComprobante } from '@/se
 import { Solicitud } from '@/types';
 import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTukashDetailModal';
+import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
+import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { detectarPlantillaId } from '@/utils/plantillasLabels';
 import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal';
+import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 
 export default function PagosPendientesPage() {
   const [selectedPago, setSelectedPago] = useState<Solicitud | null>(null);
@@ -345,17 +348,109 @@ export default function PagosPendientesPage() {
     };
   }
 
-  // Nuevo: función para renderizar el modal correcto según plantilla
+  function mapSolicitudToN09TokaData(solicitud: Solicitud): SolicitudN09TokaData {
+    let plantillaData: any = {};
+    if (solicitud.plantilla_datos) {
+      try {
+        plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      } catch {}
+    }
+    return {
+      id_solicitud: solicitud.id_solicitud,
+      asunto: (plantillaData.asunto as 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT') || 'PAGO_PROVEEDOR_N09',
+      cliente: plantillaData.cliente || '',
+      beneficiario: plantillaData.beneficiario || '',
+      proveedor: plantillaData.proveedor || '',
+      tipo_cuenta_clabe: (plantillaData.tipo_cuenta_clabe as 'CLABE' | 'CUENTA') || 'CLABE',
+      numero_cuenta_clabe: plantillaData.numero_cuenta_clabe || '',
+      banco_destino: plantillaData.banco_destino || '',
+      monto: Number(solicitud.monto) || 0,
+      tipo_moneda: (plantillaData.tipo_moneda as 'MXN' | 'USD' | 'EUR') || 'MXN',
+      estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado) || 'pendiente',
+      fecha_creacion: solicitud.fecha_creacion || '',
+      fecha_actualizacion: solicitud.updated_at || '',
+      fecha_limite_pago: solicitud.fecha_limite_pago || '',
+      usuario_creacion: solicitud.usuario_nombre || '',
+      usuario_actualizacion: '',
+    };
+  }
+
+  // Función para detectar si una solicitud es N09/TOKA
+  function isN09TokaSolicitud(solicitud: Solicitud): boolean {
+    // Verificar si tiene el campo tipo_plantilla directamente
+    const solicitudExtendida = solicitud as Solicitud & { tipo_plantilla?: string };
+    if (solicitudExtendida.tipo_plantilla === 'N09_TOKA') return true;
+    
+    // Verificar en plantilla_datos
+    if (solicitud.plantilla_datos) {
+      try {
+        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        return plantillaData.templateType === 'tarjetas-n09-toka' || 
+               plantillaData.isN09Toka === true || 
+               (plantillaData.beneficiario && plantillaData.numero_cuenta_clabe) ||
+               (plantillaData.tipo_cuenta_clabe && plantillaData.asunto);
+      } catch {
+        return false;
+      }
+    }
+    
+    return false;
+  }
+
+  // Función para detectar si una solicitud es TUKASH
+  function isTukashSolicitud(solicitud: Solicitud): boolean {
+    if (solicitud.plantilla_datos) {
+      try {
+        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        return plantillaData.templateType === 'tarjetas-tukash' || 
+               plantillaData.isTukash === true ||
+               (plantillaData.beneficiario_tarjeta && plantillaData.numero_tarjeta);
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  // Función para renderizar el modal correcto según plantilla
   function renderPlantillaModal() {
     if (!showDetailModal || !selectedPago) return null;
-    const plantillaId = detectarPlantillaId(selectedPago);
-    // Aquí puedes agregar lógica para mapear los datos si es necesario
-    // Por ahora, solo se usa el modal de TUKASH como ejemplo universal
+    
+    console.log('🔍 Detectando tipo de plantilla para solicitud:', selectedPago.id_solicitud);
+    console.log('📄 Datos de plantilla:', selectedPago.plantilla_datos);
+    
+    // Detectar N09/TOKA primero
+    if (isN09TokaSolicitud(selectedPago)) {
+      console.log('✅ Detectado como N09/TOKA - Mostrando modal N09/TOKA');
+      return (
+        <PlantillaN09TokaDetailModal
+          solicitud={mapSolicitudToN09TokaData(selectedPago)}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+        />
+      );
+    }
+    
+    // Detectar TUKASH
+    if (isTukashSolicitud(selectedPago)) {
+      console.log('✅ Detectado como TUKASH - Mostrando modal TUKASH');
+      return (
+        <PlantillaTukashDetailModal
+          solicitud={mapSolicitudToTukashData(selectedPago)}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+        />
+      );
+    }
+    
+    // Para solicitudes estándar (sin plantilla específica)
+    console.log('✅ Detectado como solicitud estándar - Mostrando modal estándar');
     return (
-      <PlantillaTukashDetailModal
-        solicitud={mapSolicitudToTukashData(selectedPago)}
+      <SolicitudDetailModal
+        solicitud={selectedPago}
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
+        userRole="pagador"
       />
     );
   }
