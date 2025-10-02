@@ -20,17 +20,8 @@ import { obtenerNombreBanco } from '@/utils/bancos';
 export default function HistorialSolicitudesPage() {
   const { solicitudes: allSolicitudes, loading } = useSolicitudes();
   
-  // DEBUG: Revisar qué solicitudes llegan
-  console.log('🔍 [HISTORIAL DEBUG] Total solicitudes recibidas:', allSolicitudes.length);
-  console.log('🔍 [HISTORIAL DEBUG] Solicitudes N09/TOKA:', allSolicitudes.filter(s => s.tipo_plantilla === 'N09_TOKA'));
-  console.log('🔍 [HISTORIAL DEBUG] Estados únicos:', [...new Set(allSolicitudes.map(s => s.estado))]);
-  console.log('🔍 [HISTORIAL DEBUG] Solicitudes con estado aprobada:', allSolicitudes.filter(s => s.estado === 'aprobada'));
-  
   // Filtrar solo las solicitudes procesadas (autorizadas, aprobadas, pagadas o rechazadas)
   const solicitudes = allSolicitudes.filter(s => s.estado !== 'pendiente');
-  
-  console.log('🔍 [HISTORIAL DEBUG] Después de filtrar pendientes:', solicitudes.length);
-  console.log('🔍 [HISTORIAL DEBUG] N09/TOKA después del filtro:', solicitudes.filter(s => s.tipo_plantilla === 'N09_TOKA'));
 
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -86,20 +77,35 @@ export default function HistorialSolicitudesPage() {
     updateFilters
   } = useAdvancedFilters(solicitudes, 'solicitudes');
 
-  // TEMPORAL: Usar solicitudes sin filtrar para debug
-  const filteredSolicitudes = solicitudes; // Cambiar por filteredSolicitudesOriginal cuando funcione
+  // Usar filtros normales
+  const filteredSolicitudes = filteredSolicitudesOriginal;
 
-  // DEBUG: Verificar filtros
-  console.log('🔍 [FILTROS DEBUG] Filtros activos:', filters);
-  console.log('🔍 [FILTROS DEBUG] Solicitudes antes de filtros:', solicitudes.length);
-  console.log('🔍 [FILTROS DEBUG] Solicitudes después de filtros:', filteredSolicitudes.length);
-  console.log('🔍 [FILTROS DEBUG] N09/TOKA después de filtros:', filteredSolicitudes.filter(s => s.tipo_plantilla === 'N09_TOKA'));
-  console.log('🔍 [FILTROS DEBUG] Departamentos únicos:', [...new Set(solicitudes.map(s => s.departamento))]);
-  console.log('🔍 [FILTROS DEBUG] Departamento de N09/TOKA:', solicitudes.find(s => s.tipo_plantilla === 'N09_TOKA')?.departamento);
+
 
   // Aplicar ordenamiento a las solicitudes filtradas
   const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
-    if (!sortField) return 0;
+    // Orden por defecto: aprobadas/autorizadas más recientes primero
+    if (!sortField) {
+      // Priorizar por estado: aprobadas recientes > autorizadas recientes > otros
+      const aFecha = new Date(a.fecha_revision || a.fecha_creacion || 0).getTime();
+      const bFecha = new Date(b.fecha_revision || b.fecha_creacion || 0).getTime();
+      
+      // Si ambas tienen el mismo estado, ordenar por fecha (más reciente primero)
+      if (a.estado === b.estado) {
+        return bFecha - aFecha; // Descendente (más reciente primero)
+      }
+      
+      // Prioridad de estados: aprobada > autorizada > pagada > rechazada
+      const prioridades = { 'aprobada': 4, 'autorizada': 3, 'pagada': 2, 'rechazada': 1 };
+      const prioridadA = prioridades[a.estado as keyof typeof prioridades] || 0;
+      const prioridadB = prioridades[b.estado as keyof typeof prioridades] || 0;
+      
+      if (prioridadA !== prioridadB) {
+        return prioridadB - prioridadA; // Mayor prioridad primero
+      }
+      
+      return bFecha - aFecha; // Si tienen la misma prioridad, más reciente primero
+    }
     
     let aVal, bVal;
     switch (sortField) {
