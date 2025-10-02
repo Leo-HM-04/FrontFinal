@@ -1595,7 +1595,7 @@ function extraerDatosDelConcepto(concepto: string) {
                   {/* Información básica */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
                       <InfoField
-                        label="Beneficiari"
+                        label="Se paga por"
                         value={solicitud.empresa_a_pagar}
                         className="bg-blue-50/50 border-blue-100"
                       />
