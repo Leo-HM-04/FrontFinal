@@ -9,8 +9,10 @@ import { Eye, CreditCard, AlertCircle, Download, ArrowUpDown, ArrowUp, ArrowDown
 import { usePagination } from '@/hooks/usePagination';
 import { toast } from 'react-hot-toast';
 import { getPagosPendientes, marcarPagoComoPagado, subirComprobante } from '@/services/pagosService';
-import type { Solicitud } from '../../../../../types/index';
-import { PagoDetailModal } from '@/components/pagos/PagoDetailModal';
+import { Solicitud } from '@/types';
+import { SolicitudTukashData } from '@/types/plantillaTukash';
+import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTukashDetailModal';
+import { detectarPlantillaId } from '@/utils/plantillasLabels';
 import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal';
 
 export default function PagosPendientesPage() {
@@ -319,8 +321,47 @@ export default function PagosPendientesPage() {
     }
   };
 
+  function mapSolicitudToTukashData(solicitud: Solicitud): SolicitudTukashData {
+    let plantillaData: Partial<SolicitudTukashData> = {};
+    if (solicitud.plantilla_datos) {
+      try {
+        plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      } catch {}
+    }
+    return {
+      id_solicitud: solicitud.id_solicitud,
+      asunto: plantillaData.asunto || 'TUKASH',
+      cliente: plantillaData.cliente || solicitud.empresa_a_pagar || '',
+      beneficiario_tarjeta: plantillaData.beneficiario_tarjeta || solicitud.nombre_persona || '',
+      numero_tarjeta: plantillaData.numero_tarjeta || solicitud.cuenta_destino || solicitud.cuenta || '',
+      monto_total_cliente: plantillaData.monto_total_cliente || Number(solicitud.monto) || 0,
+      monto_total_tukash: plantillaData.monto_total_tukash || Number(solicitud.monto2) || Number(solicitud.monto) || 0,
+      estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado) || 'pendiente',
+      fecha_creacion: solicitud.fecha_creacion || '',
+      fecha_actualizacion: solicitud.updated_at || '',
+      usuario_creacion: solicitud.usuario_nombre || '',
+      usuario_actualizacion: '',
+      folio: solicitud.folio || '',
+    };
+  }
+
+  // Nuevo: función para renderizar el modal correcto según plantilla
+  function renderPlantillaModal() {
+    if (!showDetailModal || !selectedPago) return null;
+    const plantillaId = detectarPlantillaId(selectedPago);
+    // Aquí puedes agregar lógica para mapear los datos si es necesario
+    // Por ahora, solo se usa el modal de TUKASH como ejemplo universal
+    return (
+      <PlantillaTukashDetailModal
+        solicitud={mapSolicitudToTukashData(selectedPago)}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+      />
+    );
+  }
+
   return (
-    <ProtectedRoute requiredRoles={['pagador_banca']}>
+    <ProtectedRoute requiredRoles={['pagador']}>
       <PagadorLayout>
         <div className="container mx-auto px-4 py-8">
          {/* Header */}
@@ -778,12 +819,9 @@ export default function PagosPendientesPage() {
           </div>
         )}
 
-        {/* Pago Detail Modal */}
-        <PagoDetailModal 
-          isOpen={showDetailModal} 
-          pago={selectedPago} 
-          onClose={() => setShowDetailModal(false)} 
-        />
+        {/* Pago Detail Modal (unificado para todas las plantillas) */}
+        {renderPlantillaModal()}
+
         <SubirComprobanteModal 
           isOpen={showComprobanteModal} 
           onClose={() => setShowComprobanteModal(false)} 
