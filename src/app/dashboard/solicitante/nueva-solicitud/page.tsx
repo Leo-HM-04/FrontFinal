@@ -260,27 +260,45 @@ export default function NuevaSolicitudPage() {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
-
+  // Validación para archivos adjuntos estándar (máx 5MB)
   const validateFile = (file: File) => {
     const allowedTypes = [
       'application/pdf',
-      'application/vnd.ms-excel', 
+      'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'image/jpeg',
       'image/png',
       'image/jpg'
     ];
-
     if (!allowedTypes.includes(file.type)) {
       toast.error('Tipo de archivo no permitido. Solo se permiten archivos PDF, Excel, JPG y PNG.');
       return false;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       toast.error('El archivo es demasiado grande. Máximo 5MB.');
       return false;
     }
+    return true;
+  };
 
+  // Validación para archivos adjuntos de TUKASH (máx 10MB)
+  const validateFileTukash = (file: File) => {
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'image/jpeg',
+      'image/png',
+      'image/jpg'
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Tipo de archivo no permitido. Solo se permiten archivos PDF, Excel, JPG y PNG.');
+      return false;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('El archivo supera el límite de 10MB. Por favor selecciona archivos más pequeños.');
+      return false;
+    }
     return true;
   };
 
@@ -307,23 +325,31 @@ export default function NuevaSolicitudPage() {
   // Funciones para manejar archivos adicionales
   const handleArchivoAdicionalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    
+    let valid = true;
     files.forEach(file => {
-      if (validateFile(file)) {
-        dispatch({ 
-          type: 'ADD_ARCHIVO_ADICIONAL', 
-          archivo: file, 
-          tipo: 'documento' 
-        });
+      // Si la plantilla seleccionada es TUKASH, usar la validación especial
+      if (usandoPlantilla && estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-tukash') {
+        if (!validateFileTukash(file)) {
+          valid = false;
+          return;
+        }
+      } else {
+        if (!validateFile(file)) {
+          valid = false;
+          return;
+        }
       }
+      dispatch({ 
+        type: 'ADD_ARCHIVO_ADICIONAL', 
+        archivo: file, 
+        tipo: 'documento' 
+      });
     });
-    
-    // Limpiar el error si se agregan archivos
-    if (files.length > 0) {
+    if (!valid) {
+      setErrors((prev) => ({ ...prev, archivos_adicionales: 'Uno o más archivos superan el límite de 10MB o no son válidos.' }));
+    } else if (files.length > 0) {
       setErrors((prev) => ({ ...prev, archivos_adicionales: undefined }));
     }
-    
-    // Limpiar el input
     e.target.value = '';
   };
 
