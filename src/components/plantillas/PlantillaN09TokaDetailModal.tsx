@@ -365,8 +365,8 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
             {/* Información Principal */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-2" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-3" />
                 <InfoField label="Cliente" value={solicitud.cliente} />
                 <InfoField label="Beneficiario" value={solicitud.beneficiario} />
                 <InfoField label="Monto" value={solicitud.monto} variant="currency" />
@@ -376,11 +376,10 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
             {/* Información Bancaria */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Bancaria</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InfoField label="Tipo de Cuenta" value={solicitud.tipo_cuenta_clabe} />
                 <InfoField label="Número de Cuenta/CLABE" value={solicitud.numero_cuenta_clabe} variant="mono" />
                 <InfoField label="Banco Destino" value={solicitud.banco_destino} />
-                <InfoField label="Tiene Archivos" value={solicitudExtended.tiene_archivos ? 'Sí' : 'No'} />
               </div>
             </div>
             {/* Información de Aprobación */}
