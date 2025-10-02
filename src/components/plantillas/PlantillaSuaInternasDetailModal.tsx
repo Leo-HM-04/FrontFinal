@@ -309,15 +309,55 @@ export function PlantillaSuaInternasDetailModal({
           <div className="w-full lg:w-[420px] flex-shrink-0">
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
-              {/* Aquí puedes agregar loading y error de archivos si lo necesitas */}
+              {/* Loading y error de archivos */}
+              {/* Renderizado de archivos adjuntos */}
               <div className="flex flex-col items-center justify-center w-full">
-                {/* Aquí puedes mapear archivos adjuntos si existen */}
-                {/* Si no hay archivos, muestra mensaje igual que TUKASH */}
-                <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
-                  <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
-                </div>
+                {loadingComprobantes ? (
+                  <LoadingSpinner message="Cargando archivos..." />
+                ) : errorComprobantes ? (
+                  <ErrorMessage message={errorComprobantes} />
+                ) : comprobantes.length > 0 ? (
+                  comprobantes.map((archivo, idx) => {
+                    const url = archivo.ruta_archivo;
+                    const fileName = url.split('/').pop() || `archivo-${idx}`;
+                    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+                    const isPdf = /\.pdf$/i.test(fileName);
+                    return (
+                      <div key={archivo.id_comprobante || idx} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full mb-4">
+                        <div className="relative h-[220px] bg-gray-50 flex items-center justify-center">
+                          {isImage ? (
+                            <Image src={url} alt={fileName} fill className="object-contain" />
+                          ) : isPdf ? (
+                            <iframe src={url} title={fileName} className="w-full" style={{ height: '200px' }} />
+                          ) : (
+                            <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+                              <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                              <div className="flex-1">
+                                <p className="text-blue-900 font-medium text-sm">{fileName}</p>
+                                <p className="text-xs text-gray-600 mt-1">Tipo: Archivo adjunto</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-3">
+                          <button
+                            onClick={() => window.open(url, '_blank')}
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Ver completo
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                    <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
+                    <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
