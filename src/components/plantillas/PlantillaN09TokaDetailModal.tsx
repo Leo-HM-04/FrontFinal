@@ -339,9 +339,9 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
           <X className="w-6 h-6" />
         </button>
         {/* Contenido con scroll, layout horizontal en desktop */}
-        <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
+  <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-2 sm:p-4 md:p-6">
           {/* Columna izquierda: info principal y auditoría */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 w-full">
             <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
               <div className="bg-white/20 p-3 rounded-lg">
                 <Factory className="w-8 h-8 text-white" />
@@ -365,7 +365,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
             {/* Información Principal */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
                 <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-3" />
                 <InfoField label="Cliente" value={solicitud.cliente} />
                 <InfoField label="Beneficiario" value={solicitud.beneficiario} />
@@ -376,7 +376,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
             {/* Información Bancaria */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Bancaria</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
                 <InfoField label="Tipo de Cuenta" value={solicitud.tipo_cuenta_clabe} />
                 <InfoField label="Número de Cuenta/CLABE" value={solicitud.numero_cuenta_clabe} variant="mono" />
                 <InfoField label="Banco Destino" value={solicitud.banco_destino} />
@@ -386,7 +386,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
             {(solicitudExtended.id_aprobador || solicitudExtended.fecha_aprobacion || solicitudExtended.comentarios_aprobacion) && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                   <InfoField label="ID Aprobador" value={solicitudExtended.id_aprobador?.toString()} />
                   <InfoField label="Fecha de Aprobación" value={solicitudExtended.fecha_aprobacion} variant="date" />
                   <div className="md:col-span-2">
@@ -398,7 +398,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
             {/* Información de Auditoría */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información de Auditoría</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                 <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion} variant="date" />
                 <InfoField label="Fecha de Actualización" value={solicitud.fecha_actualizacion} variant="date" />
                 <InfoField label="Usuario de Creación" value={solicitud.usuario_creacion} />
@@ -491,7 +491,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
             </div>
           </div>
           {/* Columna derecha: archivos adjuntos */}
-          <div className="w-full lg:w-[420px] flex-shrink-0">
+          <div className="w-full lg:w-[420px] flex-shrink-0 min-w-0">
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
               {loading.archivos && (
