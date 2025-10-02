@@ -284,6 +284,26 @@ export default function NuevaSolicitudPage() {
     return true;
   };
 
+  const validateFileN09Toka = (file: File) => {
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.ms-excel', 
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'image/jpeg',
+      'image/png',
+      'image/jpg'
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Tipo de archivo no permitido. Solo se permiten archivos PDF, Excel, JPG y PNG.');
+      return false;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('El archivo es demasiado grande. Máximo 10MB para esta plantilla.');
+      return false;
+    }
+    return true;
+  };
+
   // Funciones para manejar archivos adicionales
   const handleArchivoAdicionalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -344,6 +364,19 @@ export default function NuevaSolicitudPage() {
     e.preventDefault();
     setLoading(true);
     setIsFormSubmitted(true);
+
+    // Si se está usando la plantilla N09/TOKA, validar archivos antes de enviar
+    if (usandoPlantilla && estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-n09-toka') {
+      const archivos = Array.isArray(estadoPlantilla.datos.archivos_adjuntos)
+        ? estadoPlantilla.datos.archivos_adjuntos as File[]
+        : [];
+      const archivosInvalidos = archivos.filter(file => !validateFileN09Toka(file));
+      if (archivosInvalidos.length > 0) {
+        toast.error('Uno o más archivos son demasiado pesados o no permitidos. Corrige antes de crear la solicitud.');
+        setLoading(false);
+        return;
+      }
+    }
 
     // Si se está usando una plantilla, validar con el sistema de plantillas
     if (usandoPlantilla) {
@@ -1860,7 +1893,7 @@ export default function NuevaSolicitudPage() {
                             <button
                               type="button"
                               onClick={() => removeArchivoAdicional(index)}
-                              className="ml-4 p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                              className="ml-4 p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colores"
                             >
                               <X className="w-5 h-5" />
                             </button>

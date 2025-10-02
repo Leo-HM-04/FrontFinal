@@ -13,8 +13,6 @@ export default function EditarPolizasPage() {
   const solicitudId = Number(params?.id ?? 0);
   const { estado, seleccionarPlantilla, actualizarCampo } = usePlantillaSolicitud();
 
-
-
   useEffect(() => {
     async function fetchSolicitud() {
       try {
@@ -26,7 +24,7 @@ export default function EditarPolizasPage() {
           if (s.plantilla_datos) {
             try {
               datos = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
-            } catch (err) {
+            } catch {
               // Si hay error, datos queda vacío
             }
           }

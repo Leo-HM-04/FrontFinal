@@ -24,7 +24,7 @@ export default function EditarComisionesPage() {
           if (s.plantilla_datos) {
             try {
               datos = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
-            } catch (err) {
+            } catch {
               // Si hay error, datos queda vacío
             }
           }

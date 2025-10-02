@@ -16,7 +16,7 @@ import { es } from 'date-fns/locale/es';
 import { NumericFormat } from 'react-number-format';
 import Image from 'next/image'; 
 import { formatDateForAPI } from '@/utils/dateUtils';
-import { detectarPlantillaId, obtenerDatosPlantilla } from '@/utils/plantillasLabels';
+import { detectarPlantillaId } from '@/utils/plantillasLabels';
 import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
 import EditarN09Toka from '@/components/plantillas/EditarN09Toka';
 import EditarTukash from '@/components/plantillas/EditarTukash';
@@ -129,100 +129,6 @@ type ArchivoExistente = {
   mime?: string;
   url?: string;
 };
-
-// Función auxiliar para cargar datos desde plantilla_datos JSON
-function cargarDatosPlantillaJSON(solicitud: Solicitud, actualizarCampo: (campo: string, valor: unknown) => void) {
-  // Prellenar datos de la plantilla desde plantilla_datos
-  const datosPlantilla = obtenerDatosPlantilla(solicitud);
-  console.log('📋 Datos de plantilla a prellenar:', datosPlantilla);
-  console.log('📋 Número de campos a prellenar:', Object.keys(datosPlantilla).length);
-  
-  // Usar setTimeout para asegurar que el componente esté montado
-  setTimeout(() => {
-    console.log('⏰ Iniciando prellenado con delay desde JSON...');
-    
-    // 1. Actualizar campos de la plantilla desde plantilla_datos
-    Object.entries(datosPlantilla).forEach(([campo, valor]) => {
-      console.log(`🔧 Intentando actualizar campo "${campo}" con valor:`, valor);
-      if (valor !== null && valor !== undefined && valor !== '') {
-        console.log(`✅ Actualizando campo "${campo}"`);
-        actualizarCampo(campo, valor);
-      } else {
-        console.log(`⚠️ Saltando campo "${campo}" - valor vacío/nulo`);
-      }
-    });
-    
-    // 2. Obtener datos de métodos de pago de la solicitud original
-    console.log('💳 Obteniendo métodos de pago de la solicitud original...');
-    const metodosPago = [];
-    
-    // Método de pago principal
-    if (solicitud.cuenta_destino || solicitud.banco_destino) {
-      const metodoPrincipal = {
-        id: 1,
-        tipo: solicitud.tipo_cuenta_destino || 'CLABE',
-        cuenta: solicitud.cuenta_destino || '',
-        banco: solicitud.banco_destino || '',
-        tarjeta: solicitud.tipo_tarjeta || '',
-        titular: solicitud.nombre_persona || '',
-        linkPago: solicitud.link_pago || '',
-        usuario: solicitud.usuario_acceso || '',
-        contrasena: solicitud.contrasena_acceso || ''
-      };
-      metodosPago.push(metodoPrincipal);
-      console.log('💳 Método principal encontrado:', metodoPrincipal);
-    }
-    
-    // Método de pago secundario
-    if (solicitud.tiene_segunda_forma_pago && (solicitud.cuenta_destino_2 || solicitud.banco_destino_2)) {
-      const metodoSecundario = {
-        id: 2,
-        tipo: solicitud.tipo_cuenta_destino_2 || 'CLABE',
-        cuenta: solicitud.cuenta_destino_2 || '',
-        banco: solicitud.banco_destino_2 || '',
-        tarjeta: solicitud.tipo_tarjeta_2 || '',
-        titular: solicitud.nombre_persona || '',
-        linkPago: solicitud.link_pago_2 || '',
-        usuario: solicitud.usuario_acceso_2 || '',
-        contrasena: solicitud.contrasena_acceso_2 || ''
-      };
-      metodosPago.push(metodoSecundario);
-      console.log('💳 Método secundario encontrado:', metodoSecundario);
-    }
-    
-    // Actualizar métodos de pago en la plantilla
-    if (metodosPago.length > 0) {
-      console.log(`💳 Actualizando ${metodosPago.length} métodos de pago`);
-      actualizarCampo('metodos_pago', metodosPago);
-    }
-    
-    // 3. Obtener y cargar archivos de la solicitud
-    console.log('📎 Cargando archivos de la solicitud...');
-    SolicitudArchivosService.obtenerArchivos(Number(solicitud.id_solicitud))
-      .then((archivos: unknown) => {
-        console.log('📎 Archivos encontrados:', archivos);
-        
-        if (Array.isArray(archivos) && archivos.length > 0) {
-          // Transformar archivos al formato esperado por la plantilla
-          const archivosParaPlantilla = archivos.map((archivo: Record<string, unknown>) => ({
-            id: archivo.id_archivo,
-            nombre: archivo.nombre_archivo,
-            url: archivo.url_archivo,
-            tipo: archivo.tipo_archivo,
-            tamano: archivo.tamano_archivo
-          }));
-          
-          console.log('📎 Actualizando archivos en plantilla:', archivosParaPlantilla);
-          actualizarCampo('archivos_adjuntos', archivosParaPlantilla);
-        }
-      })
-      .catch((error: Error) => {
-        console.error('❌ Error cargando archivos:', error);
-      });
-    
-    console.log('🎯 Prellenado completado con delay desde JSON');
-  }, 100);
-}
 
 export default function EditarSolicitudPage() {
   const router = useRouter();

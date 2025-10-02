@@ -180,26 +180,8 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
         </div>
       )}
 
-      {/* Botón Guardar y Cancelar */}
-      <div className="flex justify-end mt-8 gap-4">
-        <button
-          type="button"
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow transition-all duration-200 flex items-center gap-2"
-          disabled={guardando}
-          onClick={handleGuardar}
-        >
-          {guardando ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-              </svg>
-              Guardando cambios...
-            </>
-          ) : (
-            <>Guardar</>
-          )}
-        </button>
+      {/* Botón Cancelar */}
+      <div className="flex justify-end mt-8">
         <button
           type="button"
           className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl shadow transition-all duration-200"
