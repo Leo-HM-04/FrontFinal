@@ -47,9 +47,9 @@ export default function PagosPendientesPage() {
     fechaHasta: ''
   });
 
-  // Filtrar solo los pagos con estado 'autorizada'
+  // Filtrar solo los pagos con estado 'autorizada' o 'aprobada' (para N09/TOKA)
   const pagosAutorizados = pagosPendientes.filter(
-    (p) => p.estado && p.estado.toLowerCase() === 'autorizada'
+    (p) => p.estado && (p.estado.toLowerCase() === 'autorizada' || p.estado.toLowerCase() === 'aprobada')
   );
 
   // Aplicar filtros personalizados
