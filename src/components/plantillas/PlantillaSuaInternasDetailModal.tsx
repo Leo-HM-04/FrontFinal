@@ -318,7 +318,8 @@ export function PlantillaSuaInternasDetailModal({
                   <ErrorMessage message={errorComprobantes} />
                 ) : comprobantes.length > 0 ? (
                   comprobantes.map((archivo, idx) => {
-                    const url = archivo.ruta_archivo;
+                    // Usar solo ruta_archivo, igual que en TUKASH
+                    const url = buildFileUrl(archivo.ruta_archivo);
                     const fileName = url.split('/').pop() || `archivo-${idx}`;
                     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
