@@ -212,7 +212,7 @@ export default function HistorialSolicitudesPage() {
   };
 
   // Estadísticas
-  const autorizadas = solicitudes.filter(s => s.estado === 'autorizada');
+  const autorizadas = solicitudes.filter(s => s.estado === 'autorizada' || s.estado === 'aprobada');
   const rechazadas = solicitudes.filter(s => s.estado === 'rechazada');
   //const totalAprobado = autorizadas.reduce((sum, s) => sum + s.monto, 0);
   //const totalRechazado = rechazadas.reduce((sum, s) => sum + s.monto, 0);
@@ -397,7 +397,7 @@ export default function HistorialSolicitudesPage() {
                               let estadoLabel = '';
                               let estadoIcon = null;
                               let rowClass = '';
-                              if (solicitud.estado === 'autorizada') {
+                              if (solicitud.estado === 'autorizada' || solicitud.estado === 'aprobada') {
                                 estadoLabel = 'Aprobada';
                                 estadoIcon = <CheckCircle className="w-4 h-4 mr-1 text-green-500 inline" />;
                                 rowClass = 'border-l-4 border-green-500 bg-green-50/10';
@@ -478,7 +478,7 @@ export default function HistorialSolicitudesPage() {
                             let statusColorClass = '';
                             let borderColorClass = '';
                             
-                            if (solicitud.estado === 'autorizada') {
+                            if (solicitud.estado === 'autorizada' || solicitud.estado === 'aprobada') {
                               estadoLabel = 'Aprobada';
                               estadoIcon = <CheckCircle className="w-4 h-4" />;
                               statusColorClass = 'bg-green-100 text-green-800 border-green-200';

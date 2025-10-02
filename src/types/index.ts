@@ -25,7 +25,7 @@ export interface AuthResponse {
   token: string;
 }
 
-export type SolicitudEstado = 'pendiente' | 'autorizada' | 'rechazada' | 'pagada';
+export type SolicitudEstado = 'pendiente' | 'autorizada' | 'aprobada' | 'rechazada' | 'pagada';
 
 export interface Solicitud {
   tipo_cuenta_destino?: string;
