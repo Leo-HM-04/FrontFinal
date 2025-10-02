@@ -81,10 +81,21 @@ export default function HistorialSolicitudesPage() {
 
   const {
     filters,
-    filteredData: filteredSolicitudes,
+    filteredData: filteredSolicitudesOriginal,
     resetFilters,
     updateFilters
   } = useAdvancedFilters(solicitudes, 'solicitudes');
+
+  // TEMPORAL: Usar solicitudes sin filtrar para debug
+  const filteredSolicitudes = solicitudes; // Cambiar por filteredSolicitudesOriginal cuando funcione
+
+  // DEBUG: Verificar filtros
+  console.log('🔍 [FILTROS DEBUG] Filtros activos:', filters);
+  console.log('🔍 [FILTROS DEBUG] Solicitudes antes de filtros:', solicitudes.length);
+  console.log('🔍 [FILTROS DEBUG] Solicitudes después de filtros:', filteredSolicitudes.length);
+  console.log('🔍 [FILTROS DEBUG] N09/TOKA después de filtros:', filteredSolicitudes.filter(s => s.tipo_plantilla === 'N09_TOKA'));
+  console.log('🔍 [FILTROS DEBUG] Departamentos únicos:', [...new Set(solicitudes.map(s => s.departamento))]);
+  console.log('🔍 [FILTROS DEBUG] Departamento de N09/TOKA:', solicitudes.find(s => s.tipo_plantilla === 'N09_TOKA')?.departamento);
 
   // Aplicar ordenamiento a las solicitudes filtradas
   const solicitudesOrdenadas = [...filteredSolicitudes].sort((a, b) => {
