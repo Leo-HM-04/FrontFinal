@@ -294,7 +294,7 @@ export default function SolicitudesPendientesPage() {
             ...(token && { Authorization: `Bearer ${token}` })
           },
           body: JSON.stringify({
-            estado: 'autorizada',
+            estado: 'aprobada',
             comentarios: comentario || 'Solicitud aprobada'
           })
         });
