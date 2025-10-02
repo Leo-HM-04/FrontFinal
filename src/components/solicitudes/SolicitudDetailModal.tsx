@@ -13,7 +13,6 @@ import {
   obtenerDatosPlantilla,
   obtenerEtiquetasPlantilla 
 } from '@/utils/plantillasLabels';
-import { bancosMexico } from '@/data/bancos';
 import { obtenerNombreBanco } from '@/utils/bancos';
 import '@/styles/modal.css';
 import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
@@ -645,7 +644,7 @@ export function SolicitudDetailModal({
 }: SolicitudDetailModalProps) {
   // Estados
   const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
-  const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
+  // const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
   
@@ -704,7 +703,7 @@ export function SolicitudDetailModal({
     setErrors(prev => ({ ...prev, archivos: null }));
     try {
       const data = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
-      setArchivos(data);
+      // setArchivos(data);
     } catch (error) {
       const errorMessage = handleError(error);
       setErrors(prev => ({ ...prev, archivos: errorMessage }));
@@ -742,7 +741,7 @@ export function SolicitudDetailModal({
   useEffect(() => {
     if (!isOpen) {
       setComprobantes([]);
-      setArchivos([]);
+      // setArchivos([]);
       setShowPassword1(false);
       setShowPassword2(false);
       setLoading({ comprobantes: false, archivos: false });

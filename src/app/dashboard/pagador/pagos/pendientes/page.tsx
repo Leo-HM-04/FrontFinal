@@ -14,7 +14,6 @@ import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTukashDetailModal';
 import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
-import { detectarPlantillaId } from '@/utils/plantillasLabels';
 import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal';
 import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 
@@ -349,7 +348,7 @@ export default function PagosPendientesPage() {
   }
 
   function mapSolicitudToN09TokaData(solicitud: Solicitud): SolicitudN09TokaData {
-    let plantillaData: any = {};
+    let plantillaData: Record<string, unknown> = {};
     if (solicitud.plantilla_datos) {
       try {
         plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
@@ -358,12 +357,12 @@ export default function PagosPendientesPage() {
     return {
       id_solicitud: solicitud.id_solicitud,
       asunto: (plantillaData.asunto as 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT') || 'PAGO_PROVEEDOR_N09',
-      cliente: plantillaData.cliente || '',
-      beneficiario: plantillaData.beneficiario || '',
-      proveedor: plantillaData.proveedor || '',
+      cliente: (plantillaData.cliente as string) || '',
+      beneficiario: (plantillaData.beneficiario as string) || '',
+      proveedor: (plantillaData.proveedor as string) || '',
       tipo_cuenta_clabe: (plantillaData.tipo_cuenta_clabe as 'CLABE' | 'CUENTA') || 'CLABE',
-      numero_cuenta_clabe: plantillaData.numero_cuenta_clabe || '',
-      banco_destino: plantillaData.banco_destino || '',
+      numero_cuenta_clabe: (plantillaData.numero_cuenta_clabe as string) || '',
+      banco_destino: (plantillaData.banco_destino as string) || '',
       monto: Number(solicitud.monto) || 0,
       tipo_moneda: (plantillaData.tipo_moneda as 'MXN' | 'USD' | 'EUR') || 'MXN',
       estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado) || 'pendiente',
