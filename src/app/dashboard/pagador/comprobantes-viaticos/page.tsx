@@ -166,13 +166,13 @@ export default function ComprobantesViaticosPage() {
                     <table className="min-w-full divide-y divide-blue-100">
                       <thead style={{ backgroundColor: "#F0F4FC" }}>
                         <tr>
-                          <th className="px-3 lg:px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Estado</th>
-                          <th className="px-3 lg:px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Folio</th>
-                          <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Departamento</th>
-                          <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Monto</th>
-                          <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Concepto</th>
-                          <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Fecha</th>
-                          <th className="px-3 lg:px-6 py-4 text-center text-xs font-semibold text-blue-700 uppercase tracking-wider">Acción</th>
+                          <th className="px-3 lg:px-6 py-2 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Estado</th>
+                          <th className="px-3 lg:px-6 py-2 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Folio</th>
+                          <th className="px-3 lg:px-6 py-2 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Departamento</th>
+                          <th className="px-3 lg:px-6 py-2 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Monto</th>
+                          <th className="px-3 lg:px-6 py-2 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Concepto</th>
+                          <th className="px-3 lg:px-6 py-2 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">Fecha</th>
+                          <th className="px-3 lg:px-6 py-2 text-center text-xs font-semibold text-blue-700 uppercase tracking-wider">Acción</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white/60 divide-y divide-blue-50">
@@ -184,54 +184,54 @@ export default function ComprobantesViaticosPage() {
                           
                           return (
                             <tr key={v.id_viatico} className={`transition-colors rounded-xl ${rowBgClass} hover:bg-blue-100 ${!hasComprobante ? 'border-l-4 border-red-400' : 'border-l-4 border-green-400'}`}>
-                              <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center gap-2">
-                                  <div className={`w-3 h-3 rounded-full ${hasComprobante ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                              <td className="px-3 lg:px-6 py-2 whitespace-nowrap">
+                                <div className="flex items-center gap-1">
+                                  <div className={`w-2 h-2 rounded-full ${hasComprobante ? 'bg-green-500' : 'bg-red-500'}`}></div>
                                   <span className={`text-xs font-semibold ${hasComprobante ? 'text-green-700' : 'text-red-700'}`}>
-                                    {hasComprobante ? 'Con comprobante' : 'Sin comprobante'}
+                                    {hasComprobante ? 'Con comp.' : 'Sin comp.'}
                                   </span>
                                 </div>
                               </td>
-                              <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-sm text-blue-900 font-bold">{v.folio || '—'}</td>
-                              <td className="px-3 lg:px-6 py-4 whitespace-nowrap">
-                                <span className="px-2 lg:px-3 py-1 text-xs lg:text-sm font-semibold rounded-xl bg-blue-200 text-blue-800 shadow">
+                              <td className="px-3 lg:px-6 py-2 whitespace-nowrap text-sm text-blue-900 font-bold">{v.folio || '—'}</td>
+                              <td className="px-3 lg:px-6 py-2 whitespace-nowrap">
+                                <span className="px-2 py-1 text-xs font-semibold rounded-lg bg-blue-200 text-blue-800 shadow">
                                   {v.departamento ? v.departamento.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : '-'}
                                 </span>
                               </td>
-                              <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-sm text-blue-800 font-bold">
+                              <td className="px-3 lg:px-6 py-2 whitespace-nowrap text-sm text-blue-800 font-bold">
                                 {Number(v.monto).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                               </td>
-                              <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-xs text-blue-900 max-w-32 truncate" title={v.concepto || '—'}>
+                              <td className="px-3 lg:px-6 py-2 whitespace-nowrap text-xs text-blue-900 max-w-32 truncate" title={v.concepto || '—'}>
                                 {v.concepto || '—'}
                               </td>
-                              <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-xs text-blue-900">
+                              <td className="px-3 lg:px-6 py-2 whitespace-nowrap text-xs text-blue-900">
                                 {v.fecha_limite_pago ? new Date(v.fecha_limite_pago).toLocaleDateString('es-MX', { 
                                   year: 'numeric', 
                                   month: 'short', 
                                   day: 'numeric' 
                                 }) : '-'}
                               </td>
-                              <td className="px-3 lg:px-6 py-4 whitespace-nowrap text-center align-middle">
-                                <div className="flex flex-col items-center gap-2 w-full">
+                              <td className="px-2 lg:px-4 py-2 whitespace-nowrap text-center">
+                                <div className="flex flex-col gap-1 items-center">
                                   <button
-                                    className="w-[120px] lg:w-[150px] py-2 text-xs font-bold bg-sky-600 text-white rounded-lg shadow hover:bg-sky-700 transition focus:outline-none focus:ring-2 focus:ring-sky-400 tracking-wide"
+                                    className="w-[100px] lg:w-[120px] py-1 text-xs font-bold bg-sky-600 text-white rounded-md shadow hover:bg-sky-700 transition"
                                     onClick={() => { setViaticoDetalle(v); setModalViaticoOpen(true); }}
                                   >
                                     Ver
                                   </button>
                                   {hasComprobante ? (
                                     <button
-                                      className="w-[120px] lg:w-[150px] py-2 text-xs font-bold bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400 tracking-wide"
+                                      className="w-[100px] lg:w-[120px] py-1 text-xs font-bold bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition"
                                       onClick={() => setVerComprobante({ open: true, viaticoId: v.id_viatico })}
                                     >
-                                      Ver comprobante
+                                      Ver comp.
                                     </button>
                                   ) : (
                                     <button
-                                      className="w-[120px] lg:w-[150px] py-2 text-xs font-bold bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition focus:outline-none focus:ring-2 focus:ring-green-400 tracking-wide animate-pulse"
+                                      className="w-[100px] lg:w-[120px] py-1 text-xs font-bold bg-green-600 text-white rounded-md shadow hover:bg-green-700 transition animate-pulse"
                                       onClick={() => handleOpenModal(v.id_viatico)}
                                     >
-                                      Subir Comprobante
+                                      Subir
                                     </button>
                                   )}
                                 </div>
