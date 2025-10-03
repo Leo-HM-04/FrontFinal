@@ -141,6 +141,7 @@ export class SolicitudesN09TokaService {
   static convertirDatosPlantilla(datosPlantilla: Record<string, unknown>): Partial<SolicitudN09TokaData> {
     return {
       asunto: (typeof datosPlantilla.asunto === 'string' ? datosPlantilla.asunto : undefined) as 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT' | undefined,
+      proveedor: typeof datosPlantilla.proveedor === 'string' ? datosPlantilla.proveedor : undefined,
       cliente: typeof datosPlantilla.cliente === 'string' ? datosPlantilla.cliente : undefined,
       beneficiario: typeof datosPlantilla.beneficiario === 'string' ? datosPlantilla.beneficiario : undefined,
       tipo_cuenta_clabe: (typeof datosPlantilla.tipo_cuenta === 'string' ? datosPlantilla.tipo_cuenta : 'CLABE') as 'CLABE' | 'CUENTA',
@@ -155,6 +156,7 @@ export class SolicitudesN09TokaService {
   static convertirADatosPlantilla(datosApi: SolicitudN09TokaData): Record<string, unknown> {
     return {
       asunto: datosApi.asunto,
+      proveedor: datosApi.proveedor,
       cliente: datosApi.cliente,
       beneficiario: datosApi.beneficiario,
       tipo_cuenta: datosApi.tipo_cuenta_clabe,

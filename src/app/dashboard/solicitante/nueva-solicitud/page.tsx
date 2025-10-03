@@ -519,6 +519,7 @@ export default function NuevaSolicitudPage() {
           // Crear datos finales para N09/TOKA (SIN crear solicitud duplicada primero)
           const datosParaCrear = {
             asunto: (datosN09Toka.asunto || 'TOKA_FONDEO_AVIT') as 'PAGO_PROVEEDOR_N09' | 'TOKA_FONDEO_AVIT',
+            proveedor: datosN09Toka.proveedor || datosN09Toka.beneficiario || solicitudPlantillaData.nombre_persona || solicitudPlantillaData.empresa_a_pagar || 'Sin especificar',
             cliente: datosN09Toka.cliente || '',
             beneficiario: datosN09Toka.beneficiario || solicitudPlantillaData.nombre_persona || '',
             tipo_cuenta_clabe: (datosN09Toka.tipo_cuenta_clabe || 'CLABE') as 'CLABE' | 'CUENTA',
