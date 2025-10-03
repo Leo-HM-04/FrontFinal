@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { PlantillaSolicitud } from '@/types/plantillas';
-import { FileText } from 'lucide-react';
+import { FileText, Clock, Wrench } from 'lucide-react';
 
 interface SelectorPlantillasProps {
   plantillas: PlantillaSolicitud[];
+  plantillasInactivas?: PlantillaSolicitud[];
   plantillaSeleccionada: PlantillaSolicitud | null;
   onSeleccionar: (plantilla: PlantillaSolicitud | null) => void;
   className?: string;
@@ -11,6 +12,7 @@ interface SelectorPlantillasProps {
 
 export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
   plantillas,
+  plantillasInactivas = [],
   plantillaSeleccionada,
   onSeleccionar,
   className = ''
@@ -179,6 +181,61 @@ export const SelectorPlantillas: React.FC<SelectorPlantillasProps> = ({
             </div>
           </div>
         ))}
+
+        {/* Plantillas en desarrollo (desactivadas) */}
+        {plantillasInactivas.length > 0 && (
+          <>
+            {plantillasInactivas.map((plantilla) => (
+              <div
+                key={`inactive-${plantilla.id}`}
+                className="relative rounded-lg border border-orange-200 bg-gradient-to-br from-orange-50 to-yellow-50 opacity-75 cursor-not-allowed"
+              >
+                <div className="p-2 sm:p-3">
+                  <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-100 rounded flex items-center justify-center">
+                      <Wrench className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-orange-800 text-xs sm:text-sm leading-tight truncate">
+                        {plantilla.nombre}
+                      </h4>
+                      <p className="text-xs text-orange-600 truncate">
+                        En desarrollo
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-orange-700 mb-1 sm:mb-2 line-clamp-2">
+                    {plantilla.descripcion}
+                  </p>
+                  <div className="flex items-center gap-1 text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-md">
+                    <Clock className="w-3 h-3" />
+                    <span className="font-medium">Próximamente disponible</span>
+                  </div>
+                  
+                  {/* Icono de desarrollo */}
+                  <div className="absolute top-1 sm:top-2 right-1 sm:right-2">
+                    <div className="w-3 h-3 sm:w-4 sm:h-4 bg-orange-500 rounded-full flex items-center justify-center">
+                      <Wrench className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Overlay con mensaje profesional */}
+                <div className="absolute inset-0 bg-white/60 rounded-lg flex items-center justify-center">
+                  <div className="text-center p-2">
+                    <Wrench className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 mx-auto mb-1" />
+                    <p className="text-xs sm:text-sm font-semibold text-orange-800">
+                      En Desarrollo
+                    </p>
+                    <p className="text-xs text-orange-700">
+                      Estará disponible pronto
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
       </div>
           </div>
         </div>

@@ -21,7 +21,7 @@ import { formatDateForAPI } from '@/utils/dateUtils';
 import { SelectorPlantillas } from '@/components/plantillas/SelectorPlantillas';
 import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
-import { obtenerPlantillasActivas } from '@/data/plantillas';
+import { obtenerPlantillasActivas, obtenerPlantillasInactivas } from '@/data/plantillas';
 
 // Reducer para manejar el formulario
 type FormState = {
@@ -145,6 +145,7 @@ export default function NuevaSolicitudPage() {
 
   // Obtener plantillas activas
   const plantillasActivas = obtenerPlantillasActivas();
+  const plantillasInactivas = obtenerPlantillasInactivas();
 
   // Estado para controlar si se usa plantilla o formulario estándar
   const usandoPlantilla = estadoPlantilla.plantillaSeleccionada !== null;
@@ -945,6 +946,7 @@ export default function NuevaSolicitudPage() {
           <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-8 mb-8 w-full">
             <SelectorPlantillas
               plantillas={plantillasActivas}
+              plantillasInactivas={plantillasInactivas}
               plantillaSeleccionada={estadoPlantilla.plantillaSeleccionada}
               onSeleccionar={seleccionarPlantilla}
             />
