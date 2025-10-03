@@ -501,29 +501,29 @@ export default function ViaticosPagadorPage() {
           {/* Panel de filtros */}
           {showFilters && (
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-6 animate-in slide-in-from-top duration-300">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Filter className="w-5 h-5" />
+              <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
+                <Filter className="w-5 h-5 text-black" />
                 Filtros de búsqueda
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">Usuario</label>
+                  <label className="block text-sm font-bold text-black mb-2">Usuario</label>
                   <input
                     type="text"
                     value={filters.usuario}
                     onChange={(e) => setFilters(prev => ({ ...prev, usuario: e.target.value }))}
                     placeholder="Buscar por nombre de usuario..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">Estado</label>
+                  <label className="block text-sm font-bold text-black mb-2">Estado</label>
                   <select
                     value={filters.estado}
                     onChange={(e) => setFilters(prev => ({ ...prev, estado: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                   >
                     <option value="">Todos los estados</option>
                     <option value="autorizada">Autorizada</option>
@@ -534,13 +534,13 @@ export default function ViaticosPagadorPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">Banco</label>
+                  <label className="block text-sm font-bold text-black mb-2">Banco</label>
                   <input
                     type="text"
                     value={filters.banco}
                     onChange={(e) => setFilters(prev => ({ ...prev, banco: e.target.value }))}
                     placeholder="Filtrar por banco..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                   />
                 </div>
               </div>
@@ -554,7 +554,7 @@ export default function ViaticosPagadorPage() {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Búsqueda general (folio, usuario, beneficiario, departamento)..."
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                     />
                   </div>
                 </div>
