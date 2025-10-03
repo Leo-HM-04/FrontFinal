@@ -107,6 +107,6 @@ export const obtenerBancoPorNombre = (nombre: string): Banco | undefined => {
 export const obtenerOpcionesBancos = () => {
   return bancosMexico.map(banco => ({
     valor: banco.codigo,
-    etiqueta: `${banco.nombreCorto} - ${banco.nombre}`
+    etiqueta: banco.nombreCorto
   }));
 };
