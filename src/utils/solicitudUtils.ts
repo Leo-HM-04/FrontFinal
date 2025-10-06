@@ -98,3 +98,60 @@ export async function updateSolicitudEstado(
     throw new Error('NOT_N09_TOKA'); // Indicador para usar el método normal
   }
 }
+
+/**
+ * Marca una solicitud N09/TOKA como pagada usando el endpoint correcto
+ * @param id - ID de la solicitud
+ * @param solicitud - Datos de la solicitud
+ * @returns Promise con el resultado
+ */
+export async function marcarN09TokaComoPagada(
+  id: number, 
+  solicitud: Solicitud
+): Promise<{ success: boolean; message?: string; data?: unknown }> {
+  // Debug de autenticación
+  const { getAuthToken } = await import('@/utils/auth');
+  const token = getAuthToken();
+  console.log('🔍 DEBUG AUTH (PAGO) - Token disponible:', !!token);
+  console.log('🔍 DEBUG AUTH (PAGO) - Token preview:', token ? token.substring(0, 30) + '...' : 'null');
+  
+  const isN09Toka = isN09TokaSolicitud(solicitud);
+  
+  if (!isN09Toka) {
+    throw new Error('NOT_N09_TOKA'); // Indicador para usar el método normal
+  }
+
+  // Verificar que el token existe
+  if (!token) {
+    console.error('❌ No hay token de autenticación disponible para pago');
+    throw new Error('No hay token de autenticación. Por favor, inicia sesión nuevamente.');
+  }
+  
+  console.log(`💰 Marcando solicitud N09/TOKA ${id} como pagada`);
+  
+  try {
+    // Para N09/TOKA usamos el endpoint de actualizar estado con estado "pagada"
+    console.log(`📡 Enviando PATCH a /solicitudes-n09-toka/${id}/estado con estado: pagada`);
+    
+    const response = await api.patch(`/solicitudes-n09-toka/${id}/estado`, {
+      estado: 'pagada',
+      comentarios: 'Solicitud marcada como pagada'
+    });
+    
+    const result = response.data;
+    console.log(`✅ Solicitud N09/TOKA ${id} marcada como pagada exitosamente`);
+    return { success: true, data: result };
+  } catch (error: unknown) {
+    console.error('❌ Error marcando solicitud N09/TOKA como pagada:', error);
+    
+    // Type guard para errores de axios
+    const axiosError = error as { response?: { data?: { message?: string }; status?: number }; message?: string };
+    console.error('❌ Error response:', axiosError?.response?.data);
+    console.error('❌ Error status:', axiosError?.response?.status);
+    
+    return { 
+      success: false, 
+      message: axiosError?.response?.data?.message || axiosError?.message || 'Error desconocido'
+    };
+  }
+}

@@ -152,7 +152,7 @@ export default function PagosPendientesPage() {
     setProcesandoPago(pagoAConfirmar.id_solicitud);
     setShowConfirmModal(false);
     try {
-      const res = await marcarPagoComoPagado(pagoAConfirmar.id_solicitud);
+      const res = await marcarPagoComoPagado(pagoAConfirmar.id_solicitud, pagoAConfirmar);
       if (res && res.error) {
         toast.error(res.error || 'No se pudo marcar como pagada.');
       } else {
