@@ -7,7 +7,7 @@ import { Solicitud } from '@/types';
  */
 export function isN09TokaSolicitud(solicitud: Solicitud): boolean {
   // Método 1: Verificar por tipo_plantilla
-  if ((solicitud as any).tipo_plantilla === 'N09_TOKA') {
+  if ((solicitud as Solicitud & { tipo_plantilla?: string }).tipo_plantilla === 'N09_TOKA') {
     return true;
   }
   
@@ -41,7 +41,7 @@ export async function updateSolicitudEstado(
   id: number, 
   solicitud: Solicitud, 
   estadoData: { estado: string; comentario_aprobador?: string }
-): Promise<any> {
+): Promise<{ success: boolean; message?: string; data?: unknown }> {
   const isN09Toka = isN09TokaSolicitud(solicitud);
   
   if (isN09Toka) {

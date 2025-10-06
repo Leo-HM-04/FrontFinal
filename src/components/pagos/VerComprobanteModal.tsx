@@ -1,12 +1,15 @@
 import React from 'react';
 import {
-  Banknote,
+  Building,
+  Calendar,
+  CreditCard,
+  DollarSign,
+  Download,
   FileText,
   FileBadge,
   X,
-  ExternalLink,
 } from 'lucide-react';
-import Image from 'next/image';
+// import Image from 'next/image';
 
 interface Pago {
   id_solicitud: number;

@@ -22,17 +22,17 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
   className = '',
   onGuardar
 }) => {
-  const [guardando, setGuardando] = React.useState(false);
+  // const [guardando, setGuardando] = useState(false);
 
-  const handleGuardar = async () => {
-    if (typeof onGuardar === 'function') {
-      setGuardando(true);
-      await Promise.resolve(onGuardar());
-      setGuardando(false);
-    } else {
-      alert('Función de guardar no implementada');
-    }
-  };
+  // const handleGuardar = async () => {
+  //   if (typeof onGuardar === 'function') {
+  //     setGuardando(true);
+  //     await Promise.resolve(onGuardar());
+  //     setGuardando(false);
+  //   } else {
+  //     alert('Función de guardar no implementada');
+  //   }
+  // };
 
   const renderSeccion = (seccion: SeccionPlantilla) => {
     const camposVisiblesEnSeccion = seccion.campos.filter(campo => 

@@ -14,13 +14,13 @@ export default function EditarN09TokaPage() {
   const solicitudId = Number(params?.id ?? 0);
   const { estado, seleccionarPlantilla, actualizarCampo, ocultarCampo } = usePlantillaSolicitud();
 
-  const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
+  // const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
 
   useEffect(() => {
     async function fetchSolicitud() {
       try {
         const s = await SolicitudesService.getById(solicitudId);
-        setSolicitud(s);
+        // setSolicitud(s);
         // Detectar plantilla N09/TOKA
         const plantillaN09Toka = plantillasDisponibles.find(p => p.id === 'tarjetas-n09-toka');
         if (plantillaN09Toka) {
@@ -45,7 +45,7 @@ export default function EditarN09TokaPage() {
       }
     }
     if (solicitudId) fetchSolicitud();
-  }, [solicitudId]);
+  }, [solicitudId, actualizarCampo, ocultarCampo, seleccionarPlantilla]);
 
   // Handler para guardar cambios
   const handleGuardar = async () => {

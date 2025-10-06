@@ -28,7 +28,6 @@ import {
   Search,
   Download,
   Filter,
-  Edit,
   Trash2,
   AlertTriangle,
 } from 'lucide-react';

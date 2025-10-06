@@ -16,25 +16,25 @@ export default function EditarTukashPage() {
   const plantillaTukash = plantillasDisponibles.find(p => p.id === 'tarjetas-tukash');
   const plantillaHook = usePlantillaSolicitud();
   const { estado, seleccionarPlantilla, actualizarCampo } = plantillaHook;
-  const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
+  // const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
 
   useEffect(() => {
     async function fetchSolicitud() {
       try {
         const s = await SolicitudesService.getById(solicitudId);
-        setSolicitud(s);
+        // setSolicitud(s);
         let datosTukash: Record<string, unknown> = {};
         if (s.plantilla_datos) {
           try {
             datosTukash = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
-          } catch (err) {
+          } catch (_err) {
             // Si hay error, datosTukash queda vacío
           }
         }
         if (plantillaTukash) {
           seleccionarPlantilla(plantillaTukash, datosTukash);
         }
-      } catch (err) {
+      } catch (_err) {
         // Si hay error, no autocompleta
       }
     }
@@ -51,9 +51,9 @@ export default function EditarTukashPage() {
       });
       alert('Cambios guardados correctamente');
       router.push('/dashboard/solicitante/mis-solicitudes');
-    } catch (err) {
+    } catch (_err) {
       alert('Error al guardar los cambios');
-      console.error('Error al guardar solicitud TUKASH:', err);
+      console.error('Error al guardar solicitud TUKASH:', _err);
     }
   };
 

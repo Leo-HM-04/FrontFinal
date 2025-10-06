@@ -14,13 +14,13 @@ export default function EditarSuaFrenshetsiPage() {
   const solicitudId = Number(params?.id ?? 0);
   const { estado, seleccionarPlantilla, actualizarCampo } = usePlantillaSolicitud();
 
-  const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
+  // const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
 
   useEffect(() => {
     async function fetchSolicitud() {
       try {
         const s = await SolicitudesService.getById(solicitudId);
-        setSolicitud(s);
+        // setSolicitud(s);
         // Detectar plantilla SUA FRENSHETSI
         const plantilla = plantillasDisponibles.find(p => p.id === 'pago-sua-frenshetsi');
         if (plantilla) {
@@ -39,7 +39,7 @@ export default function EditarSuaFrenshetsiPage() {
       }
     }
     if (solicitudId) fetchSolicitud();
-  }, [solicitudId]);
+  }, [solicitudId, seleccionarPlantilla]);
 
   // Handler para guardar cambios
   const handleGuardar = async () => {
