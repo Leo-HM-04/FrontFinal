@@ -350,16 +350,21 @@ export default function SolicitudesPendientesPage() {
 
   const getDepartmentColorClass = (departamento: string) => {
     const departamentosColores = {
-      'Finanzas': 'px-3 py-1 text-sm font-medium rounded-lg bg-blue-100 text-blue-800',
-      'Recursos Humanos': 'px-3 py-1 text-sm font-medium rounded-lg bg-purple-100 text-purple-800',
-      'Marketing': 'px-3 py-1 text-sm font-medium rounded-lg bg-green-100 text-green-800',
-      'Ventas': 'px-3 py-1 text-sm font-medium rounded-lg bg-orange-100 text-orange-800',
-      'Operaciones': 'px-3 py-1 text-sm font-medium rounded-lg bg-teal-100 text-teal-800',
-      'Tecnología': 'px-3 py-1 text-sm font-medium rounded-lg bg-indigo-100 text-indigo-800',
-      'Administración': 'px-3 py-1 text-sm font-medium rounded-lg bg-pink-100 text-pink-800',
-      'Logística': 'px-3 py-1 text-sm font-medium rounded-lg bg-amber-100 text-amber-800',
-      'Proyectos': 'px-3 py-1 text-sm font-medium rounded-lg bg-cyan-100 text-cyan-800',
-      'Legal': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800'
+      'contabilidad': 'px-3 py-1 text-sm font-medium rounded-lg bg-blue-100 text-blue-800',
+      'facturacion': 'px-3 py-1 text-sm font-medium rounded-lg bg-green-100 text-green-800',
+      'cobranza': 'px-3 py-1 text-sm font-medium rounded-lg bg-orange-100 text-orange-800',
+      'vinculacion': 'px-3 py-1 text-sm font-medium rounded-lg bg-purple-100 text-purple-800',
+      'administracion': 'px-3 py-1 text-sm font-medium rounded-lg bg-pink-100 text-pink-800',
+      'ti': 'px-3 py-1 text-sm font-medium rounded-lg bg-indigo-100 text-indigo-800',
+      'automatizaciones': 'px-3 py-1 text-sm font-medium rounded-lg bg-teal-100 text-teal-800',
+      'comercial': 'px-3 py-1 text-sm font-medium rounded-lg bg-amber-100 text-amber-800',
+      'atencion a clientes': 'px-3 py-1 text-sm font-medium rounded-lg bg-cyan-100 text-cyan-800',
+      'tesoreria': 'px-3 py-1 text-sm font-medium rounded-lg bg-emerald-100 text-emerald-800',
+      'nomina': 'px-3 py-1 text-sm font-medium rounded-lg bg-violet-100 text-violet-800',
+      'atraccion de talento': 'px-3 py-1 text-sm font-medium rounded-lg bg-rose-100 text-rose-800',
+      'asuntos corporativos': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800',
+      'seguridad': 'px-3 py-1 text-sm font-medium rounded-lg bg-yellow-100 text-yellow-800',
+      'juridico': 'px-3 py-1 text-sm font-medium rounded-lg bg-lime-100 text-lime-800'
     };
     
     return departamentosColores[departamento as keyof typeof departamentosColores] || 'px-3 py-1 text-sm font-medium rounded-lg bg-gray-100 text-gray-800';

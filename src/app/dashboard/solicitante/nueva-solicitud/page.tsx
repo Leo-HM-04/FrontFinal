@@ -230,7 +230,9 @@ export default function NuevaSolicitudPage() {
     { value: 'nomina', label: 'Nómina' },
     { value: 'atraccion de talento', label: 'Atracción de Talento' },
     { value: 'direccion general', label: 'Dirección General' },
-    { value: 'asuntos corporativos', label: 'Asuntos Corporativos' }
+    { value: 'asuntos corporativos', label: 'Asuntos Corporativos' },
+    { value: 'seguridad', label: 'Seguridad' },
+    { value: 'juridico', label: 'Jurídico' }
   ];
 
   const tipoPagoOptions = [

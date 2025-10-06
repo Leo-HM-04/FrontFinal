@@ -96,16 +96,21 @@ export default function SolicitudDetailPage() {
 
   const getDepartmentColorClass = (departamento: string) => {
     const departamentosColores = {
-      'Finanzas': 'bg-blue-100 text-blue-800 border-blue-200',
-      'Recursos Humanos': 'bg-purple-100 text-purple-800 border-purple-200',
-      'Marketing': 'bg-green-100 text-green-800 border-green-200',
-      'Ventas': 'bg-orange-100 text-orange-800 border-orange-200',
-      'Operaciones': 'bg-teal-100 text-teal-800 border-teal-200',
-      'Tecnología': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-      'Administración': 'bg-pink-100 text-pink-800 border-pink-200',
-      'Logística': 'bg-amber-100 text-amber-800 border-amber-200',
-      'Proyectos': 'bg-cyan-100 text-cyan-800 border-cyan-200',
-      'Legal': 'bg-red-100 text-red-800 border-red-200'
+      'contabilidad': 'bg-blue-100 text-blue-800 border-blue-200',
+      'facturacion': 'bg-green-100 text-green-800 border-green-200',
+      'cobranza': 'bg-orange-100 text-orange-800 border-orange-200',
+      'vinculacion': 'bg-purple-100 text-purple-800 border-purple-200',
+      'administracion': 'bg-pink-100 text-pink-800 border-pink-200',
+      'ti': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      'automatizaciones': 'bg-teal-100 text-teal-800 border-teal-200',
+      'comercial': 'bg-amber-100 text-amber-800 border-amber-200',
+      'atencion a clientes': 'bg-cyan-100 text-cyan-800 border-cyan-200',
+      'tesoreria': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      'nomina': 'bg-violet-100 text-violet-800 border-violet-200',
+      'atraccion de talento': 'bg-rose-100 text-rose-800 border-rose-200',
+      'asuntos corporativos': 'bg-red-100 text-red-800 border-red-200',
+      'seguridad': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'juridico': 'bg-lime-100 text-lime-800 border-lime-200'
     };
     
     return departamentosColores[departamento as keyof typeof departamentosColores] || 'bg-gray-100 text-gray-800 border-gray-200';

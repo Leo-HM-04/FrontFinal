@@ -75,7 +75,9 @@ export function AdvancedFilters({
     { value: 'nomina', label: 'Nómina' },
     { value: 'tesoreria', label: 'Tesorería' },
     { value: 'ti', label: 'TI' },
-    { value: 'vinculacion', label: 'Vinculación' }
+    { value: 'vinculacion', label: 'Vinculación' },
+    { value: 'seguridad', label: 'Seguridad' },
+    { value: 'juridico', label: 'Jurídico' }
   ];
 
 

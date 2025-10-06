@@ -32,7 +32,7 @@ const tipoPagoOptions = [
   { value: 'Fiscales legales y corporativos', label: 'Fiscales legales y corporativos' }
 ];
 const departamentos = [
-  'contabilidad', 'facturacion', 'cobranza', 'vinculacion',
+  'contabilidad', 'facturacion', 'cobranza', 'vinculacion', 'seguridad', 'juridico',
   'administracion', 'ti', 'automatizaciones', 'comercial',
   'atencion a clientes', 'tesoreria', 'nomina', 'atraccion de talento',
   'direccion general'

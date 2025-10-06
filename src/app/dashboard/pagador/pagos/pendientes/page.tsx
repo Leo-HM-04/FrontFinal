@@ -189,7 +189,9 @@ export default function PagosPendientesPage() {
       'Nómina': 'px-3 py-1 text-sm font-medium rounded-lg bg-violet-100 text-violet-800',
       'Atracción de Talento': 'px-3 py-1 text-sm font-medium rounded-lg bg-rose-100 text-rose-800',
       'Dirección General': 'px-3 py-1 text-sm font-medium rounded-lg bg-slate-100 text-slate-800',
-      'Asuntos Corporativos': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800'
+      'Asuntos Corporativos': 'px-3 py-1 text-sm font-medium rounded-lg bg-red-100 text-red-800',
+      'Seguridad': 'px-3 py-1 text-sm font-medium rounded-lg bg-yellow-100 text-yellow-800',
+      'Jurídico': 'px-3 py-1 text-sm font-medium rounded-lg bg-lime-100 text-lime-800'
     };
     return departamentosColores[departamento] || 'px-3 py-1 text-sm font-medium rounded-lg bg-gray-100 text-gray-800';
   };
@@ -524,6 +526,8 @@ export default function PagosPendientesPage() {
                   <option value="Nómina">Nómina</option>
                   <option value="Atracción de Talento">Atracción de Talento</option>
                   <option value="Dirección General">Dirección General</option>
+                  <option value="Seguridad">Seguridad</option>
+                  <option value="Jurídico">Jurídico</option>
                   <option value="Asuntos Corporativos">Asuntos Corporativos</option>
                 </select>
               </div>
