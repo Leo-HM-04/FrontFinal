@@ -1,4 +1,6 @@
 import { api } from '../lib/api';
+import { isN09TokaSolicitud, marcarN09TokaComoPagada } from '@/utils/solicitudUtils';
+import { Solicitud } from '@/types';
 
 export const getPagosPendientes = async () => {
   try {
@@ -23,16 +25,28 @@ export const getPagosPendientes = async () => {
   }
 };
 
-export const marcarPagoComoPagado = async (id_solicitud: number) => {
+export const marcarPagoComoPagado = async (id_solicitud: number, solicitud?: Solicitud) => {
   try {
     console.log(`💰 Marcando pago como pagado - ID: ${id_solicitud}`);
     
-    // Para N09/TOKA podríamos necesitar endpoint específico en el futuro
-    // Por ahora intentamos con el endpoint unificado
-    const res = await api.put(`/solicitudes/${id_solicitud}/pagar`);
-    
-    console.log('✅ Pago marcado como pagado exitosamente');
-    return res.data;
+    // Si tenemos datos de la solicitud, verificamos si es N09/TOKA
+    if (solicitud && isN09TokaSolicitud(solicitud)) {
+      console.log('🔄 Detectada solicitud N09/TOKA, usando endpoint específico');
+      const result = await marcarN09TokaComoPagada(id_solicitud, solicitud);
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Error marcando N09/TOKA como pagada');
+      }
+      
+      return result.data;
+    } else {
+      // Solicitud normal
+      console.log('🔄 Solicitud normal, usando endpoint estándar');
+      const res = await api.put(`/solicitudes/${id_solicitud}/pagar`);
+      
+      console.log('✅ Pago marcado como pagado exitosamente');
+      return res.data;
+    }
   } catch (error) {
     console.error('❌ Error marcando pago como pagado:', error);
     throw error;
