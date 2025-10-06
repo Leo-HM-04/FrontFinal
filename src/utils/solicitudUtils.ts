@@ -1,4 +1,5 @@
 import { Solicitud } from '@/types';
+import api from '@/lib/api';
 
 /**
  * Detecta si una solicitud es de tipo N09/TOKA
@@ -42,36 +43,56 @@ export async function updateSolicitudEstado(
   solicitud: Solicitud, 
   estadoData: { estado: string; comentario_aprobador?: string }
 ): Promise<{ success: boolean; message?: string; data?: unknown }> {
+  // Debug de autenticación
+  const { getAuthToken } = await import('@/utils/auth');
+  const token = getAuthToken();
+  console.log('🔍 DEBUG AUTH - Token disponible:', !!token);
+  console.log('🔍 DEBUG AUTH - Token preview:', token ? token.substring(0, 30) + '...' : 'null');
+  
   const isN09Toka = isN09TokaSolicitud(solicitud);
   
   if (isN09Toka) {
     // Usar endpoint específico para N09/TOKA
     console.log(`🔄 Actualizando estado solicitud N09/TOKA ID: ${id} a ${estadoData.estado}`);
-    const token = localStorage.getItem('token');
     
-    // Mapear estado de solicitudes normales a N09/TOKA
-    const estadoN09 = estadoData.estado === 'autorizada' ? 'aprobada' : estadoData.estado;
-    
-    const response = await fetch(`/api/solicitudes-n09-toka/${id}/estado`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` })
-      },
-      body: JSON.stringify({
-        estado: estadoN09,
-        comentarios: estadoData.comentario_aprobador || `Solicitud ${estadoN09}`
-      })
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Error al actualizar estado de solicitud N09/TOKA`);
+    // Verificar que el token existe (el interceptor de api ya lo maneja automáticamente)
+    if (!token) {
+      console.error('❌ No hay token de autenticación disponible');
+      throw new Error('No hay token de autenticación. Por favor, inicia sesión nuevamente.');
     }
     
-    const result = await response.json();
-    console.log(`✅ Solicitud N09/TOKA ${id} actualizada a ${estadoN09} exitosamente`);
-    return result;
+    console.log(`🔑 Token encontrado, longitud: ${token.length}`);
+    
+    try {
+      // Mapear estado de solicitudes normales a N09/TOKA
+      const estadoN09 = estadoData.estado === 'autorizada' ? 'aprobada' : estadoData.estado;
+      
+      console.log(`📡 Enviando PATCH a /solicitudes-n09-toka/${id}/estado con:`, {
+        estado: estadoN09,
+        comentarios: estadoData.comentario_aprobador || `Solicitud ${estadoN09}`
+      });
+      
+      const response = await api.patch(`/solicitudes-n09-toka/${id}/estado`, {
+        estado: estadoN09,
+        comentarios: estadoData.comentario_aprobador || `Solicitud ${estadoN09}`
+      });
+      
+      const result = response.data;
+      console.log(`✅ Solicitud N09/TOKA ${id} actualizada a ${estadoN09} exitosamente`);
+      return { success: true, data: result };
+    } catch (error: unknown) {
+      console.error('❌ Error actualizando solicitud N09/TOKA:', error);
+      
+      // Type guard para errores de axios
+      const axiosError = error as { response?: { data?: { message?: string }; status?: number }; message?: string };
+      console.error('❌ Error response:', axiosError?.response?.data);
+      console.error('❌ Error status:', axiosError?.response?.status);
+      
+      return { 
+        success: false, 
+        message: axiosError?.response?.data?.message || axiosError?.message || 'Error desconocido'
+      };
+    }
   } else {
     // Usar endpoint normal para solicitudes regulares - esto se manejará externamente
     throw new Error('NOT_N09_TOKA'); // Indicador para usar el método normal

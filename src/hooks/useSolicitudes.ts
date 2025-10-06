@@ -50,10 +50,14 @@ export function useSolicitudes() {
       
       if (isN09TokaSolicitud(solicitud)) {
         // Usar función utilitaria para N09/TOKA
-        await updateSolicitudEstado(id, solicitud, {
+        const result = await updateSolicitudEstado(id, solicitud, {
           estado: estadoData.estado,
           comentario_aprobador: estadoData.comentario_aprobador
         });
+        
+        if (!result.success) {
+          throw new Error(result.message || 'Error al actualizar solicitud N09/TOKA');
+        }
         
         // Mapear estado para actualización local
         const estadoN09 = estadoData.estado === 'autorizada' ? 'aprobada' : estadoData.estado;
