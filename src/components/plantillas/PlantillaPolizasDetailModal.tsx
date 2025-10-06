@@ -51,6 +51,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
   const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
   const [loadingComprobantes, setLoadingComprobantes] = useState(false);
   const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
+  const [comprobantePreview, setComprobantePreview] = useState<Comprobante | null>(null);
   // Cargar comprobantes si la solicitud está pagada
   const fetchComprobantes = useCallback(async () => {
     setLoadingComprobantes(true);
@@ -147,7 +148,8 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
 
   // Renderiza la previsualización del archivo seleccionado
   const renderPreview = () => {
-    if (!archivoPreview) {
+    const previewItem = comprobantePreview || archivoPreview;
+    if (!previewItem) {
       return (
         <div className="flex flex-col items-center justify-center h-full text-blue-400">
           <FileText className="w-16 h-16 mb-4" />
@@ -155,12 +157,17 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
         </div>
       );
     }
-    const url = archivoPreview.archivo_url;
+
+    const url = 'archivo_url' in previewItem ? previewItem.archivo_url : previewItem.ruta_archivo;
+    const fileName = 'archivo_url' in previewItem ? 
+      url.split('/').pop() || 'archivo' : 
+      previewItem.nombre_archivo || url.split('/').pop() || 'comprobante';
+
     if (url.match(/\.(pdf)$/i)) {
       return (
         <iframe
           src={url}
-          title="Previsualización PDF"
+          title={`Previsualización de ${fileName}`}
           className="w-full h-64 md:h-96 rounded-xl border border-blue-200 bg-white"
         />
       );
@@ -168,7 +175,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
     if (url.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i)) {
       return (
         <div className="relative w-full h-64 md:h-96 rounded-xl border border-blue-200 bg-white overflow-hidden">
-          <Image src={url} alt="Previsualización" fill className="object-contain" />
+          <Image src={url} alt={`Previsualización de ${fileName}`} fill className="object-contain" />
         </div>
       );
     }
@@ -269,10 +276,13 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
               <div className="aspect-[4/3] bg-white rounded-lg shadow-inner border border-blue-100">
                 {renderPreview()}
               </div>
-              {archivoPreview && (
+              {(archivoPreview || comprobantePreview) && (
                 <div className="mt-4">
                   <button
-                    onClick={() => window.open(archivoPreview.archivo_url, '_blank')}
+                    onClick={() => window.open(
+                      comprobantePreview ? comprobantePreview.ruta_archivo : archivoPreview?.archivo_url,
+                      '_blank'
+                    )}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -291,7 +301,10 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                   return (
                     <button
                       key={archivo.id || index}
-                      onClick={() => setArchivoPreview(archivo)}
+                      onClick={() => {
+                        setArchivoPreview(archivo);
+                        setComprobantePreview(null);
+                      }}
                       className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
                         archivoPreview?.id === archivo.id 
                           ? 'bg-blue-50 border border-blue-200 text-blue-700' 
@@ -339,10 +352,17 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                           <span className="text-sm font-medium text-gray-700 truncate">{fileName}</span>
                         </div>
                         <button
-                          onClick={() => window.open(comprobante.ruta_archivo, '_blank')}
-                          className="flex items-center gap-1 px-2 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors duration-200"
+                          onClick={() => {
+                            setComprobantePreview(comprobante);
+                            setArchivoPreview(null);
+                          }}
+                          className={`flex items-center gap-1 px-2 py-1 text-sm rounded transition-colors duration-200 ${
+                            comprobantePreview?.id_comprobante === comprobante.id_comprobante
+                              ? 'bg-blue-50 text-blue-700'
+                              : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
+                          }`}
                         >
-                          <ExternalLink className="w-4 h-4" />
+                          <FileText className="w-4 h-4" />
                           Ver
                         </button>
                       </div>
