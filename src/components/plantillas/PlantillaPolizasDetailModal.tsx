@@ -145,8 +145,6 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
 
   if (!isOpen) return null;
 
-  if (!isOpen) return null;
-
   // Renderiza la previsualización del archivo seleccionado
   const renderPreview = () => {
     if (!archivoPreview) {
@@ -191,9 +189,9 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
         role="button"
         tabIndex={-1}
         aria-label="Cerrar modal"
-      />
+      ></div>
       {/* Modal container: vertical layout */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[96vh] flex flex-col border border-blue-100">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100">
         {/* Botón de cerrar */}
         <button
           onClick={onClose}
@@ -202,12 +200,14 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
         >
           <X className="w-6 h-6" />
         </button>
-        <div className="flex flex-col gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
-          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
-            <div className="bg-white/20 p-3 rounded-lg">
-              <Shield className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex-1">
+        <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
+          {/* Columna izquierda: información principal */}
+          <div className="flex-1 min-w-0">
+            <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
+              <div className="bg-white/20 p-3 rounded-lg">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex-1">
               <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                 <span>{titulo}</span>
               </h2>
@@ -222,7 +222,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
               <FileText className="w-4 h-4" />
               {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
             </span>
-          </header>
+            </header>
           {/* Información Principal */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
@@ -367,7 +367,43 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
             </div>
           </div>
         </div>
+
+          {/* Columna derecha: Previsualización y archivos */}
+          <div className="lg:w-[500px] flex-shrink-0">
+            {/* Previsualización */}
+            <div className="mb-6 bg-gray-50 rounded-xl p-4 border border-blue-100">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4">Previsualización</h3>
+              <div className="aspect-[4/3] bg-white rounded-lg shadow-inner border border-blue-100">
+                {renderPreview()}
+              </div>
+            </div>
+
+            {/* Lista de archivos para selección */}
+            <div className="bg-white rounded-xl border border-blue-100 p-4">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4">Lista de Archivos</h3>
+              <div className="space-y-2">
+                {archivos.map((archivo, index) => {
+                  const fileName = archivo.archivo_url.split('/').pop() || `archivo-${index}`;
+                  return (
+                    <button
+                      key={archivo.id || index}
+                      onClick={() => setArchivoPreview(archivo)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
+                        archivoPreview?.id === archivo.id 
+                          ? 'bg-blue-50 border border-blue-200 text-blue-700' 
+                          : 'hover:bg-gray-50 border border-transparent'
+                      }`}
+                    >
+                      <FileText className="w-5 h-5 flex-shrink-0" />
+                      <span className="text-sm font-medium truncate">{fileName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
+}
