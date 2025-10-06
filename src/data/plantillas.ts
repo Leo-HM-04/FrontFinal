@@ -38,8 +38,8 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
             },
             {
               valor: 'TOKA_FONDEO_AVIT',
-              etiqueta: 'TOKA PARA FONDEO TARJETA AVIT 020925',
-              descripcion: 'Para fondeo de la tarjeta AVIT mediante TOKA'
+              etiqueta: 'PAGO PARA FONDEO DE TARJETA TOKA',
+              descripcion: 'Para fondeo de la tarjeta TOKA'
             }
           ],
           validaciones: {
