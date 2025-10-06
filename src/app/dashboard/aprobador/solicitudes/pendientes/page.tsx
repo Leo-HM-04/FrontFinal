@@ -8,6 +8,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { FileText, Eye, CheckCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useSolicitudes } from '@/hooks/useSolicitudes';
+import { isN09TokaSolicitud, updateSolicitudEstado } from '@/utils/solicitudUtils';
 import { usePagination } from '@/hooks/usePagination';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { exportSolicitudesToCSV, exportSolicitudesToExcel, exportSolicitudesToPDF } from '@/utils/exportUtils';
@@ -281,30 +282,17 @@ export default function SolicitudesPendientesPage() {
       
       // Buscar la solicitud para verificar si es N09/TOKA
       const solicitud = solicitudes.find(s => s.id_solicitud === id);
-      const isN09Toka = solicitud && (solicitud as Solicitud & { isN09Toka?: boolean }).isN09Toka === true;
       
-      if (isN09Toka) {
-        // Usar endpoint específico para N09/TOKA
-        console.log(`🔄 Aprobando solicitud N09/TOKA ID: ${id}`);
-        const token = localStorage.getItem('token');
-        const response = await fetch(`/api/solicitudes-n09-toka/${id}/estado`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` })
-          },
-          body: JSON.stringify({
-            estado: 'aprobada',
-            comentarios: comentario || 'Solicitud aprobada'
-          })
+      if (!solicitud) {
+        throw new Error('Solicitud no encontrada');
+      }
+      
+      if (isN09TokaSolicitud(solicitud)) {
+        // Usar función utilitaria para N09/TOKA
+        await updateSolicitudEstado(id, solicitud, {
+          estado: 'autorizada', // Se convertirá a 'aprobada' internamente
+          comentario_aprobador: comentario || 'Solicitud aprobada'
         });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Error al aprobar solicitud N09/TOKA');
-        }
-        
-        console.log(`✅ Solicitud N09/TOKA ${id} aprobada exitosamente`);
       } else {
         // Usar endpoint normal para solicitudes regulares
         await SolicitudesService.updateEstado(id, {
@@ -330,30 +318,17 @@ export default function SolicitudesPendientesPage() {
       
       // Buscar la solicitud para verificar si es N09/TOKA
       const solicitud = solicitudes.find(s => s.id_solicitud === id);
-      const isN09Toka = solicitud && (solicitud as Solicitud & { isN09Toka?: boolean }).isN09Toka === true;
       
-      if (isN09Toka) {
-        // Usar endpoint específico para N09/TOKA
-        console.log(`❌ Rechazando solicitud N09/TOKA ID: ${id}`);
-        const token = localStorage.getItem('token');
-        const response = await fetch(`/api/solicitudes-n09-toka/${id}/estado`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` })
-          },
-          body: JSON.stringify({
-            estado: 'rechazada',
-            comentarios: comentario || 'Solicitud rechazada'
-          })
+      if (!solicitud) {
+        throw new Error('Solicitud no encontrada');
+      }
+      
+      if (isN09TokaSolicitud(solicitud)) {
+        // Usar función utilitaria para N09/TOKA
+        await updateSolicitudEstado(id, solicitud, {
+          estado: 'rechazada',
+          comentario_aprobador: comentario || 'Solicitud rechazada'
         });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Error al rechazar solicitud N09/TOKA');
-        }
-        
-        console.log(`✅ Solicitud N09/TOKA ${id} rechazada exitosamente`);
       } else {
         // Usar endpoint normal para solicitudes regulares
         await SolicitudesService.updateEstado(id, {

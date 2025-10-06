@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Solicitud, CreateSolicitudData, UpdateEstadoData } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { toast } from 'react-hot-toast';
+import { isN09TokaSolicitud, updateSolicitudEstado } from '@/utils/solicitudUtils';
 
 export function useSolicitudes() {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -38,7 +39,30 @@ export function useSolicitudes() {
 
   const updateEstado = async (id: number, estadoData: UpdateEstadoData): Promise<boolean> => {
     try {
-      const updatedSolicitud = await SolicitudesService.updateEstado(id, estadoData);
+      // Buscar la solicitud para verificar si es N09/TOKA
+      const solicitud = solicitudes.find(s => s.id_solicitud === id);
+      
+      if (!solicitud) {
+        throw new Error('Solicitud no encontrada');
+      }
+
+      let updatedSolicitud;
+      
+      if (isN09TokaSolicitud(solicitud)) {
+        // Usar función utilitaria para N09/TOKA
+        await updateSolicitudEstado(id, solicitud, {
+          estado: estadoData.estado,
+          comentario_aprobador: estadoData.comentario_aprobador
+        });
+        
+        // Mapear estado para actualización local
+        const estadoN09 = estadoData.estado === 'autorizada' ? 'aprobada' : estadoData.estado;
+        updatedSolicitud = { ...solicitud, estado: estadoN09 } as Solicitud;
+      } else {
+        // Usar endpoint normal para solicitudes regulares
+        updatedSolicitud = await SolicitudesService.updateEstado(id, estadoData);
+      }
+      
       setSolicitudes(prev => 
         prev.map(sol => sol.id_solicitud === id ? updatedSolicitud : sol)
       );
@@ -46,6 +70,7 @@ export function useSolicitudes() {
       return true;
     } catch (error) {
       console.error('Error updating solicitud estado:', error);
+      toast.error('Error al actualizar el estado de la solicitud');
       return false;
     }
   };
