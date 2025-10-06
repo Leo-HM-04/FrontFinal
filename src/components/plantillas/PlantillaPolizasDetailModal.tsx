@@ -283,7 +283,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
             </div>
 
             {/* Lista de archivos para selección */}
-            <div className="bg-white rounded-xl border border-blue-100 p-4">
+            <div className="bg-white rounded-xl border border-blue-100 p-4 mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4">Lista de Archivos</h3>
               <div className="space-y-2">
                 {archivos.map((archivo, index) => {
@@ -304,6 +304,52 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                   );
                 })}
               </div>
+            </div>
+
+            {/* Sección de Comprobantes */}
+            <div className="bg-white rounded-xl border border-blue-100 p-4">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center gap-2">
+                <FileCheck className="w-5 h-5 text-blue-500" />
+                Comprobantes
+              </h3>
+              {loadingComprobantes ? (
+                <div className="text-center py-6">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 text-sm">Cargando comprobantes...</p>
+                </div>
+              ) : comprobantes.length === 0 ? (
+                <div className="text-center py-6 bg-gray-50 rounded-lg border border-gray-200">
+                  <FileCheck className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-600 font-medium">No hay comprobantes disponibles</p>
+                  {solicitud.estado !== 'pagada' && (
+                    <p className="text-gray-500 text-sm mt-1">Los comprobantes estarán disponibles cuando la solicitud sea pagada</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {comprobantes.map((comprobante, idx) => {
+                    const fileName = comprobante.nombre_archivo || comprobante.ruta_archivo.split('/').pop() || `comprobante-${idx}`;
+                    return (
+                      <div 
+                        key={comprobante.id_comprobante || idx} 
+                        className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <div className="flex items-center gap-3">
+                          <FileCheck className="w-5 h-5 text-blue-500" />
+                          <span className="text-sm font-medium text-gray-700 truncate">{fileName}</span>
+                        </div>
+                        <button
+                          onClick={() => window.open(comprobante.ruta_archivo, '_blank')}
+                          className="flex items-center gap-1 px-2 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors duration-200"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Ver
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
