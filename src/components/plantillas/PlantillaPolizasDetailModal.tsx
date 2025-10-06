@@ -203,7 +203,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
           <X className="w-6 h-6" />
         </button>
         {/* Layout horizontal: info+comprobantes left, archivos right */}
-        <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
+  <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
           {/* Columna izquierda: info principal, montos, comprobantes */}
           <div className="flex-1 min-w-0">
             <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
@@ -315,8 +315,61 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
               </div>
             </div>
           </div>
-          {/* Columna derecha: comprobante de pago */}
+          {/* Columna derecha: archivos adjuntos y comprobante de pago */}
           <div className="w-full lg:w-[420px] flex-shrink-0">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
+              {loadingArchivos ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Cargando archivos...</p>
+                </div>
+              ) : archivos.length === 0 ? (
+                <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 font-medium">No hay archivos adjuntos</p>
+                  <p className="text-gray-500 text-sm mt-2">Los archivos aparecerán aquí cuando sean cargados</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center w-full gap-4">
+                  {archivos.map((archivo, idx) => {
+                    const url = archivo.archivo_url;
+                    const fileName = url.split('/').pop() || `archivo-${idx}`;
+                    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+                    const isPdf = /\.pdf$/i.test(fileName);
+                    return (
+                      <div key={archivo.id || idx} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
+                        <div className="relative h-[220px] bg-gray-50 flex items-center justify-center">
+                          {isImage ? (
+                            <Image src={url} alt={fileName} fill className="object-contain" />
+                          ) : isPdf ? (
+                            <iframe src={url} title={fileName} className="w-full" style={{ height: '200px' }} />
+                          ) : (
+                            <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+                              <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                              <div className="flex-1">
+                                <p className="text-blue-900 font-medium text-sm">{fileName}</p>
+                                <p className="text-xs text-gray-600 mt-1">Tipo: Archivo adjunto</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-3">
+                          <button
+                            onClick={() => window.open(url, '_blank')}
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Ver completo
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            {/* Comprobante de Pago */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileCheck className="w-5 h-5 text-blue-500" />Comprobante de Pago</h3>
               {loadingComprobantes ? (
