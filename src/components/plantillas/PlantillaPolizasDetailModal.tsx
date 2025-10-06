@@ -331,21 +331,21 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                   <p className="text-gray-500 text-sm mt-2">Los archivos aparecerán aquí cuando sean cargados</p>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center w-full gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {archivos.map((archivo, idx) => {
                     const url = archivo.archivo_url;
                     const fileName = url.split('/').pop() || `archivo-${idx}`;
-                    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+                    const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
                     return (
-                      <div key={archivo.id || idx} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
+                      <div key={archivo.id || idx} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                         <div className="relative h-[220px] bg-gray-50 flex items-center justify-center">
                           {isImage ? (
                             <Image src={url} alt={fileName} fill className="object-contain" />
                           ) : isPdf ? (
-                            <iframe src={url} title={fileName} className="w-full" style={{ height: '200px' }} />
+                            <iframe src={url} title={fileName} className="w-full h-full" style={{ minHeight: '200px' }} />
                           ) : (
-                            <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+                            <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200 w-full">
                               <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
                               <div className="flex-1">
                                 <p className="text-blue-900 font-medium text-sm">{fileName}</p>
@@ -371,73 +371,54 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
             </div>
             {/* Comprobante de Pago */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileCheck className="w-5 h-5 text-blue-500" />Comprobante de Pago</h3>
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileCheck className="w-5 h-5 text-blue-500" />Comprobantes de Pago</h3>
               {loadingComprobantes ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600 font-medium">Cargando comprobante...</p>
+                  <p className="text-gray-600 font-medium">Cargando comprobantes...</p>
                 </div>
               ) : comprobantes.length === 0 ? (
                 <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
                   <FileCheck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 font-medium">No hay comprobante disponible</p>
-                  <p className="text-gray-500 text-sm mt-2">El comprobante aparecerá aquí cuando sea cargado</p>
+                  <p className="text-gray-600 font-medium">No hay comprobantes disponibles</p>
+                  <p className="text-gray-500 text-sm mt-2">Los comprobantes aparecerán aquí cuando sean cargados</p>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center w-full">
-                  {(() => {
-                    const comprobante = comprobantes[0];
-                    if (!comprobante) return null;
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {comprobantes.map((comprobante, idx) => {
                     const url = comprobante.ruta_archivo;
-                    const fileName = url.split('/').pop() || 'comprobante';
-                    const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+                    const fileName = comprobante.nombre_archivo || url.split('/').pop() || `comprobante-${idx}`;
+                    const isImage = /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName);
                     const isPdf = /\.pdf$/i.test(fileName);
                     return (
-                      <div className="w-full flex justify-center">
-                        <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
-                          <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
-                            {isImage ? (
-                              <Image
-                                src={url}
-                                alt={fileName}
-                                fill
-                                className="object-contain"
-                                onError={() => console.log('Error cargando imagen')}
-                              />
-                            ) : isPdf ? (
-                              <iframe
-                                src={url}
-                                title={fileName}
-                                className="w-full"
-                                style={{ height: '200px' }}
-                              />
-                            ) : (
-                              <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
-                                <FileCheck className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                                <div className="flex-1">
-                                  <p className="text-blue-900 font-medium text-sm">
-                                    {fileName}
-                                  </p>
-                                  <p className="text-xs text-gray-600 mt-1">
-                                    Tipo: Comprobante
-                                  </p>
-                                </div>
+                      <div key={comprobante.id_comprobante || idx} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                        <div className="relative h-[220px] bg-gray-50 flex items-center justify-center">
+                          {isImage ? (
+                            <Image src={url} alt={fileName} fill className="object-contain" />
+                          ) : isPdf ? (
+                            <iframe src={url} title={fileName} className="w-full h-full" style={{ minHeight: '200px' }} />
+                          ) : (
+                            <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200 w-full">
+                              <FileCheck className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                              <div className="flex-1">
+                                <p className="text-blue-900 font-medium text-sm">{fileName}</p>
+                                <p className="text-xs text-gray-600 mt-1">Tipo: Comprobante</p>
                               </div>
-                            )}
-                          </div>
-                          <div className="mt-3">
-                            <button
-                              onClick={() => window.open(url, '_blank')}
-                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              Ver completo
-                            </button>
-                          </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-3">
+                          <button
+                            onClick={() => window.open(url, '_blank')}
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Ver completo
+                          </button>
                         </div>
                       </div>
                     );
-                  })()}
+                  })}
                 </div>
               )}
             </div>
