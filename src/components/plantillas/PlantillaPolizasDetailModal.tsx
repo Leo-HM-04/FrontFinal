@@ -330,7 +330,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
           </div>
         </div>
 
-          {/* Columna derecha: Previsualización y archivos */}
+          {/* Columna derecha: Previsualización y archivos adjuntos */}
           <div className="lg:w-[500px] flex-shrink-0">
             {/* Previsualización */}
             <div className="mb-6 bg-gray-50 rounded-xl p-4 border border-blue-100">
@@ -356,82 +356,63 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
               )}
             </div>
 
-            {/* Lista de archivos para selección */}
-            <div className="bg-white rounded-xl border border-blue-100 p-4 mb-6">
+            {/* Lista de archivos adjuntos */}
+            <div className="bg-white rounded-xl border border-blue-100 p-4">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-500" />
                 Archivos Adjuntos
               </h3>
-              <div className="space-y-2">
-                {archivos.map((archivo, index) => {
-                  const fileName = archivo.archivo_url.split('/').pop() || `archivo-${index}`;
-                  return (
-                    <button
-                      key={archivo.id || index}
-                      onClick={() => {
-                        setArchivoPreview(archivo);
-                        setComprobantePreview(null);
-                      }}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
-                        archivoPreview?.id === archivo.id 
-                          ? 'bg-blue-50 border border-blue-200 text-blue-700' 
-                          : 'hover:bg-gray-50 border border-transparent'
-                      }`}
-                    >
-                      <FileText className="w-5 h-5 flex-shrink-0" />
-                      <span className="text-sm font-medium truncate">{fileName}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Sección de Comprobantes */}
-            <div className="bg-white rounded-xl border border-blue-100 p-4">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-blue-500" />
-                Comprobantes
-              </h3>
-              {loadingComprobantes ? (
+              {loadingArchivos ? (
                 <div className="text-center py-6">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600 text-sm">Cargando comprobantes...</p>
+                  <p className="text-gray-600 text-sm">Cargando archivos...</p>
                 </div>
-              ) : comprobantes.length === 0 ? (
+              ) : archivos.length === 0 ? (
                 <div className="text-center py-6 bg-gray-50 rounded-lg border border-gray-200">
-                  <FileCheck className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600 font-medium">No hay comprobantes disponibles</p>
-                  {solicitud.estado !== 'pagada' && (
-                    <p className="text-gray-500 text-sm mt-1">Los comprobantes estarán disponibles cuando la solicitud sea pagada</p>
-                  )}
+                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-600 font-medium">No hay archivos adjuntos</p>
+                  <p className="text-gray-500 text-sm mt-1">Los archivos aparecerán aquí cuando sean cargados</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {comprobantes.map((comprobante, idx) => {
-                    const fileName = comprobante.nombre_archivo || comprobante.ruta_archivo.split('/').pop() || `comprobante-${idx}`;
+                  {archivos.map((archivo, index) => {
+                    const fileName = archivo.archivo_url.split('/').pop() || `archivo-${index}`;
                     return (
-                      <div 
-                        key={comprobante.id_comprobante || idx} 
-                        className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+                      <div
+                        key={archivo.id || index}
+                        className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                          archivoPreview?.id === archivo.id 
+                            ? 'bg-blue-50 border-blue-200' 
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <FileCheck className="w-5 h-5 text-blue-500" />
-                          <span className="text-sm font-medium text-gray-700 truncate">{fileName}</span>
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                          <span className="text-sm font-medium truncate">{fileName}</span>
                         </div>
-                        <button
-                          onClick={() => {
-                            setComprobantePreview(comprobante);
-                            setArchivoPreview(null);
-                          }}
-                          className={`flex items-center gap-1 px-2 py-1 text-sm rounded transition-colors duration-200 ${
-                            comprobantePreview?.id_comprobante === comprobante.id_comprobante
-                              ? 'bg-blue-50 text-blue-700'
-                              : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
-                          }`}
-                        >
-                          <FileText className="w-4 h-4" />
-                          Ver
-                        </button>
+                        <div className="flex items-center gap-2 ml-2">
+                          <button
+                            onClick={() => {
+                              setArchivoPreview(archivo);
+                              setComprobantePreview(null);
+                            }}
+                            className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg transition-colors duration-200 ${
+                              archivoPreview?.id === archivo.id 
+                                ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-transparent'
+                            }`}
+                          >
+                            <FileText className="w-4 h-4" />
+                            Previsualizar
+                          </button>
+                          <button
+                            onClick={() => window.open(archivo.archivo_url, '_blank')}
+                            className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg border border-transparent transition-colors duration-200"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Abrir
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
