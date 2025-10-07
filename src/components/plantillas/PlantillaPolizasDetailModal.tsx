@@ -448,7 +448,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                          <span className="text-sm font-medium truncate">{fileName}</span>
+                          <span className="text-sm font-medium text-blue-700 truncate">{fileName}</span>
                         </div>
                         <div className="flex items-center gap-2 ml-2">
                           <button
