@@ -4,6 +4,7 @@ import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitud
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
 import Image from 'next/image';
+import { plantillaPagoPolizasGnp } from '@/data/plantillas';
 
 // Tipos específicos para la plantilla de Pólizas
 export interface SolicitudPolizasData {
@@ -129,18 +130,34 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
     return aseguradoras[key] || titular;
   };
 
+  // InfoField mejorado para mostrar ayuda, placeholder y opciones
   const InfoField: React.FC<{
     label: string;
     value: string | number | null | undefined;
+    ayuda?: string;
+    placeholder?: string;
+    opciones?: Array<{ valor: string; etiqueta: string; descripcion?: string }>;
     className?: string;
     icon?: React.ReactNode;
-  }> = ({ label, value, className = '', icon }) => (
-    <div className={`bg-white/80 p-3 rounded border border-blue-100 flex items-center gap-2 ${className}`}>
-      {icon && <span className="text-blue-600">{icon}</span>}
-      <div>
-        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">{label}</span>
-        <p className="text-blue-900 font-medium text-sm">{value || '-'}</p>
+  }> = ({ label, value, ayuda, placeholder, opciones, className = '', icon }) => (
+    <div className={`bg-white/80 p-3 rounded border border-blue-100 flex flex-col gap-1 ${className}`}>
+      <div className="flex items-center gap-2">
+        {icon && <span className="text-blue-600">{icon}</span>}
+        <span className="text-xs uppercase tracking-wider text-blue-700/70 block font-medium">{label}</span>
       </div>
+      <p className="text-blue-900 font-medium text-sm">{value !== undefined && value !== null && value !== '' ? value : 'No especificado'}</p>
+      {placeholder && <span className="text-xs text-gray-400">Placeholder: {placeholder}</span>}
+      {ayuda && <span className="text-xs text-blue-500">Ayuda: {ayuda}</span>}
+      {opciones && opciones.length > 0 && (
+        <div className="mt-1">
+          <span className="text-xs text-blue-700 font-semibold">Opciones:</span>
+          <ul className="list-disc ml-4 text-xs text-blue-800">
+            {opciones.map(opt => (
+              <li key={opt.valor}><span className="font-bold">{opt.etiqueta}</span>{opt.descripcion ? ` - ${opt.descripcion}` : ''}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 
@@ -234,12 +251,36 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InfoField label="Asunto" value={solicitud.asunto || solicitud.concepto} icon={<FileText className="w-4 h-4" />} />
-              <InfoField label="Titular de la Cuenta (Aseguradora)" value={getTitularLabel(solicitud.titular_poliza)} icon={<Shield className="w-4 h-4" />} />
-              <InfoField label="Empresa Emisora del Pago" value={solicitud.empresa_emisora} icon={<Building2 className="w-4 h-4" />} />
-              <InfoField label="Banco Destino" value={solicitud.banco_destino} icon={<Building2 className="w-4 h-4" />} />
-              <InfoField label="Convenio" value={solicitud.convenio} icon={<FileText className="w-4 h-4" />} />
-              <InfoField label="Referencia" value={solicitud.referencia} icon={<FileText className="w-4 h-4" />} />
+              {/* Recorrer todos los campos de la plantilla con tipado explícito usando import estático */}
+              {(
+                plantillaPagoPolizasGnp.secciones as Array<{
+                  id: string;
+                  titulo: string;
+                  descripcion: string;
+                  campos: Array<{
+                    id: string;
+                    nombre: keyof SolicitudPolizasData;
+                    etiqueta: string;
+                    ayuda?: string;
+                    placeholder?: string;
+                    opciones?: Array<{ valor: string; etiqueta: string; descripcion?: string }>;
+                  }>;
+                }>
+              ).map((seccion) => (
+                <React.Fragment key={seccion.id}>
+                  {seccion.campos.map((campo) => (
+                    <InfoField
+                      key={campo.id}
+                      label={campo.etiqueta}
+                      value={solicitud[campo.nombre] as string | number | undefined}
+                      ayuda={campo.ayuda}
+                      placeholder={campo.placeholder}
+                      opciones={campo.opciones}
+                      icon={<FileText className="w-4 h-4" />}
+                    />
+                  ))}
+                </React.Fragment>
+              ))}
             </div>
           </div>
           {/* Información de Montos */}
