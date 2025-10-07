@@ -259,7 +259,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                   descripcion: string;
                   campos: Array<{
                     id: string;
-                    nombre: keyof SolicitudPolizasData;
+                    nombre: keyof SolicitudPolizasData | 'metodos_pago';
                     etiqueta: string;
                     ayuda?: string;
                     placeholder?: string;
@@ -268,17 +268,48 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                 }>
               ).map((seccion) => (
                 <React.Fragment key={seccion.id}>
-                  {seccion.campos.map((campo) => (
-                    <InfoField
-                      key={campo.id}
-                      label={campo.etiqueta}
-                      value={solicitud[campo.nombre] as string | number | undefined}
-                      ayuda={campo.ayuda}
-                      placeholder={campo.placeholder}
-                      opciones={campo.opciones}
-                      icon={<FileText className="w-4 h-4" />}
-                    />
-                  ))}
+                  {seccion.campos.map((campo) => {
+                    // Render especial para métodos de pago
+                    if (campo.nombre === 'metodos_pago' && Array.isArray((solicitud as any).metodos_pago)) {
+                      const metodos = (solicitud as any).metodos_pago;
+                      return (
+                        <div key={campo.id} className="bg-white/80 p-3 rounded border border-blue-100 flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-blue-600" />
+                            <span className="text-xs uppercase tracking-wider text-blue-700/70 block font-medium">{campo.etiqueta}</span>
+                          </div>
+                          {metodos.length === 0 ? (
+                            <p className="text-blue-900 font-medium text-sm">No especificado</p>
+                          ) : (
+                            <ul className="list-disc ml-4 text-sm text-blue-900">
+                              {metodos.map((metodo: any, idx: number) => (
+                                <li key={idx} className="mb-2">
+                                  <div className="font-bold">{metodo.tipo || 'Método'}</div>
+                                  {metodo.monto && <div>Monto: {formatCurrency(metodo.monto)}</div>}
+                                  {metodo.banco && <div>Banco: {metodo.banco}</div>}
+                                  {metodo.referencia && <div>Referencia: {metodo.referencia}</div>}
+                                  {/* Agrega aquí más campos según la estructura de cada método */}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {campo.ayuda && <span className="text-xs text-blue-500">Ayuda: {campo.ayuda}</span>}
+                        </div>
+                      );
+                    }
+                    // Render normal para los demás campos
+                    return (
+                      <InfoField
+                        key={campo.id}
+                        label={campo.etiqueta}
+                        value={solicitud[campo.nombre as keyof SolicitudPolizasData] as string | number | undefined}
+                        ayuda={campo.ayuda}
+                        placeholder={campo.placeholder}
+                        opciones={campo.opciones}
+                        icon={<FileText className="w-4 h-4" />}
+                      />
+                    );
+                  })}
                 </React.Fragment>
               ))}
             </div>
