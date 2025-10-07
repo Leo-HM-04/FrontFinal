@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Shield, DollarSign, Building2, FileText, ExternalLink, FileCheck } from 'lucide-react';
+import { X, Shield, DollarSign, FileText, ExternalLink, FileCheck } from 'lucide-react';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
@@ -51,21 +51,16 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
   const [archivoPreview, setArchivoPreview] = useState<SolicitudArchivo | null>(null);
   const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
   const [loadingComprobantes, setLoadingComprobantes] = useState(false);
-  const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
+  // const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null); // No se usa
   const [comprobantePreview, setComprobantePreview] = useState<Comprobante | null>(null);
   // Cargar comprobantes si la solicitud está pagada
   const fetchComprobantes = useCallback(async () => {
-    setLoadingComprobantes(true);
-    setErrorComprobantes(null);
+  setLoadingComprobantes(true);
     try {
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
       setComprobantes(data);
-    } catch (error) {
-      let msg = 'Error al cargar comprobantes';
-      if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
-        msg = (error as { message: string }).message;
-      }
-      setErrorComprobantes(msg);
+    } catch {
+      // Error al cargar comprobantes, se ignora porque no se usa el mensaje
     } finally {
       setLoadingComprobantes(false);
     }
@@ -116,19 +111,9 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
 
 
 
-  const getTitularLabel = (titular: string): string => {
-    const aseguradoras: Record<string, string> = {
-      'qualitas': 'Qualitas Compañía de Seguros',
-      'allianz': 'Allianz Seguros',
-      'gnp': 'GNP Seguros',
-      'axa': 'AXA Seguros',
-      'mapfre': 'MAPFRE Seguros'
-    };
-    
-    if (!titular) return 'No especificada';
-    const key = titular.toLowerCase();
-    return aseguradoras[key] || titular;
-  };
+  // const getTitularLabel = (titular: string): string => {
+  //   ...función no utilizada...
+  // };
 
   // InfoField mejorado para mostrar ayuda, placeholder y opciones
   const InfoField: React.FC<{
@@ -270,8 +255,17 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                 <React.Fragment key={seccion.id}>
                   {seccion.campos.map((campo) => {
                     // Render especial para métodos de pago
-                    if (campo.nombre === 'metodos_pago' && Array.isArray((solicitud as any).metodos_pago)) {
-                      const metodos = (solicitud as any).metodos_pago;
+                    if (campo.nombre === 'metodos_pago' && Array.isArray((solicitud as { metodos_pago?: unknown[] }).metodos_pago)) {
+                      type MetodoPago = {
+                        tipo?: string;
+                        monto?: number;
+                        banco?: string;
+                        referencia?: string;
+                        [key: string]: unknown;
+                      };
+                      const metodos: MetodoPago[] = Array.isArray((solicitud as { metodos_pago?: MetodoPago[] }).metodos_pago)
+                        ? (solicitud as { metodos_pago?: MetodoPago[] }).metodos_pago!
+                        : [];
                       return (
                         <div key={campo.id} className="bg-white/80 p-3 rounded border border-blue-100 flex flex-col gap-2">
                           <div className="flex items-center gap-2">
@@ -282,7 +276,7 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                             <p className="text-blue-900 font-medium text-sm">No especificado</p>
                           ) : (
                             <ul className="list-disc ml-4 text-sm text-blue-900">
-                              {metodos.map((metodo: any, idx: number) => (
+                              {metodos.map((metodo: MetodoPago, idx: number) => (
                                 <li key={idx} className="mb-2">
                                   <div className="font-bold">{metodo.tipo || 'Método'}</div>
                                   {metodo.monto && <div>Monto: {formatCurrency(metodo.monto)}</div>}
