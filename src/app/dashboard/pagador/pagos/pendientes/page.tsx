@@ -16,6 +16,7 @@ import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN0
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal';
 import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
+import { isN09TokaSolicitud } from '@/utils/solicitudUtils';
 
 export default function PagosPendientesPage() {
   const [selectedPago, setSelectedPago] = useState<Solicitud | null>(null);
@@ -376,27 +377,7 @@ export default function PagosPendientesPage() {
     };
   }
 
-  // Función para detectar si una solicitud es N09/TOKA
-  function isN09TokaSolicitud(solicitud: Solicitud): boolean {
-    // Verificar si tiene el campo tipo_plantilla directamente
-    const solicitudExtendida = solicitud as Solicitud & { tipo_plantilla?: string };
-    if (solicitudExtendida.tipo_plantilla === 'N09_TOKA') return true;
-    
-    // Verificar en plantilla_datos
-    if (solicitud.plantilla_datos) {
-      try {
-        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-        return plantillaData.templateType === 'tarjetas-n09-toka' || 
-               plantillaData.isN09Toka === true || 
-               (plantillaData.beneficiario && plantillaData.numero_cuenta_clabe) ||
-               (plantillaData.tipo_cuenta_clabe && plantillaData.asunto);
-      } catch {
-        return false;
-      }
-    }
-    
-    return false;
-  }
+  // Nota: Usando función isN09TokaSolicitud importada de utils/solicitudUtils.ts
 
   // Función para detectar si una solicitud es TUKASH
   function isTukashSolicitud(solicitud: Solicitud): boolean {
@@ -419,9 +400,15 @@ export default function PagosPendientesPage() {
     
     console.log('🔍 Detectando tipo de plantilla para solicitud:', selectedPago.id_solicitud);
     console.log('📄 Datos de plantilla:', selectedPago.plantilla_datos);
+    console.log('🏷️ Tipo plantilla directo:', (selectedPago as Solicitud & { tipo_plantilla?: string })?.tipo_plantilla);
+    console.log('🆔 Folio:', selectedPago.folio);
+    console.log('📋 Departamento:', selectedPago.departamento);
     
     // Detectar N09/TOKA primero
-    if (isN09TokaSolicitud(selectedPago)) {
+    const isN09Toka = isN09TokaSolicitud(selectedPago);
+    console.log('🔍 ¿Es N09/TOKA?:', isN09Toka);
+    
+    if (isN09Toka) {
       console.log('✅ Detectado como N09/TOKA - Mostrando modal N09/TOKA');
       return (
         <PlantillaN09TokaDetailModal
@@ -433,7 +420,10 @@ export default function PagosPendientesPage() {
     }
     
     // Detectar TUKASH
-    if (isTukashSolicitud(selectedPago)) {
+    const isTukash = isTukashSolicitud(selectedPago);
+    console.log('🔍 ¿Es TUKASH?:', isTukash);
+    
+    if (isTukash) {
       console.log('✅ Detectado como TUKASH - Mostrando modal TUKASH');
       return (
         <PlantillaTukashDetailModal
