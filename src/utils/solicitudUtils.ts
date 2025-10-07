@@ -7,27 +7,41 @@ import api from '@/lib/api';
  * @returns true si es N09/TOKA, false en caso contrario
  */
 export function isN09TokaSolicitud(solicitud: Solicitud): boolean {
+  console.log('🔍 UTILS - isN09TokaSolicitud called for ID:', solicitud.id_solicitud);
+  
   // Método 1: Verificar por tipo_plantilla
-  if ((solicitud as Solicitud & { tipo_plantilla?: string }).tipo_plantilla === 'N09_TOKA') {
+  const tipoPlantilla = (solicitud as Solicitud & { tipo_plantilla?: string }).tipo_plantilla;
+  console.log('🔍 UTILS - tipo_plantilla:', tipoPlantilla);
+  
+  if (tipoPlantilla === 'N09_TOKA') {
+    console.log('✅ UTILS - Detectado N09/TOKA por tipo_plantilla');
     return true;
   }
   
   // Método 2: Verificar dentro de plantilla_datos
+  console.log('🔍 UTILS - plantilla_datos raw:', solicitud.plantilla_datos);
+  
   if (solicitud.plantilla_datos) {
     try {
       const plantillaData = typeof solicitud.plantilla_datos === 'string' 
         ? JSON.parse(solicitud.plantilla_datos) 
         : solicitud.plantilla_datos;
       
+      console.log('🔍 UTILS - plantilla_datos parsed:', plantillaData);
+      console.log('🔍 UTILS - isN09Toka flag:', plantillaData.isN09Toka);
+      console.log('🔍 UTILS - templateType:', plantillaData.templateType);
+      
       if (plantillaData.isN09Toka === true || plantillaData.templateType === 'tarjetas-n09-toka') {
+        console.log('✅ UTILS - Detectado N09/TOKA por plantilla_datos');
         return true;
       }
     } catch (e) {
       // Si hay error al parsear, continuar con la verificación normal
-      console.warn('Error parsing plantilla_datos:', e);
+      console.warn('❌ UTILS - Error parsing plantilla_datos:', e);
     }
   }
   
+  console.log('❌ UTILS - NO es N09/TOKA');
   return false;
 }
 

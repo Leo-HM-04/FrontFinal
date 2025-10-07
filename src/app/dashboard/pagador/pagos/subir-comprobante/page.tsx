@@ -1,15 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Solicitud } from '@/types';
+import type { Solicitud, SolicitudEstado } from '@/types';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { PagadorLayout } from '@/components/layout/PagadorLayout';
 import { AlertCircle, Download, ArrowUpDown, ArrowUp, ArrowDown, FileText, FileSpreadsheet, Search, X } from 'lucide-react';
 import { SubirFacturaModal } from '@/components/pagos/SubirFacturaModal';
 import { VerComprobanteModal } from '@/components/pagos/VerComprobanteModal';
-import { PagoDetailModal } from '@/components/pagos/PagoDetailModal';
 import type { Comprobante } from '@/components/pagos/VerComprobanteModal';
 import { SolicitudesService } from '@/services/solicitudes.service';
+import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTukashDetailModal';
+import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
+import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
+import { isN09TokaSolicitud } from '@/utils/solicitudUtils';
+import { SolicitudTukashData } from '@/types/plantillaTukash';
+import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 import { Pagination } from '@/components/ui/Pagination';
 import { Button } from '@/components/ui/Button';
 import { toast } from 'react-hot-toast';
@@ -399,6 +404,149 @@ export default function HistorialPagosPage() {
   });
   const pagosPaginados = pagosOrdenados.slice((pagina - 1) * pagosPorPagina, pagina * pagosPorPagina);
 
+  // Función para detectar si una solicitud es TUKASH
+  function isTukashSolicitud(solicitud: Solicitud): boolean {
+    if (solicitud.plantilla_datos) {
+      try {
+        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        return plantillaData.templateType === 'tarjetas-tukash' || plantillaData.isTukash === true;
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  // Función para mapear Solicitud a SolicitudTukashData
+  function mapSolicitudToTukashData(solicitud: Solicitud): SolicitudTukashData {
+    // Mapear estado: convertir 'autorizada' a 'aprobada' para compatibilidad
+    const mapearEstadoTukash = (estado: SolicitudEstado): 'pendiente' | 'aprobada' | 'rechazada' | 'pagada' | undefined => {
+      if (estado === 'autorizada') return 'aprobada';
+      return estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada';
+    };
+
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      return {
+        id_solicitud: solicitud.id_solicitud,
+        folio: solicitud.folio || undefined,
+        asunto: plantillaData?.asunto || 'TUKASH',
+        cliente: plantillaData?.cliente || '',
+        beneficiario_tarjeta: plantillaData?.beneficiario_tarjeta || '',
+        numero_tarjeta: plantillaData?.numero_tarjeta || '',
+        monto_total_cliente: plantillaData?.monto_total_cliente || solicitud.monto || 0,
+        monto_total_tukash: plantillaData?.monto_total_tukash || 0,
+        estado: mapearEstadoTukash(solicitud.estado),
+        fecha_creacion: solicitud.fecha_creacion,
+        usuario_creacion: '',
+        usuario_actualizacion: '',
+      };
+    } catch {
+      return {
+        id_solicitud: solicitud.id_solicitud,
+        folio: solicitud.folio || undefined,
+        asunto: 'TUKASH',
+        cliente: '',
+        beneficiario_tarjeta: '',
+        numero_tarjeta: '',
+        monto_total_cliente: solicitud.monto || 0,
+        monto_total_tukash: 0,
+        estado: mapearEstadoTukash(solicitud.estado),
+        fecha_creacion: solicitud.fecha_creacion,
+        usuario_creacion: '',
+        usuario_actualizacion: '',
+      };
+    }
+  }
+
+  // Función para mapear Solicitud a SolicitudN09TokaData
+  function mapSolicitudToN09TokaData(solicitud: Solicitud): SolicitudN09TokaData {
+    // Mapear estado: convertir 'autorizada' a 'aprobada' para compatibilidad
+    const mapearEstado = (estado: SolicitudEstado): 'pendiente' | 'aprobada' | 'rechazada' | 'pagada' | undefined => {
+      if (estado === 'autorizada') return 'aprobada';
+      return estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada';
+    };
+
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+      return {
+        id_solicitud: solicitud.id_solicitud,
+        monto: solicitud.monto,
+        estado: mapearEstado(solicitud.estado),
+        fecha_creacion: solicitud.fecha_creacion,
+        usuario_creacion: '',
+        usuario_actualizacion: '',
+        ...plantillaData,
+      };
+    } catch {
+      return {
+        id_solicitud: solicitud.id_solicitud,
+        monto: solicitud.monto,
+        estado: mapearEstado(solicitud.estado),
+        fecha_creacion: solicitud.fecha_creacion,
+        usuario_creacion: '',
+        usuario_actualizacion: '',
+        // Valores por defecto requeridos para SolicitudN09TokaData
+        asunto: 'PAGO_PROVEEDOR_N09',
+        cliente: '',
+        beneficiario: '',
+        tipo_cuenta_clabe: 'CLABE',
+        numero_cuenta_clabe: '',
+        banco_destino: '',
+        tipo_moneda: 'MXN',
+      };
+    }
+  }
+
+  // Función para renderizar el modal correcto según plantilla
+  function renderPlantillaModal() {
+    if (!showDetailModal || !selectedPago) return null;
+    
+    console.log('🔍 SUBIR-COMPROBANTE - Detectando tipo para solicitud:', selectedPago.id_solicitud);
+    console.log('📄 SUBIR-COMPROBANTE - Datos plantilla:', selectedPago.plantilla_datos);
+    
+    // Detectar N09/TOKA primero
+    const isN09Toka = isN09TokaSolicitud(selectedPago);
+    console.log('🔍 SUBIR-COMPROBANTE - ¿Es N09/TOKA?:', isN09Toka);
+    
+    if (isN09Toka) {
+      console.log('✅ SUBIR-COMPROBANTE - Mostrando modal N09/TOKA');
+      return (
+        <PlantillaN09TokaDetailModal
+          solicitud={mapSolicitudToN09TokaData(selectedPago)}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+        />
+      );
+    }
+    
+    // Detectar TUKASH
+    const isTukash = isTukashSolicitud(selectedPago);
+    console.log('🔍 SUBIR-COMPROBANTE - ¿Es TUKASH?:', isTukash);
+    
+    if (isTukash) {
+      console.log('✅ SUBIR-COMPROBANTE - Mostrando modal TUKASH');
+      return (
+        <PlantillaTukashDetailModal
+          solicitud={mapSolicitudToTukashData(selectedPago)}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+        />
+      );
+    }
+    
+    // Para solicitudes estándar
+    console.log('✅ SUBIR-COMPROBANTE - Mostrando modal estándar');
+    return (
+      <SolicitudDetailModal
+        solicitud={selectedPago}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        userRole="pagador"
+      />
+    );
+  }
+
   return (
     <ProtectedRoute requiredRoles={['pagador_banca']}>
       <PagadorLayout>
@@ -691,11 +839,7 @@ export default function HistorialPagosPage() {
                   onClose={() => setVerComprobante({ open: false, pago: null })}
                 />
               )}
-                <PagoDetailModal
-                  isOpen={showDetailModal}
-                  pago={selectedPago}
-                  onClose={() => setShowDetailModal(false)}
-                />
+                {renderPlantillaModal()}
               {/* Modal para subir factura */}
               <SubirFacturaModal
                 open={modalOpen}

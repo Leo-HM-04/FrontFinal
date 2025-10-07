@@ -139,6 +139,12 @@ export default function PagosPendientesPage() {
   }, []);
 
   const handleViewDetail = (pago: Solicitud) => {
+    console.log('🎯 CLICKED VIEW DETAIL - Solicitud seleccionada:', pago.id_solicitud);
+    console.log('🎯 CLICKED VIEW DETAIL - Folio:', pago.folio);
+    console.log('🎯 CLICKED VIEW DETAIL - Plantilla datos completos:', pago.plantilla_datos);
+    console.log('🎯 CLICKED VIEW DETAIL - Departamento:', pago.departamento);
+    console.log('🎯 CLICKED VIEW DETAIL - Objeto completo:', pago);
+    
     setSelectedPago(pago);
     setShowDetailModal(true);
   };
@@ -396,7 +402,12 @@ export default function PagosPendientesPage() {
 
   // Función para renderizar el modal correcto según plantilla
   function renderPlantillaModal() {
-    if (!showDetailModal || !selectedPago) return null;
+    console.log('🔴 RENDER MODAL - showDetailModal:', showDetailModal, 'selectedPago:', !!selectedPago);
+    
+    if (!showDetailModal || !selectedPago) {
+      console.log('🔴 RENDER MODAL - Saliendo temprano, no hay modal o pago seleccionado');
+      return null;
+    }
     
     console.log('🔍 Detectando tipo de plantilla para solicitud:', selectedPago.id_solicitud);
     console.log('📄 Datos de plantilla:', selectedPago.plantilla_datos);
