@@ -91,12 +91,14 @@ export default function HistorialPagosPage() {
     const dateOptions: Intl.DateTimeFormatOptions = { 
       year: 'numeric', 
       month: '2-digit', 
-      day: '2-digit' 
+      day: '2-digit',
+      timeZone: 'America/Mexico_City'
     };
     const timeOptions: Intl.DateTimeFormatOptions = { 
       hour: '2-digit', 
       minute: '2-digit',
-      hour12: false
+      hour12: false,
+      timeZone: 'America/Mexico_City'
     };
     return {
       date: date.toLocaleDateString('es-MX', dateOptions),

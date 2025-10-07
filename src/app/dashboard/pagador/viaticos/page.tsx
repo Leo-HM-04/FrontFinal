@@ -750,7 +750,7 @@ export default function ViaticosPagadorPage() {
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                                   {viatico.fecha_limite_pago 
-                                    ? new Date(viatico.fecha_limite_pago).toLocaleDateString('es-MX') 
+                                    ? new Date(viatico.fecha_limite_pago).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }) 
                                     : '-'
                                   }
                                 </td>

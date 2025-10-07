@@ -54,7 +54,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({ solicitud, open,
           {solicitud.tipo_pago_descripcion && (
             <div className="flex items-center gap-2"><FaCommentDots className="text-blue-500" /><span className="font-bold">Descripción del tipo de pago:</span> {solicitud.tipo_pago_descripcion}</div>
           )}
-          <div className="flex items-center gap-2"><FaRegCalendarAlt className="text-blue-400" /><span className="font-bold">Siguiente fecha:</span> {solicitud.siguiente_fecha ? new Date(solicitud.siguiente_fecha).toLocaleString('es-MX') : '-'}</div>
+          <div className="flex items-center gap-2"><FaRegCalendarAlt className="text-blue-400" /><span className="font-bold">Siguiente fecha:</span> {solicitud.siguiente_fecha ? new Date(solicitud.siguiente_fecha).toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }) : '-'}</div>
           <div className="flex items-center gap-2"><FaUserCheck className="text-green-700" /><span className="font-bold">Aprobador:</span> {solicitud.nombre_aprobador || '-'} {solicitud.id_aprobador ? `(ID: ${solicitud.id_aprobador})` : ''}</div>
           <div className="flex items-center gap-2"><FaUserTie className="text-blue-700" /><span className="font-bold">Pagador:</span> {solicitud.nombre_pagador || '-'}</div>
           {solicitud.comentario_aprobador && (

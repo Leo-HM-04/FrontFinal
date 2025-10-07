@@ -65,7 +65,7 @@ export const SolicitudModal: React.FC<SolicitudModalProps> = ({ solicitud, open,
               <div className="flex flex-col gap-1 text-base">
                 <span><span className="text-blue-600 font-semibold">Monto:</span> <span className="font-bold text-blue-800">{solicitud.monto?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span></span>
                 <span><span className="text-blue-600 font-semibold">Cuenta Destino:</span> {solicitud.cuenta_destino}</span>
-                <span><span className="text-blue-600 font-semibold">Fecha Límite:</span> {solicitud.siguiente_fecha ? new Date(solicitud.siguiente_fecha).toLocaleDateString('es-MX') : '-'}</span>
+                <span><span className="text-blue-600 font-semibold">Fecha Límite:</span> {solicitud.siguiente_fecha ? new Date(solicitud.siguiente_fecha).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }) : '-'}</span>
               </div>
             </div>
             {/* Información Organizacional */}

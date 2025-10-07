@@ -306,8 +306,8 @@ export default function PagosPendientesPage() {
           pago.nombre_usuario || pago.usuario_nombre || '-',
           pago.departamento,
           pago.monto,
-          new Date(pago.fecha_creacion).toLocaleDateString('es-MX'),
-          new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX'),
+          new Date(pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }),
+          new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }),
           pago.estado?.charAt(0).toUpperCase() + pago.estado?.slice(1) || 'Autorizada',
           pago.aprobador_nombre || '-'
         ].join(','))
@@ -717,10 +717,10 @@ export default function PagosPendientesPage() {
                                 {formatCurrency(pago.monto)}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {new Date(pago.fecha_creacion).toLocaleDateString('es-MX')}
+                                {new Date(pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' })}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX')}
+                                {new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' })}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">

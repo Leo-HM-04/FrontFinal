@@ -694,7 +694,14 @@ export default function SolicitudesPage() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              {new Date(solicitud.fecha_creacion).toLocaleString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '')}
+                              {new Date(solicitud.fecha_creacion).toLocaleString('es-MX', { 
+                                day: '2-digit', 
+                                month: 'short', 
+                                year: 'numeric', 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                timeZone: 'America/Mexico_City'
+                              }).replace(',', '')}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
                               <Button 
