@@ -1,9 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Shield, DollarSign, Building2, FileText, ExternalLink, FileCheck } from 'lucide-react';
+import { X, Shield, DollarSign, Building2, FileText, ExternalLink, FileCheck, CreditCard } from 'lucide-react';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
 import Image from 'next/image';
+import { obtenerNombreBanco } from '@/utils/bancos';
+
+// Interfaz para un método de pago individual
+export interface MetodoPago {
+  banco_destino: string;
+  convenio: string;
+  referencia: string;
+}
 
 // Tipos específicos para la plantilla de Pólizas
 export interface SolicitudPolizasData {
@@ -11,9 +19,10 @@ export interface SolicitudPolizasData {
   asunto: string;
   titular_poliza: string; // aseguradora (titular de la cuenta)
   empresa_emisora?: string; // empresa emisora del pago
-  banco_destino?: string; // banco destino
-  convenio?: string; // convenio
-  referencia?: string; // referencia
+  metodos_pago?: MetodoPago[]; // array de hasta 4 métodos de pago
+  banco_destino?: string; // banco destino (primer método, legacy)
+  convenio?: string; // convenio (primer método, legacy)
+  referencia?: string; // referencia (primer método, legacy)
   numero_poliza: string;
   monto: number;
   tipo_movimiento: string;
@@ -237,11 +246,62 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
               <InfoField label="Asunto" value={solicitud.asunto || solicitud.concepto} icon={<FileText className="w-4 h-4" />} />
               <InfoField label="Titular de la Cuenta (Aseguradora)" value={getTitularLabel(solicitud.titular_poliza)} icon={<Shield className="w-4 h-4" />} />
               <InfoField label="Empresa Emisora del Pago" value={solicitud.empresa_emisora} icon={<Building2 className="w-4 h-4" />} />
-              <InfoField label="Banco Destino" value={solicitud.banco_destino} icon={<Building2 className="w-4 h-4" />} />
-              <InfoField label="Convenio" value={solicitud.convenio} icon={<FileText className="w-4 h-4" />} />
-              <InfoField label="Referencia" value={solicitud.referencia} icon={<FileText className="w-4 h-4" />} />
             </div>
           </div>
+
+          {/* Métodos de Pago */}
+          {solicitud.metodos_pago && solicitud.metodos_pago.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-blue-500" />
+                Métodos de Pago ({solicitud.metodos_pago.length})
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {solicitud.metodos_pago.map((metodo, index) => (
+                  <div 
+                    key={index} 
+                    className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                        {index + 1}
+                      </div>
+                      <h4 className="font-semibold text-blue-900 text-sm">Método de Pago #{index + 1}</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <Building2 className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-blue-700 font-medium uppercase tracking-wide">Banco Destino</p>
+                          <p className="text-sm text-blue-900 font-semibold break-words">
+                            {metodo.banco_destino ? obtenerNombreBanco(metodo.banco_destino) : '-'}
+                            {metodo.banco_destino && (
+                              <span className="text-xs text-blue-600 ml-1">({metodo.banco_destino})</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <FileText className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-blue-700 font-medium uppercase tracking-wide">Convenio</p>
+                          <p className="text-sm text-blue-900 font-semibold break-words">{metodo.convenio || '-'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <FileText className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-blue-700 font-medium uppercase tracking-wide">Referencia</p>
+                          <p className="text-sm text-blue-900 font-semibold break-words">{metodo.referencia || '-'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           {/* Información de Montos */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Monto Total</h3>

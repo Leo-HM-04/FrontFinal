@@ -1264,6 +1264,9 @@ function extraerDatosDelConcepto(concepto: string) {
           asunto: plantillaData.asunto ?? datosExtraidos.asunto ?? '',
           titular_poliza: plantillaData.titular_poliza ?? plantillaData.aseguradora ?? solicitud.empresa_a_pagar ?? '',
           empresa_emisora: plantillaData.empresa_emisora ?? datosExtraidos.empresa_emisora ?? '',
+          // Array completo de métodos de pago
+          metodos_pago: plantillaData.metodos_pago ?? [],
+          // Campos legacy del primer método de pago (para compatibilidad)
           banco_destino: plantillaData.metodos_pago?.[0]?.banco_destino ? obtenerNombreBanco(plantillaData.metodos_pago[0].banco_destino) : (solicitud.banco_destino ? obtenerNombreBanco(solicitud.banco_destino) : ''),
           convenio: plantillaData.metodos_pago?.[0]?.convenio ?? datosExtraidos.convenio ?? '',
           referencia: plantillaData.metodos_pago?.[0]?.referencia ?? solicitud.cuenta_destino ?? '',
@@ -1305,6 +1308,7 @@ function extraerDatosDelConcepto(concepto: string) {
         asunto: datosExtraidos.asunto || '',
         titular_poliza: solicitud.empresa_a_pagar || '',
         empresa_emisora: datosExtraidos.empresa_emisora || '',
+        metodos_pago: [], // No hay métodos de pago en el fallback
         banco_destino: obtenerNombreBanco(solicitud.banco_destino || ''),
         convenio: datosExtraidos.convenio || '',
         referencia: solicitud.cuenta_destino || '',
