@@ -13,7 +13,7 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
   nombre: 'SOLICITUD DE PAGO TARJETAS N09 Y TOKA',
   descripcion: 'Plantilla especializada para pagos a proveedores de tarjetas N09 y fondeo de tarjeta TOKA',
   version: '1.0.0',
-  activa: true,
+  activa: false,
   icono: CreditCard,
   color: 'blue',
   categoria: 'Pagos Corporativos',
