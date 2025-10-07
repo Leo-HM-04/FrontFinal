@@ -115,34 +115,19 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
   //   ...función no utilizada...
   // };
 
-  // InfoField mejorado para mostrar ayuda, placeholder y opciones
+  // InfoField simplificado y limpio
   const InfoField: React.FC<{
     label: string;
     value: string | number | null | undefined;
-    ayuda?: string;
-    placeholder?: string;
-    opciones?: Array<{ valor: string; etiqueta: string; descripcion?: string }>;
     className?: string;
     icon?: React.ReactNode;
-  }> = ({ label, value, ayuda, placeholder, opciones, className = '', icon }) => (
+  }> = ({ label, value, className = '', icon }) => (
     <div className={`bg-white/80 p-3 rounded border border-blue-100 flex flex-col gap-1 ${className}`}>
       <div className="flex items-center gap-2">
         {icon && <span className="text-blue-600">{icon}</span>}
         <span className="text-xs uppercase tracking-wider text-blue-700/70 block font-medium">{label}</span>
       </div>
       <p className="text-blue-900 font-medium text-sm">{value !== undefined && value !== null && value !== '' ? value : 'No especificado'}</p>
-      {placeholder && <span className="text-xs text-gray-400">Placeholder: {placeholder}</span>}
-      {ayuda && <span className="text-xs text-blue-500">Ayuda: {ayuda}</span>}
-      {opciones && opciones.length > 0 && (
-        <div className="mt-1">
-          <span className="text-xs text-blue-700 font-semibold">Opciones:</span>
-          <ul className="list-disc ml-4 text-xs text-blue-800">
-            {opciones.map(opt => (
-              <li key={opt.valor}><span className="font-bold">{opt.etiqueta}</span>{opt.descripcion ? ` - ${opt.descripcion}` : ''}</li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 
@@ -267,27 +252,44 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                         ? (solicitud as { metodos_pago?: MetodoPago[] }).metodos_pago!
                         : [];
                       return (
-                        <div key={campo.id} className="bg-white/80 p-3 rounded border border-blue-100 flex flex-col gap-2">
+                        <div key={campo.id} className="bg-blue-50 p-4 rounded-lg border border-blue-200 flex flex-col gap-3 col-span-full">
                           <div className="flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-blue-600" />
-                            <span className="text-xs uppercase tracking-wider text-blue-700/70 block font-medium">{campo.etiqueta}</span>
+                            <FileText className="w-5 h-5 text-blue-600" />
+                            <span className="text-sm font-bold text-blue-900 uppercase tracking-wide">{campo.etiqueta}</span>
                           </div>
                           {metodos.length === 0 ? (
-                            <p className="text-blue-900 font-medium text-sm">No especificado</p>
+                            <p className="text-blue-700 text-sm">No se han especificado métodos de pago</p>
                           ) : (
-                            <ul className="list-disc ml-4 text-sm text-blue-900">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                               {metodos.map((metodo: MetodoPago, idx: number) => (
-                                <li key={idx} className="mb-2">
-                                  <div className="font-bold">{metodo.tipo || 'Método'}</div>
-                                  {metodo.monto && <div>Monto: {formatCurrency(metodo.monto)}</div>}
-                                  {metodo.banco && <div>Banco: {metodo.banco}</div>}
-                                  {metodo.referencia && <div>Referencia: {metodo.referencia}</div>}
-                                  {/* Agrega aquí más campos según la estructura de cada método */}
-                                </li>
+                                <div key={idx} className="bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
+                                  <div className="font-bold text-blue-900 mb-2 text-base">
+                                    {metodo.tipo || `Método ${idx + 1}`}
+                                  </div>
+                                  <div className="space-y-1 text-sm text-blue-800">
+                                    {metodo.monto && (
+                                      <div className="flex justify-between">
+                                        <span className="text-blue-600">Monto:</span>
+                                        <span className="font-semibold">{formatCurrency(metodo.monto)}</span>
+                                      </div>
+                                    )}
+                                    {metodo.banco && (
+                                      <div className="flex justify-between">
+                                        <span className="text-blue-600">Banco:</span>
+                                        <span className="font-medium">{metodo.banco}</span>
+                                      </div>
+                                    )}
+                                    {metodo.referencia && (
+                                      <div className="flex justify-between">
+                                        <span className="text-blue-600">Referencia:</span>
+                                        <span className="font-medium">{metodo.referencia}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           )}
-                          {campo.ayuda && <span className="text-xs text-blue-500">Ayuda: {campo.ayuda}</span>}
                         </div>
                       );
                     }
@@ -297,9 +299,6 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
                         key={campo.id}
                         label={campo.etiqueta}
                         value={solicitud[campo.nombre as keyof SolicitudPolizasData] as string | number | undefined}
-                        ayuda={campo.ayuda}
-                        placeholder={campo.placeholder}
-                        opciones={campo.opciones}
                         icon={<FileText className="w-4 h-4" />}
                       />
                     );
