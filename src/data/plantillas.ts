@@ -980,41 +980,24 @@ export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
           }
         },
         {
-          id: 'titular_poliza',
-          nombre: 'titular_poliza',
+          id: 'titular_cuenta',
+          nombre: 'titular_cuenta',
           tipo: 'select',
-          etiqueta: 'Titular de la Póliza',
+          etiqueta: 'Titular de la Cuenta',
           ayuda: 'Seleccione la aseguradora correspondiente',
           valorPorDefecto: '',
           validaciones: {
             requerido: true,
-            mensaje: 'Seleccione el titular de la póliza'
+            mensaje: 'Seleccione el titular de la cuenta'
           },
           opciones: [
-            { valor: 'GNP', etiqueta: 'GNP' },
-            { valor: 'ZURICH', etiqueta: 'ZURICH' },
-            { valor: 'AXA', etiqueta: 'AXA' },
-            { valor: 'SEGUROS MONTERREY', etiqueta: 'Seguros Monterrey' },
-            { valor: 'QUALITAS', etiqueta: 'Qualitas' },
-            { valor: 'ALLIANZ', etiqueta: 'Allianz' }
+            { valor: 'gnp', etiqueta: 'GNP' },
+            { valor: 'zurich', etiqueta: 'ZURICH' },
+            { valor: 'axa', etiqueta: 'AXA' },
+            { valor: 'seguros_monterrey', etiqueta: 'Seguros Monterrey' },
+            { valor: 'qualitas', etiqueta: 'Qualitas' },
+            { valor: 'allianz', etiqueta: 'Allianz' }
           ],
-          estilos: {
-            ancho: 'medio'
-          }
-        },
-        {
-          id: 'numero_poliza',
-          nombre: 'numero_poliza',
-          tipo: 'texto',
-          etiqueta: 'Número de Póliza',
-          placeholder: 'Ej. POL-123456',
-          ayuda: 'Número de la póliza a pagar',
-          valorPorDefecto: '',
-          validaciones: {
-            requerido: false,
-            minLength: 2,
-            mensaje: 'Ingrese el número de póliza'
-          },
           estilos: {
             ancho: 'medio'
           }
@@ -1031,78 +1014,6 @@ export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
             requerido: true,
             minLength: 2,
             mensaje: 'Ingrese el nombre de la empresa emisora'
-          },
-          estilos: {
-            ancho: 'medio'
-          }
-        },
-        {
-          id: 'tipo_movimiento',
-          nombre: 'tipo_movimiento',
-          tipo: 'select',
-          etiqueta: 'Tipo de Movimiento',
-          ayuda: 'Seleccione el tipo de movimiento',
-          valorPorDefecto: '',
-          validaciones: {
-            requerido: false,
-            mensaje: 'Seleccione el tipo de movimiento'
-          },
-          opciones: [
-            { valor: 'PAGO', etiqueta: 'Pago' },
-            { valor: 'REEMBOLSO', etiqueta: 'Reembolso' },
-            { valor: 'AJUSTE', etiqueta: 'Ajuste' },
-            { valor: 'OTRO', etiqueta: 'Otro' }
-          ],
-          estilos: {
-            ancho: 'medio'
-          }
-        },
-        {
-          id: 'banco_destino',
-          nombre: 'banco_destino',
-          tipo: 'texto',
-          etiqueta: 'Banco Destino',
-          placeholder: 'Ej. BBVA, Santander, MIFEL',
-          ayuda: 'Banco donde se realizará el depósito',
-          valorPorDefecto: '',
-          validaciones: {
-            requerido: false,
-            minLength: 2,
-            mensaje: 'Ingrese el banco destino'
-          },
-          estilos: {
-            ancho: 'medio'
-          }
-        },
-        {
-          id: 'convenio',
-          nombre: 'convenio',
-          tipo: 'texto',
-          etiqueta: 'Convenio',
-          placeholder: 'Ej. CONV-12345',
-          ayuda: 'Número de convenio si aplica',
-          valorPorDefecto: '',
-          validaciones: {
-            requerido: false,
-            minLength: 2,
-            mensaje: 'Ingrese el número de convenio'
-          },
-          estilos: {
-            ancho: 'medio'
-          }
-        },
-        {
-          id: 'referencia',
-          nombre: 'referencia',
-          tipo: 'texto',
-          etiqueta: 'Referencia',
-          placeholder: 'Ej. REF-123456 o cuenta CLABE',
-          ayuda: 'Número de referencia o cuenta destino',
-          valorPorDefecto: '',
-          validaciones: {
-            requerido: false,
-            minLength: 2,
-            mensaje: 'Ingrese la referencia'
           },
           estilos: {
             ancho: 'medio'

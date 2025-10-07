@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Shield, DollarSign, FileText, ExternalLink, FileCheck } from 'lucide-react';
+import { X, Shield, DollarSign, Building2, FileText, ExternalLink, FileCheck } from 'lucide-react';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
 import Image from 'next/image';
-import { plantillaPagoPolizasGnp } from '@/data/plantillas';
 
 // Tipos específicos para la plantilla de Pólizas
 export interface SolicitudPolizasData {
@@ -51,16 +50,21 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
   const [archivoPreview, setArchivoPreview] = useState<SolicitudArchivo | null>(null);
   const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
   const [loadingComprobantes, setLoadingComprobantes] = useState(false);
-  // const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null); // No se usa
+  const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
   const [comprobantePreview, setComprobantePreview] = useState<Comprobante | null>(null);
   // Cargar comprobantes si la solicitud está pagada
   const fetchComprobantes = useCallback(async () => {
-  setLoadingComprobantes(true);
+    setLoadingComprobantes(true);
+    setErrorComprobantes(null);
     try {
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
       setComprobantes(data);
-    } catch {
-      // Error al cargar comprobantes, se ignora porque no se usa el mensaje
+    } catch (error) {
+      let msg = 'Error al cargar comprobantes';
+      if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+        msg = (error as { message: string }).message;
+      }
+      setErrorComprobantes(msg);
     } finally {
       setLoadingComprobantes(false);
     }
@@ -111,23 +115,32 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
 
 
 
-  // const getTitularLabel = (titular: string): string => {
-  //   ...función no utilizada...
-  // };
+  const getTitularLabel = (titular: string): string => {
+    const aseguradoras: Record<string, string> = {
+      'qualitas': 'Qualitas Compañía de Seguros',
+      'allianz': 'Allianz Seguros',
+      'gnp': 'GNP Seguros',
+      'axa': 'AXA Seguros',
+      'mapfre': 'MAPFRE Seguros'
+    };
+    
+    if (!titular) return 'No especificada';
+    const key = titular.toLowerCase();
+    return aseguradoras[key] || titular;
+  };
 
-  // InfoField simplificado y limpio
   const InfoField: React.FC<{
     label: string;
     value: string | number | null | undefined;
     className?: string;
     icon?: React.ReactNode;
   }> = ({ label, value, className = '', icon }) => (
-    <div className={`bg-white/80 p-3 rounded border border-blue-100 flex flex-col gap-1 ${className}`}>
-      <div className="flex items-center gap-2">
-        {icon && <span className="text-blue-600">{icon}</span>}
-        <span className="text-xs uppercase tracking-wider text-blue-700/70 block font-medium">{label}</span>
+    <div className={`bg-white/80 p-3 rounded border border-blue-100 flex items-center gap-2 ${className}`}>
+      {icon && <span className="text-blue-600">{icon}</span>}
+      <div>
+        <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">{label}</span>
+        <p className="text-blue-900 font-medium text-sm">{value || '-'}</p>
       </div>
-      <p className="text-blue-900 font-medium text-sm">{value !== undefined && value !== null && value !== '' ? value : 'No especificado'}</p>
     </div>
   );
 
@@ -221,90 +234,12 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Recorrer todos los campos de la plantilla con tipado explícito usando import estático */}
-              {(
-                plantillaPagoPolizasGnp.secciones as Array<{
-                  id: string;
-                  titulo: string;
-                  descripcion: string;
-                  campos: Array<{
-                    id: string;
-                    nombre: keyof SolicitudPolizasData | 'metodos_pago';
-                    etiqueta: string;
-                    ayuda?: string;
-                    placeholder?: string;
-                    opciones?: Array<{ valor: string; etiqueta: string; descripcion?: string }>;
-                  }>;
-                }>
-              ).map((seccion) => (
-                <React.Fragment key={seccion.id}>
-                  {seccion.campos.map((campo) => {
-                    // Render especial para métodos de pago
-                    if (campo.nombre === 'metodos_pago' && Array.isArray((solicitud as { metodos_pago?: unknown[] }).metodos_pago)) {
-                      type MetodoPago = {
-                        tipo?: string;
-                        monto?: number;
-                        banco?: string;
-                        referencia?: string;
-                        [key: string]: unknown;
-                      };
-                      const metodos: MetodoPago[] = Array.isArray((solicitud as { metodos_pago?: MetodoPago[] }).metodos_pago)
-                        ? (solicitud as { metodos_pago?: MetodoPago[] }).metodos_pago!
-                        : [];
-                      return (
-                        <div key={campo.id} className="bg-blue-50 p-4 rounded-lg border border-blue-200 flex flex-col gap-3 col-span-full">
-                          <div className="flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-blue-600" />
-                            <span className="text-sm font-bold text-blue-900 uppercase tracking-wide">{campo.etiqueta}</span>
-                          </div>
-                          {metodos.length === 0 ? (
-                            <p className="text-blue-700 text-sm">No se han especificado métodos de pago</p>
-                          ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {metodos.map((metodo: MetodoPago, idx: number) => (
-                                <div key={idx} className="bg-white p-3 rounded-lg border border-blue-100 shadow-sm">
-                                  <div className="font-bold text-blue-900 mb-2 text-base">
-                                    {metodo.tipo || `Método ${idx + 1}`}
-                                  </div>
-                                  <div className="space-y-1 text-sm text-blue-800">
-                                    {metodo.monto && (
-                                      <div className="flex justify-between">
-                                        <span className="text-blue-600">Monto:</span>
-                                        <span className="font-semibold">{formatCurrency(metodo.monto)}</span>
-                                      </div>
-                                    )}
-                                    {metodo.banco && (
-                                      <div className="flex justify-between">
-                                        <span className="text-blue-600">Banco:</span>
-                                        <span className="font-medium">{metodo.banco}</span>
-                                      </div>
-                                    )}
-                                    {metodo.referencia && (
-                                      <div className="flex justify-between">
-                                        <span className="text-blue-600">Referencia:</span>
-                                        <span className="font-medium">{metodo.referencia}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    }
-                    // Render normal para los demás campos
-                    return (
-                      <InfoField
-                        key={campo.id}
-                        label={campo.etiqueta}
-                        value={solicitud[campo.nombre as keyof SolicitudPolizasData] as string | number | undefined}
-                        icon={<FileText className="w-4 h-4" />}
-                      />
-                    );
-                  })}
-                </React.Fragment>
-              ))}
+              <InfoField label="Asunto" value={solicitud.asunto || solicitud.concepto} icon={<FileText className="w-4 h-4" />} />
+              <InfoField label="Titular de la Cuenta (Aseguradora)" value={getTitularLabel(solicitud.titular_poliza)} icon={<Shield className="w-4 h-4" />} />
+              <InfoField label="Empresa Emisora del Pago" value={solicitud.empresa_emisora} icon={<Building2 className="w-4 h-4" />} />
+              <InfoField label="Banco Destino" value={solicitud.banco_destino} icon={<Building2 className="w-4 h-4" />} />
+              <InfoField label="Convenio" value={solicitud.convenio} icon={<FileText className="w-4 h-4" />} />
+              <InfoField label="Referencia" value={solicitud.referencia} icon={<FileText className="w-4 h-4" />} />
             </div>
           </div>
           {/* Información de Montos */}
