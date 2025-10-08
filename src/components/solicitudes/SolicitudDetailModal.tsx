@@ -26,6 +26,7 @@ import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
 import { PlantillaComisionesDetailModal } from '../plantillas/PlantillaComisionesDetailModal';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { PlantillaPolizasDetailModal, SolicitudPolizasData } from '@/components/plantillas/PlantillaPolizasDetailModal';
+import { PlantillaTransferenciaDetailModal, SolicitudTransferenciaData, CuentaTransferencia } from '@/components/plantillas/PlantillaTransferenciaDetailModal';
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
@@ -560,6 +561,74 @@ function isComisionesSolicitud(solicitud: Solicitud | null): boolean {
   return false;
 }
 
+// Función auxiliar para detectar si es REGRESOS - TRANSFERENCIA
+function isTransferenciaSolicitud(solicitud: Solicitud & { tipo_plantilla?: string }): boolean {
+  console.log(`🔍 [TRANSFERENCIA DETECCIÓN] Iniciando detección para solicitud ${solicitud.id_solicitud}`);
+  
+  // 1. Verificar por plantilla_id directamente
+  const plantillaId = detectarPlantillaId(solicitud);
+  console.log(`🔍 [TRANSFERENCIA DETECCIÓN] plantillaId detectado: ${plantillaId}`);
+  
+  if (plantillaId === 'regresos-transferencia') {
+    console.log('✅ [TRANSFERENCIA DETECCIÓN] Detectada por plantillaId = regresos-transferencia');
+    return true;
+  }
+
+  // 2. Verificar por tipo_plantilla
+  console.log(`🔍 [TRANSFERENCIA DETECCIÓN] tipo_plantilla: ${solicitud.tipo_plantilla}`);
+  if (solicitud.tipo_plantilla === 'REGRESOS_TRANSFERENCIA' || solicitud.tipo_plantilla === 'regresos-transferencia') {
+    console.log('✅ [TRANSFERENCIA DETECCIÓN] Detectada por tipo_plantilla');
+    return true;
+  }
+
+  // 3. Verificar por análisis de plantilla_datos
+  console.log(`🔍 [TRANSFERENCIA DETECCIÓN] plantilla_datos: ${solicitud.plantilla_datos}`);
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' 
+        ? JSON.parse(solicitud.plantilla_datos) 
+        : solicitud.plantilla_datos;
+      
+      console.log('🔍 [TRANSFERENCIA DETECCIÓN] Datos parseados de plantilla_datos:', plantillaData);
+      
+      // Buscar indicadores de transferencia: cuentas_transferencia array
+      const esTransferencia = plantillaData.templateType === 'regresos-transferencia' || 
+             plantillaData.isTransferencia === true || 
+             (plantillaData.cuentas_transferencia && Array.isArray(plantillaData.cuentas_transferencia));
+      
+      if (esTransferencia) {
+        console.log('✅ [TRANSFERENCIA DETECCIÓN] Detectada por análisis de plantilla_datos');
+        return true;
+      }
+    } catch (error) {
+      console.log('⚠️ [TRANSFERENCIA DETECCIÓN] Error parseando plantilla_datos:', error);
+    }
+  }
+  
+  // 4. Verificar por tipo_pago_descripcion
+  console.log(`🔍 [TRANSFERENCIA DETECCIÓN] tipo_pago_descripcion: ${solicitud.tipo_pago_descripcion}`);
+  if (solicitud.tipo_pago_descripcion && (
+      solicitud.tipo_pago_descripcion.toLowerCase().includes('regresos-transferencia') || 
+      solicitud.tipo_pago_descripcion.toLowerCase().includes('regresos transferencia')
+    )) {
+    console.log('✅ [TRANSFERENCIA DETECCIÓN] Detectada por tipo_pago_descripcion');
+    return true;
+  }
+  
+  // 5. Verificar por concepto que contenga indicadores de transferencia múltiple
+  console.log(`🔍 [TRANSFERENCIA DETECCIÓN] concepto: ${solicitud.concepto}`);
+  if (solicitud.concepto && (
+      solicitud.concepto.includes('cuentas de transferencia') ||
+      solicitud.concepto.toLowerCase().includes('regresos transferencia')
+    )) {
+    console.log('✅ [TRANSFERENCIA DETECCIÓN] Detectada por concepto');
+    return true;
+  }
+  
+  console.log('❌ [TRANSFERENCIA DETECCIÓN] No se detectó como REGRESOS - TRANSFERENCIA');
+  return false;
+}
+
 // Función auxiliar para detectar si es PAGO POLIZAS
 function isPolizasSolicitud(solicitud: Solicitud & { tipo_plantilla?: string }): boolean {
   console.log(`🔍 [POLIZAS DETECCIÓN] Iniciando detección para solicitud ${solicitud.id_solicitud}`);
@@ -839,6 +908,93 @@ export function SolicitudDetailModal({
       return (
         <PlantillaN09TokaDetailModal
           solicitud={solicitudN09Toka}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+    // Si no se pudo mapear, mostrar modal estándar
+  }
+
+  // Renderizado condicional del modal REGRESOS - TRANSFERENCIA
+  if (isOpen && solicitud && isTransferenciaSolicitud(solicitud)) {
+    console.log('🎯 [TRANSFERENCIA] Detectada solicitud REGRESOS - TRANSFERENCIA, procesando datos...');
+    
+    let solicitudTransferencia: SolicitudTransferenciaData | null = null;
+    
+    // Verificar que solicitud no sea null
+    if (!solicitud) return null;
+    
+    // Intentar mapear los datos desde plantilla_datos primero
+    if (typeof solicitud === 'object' && solicitud.plantilla_datos) {
+      try {
+        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        console.log('📄 [TRANSFERENCIA] Datos de plantilla encontrados:', plantillaData);
+        
+        // Usar datos de plantilla si están disponibles
+        solicitudTransferencia = {
+          id_solicitud: solicitud.id_solicitud,
+          asunto: plantillaData.asunto || '',
+          cuentas_transferencia: plantillaData.cuentas_transferencia || [],
+          archivos_adjuntos: plantillaData.archivos_adjuntos || [],
+          estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+          folio: solicitud.folio || '',
+          departamento: solicitud.departamento || '',
+          concepto: solicitud.concepto || '',
+          observaciones: solicitud.comentario_aprobador || '',
+          fecha_creacion: solicitud.fecha_creacion || '',
+          fecha_actualizacion: solicitud.updated_at || '',
+          usuario_creacion: solicitud.usuario_nombre || '',
+          usuario_actualizacion: solicitud.aprobador_nombre || '',
+        };
+      } catch {
+        console.log('❌ [TRANSFERENCIA] Error parseando plantilla_datos, usando datos base');
+      }
+    }
+    
+    // Si no se pudo mapear desde plantilla_datos, usar datos básicos de la solicitud
+    if (!solicitudTransferencia) {
+      console.log('🔄 [TRANSFERENCIA] Construyendo desde datos básicos de solicitud...');
+      
+      // Intentar extraer información del concepto si es posible
+      const cuentas: CuentaTransferencia[] = [];
+      
+      // Si hay cuenta_destino, banco_destino y empresa_a_pagar, crear una cuenta básica
+      if (solicitud.cuenta_destino && solicitud.banco_destino) {
+        cuentas.push({
+          beneficiario: solicitud.empresa_a_pagar || solicitud.nombre_persona || 'Sin especificar',
+          tipo_cuenta: solicitud.tipo_cuenta_destino === 'CLABE' ? 'clabe' : 'cuenta',
+          numero_cuenta: solicitud.cuenta_destino,
+          banco_destino: solicitud.banco_destino,
+          monto: solicitud.monto || 0,
+          tipo_tarjeta: ''
+        });
+      }
+      
+      solicitudTransferencia = {
+        id_solicitud: solicitud.id_solicitud,
+        asunto: 'REGRESOS - TRANSFERENCIA',
+        cuentas_transferencia: cuentas,
+        archivos_adjuntos: [],
+        estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+        folio: solicitud.folio || '',
+        departamento: solicitud.departamento || '',
+        concepto: solicitud.concepto || '',
+        observaciones: solicitud.comentario_aprobador || '',
+        fecha_creacion: solicitud.fecha_creacion || '',
+        fecha_actualizacion: solicitud.updated_at || '',
+        usuario_creacion: solicitud.usuario_nombre || '',
+        usuario_actualizacion: solicitud.aprobador_nombre || '',
+      };
+      
+      console.log('🔧 [TRANSFERENCIA] Datos construidos:', solicitudTransferencia);
+    }
+    
+    if (solicitudTransferencia) {
+      console.log('✅ [TRANSFERENCIA] Mostrando modal REGRESOS - TRANSFERENCIA con datos:', solicitudTransferencia);
+      return (
+        <PlantillaTransferenciaDetailModal
+          solicitud={solicitudTransferencia}
           isOpen={isOpen}
           onClose={onClose}
         />
