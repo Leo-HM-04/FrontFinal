@@ -27,6 +27,7 @@ import { PlantillaComisionesDetailModal } from '../plantillas/PlantillaComisione
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { PlantillaPolizasDetailModal, SolicitudPolizasData } from '@/components/plantillas/PlantillaPolizasDetailModal';
 import { PlantillaTransferenciaDetailModal, SolicitudTransferenciaData, CuentaTransferencia } from '@/components/plantillas/PlantillaTransferenciaDetailModal';
+import { PlantillaEfectivoDetailModal, SolicitudEfectivoData } from '@/components/plantillas/PlantillaEfectivoDetailModal';
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
@@ -629,6 +630,74 @@ function isTransferenciaSolicitud(solicitud: Solicitud & { tipo_plantilla?: stri
   return false;
 }
 
+// Función auxiliar para detectar si es REGRESOS - EFECTIVO
+function isEfectivoSolicitud(solicitud: Solicitud & { tipo_plantilla?: string }): boolean {
+  console.log(`🔍 [EFECTIVO DETECCIÓN] Iniciando detección para solicitud ${solicitud.id_solicitud}`);
+  
+  // 1. Verificar por plantilla_id directamente
+  const plantillaId = detectarPlantillaId(solicitud);
+  console.log(`🔍 [EFECTIVO DETECCIÓN] plantillaId detectado: ${plantillaId}`);
+  
+  if (plantillaId === 'regresos-efectivo') {
+    console.log('✅ [EFECTIVO DETECCIÓN] Detectada por plantillaId = regresos-efectivo');
+    return true;
+  }
+
+  // 2. Verificar por tipo_plantilla
+  console.log(`🔍 [EFECTIVO DETECCIÓN] tipo_plantilla: ${solicitud.tipo_plantilla}`);
+  if (solicitud.tipo_plantilla === 'REGRESOS_EFECTIVO' || solicitud.tipo_plantilla === 'regresos-efectivo') {
+    console.log('✅ [EFECTIVO DETECCIÓN] Detectada por tipo_plantilla');
+    return true;
+  }
+
+  // 3. Verificar por análisis de plantilla_datos
+  console.log(`🔍 [EFECTIVO DETECCIÓN] plantilla_datos: ${solicitud.plantilla_datos}`);
+  if (solicitud.plantilla_datos) {
+    try {
+      const plantillaData = typeof solicitud.plantilla_datos === 'string' 
+        ? JSON.parse(solicitud.plantilla_datos) 
+        : solicitud.plantilla_datos;
+      
+      console.log('🔍 [EFECTIVO DETECCIÓN] Datos parseados de plantilla_datos:', plantillaData);
+      
+      // Buscar indicadores de efectivo: monto_efectivo, viaticos, persona_recibe
+      const esEfectivo = plantillaData.templateType === 'regresos-efectivo' || 
+             plantillaData.isEfectivo === true || 
+             (plantillaData.monto_efectivo !== undefined && plantillaData.persona_recibe);
+      
+      if (esEfectivo) {
+        console.log('✅ [EFECTIVO DETECCIÓN] Detectada por análisis de plantilla_datos');
+        return true;
+      }
+    } catch (error) {
+      console.log('⚠️ [EFECTIVO DETECCIÓN] Error parseando plantilla_datos:', error);
+    }
+  }
+  
+  // 4. Verificar por tipo_pago_descripcion
+  console.log(`🔍 [EFECTIVO DETECCIÓN] tipo_pago_descripcion: ${solicitud.tipo_pago_descripcion}`);
+  if (solicitud.tipo_pago_descripcion && (
+      solicitud.tipo_pago_descripcion.toLowerCase().includes('regresos-efectivo') || 
+      solicitud.tipo_pago_descripcion.toLowerCase().includes('regresos efectivo')
+    )) {
+    console.log('✅ [EFECTIVO DETECCIÓN] Detectada por tipo_pago_descripcion');
+    return true;
+  }
+  
+  // 5. Verificar por concepto que contenga indicadores de efectivo
+  console.log(`🔍 [EFECTIVO DETECCIÓN] concepto: ${solicitud.concepto}`);
+  if (solicitud.concepto && (
+      solicitud.concepto.toLowerCase().includes('regreso en efectivo') ||
+      solicitud.concepto.toLowerCase().includes('regresos efectivo')
+    )) {
+    console.log('✅ [EFECTIVO DETECCIÓN] Detectada por concepto');
+    return true;
+  }
+  
+  console.log('❌ [EFECTIVO DETECCIÓN] No se detectó como REGRESOS - EFECTIVO');
+  return false;
+}
+
 // Función auxiliar para detectar si es PAGO POLIZAS
 function isPolizasSolicitud(solicitud: Solicitud & { tipo_plantilla?: string }): boolean {
   console.log(`🔍 [POLIZAS DETECCIÓN] Iniciando detección para solicitud ${solicitud.id_solicitud}`);
@@ -995,6 +1064,88 @@ export function SolicitudDetailModal({
       return (
         <PlantillaTransferenciaDetailModal
           solicitud={solicitudTransferencia}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+    // Si no se pudo mapear, mostrar modal estándar
+  }
+
+  // Renderizado condicional del modal REGRESOS - EFECTIVO
+  if (isOpen && solicitud && isEfectivoSolicitud(solicitud)) {
+    console.log('🎯 [EFECTIVO] Detectada solicitud REGRESOS - EFECTIVO, procesando datos...');
+    
+    let solicitudEfectivo: SolicitudEfectivoData | null = null;
+    
+    // Verificar que solicitud no sea null
+    if (!solicitud) return null;
+    
+    // Intentar mapear los datos desde plantilla_datos primero
+    if (typeof solicitud === 'object' && solicitud.plantilla_datos) {
+      try {
+        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        console.log('📄 [EFECTIVO] Datos de plantilla encontrados:', plantillaData);
+        
+        // Usar datos de plantilla si están disponibles
+        solicitudEfectivo = {
+          id_solicitud: solicitud.id_solicitud,
+          asunto: plantillaData.asunto || '',
+          cliente: plantillaData.cliente || '',
+          persona_recibe: plantillaData.persona_recibe || '',
+          fecha_entrega: plantillaData.fecha_entrega || '',
+          monto_efectivo: plantillaData.monto_efectivo || 0,
+          viaticos: plantillaData.viaticos || 0,
+          elementos_adicionales: plantillaData.elementos_adicionales || '',
+          archivos_adjuntos: plantillaData.archivos_adjuntos || [],
+          estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+          folio: solicitud.folio || '',
+          departamento: solicitud.departamento || '',
+          concepto: solicitud.concepto || '',
+          observaciones: solicitud.comentario_aprobador || '',
+          fecha_creacion: solicitud.fecha_creacion || '',
+          fecha_actualizacion: solicitud.updated_at || '',
+          usuario_creacion: solicitud.usuario_nombre || '',
+          usuario_actualizacion: solicitud.aprobador_nombre || '',
+        };
+      } catch {
+        console.log('❌ [EFECTIVO] Error parseando plantilla_datos, usando datos base');
+      }
+    }
+    
+    // Si no se pudo mapear desde plantilla_datos, usar datos básicos de la solicitud
+    if (!solicitudEfectivo) {
+      console.log('🔄 [EFECTIVO] Construyendo desde datos básicos de solicitud...');
+      
+      solicitudEfectivo = {
+        id_solicitud: solicitud.id_solicitud,
+        asunto: 'REGRESOS - EFECTIVO',
+        cliente: solicitud.empresa_a_pagar || '',
+        persona_recibe: solicitud.nombre_persona || '',
+        fecha_entrega: solicitud.fecha_limite_pago || '',
+        monto_efectivo: solicitud.monto || 0,
+        viaticos: 0,
+        elementos_adicionales: '',
+        archivos_adjuntos: [],
+        estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
+        folio: solicitud.folio || '',
+        departamento: solicitud.departamento || '',
+        concepto: solicitud.concepto || '',
+        observaciones: solicitud.comentario_aprobador || '',
+        fecha_creacion: solicitud.fecha_creacion || '',
+        fecha_actualizacion: solicitud.updated_at || '',
+        usuario_creacion: solicitud.usuario_nombre || '',
+        usuario_actualizacion: solicitud.aprobador_nombre || '',
+      };
+      
+      console.log('🔧 [EFECTIVO] Datos construidos:', solicitudEfectivo);
+    }
+    
+    if (solicitudEfectivo) {
+      console.log('✅ [EFECTIVO] Mostrando modal REGRESOS - EFECTIVO con datos:', solicitudEfectivo);
+      return (
+        <PlantillaEfectivoDetailModal
+          solicitud={solicitudEfectivo}
           isOpen={isOpen}
           onClose={onClose}
         />
