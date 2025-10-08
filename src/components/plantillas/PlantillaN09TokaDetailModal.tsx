@@ -248,7 +248,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     }
   }, [solicitud, handleError]);
 
-  // Función para obtener comprobantes
+  // Función para obtener comprobantes (para TOKA, usa archivos adjuntos de solicitudes_n09_toka_archivos)
   const fetchComprobantes = useCallback(async () => {
     if (!solicitud || !solicitud.id_solicitud) return;
     
@@ -264,44 +264,30 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
     try {
-      // 🔍 PRIMERO: Revisar si la solicitud tiene soporte_url (nuevo sistema para N09/TOKA)
-      if (solicitudExtended.soporte_url) {
-        console.log('✅ Comprobante encontrado en soporte_url:', solicitudExtended.soporte_url);
-        setComprobantes([{
-          id_comprobante: 0, // ID ficticio para comprobantes en soporte_url
-          id_solicitud: solicitud.id_solicitud,
-          ruta_archivo: solicitudExtended.soporte_url,
-          nombre_archivo: 'Comprobante de pago',
-          fecha_subida: solicitud.fecha_actualizacion || solicitud.fecha_creacion || new Date().toISOString(),
-          usuario_subio: 0, // Usuario desconocido para comprobantes en soporte_url
-          comentario: 'Comprobante de pago N09/TOKA'
-        }]);
-        setLoadingComprobantes(false);
-        setErrorComprobantes(null);
-        return;
-      }
-
-      // 🔍 SEGUNDO: Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
-      console.log('⚠️ No hay soporte_url, buscando en tabla comprobantes...');
-      const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
+      // 🔍 Para TOKA: Obtener archivos de solicitudes_n09_toka_archivos
+      console.log('📋 Obteniendo archivos TOKA para comprobantes desde /uploads/solicitudes-n09-toka/');
+      const archivos = await SolicitudN09TokaArchivosService.obtenerArchivos(solicitud.id_solicitud);
       
-      // Filtrar comprobantes que puedan ser de solicitudes normales con el mismo ID
-      // Solo incluir comprobantes que fueron subidos DESPUÉS de la creación de esta solicitud N09/TOKA
-      const fechaCreacionSolicitud = new Date(solicitud.fecha_creacion || '').getTime();
-      const comprobantesFiltrados = data.filter(comprobante => {
-        const fechaComprobante = new Date(comprobante.fecha_subida).getTime();
-        return fechaComprobante >= fechaCreacionSolicitud;
-      });
+      // Convertir archivos TOKA al formato de comprobantes para mantener compatibilidad con el render
+      const comprobantesConvertidos = archivos.map(archivo => ({
+        id_comprobante: archivo.id_archivo,
+        id_solicitud: solicitud.id_solicitud || 0,
+        ruta_archivo: archivo.ruta_archivo, // Ya tiene formato /uploads/solicitudes-n09-toka/xxx.pdf
+        nombre_archivo: archivo.nombre_archivo,
+        fecha_subida: archivo.fecha_subida,
+        usuario_subio: 0,
+        comentario: `Archivo TOKA: ${archivo.tipo_archivo}`
+      }));
       
-      console.log(`🔍 Comprobantes N09/TOKA filtrados: ${comprobantesFiltrados.length}/${data.length} (después de ${solicitud.fecha_creacion})`);
-      setComprobantes(comprobantesFiltrados);
+      console.log(`✅ Archivos TOKA convertidos a comprobantes: ${comprobantesConvertidos.length}`);
+      setComprobantes(comprobantesConvertidos);
     } catch (error) {
-      console.error('❌ Error cargando comprobantes:', error);
-      setErrorComprobantes('Error al cargar comprobantes');
+      console.error('❌ Error cargando archivos TOKA:', error);
+      setErrorComprobantes('Error al cargar archivos');
     } finally {
       setLoadingComprobantes(false);
     }
-  }, [solicitud, solicitudExtended]);
+  }, [solicitud]);
 
   useEffect(() => {
     if (isOpen && solicitud) {
