@@ -16,6 +16,7 @@ interface SolicitudN09TokaExtended extends SolicitudN09TokaData {
   id_aprobador?: number;
   fecha_aprobacion?: string;
   comentarios_aprobacion?: string;
+  soporte_url?: string; // URL del comprobante de pago
 }
 
 // Función para formatear moneda en pesos mexicanos
@@ -263,6 +264,25 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
     try {
+      // 🔍 PRIMERO: Revisar si la solicitud tiene soporte_url (nuevo sistema para N09/TOKA)
+      if (solicitudExtended.soporte_url) {
+        console.log('✅ Comprobante encontrado en soporte_url:', solicitudExtended.soporte_url);
+        setComprobantes([{
+          id_comprobante: 0, // ID ficticio para comprobantes en soporte_url
+          id_solicitud: solicitud.id_solicitud,
+          ruta_archivo: solicitudExtended.soporte_url,
+          nombre_archivo: 'Comprobante de pago',
+          fecha_subida: solicitud.fecha_actualizacion || solicitud.fecha_creacion || new Date().toISOString(),
+          usuario_subio: 0, // Usuario desconocido para comprobantes en soporte_url
+          comentario: 'Comprobante de pago N09/TOKA'
+        }]);
+        setLoadingComprobantes(false);
+        setErrorComprobantes(null);
+        return;
+      }
+
+      // 🔍 SEGUNDO: Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+      console.log('⚠️ No hay soporte_url, buscando en tabla comprobantes...');
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
       
       // Filtrar comprobantes que puedan ser de solicitudes normales con el mismo ID
@@ -275,12 +295,13 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
       
       console.log(`🔍 Comprobantes N09/TOKA filtrados: ${comprobantesFiltrados.length}/${data.length} (después de ${solicitud.fecha_creacion})`);
       setComprobantes(comprobantesFiltrados);
-    } catch {
+    } catch (error) {
+      console.error('❌ Error cargando comprobantes:', error);
       setErrorComprobantes('Error al cargar comprobantes');
     } finally {
       setLoadingComprobantes(false);
     }
-  }, [solicitud]);
+  }, [solicitud, solicitudExtended]);
 
   useEffect(() => {
     if (isOpen && solicitud) {
