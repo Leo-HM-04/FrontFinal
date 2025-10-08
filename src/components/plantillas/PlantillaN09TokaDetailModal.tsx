@@ -457,8 +457,8 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                 (() => {
                   const comprobante = comprobantes[0];
                   if (!comprobante) return null;
-                  const url = comprobante.ruta_archivo;
-                  const fileName = url.split('/').pop() || 'comprobante';
+                  const url = buildFileUrl(comprobante.ruta_archivo); // ✅ Usar buildFileUrl para construir URL correcta
+                  const fileName = comprobante.ruta_archivo.split('/').pop() || 'comprobante';
                   const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                   const isPdf = /\.pdf$/i.test(fileName);
                   return (
