@@ -85,21 +85,44 @@ export default function HistorialPagosPage() {
       await Promise.all(
         solicitudesUnicas.map(async (pago: Solicitud) => {
           if (pago.estado === 'pagada') {
-            // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
-            if (pago.soporte_url) {
-              comprobantesObj[pago.id_solicitud] = {
-                ruta_archivo: pago.soporte_url,
-                nombre_archivo: 'Comprobante de pago',
-                fecha_subida: pago.fecha_actualizacion || pago.fecha_pago
-              };
-            } else {
-              // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+            // 🔍 PASO 1: Verificar si es solicitud N09/TOKA
+            const esN09Toka = isN09TokaSolicitud(pago);
+            
+            if (esN09Toka) {
+              // Para TOKA: Obtener archivos de solicitudes_n09_toka_archivos
               try {
-                const comprobantes = await ComprobantesService.getBySolicitud(pago.id_solicitud, token);
-                if (comprobantes && comprobantes.length > 0) {
-                  comprobantesObj[pago.id_solicitud] = comprobantes[0];
+                const { default: SolicitudN09TokaArchivosService } = await import('@/services/solicitudN09TokaArchivos.service');
+                const archivos = await SolicitudN09TokaArchivosService.obtenerArchivos(pago.id_solicitud);
+                
+                if (archivos && archivos.length > 0) {
+                  // Usar el primer archivo como comprobante
+                  comprobantesObj[pago.id_solicitud] = {
+                    ruta_archivo: archivos[0].ruta_archivo,
+                    nombre_archivo: archivos[0].nombre_archivo,
+                    fecha_subida: archivos[0].fecha_subida
+                  };
                 }
-              } catch {}
+              } catch (error) {
+                console.error(`Error obteniendo archivos TOKA para solicitud ${pago.id_solicitud}:`, error);
+              }
+            } else {
+              // Para solicitudes NO-TOKA: Sistema original
+              // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+              if (pago.soporte_url) {
+                comprobantesObj[pago.id_solicitud] = {
+                  ruta_archivo: pago.soporte_url,
+                  nombre_archivo: 'Comprobante de pago',
+                  fecha_subida: pago.fecha_actualizacion || pago.fecha_pago
+                };
+              } else {
+                // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+                try {
+                  const comprobantes = await ComprobantesService.getBySolicitud(pago.id_solicitud, token);
+                  if (comprobantes && comprobantes.length > 0) {
+                    comprobantesObj[pago.id_solicitud] = comprobantes[0];
+                  }
+                } catch {}
+              }
             }
           }
         })
