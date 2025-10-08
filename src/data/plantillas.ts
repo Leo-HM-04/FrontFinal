@@ -1117,7 +1117,7 @@ export const plantillaRegresosTransferencia: PlantillaSolicitud = {
   nombre: 'REGRESOS EN TRANSFERENCIA',
   descripcion: 'Plantilla para solicitudes de regreso de transferencias bancarias',
   version: '1.0.0',
-  activa: false ,
+  activa: true,
   categoria: 'regresos',
   icono: ArrowLeftRight,
   secciones: [
