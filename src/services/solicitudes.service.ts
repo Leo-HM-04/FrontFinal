@@ -46,8 +46,9 @@ export class SolicitudesService {
 
   static async subirFactura(id: number, factura: File, token: string): Promise<unknown> {
     const formData = new FormData();
-    formData.append('comprobante', factura); // El backend espera 'comprobante'
-    const response = await api.put(`/solicitudes/${id}/comprobante`, formData, {
+    formData.append('archivo', factura); // El backend espera 'archivo'
+    formData.append('id_solicitud', String(id));
+    const response = await api.post(`/comprobantes/subir`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`
