@@ -81,16 +81,26 @@ export default function HistorialPagosPage() {
       });
       setPagos(solicitudesUnicas);
       // Consultar comprobantes para cada solicitud pagada
-      const comprobantesObj: { [id: number]: null } = {};
+      const comprobantesObj: { [id: number]: Comprobante | null } = {};
       await Promise.all(
         solicitudesUnicas.map(async (pago: Solicitud) => {
           if (pago.estado === 'pagada') {
-            try {
-              const comprobantes = await ComprobantesService.getBySolicitud(pago.id_solicitud, token);
-              if (comprobantes && comprobantes.length > 0) {
-                comprobantesObj[pago.id_solicitud] = comprobantes[0];
-              }
-            } catch {}
+            // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+            if (pago.soporte_url) {
+              comprobantesObj[pago.id_solicitud] = {
+                ruta_archivo: pago.soporte_url,
+                nombre_archivo: 'Comprobante de pago',
+                fecha_subida: pago.fecha_actualizacion || pago.fecha_pago
+              };
+            } else {
+              // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+              try {
+                const comprobantes = await ComprobantesService.getBySolicitud(pago.id_solicitud, token);
+                if (comprobantes && comprobantes.length > 0) {
+                  comprobantesObj[pago.id_solicitud] = comprobantes[0];
+                }
+              } catch {}
+            }
           }
         })
       );

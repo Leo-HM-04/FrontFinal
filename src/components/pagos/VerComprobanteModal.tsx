@@ -29,6 +29,8 @@ interface Pago {
 
 export interface Comprobante {
   ruta_archivo?: string;
+  nombre_archivo?: string;
+  fecha_subida?: string;
 }
 
 interface VerComprobanteModalProps {

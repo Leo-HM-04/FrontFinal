@@ -12,8 +12,11 @@ export interface Solicitud {
   banco_destino?: string;
   cuenta_destino?: string;
   factura_url?: string;
+  soporte_url?: string; // URL del comprobante de pago
   fecha_limite_pago?: string;
   fecha_creacion?: string;
+  fecha_actualizacion?: string;
+  fecha_pago?: string;
   updated_at?: string;
   id_pago?: number;
 }

@@ -46,6 +46,7 @@ export interface Solicitud {
   comentario_aprobador?: string;
   fecha_revision?: string;
   fecha_creacion: string;
+  fecha_actualizacion?: string; // <-- Campo agregado para comprobantes
   updated_at: string;
   usuario_nombre?: string;
   aprobador_nombre?: string;
