@@ -448,48 +448,30 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                   const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
                   const isPdf = /\.pdf$/i.test(fileName);
                   return (
-                    <div className="bg-white/90 rounded-lg border border-blue-200 p-4 shadow-sm">
-                      <div className="flex flex-col gap-3 mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
-                            <span className="text-xs text-blue-800 font-semibold">
-                              {comprobante.nombre_usuario || `Usuario ${comprobante.usuario_subio}`}
-                            </span>
-                          </div>
-                          {comprobante.comentario && (
-                            <div className="mt-2 bg-white/60 p-2 rounded border-l-3 border-blue-300">
-                              <p className="text-xs text-gray-700 italic">&ldquo;{comprobante.comentario}&rdquo;</p>
-                            </div>
-                          )}
-                        </div>
-                        <div className="w-full flex justify-center">
-                          <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
-                            <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
-                              {isImage ? (
-                                <Image src={url} alt={fileName} fill className="object-contain" />
-                              ) : isPdf ? (
-                                <iframe src={url} title={fileName} className="w-full" style={{ height: '200px' }} />
-                              ) : (
-                                <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
-                                  <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                                  <div className="flex-1">
-                                    <p className="text-blue-900 font-medium text-sm">{fileName}</p>
-                                    <p className="text-xs text-gray-600 mt-1">Tipo: Comprobante</p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                            <div className="mt-3">
-                              <button
-                                onClick={() => window.open(url, '_blank')}
-                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
-                              >
-                                <ExternalLink className="w-4 h-4" />
-                                Ver completo
-                              </button>
+                    <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
+                      <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                        {isImage ? (
+                          <Image src={url} alt={fileName} fill className="object-contain" />
+                        ) : isPdf ? (
+                          <iframe src={url} title={fileName} className="w-full h-full" />
+                        ) : (
+                          <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
+                            <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                            <div className="flex-1">
+                              <p className="text-blue-900 font-medium text-sm">{fileName}</p>
+                              <p className="text-xs text-gray-600 mt-1">Archivo adjunto</p>
                             </div>
                           </div>
-                        </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <button
+                          onClick={() => window.open(url, '_blank')}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Ver completo
+                        </button>
                       </div>
                     </div>
                   );
@@ -520,16 +502,10 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                 </div>
               )}
               {!loading.archivos && !errors.archivos && (
-                <div className="flex flex-col items-center justify-center w-full">
+                <div className="flex flex-col gap-4 items-center justify-center w-full">
                   {archivos && archivos.length > 0 ? (
                     archivos.map((archivo) => (
-                      <div key={archivo.id_archivo} className="w-full flex justify-center">
-                        <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
-                          <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
-                            <FilePreview archivo={archivo} />
-                          </div>
-                        </div>
-                      </div>
+                      <FilePreview key={archivo.id_archivo} archivo={archivo} />
                     ))
                   ) : (
                     <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
