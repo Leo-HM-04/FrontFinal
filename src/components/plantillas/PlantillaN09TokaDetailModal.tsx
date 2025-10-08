@@ -104,9 +104,9 @@ const InfoField: React.FC<InfoFieldProps> = ({
     }
   };
   const getValueClassName = () => {
-    let baseClass = "text-gray-900 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200";
+    let baseClass = "text-gray-900 bg-blue-50 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-blue-200 text-sm";
     if (variant === 'mono') {
-      baseClass += " font-mono text-sm";
+      baseClass += " font-mono text-xs sm:text-sm";
     }
     if (variant === 'currency') {
       baseClass += " font-semibold text-green-700";
@@ -114,8 +114,8 @@ const InfoField: React.FC<InfoFieldProps> = ({
     return baseClass;
   };
   return (
-    <div className={`space-y-2 ${className}`}>
-      <label className="block text-sm font-semibold text-blue-800">{label}</label>
+    <div className={`space-y-1.5 sm:space-y-2 ${className}`}>
+      <label className="block text-xs sm:text-sm font-semibold text-blue-800">{label}</label>
       <div className={getValueClassName()}>
         {formatValue()}
       </div>
@@ -326,7 +326,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
   if (!isOpen || !solicitud) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-blue-900/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-blue-900/60 backdrop-blur-sm overflow-hidden">
       {/* Overlay */}
       <div
         className="absolute inset-0"
@@ -335,45 +335,45 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
-      {/* Modal container: horizontal, ancho, igual a SUA Frenshetsi */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100">
+      {/* Modal container: responsive y con scroll interno */}
+      <div className="relative bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full h-full sm:h-auto sm:max-w-6xl sm:max-h-[90vh] flex flex-col border border-blue-100">
         {/* Botón de cerrar */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="absolute top-2 right-2 sm:top-3 sm:right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-1.5 sm:p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
           aria-label="Cerrar modal"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         {/* Contenido con scroll, layout horizontal en desktop */}
-  <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-2 sm:p-4 md:p-6">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 overflow-y-auto p-3 sm:p-4 md:p-6">
           {/* Columna izquierda: info principal y auditoría */}
           <div className="flex-1 min-w-0 w-full">
-            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
-              <div className="bg-white/20 p-3 rounded-lg">
-                <Factory className="w-8 h-8 text-white" />
+            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-3 sm:p-4 rounded-lg sm:rounded-xl mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 shadow-md">
+              <div className="bg-white/20 p-2 sm:p-3 rounded-lg">
+                <Factory className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+              <div className="flex-1 w-full sm:w-auto">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
                   <span>PAGO N09 / TOKA</span>
                 </h2>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  <span className="inline-flex items-center gap-1 text-blue-100 text-sm"><FileText className="w-4 h-4" />Solicitud #{solicitud.id_solicitud}</span>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-1">
+                  <span className="inline-flex items-center gap-1 text-blue-100 text-xs sm:text-sm"><FileText className="w-3 h-3 sm:w-4 sm:h-4" />Solicitud #{solicitud.id_solicitud}</span>
                   {solicitudExtended.folio && (
-                    <span className="inline-flex items-center gap-1 text-blue-100 text-sm"><Factory className="w-4 h-4" />Folio: {solicitudExtended.folio}</span>
+                    <span className="inline-flex items-center gap-1 text-blue-100 text-xs sm:text-sm"><Factory className="w-3 h-3 sm:w-4 sm:h-4" />Folio: {solicitudExtended.folio}</span>
                   )}
                 </div>
               </div>
-              <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 bg-white/80 text-blue-700 border-blue-300 shadow-sm flex items-center gap-2`}>
-                <Factory className="w-4 h-4" />
+              <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold border-2 bg-white/80 text-blue-700 border-blue-300 shadow-sm flex items-center gap-1.5 sm:gap-2 self-start sm:self-auto`}>
+                <Factory className="w-3 h-3 sm:w-4 sm:h-4" />
                 {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
               </span>
             </header>
             {/* Información Principal */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Principal</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
-                <InfoField label="Asunto" value={solicitud.asunto} className="md:col-span-3" />
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3 sm:mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />Información Principal</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <InfoField label="Asunto" value={solicitud.asunto} className="sm:col-span-2 lg:col-span-3" />
                 <InfoField label="Cliente" value={solicitud.cliente} />
                 <InfoField label="Beneficiario" value={solicitud.beneficiario} />
                 <InfoField label="Monto" value={solicitud.monto} variant="currency" />
@@ -381,9 +381,9 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
               </div>
             </div>
             {/* Información Bancaria */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información Bancaria</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3 sm:mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />Información Bancaria</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <InfoField label="Tipo de Cuenta" value={solicitud.tipo_cuenta_clabe} />
                 <InfoField label="Número de Cuenta/CLABE" value={solicitud.numero_cuenta_clabe} variant="mono" />
                 <InfoField label="Banco Destino" value={solicitud.banco_destino} />
@@ -403,9 +403,9 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
               </div>
             )}
             {/* Información de Auditoría */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Información de Auditoría</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3 sm:mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />Información de Auditoría</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <InfoField label="Fecha de Creación" value={solicitud.fecha_creacion} variant="date" />
                 <InfoField label="Fecha de Actualización" value={solicitud.fecha_actualizacion} variant="date" />
                 <InfoField label="Usuario de Creación" value={solicitud.usuario_creacion} />
@@ -414,8 +414,8 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
             </div>
 
             {/* Comprobantes de Pago - Movido dentro de la columna izquierda */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobante de Pago</h3>
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3 sm:mb-4 pb-2 border-b border-blue-200">Comprobante de Pago</h3>
               {loadingComprobantes ? (
                 <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3" />
@@ -449,27 +449,27 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                   const isPdf = /\.pdf$/i.test(fileName);
                   return (
                     <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
-                      <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
+                      <div className="relative h-[300px] sm:h-[350px] md:h-[420px] bg-gray-50 flex items-center justify-center">
                         {isImage ? (
-                          <Image src={url} alt={fileName} fill className="object-contain" />
+                          <Image src={url} alt={fileName} fill className="object-contain p-2" />
                         ) : isPdf ? (
                           <iframe src={url} title={fileName} className="w-full h-full" />
                         ) : (
-                          <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
-                            <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                            <div className="flex-1">
-                              <p className="text-blue-900 font-medium text-sm">{fileName}</p>
+                          <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200 m-4">
+                            <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-blue-900 font-medium text-xs sm:text-sm truncate">{fileName}</p>
                               <p className="text-xs text-gray-600 mt-1">Archivo adjunto</p>
                             </div>
                           </div>
                         )}
                       </div>
-                      <div className="p-4">
+                      <div className="p-3 sm:p-4">
                         <button
                           onClick={() => window.open(url, '_blank')}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                          className="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm font-medium"
                         >
-                          <ExternalLink className="w-4 h-4" />
+                          <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
                           Ver completo
                         </button>
                       </div>
@@ -480,9 +480,9 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
             </div>
           </div>
           {/* Columna derecha: archivos adjuntos */}
-          <div className="w-full lg:w-[420px] flex-shrink-0 min-w-0">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
+          <div className="w-full lg:w-[380px] xl:w-[420px] flex-shrink-0 min-w-0">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3 sm:mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />Archivos Adjuntos</h3>
               {loading.archivos && (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
