@@ -222,7 +222,7 @@ export const PlantillaTransferenciaDetailModal: React.FC<PlantillaTransferenciaD
         <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
           {/* Columna izquierda: información principal */}
           <div className="flex-1 min-w-0">
-            <header className="bg-gradient-to-r from-green-700 via-emerald-600 to-teal-600 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
+            <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
               <div className="bg-white/20 p-3 rounded-lg">
                 <ArrowRightLeft className="w-8 h-8 text-white" />
               </div>
@@ -231,13 +231,13 @@ export const PlantillaTransferenciaDetailModal: React.FC<PlantillaTransferenciaD
                   <span>{titulo}</span>
                 </h2>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  <span className="inline-flex items-center gap-1 text-green-100 text-sm"><FileText className="w-4 h-4" />Solicitud #{solicitud.id_solicitud}</span>
+                  <span className="inline-flex items-center gap-1 text-blue-100 text-sm"><FileText className="w-4 h-4" />Solicitud #{solicitud.id_solicitud}</span>
                   {solicitud.folio && (
-                    <span className="inline-flex items-center gap-1 text-green-100 text-sm"><FileText className="w-4 h-4" />Folio: {solicitud.folio}</span>
+                    <span className="inline-flex items-center gap-1 text-blue-100 text-sm"><FileText className="w-4 h-4" />Folio: {solicitud.folio}</span>
                   )}
                 </div>
               </div>
-              <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 bg-white/80 text-green-700 border-green-300 shadow-sm flex items-center gap-2`}>
+              <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 bg-white/80 text-blue-700 border-blue-300 shadow-sm flex items-center gap-2`}>
                 <FileText className="w-4 h-4" />
                 {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
               </span>
@@ -265,55 +265,55 @@ export const PlantillaTransferenciaDetailModal: React.FC<PlantillaTransferenciaD
                   {solicitud.cuentas_transferencia.map((cuenta, index) => (
                     <div 
                       key={index} 
-                      className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-lg border-2 border-green-200 shadow-sm hover:shadow-md transition-shadow"
+                      className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-lg border-2 border-blue-200 shadow-sm hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center gap-2 mb-4">
-                        <div className="bg-green-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                        <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
                           {index + 1}
                         </div>
-                        <h4 className="font-semibold text-green-900 text-base">Cuenta #{index + 1}</h4>
+                        <h4 className="font-semibold text-blue-900 text-base">Cuenta #{index + 1}</h4>
                       </div>
                       <div className="space-y-3">
                         <div className="flex items-start gap-2">
-                          <User className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                          <User className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Beneficiario</p>
-                            <p className="text-sm text-green-900 font-semibold break-words">{cuenta.beneficiario || '-'}</p>
+                            <p className="text-xs text-blue-700 font-medium uppercase tracking-wide">Beneficiario</p>
+                            <p className="text-sm text-blue-900 font-semibold break-words">{cuenta.beneficiario || '-'}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
-                          <CreditCard className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                          <CreditCard className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Tipo de Cuenta</p>
-                            <p className="text-sm text-green-900 font-semibold break-words">
+                            <p className="text-xs text-blue-700 font-medium uppercase tracking-wide">Tipo de Cuenta</p>
+                            <p className="text-sm text-blue-900 font-semibold break-words">
                               {getTipoCuentaLabel(cuenta.tipo_cuenta, cuenta.tipo_tarjeta)}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
-                          <FileText className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                          <FileText className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Número de Cuenta</p>
-                            <p className="text-sm text-green-900 font-semibold font-mono break-all">{cuenta.numero_cuenta || '-'}</p>
+                            <p className="text-xs text-blue-700 font-medium uppercase tracking-wide">Número de Cuenta</p>
+                            <p className="text-sm text-blue-900 font-semibold font-mono break-all">{cuenta.numero_cuenta || '-'}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
-                          <Building2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                          <Building2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Banco Destino</p>
-                            <p className="text-sm text-green-900 font-semibold break-words">
+                            <p className="text-xs text-blue-700 font-medium uppercase tracking-wide">Banco Destino</p>
+                            <p className="text-sm text-blue-900 font-semibold break-words">
                               {cuenta.banco_destino ? obtenerNombreBanco(cuenta.banco_destino) : '-'}
                               {cuenta.banco_destino && (
-                                <span className="text-xs text-green-600 ml-1">({cuenta.banco_destino})</span>
+                                <span className="text-xs text-blue-600 ml-1">({cuenta.banco_destino})</span>
                               )}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
-                          <DollarSign className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                          <DollarSign className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Monto</p>
-                            <p className="text-lg text-green-900 font-bold">{formatCurrency(cuenta.monto)}</p>
+                            <p className="text-xs text-blue-700 font-medium uppercase tracking-wide">Monto</p>
+                            <p className="text-lg text-blue-900 font-bold">{formatCurrency(cuenta.monto)}</p>
                           </div>
                         </div>
                       </div>
@@ -326,14 +326,14 @@ export const PlantillaTransferenciaDetailModal: React.FC<PlantillaTransferenciaD
             {/* Información de Montos */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Monto Total</h3>
-              <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 rounded-xl">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-xl">
                 <div className="flex items-baseline gap-2">
                   <DollarSign className="w-6 h-6 text-yellow-300" />
                   <p className="text-2xl font-bold text-white tracking-tight">
                     {formatCurrency(calcularMontoTotal())}
                   </p>
                 </div>
-                <div className="mt-2 text-sm text-green-100">
+                <div className="mt-2 text-sm text-blue-100">
                   Suma de {solicitud.cuentas_transferencia.length} {solicitud.cuentas_transferencia.length === 1 ? 'transferencia' : 'transferencias'}
                 </div>
                 <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-20" />
