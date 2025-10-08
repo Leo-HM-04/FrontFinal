@@ -4,16 +4,38 @@ import {
   Building, 
   ArrowLeftRight, 
   Banknote,
-  Shield
+  Shield,
+  FileText
 } from 'lucide-react';
 
-// Plantilla para SOLICITUD DE PAGO TARJETAS N09 Y TOKA
+/**
+ * SISTEMA DE PLANTILLAS DE SOLICITUDES
+ * 
+ * Este archivo contiene todas las plantillas disponibles para crear solicitudes
+ * de pago en el sistema. Cada plantilla define su estructura, validaciones y
+ * configuraciones específicas.
+ * 
+ * Última actualización: 08 de Octubre 2025
+ * @version 2.0.0
+ */
+
+// ============================================================================
+// PLANTILLAS DE PAGOS CORPORATIVOS
+// ============================================================================
+
+/**
+ * Plantilla: SOLICITUD DE PAGO TARJETAS N09 Y TOKA
+ * 
+ * Propósito: Gestionar pagos a proveedores de tarjetas N09 y fondeo de tarjetas TOKA
+ * Departamentos: Tesorería, Finanzas
+ * Uso frecuente: Pagos corporativos recurrentes
+ */
 export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
   id: 'tarjetas-n09-toka',
   nombre: 'SOLICITUD DE PAGO TARJETAS N09 Y TOKA',
   descripcion: 'Plantilla especializada para pagos a proveedores de tarjetas N09 y fondeo de tarjeta TOKA',
-  version: '1.0.0',
-  activa: false,
+  version: '2.0.0',
+  activa: true,
   icono: CreditCard,
   color: 'blue',
   categoria: 'Pagos Corporativos',
@@ -253,18 +275,28 @@ export const plantillaTarjetasN09Toka: PlantillaSolicitud = {
   },
   metadatos: {
     creadoPor: 'Sistema',
-    fechaCreacion: new Date().toISOString(),
+    fechaCreacion: '2025-10-08T00:00:00.000Z',
     fechaModificacion: new Date().toISOString(),
     usosFrecuentes: 0
   }
 };
 
-// Plantilla para SOLICITUD DE PAGO TARJETAS TUKASH
+// ============================================================================
+// PLANTILLAS DE TARJETAS CORPORATIVAS
+// ============================================================================
+
+/**
+ * Plantilla: SOLICITUD DE PAGO TARJETAS TUKASH
+ * 
+ * Propósito: Gestionar pagos y fondeo exclusivo de tarjetas TUKASH
+ * Departamentos: Tesorería, Finanzas
+ * Características: Validación de número de tarjeta, montos duales
+ */
 export const plantillaTarjetasTukash: PlantillaSolicitud = {
   id: 'tarjetas-tukash',
   nombre: 'SOLICITUD DE PAGO TARJETAS TUKASH',
   descripcion: 'Plantilla especializada para pagos y fondeo de tarjetas TUKASH',
-  version: '1.0',
+  version: '2.0.0',
   activa: true,
   icono: CreditCard,
   color: 'green',
@@ -429,20 +461,30 @@ export const plantillaTarjetasTukash: PlantillaSolicitud = {
   },
   metadatos: {
     creadoPor: 'Sistema',
-    fechaCreacion: new Date().toISOString(),
+    fechaCreacion: '2025-10-08T00:00:00.000Z',
     fechaModificacion: new Date().toISOString(),
     usosFrecuentes: 0
   }
 };
 
-// Plantilla para PAGO SUA INTERNAS
+// ============================================================================
+// PLANTILLAS DE PAGOS FISCALES E IMSS
+// ============================================================================
+
+/**
+ * Plantilla: PAGO SUA INTERNAS
+ * 
+ * Propósito: Gestionar pagos de impuestos IMSS para empresas internas
+ * Departamentos: Seguridad Social, Contabilidad, Tesorería
+ * Características: Línea de captura IMSS, fecha límite, archivos ZIP
+ */
 export const plantillaPagoSuaInternas: PlantillaSolicitud = {
   id: 'pago-sua-internas',
   nombre: 'PAGO SUA INTERNAS',
   descripcion: 'Plantilla especializada para pagos de impuestos relacionados con el IMSS enviados por el Departamento de Seguridad Social',
-  version: '1.0',
+  version: '2.0.0',
   activa: true,
-  icono: '🏛️',
+  icono: FileText,
   color: 'purple',
   categoria: 'Pagos Fiscales',
   secciones: [
@@ -589,18 +631,24 @@ export const plantillaPagoSuaInternas: PlantillaSolicitud = {
   },
   metadatos: {
     creadoPor: 'Sistema',
-    fechaCreacion: new Date().toISOString(),
+    fechaCreacion: '2025-10-08T00:00:00.000Z',
     fechaModificacion: new Date().toISOString(),
     usosFrecuentes: 0
   }
 };
 
-// Plantilla para PAGO SUA FRENSHETSI
+/**
+ * Plantilla: PAGO SUA FRENSHETSI
+ * 
+ * Propósito: Gestionar pagos de impuestos IMSS específicos para FRENSHETSI
+ * Departamentos: Seguridad Social, Contabilidad, Tesorería
+ * Características: Empresa fija (FRENSHETSI), cliente variable, línea de captura
+ */
 export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
   id: 'pago-sua-frenshetsi',
   nombre: 'PAGO SUA FRENSHETSI',
   descripcion: 'Plantilla especializada para pagos de impuestos SUA FRENSHETSI relacionados con el IMSS enviados por el Departamento de Seguridad Social',
-  version: '1.0',
+  version: '2.0.0',
   activa: true,
   icono: Building,
   color: 'indigo',
@@ -766,21 +814,31 @@ export const plantillaPagoSuaFrenshetsi: PlantillaSolicitud = {
   },
   metadatos: {
     creadoPor: 'Sistema',
-    fechaCreacion: new Date().toISOString(),
+    fechaCreacion: '2025-10-08T00:00:00.000Z',
     fechaModificacion: new Date().toISOString(),
     usosFrecuentes: 0
   }
 };
 
-// Plantilla para PAGO COMISIONES
+// ============================================================================
+// PLANTILLAS DE COMISIONES Y COMPENSACIONES
+// ============================================================================
+
+/**
+ * Plantilla: PAGO COMISIONES
+ * 
+ * Propósito: Gestionar pagos de comisiones a empleados y colaboradores
+ * Departamentos: Recursos Humanos, Tesorería, Finanzas
+ * Características: Cliente generador, beneficiario, datos bancarios
+ */
 export const plantillaPagoComisiones: PlantillaSolicitud = {
   id: 'pago-comisiones',
   nombre: 'PAGO COMISIONES',
   descripcion: 'Plantilla para solicitudes de pago de comisiones',
-  version: '1.0.0',
+  version: '2.0.0',
   activa: true,
   categoria: 'pagos',
-  icono: '💰',
+  icono: Banknote,
   secciones: [
     {
       id: 'datos-generales',
@@ -940,18 +998,28 @@ export const plantillaPagoComisiones: PlantillaSolicitud = {
   },
   metadatos: {
     creadoPor: 'Sistema',
-    fechaCreacion: new Date().toISOString(),
+    fechaCreacion: '2025-10-08T00:00:00.000Z',
     fechaModificacion: new Date().toISOString(),
     usosFrecuentes: 0
   }
 };
 
-// Plantilla para PAGO POLIZAS
+// ============================================================================
+// PLANTILLAS DE SEGUROS Y PÓLIZAS
+// ============================================================================
+
+/**
+ * Plantilla: PAGO POLIZAS
+ * 
+ * Propósito: Gestionar pagos de pólizas de seguros a diversas aseguradoras
+ * Departamentos: Administración, Tesorería, Seguros
+ * Características: Múltiples aseguradoras, métodos de pago dinámicos (máx 4)
+ */
 export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
   id: 'pago-polizas-gnp',
   nombre: 'PAGO POLIZAS',
   descripcion: 'Plantilla para solicitudes de pago de pólizas y otras aseguradoras',
-  version: '1.0.0',
+  version: '2.0.0',
   activa: true,
   categoria: 'pagos',
   icono: Shield,
@@ -1105,18 +1173,28 @@ export const plantillaPagoPolizasGnp: PlantillaSolicitud = {
   },
   metadatos: {
     creadoPor: 'Sistema',
-    fechaCreacion: new Date().toISOString(),
+    fechaCreacion: '2025-10-08T00:00:00.000Z',
     fechaModificacion: new Date().toISOString(),
     usosFrecuentes: 0
   }
 };
 
-// Plantilla para REGRESOS EN TRANSFERENCIA
+// ============================================================================
+// PLANTILLAS DE REGRESOS Y REEMBOLSOS
+// ============================================================================
+
+/**
+ * Plantilla: REGRESOS EN TRANSFERENCIA
+ * 
+ * Propósito: Gestionar devoluciones de fondos mediante transferencia bancaria
+ * Departamentos: Tesorería, Atención a Clientes
+ * Características: Cuentas dinámicas (máx 3), datos bancarios completos
+ */
 export const plantillaRegresosTransferencia: PlantillaSolicitud = {
   id: 'regresos-transferencia',
   nombre: 'REGRESOS EN TRANSFERENCIA',
   descripcion: 'Plantilla para solicitudes de regreso de transferencias bancarias',
-  version: '1.0.0',
+  version: '2.0.0',
   activa: true,
   categoria: 'regresos',
   icono: ArrowLeftRight,
@@ -1211,18 +1289,24 @@ export const plantillaRegresosTransferencia: PlantillaSolicitud = {
   },
   metadatos: {
     creadoPor: 'Sistema',
-    fechaCreacion: new Date().toISOString(),
+    fechaCreacion: '2025-10-08T00:00:00.000Z',
     fechaModificacion: new Date().toISOString(),
     usosFrecuentes: 0
   }
 };
 
-// Plantilla para REGRESOS EN EFECTIVO
+/**
+ * Plantilla: REGRESOS EN EFECTIVO
+ * 
+ * Propósito: Gestionar devoluciones de fondos en efectivo con viáticos
+ * Departamentos: Tesorería, Atención a Clientes
+ * Características: Montos efectivo + viáticos, elementos adicionales, fecha entrega
+ */
 export const plantillaRegresosEfectivo: PlantillaSolicitud = {
   id: 'regresos-efectivo',
   nombre: 'REGRESOS EN EFECTIVO',
   descripcion: 'Plantilla para solicitudes de regreso en efectivo',
-  version: '1.0.0',
+  version: '2.0.0',
   activa: true,
   categoria: 'regresos',
   icono: Banknote,
@@ -1413,13 +1497,24 @@ export const plantillaRegresosEfectivo: PlantillaSolicitud = {
   },
   metadatos: {
     creadoPor: 'Sistema',
-    fechaCreacion: new Date().toISOString(),
+    fechaCreacion: '2025-10-08T00:00:00.000Z',
     fechaModificacion: new Date().toISOString(),
     usosFrecuentes: 0
   }
 };
 
-// Lista de todas las plantillas disponibles
+// ============================================================================
+// REGISTRO Y GESTIÓN DE PLANTILLAS
+// ============================================================================
+
+/**
+ * Lista completa de todas las plantillas disponibles en el sistema
+ * 
+ * @constant plantillasDisponibles
+ * @type {PlantillaSolicitud[]}
+ * @description Array que contiene todas las plantillas registradas.
+ *              Se usa como fuente única de verdad para el sistema de plantillas.
+ */
 export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaTarjetasN09Toka,
   plantillaTarjetasTukash,
@@ -1429,25 +1524,95 @@ export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaPagoPolizasGnp,
   plantillaRegresosTransferencia,
   plantillaRegresosEfectivo
-  // Aquí se pueden agregar más plantillas en el futuro
 ];
 
-// Función para obtener una plantilla por ID
+// ============================================================================
+// FUNCIONES UTILITARIAS
+// ============================================================================
+
+/**
+ * Obtiene una plantilla específica por su ID único
+ * 
+ * @param {string} id - ID único de la plantilla
+ * @returns {PlantillaSolicitud | null} La plantilla encontrada o null
+ * @example
+ * const plantilla = obtenerPlantillaPorId('tarjetas-n09-toka');
+ */
 export const obtenerPlantillaPorId = (id: string): PlantillaSolicitud | null => {
   return plantillasDisponibles.find(plantilla => plantilla.id === id) || null;
 };
 
-// Función para obtener plantillas activas
+/**
+ * Obtiene todas las plantillas activas del sistema
+ * 
+ * @returns {PlantillaSolicitud[]} Array de plantillas activas
+ * @example
+ * const activas = obtenerPlantillasActivas();
+ */
 export const obtenerPlantillasActivas = (): PlantillaSolicitud[] => {
   return plantillasDisponibles.filter(plantilla => plantilla.activa);
 };
 
-// Función para obtener todas las plantillas (activas e inactivas)
+/**
+ * Obtiene todas las plantillas (activas e inactivas)
+ * 
+ * @returns {PlantillaSolicitud[]} Array de todas las plantillas
+ * @example
+ * const todas = obtenerTodasLasPlantillas();
+ */
 export const obtenerTodasLasPlantillas = (): PlantillaSolicitud[] => {
   return plantillasDisponibles;
 };
 
-// Función para obtener plantillas inactivas
+/**
+ * Obtiene todas las plantillas inactivas del sistema
+ * 
+ * @returns {PlantillaSolicitud[]} Array de plantillas inactivas
+ * @example
+ * const inactivas = obtenerPlantillasInactivas();
+ */
 export const obtenerPlantillasInactivas = (): PlantillaSolicitud[] => {
   return plantillasDisponibles.filter(plantilla => !plantilla.activa);
+};
+
+/**
+ * Obtiene plantillas filtradas por categoría
+ * 
+ * @param {string} categoria - Categoría de las plantillas
+ * @returns {PlantillaSolicitud[]} Array de plantillas de la categoría
+ * @example
+ * const pagosFiscales = obtenerPlantillasPorCategoria('Pagos Fiscales');
+ */
+export const obtenerPlantillasPorCategoria = (categoria: string): PlantillaSolicitud[] => {
+  return plantillasDisponibles.filter(plantilla => plantilla.categoria === categoria);
+};
+
+/**
+ * Valida si una plantilla existe y está activa
+ * 
+ * @param {string} id - ID de la plantilla a validar
+ * @returns {boolean} true si existe y está activa, false en caso contrario
+ * @example
+ * if (validarPlantillaActiva('tarjetas-n09-toka')) {
+ *   // procesar solicitud
+ * }
+ */
+export const validarPlantillaActiva = (id: string): boolean => {
+  const plantilla = obtenerPlantillaPorId(id);
+  return plantilla !== null && plantilla.activa;
+};
+
+/**
+ * Obtiene estadísticas generales de las plantillas
+ * 
+ * @returns {Object} Objeto con estadísticas del sistema
+ */
+export const obtenerEstadisticasPlantillas = () => {
+  return {
+    total: plantillasDisponibles.length,
+    activas: plantillasDisponibles.filter(p => p.activa).length,
+    inactivas: plantillasDisponibles.filter(p => !p.activa).length,
+    categorias: [...new Set(plantillasDisponibles.map(p => p.categoria))],
+    ultimaActualizacion: new Date().toISOString()
+  };
 };
