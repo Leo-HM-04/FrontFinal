@@ -2204,17 +2204,6 @@ function extraerDatosDelConcepto(concepto: string) {
                           <ExternalLink className="w-5 h-5" />
                         </Button>
                       )}
-                      {solicitud.soporte_url && (
-                        <Button
-                          size="lg"
-                          onClick={() => solicitud.soporte_url && window.open(buildFileUrl(solicitud.soporte_url), '_blank')}
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
-                        >
-                          <FileText className="w-5 h-5" />
-                          Ver Soporte
-                          <ExternalLink className="w-5 h-5" />
-                        </Button>
-                      )}
                     </div>
                   ) : (
                     <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">
@@ -2238,21 +2227,52 @@ function extraerDatosDelConcepto(concepto: string) {
                   ) : errors.comprobantes ? (
                     <ErrorMessage message={errors.comprobantes} />
                   ) : comprobantes.length === 0 ? (
-                    <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
-                      <div className="flex justify-center mb-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
-                          <FileCheck className="w-8 h-8 text-blue-600" />
+                    // Si no hay comprobantes en la tabla pero hay soporte_url, mostrar ese archivo
+                    solicitud.soporte_url ? (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                                <span className="text-xs text-blue-800 font-semibold">
+                                  Comprobante de Pago
+                                </span>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => window.open(buildFileUrl(solicitud.soporte_url!), '_blank')}
+                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3"
+                            >
+                              Ver completo
+                            </Button>
+                          </div>
+                          
+                          <FilePreview 
+                            url={buildFileUrl(solicitud.soporte_url)}
+                            fileName={solicitud.soporte_url.split('/').pop() || 'comprobante'}
+                            alt="Comprobante de pago"
+                            height="h-36"
+                          />
                         </div>
                       </div>
-                      <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
-                      <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
-                        El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
-                      </p>
-                      <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
-                        <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
+                    ) : (
+                      <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
+                        <div className="flex justify-center mb-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                            <FileCheck className="w-8 h-8 text-blue-600" />
+                          </div>
+                        </div>
+                        <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
+                        <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
+                          El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
+                        </p>
+                        <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
+                          <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
+                        </div>
                       </div>
-                    </div>
+                    )
                   ) : (
                     <div className="space-y-4">
                       {comprobantes.map((comprobante) => {
