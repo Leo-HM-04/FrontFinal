@@ -25,6 +25,7 @@ interface Pago {
   aprobador_nombre?: string;
   comentario_aprobador?: string;
   tipo_pago?: string;
+  soporte_url?: string;
 }
 
 export interface Comprobante {
@@ -77,16 +78,18 @@ export const VerComprobanteModal: React.FC<VerComprobanteModalProps> = ({
     }
   }
 
-  // Construir la URL del comprobante
+  // Construir la URL del comprobante (priorizar soporte_url de la tabla solicitudes_pago)
   let comprobanteUrl = '';
-  if (comprobante?.ruta_archivo) {
-    if (comprobante.ruta_archivo.startsWith('http')) {
-      comprobanteUrl = comprobante.ruta_archivo;
-    } else {
-      const rutaArchivo = comprobante.ruta_archivo.startsWith('/')
-        ? comprobante.ruta_archivo
-        : `/${comprobante.ruta_archivo}`;
+  const rutaArchivo = pago.soporte_url || comprobante?.ruta_archivo;
+  
+  if (rutaArchivo) {
+    if (rutaArchivo.startsWith('http')) {
       comprobanteUrl = rutaArchivo;
+    } else {
+      const rutaNormalizada = rutaArchivo.startsWith('/')
+        ? rutaArchivo
+        : `/${rutaArchivo}`;
+      comprobanteUrl = `https://bechapra.com.mx${rutaNormalizada}`;
     }
   }
 
