@@ -264,6 +264,25 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
     try {
+      // Primero verificar si hay soporte_url en la solicitud
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((solicitud as any).soporte_url) {
+        const comprobanteFromSoporte = {
+          id_comprobante: 999999, // ID ficticio para soporte_url
+          id_solicitud: solicitud.id_solicitud || 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ruta_archivo: (solicitud as any).soporte_url,
+          nombre_archivo: 'Comprobante de Pago',
+          fecha_subida: new Date().toISOString(),
+          usuario_subio: 0,
+          comentario: 'Comprobante desde soporte_url'
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        console.log(`✅ Usando comprobante desde soporte_url: ${(solicitud as any).soporte_url}`);
+        setComprobantes([comprobanteFromSoporte]);
+        return;
+      }
+      
       // 🔍 Para TOKA: Obtener archivos de solicitudes_n09_toka_archivos
       console.log('📋 Obteniendo archivos TOKA para comprobantes desde /uploads/solicitudes-n09-toka/');
       const archivos = await SolicitudN09TokaArchivosService.obtenerArchivos(solicitud.id_solicitud);

@@ -156,6 +156,24 @@ export function PlantillaSuaInternasDetailModal({
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
     try {
+      // Primero verificar si hay soporte_url en la solicitud
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((solicitud as any).soporte_url) {
+        const comprobanteFromSoporte = {
+          id_comprobante: 999999,
+          id_solicitud: typeof solicitud.id_solicitud === 'number' ? solicitud.id_solicitud : 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ruta_archivo: (solicitud as any).soporte_url,
+          nombre_archivo: 'Comprobante de Pago',
+          fecha_subida: new Date().toISOString(),
+          usuario_subio: 0,
+          comentario: 'Comprobante desde soporte_url'
+        };
+        setComprobantes([comprobanteFromSoporte]);
+        return;
+      }
+
+      // Si no hay soporte_url, buscar en tabla comprobantes
       const id = typeof solicitud.id_solicitud === 'number' ? solicitud.id_solicitud : 0;
       const data = await import('@/services/solicitudes.service').then(mod => mod.SolicitudesService.getComprobantes(id));
       setComprobantes(data);

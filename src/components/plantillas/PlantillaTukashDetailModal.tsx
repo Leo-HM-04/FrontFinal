@@ -200,6 +200,15 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
       }
       
       try {
+        // Primero verificar si hay soporte_url en la solicitud
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((solicitud as any).soporte_url) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          setComprobanteUrl(buildFileUrl((solicitud as any).soporte_url));
+          return;
+        }
+        
+        // Si no hay soporte_url, buscar en la tabla comprobantes
         const comprobantes = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
         
         // Filtrar comprobantes que puedan ser de solicitudes normales con el mismo ID
@@ -213,7 +222,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
         console.log(`🔍 Comprobantes Tukash filtrados: ${comprobantesFiltrados.length}/${comprobantes.length} (después de ${solicitud.fecha_creacion})`);
         
         if (comprobantesFiltrados && comprobantesFiltrados.length > 0 && comprobantesFiltrados[0].ruta_archivo) {
-          setComprobanteUrl(comprobantesFiltrados[0].ruta_archivo);
+          setComprobanteUrl(buildFileUrl(comprobantesFiltrados[0].ruta_archivo));
         } else {
           setComprobanteUrl(null);
         }

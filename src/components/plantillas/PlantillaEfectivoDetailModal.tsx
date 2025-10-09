@@ -54,6 +54,24 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
     try {
+      // Primero verificar si hay soporte_url en la solicitud
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((solicitud as any).soporte_url) {
+        const comprobanteFromSoporte = {
+          id_comprobante: 999999,
+          id_solicitud: solicitud.id_solicitud,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ruta_archivo: (solicitud as any).soporte_url,
+          nombre_archivo: 'Comprobante de Pago',
+          fecha_subida: new Date().toISOString(),
+          usuario_subio: 0,
+          comentario: 'Comprobante desde soporte_url'
+        };
+        setComprobantes([comprobanteFromSoporte]);
+        return;
+      }
+
+      // Si no hay soporte_url, buscar en tabla comprobantes
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
       setComprobantes(data);
     } catch (error) {

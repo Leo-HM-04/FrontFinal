@@ -396,6 +396,15 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
       setLoadingComprobante(true);
       setErrorComprobante(null);
       try {
+        // Primero verificar si hay soporte_url en la solicitud
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((solicitud as any).soporte_url) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          setComprobanteUrl((solicitud as any).soporte_url);
+          return;
+        }
+
+        // Si no hay soporte_url, buscar en tabla comprobantes
         const comprobantes = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
         if (comprobantes && comprobantes.length > 0 && comprobantes[0].ruta_archivo) {
           setComprobanteUrl(comprobantes[0].ruta_archivo);
