@@ -254,16 +254,23 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     
     // Solo cargar comprobantes si la solicitud está pagada
     const estadoPagado = solicitud.estado?.toLowerCase();
-    if (estadoPagado !== 'pagada') {
-      setComprobantes([]);
-      setLoadingComprobantes(false);
-      setErrorComprobantes(null);
-      return;
-    }
+    console.log('🔍 N09/TOKA DEBUG - Estado de la solicitud:', estadoPagado);
+    // TEMPORALMENTE comentado para debug
+    // if (estadoPagado !== 'pagada') {
+    //   setComprobantes([]);
+    //   setLoadingComprobantes(false);
+    //   setErrorComprobantes(null);
+    //   return;
+    // }
     
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
     try {
+      console.log('🔍 N09/TOKA DEBUG - Estado solicitud:', solicitud.estado);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      console.log('🔍 N09/TOKA DEBUG - soporte_url:', (solicitud as any).soporte_url);
+      console.log('🔍 N09/TOKA DEBUG - Solicitud completa:', solicitud);
+      
       // Primero verificar si hay soporte_url en la solicitud
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((solicitud as any).soporte_url) {
@@ -278,9 +285,11 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
           comentario: 'Comprobante desde soporte_url'
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.log(`✅ Usando comprobante desde soporte_url: ${(solicitud as any).soporte_url}`);
+        console.log(`✅ N09/TOKA - Usando comprobante desde soporte_url: ${(solicitud as any).soporte_url}`);
         setComprobantes([comprobanteFromSoporte]);
         return;
+      } else {
+        console.log('❌ N09/TOKA DEBUG - No hay soporte_url en la solicitud');
       }
       
       // 🔍 Para TOKA: Obtener archivos de solicitudes_n09_toka_archivos

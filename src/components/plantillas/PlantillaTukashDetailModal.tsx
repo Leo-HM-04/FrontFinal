@@ -192,20 +192,34 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
     async function fetchComprobante() {
       if (!solicitud?.id_solicitud) return setComprobanteUrl(null);
       
+      console.log('🔍 TUKASH DEBUG - Estado solicitud:', solicitud.estado);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      console.log('🔍 TUKASH DEBUG - soporte_url:', (solicitud as any).soporte_url);
+      console.log('🔍 TUKASH DEBUG - Solicitud completa:', solicitud);
+      
       // Solo cargar comprobantes si la solicitud está pagada
       const estadoPagado = solicitud.estado?.toLowerCase();
-      if (estadoPagado !== 'pagada') {
-        setComprobanteUrl(null);
-        return;
-      }
+      console.log('🔍 TUKASH DEBUG - Verificando estado para comprobantes...');
+      // TEMPORALMENTE comentado para debug
+      // if (estadoPagado !== 'pagada') {
+      //   console.log('❌ TUKASH DEBUG - Solicitud no está pagada, estado:', estadoPagado);
+      //   setComprobanteUrl(null);
+      //   return;
+      // }
       
       try {
         // Primero verificar si hay soporte_url en la solicitud
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((solicitud as any).soporte_url) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          setComprobanteUrl(buildFileUrl((solicitud as any).soporte_url));
+          console.log('✅ TUKASH DEBUG - Encontrado soporte_url:', (solicitud as any).soporte_url);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const url = buildFileUrl((solicitud as any).soporte_url);
+          console.log('✅ TUKASH DEBUG - URL final construida:', url);
+          setComprobanteUrl(url);
           return;
+        } else {
+          console.log('❌ TUKASH DEBUG - No hay soporte_url en la solicitud');
         }
         
         // Si no hay soporte_url, buscar en la tabla comprobantes
