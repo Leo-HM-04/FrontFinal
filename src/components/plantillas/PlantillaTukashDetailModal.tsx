@@ -181,6 +181,8 @@ const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudA
 };
 
 export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: PlantillaTukashModalProps) {
+  console.log('🚀 TUKASH MODAL - Componente renderizado. isOpen:', isOpen, 'solicitud ID:', solicitud?.id_solicitud);
+  
   const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
   const [loading, setLoading] = useState<LoadingStateTukash>({ archivos: false, general: false });
   const [errors, setErrors] = useState<ErrorStateTukash>({ archivos: null, general: null });
@@ -189,8 +191,12 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
   // Estado para comprobante
   const [comprobanteUrl, setComprobanteUrl] = useState<string | null>(null);
   useEffect(() => {
+    console.log('🔄 TUKASH useEffect - Ejecutándose con solicitud ID:', solicitud?.id_solicitud);
     async function fetchComprobante() {
-      if (!solicitud?.id_solicitud) return setComprobanteUrl(null);
+      if (!solicitud?.id_solicitud) {
+        console.log('❌ TUKASH - No hay ID de solicitud');
+        return setComprobanteUrl(null);
+      }
       
       console.log('🔍 TUKASH DEBUG - Estado solicitud:', solicitud.estado);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
