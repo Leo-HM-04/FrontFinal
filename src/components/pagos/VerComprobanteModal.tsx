@@ -80,12 +80,17 @@ export const VerComprobanteModal: React.FC<VerComprobanteModalProps> = ({
 
   // Construir la URL del comprobante (priorizar soporte_url de la tabla solicitudes_pago)
   let comprobanteUrl = '';
-  const rutaArchivo = pago.soporte_url || comprobante?.ruta_archivo;
+  let rutaArchivo = pago.soporte_url || comprobante?.ruta_archivo;
   
   if (rutaArchivo) {
     if (rutaArchivo.startsWith('http')) {
       comprobanteUrl = rutaArchivo;
     } else {
+      // Corregir ruta: si viene como /uploads/facturas/, cambiar a /uploads/comprobantes/
+      if (rutaArchivo.includes('/uploads/facturas/')) {
+        rutaArchivo = rutaArchivo.replace('/uploads/facturas/', '/uploads/comprobantes/');
+      }
+      
       const rutaNormalizada = rutaArchivo.startsWith('/')
         ? rutaArchivo
         : `/${rutaArchivo}`;
