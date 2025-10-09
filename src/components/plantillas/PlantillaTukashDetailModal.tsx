@@ -201,6 +201,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
       console.log('🔍 TUKASH DEBUG - Estado solicitud:', solicitud.estado);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       console.log('🔍 TUKASH DEBUG - soporte_url:', (solicitud as any).soporte_url);
+      console.log('🔍 TUKASH DEBUG - Todos los campos de solicitud:', Object.keys(solicitud));
       console.log('🔍 TUKASH DEBUG - Solicitud completa:', solicitud);
       
       // Solo cargar comprobantes si la solicitud está pagada
