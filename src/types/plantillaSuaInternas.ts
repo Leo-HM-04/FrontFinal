@@ -13,6 +13,7 @@ export interface SolicitudSuaInternasData {
   usuario_creacion?: string;
   usuario_actualizacion?: string;
   estado?: string;
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
 }
 
 // Props para el modal de SUA INTERNAS

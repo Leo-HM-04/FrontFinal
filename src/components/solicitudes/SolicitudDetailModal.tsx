@@ -1265,6 +1265,8 @@ export function SolicitudDetailModal({
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: solicitud.soporte_url,
         };
       } catch {
         solicitudSuaInternas = null;
@@ -1301,6 +1303,8 @@ export function SolicitudDetailModal({
         usuario_actualizacion: '',
         // Campos adicionales
         folio: solicitud.folio || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: solicitud.soporte_url,
       };
       
       console.log('🔧 [SUA INTERNAS] Datos construidos:', solicitudSuaInternas);
@@ -1692,6 +1696,8 @@ function extraerDatosDelConcepto(concepto: string) {
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: solicitud.soporte_url,
         };
       } catch {
         console.log('❌ [SUA FRENSHETSI] Error parseando plantilla_datos, usando datos base');
@@ -1724,6 +1730,8 @@ function extraerDatosDelConcepto(concepto: string) {
         fecha_actualizacion: solicitud.updated_at || '',
         usuario_creacion: solicitud.usuario_nombre || '',
         usuario_actualizacion: '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: solicitud.soporte_url,
       };
       
       console.log('🔧 [SUA FRENSHETSI] Datos construidos:', solicitudSuaFrenshetsi);
