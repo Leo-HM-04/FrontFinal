@@ -475,6 +475,8 @@ export default function HistorialPagosPage() {
         fecha_creacion: solicitud.fecha_creacion,
         usuario_creacion: '',
         usuario_actualizacion: '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
     } catch {
       return {
@@ -490,6 +492,8 @@ export default function HistorialPagosPage() {
         fecha_creacion: solicitud.fecha_creacion,
         usuario_creacion: '',
         usuario_actualizacion: '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
     }
   }

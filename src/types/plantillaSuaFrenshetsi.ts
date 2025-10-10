@@ -14,6 +14,7 @@ export interface SolicitudSuaFrenshetsiData {
   fecha_actualizacion: string;
   usuario_creacion: string;
   usuario_actualizacion: string;
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
 }
 
 export interface PlantillaSuaFrenshetsiDetailModalProps {

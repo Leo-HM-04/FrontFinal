@@ -14,6 +14,8 @@ interface SolicitudSuaInternasExtended extends SolicitudSuaInternasData {
   id_aprobador?: number;
   fecha_aprobacion?: string;
   comentarios_aprobacion?: string;
+  ruta_archivo?: string; // <-- Agregado para comprobante
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
 }
 
 // Función para formatear moneda en pesos mexicanos
@@ -151,24 +153,63 @@ export function PlantillaSuaInternasDetailModal({
   // Cast de la solicitud para acceder a campos adicionales
   const solicitudExtended = solicitud as SolicitudSuaInternasExtended;
 
-  // Función para obtener comprobantes de pago
+  // Función para obtener comprobantes de pago (usando la misma lógica que funciona en TUKASH)
   const fetchComprobantes = useCallback(async () => {
+    if (!solicitud) return;
+    console.log('🔍 SUA INTERNAS COMPROBANTES - Iniciando fetchComprobantes para solicitud:', solicitud.id_solicitud);
+    console.log('🔍 SUA INTERNAS COMPROBANTES - solicitud completa:', solicitud);
+    console.log('🔍 SUA INTERNAS COMPROBANTES - soporte_url específico:', solicitud.soporte_url);
+    console.log('🔍 SUA INTERNAS COMPROBANTES - tipo de soporte_url:', typeof solicitud.soporte_url);
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
+    
     try {
-      const id = typeof solicitud.id_solicitud === 'number' ? solicitud.id_solicitud : 0;
-      const data = await import('@/services/solicitudes.service').then(mod => mod.SolicitudesService.getComprobantes(id));
-      setComprobantes(data);
+      const token = localStorage.getItem('auth_token');
+      
+      // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+      if (solicitud.soporte_url) {
+        console.log('✅ SUA INTERNAS COMPROBANTES - Encontrado soporte_url:', solicitud.soporte_url);
+        const comprobanteFromSoporte = {
+          id_comprobante: 999999, // ID ficticio para soporte_url
+          id_solicitud: solicitud.id_solicitud || 0,
+          ruta_archivo: solicitud.soporte_url,
+          nombre_archivo: 'Comprobante de Pago',
+          fecha_subida: solicitud.fecha_actualizacion || new Date().toISOString(),
+          usuario_subio: 0,
+          comentario: 'Comprobante desde soporte_url',
+          nombre_usuario: 'Sistema'
+        };
+        setComprobantes([comprobanteFromSoporte]);
+        return;
+      }
+      
+      // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+      console.log('⚠️ SUA INTERNAS COMPROBANTES - No se encontró soporte_url, buscando en tabla comprobantes_pago');
+      if (token) {
+        const { ComprobantesService } = await import('@/services/comprobantes.service');
+        const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud || 0, token);
+        console.log('✅ SUA INTERNAS COMPROBANTES - Comprobantes de tabla:', comprobantes);
+        if (comprobantes && comprobantes.length > 0) {
+          setComprobantes(comprobantes);
+        } else {
+          setComprobantes([]);
+        }
+      } else {
+        console.log('❌ SUA INTERNAS COMPROBANTES - No hay token');
+        setComprobantes([]);
+      }
     } catch (error) {
+      console.error('❌ SUA INTERNAS COMPROBANTES - Error:', error);
       let msg = 'Error al cargar comprobantes';
       if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
         msg = (error as { message: string }).message;
       }
       setErrorComprobantes(msg);
+      setComprobantes([]);
     } finally {
       setLoadingComprobantes(false);
     }
-  }, [solicitud.id_solicitud]);
+  }, [solicitud]);
 
   // Función para obtener archivos adjuntos
   const fetchArchivos = useCallback(async () => {

@@ -326,16 +326,55 @@ export function PlantillaSuaFrenshetsiDetailModal({
     }
   }, [solicitud, handleError]);
 
-  // Función para obtener comprobantes
+  // Función para obtener comprobantes (usando la misma lógica que funciona en TUKASH)
   const fetchComprobantes = useCallback(async () => {
     if (!solicitud || !solicitud.id_solicitud) return;
+    console.log('🔍 SUA FRENSHETSI COMPROBANTES - Iniciando fetchComprobantes para solicitud:', solicitud.id_solicitud);
+    console.log('🔍 SUA FRENSHETSI COMPROBANTES - solicitud completa:', solicitud);
+    console.log('🔍 SUA FRENSHETSI COMPROBANTES - soporte_url específico:', solicitud.soporte_url);
+    console.log('🔍 SUA FRENSHETSI COMPROBANTES - tipo de soporte_url:', typeof solicitud.soporte_url);
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
+    
     try {
-      const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-      setComprobantes(data);
+      const token = localStorage.getItem('auth_token');
+      
+      // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+      if (solicitud.soporte_url) {
+        console.log('✅ SUA FRENSHETSI COMPROBANTES - Encontrado soporte_url:', solicitud.soporte_url);
+        const comprobanteFromSoporte = {
+          id_comprobante: 999999, // ID ficticio para soporte_url
+          id_solicitud: solicitud.id_solicitud,
+          ruta_archivo: solicitud.soporte_url,
+          nombre_archivo: 'Comprobante de Pago',
+          fecha_subida: solicitud.fecha_actualizacion || new Date().toISOString(),
+          usuario_subio: 0,
+          comentario: 'Comprobante desde soporte_url',
+          nombre_usuario: 'Sistema'
+        };
+        setComprobantes([comprobanteFromSoporte]);
+        return;
+      }
+      
+      // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+      console.log('⚠️ SUA FRENSHETSI COMPROBANTES - No se encontró soporte_url, buscando en tabla comprobantes_pago');
+      if (token) {
+        const { ComprobantesService } = await import('@/services/comprobantes.service');
+        const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
+        console.log('✅ SUA FRENSHETSI COMPROBANTES - Comprobantes de tabla:', comprobantes);
+        if (comprobantes && comprobantes.length > 0) {
+          setComprobantes(comprobantes);
+        } else {
+          setComprobantes([]);
+        }
+      } else {
+        console.log('❌ SUA FRENSHETSI COMPROBANTES - No hay token');
+        setComprobantes([]);
+      }
     } catch (error) {
+      console.error('❌ SUA FRENSHETSI COMPROBANTES - Error:', error);
       setErrorComprobantes('Error al cargar comprobantes');
+      setComprobantes([]);
     } finally {
       setLoadingComprobantes(false);
     }

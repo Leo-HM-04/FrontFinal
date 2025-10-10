@@ -7,6 +7,17 @@ export const getPagosPendientes = async () => {
     // Usar endpoint unificado que incluye N09/TOKA y solicitudes normales
     const res = await api.get('/solicitudes/unificadas');
     
+    // 🔍 DEBUG: Verificar solicitud 321 en el servicio frontend
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const solicitud321 = res.data.find((s: any) => s.id_solicitud === 321);
+    if (solicitud321) {
+      console.log('🔍 [FRONTEND SERVICE DEBUG] Solicitud 321 recibida:', {
+        id_solicitud: solicitud321.id_solicitud,
+        soporte_url: solicitud321.soporte_url,
+        keys: Object.keys(solicitud321)
+      });
+    }
+    
     // Filtrar solo solicitudes autorizadas/aprobadas
     const solicitudesAutorizadas = res.data.filter((solicitud: { estado?: string }) => 
       solicitud.estado && (

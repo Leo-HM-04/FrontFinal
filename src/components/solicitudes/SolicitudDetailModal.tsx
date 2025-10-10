@@ -28,6 +28,7 @@ import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { PlantillaPolizasDetailModal, SolicitudPolizasData } from '@/components/plantillas/PlantillaPolizasDetailModal';
 import { PlantillaTransferenciaDetailModal, SolicitudTransferenciaData, CuentaTransferencia } from '@/components/plantillas/PlantillaTransferenciaDetailModal';
 import { PlantillaEfectivoDetailModal, SolicitudEfectivoData } from '@/components/plantillas/PlantillaEfectivoDetailModal';
+import { PlantillaRegresosTransferenciaDetailModal, SolicitudRegresosTransferenciaData } from '@/components/plantillas/PlantillaRegresosTransferenciaDetailModal';
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
@@ -782,7 +783,7 @@ export function SolicitudDetailModal({
 }: SolicitudDetailModalProps) {
   // Estados
   const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
-  // const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
+  const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
   
@@ -841,7 +842,7 @@ export function SolicitudDetailModal({
     setErrors(prev => ({ ...prev, archivos: null }));
     try {
       const data = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
-      // setArchivos(data);
+      setArchivos(data);
     } catch (error) {
       const errorMessage = handleError(error);
       setErrors(prev => ({ ...prev, archivos: errorMessage }));
@@ -879,7 +880,7 @@ export function SolicitudDetailModal({
   useEffect(() => {
     if (!isOpen) {
       setComprobantes([]);
-      // setArchivos([]);
+      setArchivos([]);
       setShowPassword1(false);
       setShowPassword2(false);
       setLoading({ comprobantes: false, archivos: false });
@@ -1015,6 +1016,8 @@ export function SolicitudDetailModal({
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: solicitud.aprobador_nombre || '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
       } catch {
         console.log('❌ [TRANSFERENCIA] Error parseando plantilla_datos, usando datos base');
@@ -1054,6 +1057,8 @@ export function SolicitudDetailModal({
         fecha_actualizacion: solicitud.updated_at || '',
         usuario_creacion: solicitud.usuario_nombre || '',
         usuario_actualizacion: solicitud.aprobador_nombre || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [TRANSFERENCIA] Datos construidos:', solicitudTransferencia);
@@ -1107,6 +1112,8 @@ export function SolicitudDetailModal({
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: solicitud.aprobador_nombre || '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
       } catch {
         console.log('❌ [EFECTIVO] Error parseando plantilla_datos, usando datos base');
@@ -1136,6 +1143,8 @@ export function SolicitudDetailModal({
         fecha_actualizacion: solicitud.updated_at || '',
         usuario_creacion: solicitud.usuario_nombre || '',
         usuario_actualizacion: solicitud.aprobador_nombre || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [EFECTIVO] Datos construidos:', solicitudEfectivo);
@@ -1176,6 +1185,8 @@ export function SolicitudDetailModal({
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
       } catch {
         solicitudTukash = null;
@@ -1216,6 +1227,8 @@ export function SolicitudDetailModal({
         usuario_actualizacion: '',
         // Campos adicionales
         folio: solicitud.folio || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [TUKASH] Datos construidos:', solicitudTukash);
@@ -1261,6 +1274,8 @@ export function SolicitudDetailModal({
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: solicitud.soporte_url,
         };
       } catch {
         solicitudSuaInternas = null;
@@ -1297,6 +1312,8 @@ export function SolicitudDetailModal({
         usuario_actualizacion: '',
         // Campos adicionales
         folio: solicitud.folio || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: solicitud.soporte_url,
       };
       
       console.log('🔧 [SUA INTERNAS] Datos construidos:', solicitudSuaInternas);
@@ -1351,6 +1368,8 @@ export function SolicitudDetailModal({
           cuenta_destino: plantillaData.cuenta_destino || solicitud.cuenta_destino || '',
           tipo_cuenta_destino: plantillaData.tipo_cuenta_destino || solicitud.tipo_cuenta_destino || '',
           beneficiario: plantillaData.beneficiario || solicitud.nombre_persona || '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
       } catch {
         console.log('❌ [COMISIONES] Error parseando plantilla_datos, usando datos base');
@@ -1436,6 +1455,8 @@ export function SolicitudDetailModal({
         cuenta_destino: solicitud.cuenta_destino || '',
         tipo_cuenta_destino: solicitud.tipo_cuenta_destino || '',
         beneficiario: solicitud.nombre_persona || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [COMISIONES] Datos construidos:', solicitudComisiones);
@@ -1594,6 +1615,8 @@ function extraerDatosDelConcepto(concepto: string) {
           fecha_actualizacion: solicitud.updated_at ?? '',
           usuario_creacion: solicitud.usuario_nombre ?? '',
           usuario_actualizacion: solicitud.aprobador_nombre ?? '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
         console.log('🔧 [POLIZAS] Datos construidos desde plantilla (prioridad plantilla_datos):', solicitudPolizas);
       } catch (error) {
@@ -1636,6 +1659,8 @@ function extraerDatosDelConcepto(concepto: string) {
         fecha_actualizacion: solicitud.updated_at || '',
         usuario_creacion: solicitud.usuario_nombre || '',
         usuario_actualizacion: solicitud.aprobador_nombre || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [POLIZAS] Datos construidos:', solicitudPolizas);
@@ -1688,6 +1713,8 @@ function extraerDatosDelConcepto(concepto: string) {
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: solicitud.soporte_url,
         };
       } catch {
         console.log('❌ [SUA FRENSHETSI] Error parseando plantilla_datos, usando datos base');
@@ -1720,6 +1747,8 @@ function extraerDatosDelConcepto(concepto: string) {
         fecha_actualizacion: solicitud.updated_at || '',
         usuario_creacion: solicitud.usuario_nombre || '',
         usuario_actualizacion: '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: solicitud.soporte_url,
       };
       
       console.log('🔧 [SUA FRENSHETSI] Datos construidos:', solicitudSuaFrenshetsi);
@@ -2189,6 +2218,48 @@ function extraerDatosDelConcepto(concepto: string) {
                   )
                 )}
 
+                {/* Archivos adicionales de la solicitud */}
+                {loading.archivos ? (
+                  <LoadingSpinner message="Cargando archivos..." />
+                ) : errors.archivos ? (
+                  <ErrorMessage message={errors.archivos} />
+                ) : archivos.length > 0 ? (
+                  <div className="space-y-3">
+                    <span className="text-sm text-blue-700 font-medium flex items-center">
+                      <FileText className="w-4 h-4 mr-1.5 text-blue-600" />
+                      Archivos adicionales ({archivos.length}):
+                    </span>
+                    {archivos.map((archivo) => (
+                      <div key={archivo.id} className="bg-blue-50/30 p-3 rounded-lg border border-blue-100">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex-1">
+                            <span className="text-xs text-blue-600 font-medium bg-white/60 px-2 py-1 rounded">
+                              {archivo.tipo || 'Documento'}
+                            </span>
+                            <p className="text-xs text-gray-600 mt-1">
+                              Subido: {new Date(archivo.fecha_subida).toLocaleDateString('es-MX')}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => window.open(buildFileUrl(archivo.archivo_url), '_blank')}
+                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-lg px-3 py-1.5 text-xs"
+                          >
+                            Ver archivo
+                          </Button>
+                        </div>
+                        <div className="mt-2">
+                          <FilePreview 
+                            url={buildFileUrl(archivo.archivo_url)}
+                            fileName={archivo.archivo_url.split('/').pop() || ''}
+                            alt={`Archivo: ${archivo.tipo || 'Documento'}`}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
                 {/* Botones de acción para documentos principales */}
                 <div className="flex w-full justify-end mt-6">
                   {(solicitud.factura_url || solicitud.soporte_url) ? (
@@ -2201,17 +2272,6 @@ function extraerDatosDelConcepto(concepto: string) {
                         >
                           <FileText className="w-5 h-5" />
                           Ver Factura
-                          <ExternalLink className="w-5 h-5" />
-                        </Button>
-                      )}
-                      {solicitud.soporte_url && (
-                        <Button
-                          size="lg"
-                          onClick={() => solicitud.soporte_url && window.open(buildFileUrl(solicitud.soporte_url), '_blank')}
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
-                        >
-                          <FileText className="w-5 h-5" />
-                          Ver Soporte
                           <ExternalLink className="w-5 h-5" />
                         </Button>
                       )}
@@ -2238,21 +2298,52 @@ function extraerDatosDelConcepto(concepto: string) {
                   ) : errors.comprobantes ? (
                     <ErrorMessage message={errors.comprobantes} />
                   ) : comprobantes.length === 0 ? (
-                    <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
-                      <div className="flex justify-center mb-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
-                          <FileCheck className="w-8 h-8 text-blue-600" />
+                    // Si no hay comprobantes en la tabla pero hay soporte_url, mostrar ese archivo
+                    solicitud.soporte_url ? (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                                <span className="text-xs text-blue-800 font-semibold">
+                                  Comprobante de Pago
+                                </span>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => window.open(buildFileUrl(solicitud.soporte_url!), '_blank')}
+                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3"
+                            >
+                              Ver completo
+                            </Button>
+                          </div>
+                          
+                          <FilePreview 
+                            url={buildFileUrl(solicitud.soporte_url)}
+                            fileName={solicitud.soporte_url.split('/').pop() || 'comprobante'}
+                            alt="Comprobante de pago"
+                            height="h-36"
+                          />
                         </div>
                       </div>
-                      <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
-                      <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
-                        El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
-                      </p>
-                      <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
-                        <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
+                    ) : (
+                      <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
+                        <div className="flex justify-center mb-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                            <FileCheck className="w-8 h-8 text-blue-600" />
+                          </div>
+                        </div>
+                        <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
+                        <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
+                          El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
+                        </p>
+                        <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
+                          <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
+                        </div>
                       </div>
-                    </div>
+                    )
                   ) : (
                     <div className="space-y-4">
                       {comprobantes.map((comprobante) => {

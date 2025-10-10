@@ -38,6 +38,8 @@ interface SolicitudComisionesExtended extends SolicitudComisionesData {
   cuenta_destino?: string;
   tipo_cuenta_destino?: string;
   beneficiario?: string;
+  ruta_archivo?: string; // <-- Agregado para comprobante
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
   concepto?: string; // Campo del concepto original de la base de datos
 }
 
@@ -393,16 +395,40 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
   useEffect(() => {
     async function fetchComprobante() {
       if (!isOpen || !solicitud?.id_solicitud) return setComprobanteUrl(null);
+      console.log('🔍 COMISIONES COMPROBANTES - Iniciando fetchComprobante para solicitud:', solicitud.id_solicitud);
+      console.log('🔍 COMISIONES COMPROBANTES - solicitud completa:', solicitud);
+      console.log('🔍 COMISIONES COMPROBANTES - soporte_url específico:', solicitud.soporte_url);
+      console.log('🔍 COMISIONES COMPROBANTES - tipo de soporte_url:', typeof solicitud.soporte_url);
       setLoadingComprobante(true);
       setErrorComprobante(null);
+      
       try {
-        const comprobantes = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-        if (comprobantes && comprobantes.length > 0 && comprobantes[0].ruta_archivo) {
-          setComprobanteUrl(comprobantes[0].ruta_archivo);
+        const token = localStorage.getItem('auth_token');
+        
+        // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+        if (solicitud.soporte_url) {
+          console.log('✅ COMISIONES COMPROBANTES - Encontrado soporte_url:', solicitud.soporte_url);
+          setComprobanteUrl(solicitud.soporte_url);
+          return;
+        }
+
+        // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+        console.log('⚠️ COMISIONES COMPROBANTES - No se encontró soporte_url, buscando en tabla comprobantes_pago');
+        if (token) {
+          const { ComprobantesService } = await import('@/services/comprobantes.service');
+          const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
+          console.log('✅ COMISIONES COMPROBANTES - Comprobantes de tabla:', comprobantes);
+          if (comprobantes && comprobantes.length > 0 && comprobantes[0].ruta_archivo) {
+            setComprobanteUrl(comprobantes[0].ruta_archivo);
+          } else {
+            setComprobanteUrl(null);
+          }
         } else {
+          console.log('❌ COMISIONES COMPROBANTES - No hay token');
           setComprobanteUrl(null);
         }
-      } catch {
+      } catch (error) {
+        console.error('❌ COMISIONES COMPROBANTES - Error:', error);
         setErrorComprobante('Error al cargar comprobante');
         setComprobanteUrl(null);
       } finally {

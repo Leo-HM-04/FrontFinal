@@ -4,7 +4,7 @@ import { Solicitud, CreateSolicitudData, UpdateEstadoData, Comprobante } from '@
 
 export class SolicitudesService {
   static async updatePlantilla({ id, plantilla_datos }: { id: number; plantilla_datos: string }): Promise<void> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     await api.put(`/solicitudes/${id}/plantilla`, { plantilla_datos }, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
@@ -13,7 +13,7 @@ export class SolicitudesService {
     try {
       // Si no se proporciona token, intentamos obtenerlo del localStorage
       if (!token) {
-        const storedToken = localStorage.getItem('token');
+        const storedToken = localStorage.getItem('auth_token');
         if (storedToken) {
           token = storedToken;
         }
@@ -64,7 +64,7 @@ export class SolicitudesService {
     return response.data;
   }
   static async getAll(): Promise<Solicitud[]> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     try {
       const response = await api.get<Solicitud[]>('/solicitudes', {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -87,7 +87,7 @@ export class SolicitudesService {
   }
 
   static async getAllUnified(): Promise<Solicitud[]> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     try {
       const response = await api.get<Solicitud[]>('/solicitudes/unificadas', {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -110,7 +110,7 @@ export class SolicitudesService {
   }
 
   static async getById(id: number): Promise<Solicitud> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const response = await api.get<Solicitud>(`/solicitudes/${id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
@@ -118,7 +118,7 @@ export class SolicitudesService {
   }
 
   static async create(solicitudData: CreateSolicitudData): Promise<Solicitud> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const response = await api.post<Solicitud>('/solicitudes', solicitudData, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
@@ -126,7 +126,7 @@ export class SolicitudesService {
   }
 
   static async updateEstado(id: number, estadoData: UpdateEstadoData): Promise<Solicitud> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const response = await api.put<Solicitud>(`/solicitudes/${id}/estado`, estadoData, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
@@ -134,14 +134,14 @@ export class SolicitudesService {
   }
 
   static async delete(id: number): Promise<void> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     await api.delete(`/solicitudes/${id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
   }
 
   static async getMySolicitudes(): Promise<Solicitud[]> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const response = await api.get<Solicitud[]>('/solicitudes', {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
@@ -149,7 +149,7 @@ export class SolicitudesService {
   }
 
   static async update(id: number, data: Partial<Solicitud>): Promise<Solicitud> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const response = await api.put<Solicitud>(`/solicitudes/${id}`, data, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
@@ -192,7 +192,7 @@ export class SolicitudesService {
     // Datos de la plantilla TUKASH
     plantilla_datos?: string | object;
   }): Promise<unknown> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     
     console.log('Service data received:', data);
     
@@ -265,7 +265,7 @@ export class SolicitudesService {
     cuenta?: string | null;
     banco_cuenta?: string | null;
   }): Promise<unknown> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const formData = new FormData();
     formData.append('departamento', data.departamento);
     formData.append('monto', String(data.monto));
@@ -305,14 +305,14 @@ export class SolicitudesService {
   }
 
   static async deleteSolicitante(id: number): Promise<void> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     await api.delete(`/solicitudes/solicitante/${id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
   }
 
   static async aprobarLote(ids: number[], comentario_aprobador = ''): Promise<{ success: boolean; message?: string; updated?: number }> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const response = await api.put<{ success: boolean; message?: string; updated?: number }>(
       '/solicitudes/aprobar-lote',
       { ids, comentario_aprobador },
@@ -324,7 +324,7 @@ export class SolicitudesService {
   }
 
   static async rechazarLote(ids: number[], comentario_aprobador = ''): Promise<{ success: boolean; message?: string; updated?: number }> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     const response = await api.put<{ success: boolean; message?: string; updated?: number }>(
       '/solicitudes/rechazar-lote',
       { ids, comentario_aprobador },
@@ -357,7 +357,7 @@ export class SolicitudesService {
     // Archivos
     archivos: File[];
   }): Promise<unknown> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     
     console.log('Service createPlantilla data received:', data);
     
