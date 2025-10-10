@@ -196,12 +196,15 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
   // Función para obtener comprobantes (copiada de SolicitudDetailModal)
   const fetchComprobantes = useCallback(async () => {
     if (!solicitud) return;
+    console.log('🔍 TUKASH COMPROBANTES - Iniciando fetchComprobantes para solicitud:', solicitud.id_solicitud);
     setLoading(prev => ({ ...prev, archivos: true })); // Reutilizamos el loading de archivos
     setErrors(prev => ({ ...prev, archivos: null }));
     try {
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud || 0);
+      console.log('✅ TUKASH COMPROBANTES - Datos recibidos:', data);
       setComprobantes(data);
     } catch (error) {
+      console.error('❌ TUKASH COMPROBANTES - Error:', error);
       const errorMessage = handleError(error);
       setErrors(prev => ({ ...prev, archivos: errorMessage }));
     } finally {
@@ -211,8 +214,8 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
 
   // useEffect para cargar comprobantes cuando el modal se abre
   useEffect(() => {
-    if (isOpen && solicitud && solicitud.estado === 'pagada') {
-      fetchComprobantes();
+    if (isOpen && solicitud) {
+      fetchComprobantes(); // Cargar comprobantes sin restricción de estado
     }
   }, [isOpen, solicitud, fetchComprobantes]);
   const fetchArchivos = useCallback(async () => {

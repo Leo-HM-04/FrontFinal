@@ -269,9 +269,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
   useEffect(() => {
     if (isOpen && solicitud) {
       fetchArchivos();
-      if (solicitud.estado === 'pagada') {
-        fetchComprobantes();
-      }
+      fetchComprobantes(); // Cargar comprobantes sin restricción de estado
     }
   }, [isOpen, solicitud, fetchArchivos, fetchComprobantes]);
 
