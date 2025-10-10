@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, Factory } from 'lucide-react';
@@ -248,19 +247,81 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     }
   }, [solicitud, handleError]);
 
-  // Función para obtener comprobantes (usando la misma lógica que SolicitudDetailModal)
+  // Función para obtener comprobantes (usando la misma lógica que funciona en subir-comprobante)
   const fetchComprobantes = useCallback(async () => {
     if (!solicitud || !solicitud.id_solicitud) return;
     
+    console.log('🔍 N09/TOKA COMPROBANTES - Iniciando fetchComprobantes para solicitud:', solicitud.id_solicitud);
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
+    
     try {
-      // Usar el mismo servicio que funciona en SolicitudDetailModal
-      const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-      setComprobantes(data);
+      const token = localStorage.getItem('auth_token');
+      
+      // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+      if ((solicitud as SolicitudN09TokaExtended).soporte_url) {
+        console.log('✅ N09/TOKA COMPROBANTES - Encontrado soporte_url:', (solicitud as SolicitudN09TokaExtended).soporte_url);
+        const comprobanteFromSoporte = {
+          id_comprobante: 999999, // ID ficticio para soporte_url
+          id_solicitud: solicitud.id_solicitud || 0,
+          ruta_archivo: (solicitud as SolicitudN09TokaExtended).soporte_url!,
+          nombre_archivo: 'Comprobante de Pago',
+          fecha_subida: solicitud.fecha_actualizacion || new Date().toISOString(),
+          usuario_subio: 0,
+          comentario: 'Comprobante desde soporte_url',
+          nombre_usuario: 'Sistema'
+        };
+        setComprobantes([comprobanteFromSoporte]);
+        return;
+      }
+      
+      // Para N09/TOKA: Obtener archivos de solicitudes_n09_toka_archivos
+      try {
+        console.log('📋 N09/TOKA COMPROBANTES - Obteniendo archivos TOKA...');
+        const archivos = await SolicitudN09TokaArchivosService.obtenerArchivos(solicitud.id_solicitud);
+        
+        if (archivos && archivos.length > 0) {
+          // Convertir archivos TOKA al formato de comprobantes para mantener compatibilidad con el render
+          const comprobantesConvertidos = archivos.map(archivo => ({
+            id_comprobante: archivo.id_archivo,
+            id_solicitud: solicitud.id_solicitud || 0,
+            ruta_archivo: archivo.ruta_archivo, // Ya tiene formato /uploads/solicitudes-n09-toka/xxx.pdf
+            nombre_archivo: archivo.nombre_archivo,
+            fecha_subida: archivo.fecha_subida,
+            usuario_subio: 0,
+            comentario: `Archivo TOKA: ${archivo.tipo_archivo}`,
+            nombre_usuario: 'Sistema TOKA'
+          }));
+          
+          console.log(`✅ N09/TOKA COMPROBANTES - Archivos TOKA convertidos: ${comprobantesConvertidos.length}`);
+          setComprobantes(comprobantesConvertidos);
+        } else {
+          // Si no hay archivos TOKA, buscar en la tabla comprobantes (sistema viejo)
+          if (token) {
+            const { ComprobantesService } = await import('@/services/comprobantes.service');
+            const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
+            console.log('✅ N09/TOKA COMPROBANTES - Comprobantes de tabla:', comprobantes);
+            setComprobantes(comprobantes || []);
+          } else {
+            console.log('❌ N09/TOKA COMPROBANTES - No hay token');
+            setComprobantes([]);
+          }
+        }
+      } catch (archivosError) {
+        console.error('❌ N09/TOKA COMPROBANTES - Error obteniendo archivos TOKA:', archivosError);
+        // Fallback: buscar en la tabla comprobantes
+        if (token) {
+          const { ComprobantesService } = await import('@/services/comprobantes.service');
+          const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
+          setComprobantes(comprobantes || []);
+        } else {
+          setComprobantes([]);
+        }
+      }
     } catch (error) {
-      console.error('Error al cargar comprobantes:', error);
+      console.error('❌ N09/TOKA COMPROBANTES - Error general:', error);
       setErrorComprobantes('Error al cargar comprobantes');
+      setComprobantes([]);
     } finally {
       setLoadingComprobantes(false);
     }

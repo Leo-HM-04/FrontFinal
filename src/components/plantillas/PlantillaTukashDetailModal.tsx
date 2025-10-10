@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { SolicitudesService } from '@/services/solicitudes.service';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, CreditCard } from 'lucide-react';
 import { DollarSign } from 'lucide-react';
@@ -193,24 +192,60 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
   // Estados para comprobantes (igual que en SolicitudDetailModal)
   const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
 
-  // Función para obtener comprobantes (copiada de SolicitudDetailModal)
+  // Función para obtener comprobantes (usando la misma lógica que funciona en subir-comprobante)
   const fetchComprobantes = useCallback(async () => {
     if (!solicitud) return;
     console.log('🔍 TUKASH COMPROBANTES - Iniciando fetchComprobantes para solicitud:', solicitud.id_solicitud);
+    console.log('🔍 TUKASH COMPROBANTES - solicitudExtended completo:', solicitudExtended);
+    console.log('🔍 TUKASH COMPROBANTES - soporte_url específico:', solicitudExtended.soporte_url);
+    console.log('🔍 TUKASH COMPROBANTES - tipo de soporte_url:', typeof solicitudExtended.soporte_url);
     setLoading(prev => ({ ...prev, archivos: true })); // Reutilizamos el loading de archivos
     setErrors(prev => ({ ...prev, archivos: null }));
+    
     try {
-      const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud || 0);
-      console.log('✅ TUKASH COMPROBANTES - Datos recibidos:', data);
-      setComprobantes(data);
+      const token = localStorage.getItem('auth_token');
+      
+      // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+      if (solicitudExtended.soporte_url) {
+        console.log('✅ TUKASH COMPROBANTES - Encontrado soporte_url:', solicitudExtended.soporte_url);
+        const comprobanteFromSoporte = {
+          id_comprobante: 999999, // ID ficticio para soporte_url
+          id_solicitud: solicitud.id_solicitud || 0,
+          ruta_archivo: solicitudExtended.soporte_url,
+          nombre_archivo: 'Comprobante de Pago',
+          fecha_subida: solicitud.fecha_actualizacion || new Date().toISOString(),
+          usuario_subio: 0,
+          comentario: 'Comprobante desde soporte_url',
+          nombre_usuario: 'Sistema'
+        };
+        setComprobantes([comprobanteFromSoporte]);
+        return;
+      }
+      
+      // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+      console.log('⚠️ TUKASH COMPROBANTES - No se encontró soporte_url, buscando en tabla comprobantes_pago');
+      if (token) {
+        const { ComprobantesService } = await import('@/services/comprobantes.service');
+        const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud || 0, token);
+        console.log('✅ TUKASH COMPROBANTES - Comprobantes de tabla:', comprobantes);
+        if (comprobantes && comprobantes.length > 0) {
+          setComprobantes(comprobantes);
+        } else {
+          setComprobantes([]);
+        }
+      } else {
+        console.log('❌ TUKASH COMPROBANTES - No hay token');
+        setComprobantes([]);
+      }
     } catch (error) {
       console.error('❌ TUKASH COMPROBANTES - Error:', error);
       const errorMessage = handleError(error);
       setErrors(prev => ({ ...prev, archivos: errorMessage }));
+      setComprobantes([]);
     } finally {
       setLoading(prev => ({ ...prev, archivos: false }));
     }
-  }, [solicitud, handleError]);
+  }, [solicitud, solicitudExtended.soporte_url, handleError]);
 
   // useEffect para cargar comprobantes cuando el modal se abre
   useEffect(() => {
