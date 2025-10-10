@@ -24,6 +24,7 @@ export interface SolicitudTukashData {
   // Campos adicionales para compatibilidad con solicitud normal
   folio?: string;
   ruta_archivo?: string; // <-- Agregado para comprobante
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
 }
 
 export interface SolicitudTukashArchivo {

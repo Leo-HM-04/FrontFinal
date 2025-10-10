@@ -1176,6 +1176,8 @@ export function SolicitudDetailModal({
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
       } catch {
         solicitudTukash = null;
@@ -1216,6 +1218,8 @@ export function SolicitudDetailModal({
         usuario_actualizacion: '',
         // Campos adicionales
         folio: solicitud.folio || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [TUKASH] Datos construidos:', solicitudTukash);
