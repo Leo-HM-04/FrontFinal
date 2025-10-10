@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
 import Image from 'next/image';
@@ -37,6 +37,7 @@ export interface SolicitudRegresosTransferenciaData {
   fecha_actualizacion?: string;
   usuario_creacion?: string;
   usuario_actualizacion?: string;
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
 }
 
 export interface SolicitudArchivo {
@@ -114,6 +115,60 @@ export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegres
   const [loadingComprobantes, setLoadingComprobantes] = useState(false);
   const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
 
+  // Función para obtener comprobantes de pago (usando la misma lógica que funciona en TUKASH)
+  const fetchComprobantes = useCallback(async () => {
+    if (!solicitud) return;
+    console.log('🔍 REGRESOS-TRANSFERENCIA COMPROBANTES - Iniciando fetchComprobantes para solicitud:', solicitud.id_solicitud);
+    console.log('🔍 REGRESOS-TRANSFERENCIA COMPROBANTES - solicitud completa:', solicitud);
+    console.log('🔍 REGRESOS-TRANSFERENCIA COMPROBANTES - soporte_url específico:', solicitud.soporte_url);
+    console.log('🔍 REGRESOS-TRANSFERENCIA COMPROBANTES - tipo de soporte_url:', typeof solicitud.soporte_url);
+    setLoadingComprobantes(true);
+    setErrorComprobantes(null);
+    
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+      if (solicitud.soporte_url) {
+        console.log('✅ REGRESOS-TRANSFERENCIA COMPROBANTES - Encontrado soporte_url:', solicitud.soporte_url);
+        const comprobanteFromSoporte = {
+          id_comprobante: 999999, // ID ficticio para soporte_url
+          id_solicitud: solicitud.id_solicitud,
+          ruta_archivo: solicitud.soporte_url,
+          nombre_archivo: 'Comprobante de Pago',
+          fecha_subida: solicitud.fecha_actualizacion || new Date().toISOString(),
+          usuario_subio: 0,
+          comentario: 'Comprobante desde soporte_url',
+          nombre_usuario: 'Sistema'
+        };
+        setComprobantes([comprobanteFromSoporte]);
+        return;
+      }
+      
+      // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+      console.log('⚠️ REGRESOS-TRANSFERENCIA COMPROBANTES - No se encontró soporte_url, buscando en tabla comprobantes_pago');
+      if (token) {
+        const { ComprobantesService } = await import('@/services/comprobantes.service');
+        const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
+        console.log('✅ REGRESOS-TRANSFERENCIA COMPROBANTES - Comprobantes de tabla:', comprobantes);
+        if (comprobantes && comprobantes.length > 0) {
+          setComprobantes(comprobantes);
+        } else {
+          setComprobantes([]);
+        }
+      } else {
+        console.log('❌ REGRESOS-TRANSFERENCIA COMPROBANTES - No hay token');
+        setComprobantes([]);
+      }
+    } catch (error) {
+      console.error('❌ REGRESOS-TRANSFERENCIA COMPROBANTES - Error:', error);
+      setErrorComprobantes('Error al cargar comprobantes');
+      setComprobantes([]);
+    } finally {
+      setLoadingComprobantes(false);
+    }
+  }, [solicitud]);
+
   useEffect(() => {
     if (isOpen && solicitud) {
       setLoadingArchivos(true);
@@ -123,24 +178,14 @@ export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegres
         setLoadingArchivos(false);
       }, 500);
 
-      // Fetch comprobantes
-      setLoadingComprobantes(true);
-      setErrorComprobantes(null);
-      if (solicitud.id_solicitud) {
-        SolicitudesService.getComprobantes(solicitud.id_solicitud)
-          .then((data) => setComprobantes(data))
-          .catch(() => setErrorComprobantes('Error al cargar comprobantes'))
-          .finally(() => setLoadingComprobantes(false));
-      } else {
-        setComprobantes([]);
-        setLoadingComprobantes(false);
-      }
+      // Fetch comprobantes usando fetchComprobantes separado
+      fetchComprobantes();
     } else {
       setComprobantes([]);
       setLoadingComprobantes(false);
       setErrorComprobantes(null);
     }
-  }, [isOpen, solicitud]);
+  }, [isOpen, fetchComprobantes]);
 
   if (!isOpen) return null;
 

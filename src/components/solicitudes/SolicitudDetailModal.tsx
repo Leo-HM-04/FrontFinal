@@ -28,6 +28,7 @@ import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { PlantillaPolizasDetailModal, SolicitudPolizasData } from '@/components/plantillas/PlantillaPolizasDetailModal';
 import { PlantillaTransferenciaDetailModal, SolicitudTransferenciaData, CuentaTransferencia } from '@/components/plantillas/PlantillaTransferenciaDetailModal';
 import { PlantillaEfectivoDetailModal, SolicitudEfectivoData } from '@/components/plantillas/PlantillaEfectivoDetailModal';
+import { PlantillaRegresosTransferenciaDetailModal, SolicitudRegresosTransferenciaData } from '@/components/plantillas/PlantillaRegresosTransferenciaDetailModal';
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;
@@ -1015,6 +1016,8 @@ export function SolicitudDetailModal({
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: solicitud.aprobador_nombre || '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
       } catch {
         console.log('❌ [TRANSFERENCIA] Error parseando plantilla_datos, usando datos base');
@@ -1054,6 +1057,8 @@ export function SolicitudDetailModal({
         fecha_actualizacion: solicitud.updated_at || '',
         usuario_creacion: solicitud.usuario_nombre || '',
         usuario_actualizacion: solicitud.aprobador_nombre || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [TRANSFERENCIA] Datos construidos:', solicitudTransferencia);
@@ -1107,6 +1112,8 @@ export function SolicitudDetailModal({
           fecha_actualizacion: solicitud.updated_at || '',
           usuario_creacion: solicitud.usuario_nombre || '',
           usuario_actualizacion: solicitud.aprobador_nombre || '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
       } catch {
         console.log('❌ [EFECTIVO] Error parseando plantilla_datos, usando datos base');
@@ -1136,6 +1143,8 @@ export function SolicitudDetailModal({
         fecha_actualizacion: solicitud.updated_at || '',
         usuario_creacion: solicitud.usuario_nombre || '',
         usuario_actualizacion: solicitud.aprobador_nombre || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [EFECTIVO] Datos construidos:', solicitudEfectivo);
@@ -1359,6 +1368,8 @@ export function SolicitudDetailModal({
           cuenta_destino: plantillaData.cuenta_destino || solicitud.cuenta_destino || '',
           tipo_cuenta_destino: plantillaData.tipo_cuenta_destino || solicitud.tipo_cuenta_destino || '',
           beneficiario: plantillaData.beneficiario || solicitud.nombre_persona || '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
       } catch {
         console.log('❌ [COMISIONES] Error parseando plantilla_datos, usando datos base');
@@ -1444,6 +1455,8 @@ export function SolicitudDetailModal({
         cuenta_destino: solicitud.cuenta_destino || '',
         tipo_cuenta_destino: solicitud.tipo_cuenta_destino || '',
         beneficiario: solicitud.nombre_persona || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [COMISIONES] Datos construidos:', solicitudComisiones);
@@ -1602,6 +1615,8 @@ function extraerDatosDelConcepto(concepto: string) {
           fecha_actualizacion: solicitud.updated_at ?? '',
           usuario_creacion: solicitud.usuario_nombre ?? '',
           usuario_actualizacion: solicitud.aprobador_nombre ?? '',
+          // ✅ Agregado: Incluir soporte_url desde la solicitud original
+          soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
         console.log('🔧 [POLIZAS] Datos construidos desde plantilla (prioridad plantilla_datos):', solicitudPolizas);
       } catch (error) {
@@ -1644,6 +1659,8 @@ function extraerDatosDelConcepto(concepto: string) {
         fecha_actualizacion: solicitud.updated_at || '',
         usuario_creacion: solicitud.usuario_nombre || '',
         usuario_actualizacion: solicitud.aprobador_nombre || '',
+        // ✅ Agregado: Incluir soporte_url desde la solicitud original
+        soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
       
       console.log('🔧 [POLIZAS] Datos construidos:', solicitudPolizas);

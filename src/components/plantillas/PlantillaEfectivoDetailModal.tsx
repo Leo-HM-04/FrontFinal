@@ -26,6 +26,7 @@ export interface SolicitudEfectivoData {
   fecha_actualizacion?: string;
   usuario_creacion: string;
   usuario_actualizacion?: string;
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
 }
 
 interface PlantillaEfectivoDetailModalProps {
@@ -51,29 +52,49 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
 
   // Cargar comprobantes si la solicitud está pagada
   const fetchComprobantes = useCallback(async () => {
+    if (!solicitud) return;
+    console.log('🔍 EFECTIVO COMPROBANTES - Iniciando fetchComprobantes para solicitud:', solicitud.id_solicitud);
+    console.log('🔍 EFECTIVO COMPROBANTES - solicitud completa:', solicitud);
+    console.log('🔍 EFECTIVO COMPROBANTES - soporte_url específico:', solicitud.soporte_url);
+    console.log('🔍 EFECTIVO COMPROBANTES - tipo de soporte_url:', typeof solicitud.soporte_url);
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
+    
     try {
-      // Primero verificar si hay soporte_url en la solicitud
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((solicitud as any).soporte_url) {
+      const token = localStorage.getItem('auth_token');
+      
+      // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+      if (solicitud.soporte_url) {
+        console.log('✅ EFECTIVO COMPROBANTES - Encontrado soporte_url:', solicitud.soporte_url);
         const comprobanteFromSoporte = {
-          id_comprobante: 999999,
+          id_comprobante: 999999, // ID ficticio para soporte_url
           id_solicitud: solicitud.id_solicitud,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ruta_archivo: (solicitud as any).soporte_url,
+          ruta_archivo: solicitud.soporte_url,
           nombre_archivo: 'Comprobante de Pago',
-          fecha_subida: new Date().toISOString(),
+          fecha_subida: solicitud.fecha_actualizacion || new Date().toISOString(),
           usuario_subio: 0,
-          comentario: 'Comprobante desde soporte_url'
+          comentario: 'Comprobante desde soporte_url',
+          nombre_usuario: 'Sistema'
         };
         setComprobantes([comprobanteFromSoporte]);
         return;
       }
-
-      // Si no hay soporte_url, buscar en tabla comprobantes
-      const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-      setComprobantes(data);
+      
+      // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+      console.log('⚠️ EFECTIVO COMPROBANTES - No se encontró soporte_url, buscando en tabla comprobantes_pago');
+      if (token) {
+        const { ComprobantesService } = await import('@/services/comprobantes.service');
+        const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
+        console.log('✅ EFECTIVO COMPROBANTES - Comprobantes de tabla:', comprobantes);
+        if (comprobantes && comprobantes.length > 0) {
+          setComprobantes(comprobantes);
+        } else {
+          setComprobantes([]);
+        }
+      } else {
+        console.log('❌ EFECTIVO COMPROBANTES - No hay token');
+        setComprobantes([]);
+      }
     } catch (error) {
       let msg = 'Error al cargar comprobantes';
       if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {

@@ -39,6 +39,7 @@ export interface SolicitudPolizasData {
   fecha_actualizacion: string;
   usuario_creacion: string;
   usuario_actualizacion: string;
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
 }
 
 interface PlantillaPolizasDetailModalProps {
@@ -61,31 +62,51 @@ export const PlantillaPolizasDetailModal: React.FC<PlantillaPolizasDetailModalPr
   const [loadingComprobantes, setLoadingComprobantes] = useState(false);
   const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
   const [comprobantePreview, setComprobantePreview] = useState<Comprobante | null>(null);
-  // Cargar comprobantes si la solicitud está pagada
+  // Cargar comprobantes si la solicitud está pagada (usando la misma lógica que funciona en TUKASH)
   const fetchComprobantes = useCallback(async () => {
+    if (!solicitud) return;
+    console.log('🔍 POLIZAS COMPROBANTES - Iniciando fetchComprobantes para solicitud:', solicitud.id_solicitud);
+    console.log('🔍 POLIZAS COMPROBANTES - solicitud completa:', solicitud);
+    console.log('🔍 POLIZAS COMPROBANTES - soporte_url específico:', solicitud.soporte_url);
+    console.log('🔍 POLIZAS COMPROBANTES - tipo de soporte_url:', typeof solicitud.soporte_url);
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
+    
     try {
-      // Primero verificar si hay soporte_url en la solicitud
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((solicitud as any).soporte_url) {
+      const token = localStorage.getItem('auth_token');
+      
+      // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+      if (solicitud.soporte_url) {
+        console.log('✅ POLIZAS COMPROBANTES - Encontrado soporte_url:', solicitud.soporte_url);
         const comprobanteFromSoporte = {
-          id_comprobante: 999999,
+          id_comprobante: 999999, // ID ficticio para soporte_url
           id_solicitud: solicitud.id_solicitud,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ruta_archivo: (solicitud as any).soporte_url,
+          ruta_archivo: solicitud.soporte_url,
           nombre_archivo: 'Comprobante de Pago',
-          fecha_subida: new Date().toISOString(),
+          fecha_subida: solicitud.fecha_actualizacion || new Date().toISOString(),
           usuario_subio: 0,
-          comentario: 'Comprobante desde soporte_url'
+          comentario: 'Comprobante desde soporte_url',
+          nombre_usuario: 'Sistema'
         };
         setComprobantes([comprobanteFromSoporte]);
         return;
       }
-
-      // Si no hay soporte_url, buscar en tabla comprobantes
-      const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-      setComprobantes(data);
+      
+      // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+      console.log('⚠️ POLIZAS COMPROBANTES - No se encontró soporte_url, buscando en tabla comprobantes_pago');
+      if (token) {
+        const { ComprobantesService } = await import('@/services/comprobantes.service');
+        const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
+        console.log('✅ POLIZAS COMPROBANTES - Comprobantes de tabla:', comprobantes);
+        if (comprobantes && comprobantes.length > 0) {
+          setComprobantes(comprobantes);
+        } else {
+          setComprobantes([]);
+        }
+      } else {
+        console.log('❌ POLIZAS COMPROBANTES - No hay token');
+        setComprobantes([]);
+      }
     } catch (error) {
       let msg = 'Error al cargar comprobantes';
       if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {

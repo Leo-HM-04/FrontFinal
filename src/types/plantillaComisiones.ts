@@ -22,6 +22,7 @@ export interface SolicitudComisionesData {
   beneficiario?: string;
   // Campo adicional para extraer información del concepto original
   concepto?: string;
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
 }
 
 export interface PlantillaComisionesDetailModalProps {
