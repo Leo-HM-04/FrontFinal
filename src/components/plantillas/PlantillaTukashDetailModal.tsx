@@ -6,6 +6,7 @@ import { DollarSign } from 'lucide-react';
 import { PlantillaTukashModalProps, LoadingStateTukash, ErrorStateTukash } from '@/types/plantillaTukash';
 import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
+import { Comprobante } from '@/types';
 
 interface SolicitudTukashExtended extends SolicitudTukashData {
   folio?: string;
@@ -17,6 +18,7 @@ interface SolicitudTukashExtended extends SolicitudTukashData {
   cuenta_destino?: string;
   tipo_cuenta_destino?: string;
   ruta_archivo?: string; // <-- Agregado para comprobante
+  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
 }
 
 const formatCurrency = (amount: number | string): string => {
@@ -188,71 +190,31 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
   const [errors, setErrors] = useState<ErrorStateTukash>({ archivos: null, general: null });
   const { handleError } = useErrorHandler();
   const solicitudExtended = solicitud as SolicitudTukashExtended;
-  // Estado para comprobante
-  const [comprobanteUrl, setComprobanteUrl] = useState<string | null>(null);
-  useEffect(() => {
-    console.log('🔄 TUKASH useEffect - Ejecutándose con solicitud ID:', solicitud?.id_solicitud);
-    async function fetchComprobante() {
-      if (!solicitud?.id_solicitud) {
-        console.log('❌ TUKASH - No hay ID de solicitud');
-        return setComprobanteUrl(null);
-      }
-      
-      console.log('🔍 TUKASH DEBUG - Estado solicitud:', solicitud.estado);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      console.log('🔍 TUKASH DEBUG - soporte_url:', (solicitud as any).soporte_url);
-      console.log('🔍 TUKASH DEBUG - Todos los campos de solicitud:', Object.keys(solicitud));
-      console.log('🔍 TUKASH DEBUG - Solicitud completa:', solicitud);
-      
-      // Solo cargar comprobantes si la solicitud está pagada
-      const estadoPagado = solicitud.estado?.toLowerCase();
-      console.log('🔍 TUKASH DEBUG - Verificando estado para comprobantes...');
-      // TEMPORALMENTE comentado para debug
-      // if (estadoPagado !== 'pagada') {
-      //   console.log('❌ TUKASH DEBUG - Solicitud no está pagada, estado:', estadoPagado);
-      //   setComprobanteUrl(null);
-      //   return;
-      // }
-      
-      try {
-        // Primero verificar si hay soporte_url en la solicitud
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((solicitud as any).soporte_url) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          console.log('✅ TUKASH DEBUG - Encontrado soporte_url:', (solicitud as any).soporte_url);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const url = buildFileUrl((solicitud as any).soporte_url);
-          console.log('✅ TUKASH DEBUG - URL final construida:', url);
-          setComprobanteUrl(url);
-          return;
-        } else {
-          console.log('❌ TUKASH DEBUG - No hay soporte_url en la solicitud');
-        }
-        
-        // Si no hay soporte_url, buscar en la tabla comprobantes
-        const comprobantes = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-        
-        // Filtrar comprobantes que puedan ser de solicitudes normales con el mismo ID
-        // Solo incluir comprobantes que fueron subidos DESPUÉS de la creación de esta solicitud
-        const fechaCreacionSolicitud = new Date(solicitud.fecha_creacion || '').getTime();
-        const comprobantesFiltrados = comprobantes.filter(comprobante => {
-          const fechaComprobante = new Date(comprobante.fecha_subida).getTime();
-          return fechaComprobante >= fechaCreacionSolicitud;
-        });
-        
-        console.log(`🔍 Comprobantes Tukash filtrados: ${comprobantesFiltrados.length}/${comprobantes.length} (después de ${solicitud.fecha_creacion})`);
-        
-        if (comprobantesFiltrados && comprobantesFiltrados.length > 0 && comprobantesFiltrados[0].ruta_archivo) {
-          setComprobanteUrl(buildFileUrl(comprobantesFiltrados[0].ruta_archivo));
-        } else {
-          setComprobanteUrl(null);
-        }
-      } catch {
-        setComprobanteUrl(null);
-      }
+  // Estados para comprobantes (igual que en SolicitudDetailModal)
+  const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
+
+  // Función para obtener comprobantes (copiada de SolicitudDetailModal)
+  const fetchComprobantes = useCallback(async () => {
+    if (!solicitud) return;
+    setLoading(prev => ({ ...prev, archivos: true })); // Reutilizamos el loading de archivos
+    setErrors(prev => ({ ...prev, archivos: null }));
+    try {
+      const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud || 0);
+      setComprobantes(data);
+    } catch (error) {
+      const errorMessage = handleError(error);
+      setErrors(prev => ({ ...prev, archivos: errorMessage }));
+    } finally {
+      setLoading(prev => ({ ...prev, archivos: false }));
     }
-    fetchComprobante();
-  }, [solicitud?.id_solicitud]);
+  }, [solicitud, handleError]);
+
+  // useEffect para cargar comprobantes cuando el modal se abre
+  useEffect(() => {
+    if (isOpen && solicitud && solicitud.estado === 'pagada') {
+      fetchComprobantes();
+    }
+  }, [isOpen, solicitud, fetchComprobantes]);
   const fetchArchivos = useCallback(async () => {
     if (!solicitud) return;
     setLoading(prev => ({ ...prev, archivos: true }));
@@ -275,6 +237,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
   useEffect(() => {
     if (!isOpen) {
       setArchivos([]);
+      setComprobantes([]);
       setLoading({ archivos: false, general: false });
       setErrors({ archivos: null, general: null });
     }
@@ -360,46 +323,118 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
             </div>
             {/* Comprobantes de Pago - debajo de Auditoría */}
             <div className="mb-6 w-full">
-              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Comprobantes de Pago</h3>
-              <div className="flex flex-col items-center justify-center w-full">
-                {comprobanteUrl ? (
-                  <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
-                    <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
-                      <img
-                        src={comprobanteUrl}
-                        alt="Comprobante de Pago"
-                        className="object-contain w-full h-full rounded-lg shadow-sm"
-                        style={{ maxHeight: '420px', width: '100%' }}
-                        onError={e => { e.currentTarget.style.display = 'none'; }}
-                      />
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />
+                Comprobantes de Pago
+              </h3>
+              
+              {loading.archivos ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Cargando comprobantes...</p>
+                </div>
+              ) : errors.archivos ? (
+                <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <X className="h-5 w-5 text-red-400" />
                     </div>
-                    <div className="p-5 flex justify-end">
-                      <button
-                        onClick={() => window.open(comprobanteUrl, '_blank')}
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
-                      >
-                        Ver completo
-                      </button>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{errors.archivos}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : comprobantes.length === 0 ? (
+                // Si no hay comprobantes en la tabla pero hay soporte_url, mostrar ese archivo
+                (solicitudExtended as SolicitudTukashExtended).soporte_url ? (
+                  <div className="space-y-4">
+                    <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                            <span className="text-xs text-blue-800 font-semibold">
+                              Comprobante de Pago
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => window.open(buildFileUrl((solicitudExtended as SolicitudTukashExtended).soporte_url!), '_blank')}
+                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3 text-sm"
+                        >
+                          Ver completo
+                        </button>
+                      </div>
+                      
+                      <div className="relative h-36 bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
+                        <img
+                          src={buildFileUrl((solicitudExtended as SolicitudTukashExtended).soporte_url!)}
+                          alt="Comprobante de pago"
+                          className="object-contain w-full h-full"
+                          onError={e => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full">
-                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    {(() => {
-                      const estado = solicitud.estado?.toLowerCase();
-                      if (estado === 'pendiente') {
-                        return <p className="text-gray-600 font-medium">La solicitud debe ser autorizada y pagada para mostrar comprobantes</p>;
-                      } else if (estado === 'autorizada') {
-                        return <p className="text-gray-600 font-medium">La solicitud está autorizada. Los comprobantes aparecerán cuando sea pagada</p>;
-                      } else if (estado === 'rechazada') {
-                        return <p className="text-gray-600 font-medium">La solicitud fue rechazada. No se generarán comprobantes</p>;
-                      } else {
-                        return <p className="text-gray-600 font-medium">No hay comprobante disponible</p>;
-                      }
-                    })()}
+                  <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                        <FileText className="w-8 h-8 text-blue-600" />
+                      </div>
+                    </div>
+                    <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
+                    <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
+                      El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
+                    </p>
+                    <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
+                      <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
+                    </div>
                   </div>
-                )}
-              </div>
+                )
+              ) : (
+                <div className="space-y-4">
+                  {comprobantes.map((comprobante) => {
+                    const comprobanteUrl = buildFileUrl(comprobante.ruta_archivo);
+                    const fileName = comprobante.nombre_archivo || comprobanteUrl.split('/').pop() || '';
+                    
+                    return (
+                      <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                              <span className="text-xs text-blue-800 font-semibold">
+                                {comprobante.nombre_usuario || `Usuario ${comprobante.usuario_subio}`}
+                              </span>
+                            </div>
+                            {comprobante.comentario && (
+                              <div className="mt-2 bg-white/60 p-2 rounded border-l-3 border-blue-300">
+                                <p className="text-xs text-gray-700 italic">&ldquo;{comprobante.comentario}&rdquo;</p>
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => window.open(comprobanteUrl, '_blank')}
+                            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3 text-sm"
+                            disabled={!comprobanteUrl}
+                          >
+                            Ver completo
+                          </button>
+                        </div>
+                        
+                        <div className="relative h-36 bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
+                          <img
+                            src={comprobanteUrl}
+                            alt={`Comprobante de ${comprobante.nombre_usuario || 'usuario'}: ${fileName}`}
+                            className="object-contain w-full h-full"
+                            onError={e => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             {/* Aquí podrías agregar comprobantes si aplica para TUKASH */}
           </div>

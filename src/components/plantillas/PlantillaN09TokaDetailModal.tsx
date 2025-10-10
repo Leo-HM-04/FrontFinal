@@ -248,70 +248,19 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     }
   }, [solicitud, handleError]);
 
-  // Función para obtener comprobantes (para TOKA, usa archivos adjuntos de solicitudes_n09_toka_archivos)
+  // Función para obtener comprobantes (usando la misma lógica que SolicitudDetailModal)
   const fetchComprobantes = useCallback(async () => {
     if (!solicitud || !solicitud.id_solicitud) return;
-    
-    // Solo cargar comprobantes si la solicitud está pagada
-    const estadoPagado = solicitud.estado?.toLowerCase();
-    console.log('🔍 N09/TOKA DEBUG - Estado de la solicitud:', estadoPagado);
-    // TEMPORALMENTE comentado para debug
-    // if (estadoPagado !== 'pagada') {
-    //   setComprobantes([]);
-    //   setLoadingComprobantes(false);
-    //   setErrorComprobantes(null);
-    //   return;
-    // }
     
     setLoadingComprobantes(true);
     setErrorComprobantes(null);
     try {
-      console.log('🔍 N09/TOKA DEBUG - Estado solicitud:', solicitud.estado);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      console.log('🔍 N09/TOKA DEBUG - soporte_url:', (solicitud as any).soporte_url);
-      console.log('🔍 N09/TOKA DEBUG - Solicitud completa:', solicitud);
-      
-      // Primero verificar si hay soporte_url en la solicitud
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((solicitud as any).soporte_url) {
-        const comprobanteFromSoporte = {
-          id_comprobante: 999999, // ID ficticio para soporte_url
-          id_solicitud: solicitud.id_solicitud || 0,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ruta_archivo: (solicitud as any).soporte_url,
-          nombre_archivo: 'Comprobante de Pago',
-          fecha_subida: new Date().toISOString(),
-          usuario_subio: 0,
-          comentario: 'Comprobante desde soporte_url'
-        };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.log(`✅ N09/TOKA - Usando comprobante desde soporte_url: ${(solicitud as any).soporte_url}`);
-        setComprobantes([comprobanteFromSoporte]);
-        return;
-      } else {
-        console.log('❌ N09/TOKA DEBUG - No hay soporte_url en la solicitud');
-      }
-      
-      // 🔍 Para TOKA: Obtener archivos de solicitudes_n09_toka_archivos
-      console.log('📋 Obteniendo archivos TOKA para comprobantes desde /uploads/solicitudes-n09-toka/');
-      const archivos = await SolicitudN09TokaArchivosService.obtenerArchivos(solicitud.id_solicitud);
-      
-      // Convertir archivos TOKA al formato de comprobantes para mantener compatibilidad con el render
-      const comprobantesConvertidos = archivos.map(archivo => ({
-        id_comprobante: archivo.id_archivo,
-        id_solicitud: solicitud.id_solicitud || 0,
-        ruta_archivo: archivo.ruta_archivo, // Ya tiene formato /uploads/solicitudes-n09-toka/xxx.pdf
-        nombre_archivo: archivo.nombre_archivo,
-        fecha_subida: archivo.fecha_subida,
-        usuario_subio: 0,
-        comentario: `Archivo TOKA: ${archivo.tipo_archivo}`
-      }));
-      
-      console.log(`✅ Archivos TOKA convertidos a comprobantes: ${comprobantesConvertidos.length}`);
-      setComprobantes(comprobantesConvertidos);
+      // Usar el mismo servicio que funciona en SolicitudDetailModal
+      const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
+      setComprobantes(data);
     } catch (error) {
-      console.error('❌ Error cargando archivos TOKA:', error);
-      setErrorComprobantes('Error al cargar archivos');
+      console.error('Error al cargar comprobantes:', error);
+      setErrorComprobantes('Error al cargar comprobantes');
     } finally {
       setLoadingComprobantes(false);
     }
@@ -320,7 +269,9 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
   useEffect(() => {
     if (isOpen && solicitud) {
       fetchArchivos();
-      fetchComprobantes();
+      if (solicitud.estado === 'pagada') {
+        fetchComprobantes();
+      }
     }
   }, [isOpen, solicitud, fetchArchivos, fetchComprobantes]);
 
@@ -441,69 +392,119 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
               </div>
             </div>
 
-            {/* Comprobantes de Pago - Movido dentro de la columna izquierda */}
+            {/* Comprobantes de Pago - usando la misma lógica que SolicitudDetailModal */}
             <div className="mb-4 sm:mb-6">
-              <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3 sm:mb-4 pb-2 border-b border-blue-200">Comprobante de Pago</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3 sm:mb-4 pb-2 border-b border-blue-200 flex items-center gap-2">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                Comprobantes de Pago
+              </h3>
+              
               {loadingComprobantes ? (
-                <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3" />
-                  <span className="text-blue-600 text-sm">Cargando comprobante...</span>
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Cargando comprobantes...</p>
                 </div>
               ) : errorComprobantes ? (
-                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{errorComprobantes}</div>
-              ) : comprobantes.length === 0 ? (
-                <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
-                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  {(() => {
-                    const estado = solicitud.estado?.toLowerCase();
-                    if (estado === 'pendiente') {
-                      return <p className="text-gray-600 font-semibold">La solicitud debe ser autorizada y pagada para mostrar comprobantes</p>;
-                    } else if (estado === 'autorizada') {
-                      return <p className="text-gray-600 font-semibold">La solicitud está autorizada. Los comprobantes aparecerán cuando sea pagada</p>;
-                    } else if (estado === 'rechazada') {
-                      return <p className="text-gray-600 font-semibold">La solicitud fue rechazada. No se generarán comprobantes</p>;
-                    } else {
-                      return <p className="text-gray-600 font-semibold">AÚN NO HAY COMPROBANTE</p>;
-                    }
-                  })()}
+                <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <X className="h-5 w-5 text-red-400" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{errorComprobantes}</p>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                (() => {
-                  const comprobante = comprobantes[0];
-                  if (!comprobante) return null;
-                  const url = buildFileUrl(comprobante.ruta_archivo); // ✅ Usar buildFileUrl para construir URL correcta
-                  const fileName = comprobante.ruta_archivo.split('/').pop() || 'comprobante';
-                  const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
-                  const isPdf = /\.pdf$/i.test(fileName);
-                  return (
-                    <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
-                      <div className="relative h-[300px] sm:h-[350px] md:h-[420px] bg-gray-50 flex items-center justify-center">
-                        {isImage ? (
-                          <Image src={url} alt={fileName} fill className="object-contain p-2" />
-                        ) : isPdf ? (
-                          <iframe src={url} title={fileName} className="w-full h-full" />
-                        ) : (
-                          <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200 m-4">
-                            <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-blue-900 font-medium text-xs sm:text-sm truncate">{fileName}</p>
-                              <p className="text-xs text-gray-600 mt-1">Archivo adjunto</p>
-                            </div>
+              ) : comprobantes.length === 0 ? (
+                // Si no hay comprobantes en la tabla pero hay soporte_url, mostrar ese archivo
+                (solicitud as SolicitudN09TokaExtended).soporte_url ? (
+                  <div className="space-y-4">
+                    <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                            <span className="text-xs text-blue-800 font-semibold">
+                              Comprobante de Pago
+                            </span>
                           </div>
-                        )}
-                      </div>
-                      <div className="p-3 sm:p-4">
+                        </div>
                         <button
-                          onClick={() => window.open(url, '_blank')}
-                          className="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm font-medium"
+                          onClick={() => window.open(buildFileUrl((solicitud as SolicitudN09TokaExtended).soporte_url!), '_blank')}
+                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3 text-sm"
                         >
-                          <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
                           Ver completo
                         </button>
                       </div>
+                      
+                      <div className="relative h-36 bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
+                        <img
+                          src={buildFileUrl((solicitud as SolicitudN09TokaExtended).soporte_url!)}
+                          alt="Comprobante de pago"
+                          className="object-contain w-full h-full"
+                          onError={e => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      </div>
                     </div>
-                  );
-                })()
+                  </div>
+                ) : (
+                  <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                        <FileText className="w-8 h-8 text-blue-600" />
+                      </div>
+                    </div>
+                    <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
+                    <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
+                      El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
+                    </p>
+                    <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
+                      <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
+                    </div>
+                  </div>
+                )
+              ) : (
+                <div className="space-y-4">
+                  {comprobantes.map((comprobante) => {
+                    const comprobanteUrl = buildFileUrl(comprobante.ruta_archivo);
+                    const fileName = comprobante.nombre_archivo || comprobanteUrl.split('/').pop() || '';
+                    
+                    return (
+                      <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                              <span className="text-xs text-blue-800 font-semibold">
+                                {comprobante.nombre_usuario || `Usuario ${comprobante.usuario_subio}`}
+                              </span>
+                            </div>
+                            {comprobante.comentario && (
+                              <div className="mt-2 bg-white/60 p-2 rounded border-l-3 border-blue-300">
+                                <p className="text-xs text-gray-700 italic">&ldquo;{comprobante.comentario}&rdquo;</p>
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => window.open(comprobanteUrl, '_blank')}
+                            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3 text-sm"
+                            disabled={!comprobanteUrl}
+                          >
+                            Ver completo
+                          </button>
+                        </div>
+                        
+                        <div className="relative h-36 bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
+                          <img
+                            src={comprobanteUrl}
+                            alt={`Comprobante de ${comprobante.nombre_usuario || 'usuario'}: ${fileName}`}
+                            className="object-contain w-full h-full"
+                            onError={e => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
