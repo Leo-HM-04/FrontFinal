@@ -27,8 +27,7 @@ export default function LoginPage() {
   // Redirige si ya está autenticado
   useEffect(() => {
     if (user) {
-      const route = roleRoutes[user.rol];
-      router.replace(route || '/dashboard');
+      router.replace('/home');
     }
   }, [user, router]);
 
