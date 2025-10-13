@@ -87,7 +87,7 @@ export default function HomeAnimado() {
               <span className="icon-wrap inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-sm">
                 <Mail className="icon text-blue-700" size={18} />
               </span>
-              <span>Extractor de XML</span>
+              <span>Envio Masivo de XML</span>
             </a>
 
             <div className="nav-item-disabled relative px-4 md:px-5 py-2 md:py-3 rounded-full text-blue-500/90 text-lg md:text-xl">
