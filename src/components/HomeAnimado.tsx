@@ -3,19 +3,48 @@
 import React, { useEffect } from 'react';
 import { Mail, ArrowRight, CheckCircle, Globe, Shield, Zap } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { getAuthUser } from '@/utils/auth';
 
 export default function HomeAnimado() {
   const email = "automatizaciones@bechapra.com.mx";
-  
+  const router = useRouter();
+
   // Redirigir a /home si hay token en la URL
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.has('token')) {
-        window.location.href = '/home';
+        router.replace('/home');
       }
     }
-  }, []);
+  }, [router]);
+
+  // Función para redirigir según el rol
+  const handleDashboardRedirect = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const user = getAuthUser();
+    let dashboard = '/dashboard';
+    if (user && user.rol) {
+      switch (user.rol) {
+        case 'admin':
+          dashboard = '/dashboard/admin';
+          break;
+        case 'aprobador':
+          dashboard = '/dashboard/aprobador';
+          break;
+        case 'pagador':
+          dashboard = '/dashboard/pagador';
+          break;
+        case 'solicitante':
+          dashboard = '/dashboard/solicitante';
+          break;
+        default:
+          dashboard = '/dashboard';
+      }
+    }
+    router.push(dashboard);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden font-sans">
@@ -36,9 +65,8 @@ export default function HomeAnimado() {
         <nav className="relative flex items-center order-2 xl:order-1 flex-1 justify-center">
           <div className="nav-pill mt-2 md:mt-0 flex items-center gap-3 md:gap-4 px-2 md:px-3 py-2 md:py-3 rounded-full bg-white/92 shadow-2xl border border-blue-100/60 mx-auto max-w-[1100px] w-full md:w-auto">
             <a
-              href="https://www.bechapra.com.mx/login"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#"
+              onClick={handleDashboardRedirect}
               className="nav-item nav-cta group flex items-center gap-3 font-extrabold text-blue-800 px-4 md:px-6 py-2 md:py-3 rounded-full transition-all duration-200 text-lg md:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200"
               aria-current="page"
               style={{letterSpacing: '0.01em'}}

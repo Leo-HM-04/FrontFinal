@@ -60,8 +60,7 @@ export default function LoginPage() {
     try {
       const response = await login({ email, password });
       if (response.success && response.user) {
-        const route = roleRoutes[response.user.rol];
-        router.push(route || '/dashboard');
+        router.replace('/home');
       } else if (response.error === 'USER_NOT_FOUND') {
         setErrors((prev) => ({ ...prev, email: 'El correo no está registrado' }));
         toast.error('El correo no está registrado.');
