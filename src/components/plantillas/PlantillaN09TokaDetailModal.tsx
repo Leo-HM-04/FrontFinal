@@ -247,7 +247,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
     }
   }, [solicitud, handleError]);
 
-  // Función para obtener comprobantes (usando la misma lógica que funciona en subir-comprobante)
+  // Función para obtener comprobantes (solo comprobantes reales de pago, no facturas originales)
   const fetchComprobantes = useCallback(async () => {
     if (!solicitud || !solicitud.id_solicitud) return;
     
@@ -275,48 +275,22 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
         return;
       }
       
-      // Para N09/TOKA: Obtener archivos de solicitudes_n09_toka_archivos
+      // Para N09/TOKA: Solo buscar comprobantes reales en la tabla comprobantes
+      // NO convertir los archivos originales de factura como comprobantes de pago
       try {
-        console.log('📋 N09/TOKA COMPROBANTES - Obteniendo archivos TOKA...');
-        const archivos = await SolicitudN09TokaArchivosService.obtenerArchivos(solicitud.id_solicitud);
-        
-        if (archivos && archivos.length > 0) {
-          // Convertir archivos TOKA al formato de comprobantes para mantener compatibilidad con el render
-          const comprobantesConvertidos = archivos.map(archivo => ({
-            id_comprobante: archivo.id_archivo,
-            id_solicitud: solicitud.id_solicitud || 0,
-            ruta_archivo: archivo.ruta_archivo, // Ya tiene formato /uploads/solicitudes-n09-toka/xxx.pdf
-            nombre_archivo: archivo.nombre_archivo,
-            fecha_subida: archivo.fecha_subida,
-            usuario_subio: 0,
-            comentario: `Archivo TOKA: ${archivo.tipo_archivo}`,
-            nombre_usuario: 'Sistema TOKA'
-          }));
-          
-          console.log(`✅ N09/TOKA COMPROBANTES - Archivos TOKA convertidos: ${comprobantesConvertidos.length}`);
-          setComprobantes(comprobantesConvertidos);
-        } else {
-          // Si no hay archivos TOKA, buscar en la tabla comprobantes (sistema viejo)
-          if (token) {
-            const { ComprobantesService } = await import('@/services/comprobantes.service');
-            const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
-            console.log('✅ N09/TOKA COMPROBANTES - Comprobantes de tabla:', comprobantes);
-            setComprobantes(comprobantes || []);
-          } else {
-            console.log('❌ N09/TOKA COMPROBANTES - No hay token');
-            setComprobantes([]);
-          }
-        }
-      } catch (archivosError) {
-        console.error('❌ N09/TOKA COMPROBANTES - Error obteniendo archivos TOKA:', archivosError);
-        // Fallback: buscar en la tabla comprobantes
+        console.log('📋 N09/TOKA COMPROBANTES - Buscando comprobantes reales de pago...');
         if (token) {
           const { ComprobantesService } = await import('@/services/comprobantes.service');
           const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
+          console.log('✅ N09/TOKA COMPROBANTES - Comprobantes encontrados:', comprobantes?.length || 0);
           setComprobantes(comprobantes || []);
         } else {
+          console.log('❌ N09/TOKA COMPROBANTES - No hay token');
           setComprobantes([]);
         }
+      } catch (archivosError) {
+        console.error('❌ N09/TOKA COMPROBANTES - Error obteniendo comprobantes:', archivosError);
+        setComprobantes([]);
       }
     } catch (error) {
       console.error('❌ N09/TOKA COMPROBANTES - Error general:', error);
@@ -567,10 +541,10 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
               )}
             </div>
           </div>
-          {/* Columna derecha: archivos adjuntos */}
+          {/* Columna derecha: facturas y documentos originales */}
           <div className="w-full lg:w-[380px] xl:w-[420px] flex-shrink-0 min-w-0">
             <div className="mb-4 sm:mb-6">
-              <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3 sm:mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />Archivos Adjuntos</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3 sm:mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />Facturas y Documentos</h3>
               {loading.archivos && (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
@@ -598,8 +572,8 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                   ) : (
                     <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
                       <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
-                      <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
+                      <p className="text-gray-600 font-medium">No hay facturas adjuntas disponibles</p>
+                      <p className="text-gray-500 text-sm mt-2">Las facturas y documentos aparecerán aquí cuando sean cargados</p>
                     </div>
                   )}
                 </div>
