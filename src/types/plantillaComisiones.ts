@@ -23,6 +23,10 @@ export interface SolicitudComisionesData {
   // Campo adicional para extraer información del concepto original
   concepto?: string;
   soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
+  // Campos base de la tabla solicitudes_pago
+  empresa_a_pagar?: string; // Campo para "se paga por"
+  nombre_persona?: string; // Campo alternativo para "se paga por"
+  fecha_limite_pago?: string; // Campo fecha límite en formato de base de datos
 }
 
 export interface PlantillaComisionesDetailModalProps {

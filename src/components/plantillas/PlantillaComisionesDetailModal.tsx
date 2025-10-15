@@ -41,6 +41,8 @@ interface SolicitudComisionesExtended extends SolicitudComisionesData {
   ruta_archivo?: string; // <-- Agregado para comprobante
   soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
   concepto?: string; // Campo del concepto original de la base de datos
+  empresa_a_pagar?: string; // Campo para "se paga por"
+  nombre_persona?: string; // Campo alternativo para "se paga por"
 }
 
 // Función para formatear moneda en pesos mexicanos
@@ -516,10 +518,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 />
                 <InfoField 
                   label="Cliente" 
-                  value={(() => {
-                    const concepto = solicitudExtended.concepto || solicitud.asunto || '';
-                    return extraerClienteDelConcepto(concepto) || solicitud.cliente || 'No especificado';
-                  })()} 
+                  value={solicitudExtended.concepto || solicitud.concepto || 'No especificado'} 
                 />
                 <InfoField 
                   label="Asunto" 
@@ -531,10 +530,10 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 />
                 <InfoField 
                   label="Se paga por" 
-                  value={solicitud.empresa || 'No especificado'} 
+                  value={solicitudExtended.empresa_a_pagar || solicitud.empresa_a_pagar || solicitudExtended.nombre_persona || solicitud.nombre_persona || 'No especificado'} 
                 />
                 <InfoField label="Monto Total" value={solicitud.monto} variant="currency" />
-                <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
+                <InfoField label="Fecha Límite" value={solicitudExtended.fecha_limite_pago || solicitud.fecha_limite_pago || solicitud.fecha_limite} variant="date" />
               </div>
             </div>
 
