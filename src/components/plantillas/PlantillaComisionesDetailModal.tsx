@@ -38,9 +38,8 @@ interface SolicitudComisionesExtended extends SolicitudComisionesData {
   beneficiario?: string;
   ruta_archivo?: string; // <-- Agregado para comprobante
   soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
-  concepto?: string; // Campo del concepto original de la base de datos
-  empresa_a_pagar?: string; // Campo para "se paga por"
-  nombre_persona?: string; // Campo alternativo para "se paga por"
+  // Los campos requeridos de SolicitudComisionesData ya están heredados
+  // Solo agregamos campos adicionales opcionales aquí
 }
 
 // Función para formatear moneda en pesos mexicanos
@@ -357,13 +356,21 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
   const solicitudExtended = solicitud as SolicitudComisionesExtended;
 
   // Debug: Verificar qué datos llegan al modal
-  console.log('🔍 [DEBUG MODAL COMISIONES] Datos de solicitud recibidos:', solicitud);
-  console.log('🔍 [DEBUG MODAL COMISIONES] Campos específicos:', {
+  console.log('🔍 [DEBUG MODAL COMISIONES] Solicitud recibida ID:', solicitud?.id_solicitud);
+  console.log('🔍 [DEBUG MODAL COMISIONES] Campos de tabla solicitud:', {
     concepto: solicitud?.concepto,
-    empresa_a_pagar: solicitudExtended?.empresa_a_pagar,
-    nombre_persona: solicitudExtended?.nombre_persona,
-    fecha_limite_pago: solicitudExtended?.fecha_limite_pago,
-    fecha_limite: solicitud?.fecha_limite
+    empresa_a_pagar: solicitud?.empresa_a_pagar,
+    nombre_persona: solicitud?.nombre_persona, 
+    fecha_limite_pago: solicitud?.fecha_limite_pago
+  });
+  
+  // Test extracción de cliente
+  const conceptoTest = solicitud?.concepto || '';
+  const matchTest = conceptoTest.match(/Cliente:\s*([^-]+)/);
+  console.log('🔍 [DEBUG EXTRACCION CLIENTE]', {
+    conceptoCompleto: conceptoTest,
+    regexMatch: matchTest,
+    clienteExtraido: matchTest ? matchTest[1].trim() : 'NO EXTRAIDO'
   });
 
   // Comprobante principal
@@ -513,14 +520,16 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 />
                 <InfoField 
                   label="Cliente" 
-                  value={solicitudExtended.concepto || solicitud.concepto || 'No especificado'} 
+                  value={(() => {
+                    // Extraer cliente del concepto que tiene formato: "Pago de Comisión - Cliente: CLIENTE TEST - IGNORAR ESTA PRUEBA"
+                    const concepto = solicitudExtended.concepto || solicitud.concepto || '';
+                    const match = concepto.match(/Cliente:\s*([^-]+)/);
+                    return match ? match[1].trim() : concepto || 'No especificado';
+                  })()} 
                 />
                 <InfoField 
                   label="Asunto" 
-                  value={(() => {
-                    const concepto = solicitudExtended.concepto || solicitud.asunto || '';
-                    return extraerAsuntoDelConcepto(concepto) || solicitud.asunto || 'No especificado';
-                  })()} 
+                  value={solicitud.asunto || 'No especificado'} 
                   className="md:col-span-2" 
                 />
                 <InfoField 
