@@ -1368,6 +1368,11 @@ export function SolicitudDetailModal({
           cuenta_destino: plantillaData.cuenta_destino || solicitud.cuenta_destino || '',
           tipo_cuenta_destino: plantillaData.tipo_cuenta_destino || solicitud.tipo_cuenta_destino || '',
           beneficiario: plantillaData.beneficiario || solicitud.nombre_persona || '',
+          // Campos REALES de la tabla solicitudes_pago (requeridos)
+          concepto: plantillaData.concepto || solicitud.concepto || '',
+          empresa_a_pagar: plantillaData.empresa_a_pagar || solicitud.empresa_a_pagar || '',
+          nombre_persona: plantillaData.nombre_persona || solicitud.nombre_persona || '',
+          fecha_limite_pago: plantillaData.fecha_limite_pago || solicitud.fecha_limite_pago || '',
           // ✅ Agregado: Incluir soporte_url desde la solicitud original
           soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
         };
@@ -1455,6 +1460,11 @@ export function SolicitudDetailModal({
         cuenta_destino: solicitud.cuenta_destino || '',
         tipo_cuenta_destino: solicitud.tipo_cuenta_destino || '',
         beneficiario: solicitud.nombre_persona || '',
+        // Campos REALES de la tabla solicitudes_pago (requeridos)
+        concepto: solicitud.concepto || '',
+        empresa_a_pagar: solicitud.empresa_a_pagar || '',
+        nombre_persona: solicitud.nombre_persona || '',
+        fecha_limite_pago: solicitud.fecha_limite_pago || '',
         // ✅ Agregado: Incluir soporte_url desde la solicitud original
         soporte_url: (solicitud as Solicitud & { soporte_url?: string }).soporte_url,
       };
