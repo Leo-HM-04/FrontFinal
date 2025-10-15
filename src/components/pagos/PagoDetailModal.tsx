@@ -120,8 +120,11 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
           cuenta_destino: plantillaData.cuenta_destino || pago.cuenta_destino || '',
           tipo_cuenta_destino: plantillaData.tipo_cuenta_destino || pago.tipo_cuenta_destino || '',
           beneficiario: plantillaData.beneficiario || pago.nombre_persona || '',
-          // Campo adicional para extraer información
+          // Campos REALES de la tabla solicitudes_pago (requeridos)
           concepto: pago.concepto || '',
+          empresa_a_pagar: plantillaData.empresa_a_pagar || pago.empresa_a_pagar || '',
+          nombre_persona: plantillaData.nombre_persona || pago.nombre_persona || '',
+          fecha_limite_pago: plantillaData.fecha_limite_pago || pago.fecha_limite_pago || '',
         };
       } catch {
         // Error parseando plantilla_datos, usar datos base
@@ -198,8 +201,11 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
         cuenta_destino: pago.cuenta_destino || '',
         tipo_cuenta_destino: pago.tipo_cuenta_destino || '',
         beneficiario: pago.nombre_persona || '',
-        // Campo adicional para extraer información
+        // Campos REALES de la tabla solicitudes_pago (requeridos)
         concepto: pago.concepto || '',
+        empresa_a_pagar: pago.empresa_a_pagar || '',
+        nombre_persona: pago.nombre_persona || '',
+        fecha_limite_pago: pago.fecha_limite_pago || '',
       };
     }
     

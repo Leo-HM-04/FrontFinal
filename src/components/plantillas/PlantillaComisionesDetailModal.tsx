@@ -291,7 +291,8 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   );
 };
 
-// Función para extraer el asunto del concepto
+// Función para extraer el asunto del concepto (no se usa actualmente)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const extraerAsuntoDelConcepto = (concepto: string): string => {
   if (!concepto) return '';
   
