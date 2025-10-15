@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { SolicitudesService } from '@/services/solicitudes.service';
-import { Comprobante } from '@/types';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, CreditCard, DollarSign } from 'lucide-react';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
@@ -311,20 +309,7 @@ const extraerAsuntoDelConcepto = (concepto: string): string => {
   return concepto;
 };
 
-// Función para extraer el cliente del concepto
-const extraerClienteDelConcepto = (concepto: string): string => {
-  if (!concepto) return '';
-  
-  // Formato esperado: "Pago de Comisión - Cliente: Test - Prueba plantilla"
-  // Necesitamos extraer "Test"
-  const match = concepto.match(/Cliente:\s*([^-]+)/);
-  
-  if (match && match[1]) {
-    return match[1].trim();
-  }
-  
-  return '';
-};
+
 
 // Función para formatear el tipo de cuenta correctamente
 const formatearTipoCuenta = (tipoCuenta: string): string => {
@@ -375,9 +360,9 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
   console.log('🔍 [DEBUG MODAL COMISIONES] Datos de solicitud recibidos:', solicitud);
   console.log('🔍 [DEBUG MODAL COMISIONES] Campos específicos:', {
     concepto: solicitud?.concepto,
-    empresa_a_pagar: (solicitud as any)?.empresa_a_pagar,
-    nombre_persona: (solicitud as any)?.nombre_persona,
-    fecha_limite_pago: (solicitud as any)?.fecha_limite_pago,
+    empresa_a_pagar: solicitudExtended?.empresa_a_pagar,
+    nombre_persona: solicitudExtended?.nombre_persona,
+    fecha_limite_pago: solicitudExtended?.fecha_limite_pago,
     fecha_limite: solicitud?.fecha_limite
   });
 
@@ -624,12 +609,13 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 ) : comprobanteUrl ? (
                   <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
                     <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
-                      <img
+                      <Image
                         src={comprobanteUrl}
                         alt="Comprobante de Pago"
+                        width={400}
+                        height={420}
                         className="object-contain w-full h-full rounded-lg shadow-sm"
                         style={{ maxHeight: '420px', width: '100%' }}
-                        onError={e => { e.currentTarget.style.display = 'none'; }}
                       />
                     </div>
                     <div className="p-5 flex justify-end">
