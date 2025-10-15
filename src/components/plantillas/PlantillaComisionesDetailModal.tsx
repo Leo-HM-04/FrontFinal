@@ -371,6 +371,16 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
   const { handleError } = useErrorHandler();
   const solicitudExtended = solicitud as SolicitudComisionesExtended;
 
+  // Debug: Verificar qué datos llegan al modal
+  console.log('🔍 [DEBUG MODAL COMISIONES] Datos de solicitud recibidos:', solicitud);
+  console.log('🔍 [DEBUG MODAL COMISIONES] Campos específicos:', {
+    concepto: solicitud?.concepto,
+    empresa_a_pagar: (solicitud as any)?.empresa_a_pagar,
+    nombre_persona: (solicitud as any)?.nombre_persona,
+    fecha_limite_pago: (solicitud as any)?.fecha_limite_pago,
+    fecha_limite: solicitud?.fecha_limite
+  });
+
   // Comprobante principal
   const [comprobanteUrl, setComprobanteUrl] = useState<string | null>(null);
   const [loadingComprobante, setLoadingComprobante] = useState(false);
