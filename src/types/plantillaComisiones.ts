@@ -20,9 +20,12 @@ export interface SolicitudComisionesData {
   cuenta_destino?: string;
   tipo_cuenta_destino?: string;
   beneficiario?: string;
-  // Campo adicional para extraer información del concepto original
-  concepto?: string;
-  soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
+  // Campos REALES de la tabla solicitudes_pago (estos son los que importan)
+  concepto: string; // Concepto completo con formato "Pago de Comisión - Cliente: XXX - Asunto"
+  empresa_a_pagar: string; // Campo REAL para "se paga por" 
+  nombre_persona: string; // Campo alternativo REAL para "se paga por"
+  fecha_limite_pago: string; // Campo REAL fecha límite de la tabla
+  soporte_url?: string; // Comprobante desde soporte_url
 }
 
 export interface PlantillaComisionesDetailModalProps {

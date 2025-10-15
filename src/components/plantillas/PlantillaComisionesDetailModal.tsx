@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { SolicitudesService } from '@/services/solicitudes.service';
-import { Comprobante } from '@/types';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, CreditCard, DollarSign } from 'lucide-react';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
@@ -40,7 +38,8 @@ interface SolicitudComisionesExtended extends SolicitudComisionesData {
   beneficiario?: string;
   ruta_archivo?: string; // <-- Agregado para comprobante
   soporte_url?: string; // <-- Agregado para comprobante desde soporte_url
-  concepto?: string; // Campo del concepto original de la base de datos
+  // Los campos requeridos de SolicitudComisionesData ya están heredados
+  // Solo agregamos campos adicionales opcionales aquí
 }
 
 // Función para formatear moneda en pesos mexicanos
@@ -292,7 +291,8 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   );
 };
 
-// Función para extraer el asunto del concepto
+// Función para extraer el asunto del concepto (no se usa actualmente)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const extraerAsuntoDelConcepto = (concepto: string): string => {
   if (!concepto) return '';
   
@@ -309,20 +309,7 @@ const extraerAsuntoDelConcepto = (concepto: string): string => {
   return concepto;
 };
 
-// Función para extraer el cliente del concepto
-const extraerClienteDelConcepto = (concepto: string): string => {
-  if (!concepto) return '';
-  
-  // Formato esperado: "Pago de Comisión - Cliente: Test - Prueba plantilla"
-  // Necesitamos extraer "Test"
-  const match = concepto.match(/Cliente:\s*([^-]+)/);
-  
-  if (match && match[1]) {
-    return match[1].trim();
-  }
-  
-  return '';
-};
+
 
 // Función para formatear el tipo de cuenta correctamente
 const formatearTipoCuenta = (tipoCuenta: string): string => {
@@ -368,6 +355,24 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
   // Hooks personalizados
   const { handleError } = useErrorHandler();
   const solicitudExtended = solicitud as SolicitudComisionesExtended;
+
+  // Debug: Verificar qué datos llegan al modal
+  console.log('🔍 [DEBUG MODAL COMISIONES] Solicitud recibida ID:', solicitud?.id_solicitud);
+  console.log('🔍 [DEBUG MODAL COMISIONES] Campos de tabla solicitud:', {
+    concepto: solicitud?.concepto,
+    empresa_a_pagar: solicitud?.empresa_a_pagar,
+    nombre_persona: solicitud?.nombre_persona, 
+    fecha_limite_pago: solicitud?.fecha_limite_pago
+  });
+  
+  // Test extracción de cliente
+  const conceptoTest = solicitud?.concepto || '';
+  const matchTest = conceptoTest.match(/Cliente:\s*([^-]+)/);
+  console.log('🔍 [DEBUG EXTRACCION CLIENTE]', {
+    conceptoCompleto: conceptoTest,
+    regexMatch: matchTest,
+    clienteExtraido: matchTest ? matchTest[1].trim() : 'NO EXTRAIDO'
+  });
 
   // Comprobante principal
   const [comprobanteUrl, setComprobanteUrl] = useState<string | null>(null);
@@ -517,24 +522,23 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 <InfoField 
                   label="Cliente" 
                   value={(() => {
-                    const concepto = solicitudExtended.concepto || solicitud.asunto || '';
-                    return extraerClienteDelConcepto(concepto) || solicitud.cliente || 'No especificado';
+                    // Extraer cliente del concepto que tiene formato: "Pago de Comisión - Cliente: CLIENTE TEST - IGNORAR ESTA PRUEBA"
+                    const concepto = solicitudExtended.concepto || solicitud.concepto || '';
+                    const match = concepto.match(/Cliente:\s*([^-]+)/);
+                    return match ? match[1].trim() : concepto || 'No especificado';
                   })()} 
                 />
                 <InfoField 
                   label="Asunto" 
-                  value={(() => {
-                    const concepto = solicitudExtended.concepto || solicitud.asunto || '';
-                    return extraerAsuntoDelConcepto(concepto) || solicitud.asunto || 'No especificado';
-                  })()} 
+                  value={solicitud.asunto || 'No especificado'} 
                   className="md:col-span-2" 
                 />
                 <InfoField 
                   label="Se paga por" 
-                  value={solicitud.empresa || 'No especificado'} 
+                  value={solicitudExtended.empresa_a_pagar || solicitud.empresa_a_pagar || solicitudExtended.nombre_persona || solicitud.nombre_persona || 'No especificado'} 
                 />
                 <InfoField label="Monto Total" value={solicitud.monto} variant="currency" />
-                <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
+                <InfoField label="Fecha Límite" value={solicitudExtended.fecha_limite_pago || solicitud.fecha_limite_pago || solicitud.fecha_limite} variant="date" />
               </div>
             </div>
 
@@ -615,12 +619,13 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                 ) : comprobanteUrl ? (
                   <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
                     <div className="relative h-[420px] bg-gray-50 flex items-center justify-center">
-                      <img
+                      <Image
                         src={comprobanteUrl}
                         alt="Comprobante de Pago"
+                        width={400}
+                        height={420}
                         className="object-contain w-full h-full rounded-lg shadow-sm"
                         style={{ maxHeight: '420px', width: '100%' }}
-                        onError={e => { e.currentTarget.style.display = 'none'; }}
                       />
                     </div>
                     <div className="p-5 flex justify-end">
