@@ -24,13 +24,18 @@ import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
 import { PlantillaSuaFrenshetsiDetailModal } from '../plantillas/PlantillaSuaFrenshetsiDetailModal';
 import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
 
+// Interfaz extendida para incluir soporte_url
+interface SolicitudN09TokaExtended extends SolicitudN09TokaData {
+  soporte_url?: string | null;
+}
+
 // Componente wrapper que recarga la solicitud TOKA con el parámetro correcto
 const PlantillaN09TokaReloadModal: React.FC<{
   solicitudId: number;
   isOpen: boolean;
   onClose: () => void;
 }> = ({ solicitudId, isOpen, onClose }) => {
-  const [solicitudToka, setSolicitudToka] = useState<any>(null);
+  const [solicitudToka, setSolicitudToka] = useState<SolicitudN09TokaExtended | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +49,7 @@ const PlantillaN09TokaReloadModal: React.FC<{
           const solicitudCorrecta = await SolicitudesService.getById(solicitudId, 'toka');
           
           // Extraer datos TOKA desde plantilla_datos
-          let solicitudN09Toka: any = null;
+          let solicitudN09Toka: SolicitudN09TokaExtended | null = null;
           if (solicitudCorrecta.plantilla_datos) {
             try {
               const plantillaData = typeof solicitudCorrecta.plantilla_datos === 'string' 
@@ -136,7 +141,7 @@ import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { PlantillaPolizasDetailModal, SolicitudPolizasData } from '@/components/plantillas/PlantillaPolizasDetailModal';
 import { PlantillaTransferenciaDetailModal, SolicitudTransferenciaData, CuentaTransferencia } from '@/components/plantillas/PlantillaTransferenciaDetailModal';
 import { PlantillaEfectivoDetailModal, SolicitudEfectivoData } from '@/components/plantillas/PlantillaEfectivoDetailModal';
-import { PlantillaRegresosTransferenciaDetailModal, SolicitudRegresosTransferenciaData } from '@/components/plantillas/PlantillaRegresosTransferenciaDetailModal';
+
 
 interface SolicitudDetailModalProps {
   solicitud: Solicitud | null;

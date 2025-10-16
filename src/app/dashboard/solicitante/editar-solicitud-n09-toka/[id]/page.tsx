@@ -1,11 +1,10 @@
 "use client";
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditarN09Toka from '@/components/plantillas/EditarN09Toka';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
-import type { Solicitud } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
 
 export default function EditarN09TokaPage() {
@@ -26,7 +25,9 @@ export default function EditarN09TokaPage() {
         if (plantillaN09Toka) {
           seleccionarPlantilla(plantillaN09Toka);
           // Ocultar campo de archivos_adjuntos para solicitante
-          ocultarCampo && ocultarCampo('archivos_adjuntos');
+          if (ocultarCampo) {
+            ocultarCampo('archivos_adjuntos');
+          }
           // Prellenar datos desde plantilla_datos
           let datosN09Toka: Record<string, unknown> = {};
           if (s.plantilla_datos) {
