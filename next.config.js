@@ -2,6 +2,10 @@
 const isDev = process.env.NODE_ENV !== 'production';
 
 const nextConfig = {
+  // Configuración para resolver el warning de múltiples lockfiles
+  output: 'standalone',
+  outputFileTracingRoot: '.',
+  
   // Configuración compatible con Turbopack
   ...(isDev && {
     // Configuración simplificada para desarrollo

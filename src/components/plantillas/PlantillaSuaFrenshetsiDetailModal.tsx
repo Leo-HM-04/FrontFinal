@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { X, FileText, ExternalLink, Factory } from 'lucide-react';
 import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
+import { extraerFechaLimiteDesdeplantilla } from '@/utils/plantillaUtils';
 
 // Interfaz para props del modal
 interface PlantillaSuaFrenshetsiDetailModalProps {
@@ -49,6 +50,19 @@ const formatCurrency = (amount: number | string): string => {
 // Función para formatear fecha
 const formatDate = (dateString: string): string => {
   if (!dateString) return 'No especificada';
+  
+  // Si la fecha viene en formato YYYY-MM-DD, parsearla como fecha local
+  if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month - 1 porque Date usa 0-indexed months
+    return date.toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+  
+  // Para otros formatos, usar el parsing normal
   const date = new Date(dateString);
   return date.toLocaleDateString('es-MX', {
     year: 'numeric',
@@ -474,7 +488,7 @@ export function PlantillaSuaFrenshetsiDetailModal({
                 <InfoField label="Se paga por" value={solicitud.empresa} />
                 <InfoField label="Cliente" value={solicitud.cliente} />
                 <InfoField label="Monto Total" value={solicitud.monto} variant="currency" />
-                <InfoField label="Fecha Límite" value={solicitud.fecha_limite} variant="date" />
+                <InfoField label="Fecha Límite" value={extraerFechaLimiteDesdeplantilla(solicitud) || solicitud.fecha_limite} variant="date" />
               </div>
             </div>
             {/* Línea de Captura */}
