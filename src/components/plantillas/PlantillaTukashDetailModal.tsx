@@ -199,15 +199,24 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
     console.log('🔍 TUKASH COMPROBANTES - solicitudExtended completo:', solicitudExtended);
     console.log('🔍 TUKASH COMPROBANTES - soporte_url específico:', solicitudExtended.soporte_url);
     console.log('🔍 TUKASH COMPROBANTES - tipo de soporte_url:', typeof solicitudExtended.soporte_url);
+    
+    // Debug detallado de las condiciones
+    console.log('🔍 TUKASH COMPROBANTES - Verificando condiciones:');
+    console.log('  - Existe soporte_url?', !!solicitudExtended.soporte_url);
+    console.log('  - No es "NO TIENE"?', solicitudExtended.soporte_url !== 'NO TIENE');
+    console.log('  - No está vacío?', solicitudExtended.soporte_url && solicitudExtended.soporte_url.trim() !== '');
     setLoading(prev => ({ ...prev, archivos: true })); // Reutilizamos el loading de archivos
     setErrors(prev => ({ ...prev, archivos: null }));
     
     try {
       const token = localStorage.getItem('auth_token');
       
-      // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
-      if (solicitudExtended.soporte_url) {
-        console.log('✅ TUKASH COMPROBANTES - Encontrado soporte_url:', solicitudExtended.soporte_url);
+      // Primero verificar si la solicitud tiene soporte_url válido (nuevo sistema)
+      // Solo crear comprobante si soporte_url existe Y no es "NO TIENE"
+      if (solicitudExtended.soporte_url && 
+          solicitudExtended.soporte_url !== 'NO TIENE' && 
+          solicitudExtended.soporte_url.trim() !== '') {
+        console.log('✅ TUKASH COMPROBANTES - Encontrado soporte_url válido:', solicitudExtended.soporte_url);
         const comprobanteFromSoporte = {
           id_comprobante: 999999, // ID ficticio para soporte_url
           id_solicitud: solicitud.id_solicitud || 0,
@@ -220,9 +229,18 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
         };
         setComprobantes([comprobanteFromSoporte]);
         return;
+      } else {
+        console.log('❌ TUKASH COMPROBANTES - No se creará comprobante desde soporte_url porque:');
+        if (!solicitudExtended.soporte_url) {
+          console.log('  - No existe soporte_url');
+        } else if (solicitudExtended.soporte_url === 'NO TIENE') {
+          console.log('  - soporte_url es "NO TIENE"');
+        } else if (solicitudExtended.soporte_url.trim() === '') {
+          console.log('  - soporte_url está vacío');
+        }
       }
       
-      // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+      // Si no tiene soporte_url válido, buscar en la tabla comprobantes (sistema viejo)
       console.log('⚠️ TUKASH COMPROBANTES - No se encontró soporte_url, buscando en tabla comprobantes_pago');
       if (token) {
         const { ComprobantesService } = await import('@/services/comprobantes.service');
