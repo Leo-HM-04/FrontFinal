@@ -20,7 +20,7 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
   camposVisibles,
   onCambiarCampo,
   className = '',
-  onGuardar
+  // onGuardar - parámetro no utilizado actualmente
 }) => {
   // const [guardando, setGuardando] = useState(false);
 

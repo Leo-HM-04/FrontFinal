@@ -1,10 +1,5 @@
 import React from 'react';
 import {
-  Building,
-  Calendar,
-  CreditCard,
-  DollarSign,
-  Download,
   FileText,
   FileBadge,
   X,
@@ -49,7 +44,8 @@ export const VerComprobanteModal: React.FC<VerComprobanteModalProps> = ({
 }) => {
   if (!open || !pago) return null;
 
-  // Formatear la fecha de pago
+  // Formatear la fecha de pago (código comentado porque las variables no se usan)
+  /*
   let fechaPagoProfesional = '-';
   let fechaPagoTooltip = '';
   if (pago.fecha_pago) {
@@ -77,6 +73,7 @@ export const VerComprobanteModal: React.FC<VerComprobanteModalProps> = ({
       fechaPagoTooltip = fallbackDate.toLocaleString('es-CO');
     }
   }
+  */
 
   // Construir la URL del comprobante (priorizar soporte_url de la tabla solicitudes_pago)
   let comprobanteUrl = '';

@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, Building2 } from 'lucide-react';
-import { PlantillaSuaInternasModalProps, LoadingStateSuaInternas, ErrorStateSuaInternas } from '@/types/plantillaSuaInternas';
+import { PlantillaSuaInternasModalProps } from '@/types/plantillaSuaInternas';
 import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 
@@ -42,7 +42,8 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-// Función para obtener colores del estado
+// Función para obtener colores del estado (comentada porque no se usa)
+/*
 const getEstadoColor = (estado: string) => {
   switch (estado.toLowerCase()) {
     case 'aprobada':
@@ -55,6 +56,7 @@ const getEstadoColor = (estado: string) => {
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
   }
 };
+*/
 
 // Función para construir URL de archivos
 const buildFileUrl = (rutaArchivo: string): string => {
@@ -63,7 +65,8 @@ const buildFileUrl = (rutaArchivo: string): string => {
   return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
 };
 
-// Hook para manejo de errores
+// Hook para manejo de errores (comentado porque no se usa)
+/*
 const useErrorHandler = () => {
   const handleError = useCallback((error: unknown): string => {
     console.error('Error en PlantillaSuaInternasDetailModal:', error);
@@ -75,6 +78,7 @@ const useErrorHandler = () => {
 
   return { handleError };
 };
+*/
 
 // Componente de loading
 const LoadingSpinner: React.FC<{ message?: string }> = ({ message }) => (
@@ -122,7 +126,8 @@ const InfoField: React.FC<InfoFieldProps> = ({ label, value, variant = 'default'
 
 // Componente para preview de archivos
 
-// Función para obtener archivos de solicitud
+// Función para obtener archivos de solicitud (comentada porque no se usa)
+/*
 const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudArchivo[]> => {
   try {
     console.log('📁 [SUA INTERNAS ARCHIVOS] Obteniendo archivos para solicitud:', idSolicitud);
@@ -134,6 +139,7 @@ const obtenerArchivosSolicitud = async (idSolicitud: number): Promise<SolicitudA
     throw error;
   }
 };
+*/
 
 export function PlantillaSuaInternasDetailModal({ 
   solicitud, 

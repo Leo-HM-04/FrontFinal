@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 // import { Button } from '@/components/ui/Button';
 import type { Solicitud } from '@/types/index';
-import { Calendar, MapPin, User, DollarSign, Clock, FileText, CreditCard } from 'lucide-react';
+import { FileText, CreditCard } from 'lucide-react';
 // import Image from 'next/image';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 import { detectarPlantillaId } from '@/utils/plantillasLabels';
 import { PlantillaComisionesDetailModal } from '@/components/plantillas/PlantillaComisionesDetailModal';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
-import { obtenerNombreBanco } from '@/utils/bancos';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
 
 interface PagoDetailModalProps {
@@ -29,7 +28,7 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
       try {
         const data = await SolicitudArchivosService.obtenerArchivos(pago.id_solicitud);
         setArchivos(data);
-      } catch (_error) {
+      } catch {
         setErrorArchivos('Error al cargar archivos adjuntos');
       } finally {
         setLoadingArchivos(false);

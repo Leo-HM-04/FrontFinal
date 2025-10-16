@@ -1,11 +1,10 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditarSuaFrenshetsi from '@/components/plantillas/EditarSuaFrenshetsi';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
-import type { Solicitud } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
 
 export default function EditarSuaFrenshetsiPage() {
@@ -28,7 +27,7 @@ export default function EditarSuaFrenshetsiPage() {
           if (s.plantilla_datos) {
             try {
               datos = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
-            } catch (err) {
+            } catch {
               // Si hay error, datos queda vacío
             }
           }

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
 import Image from 'next/image';
 import { 
@@ -185,7 +184,7 @@ export const PlantillaRegresosTransferenciaDetailModal: React.FC<PlantillaRegres
       setLoadingComprobantes(false);
       setErrorComprobantes(null);
     }
-  }, [isOpen, fetchComprobantes]);
+  }, [isOpen, solicitud, fetchComprobantes]);
 
   if (!isOpen) return null;
 

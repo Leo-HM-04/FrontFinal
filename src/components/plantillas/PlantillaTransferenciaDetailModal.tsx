@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, ArrowRightLeft, DollarSign, Building2, FileText, ExternalLink, FileCheck, CreditCard, User } from 'lucide-react';
 import { SolicitudArchivosService, SolicitudArchivo } from '@/services/solicitudArchivos.service';
-import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
 import Image from 'next/image';
 import { obtenerNombreBanco } from '@/utils/bancos';
@@ -53,7 +52,7 @@ export const PlantillaTransferenciaDetailModal: React.FC<PlantillaTransferenciaD
   const [archivoPreview, setArchivoPreview] = useState<SolicitudArchivo | null>(null);
   const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
   const [loadingComprobantes, setLoadingComprobantes] = useState(false);
-  const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
+  // const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null); // Variable no utilizada
   const [comprobantePreview, setComprobantePreview] = useState<Comprobante | null>(null);
 
   // Cargar comprobantes si la solicitud está pagada (usando la misma lógica que funciona en TUKASH)
@@ -64,7 +63,7 @@ export const PlantillaTransferenciaDetailModal: React.FC<PlantillaTransferenciaD
     console.log('🔍 TRANSFERENCIA COMPROBANTES - soporte_url específico:', solicitud.soporte_url);
     console.log('🔍 TRANSFERENCIA COMPROBANTES - tipo de soporte_url:', typeof solicitud.soporte_url);
     setLoadingComprobantes(true);
-    setErrorComprobantes(null);
+    // setErrorComprobantes(null); // Variable no utilizada
     
     try {
       const token = localStorage.getItem('auth_token');
@@ -102,15 +101,17 @@ export const PlantillaTransferenciaDetailModal: React.FC<PlantillaTransferenciaD
         setComprobantes([]);
       }
     } catch (error) {
-      let msg = 'Error al cargar comprobantes';
-      if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
-        msg = (error as { message: string }).message;
-      }
-      setErrorComprobantes(msg);
+      // Error handling (mensaje comentado porque no se usa)
+      // let msg = 'Error al cargar comprobantes';
+      // if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+      //   msg = (error as { message: string }).message;
+      // }
+      console.error('Error cargando comprobantes:', error);
+      // setErrorComprobantes(msg); // Variable no utilizada
     } finally {
       setLoadingComprobantes(false);
     }
-  }, [solicitud.id_solicitud]);
+  }, [solicitud]);
 
   useEffect(() => {
     if (isOpen && solicitud?.estado === 'pagada') {

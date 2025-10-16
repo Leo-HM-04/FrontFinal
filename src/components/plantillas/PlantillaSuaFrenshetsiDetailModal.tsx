@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { SolicitudesService } from '@/services/solicitudes.service';
 import { Comprobante } from '@/types';
 import Image from 'next/image';
 import { X, FileText, ExternalLink, Factory } from 'lucide-react';
@@ -60,7 +59,8 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-// Función para obtener colores del estado
+// Función para obtener colores del estado (comentada porque no se usa)
+/*
 const getEstadoColor = (estado: string) => {
   switch (estado.toLowerCase()) {
     case 'aprobada':
@@ -73,6 +73,7 @@ const getEstadoColor = (estado: string) => {
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
   }
 };
+*/
 
 // Función auxiliar para construir URLs de archivos
 // Unificado con otros modales: siempre usa la URL de producción
@@ -386,7 +387,7 @@ export function PlantillaSuaFrenshetsiDetailModal({
       fetchArchivos();
       fetchComprobantes();
     }
-  }, [isOpen, solicitud, fetchArchivos]);
+  }, [isOpen, solicitud, fetchArchivos, fetchComprobantes]);
 
   // Resetear estados al cerrar
   useEffect(() => {

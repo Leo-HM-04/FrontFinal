@@ -57,72 +57,8 @@ type SortOrder = 'asc' | 'desc';
 const ITEMS_PER_PAGE = 5;
 const LOAD_TIMEOUT = 10000;
 
-// Detección robusta de plantillas especiales
-const isSuaInternasSolicitud = (solicitud: Solicitud): boolean => {
-  if (getTemplateType(solicitud) === 'pago-sua-internas') return true;
-  if (
-    typeof solicitud.tipo_pago_descripcion === 'string' &&
-    solicitud.tipo_pago_descripcion.toLowerCase().includes('pago-sua-internas')
-  ) return true;
-  if (
-    typeof solicitud.concepto === 'string' &&
-    solicitud.concepto.toLowerCase().includes('sua internas')
-  ) return true;
-  return false;
-};
-
-const isSuaFrenshetsiSolicitud = (solicitud: Solicitud): boolean => {
-  if (getTemplateType(solicitud) === 'pago-sua-frenshetsi') return true;
-  if (
-    typeof solicitud.tipo_pago_descripcion === 'string' &&
-    solicitud.tipo_pago_descripcion.toLowerCase().includes('pago-sua-frenshetsi')
-  ) return true;
-  if (
-    typeof solicitud.concepto === 'string' &&
-    solicitud.concepto.toLowerCase().includes('sua frenshetsi')
-  ) return true;
-  return false;
-};
-
-const isComisionesSolicitud = (solicitud: Solicitud): boolean => {
-  if (getTemplateType(solicitud) === 'pago-comisiones') return true;
-  if (
-    typeof solicitud.tipo_pago_descripcion === 'string' &&
-    solicitud.tipo_pago_descripcion.toLowerCase().includes('pago-comisiones')
-  ) return true;
-  if (
-    typeof solicitud.concepto === 'string' &&
-    solicitud.concepto.toLowerCase().includes('comision')
-  ) return true;
-  return false;
-};
-
-const isPolizasSolicitud = (solicitud: Solicitud): boolean => {
-  if (getTemplateType(solicitud) === 'pago-polizas-gnp') return true;
-  if (
-    typeof solicitud.tipo_pago_descripcion === 'string' &&
-    solicitud.tipo_pago_descripcion.toLowerCase().includes('pago-polizas-gnp')
-  ) return true;
-  if (
-    typeof solicitud.concepto === 'string' &&
-    solicitud.concepto.toLowerCase().includes('poliza')
-  ) return true;
-  return false;
-};
-
-const isRegresosTransferenciaSolicitud = (solicitud: Solicitud): boolean => {
-  if (getTemplateType(solicitud) === 'regresos-transferencia') return true;
-  if (
-    typeof solicitud.tipo_pago_descripcion === 'string' &&
-    solicitud.tipo_pago_descripcion.toLowerCase().includes('regresos-transferencia')
-  ) return true;
-  if (
-    typeof solicitud.concepto === 'string' &&
-    solicitud.concepto.toLowerCase().includes('regreso transferencia')
-  ) return true;
-  return false;
-};
-// Utilidad global para obtener el templateType de una solicitud
+// Utilidad global para obtener el templateType de una solicitud (comentada porque no se usa)
+/*
 const getTemplateType = (solicitud: Solicitud): string => {
   if (solicitud.plantilla_datos) {
     try {
@@ -132,35 +68,8 @@ const getTemplateType = (solicitud: Solicitud): string => {
   }
   return '';
 };
+*/
 
-// Función para detectar si una solicitud es del tipo TUKASH
-const isTukashSolicitud = (solicitud: Solicitud): boolean => {
-  // Detectar por plantilla_datos.templateType
-  if (solicitud.plantilla_datos) {
-    try {
-      const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-      if (plantillaData.templateType === 'tarjetas-tukash') {
-        return true;
-      }
-    } catch {}
-  }
-  // Detectar por tipo_plantilla
-  if ('tipo_plantilla' in solicitud && solicitud.tipo_plantilla === 'TUKASH') {
-    return true;
-  }
-  // Detectar por concepto
-  if (solicitud.concepto && String(solicitud.concepto).toUpperCase().includes('TUKASH')) {
-    return true;
-  }
-  // Detectar por nombre_persona o empresa_a_pagar
-  if ('nombre_persona' in solicitud && solicitud.nombre_persona && String(solicitud.nombre_persona).toUpperCase().includes('TUKASH')) {
-    return true;
-  }
-  if ('empresa_a_pagar' in solicitud && solicitud.empresa_a_pagar && String(solicitud.empresa_a_pagar).toUpperCase().includes('TUKASH')) {
-    return true;
-  }
-  return false;
-};
 const ESTADO_ORDEN = {
   pendiente: 1,
   autorizadas: 2,

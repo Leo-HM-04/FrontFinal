@@ -1,12 +1,11 @@
 "use client";
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 
 import EditarTukash from '@/components/plantillas/EditarTukash';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
-import type { Solicitud } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
 
 export default function EditarTukashPage() {
@@ -27,14 +26,14 @@ export default function EditarTukashPage() {
         if (s.plantilla_datos) {
           try {
             datosTukash = typeof s.plantilla_datos === 'string' ? JSON.parse(s.plantilla_datos) : s.plantilla_datos;
-          } catch (_err) {
+          } catch {
             // Si hay error, datosTukash queda vacío
           }
         }
         if (plantillaTukash) {
           seleccionarPlantilla(plantillaTukash, datosTukash);
         }
-      } catch (_err) {
+      } catch {
         // Si hay error, no autocompleta
       }
     }

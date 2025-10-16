@@ -1,11 +1,10 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditarSuaInternas from '@/components/plantillas/EditarSuaInternas';
 import { SolicitanteLayout } from '@/components/layout/SolicitanteLayout';
 import { plantillasDisponibles } from '@/data/plantillas';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
-import type { Solicitud } from '@/types';
 import { SolicitudesService } from '@/services/solicitudes.service';
 
 export default function EditarSuaInternasPage() {

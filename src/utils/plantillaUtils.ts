@@ -64,7 +64,11 @@ function formatearFechaFallback(fecha?: string | Date | null): string {
  * @param solicitud - Objeto de solicitud
  * @returns true si es una plantilla SUA que usa fecha_limite
  */
-export function esSolicitudConFechaLimitePlantilla(solicitud: any): boolean {
+export function esSolicitudConFechaLimitePlantilla(solicitud: {
+  plantilla_datos?: string | object;
+  concepto?: string;
+  tipo_pago_descripcion?: string;
+}): boolean {
   if (!solicitud) return false;
 
   // Verificar si tiene plantilla_datos con fecha_limite
@@ -82,7 +86,7 @@ export function esSolicitudConFechaLimitePlantilla(solicitud: any): boolean {
   }
 
   // Verificar por tipo de plantilla o concepto
-  const esPlantillaSua = 
+  const esPlantillaSua = Boolean(
     (solicitud.concepto && (
       solicitud.concepto.includes('SUA FRENSHETSI') ||
       solicitud.concepto.includes('SUA INTERNAS') ||
@@ -91,7 +95,8 @@ export function esSolicitudConFechaLimitePlantilla(solicitud: any): boolean {
     (solicitud.tipo_pago_descripcion && (
       solicitud.tipo_pago_descripcion.includes('sua-frenshetsi') ||
       solicitud.tipo_pago_descripcion.includes('sua-internas')
-    ));
+    ))
+  );
 
   return esPlantillaSua;
 }

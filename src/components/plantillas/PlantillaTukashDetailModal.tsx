@@ -245,7 +245,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
     } finally {
       setLoading(prev => ({ ...prev, archivos: false }));
     }
-  }, [solicitud, solicitudExtended.soporte_url, handleError]);
+  }, [solicitud, handleError]);
 
   // useEffect para cargar comprobantes cuando el modal se abre
   useEffect(() => {
