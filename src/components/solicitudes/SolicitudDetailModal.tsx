@@ -1800,7 +1800,7 @@ function extraerDatosDelConcepto(concepto: string) {
           empresa: plantillaData.empresa || 'FRENSHETSI',
           cliente: plantillaData.cliente || datosExtraidos.empresa || '',
           monto: plantillaData.monto || Number(solicitud.monto) || 0,
-          fecha_limite: plantillaData.fecha_limite || '',
+          fecha_limite: plantillaData.fecha_limite || solicitud.fecha_limite_pago || '',
           linea_captura: plantillaData.linea_captura || datosExtraidos.linea_captura || '',
           archivos_adjuntos: plantillaData.archivos_adjuntos || [],
           estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',

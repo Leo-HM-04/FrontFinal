@@ -4,7 +4,7 @@ import { NumericFormat } from 'react-number-format';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale/es';
-import { formatDateForAPI } from '@/utils/dateUtils';
+import { formatDateForAPI, parseBackendDateForForm } from '@/utils/dateUtils';
 import { obtenerOpcionesBancos } from '@/data/bancos';
 
 interface CampoFormularioProps {
@@ -310,17 +310,15 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
         );
 
       case 'fecha':
-        const fechaValue = valor instanceof Date ? valor : (valor ? new Date(valor as string) : null);
+        const fechaValue = valor instanceof Date ? valor : (valor ? parseBackendDateForForm(valor as string) : null);
         return (
           <div className="relative">
             <DatePicker
               selected={fechaValue}
               onChange={(date: Date | null) => {
                 if (date) {
-                  // Sumar el offset de zona horaria para que la fecha guardada sea la seleccionada
-                  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-                  const localDate = new Date(date.getTime() + userTimezoneOffset);
-                  onChange(formatDateForAPI(localDate));
+                  // Usar la fecha directamente sin ajustes de zona horaria
+                  onChange(formatDateForAPI(date));
                 } else {
                   onChange('');
                 }
