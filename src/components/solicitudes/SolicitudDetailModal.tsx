@@ -22,6 +22,7 @@ import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { PlantillaSuaInternasDetailModal } from '@/components/plantillas/PlantillaSuaInternasDetailModal';
 import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
 import { PlantillaSuaFrenshetsiDetailModal } from '../plantillas/PlantillaSuaFrenshetsiDetailModal';
+import { extraerFechaLimiteDesdeplantilla, esSolicitudConFechaLimitePlantilla } from '@/utils/plantillaUtils';
 import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
 
 // Interfaz extendida para incluir soporte_url
@@ -1384,7 +1385,7 @@ export function SolicitudDetailModal({
       const asunto = datosExtraidos.asunto || '';
       const empresa = datosExtraidos.empresa || solicitud.empresa_a_pagar || solicitud.nombre_persona || '';
       const monto = Number(solicitud.monto) || 0;
-      const fecha_limite = solicitud.fecha_limite_pago || '';
+      const fecha_limite = extraerFechaLimiteDesdeplantilla(solicitud.plantilla_datos || null, solicitud.fecha_limite_pago);
       const linea_captura = datosExtraidos.linea_captura || '';
       
       // Crear solicitud extendida con campos adicionales
@@ -1806,7 +1807,7 @@ function extraerDatosDelConcepto(concepto: string) {
           empresa: plantillaData.empresa || 'FRENSHETSI',
           cliente: plantillaData.cliente || datosExtraidos.empresa || '',
           monto: plantillaData.monto || Number(solicitud.monto) || 0,
-          fecha_limite: plantillaData.fecha_limite || solicitud.fecha_limite_pago || '',
+          fecha_limite: extraerFechaLimiteDesdeplantilla(solicitud.plantilla_datos || null, solicitud.fecha_limite_pago),
           linea_captura: plantillaData.linea_captura || datosExtraidos.linea_captura || '',
           archivos_adjuntos: plantillaData.archivos_adjuntos || [],
           estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
@@ -1840,7 +1841,7 @@ function extraerDatosDelConcepto(concepto: string) {
         empresa: 'FRENSHETSI',
         cliente,
         monto: Number(solicitud.monto) || 0,
-        fecha_limite: solicitud.fecha_limite_pago || '',
+        fecha_limite: extraerFechaLimiteDesdeplantilla(null, solicitud.fecha_limite_pago),
         linea_captura,
         archivos_adjuntos: [],
         estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado as 'pendiente' | 'aprobada' | 'rechazada' | 'pagada') || 'pendiente',
@@ -2041,7 +2042,10 @@ function extraerDatosDelConcepto(concepto: string) {
                       />
                     <InfoField
                       label="Fecha límite"
-                      value={solicitud.fecha_limite_pago ? formatDateForDisplay(solicitud.fecha_limite_pago) : null}
+                      value={esSolicitudConFechaLimitePlantilla(solicitud) 
+                        ? formatDateForDisplay(extraerFechaLimiteDesdeplantilla(solicitud.plantilla_datos || null, solicitud.fecha_limite_pago))
+                        : (solicitud.fecha_limite_pago ? formatDateForDisplay(solicitud.fecha_limite_pago) : null)
+                      }
                       className="bg-blue-50/50 border-blue-100"
                     />
                   </div>

@@ -17,6 +17,7 @@ import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailMo
 import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal';
 import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 import { isN09TokaSolicitud } from '@/utils/solicitudUtils';
+import { extraerFechaLimiteDesdeplantilla, esSolicitudConFechaLimitePlantilla } from '@/utils/plantillaUtils';
 
 export default function PagosPendientesPage() {
   const [selectedPago, setSelectedPago] = useState<Solicitud | null>(null);
@@ -307,7 +308,11 @@ export default function PagosPendientesPage() {
           pago.departamento,
           pago.monto,
           new Date(pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }),
-          new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }),
+          new Date(
+            esSolicitudConFechaLimitePlantilla(pago) 
+              ? extraerFechaLimiteDesdeplantilla(pago.plantilla_datos || null, pago.fecha_limite_pago) || pago.fecha_creacion
+              : pago.fecha_limite_pago || pago.fecha_creacion
+          ).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }),
           pago.estado?.charAt(0).toUpperCase() + pago.estado?.slice(1) || 'Autorizada',
           pago.aprobador_nombre || '-'
         ].join(','))
@@ -720,7 +725,11 @@ export default function PagosPendientesPage() {
                                 {new Date(pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' })}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {new Date(pago.fecha_limite_pago || pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' })}
+                                {new Date(
+                                  esSolicitudConFechaLimitePlantilla(pago) 
+                                    ? extraerFechaLimiteDesdeplantilla(pago.plantilla_datos || null, pago.fecha_limite_pago) || pago.fecha_creacion
+                                    : pago.fecha_limite_pago || pago.fecha_creacion
+                                ).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' })}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">

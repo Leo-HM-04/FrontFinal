@@ -16,6 +16,7 @@ import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { SolicitudesN09TokaService, SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 import { Solicitud } from '@/types';
+import { extraerFechaLimiteDesdeplantilla, esSolicitudConFechaLimitePlantilla } from '@/utils/plantillaUtils';
 import { toast } from 'react-hot-toast';
 import {
   Eye,
@@ -1020,7 +1021,13 @@ function MisSolicitudesContent() {
                           </span>
                         </td>
                         <td className="px-3 py-2.5">
-                          <div className="text-sm text-blue-900/80">{formatShortDate(s.fecha_limite_pago)}</div>
+                          <div className="text-sm text-blue-900/80">
+                            {formatShortDate(
+                              esSolicitudConFechaLimitePlantilla(s) 
+                                ? extraerFechaLimiteDesdeplantilla(s.plantilla_datos || null, s.fecha_limite_pago)
+                                : s.fecha_limite_pago
+                            )}
+                          </div>
                         </td>
                         <td className="px-3 py-2.5">
                           <div className="flex items-center justify-center gap-1.5">
@@ -1144,7 +1151,13 @@ function MisSolicitudesContent() {
                           </div>
                           <div>
                             <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Fecha Límite</span>
-                            <p className="text-sm text-blue-900/80 mt-1">{formatShortDate(s.fecha_limite_pago)}</p>
+                            <p className="text-sm text-blue-900/80 mt-1">
+                              {formatShortDate(
+                                esSolicitudConFechaLimitePlantilla(s) 
+                                  ? extraerFechaLimiteDesdeplantilla(s.plantilla_datos || null, s.fecha_limite_pago)
+                                  : s.fecha_limite_pago
+                              )}
+                            </p>
                           </div>
                         </div>
 
