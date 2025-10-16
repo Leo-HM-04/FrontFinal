@@ -23,6 +23,114 @@ import { PlantillaSuaInternasDetailModal } from '@/components/plantillas/Plantil
 import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
 import { PlantillaSuaFrenshetsiDetailModal } from '../plantillas/PlantillaSuaFrenshetsiDetailModal';
 import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
+
+// Componente wrapper que recarga la solicitud TOKA con el parámetro correcto
+const PlantillaN09TokaReloadModal: React.FC<{
+  solicitudId: number;
+  isOpen: boolean;
+  onClose: () => void;
+}> = ({ solicitudId, isOpen, onClose }) => {
+  const [solicitudToka, setSolicitudToka] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen && solicitudId) {
+      const fetchSolicitudToka = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          // Llamar específicamente con el parámetro tipo=toka
+          const solicitudCorrecta = await SolicitudesService.getById(solicitudId, 'toka');
+          
+          // Extraer datos TOKA desde plantilla_datos
+          let solicitudN09Toka: any = null;
+          if (solicitudCorrecta.plantilla_datos) {
+            try {
+              const plantillaData = typeof solicitudCorrecta.plantilla_datos === 'string' 
+                ? JSON.parse(solicitudCorrecta.plantilla_datos) 
+                : solicitudCorrecta.plantilla_datos;
+              
+              solicitudN09Toka = {
+                id_solicitud: solicitudCorrecta.id_solicitud,
+                asunto: plantillaData.asunto || 'TOKA_FONDEO_AVIT',
+                cliente: plantillaData.cliente || '',
+                beneficiario: plantillaData.beneficiario || '',
+                proveedor: plantillaData.proveedor || '',
+                tipo_cuenta_clabe: plantillaData.tipo_cuenta_clabe || 'CLABE',
+                numero_cuenta_clabe: plantillaData.numero_cuenta_clabe || '',
+                banco_destino: plantillaData.banco_destino || '',
+                monto: Number(plantillaData.monto) || 0,
+                tipo_moneda: (plantillaData.tipo_moneda || 'MXN'),
+                estado: solicitudCorrecta.estado || '',
+                fecha_creacion: solicitudCorrecta.fecha_creacion || '',
+                fecha_actualizacion: plantillaData.fecha_actualizacion || solicitudCorrecta.updated_at || '',
+                fecha_limite_pago: plantillaData.fecha_limite_pago || solicitudCorrecta.fecha_limite_pago || '',
+                usuario_creacion: plantillaData.usuario_creacion || solicitudCorrecta.usuario_nombre || '',
+                usuario_actualizacion: plantillaData.usuario_actualizacion || '',
+                soporte_url: solicitudCorrecta.soporte_url || null,
+              };
+            } catch (parseError) {
+              console.error('Error parseando plantilla_datos TOKA:', parseError);
+            }
+          }
+          setSolicitudToka(solicitudN09Toka);
+        } catch (fetchError) {
+          console.error('Error cargando solicitud TOKA:', fetchError);
+          setError('Error al cargar los datos de la solicitud TOKA');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchSolicitudToka();
+    }
+  }, [solicitudId, isOpen]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg">
+          <div className="text-center">Cargando solicitud TOKA...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg">
+          <div className="text-red-600 text-center">{error}</div>
+          <button onClick={onClose} className="mt-4 bg-gray-500 text-white px-4 py-2 rounded">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!solicitudToka) {
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg">
+          <div className="text-center">No se pudieron cargar los datos TOKA</div>
+          <button onClick={onClose} className="mt-4 bg-gray-500 text-white px-4 py-2 rounded">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <PlantillaN09TokaDetailModal
+      solicitud={solicitudToka}
+      isOpen={isOpen}
+      onClose={onClose}
+    />
+  );
+};
 import { PlantillaComisionesDetailModal } from '../plantillas/PlantillaComisionesDetailModal';
 import { SolicitudComisionesData } from '@/types/plantillaComisiones';
 import { PlantillaPolizasDetailModal, SolicitudPolizasData } from '@/components/plantillas/PlantillaPolizasDetailModal';
@@ -948,42 +1056,14 @@ export function SolicitudDetailModal({
 
   // Renderizado condicional del modal N09/TOKA
   if (isOpen && solicitud && isN09TokaSolicitud(solicitud)) {
-    let solicitudN09Toka: SolicitudN09TokaData | null = null;
-    if (typeof solicitud === 'object' && solicitud.plantilla_datos) {
-      try {
-        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
-        solicitudN09Toka = {
-          id_solicitud: solicitud.id_solicitud,
-          asunto: plantillaData.asunto || 'TOKA_FONDEO_AVIT',
-          cliente: plantillaData.cliente || '',
-          beneficiario: plantillaData.beneficiario || '',
-          proveedor: plantillaData.proveedor || '',
-          tipo_cuenta_clabe: plantillaData.tipo_cuenta_clabe || 'CLABE',
-          numero_cuenta_clabe: plantillaData.numero_cuenta_clabe || '',
-          banco_destino: plantillaData.banco_destino || '',
-          monto: Number(plantillaData.monto) || 0,
-          tipo_moneda: (plantillaData.tipo_moneda || 'MXN'),
-          estado: solicitud.estado || '',
-          fecha_creacion: solicitud.fecha_creacion || '',
-          fecha_actualizacion: plantillaData.fecha_actualizacion || solicitud.updated_at || '',
-          fecha_limite_pago: plantillaData.fecha_limite_pago || solicitud.fecha_limite_pago || '',
-          usuario_creacion: plantillaData.usuario_creacion || solicitud.usuario_nombre || '',
-          usuario_actualizacion: plantillaData.usuario_actualizacion || '',
-        };
-      } catch {
-        solicitudN09Toka = null;
-      }
-    }
-    if (solicitudN09Toka) {
-      return (
-        <PlantillaN09TokaDetailModal
-          solicitud={solicitudN09Toka}
-          isOpen={isOpen}
-          onClose={onClose}
-        />
-      );
-    }
-    // Si no se pudo mapear, mostrar modal estándar
+    // Para solicitudes TOKA, hacer una llamada específica para obtener los datos correctos
+    return (
+      <PlantillaN09TokaReloadModal
+        solicitudId={solicitud.id_solicitud}
+        isOpen={isOpen}
+        onClose={onClose}
+      />
+    );
   }
 
   // Renderizado condicional del modal REGRESOS - TRANSFERENCIA

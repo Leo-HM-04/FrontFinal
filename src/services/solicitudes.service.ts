@@ -109,9 +109,10 @@ export class SolicitudesService {
     }
   }
 
-  static async getById(id: number): Promise<Solicitud> {
+  static async getById(id: number, tipo?: 'toka'): Promise<Solicitud> {
     const token = localStorage.getItem('auth_token');
-    const response = await api.get<Solicitud>(`/solicitudes/${id}`, {
+    const url = tipo === 'toka' ? `/solicitudes/${id}?tipo=toka` : `/solicitudes/${id}`;
+    const response = await api.get<Solicitud>(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     });
     return response.data;

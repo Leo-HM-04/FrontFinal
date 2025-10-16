@@ -19,7 +19,7 @@ export default function EditarN09TokaPage() {
   useEffect(() => {
     async function fetchSolicitud() {
       try {
-        const s = await SolicitudesService.getById(solicitudId);
+        const s = await SolicitudesService.getById(solicitudId, 'toka');
         // setSolicitud(s);
         // Detectar plantilla N09/TOKA
         const plantillaN09Toka = plantillasDisponibles.find(p => p.id === 'tarjetas-n09-toka');
