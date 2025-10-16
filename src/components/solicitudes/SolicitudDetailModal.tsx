@@ -473,6 +473,12 @@ function isTukashSolicitud(solicitud: Solicitud | null): boolean {
 function isSuaInternasSolicitud(solicitud: Solicitud | null): boolean {
   if (!solicitud) return false;
   
+  // 🔧 EXCLUSIÓN IMPORTANTE: Si es SUA FRENSHETSI, NO es SUA INTERNAS
+  if (isSuaFrenshetsiSolicitud(solicitud)) {
+    console.log('🚫 [SUA INTERNAS DETECCIÓN] EXCLUIDA: Esta es una solicitud SUA FRENSHETSI');
+    return false;
+  }
+  
   console.log(`🔍 [SUA INTERNAS DETECCIÓN] Analizando solicitud ID: ${solicitud.id_solicitud}`);
   
   // 1. Verificar si tiene el campo tipo_plantilla directamente
@@ -500,7 +506,7 @@ function isSuaInternasSolicitud(solicitud: Solicitud | null): boolean {
       
       const esSuaInternas = plantillaData.templateType === 'pago-sua-internas' || 
              plantillaData.isSuaInternas === true || 
-             (plantillaData.empresa && plantillaData.linea_captura) ||
+             (plantillaData.empresa && plantillaData.linea_captura && plantillaData.empresa !== 'FRENSHETSI') ||
              (plantillaData.asunto && plantillaData.asunto.includes('SUA INTERNAS'));
       
       if (esSuaInternas) {
