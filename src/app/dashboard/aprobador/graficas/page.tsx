@@ -16,8 +16,7 @@ import {
   MdPieChart,
   MdShowChart,
   MdAttachMoney,
-  MdDateRange,
-  MdErrorOutline
+  MdDateRange
 } from 'react-icons/md';
 import {
   Chart as ChartJS,
@@ -100,59 +99,39 @@ export default function AprobadorGraficasPage() {
           throw new Error('Error al obtener datos');
         }
         
-        const [data1, data2, data3, data4, data5, data6] = await Promise.all([
-          res1.json(),
-          res2.json(),
-          res3.json(),
-          res4.json(),
-          res5.json(),
-          res6.json()
-        ]);
-        
-        setResumenEstado(data1);
-        setGastoNeto(data2);
-        setGastosPorTipo(data3);
-        setTendenciaTemporal(data4);
-        setResumenMesActual(data5);
-        setDepartamentos(data6);
-        
+        setResumenEstado(await res1.json());
+        setGastoNeto(await res2.json());
+        setGastosPorTipo(await res3.json());
+        setTendenciaTemporal(await res4.json());
+        setResumenMesActual(await res5.json());
+        setDepartamentos(await res6.json());
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError(err instanceof Error ? err.message : 'Error desconocido');
+        if (err instanceof Error) setError(err.message);
+        else setError('Error desconocido');
       } finally {
         setLoading(false);
       }
     };
-    
     fetchData();
   }, [departamentoSeleccionado, periodoTemporal]);
 
-  const formatCurrency = (amount: number): string => {
-    if (!amount && amount !== 0) return '$0';
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatPercentage = (value: number): string => {
-    return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
-  };
-
   if (loading) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute requiredRoles={['aprobador', 'aprobador_director']}>
         <AprobadorLayout>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-            <div className="text-center">
-              <div className="relative">
-                <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
-                <div className="absolute inset-0 rounded-full bg-blue-100/20 blur-xl"></div>
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+            <div className="text-center bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8 max-w-md mx-4">
+              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <div className="animate-spin w-10 h-10 border-3 border-white border-t-transparent rounded-full"></div>
               </div>
-              <p className="text-xl font-medium text-gray-600">Cargando estadísticas...</p>
-              <p className="text-sm text-gray-500 mt-2">Preparando tu dashboard ejecutivo</p>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">
+                Cargando Dashboard
+              </h3>
+              <p className="text-gray-600 mb-6 text-lg">Procesando información financiera...</p>
+              
+              <div className="w-64 h-3 bg-gray-200 rounded-full overflow-hidden mx-auto shadow-inner">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full animate-pulse shadow-sm" style={{width: '60%'}}></div>
+              </div>
             </div>
           </div>
         </AprobadorLayout>
@@ -162,20 +141,18 @@ export default function AprobadorGraficasPage() {
 
   if (error) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute requiredRoles={['aprobador', 'aprobador_director']}>
         <AprobadorLayout>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-            <div className="text-center bg-white/80 backdrop-blur-sm rounded-3xl p-10 shadow-2xl border border-white/50">
-              <div className="text-red-500 text-6xl mb-6 flex justify-center">
-                <div className="bg-red-50 p-4 rounded-full">
-                  <MdErrorOutline size={56} />
-                </div>
+          <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
+            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-red-200/50 p-8 text-center max-w-md mx-4">
+              <div className="w-20 h-20 bg-gradient-to-r from-red-400 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <MdInsertChartOutlined className="text-white text-3xl" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-3">Error al cargar datos</h2>
-              <p className="text-gray-600 mb-6">{error}</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Error de Conexión</h3>
+              <p className="text-gray-600 mb-6 bg-red-50 rounded-xl p-4 border border-red-200 text-sm leading-relaxed">{error}</p>
               <button 
                 onClick={() => window.location.reload()} 
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-3 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 font-semibold text-sm shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Reintentar
               </button>
@@ -186,15 +163,40 @@ export default function AprobadorGraficasPage() {
     );
   }
 
-  // Consolidar estados de múltiples orígenes
-  const estadosConsolidados = resumenEstado.reduce((acc: EstadoResumen[], curr) => {
-    const existente = acc.find(item => item.estado === curr.estado);
-    if (existente) {
-      existente.total += curr.total;
-      existente.monto_total += curr.monto_total;
-    } else {
-      acc.push({ ...curr });
+  // Funciones auxiliares
+  const formatCurrency = (amount: number) => {
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      return '$0.00';
     }
+    return new Intl.NumberFormat('es-MX', { 
+      style: 'currency', 
+      currency: 'MXN' 
+    }).format(amount);
+  };
+
+  const formatPercentage = (value: number) => {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
+  };
+
+  const formatDepartmentName = (departamento: string) => {
+    if (departamento.toLowerCase() === 'ti') {
+      return 'TI';
+    }
+    return departamento.charAt(0).toUpperCase() + departamento.slice(1).toLowerCase();
+  };
+
+  // Consolidar estados duplicados
+  const estadosConsolidados = resumenEstado.reduce((acc, estado) => {
+    const estadoKey = estado.estado.toLowerCase();
+    const existing = acc.find(item => item.estado.toLowerCase() === estadoKey);
+    
+    if (existing) {
+      existing.total += estado.total;
+      existing.monto_total += estado.monto_total;
+    } else {
+      acc.push({ ...estado });
+    }
+    
     return acc;
   }, [] as EstadoResumen[]);
 
@@ -229,6 +231,10 @@ export default function AprobadorGraficasPage() {
         'rgba(139, 92, 246, 0.95)'
       ],
       hoverBorderWidth: 4,
+      shadowOffsetX: 3,
+      shadowOffsetY: 3,
+      shadowBlur: 10,
+      shadowColor: 'rgba(0, 0, 0, 0.2)'
     }]
   };
 
@@ -246,6 +252,7 @@ export default function AprobadorGraficasPage() {
             family: 'Inter, system-ui, sans-serif'
           },
           color: '#374151',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           generateLabels: (chart: any) => {
             const datasets = chart.data.datasets;
             if (datasets.length) {
@@ -392,204 +399,530 @@ export default function AprobadorGraficasPage() {
     );
   };
 
+  // Renderizar controles mejorados
+  const renderControles = () => (
+    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 mb-10 overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-6 border-b border-gray-200/50">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <MdFilterList className="text-white text-xl" />
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-900 text-xl">Panel de Control</h3>
+            <p className="text-sm text-gray-600">Configura la vista y filtros del dashboard</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6">
+        <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-end">
+          {/* Selector de vista */}
+          <div className="flex flex-col space-y-2">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Vista</label>
+            <div className="relative">
+              <select
+                value={vistaActual}
+                onChange={(e) => setVistaActual(e.target.value as 'general' | 'departamentos' | 'comparativa' | 'tipos-pago')}
+                className="appearance-none px-4 py-3 pr-10 border-2 border-gray-300 rounded-xl text-sm font-semibold text-gray-900 bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-400 transition-all duration-200 min-w-[200px] shadow-sm"
+              >
+                <option value="general">Vista General</option>
+                <option value="departamentos">Por Departamentos</option>
+                <option value="tipos-pago">Por Tipos de Pago</option>
+                <option value="comparativa">Comparativas</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Selector de departamento */}
+          <div className="flex flex-col space-y-2">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Departamento</label>
+            <div className="relative">
+              <select
+                value={departamentoSeleccionado}
+                onChange={(e) => setDepartamentoSeleccionado(e.target.value)}
+                className="appearance-none px-4 py-3 pr-10 border-2 border-gray-300 rounded-xl text-sm font-semibold text-gray-900 bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 hover:border-gray-400 transition-all duration-200 min-w-[200px] shadow-sm"
+              >
+                <option value="">Todos los departamentos</option>
+                {departamentos.map((dept) => (
+                  <option key={dept.departamento} value={dept.departamento}>
+                    {formatDepartmentName(dept.departamento)}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Selector de período */}
+          <div className="flex flex-col space-y-2">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Período</label>
+            <div className="flex bg-gray-100 rounded-xl p-1 border-2 border-gray-200 shadow-inner">
+              {[
+                { key: 'semana', label: 'Semana' },
+                { key: 'mes', label: 'Mes' },
+                { key: 'año', label: 'Año' }
+              ].map((periodo) => (
+                <button
+                  key={periodo.key}
+                  onClick={() => setPeriodoTemporal(periodo.key as 'semana' | 'mes' | 'año')}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
+                    periodoTemporal === periodo.key
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105'
+                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200'
+                  }`}
+                >
+                  {periodo.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Botón de actualizar */}
+          <div className="flex flex-col space-y-2">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Acción</label>
+            <button
+              onClick={() => window.location.reload()}
+              className="group px-6 py-3 bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white rounded-xl text-sm font-bold hover:from-blue-700 hover:via-blue-800 hover:to-purple-800 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <MdRefresh className="text-lg group-hover:rotate-180 transition-transform duration-500" />
+              <span>Actualizar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <ProtectedRoute>
+      <ProtectedRoute requiredRoles={['aprobador', 'aprobador_director']}>
         <AprobadorLayout>
-          <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20 py-10 px-6">
-            <div className="max-w-7xl mx-auto">
-              
-              {/* Header Section */}
-              <div className="mb-12">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                  <div className="text-center lg:text-left max-w-3xl">
-                    <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 leading-tight">
-                      Dashboard Ejecutivo de Aprobaciones
-                    </h1>
-                    <p className="text-xl text-gray-600 font-medium leading-relaxed">
-                      Análisis completo y métricas avanzadas para la gestión de solicitudes y aprobaciones corporativas
-                    </p>
-                  </div>
-                  
-                  <div className="flex flex-col sm:flex-row justify-center lg:justify-end gap-4 no-print">
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      <MdRefresh className="text-xl" />
-                      <span>Actualizar</span>
-                    </button>
-                  </div>
-                </div>
+          <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
+            <div className="max-w-7xl mx-auto space-y-10">
+              {/* Header mejorado */}
+              <div className="text-center mb-12">
+                <h1 className="text-6xl font-black bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-4 tracking-tight">
+                  Graficas 
+                </h1>
+                <p className="text-gray-600 text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+                  Análisis detallado y visualización inteligente de pagos, transacciones y tendencias financieras
+                </p>
               </div>
 
               {/* Barra superior con métricas */}
               {renderBarraSuperior()}
 
-              {/* Navegación de vistas */}
-              <div className="mb-12">
-                <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl border border-white/50 p-3">
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { key: 'general', label: 'Vista General', icon: MdInsertChartOutlined },
-                      { key: 'departamentos', label: 'Por Departamentos', icon: MdBusiness },
-                      { key: 'tipos-pago', label: 'Tipos de Pago', icon: MdPayments },
-                      { key: 'comparativa', label: 'Análisis Comparativo', icon: MdCompare }
-                    ].map((vista) => (
-                      <button
-                        key={vista.key}
-                        onClick={() => setVistaActual(vista.key as any)}
-                        className={`flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform ${
-                          vistaActual === vista.key
-                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105'
-                            : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-102'
-                        }`}
-                      >
-                        <vista.icon className="text-lg" />
-                        <span className="hidden sm:inline">{vista.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {/* Controles */}
+              {renderControles()}
 
-              {/* Vista General */}
-              {vistaActual === 'general' && estadosConsolidados.length > 0 && (
-                <div className="space-y-12">
-                  {/* Gráficas principales */}
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
-                    {/* Gráfica de pie */}
-                    <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 border-b border-gray-200/50">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                            <MdPieChart className="text-white text-2xl" />
+              {/* Contenido según la vista seleccionada */}
+              {vistaActual === 'general' && (
+                <>
+                  {/* Grid de gráficas principales */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                    {/* Gráfica de estado */}
+                    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                      <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-6 border-b border-gray-200/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                              <MdPieChart className="text-white text-lg" />
+                            </div>
+                            <div>
+                              <h2 className="text-xl font-bold text-gray-900">Distribución por Estado</h2>
+                              <p className="text-sm text-gray-600">Estado actual de las solicitudes</p>
+                            </div>
                           </div>
-                          <div>
-                            <h2 className="text-3xl font-bold text-gray-900">Distribución de Estados</h2>
-                            <p className="text-gray-600 text-lg">Análisis visual de solicitudes por estado</p>
+                          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full shadow-lg">
+                            <span className="text-sm font-bold">{totalSolicitudes} solicitudes</span>
                           </div>
                         </div>
                       </div>
                       
                       <div className="p-8">
-                        <div className="relative h-96">
-                          <Pie data={pieData} options={pieOptions} />
+                        <div className="h-96">
+                          {resumenEstado.length > 0 ? (
+                            <Pie data={pieData} options={pieOptions} />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                              <MdPieChart size={64} className="mb-4 opacity-50" />
+                              <p className="text-lg font-semibold">Sin datos disponibles</p>
+                              <p className="text-sm">Los datos aparecerán aquí cuando estén disponibles</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Estadísticas detalladas */}
-                    <div className="space-y-6">
-                      {estadosConsolidados.map((estado, index) => {
-                        const porcentaje = ((estado.total / totalSolicitudes) * 100).toFixed(1);
-                        const colors = [
-                          { bg: 'from-blue-500 to-indigo-600', text: 'text-blue-600', light: 'bg-blue-50' },
-                          { bg: 'from-emerald-500 to-green-600', text: 'text-emerald-600', light: 'bg-emerald-50' },
-                          { bg: 'from-orange-500 to-amber-600', text: 'text-orange-600', light: 'bg-orange-50' },
-                          { bg: 'from-red-500 to-rose-600', text: 'text-red-600', light: 'bg-red-50' },
-                          { bg: 'from-purple-500 to-indigo-600', text: 'text-purple-600', light: 'bg-purple-50' }
-                        ];
-                        const color = colors[index % colors.length];
-
-                        return (
-                          <div key={estado.estado} className={`${color.light} rounded-2xl p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300`}>
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center space-x-4">
-                                <div className={`w-12 h-12 bg-gradient-to-r ${color.bg} rounded-xl flex items-center justify-center shadow-lg`}>
-                                  <span className="text-white font-bold text-lg">{estado.estado.charAt(0).toUpperCase()}</span>
-                                </div>
-                                <div>
-                                  <h3 className="text-xl font-bold text-gray-900 capitalize">{estado.estado}</h3>
-                                  <p className="text-gray-600">{porcentaje}% del total</p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className={`text-3xl font-bold ${color.text}`}>{estado.total}</div>
-                                <div className="text-sm text-gray-600">solicitudes</div>
-                              </div>
+                    {/* Tendencia temporal */}
+                    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                      <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-6 border-b border-gray-200/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                              <MdTrendingUp className="text-white text-lg" />
                             </div>
-                            
-                            <div className="grid grid-cols-2 gap-4 mt-6">
-                              <div className="bg-white rounded-xl p-4 shadow-sm">
-                                <div className="text-2xl font-bold text-gray-900">{formatCurrency(estado.monto_total)}</div>
-                                <div className="text-sm text-gray-600">Monto Total</div>
-                              </div>
-                              <div className="bg-white rounded-xl p-4 shadow-sm">
-                                <div className="text-2xl font-bold text-gray-900">{formatCurrency(estado.monto_total / estado.total)}</div>
-                                <div className="text-sm text-gray-600">Promedio</div>
-                              </div>
+                            <div>
+                              <h2 className="text-xl font-bold text-gray-900">
+                                Tendencia por {periodoTemporal}
+                              </h2>
+                              <p className="text-sm text-gray-600">
+                                Evolución de gastos ({periodoTemporal})
+                              </p>
                             </div>
                           </div>
-                        );
-                      })}
+                          <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-2 rounded-full shadow-lg">
+                            <span className="text-sm font-bold">
+                              {formatCurrency(tendenciaTemporal.reduce((sum, item) => sum + (Number(item.monto_total) || 0), 0))}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-8">
+                        <div className="h-96">
+                          {tendenciaTemporal.length > 0 ? (
+                            <Bar 
+                              data={{
+                                labels: tendenciaTemporal.map(item => item.periodo),
+                                datasets: [{
+                                  label: 'Monto Total',
+                                  data: tendenciaTemporal.map(item => Number(item.monto_total) || 0),
+                                  backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                                  borderColor: 'rgb(16, 185, 129)',
+                                  borderWidth: 2,
+                                  borderRadius: 12,
+                                  borderSkipped: false,
+                                  hoverBackgroundColor: 'rgba(16, 185, 129, 0.9)',
+                                  hoverBorderColor: 'rgb(5, 150, 105)',
+                                  hoverBorderWidth: 3
+                                }]
+                              }} 
+                              options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: { display: false },
+                                  tooltip: {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                                    titleColor: '#1e293b',
+                                    bodyColor: '#374151',
+                                    borderColor: '#d1d5db',
+                                    borderWidth: 2,
+                                    cornerRadius: 12,
+                                    padding: 16,
+                                    callbacks: {
+                                      label: (context: TooltipItem<'bar'>) => formatCurrency(context.parsed.y)
+                                    }
+                                  }
+                                },
+                                scales: {
+                                  x: {
+                                    grid: {
+                                      display: false
+                                    },
+                                    ticks: {
+                                      color: '#6b7280',
+                                      font: {
+                                        weight: 'bold'
+                                      }
+                                    }
+                                  },
+                                  y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                      color: 'rgba(107, 114, 128, 0.1)'
+                                    },
+                                    ticks: {
+                                      color: '#6b7280',
+                                      font: {
+                                        weight: 'bold'
+                                      },
+                                      callback: (value: string | number) => formatCurrency(Number(value))
+                                    }
+                                  }
+                                }
+                              }}
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                              <MdShowChart size={64} className="mb-4 opacity-50" />
+                              <p className="text-lg font-semibold">Sin datos de tendencia</p>
+                              <p className="text-sm">Los datos aparecerán cuando haya información temporal</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </>
               )}
 
-              {/* Mensajes para otras vistas */}
               {vistaActual === 'departamentos' && (
                 <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 border-b border-gray-200/50">
+                  <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 border-b border-gray-200/50">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
                         <MdBusiness className="text-white text-xl" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Análisis por Departamentos</h2>
-                        <p className="text-sm text-gray-600">Vista detallada de gastos y transacciones por departamento</p>
+                        <h2 className="text-2xl font-bold text-gray-900">Gastos por Departamento</h2>
+                        <p className="text-sm text-gray-600">Distribución de gastos por área organizacional</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="p-12">
-                    <div className="text-center py-16">
-                      <div className="w-24 h-24 bg-gradient-to-r from-green-100 to-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                        <MdBusiness size={48} className="text-green-500" />
+                  <div className="p-8">
+                    {gastoNeto.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {gastoNeto.map((dept, index) => (
+                          <div key={index} className="group relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 rounded-2xl p-6 shadow-lg border border-blue-200/50 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="relative z-10">
+                              <div className="flex items-center justify-between mb-6">
+                                <h3 className="font-bold text-gray-900 text-lg truncate">{formatDepartmentName(dept.departamento)}</h3>
+                                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                                  <MdBusiness className="text-white" />
+                                </div>
+                              </div>
+                              <div className="space-y-4">
+                                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4">
+                                  <div className="text-3xl font-black text-gray-900 mb-1">
+                                    {formatCurrency(dept.gasto_total)}
+                                  </div>
+                                  <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Gasto Total</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-3">
+                                    <div className="font-bold text-gray-900 text-lg">{dept.total_transacciones}</div>
+                                    <div className="text-xs text-gray-600">Transacciones</div>
+                                  </div>
+                                  <div className="bg-white/40 backdrop-blur-sm rounded-lg p-3">
+                                    <div className="font-bold text-gray-900 text-sm">{formatCurrency(dept.promedio_por_transaccion)}</div>
+                                    <div className="text-xs text-gray-600">Promedio</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-4">Vista por Departamentos</h3>
-                      <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto leading-relaxed">
-                        El análisis detallado por departamentos estará disponible próximamente con métricas avanzadas
-                      </p>
-                      <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-lg">
-                        <MdDateRange className="mr-2" />
-                        <span className="font-semibold">En desarrollo</span>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+                        <MdBusiness size={64} className="mb-4 opacity-50" />
+                        <p className="text-lg font-semibold">Sin datos de departamentos</p>
+                        <p className="text-sm">Selecciona un filtro diferente o verifica la conexión</p>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}
 
               {vistaActual === 'tipos-pago' && (
-                <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 border-b border-gray-200/50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <MdPayments className="text-white text-xl" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Análisis por Tipos de Pago</h2>
-                        <p className="text-sm text-gray-600">Distribución y análisis de métodos de pago utilizados</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-12">
-                    <div className="text-center py-16">
-                      <div className="w-24 h-24 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                        <MdPayments size={48} className="text-purple-500" />
-                      </div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-4">Análisis de Tipos de Pago</h3>
-                      <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto leading-relaxed">
-                        Las métricas detalladas por tipo de pago estarán disponibles próximamente
-                      </p>
-                      <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full shadow-lg">
-                        <MdDateRange className="mr-2" />
-                        <span className="font-semibold">En desarrollo</span>
+                <div className="space-y-8">
+                  {/* Header */}
+                  <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <MdPayments className="text-white text-xl" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900">Gastos por Tipo de Pago</h2>
+                          <p className="text-sm text-gray-600">Análisis detallado por método de pago</p>
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* Grid de contenido optimizado */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Gráfica principal - más compacta */}
+                    <div className="lg:col-span-2 bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6">
+                      <div className="h-80 lg:h-96">
+                        {gastosPorTipo.length > 0 ? (
+                          <Doughnut 
+                            data={{
+                              labels: gastosPorTipo.map(tipo => tipo.tipo_pago),
+                              datasets: [{
+                                data: gastosPorTipo.map(tipo => tipo.monto_total),
+                                backgroundColor: [
+                                  'rgba(59, 130, 246, 0.85)',
+                                  'rgba(16, 185, 129, 0.85)',
+                                  'rgba(245, 158, 11, 0.85)',
+                                  'rgba(239, 68, 68, 0.85)',
+                                  'rgba(139, 92, 246, 0.85)',
+                                  'rgba(236, 72, 153, 0.85)'
+                                ],
+                                borderWidth: 3,
+                                borderColor: '#fff',
+                                hoverBackgroundColor: [
+                                  'rgba(59, 130, 246, 0.95)',
+                                  'rgba(16, 185, 129, 0.95)',
+                                  'rgba(245, 158, 11, 0.95)',
+                                  'rgba(239, 68, 68, 0.95)',
+                                  'rgba(139, 92, 246, 0.95)',
+                                  'rgba(236, 72, 153, 0.95)'
+                                ],
+                                hoverBorderWidth: 4
+                              }]
+                            }}
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              cutout: '65%',
+                              plugins: {
+                                legend: {
+                                  position: 'right' as const,
+                                  labels: {
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    font: {
+                                      weight: 'bold',
+                                      size: 12
+                                    },
+                                    boxWidth: 12,
+                                    boxHeight: 12
+                                  }
+                                },
+                                tooltip: {
+                                  backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                                  titleColor: '#1e293b',
+                                  bodyColor: '#374151',
+                                  borderColor: '#d1d5db',
+                                  borderWidth: 2,
+                                  cornerRadius: 12,
+                                  padding: 16,
+                                  callbacks: {
+                                    label: (context: TooltipItem<'doughnut'>) => {
+                                      const value = context.parsed;
+                                      const total = (context.dataset.data as number[]).reduce((a: number, b: number) => a + b, 0);
+                                      const percentage = ((value / total) * 100).toFixed(1);
+                                      return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
+                                    }
+                                  }
+                                }
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                            <MdPayments size={64} className="mb-4 opacity-50" />
+                            <p className="text-lg font-semibold">Sin datos de tipos de pago</p>
+                            <p className="text-sm">Los datos aparecerán cuando haya transacciones</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Panel de detalles optimizado */}
+                    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6">
+                      <div className="flex items-center mb-6">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center shadow-lg mr-3">
+                          <MdAnalytics className="text-white text-lg" />
+                        </div>
+                        <h3 className="font-bold text-gray-900 text-xl">Detalles por Tipo</h3>
+                      </div>
+                      
+                      <div className="space-y-4 max-h-96 overflow-y-auto">
+                        {gastosPorTipo.map((tipo, index) => (
+                          <div key={index} className="group bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 shadow-md border border-gray-100 hover:shadow-lg hover:border-purple-200 transition-all duration-300">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="font-bold text-gray-900 text-lg">{tipo.tipo_pago}</div>
+                              <div className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 group-hover:scale-110 transition-transform duration-200"></div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3">
+                              <div className="bg-green-50 rounded-lg p-3 border-l-4 border-green-400">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-green-700 font-medium text-sm">Monto Total</span>
+                                  <span className="font-bold text-green-800 text-lg">{formatCurrency(tipo.monto_total)}</span>
+                                </div>
+                              </div>
+                              <div className="bg-blue-50 rounded-lg p-3 border-l-4 border-blue-400">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-blue-700 font-medium text-sm">Transacciones</span>
+                                  <span className="font-bold text-blue-800 text-lg">{tipo.total_transacciones}</span>
+                                </div>
+                              </div>
+                              <div className="bg-purple-50 rounded-lg p-3 border-l-4 border-purple-400">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-black font-medium text-sm">Promedio</span>
+                                  <span className="font-bold text-black text-lg">{formatCurrency(tipo.promedio_monto)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Resumen estadístico adicional */}
+                  {gastosPorTipo.length > 0 && (
+                    <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6">
+                      <h3 className="font-bold text-gray-900 text-xl mb-6 flex items-center">
+                        <MdInsertChartOutlined className="mr-2 text-purple-600" />
+                        Resumen Estadístico
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <MdPayments className="text-blue-600 text-2xl" />
+                            <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full font-semibold">Total</span>
+                          </div>
+                          <div className="text-2xl font-bold text-blue-900">
+                            {formatCurrency(gastosPorTipo.reduce((sum, tipo) => sum + (Number(tipo.monto_total) || 0), 0))}
+                          </div>
+                          <div className="text-sm text-blue-700">Monto Global</div>
+                        </div>
+                        
+                        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <MdTrendingUp className="text-green-600 text-2xl" />
+                            <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full font-semibold">Tipos</span>
+                          </div>
+                          <div className="text-2xl font-bold text-green-900">{gastosPorTipo.length}</div>
+                          <div className="text-sm text-green-700">Métodos de Pago</div>
+                        </div>
+                        
+                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <MdAnalytics className="text-purple-600 text-2xl" />
+                            <span className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full font-semibold">Total</span>
+                          </div>
+                          <div className="text-2xl font-bold text-purple-900">
+                            {gastosPorTipo.reduce((sum, tipo) => sum + (Number(tipo.total_transacciones) || 0), 0)}
+                          </div>
+                          <div className="text-sm text-purple-700">Transacciones</div>
+                        </div>
+                        
+                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <MdAttachMoney className="text-orange-600 text-2xl" />
+                            <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded-full font-semibold">Promedio</span>
+                          </div>
+                          <div className="text-2xl font-bold text-orange-900">
+                            {(() => {
+                              const totalMonto = gastosPorTipo.reduce((sum, tipo) => sum + (Number(tipo.monto_total) || 0), 0);
+                              const totalTransacciones = gastosPorTipo.reduce((sum, tipo) => sum + (Number(tipo.total_transacciones) || 0), 0);
+                              const promedio = totalTransacciones > 0 ? totalMonto / totalTransacciones : 0;
+                              return formatCurrency(promedio);
+                            })()}
+                          </div>
+                          <div className="text-sm text-orange-700">Por Transacción</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
