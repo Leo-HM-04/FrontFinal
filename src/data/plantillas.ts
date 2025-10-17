@@ -297,7 +297,7 @@ export const plantillaTarjetasTukash: PlantillaSolicitud = {
   nombre: 'SOLICITUD DE PAGO TARJETAS TUKASH',
   descripcion: 'Plantilla especializada para pagos y fondeo de tarjetas TUKASH',
   version: '2.0.0',
-  activa: true,
+  activa: false, // ⚠️ DESACTIVADA PARA DESARROLLO - Bug comprobante fantasma
   icono: CreditCard,
   color: 'green',
   categoria: 'Pagos Corporativos',

@@ -1,8 +1,24 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Bar, Doughnut } from "react-chartjs-2";
-import { MdAssignment, MdAttachMoney, MdBarChart, MdPieChart, MdStackedBarChart, MdErrorOutline, MdInsertChartOutlined, MdAnalytics, MdFileDownload } from "react-icons/md";
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
+import { useEffect, useState } from 'react';
+import { Bar, Pie, Doughnut } from 'react-chartjs-2';
+import { 
+  MdInsertChartOutlined, 
+  MdTrendingUp, 
+  MdFilterList,
+  MdCompare,
+  MdBusiness,
+  MdPayments,
+  MdAnalytics,
+  MdRefresh,
+  MdPieChart,
+  MdShowChart,
+  MdAttachMoney,
+  MdDateRange,
+  MdErrorOutline
+} from 'react-icons/md';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -12,114 +28,117 @@ import {
   LinearScale,
   BarElement,
   Title,
-  TooltipItem,
-  Chart
-} from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels/types";
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
-import '@/styles/charts.css';
+  PointElement,
+  LineElement,
+  Filler,
+  TimeScale
+} from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import type { TooltipItem } from 'chart.js';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, ChartDataLabels);
+ChartJS.register(
+  ArcElement, 
+  Tooltip, 
+  Legend, 
+  CategoryScale, 
+  LinearScale, 
+  BarElement, 
+  Title, 
+  ChartDataLabels,
+  PointElement,
+  LineElement,
+  Filler,
+  TimeScale
+);
 
-interface EstadoData {
-  estado: string;
-  total: number;
-  monto_total: string;
-  origen?: 'solicitudes_pago' | 'solicitudes_viaticos' | 'pagos_recurrentes';
-}
+type EstadoResumen = { estado: string; total: number; monto_total: number; origen?: string };
+type GastoNeto = { departamento: string; gasto_total: number; total_transacciones: number; promedio_por_transaccion: number };
+type GastoTipoPago = { tipo_pago: string; total_transacciones: number; monto_total: number; promedio_monto: number };
+type TendenciaTemporal = { periodo: string; monto_total: number; total_transacciones: number };
+type ResumenMes = { 
+  gasto_mes_actual: number; 
+  gasto_mes_anterior: number; 
+  diferencia: number; 
+  porcentaje_cambio: number; 
+  transacciones_mes_actual: number; 
+};
+type Departamento = { departamento: string };
 
-interface TendenciaMes {
-  mes: string;
-  total: number;
-  monto_total: number;
-  origen?: string;
-}
-
-export default function GraficasAprobador() {
-  const [data, setData] = useState<EstadoData[]>([]);
+export default function AprobadorGraficasPage() {
+  const [resumenEstado, setResumenEstado] = useState<EstadoResumen[]>([]);
+  const [gastoNeto, setGastoNeto] = useState<GastoNeto[]>([]);
+  const [gastosPorTipo, setGastosPorTipo] = useState<GastoTipoPago[]>([]);
+  const [tendenciaTemporal, setTendenciaTemporal] = useState<TendenciaTemporal[]>([]);
+  const [resumenMesActual, setResumenMesActual] = useState<ResumenMes | null>(null);
+  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tendencia, setTendencia] = useState<TendenciaMes[]>([]);
-  const [showExportModal, setShowExportModal] = useState(false);
+
+  // Estados para filtros
+  const [departamentoSeleccionado, setDepartamentoSeleccionado] = useState<string>('');
+  const [periodoTemporal, setPeriodoTemporal] = useState<'semana' | 'mes' | 'año'>('mes');
+  const [vistaActual, setVistaActual] = useState<'general' | 'departamentos' | 'comparativa' | 'tipos-pago'>('general');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('auth_token');
-        // Resumen por estado
-        const res = await fetch("/api/estadisticas-aprobador/resumen-estado", {
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
-          },
-        });
-        if (!res.ok) throw new Error("Error al obtener datos");
-        const json = await res.json();
-        setData(json);
-        // Tendencia mensual (opcional - si no existe el endpoint, continúa sin error)
-        try {
-          const resTend = await fetch("/api/estadisticas-aprobador/tendencia-mensual", {
-            headers: {
-              ...(token ? { Authorization: `Bearer ${token}` } : {})
-            },
-          });
-          if (resTend.ok) {
-            const tendenciaJson = await resTend.json();
-            setTendencia(tendenciaJson);
-          }
-        } catch {
-          // console.warn('Endpoint de tendencia mensual no disponible');
-          // Continúa sin la data de tendencia
+        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+        
+        const [
+          res1, res2, res3, res4, res5, res6
+        ] = await Promise.all([
+          fetch('/api/estadisticas-aprobador-dashboard/resumen-estado', { headers }),
+          fetch(`/api/estadisticas-aprobador-dashboard/gasto-neto${departamentoSeleccionado ? `?departamento=${departamentoSeleccionado}` : ''}`, { headers }),
+          fetch('/api/estadisticas-aprobador-dashboard/gastos-por-tipo-pago', { headers }),
+          fetch(`/api/estadisticas-aprobador-dashboard/tendencia-temporal?periodo=${periodoTemporal}`, { headers }),
+          fetch('/api/estadisticas-aprobador-dashboard/resumen-mes-actual', { headers }),
+          fetch('/api/estadisticas-aprobador-dashboard/departamentos', { headers })
+        ]);
+        
+        if (!res1.ok || !res2.ok || !res3.ok || !res4.ok || !res5.ok || !res6.ok) {
+          throw new Error('Error al obtener datos');
         }
+        
+        const [data1, data2, data3, data4, data5, data6] = await Promise.all([
+          res1.json(),
+          res2.json(),
+          res3.json(),
+          res4.json(),
+          res5.json(),
+          res6.json()
+        ]);
+        
+        setResumenEstado(data1);
+        setGastoNeto(data2);
+        setGastosPorTipo(data3);
+        setTendenciaTemporal(data4);
+        setResumenMesActual(data5);
+        setDepartamentos(data6);
+        
       } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Error desconocido");
-        }
+        console.error('Error fetching data:', err);
+        setError(err instanceof Error ? err.message : 'Error desconocido');
       } finally {
         setLoading(false);
       }
     };
+    
     fetchData();
-  }, []);
+  }, [departamentoSeleccionado, periodoTemporal]);
 
-  // Función alternativa más simple para casos problemáticos
-  const downloadSimplePDF = async () => {
-    try {
-  // console.log('Usando método alternativo simple...');
-      
-      // Usar window.print() nativo con estilos CSS para PDF
-      const originalTitle = document.title;
-      const currentDate = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
-      document.title = `Dashboard-Estadisticas-${currentDate}`;
-      
-      // Agregar estilos específicos para impresión
-      const printStyles = document.createElement('style');
-      printStyles.textContent = `
-        @media print {
-          body * { visibility: hidden; }
-          #dashboard-content, #dashboard-content * { visibility: visible; }
-          #dashboard-content { position: absolute; left: 0; top: 0; width: 100%; }
-          .no-print { display: none !important; }
-        }
-      `;
-      document.head.appendChild(printStyles);
-      
-      // Trigger print
-      window.print();
-      
-      // Limpiar después
-      setTimeout(() => {
-        document.title = originalTitle;
-        document.head.removeChild(printStyles);
-      }, 1000);
-      
-    } catch {
-      // console.error('Error en método alternativo');
-      alert('Error al abrir el diálogo de impresión');
-    }
+  const formatCurrency = (amount: number): string => {
+    if (!amount && amount !== 0) return '$0';
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatPercentage = (value: number): string => {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
   };
 
   if (loading) {
@@ -146,44 +165,20 @@ export default function GraficasAprobador() {
       <ProtectedRoute>
         <AprobadorLayout>
           <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-              <div className="text-center bg-white/80 backdrop-blur-sm rounded-3xl p-10 shadow-2xl border border-white/50">
-                <div className="text-red-500 text-6xl mb-6 flex justify-center">
-                  <div className="bg-red-50 p-4 rounded-full">
-                    <MdErrorOutline size={56} />
-                  </div>
-                </div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-3">Error al cargar datos</h2>
-                <p className="text-gray-600 mb-6">{error}</p>
-                <button 
-                  onClick={() => window.location.reload()} 
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-                >
-                  Reintentar
-                </button>
-              </div>
-          </div>
-        </AprobadorLayout>
-      </ProtectedRoute>
-    );
-  }
-
-  if (!data.length) {
-    return (
-      <ProtectedRoute>
-        <AprobadorLayout>
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
             <div className="text-center bg-white/80 backdrop-blur-sm rounded-3xl p-10 shadow-2xl border border-white/50">
-              <div className="text-gray-400 text-6xl mb-6 flex justify-center">
-                <div className="bg-gray-50 p-4 rounded-full">
-                  <MdInsertChartOutlined size={56} />
+              <div className="text-red-500 text-6xl mb-6 flex justify-center">
+                <div className="bg-red-50 p-4 rounded-full">
+                  <MdErrorOutline size={56} />
                 </div>
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-3">Sin datos disponibles</h2>
-              <p className="text-gray-600 mb-6">No hay datos para mostrar en este momento.</p>
-              <div className="text-sm text-gray-500">
-                <p>• Verifica que tengas solicitudes asignadas</p>
-                <p>• Contacta al administrador si el problema persiste</p>
-              </div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-3">Error al cargar datos</h2>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+              >
+                Reintentar
+              </button>
             </div>
           </div>
         </AprobadorLayout>
@@ -191,654 +186,448 @@ export default function GraficasAprobador() {
     );
   }
 
-  // Paleta de colores corporativa mejorada
-  const colorPalette = [
-    { bg: "#1e40af", hover: "#1d4ed8", gradient: "linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%)" },
-    { bg: "#059669", hover: "#047857", gradient: "linear-gradient(135deg, #059669 0%, #047857 100%)" },
-    { bg: "#d97706", hover: "#b45309", gradient: "linear-gradient(135deg, #d97706 0%, #b45309 100%)" },
-    { bg: "#dc2626", hover: "#b91c1c", gradient: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)" },
-    { bg: "#7c3aed", hover: "#6d28d9", gradient: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)" },
-    { bg: "#0891b2", hover: "#0e7490", gradient: "linear-gradient(135deg, #0891b2 0%, #0e7490 100%)" }
-  ];
-
-  const totalSolicitudes = data.reduce((sum, item) => sum + item.total, 0);
-  const totalMonto = data.reduce((sum, item) => sum + Number(item.monto_total), 0);
-
-  // Calcular variación mensual de solicitudes y monto
-  let variacionSolicitudes = 0;
-  let variacionMonto = 0;
-  if (tendencia.length > 1) {
-    // Agrupar por mes (puede haber varios orígenes por mes)
-    const meses: { [key: string]: { total: number; monto: number } } = {};
-    tendencia.forEach((item) => {
-      if (!meses[item.mes]) meses[item.mes] = { total: 0, monto: 0 };
-      meses[item.mes].total += Number(item.total);
-      meses[item.mes].monto += Number(item.monto_total);
-    });
-    const mesesKeys = Object.keys(meses).sort();
-    if (mesesKeys.length >= 2) {
-      const mesActual = meses[mesesKeys[mesesKeys.length - 1]];
-      const mesAnterior = meses[mesesKeys[mesesKeys.length - 2]];
-      variacionSolicitudes = mesAnterior.total === 0 ? 100 : ((mesActual.total - mesAnterior.total) / mesAnterior.total) * 100;
-      variacionMonto = mesAnterior.monto === 0 ? 100 : ((mesActual.monto - mesAnterior.monto) / mesAnterior.monto) * 100;
+  // Consolidar estados de múltiples orígenes
+  const estadosConsolidados = resumenEstado.reduce((acc: EstadoResumen[], curr) => {
+    const existente = acc.find(item => item.estado === curr.estado);
+    if (existente) {
+      existente.total += curr.total;
+      existente.monto_total += curr.monto_total;
+    } else {
+      acc.push({ ...curr });
     }
-  }
+    return acc;
+  }, [] as EstadoResumen[]);
 
-  // Configuración mejorada de gráfica de dona
-  const doughnutData = {
-    labels: data.map(d => d.estado.charAt(0).toUpperCase() + d.estado.slice(1)),
-    datasets: [
-      {
-        label: "Solicitudes",
-        data: data.map(d => d.total),
-        backgroundColor: data.map((_, i) => colorPalette[i % colorPalette.length].bg),
-        borderWidth: 4,
-        borderColor: '#ffffff',
-        hoverOffset: 15,
-        cutout: "65%",
-        hoverBorderWidth: 6,
-        hoverBackgroundColor: data.map((_, i) => colorPalette[i % colorPalette.length].hover),
-      }
-    ]
+  // Calcular total de solicitudes usando estados consolidados
+  const totalSolicitudes = estadosConsolidados.reduce((acc: number, curr) => acc + curr.total, 0);
+
+  // Datos para gráfica de pie mejorada
+  const pieData = {
+    labels: estadosConsolidados.map(estado => estado.estado.charAt(0).toUpperCase() + estado.estado.slice(1)),
+    datasets: [{
+      data: estadosConsolidados.map(estado => estado.total),
+      backgroundColor: [
+        'rgba(99, 102, 241, 0.85)',
+        'rgba(16, 185, 129, 0.85)',
+        'rgba(245, 158, 11, 0.85)',
+        'rgba(59, 130, 246, 0.85)',
+        'rgba(139, 92, 246, 0.85)'
+      ],
+      borderColor: [
+        '#6366f1',
+        '#10b981',
+        '#f59e0b',
+        '#3b82f6',
+        '#8b5cf6'
+      ],
+      borderWidth: 3,
+      hoverBackgroundColor: [
+        'rgba(99, 102, 241, 0.95)',
+        'rgba(16, 185, 129, 0.95)',
+        'rgba(245, 158, 11, 0.95)',
+        'rgba(59, 130, 246, 0.95)',
+        'rgba(139, 92, 246, 0.95)'
+      ],
+      hoverBorderWidth: 4,
+    }]
   };
 
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
+  const pieOptions = {
     plugins: {
-      datalabels: {
-        color: '#fff',
-        font: (ctx: DataLabelsContext) => {
-          // Si el porcentaje es pequeño, reducir fuente
-          const value = ctx.dataset.data[ctx.dataIndex] as number;
-          const percentage = (value / totalSolicitudes) * 100;
-          return {
-            weight: "bold" as const,
-            size: percentage < 5 ? 11 : 14
-          };
-        },
-        formatter: (value: number) => {
-          const percentage = ((value / totalSolicitudes) * 100);
-          return `${value.toLocaleString()}\n${percentage.toFixed(1)}%`;
-        },
-        anchor: 'center' as const,
-        align: 'center' as const,
-        borderRadius: 8,
-        backgroundColor: 'rgba(30,41,59,0.85)',
-        padding: { top: 4, bottom: 4, left: 8, right: 8 },
-        display: true,
-        textAlign: 'center' as const,
-        borderWidth: 0,
-        shadowBlur: 4,
-        clamp: true,
-      },
       legend: {
         position: 'bottom' as const,
         labels: {
-          color: '#374151',
-          font: { size: 15, weight: "bold" as const, family: 'Inter, system-ui, sans-serif' },
-          padding: 25,
           usePointStyle: true,
-          pointStyle: 'circle',
-          boxWidth: 12,
-          boxHeight: 12,
-          generateLabels: (chart: Chart<"doughnut">) => {
-            const data = chart.data;
-            const labels = Array.isArray(data.labels) ? data.labels.map(l => String(l)) : [];
-            const bgColors = Array.isArray(data.datasets[0]?.backgroundColor)
-              ? (data.datasets[0].backgroundColor as string[])
-              : [];
-            return labels.map((label, i) => ({
-              text: `${label} (${data.datasets[0]?.data[i] ?? 0})`,
-              fillStyle: bgColors[i] ?? '#ccc',
-              strokeStyle: 'transparent',
-              pointStyle: "circle" as const,
-            }));
+          pointStyle: 'rectRounded' as const,
+          padding: 20,
+          font: { 
+            size: 14, 
+            weight: 600,
+            family: 'Inter, system-ui, sans-serif'
           },
+          color: '#374151',
+          generateLabels: (chart: any) => {
+            const datasets = chart.data.datasets;
+            if (datasets.length) {
+              return chart.data.labels.map((label: string, index: number) => {
+                const value = datasets[0].data[index];
+                const total = datasets[0].data.reduce((a: number, b: number) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                return {
+                  text: `${label}: ${value} (${percentage}%)`,
+                  fillStyle: datasets[0].backgroundColor[index],
+                  strokeStyle: datasets[0].borderColor[index],
+                  lineWidth: 2,
+                  hidden: false,
+                  index
+                };
+              });
+            }
+            return [];
+          }
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        titleColor: '#1f2937',
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        titleColor: '#1e293b',
+        titleFont: { 
+          weight: 'bold' as const, 
+          size: 16,
+          family: 'Inter, system-ui, sans-serif'
+        },
         bodyColor: '#374151',
-        borderColor: '#e5e7eb',
-        borderWidth: 1,
+        bodyFont: {
+          size: 14,
+          family: 'Inter, system-ui, sans-serif'
+        },
+        borderColor: '#d1d5db',
+        borderWidth: 2,
         cornerRadius: 12,
         padding: 16,
-        displayColors: false,
         callbacks: {
-          label: function(this: import("chart.js").TooltipModel<"doughnut">, tooltipItem: TooltipItem<"doughnut">) {
-            const label = tooltipItem.label || '';
-            const value = tooltipItem.parsed;
-            const percentage = ((value / totalSolicitudes) * 100).toFixed(1);
-            return [
-              `Estado: ${label}`,
-              `Cantidad: ${value} solicitudes`,
-              `Porcentaje: ${percentage}%`
-            ];
+          label: (context: TooltipItem<'pie'>) => {
+            const value = context.parsed;
+            const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${value} solicitudes (${percentage}%)`;
           },
-        },
-        // zIndex para asegurar que la tooltip esté por encima
-        z: 100,
-      }
+          afterLabel: (context: TooltipItem<'pie'>) => {
+            const idx = context.dataIndex;
+            const estado = estadosConsolidados[idx];
+            if (estado && typeof estado.monto_total === 'number') {
+              return `Monto: ${formatCurrency(estado.monto_total)}`;
+            }
+            return '';
+          }
+        }
+      },
     },
-    animation: {
-      animateRotate: true,
-      duration: 800,
-      easing: 'easeOutQuart' as const
-    }
-  };
-
-  // Configuración mejorada de gráfica de barras
-  const barData = {
-    labels: data.map(d => d.estado.charAt(0).toUpperCase() + d.estado.slice(1)),
-    datasets: [
-      {
-        label: "Monto total",
-        data: data.map(d => Number(d.monto_total)),
-        backgroundColor: data.map((_, i) => colorPalette[i % colorPalette.length].bg),
-        borderRadius: {
-          topLeft: 16,
-          topRight: 16,
-          bottomLeft: 0,
-          bottomRight: 0
-        },
-        borderSkipped: false,
-        maxBarThickness: 70,
-        borderWidth: 0,
-        hoverBackgroundColor: data.map((_, i) => colorPalette[i % colorPalette.length].hover),
-        shadowOffsetX: 0,
-        shadowOffsetY: 4,
-        shadowBlur: 8,
-        shadowColor: 'rgba(0, 0, 0, 0.1)'
-      }
-    ]
-  };
-
-  const barOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      datalabels: {
-        color: '#fff',
-        font: { weight: "bold" as const, size: 13 },
-        anchor: 'end' as const,
-        align: 'end' as const,
-        offset: 0,
-        borderRadius: 8,
-        backgroundColor: 'rgba(30,41,59,0.85)',
-        padding: { top: 6, bottom: 6, left: 10, right: 10 },
-        display: true,
-        textAlign: 'center' as const,
-        borderWidth: 0,
-        shadowBlur: 4,
-        clip: false,
-        formatter: (value: number) => {
-          // Mostrar con separador de miles y símbolo de $ grande
-          return `$${value.toLocaleString('es-MX', { minimumFractionDigits: 0 })}`;
-        }
-      },
-      legend: {
-        display: false
-      },
-      tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        titleColor: '#1f2937',
-        bodyColor: '#374151',
-        borderColor: '#e5e7eb',
-        borderWidth: 1,
-        cornerRadius: 12,
-        padding: 16,
-        displayColors: false,
-        callbacks: {
-          label: function(this: import("chart.js").TooltipModel<"bar">, tooltipItem: TooltipItem<"bar">) {
-            const label = tooltipItem.label || '';
-            const value = tooltipItem.parsed.y;
-            return [
-              `Monto: $${value.toLocaleString()}`,
-              `Promedio por solicitud: $${Math.round(value / (data.find(d => d.estado.charAt(0).toUpperCase() + d.estado.slice(1) === label)?.total || 1)).toLocaleString()}`
-            ];
-          },
-        },
-        // zIndex para asegurar que la tooltip esté por encima
-        z: 100,
-      }
-    },
-    scales: {
-      x: {
-        ticks: { 
-          color: '#4b5563', 
-          font: { size: 14, weight: "bold" as const, family: 'Inter, system-ui, sans-serif' },
-          maxRotation: 0,
-          padding: 10
-        },
-        grid: { display: false },
-        border: { display: false }
-      },
-      y: {
-        ticks: { 
-          color: '#4b5563', 
-          font: { size: 13, weight: "bold" as const, family: 'Inter, system-ui, sans-serif' },
-          callback: (value: number | string) => `$${Number(value).toLocaleString()}`,
-          padding: 15
-        },
-        grid: { 
-          color: 'rgba(156, 163, 175, 0.1)',
-          drawBorder: false,
-          lineWidth: 1
-        },
-        border: { display: false },
-        beginAtZero: true
-      }
-    },
     animation: {
-      duration: 800,
-      easing: 'easeOutQuart' as const
+      animateScale: true,
+      animateRotate: true,
+      duration: 2000,
+      easing: 'easeInOutCubic' as const
     }
   };
 
-  const getStatusIcon = (estado: string) => {
-    switch (estado.toLowerCase()) {
-      case 'autorizada': 
-      case 'autorizado': 
-        return (
-          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+  // Renderizar barra superior con métricas mejorada
+  const renderBarraSuperior = () => {
+    if (!resumenMesActual) return null;
+    
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        {/* Mes Actual */}
+        <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl p-8 text-white shadow-2xl border border-blue-400/30 hover:shadow-3xl transition-all duration-300 transform hover:scale-[1.02]">
+          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                <MdAttachMoney className="text-3xl" />
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full">
+                <span className="text-xs font-semibold">Mes Actual</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-4xl font-black tracking-tight">
+                {formatCurrency(resumenMesActual.gasto_mes_actual)}
+              </div>
+              <div className="text-blue-100 font-medium">
+                {resumenMesActual.transacciones_mes_actual} transacciones
+              </div>
+            </div>
           </div>
-        );
-      case 'pagada': 
-      case 'pagado': 
-        return (
-          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
+        </div>
+
+        {/* Comparación */}
+        <div className={`group relative overflow-hidden rounded-2xl p-8 text-white shadow-2xl border border-opacity-30 hover:shadow-3xl transition-all duration-300 transform hover:scale-[1.02] ${
+          resumenMesActual.diferencia >= 0 
+            ? 'bg-gradient-to-br from-red-500 via-red-600 to-red-700 border-red-400' 
+            : 'bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 border-emerald-400'
+        }`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                <MdTrendingUp className="text-3xl" />
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full">
+                <span className="text-xs font-semibold">vs Mes Anterior</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-4xl font-black tracking-tight">
+                {formatCurrency(Math.abs(resumenMesActual.diferencia))}
+              </div>
+              <div className={`font-medium ${resumenMesActual.diferencia >= 0 ? 'text-red-100' : 'text-emerald-100'}`}>
+                {formatPercentage(resumenMesActual.porcentaje_cambio)} cambio
+              </div>
+            </div>
           </div>
-        );
-      case 'rechazada': 
-      case 'rechazado': 
-        return (
-          <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+        </div>
+
+        {/* Balance */}
+        <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-2xl p-8 text-white shadow-2xl border border-purple-400/30 hover:shadow-3xl transition-all duration-300 transform hover:scale-[1.02]">
+          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                <MdAnalytics className="text-3xl" />
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full">
+                <span className="text-xs font-semibold">Histórico</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-4xl font-black tracking-tight">
+                {formatCurrency(resumenMesActual.gasto_mes_anterior)}
+              </div>
+              <div className="text-purple-100 font-medium">Mes anterior</div>
+            </div>
           </div>
-        );
-      case 'pendiente': 
-        return (
-          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
-      case 'en_proceso': 
-        return (
-          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </div>
-        );
-      default: 
-        return (
-          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-        );
-    }
+        </div>
+      </div>
+    );
   };
 
-  // CSS global para tooltips de Chart.js y datalabels mejorado
-  // Movido a charts.css para mejor organización
   return (
-    <ProtectedRoute>
-      <AprobadorLayout>
-        <div id="dashboard-content" className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20 py-10 px-6">
+    <>
+      <ProtectedRoute>
+        <AprobadorLayout>
+          <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/20 py-10 px-6">
             <div className="max-w-7xl mx-auto">
               
               {/* Header Section */}
               <div className="mb-12">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                   <div className="text-center lg:text-left max-w-3xl">
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-4">
-                      Panel de Estadísticas Ejecutivas
+                    <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 leading-tight">
+                      Dashboard Ejecutivo de Aprobaciones
                     </h1>
-                  </div>
-                  <div className="flex justify-center lg:justify-end gap-3 no-print">
-                    <button
-                      onClick={downloadSimplePDF}
-                      className="flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                      title="Método alternativo usando Ctrl+P del navegador"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                      </svg>
-                      Imprimir
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Cards de estadísticas - Diseño corporativo mejorado */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                <div className="group relative bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <MdAssignment size={28} className="text-white" />
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${variacionSolicitudes >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {variacionSolicitudes >= 0 ? '+' : ''}{variacionSolicitudes.toFixed(1)}%
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide mb-2">Total Solicitudes</p>
-                      <p className="text-3xl font-bold text-gray-900 mb-2">{totalSolicitudes.toLocaleString()}</p>
-                      <p className="text-gray-500 text-sm">vs mes anterior</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="group relative bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <MdAttachMoney size={28} className="text-white" />
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-semibold ${variacionMonto >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {variacionMonto >= 0 ? '+' : ''}{variacionMonto.toFixed(1)}%
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide mb-2">Monto Total</p>
-                      <p className="text-3xl font-bold text-gray-900 mb-2">${totalMonto.toLocaleString()}</p>
-                      <p className="text-gray-500 text-sm">vs mes anterior</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="group relative bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <MdBarChart size={28} className="text-white" />
-                      </div>
-                      <div className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                        Activo
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide mb-2">Estados Activos</p>
-                      <p className="text-3xl font-bold text-gray-900 mb-2">{data.length}</p>
-                      <p className="text-gray-500 text-sm">Categorías en proceso</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Gráficas principales - Diseño mejorado */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-12">
-                {/* Gráfica de dona */}
-                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300">
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Distribución por Estado</h2>
-                      <p className="text-gray-600">Análisis de solicitudes por categoría</p>
-                    </div>
-                    <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                      <MdPieChart size={24} className="text-white" />
-                    </div>
-                  </div>
-                  <div className="relative h-96 flex items-center justify-center chart-container doughnut-chart">
-                    <Doughnut data={doughnutData} options={doughnutOptions} />
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-center bg-white/95 rounded-2xl px-6 py-4 shadow-xl backdrop-blur-md border border-white/50">
-                        <div className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text text-transparent">
-                          {totalSolicitudes}
-                        </div>
-                        <div className="text-sm text-gray-600 font-semibold">Total Solicitudes</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Gráfica de barras */}
-                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300">
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2">Valores por Estado</h2>
-                      <p className="text-gray-600">Distribución monetaria por categoría</p>
-                    </div>
-                    <div className="w-14 h-14 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                      <MdStackedBarChart size={24} className="text-white" />
-                    </div>
-                  </div>
-                  <div className="relative h-96 chart-container bar-chart">
-                    <Bar data={barData} options={barOptions} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Panel de insights y detalle */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-                  <div className="flex items-center mb-8">
-                    <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                      <MdAnalytics size={24} className="text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Insights Ejecutivos</h3>
-                      <p className="text-gray-600">Análisis inteligente y automatizado</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                        </div>
-                        <h4 className="text-lg font-bold text-gray-900">Rendimiento Actual</h4>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed">
-                        {data.length > 0 && (
-                          <>
-                            Estado predominante: <span className="font-bold text-blue-700">{data.sort((a, b) => b.total - a.total)[0].estado}</span> con <span className="font-bold">{data.sort((a, b) => b.total - a.total)[0].total} solicitudes</span>
-                            <br />
-                            <span className="text-sm text-gray-600">
-                              Representa el {((data.sort((a, b) => b.total - a.total)[0].total / totalSolicitudes) * 100).toFixed(1)}% del volumen total
-                            </span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                    
-                    <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-6 border border-emerald-100">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                          </svg>
-                        </div>
-                        <h4 className="text-lg font-bold text-gray-900">Análisis Financiero</h4>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed">
-                        Monto promedio por solicitud: <span className="font-bold text-emerald-700 text-xl">${Math.round(totalMonto / totalSolicitudes).toLocaleString()}</span>
-                        <br />
-                        <span className="text-sm text-gray-600">Valor medio de procesamiento por transacción</span>
-                      </p>
-                    </div>
-                    
-                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                          </svg>
-                        </div>
-                        <h4 className="text-lg font-bold text-gray-900">Recomendaciones Estratégicas</h4>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                          <span className="text-gray-700">Priorizar revisión de montos altos</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                          <span className="text-gray-700">Optimizar tiempos de aprobación</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                          <span className="text-gray-700">Implementar alertas tempranas</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Detalle por estado */}
-                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-                  <div className="flex items-center mb-8">
-                    <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                      <MdPieChart size={24} className="text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Detalle por Estado</h3>
-                      <p className="text-gray-600">Análisis detallado de cada categoría</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    {data.map((item, index) => {
-                      const percentage = ((item.total / totalSolicitudes) * 100).toFixed(1);
-                      const color = colorPalette[index % colorPalette.length];
-                      const avgPerRequest = Math.round(Number(item.monto_total) / item.total);
-                      
-                      return (
-                        <div key={item.estado} className="group border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-gray-300 bg-gradient-to-r from-gray-50/50 to-white">
-                          <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-4">
-                              {getStatusIcon(item.estado)}
-                              <div>
-                                <h4 className="text-xl font-bold text-gray-900 capitalize mb-1">{item.estado}</h4>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-gray-600">{percentage}% del total</span>
-                                  <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                                  <span className="text-sm text-gray-600">{item.total} solicitudes</span>
-                                </div>
-                              </div>
-                            </div>
-                            <div 
-                              className="w-6 h-6 rounded-full shadow-lg ring-2 ring-white" 
-                              style={{ backgroundColor: color.bg }}
-                            ></div>
-                          </div>
-                          
-                          <div className="grid grid-cols-3 gap-4 mb-6">
-                            <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-                              <p className="text-2xl font-bold text-gray-900 mb-1">{item.total}</p>
-                              <p className="text-sm text-gray-600 font-medium">Solicitudes</p>
-                            </div>
-                            <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-                              <p className="text-2xl font-bold text-emerald-600 mb-1">${Number(item.monto_total).toLocaleString()}</p>
-                              <p className="text-sm text-gray-600 font-medium">Monto Total</p>
-                            </div>
-                            <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
-                              <p className="text-2xl font-bold text-blue-600 mb-1">${avgPerRequest.toLocaleString()}</p>
-                              <p className="text-sm text-gray-600 font-medium">Promedio</p>
-                            </div>
-                          </div>
-                          
-                          <div className="mt-4">
-                            <div className="flex justify-between text-sm font-medium text-gray-700 mb-3">
-                              <span>Participación en volumen</span>
-                              <span className="text-lg font-bold" style={{ color: color.bg }}>{percentage}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                              <div 
-                                className="h-full rounded-full transition-all duration-500 group-hover:scale-x-105 origin-left" 
-                                style={{ 
-                                  width: `${percentage}%`, 
-                                  background: `linear-gradient(90deg, ${color.bg} 0%, ${color.hover} 100%)`,
-                                  boxShadow: `0 2px 8px ${color.bg}30`
-                                }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Modal de Exportación */}
-          {showExportModal && (
-            <div className="fixed inset-0 export-modal z-50 flex items-center justify-center p-4">
-              <div className="export-modal-content max-w-lg w-full mx-4">
-                <div className="p-6 border-b border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                        <MdFileDownload size={20} className="text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">Imprimir Dashboard</h3>
-                        <p className="text-sm text-gray-600">Usar función de impresión del navegador</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setShowExportModal(false)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="p-6 space-y-4">
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => { downloadSimplePDF(); setShowExportModal(false); }}
-                      className="export-button w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 rounded-xl group"
-                    >
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:shadow-lg transition-shadow">
-                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                      </div>
-                      <div className="text-left">
-                        <p className="font-semibold text-gray-900">Imprimir Dashboard</p>
-                        <p className="text-sm text-gray-600">Abre el diálogo de impresión para guardar como PDF</p>
-                      </div>
-                    </button>
-                  </div>
-                  
-                  <div className="pt-4 border-t border-gray-100">
-                    <p className="text-xs text-gray-500 text-center">
-                      En el diálogo de impresión, selecciona &ldquo;Guardar como PDF&rdquo; como destino
+                    <p className="text-xl text-gray-600 font-medium leading-relaxed">
+                      Análisis completo y métricas avanzadas para la gestión de solicitudes y aprobaciones corporativas
                     </p>
                   </div>
+                  
+                  <div className="flex flex-col sm:flex-row justify-center lg:justify-end gap-4 no-print">
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    >
+                      <MdRefresh className="text-xl" />
+                      <span>Actualizar</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
 
-      </AprobadorLayout>
-    </ProtectedRoute>
+              {/* Barra superior con métricas */}
+              {renderBarraSuperior()}
+
+              {/* Navegación de vistas */}
+              <div className="mb-12">
+                <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl border border-white/50 p-3">
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { key: 'general', label: 'Vista General', icon: MdInsertChartOutlined },
+                      { key: 'departamentos', label: 'Por Departamentos', icon: MdBusiness },
+                      { key: 'tipos-pago', label: 'Tipos de Pago', icon: MdPayments },
+                      { key: 'comparativa', label: 'Análisis Comparativo', icon: MdCompare }
+                    ].map((vista) => (
+                      <button
+                        key={vista.key}
+                        onClick={() => setVistaActual(vista.key as any)}
+                        className={`flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform ${
+                          vistaActual === vista.key
+                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105'
+                            : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-102'
+                        }`}
+                      >
+                        <vista.icon className="text-lg" />
+                        <span className="hidden sm:inline">{vista.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Vista General */}
+              {vistaActual === 'general' && estadosConsolidados.length > 0 && (
+                <div className="space-y-12">
+                  {/* Gráficas principales */}
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
+                    {/* Gráfica de pie */}
+                    <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 border-b border-gray-200/50">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                            <MdPieChart className="text-white text-2xl" />
+                          </div>
+                          <div>
+                            <h2 className="text-3xl font-bold text-gray-900">Distribución de Estados</h2>
+                            <p className="text-gray-600 text-lg">Análisis visual de solicitudes por estado</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-8">
+                        <div className="relative h-96">
+                          <Pie data={pieData} options={pieOptions} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Estadísticas detalladas */}
+                    <div className="space-y-6">
+                      {estadosConsolidados.map((estado, index) => {
+                        const porcentaje = ((estado.total / totalSolicitudes) * 100).toFixed(1);
+                        const colors = [
+                          { bg: 'from-blue-500 to-indigo-600', text: 'text-blue-600', light: 'bg-blue-50' },
+                          { bg: 'from-emerald-500 to-green-600', text: 'text-emerald-600', light: 'bg-emerald-50' },
+                          { bg: 'from-orange-500 to-amber-600', text: 'text-orange-600', light: 'bg-orange-50' },
+                          { bg: 'from-red-500 to-rose-600', text: 'text-red-600', light: 'bg-red-50' },
+                          { bg: 'from-purple-500 to-indigo-600', text: 'text-purple-600', light: 'bg-purple-50' }
+                        ];
+                        const color = colors[index % colors.length];
+
+                        return (
+                          <div key={estado.estado} className={`${color.light} rounded-2xl p-6 border border-gray-200/50 hover:shadow-xl transition-all duration-300`}>
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center space-x-4">
+                                <div className={`w-12 h-12 bg-gradient-to-r ${color.bg} rounded-xl flex items-center justify-center shadow-lg`}>
+                                  <span className="text-white font-bold text-lg">{estado.estado.charAt(0).toUpperCase()}</span>
+                                </div>
+                                <div>
+                                  <h3 className="text-xl font-bold text-gray-900 capitalize">{estado.estado}</h3>
+                                  <p className="text-gray-600">{porcentaje}% del total</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className={`text-3xl font-bold ${color.text}`}>{estado.total}</div>
+                                <div className="text-sm text-gray-600">solicitudes</div>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 mt-6">
+                              <div className="bg-white rounded-xl p-4 shadow-sm">
+                                <div className="text-2xl font-bold text-gray-900">{formatCurrency(estado.monto_total)}</div>
+                                <div className="text-sm text-gray-600">Monto Total</div>
+                              </div>
+                              <div className="bg-white rounded-xl p-4 shadow-sm">
+                                <div className="text-2xl font-bold text-gray-900">{formatCurrency(estado.monto_total / estado.total)}</div>
+                                <div className="text-sm text-gray-600">Promedio</div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Mensajes para otras vistas */}
+              {vistaActual === 'departamentos' && (
+                <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 border-b border-gray-200/50">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <MdBusiness className="text-white text-xl" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">Análisis por Departamentos</h2>
+                        <p className="text-sm text-gray-600">Vista detallada de gastos y transacciones por departamento</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-12">
+                    <div className="text-center py-16">
+                      <div className="w-24 h-24 bg-gradient-to-r from-green-100 to-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <MdBusiness size={48} className="text-green-500" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-4">Vista por Departamentos</h3>
+                      <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto leading-relaxed">
+                        El análisis detallado por departamentos estará disponible próximamente con métricas avanzadas
+                      </p>
+                      <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-lg">
+                        <MdDateRange className="mr-2" />
+                        <span className="font-semibold">En desarrollo</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {vistaActual === 'tipos-pago' && (
+                <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 border-b border-gray-200/50">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <MdPayments className="text-white text-xl" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">Análisis por Tipos de Pago</h2>
+                        <p className="text-sm text-gray-600">Distribución y análisis de métodos de pago utilizados</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-12">
+                    <div className="text-center py-16">
+                      <div className="w-24 h-24 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <MdPayments size={48} className="text-purple-500" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-4">Análisis de Tipos de Pago</h3>
+                      <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto leading-relaxed">
+                        Las métricas detalladas por tipo de pago estarán disponibles próximamente
+                      </p>
+                      <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full shadow-lg">
+                        <MdDateRange className="mr-2" />
+                        <span className="font-semibold">En desarrollo</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {vistaActual === 'comparativa' && (
+                <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                  <div className="bg-gradient-to-r from-red-50 to-rose-50 p-6 border-b border-gray-200/50">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <MdCompare className="text-white text-xl" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">Análisis Comparativo</h2>
+                        <p className="text-sm text-gray-600">Comparaciones avanzadas de períodos y categorías</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-12">
+                    <div className="text-center py-16">
+                      <div className="w-24 h-24 bg-gradient-to-r from-red-100 to-rose-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <MdCompare size={48} className="text-red-500" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-4">Funciones Comparativas</h3>
+                      <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto leading-relaxed">
+                        Las herramientas de análisis comparativo y benchmarking estarán disponibles próximamente
+                      </p>
+                      <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-full shadow-lg">
+                        <MdDateRange className="mr-2" />
+                        <span className="font-semibold">En desarrollo</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </AprobadorLayout>
+      </ProtectedRoute>
+    </>
   );
 }
