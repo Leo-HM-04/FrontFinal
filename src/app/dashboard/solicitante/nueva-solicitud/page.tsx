@@ -990,14 +990,35 @@ export default function NuevaSolicitudPage() {
             </div>
           ) : (
             // Formulario estándar (código original)
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-8 md:p-12 lg:p-16 w-full">
-            <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 sm:mb-12">
-              <div className="p-3 sm:p-4 rounded-full bg-white/20">
-                <FileText className="w-7 h-7 text-white" />
+            <>
+              {/* Mensaje informativo sobre días de pago - SOLO para formulario estándar */}
+              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-4 mb-6 w-full">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <Calendar className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-bold text-orange-800 text-sm">
+                        Días de Pago de Proveedores
+                      </h4>
+                      <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <p className="text-orange-700 text-sm leading-relaxed">
+                      <strong>Los pagos de proveedores se procesan únicamente los días lunes de cada semana.</strong> Ten esto en cuenta al planificar tus solicitudes.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">Solicitud de Pago</h2>
-                <p className="text-white/80 text-sm sm:text-base">Completa todos los campos para crear tu solicitud</p>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-8 md:p-12 lg:p-16 w-full">
+                <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 sm:mb-12">
+                <div className="p-3 sm:p-4 rounded-full bg-white/20">
+                  <FileText className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">Solicitud de Pago</h2>
+                  <p className="text-white/80 text-sm sm:text-base">Completa todos los campos para crear tu solicitud</p>
               </div>
             </div>
 
@@ -1979,6 +2000,7 @@ export default function NuevaSolicitudPage() {
               </div>
             </form>
           </div>
+          </>
           )}
         </div>
       </SolicitanteLayout>
