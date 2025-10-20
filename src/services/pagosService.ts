@@ -67,7 +67,44 @@ export const marcarPagoComoPagado = async (id_solicitud: number, solicitud?: Sol
 export async function subirComprobante(id_solicitud: number, file: File) {
   try {
     console.log(`📄 Subiendo comprobante para solicitud ${id_solicitud}`);
+    console.log(`📄 Archivo recibido:`, { 
+      name: file.name, 
+      size: file.size, 
+      type: file.type 
+    });
     
+    // 🔍 DETECTAR SI ES SOLICITUD TOKA (N09/TOKA)
+    // Verificamos si es una solicitud TOKA consultando por solicitud principal
+    try {
+      console.log(`🔍 Verificando si solicitud ${id_solicitud} es TOKA...`);
+      const res = await api.get(`/solicitudes-n09-toka/por-solicitud/${id_solicitud}`);
+      console.log(`🔍 Respuesta de verificación TOKA:`, res.data);
+      
+      if (res.data && res.data.success && res.data.data) {
+        console.log('🎯 ¡ES SOLICITUD TOKA! - usando servicio específico');
+        console.log('🎯 Datos TOKA encontrados:', res.data.data);
+        
+        // Es solicitud TOKA - usar servicio específico
+        const { default: SolicitudN09TokaArchivosService } = await import('@/services/solicitudN09TokaArchivos.service');
+        
+        const tokaId = res.data.data.id_solicitud_n09_toka;
+        console.log(`📤 Subiendo a TOKA con ID: ${tokaId}`);
+        
+        const result = await SolicitudN09TokaArchivosService.subirArchivos(
+          tokaId, // Usar el ID específico de TOKA
+          [file], 
+          ['comprobante_pago']
+        );
+        console.log('✅ Comprobante TOKA subido exitosamente:', result);
+        return result;
+      }
+    } catch (tokaError) {
+      console.log('📝 No es solicitud TOKA o error verificando:', tokaError);
+      // No es TOKA, continuar con método estándar
+    }
+    
+    // MÉTODO ESTÁNDAR para solicitudes normales
+    console.log('📝 Usando método estándar para solicitud normal');
     const formData = new FormData();
     formData.append('comprobante', file);
     
@@ -78,10 +115,12 @@ export async function subirComprobante(id_solicitud: number, file: File) {
       },
     });
     
-    console.log('✅ Comprobante subido exitosamente');
+    console.log('✅ Comprobante estándar subido exitosamente');
     return res.data;
   } catch (error) {
     console.error('❌ Error subiendo comprobante:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    alert(`Error al subir comprobante: ${errorMessage}`);
     throw error;
   }
 }
