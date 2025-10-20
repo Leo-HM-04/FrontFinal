@@ -83,10 +83,14 @@ class SolicitudN09TokaArchivosService {
         }
       );
       
+      console.log('📡 Respuesta HTTP:', response.status, response.statusText);
+      
       const result: UploadResponse = await response.json();
+      console.log('📄 Resultado JSON:', result);
       
       if (!response.ok) {
-        throw new Error(result.message || 'Error al subir archivos');
+        console.error('❌ Error HTTP:', response.status, result);
+        throw new Error(result.message || `Error HTTP ${response.status}: ${response.statusText}`);
       }
       
       console.log('✅ Archivos N09/TOKA subidos exitosamente:', result);

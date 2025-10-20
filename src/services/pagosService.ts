@@ -89,6 +89,7 @@ export async function subirComprobante(id_solicitud: number, file: File) {
         
         const tokaId = res.data.data.id_solicitud_n09_toka;
         console.log(`📤 Subiendo a TOKA con ID: ${tokaId}`);
+        console.log(`📤 Archivo a subir:`, { name: file.name, size: file.size, type: file.type });
         
         const result = await SolicitudN09TokaArchivosService.subirArchivos(
           tokaId, // Usar el ID específico de TOKA
@@ -96,7 +97,14 @@ export async function subirComprobante(id_solicitud: number, file: File) {
           ['comprobante_pago']
         );
         console.log('✅ Comprobante TOKA subido exitosamente:', result);
-        return result;
+        
+        // Verificar que el resultado sea exitoso
+        if (result && result.success !== false) {
+          return result;
+        } else {
+          console.error('❌ Error en resultado TOKA:', result);
+          throw new Error(result?.message || 'Error al subir comprobante TOKA');
+        }
       }
     } catch (tokaError) {
       console.log('📝 No es solicitud TOKA o error verificando:', tokaError);
@@ -119,8 +127,7 @@ export async function subirComprobante(id_solicitud: number, file: File) {
     return res.data;
   } catch (error) {
     console.error('❌ Error subiendo comprobante:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-    alert(`Error al subir comprobante: ${errorMessage}`);
+    // Dejar que el error se propague al componente para manejo apropiado
     throw error;
   }
 }
