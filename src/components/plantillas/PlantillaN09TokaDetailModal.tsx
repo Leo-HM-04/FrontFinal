@@ -275,21 +275,44 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
         return;
       }
       
-      // Para N09/TOKA: Solo buscar comprobantes reales en la tabla comprobantes
-      // NO convertir los archivos originales de factura como comprobantes de pago
+      // Para N09/TOKA: SOLO buscar comprobantes en su tabla específica de archivos
+      // NO buscar en la tabla general de comprobantes porque puede haber conflicto de IDs
       try {
-        console.log('📋 N09/TOKA COMPROBANTES - Buscando comprobantes reales de pago...');
+        console.log('📋 N09/TOKA COMPROBANTES - Buscando comprobantes específicos de TOKA...');
         if (token) {
-          const { ComprobantesService } = await import('@/services/comprobantes.service');
-          const comprobantes = await ComprobantesService.getBySolicitud(solicitud.id_solicitud, token);
-          console.log('✅ N09/TOKA COMPROBANTES - Comprobantes encontrados:', comprobantes?.length || 0);
-          setComprobantes(comprobantes || []);
+          // Buscar comprobantes SOLO en la tabla específica de N09/TOKA
+          const archivosComprobante = await SolicitudN09TokaArchivosService.obtenerArchivos(solicitud.id_solicitud || 0);
+          
+          if (archivosComprobante && Array.isArray(archivosComprobante)) {
+            // Filtrar solo los archivos que son comprobantes de pago
+            const comprobantesReales = archivosComprobante
+              .filter((archivo: SolicitudN09TokaArchivo) => 
+                archivo.tipo_archivo === 'comprobante_pago' || 
+                archivo.nombre_archivo.toLowerCase().includes('comprobante')
+              )
+              .map((archivo: SolicitudN09TokaArchivo) => ({
+                id_comprobante: archivo.id_archivo,
+                id_solicitud: solicitud.id_solicitud || 0,
+                ruta_archivo: archivo.ruta_archivo,
+                nombre_archivo: archivo.nombre_archivo,
+                fecha_subida: archivo.fecha_subida,
+                usuario_subio: 0,
+                comentario: 'Comprobante de pago TOKA',
+                nombre_usuario: 'Pagador'
+              }));
+            
+            console.log('✅ N09/TOKA COMPROBANTES - Comprobantes TOKA encontrados:', comprobantesReales.length);
+            setComprobantes(comprobantesReales);
+          } else {
+            console.log('📝 N09/TOKA COMPROBANTES - No hay comprobantes TOKA');
+            setComprobantes([]);
+          }
         } else {
           console.log('❌ N09/TOKA COMPROBANTES - No hay token');
           setComprobantes([]);
         }
       } catch (archivosError) {
-        console.error('❌ N09/TOKA COMPROBANTES - Error obteniendo comprobantes:', archivosError);
+        console.error('❌ N09/TOKA COMPROBANTES - Error obteniendo comprobantes TOKA:', archivosError);
         setComprobantes([]);
       }
     } catch (error) {

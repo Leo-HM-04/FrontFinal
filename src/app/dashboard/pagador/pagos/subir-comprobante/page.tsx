@@ -95,8 +95,39 @@ export default function HistorialPagosPage() {
                 fecha_subida: pago.fecha_actualizacion || pago.fecha_pago
               };
             } else {
-              // Si no tiene soporte_url, buscar en la tabla comprobantes (sistema viejo)
+              // Verificar si es solicitud TOKA antes de buscar comprobantes
               try {
+                // Detectar si es solicitud TOKA
+                const isTokaResponse = await fetch(`/api/solicitudes-n09-toka/por-solicitud/${pago.id_solicitud}`, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (isTokaResponse.ok) {
+                  const tokaData = await isTokaResponse.json();
+                  if (tokaData.success && tokaData.data) {
+                    console.log(`🎯 Solicitud ${pago.id_solicitud} es TOKA - buscando comprobantes específicos`);
+                    // Es TOKA - buscar en su tabla específica
+                    const { default: SolicitudN09TokaArchivosService } = await import('@/services/solicitudN09TokaArchivos.service');
+                    const archivos = await SolicitudN09TokaArchivosService.obtenerArchivos(tokaData.data.id_solicitud_n09_toka);
+                    
+                    const comprobante = archivos.find(archivo => 
+                      archivo.tipo_archivo === 'comprobante_pago' || 
+                      archivo.nombre_archivo.toLowerCase().includes('comprobante')
+                    );
+                    
+                    if (comprobante) {
+                      comprobantesObj[pago.id_solicitud] = {
+                        ruta_archivo: comprobante.ruta_archivo,
+                        nombre_archivo: comprobante.nombre_archivo,
+                        fecha_subida: comprobante.fecha_subida
+                      };
+                    }
+                    return; // Salir temprano, ya procesamos TOKA
+                  }
+                }
+                
+                // No es TOKA - usar método estándar
+                console.log(`📝 Solicitud ${pago.id_solicitud} es estándar - buscando comprobantes normales`);
                 const comprobantes = await ComprobantesService.getBySolicitud(pago.id_solicitud, token);
                 if (comprobantes && comprobantes.length > 0) {
                   comprobantesObj[pago.id_solicitud] = comprobantes[0];
