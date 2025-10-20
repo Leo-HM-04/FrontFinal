@@ -61,9 +61,20 @@ class SolicitudN09TokaArchivosService {
       
       // Agregar tipos de archivos si se proporcionan
       if (tiposArchivos && tiposArchivos.length === archivos.length) {
-        tiposArchivos.forEach((tipo) => {
+        tiposArchivos.forEach((tipo, index) => {
+          console.log(`🔍 FRONTEND DEBUG - Agregando tipo ${index}: '${tipo}' (length: ${tipo.length})`);
           formData.append('tipos_archivos', tipo);
         });
+      }
+      
+      // 🔍 DEBUG: Ver qué contiene el FormData
+      console.log('🔍 FRONTEND DEBUG - FormData entries:');
+      for (const [key, value] of formData.entries()) {
+        if (key === 'tipos_archivos') {
+          console.log(`   ${key}: '${value}' (length: ${(value as string).length})`);
+        } else {
+          console.log(`   ${key}: ${value instanceof File ? value.name : value}`);
+        }
       }
       
       console.log('📤 Subiendo archivos N09/TOKA:', {
