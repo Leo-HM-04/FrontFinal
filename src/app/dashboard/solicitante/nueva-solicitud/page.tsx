@@ -873,13 +873,26 @@ export default function NuevaSolicitudPage() {
           console.log('📋 Solicitud ID final obtenido:', solicitudId);
           
           if (solicitudId) {
-            console.log('📤 LLAMANDO a SolicitudArchivosService.subirArchivos');
-            await SolicitudArchivosService.subirArchivos(
-              solicitudId,
-              formData.archivos_adicionales,
-              formData.tipos_archivos_adicionales
-            );
-            console.log('✅ Archivos adicionales subidos exitosamente');
+            // Verificar si es solicitud TOKA para usar el servicio correcto
+            if (estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-n09-toka') {
+              console.log('📤 LLAMANDO a SolicitudN09TokaArchivosService.subirArchivos (TOKA)');
+              // Para TOKA, forzar todos los archivos como comprobante_pago
+              const tiposParaToka = formData.tipos_archivos_adicionales.map(() => 'comprobante_pago');
+              await SolicitudN09TokaArchivosService.subirArchivos(
+                solicitudId,
+                formData.archivos_adicionales,
+                tiposParaToka
+              );
+              console.log('✅ Archivos adicionales TOKA subidos exitosamente');
+            } else {
+              console.log('📤 LLAMANDO a SolicitudArchivosService.subirArchivos (Normal)');
+              await SolicitudArchivosService.subirArchivos(
+                solicitudId,
+                formData.archivos_adicionales,
+                formData.tipos_archivos_adicionales
+              );
+              console.log('✅ Archivos adicionales subidos exitosamente');
+            }
           } else {
             console.error('❌ No se pudo obtener el ID de la solicitud');
           }
@@ -1929,12 +1942,13 @@ export default function NuevaSolicitudPage() {
                               
                               {/* Selector de tipo */}
                               <select
-                                value={formData.tipos_archivos_adicionales[index] || 'documento'}
+                                value={formData.tipos_archivos_adicionales[index] || (estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-n09-toka' ? 'comprobante_pago' : 'documento')}
                                 onChange={(e) => updateTipoArchivoAdicional(index, e.target.value)}
                                 className="px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white text-sm"
                               >
                                 <option value="documento" className="bg-blue-900 text-white">Documento</option>
                                 <option value="comprobante" className="bg-blue-900 text-white">Comprobante</option>
+                                <option value="comprobante_pago" className="bg-blue-900 text-white">Comprobante de Pago</option>
                                 <option value="contrato" className="bg-blue-900 text-white">Contrato</option>
                                 <option value="identificacion" className="bg-blue-900 text-white">Identificación</option>
                                 <option value="otro" className="bg-blue-900 text-white">Otro</option>
