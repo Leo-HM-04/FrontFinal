@@ -231,6 +231,10 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
   const [loadingComprobantes, setLoadingComprobantes] = useState(false);
   const [errorComprobantes, setErrorComprobantes] = useState<string | null>(null);
 
+  // 🔧 FILTRADO CORRECTO: Separar archivos por tipo
+  const archivosSoloDocumentos = archivos.filter(archivo => archivo.tipo_archivo !== 'comprobante_pago');
+  const archivosComprobantes = archivos.filter(archivo => archivo.tipo_archivo === 'comprobante_pago');
+
   // Función para obtener archivos
   const fetchArchivos = useCallback(async () => {
     if (!solicitud) return;
@@ -471,8 +475,8 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                     </div>
                   </div>
                 </div>
-              ) : comprobantes.length === 0 ? (
-                // Si no hay comprobantes en la tabla pero hay soporte_url, mostrar ese archivo
+              ) : comprobantes.length === 0 && archivosComprobantes.length === 0 ? (
+                // Si no hay comprobantes ni archivos de tipo comprobante_pago, pero hay soporte_url, mostrar ese archivo
                 (solicitud as SolicitudN09TokaExtended).soporte_url ? (
                   <div className="space-y-4">
                     <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
@@ -521,6 +525,7 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                 )
               ) : (
                 <div className="space-y-4">
+                  {/* Mostrar comprobantes tradicionales */}
                   {comprobantes.map((comprobante) => {
                     const comprobanteUrl = buildFileUrl(comprobante.ruta_archivo);
                     const fileName = comprobante.nombre_archivo || comprobanteUrl.split('/').pop() || '';
@@ -560,6 +565,37 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                       </div>
                     );
                   })}
+                  
+                  {/* Mostrar archivos marcados como comprobante_pago */}
+                  {archivosComprobantes.map((archivo) => (
+                    <div key={`archivo-${archivo.id_archivo}`} className="bg-green-50/50 p-4 rounded-lg border border-green-200/50 shadow-sm">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
+                            <span className="text-xs text-green-800 font-semibold">
+                              Comprobante Subido
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-700 mt-1">{archivo.nombre_archivo}</p>
+                        </div>
+                        <button
+                          onClick={() => window.open(buildFileUrl(archivo.ruta_archivo), '_blank')}
+                          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3 text-sm"
+                        >
+                          Ver completo
+                        </button>
+                      </div>
+                      
+                      <div className="relative h-36 bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
+                        <img
+                          src={buildFileUrl(archivo.ruta_archivo)}
+                          alt={`Comprobante: ${archivo.nombre_archivo}`}
+                          className="object-contain w-full h-full"
+                          onError={e => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -588,8 +624,8 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
               )}
               {!loading.archivos && !errors.archivos && (
                 <div className="flex flex-col gap-4 items-center justify-center w-full">
-                  {archivos && archivos.length > 0 ? (
-                    archivos.map((archivo) => (
+                  {archivosSoloDocumentos && archivosSoloDocumentos.length > 0 ? (
+                    archivosSoloDocumentos.map((archivo) => (
                       <FilePreview key={archivo.id_archivo} archivo={archivo} />
                     ))
                   ) : (
