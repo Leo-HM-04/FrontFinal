@@ -87,12 +87,12 @@ export async function subirComprobante(id_solicitud: number, file: File) {
         // Es solicitud TOKA - usar servicio específico
         const { default: SolicitudN09TokaArchivosService } = await import('@/services/solicitudN09TokaArchivos.service');
         
-        const tokaId = res.data.data.id_solicitud_n09_toka;
+        const tokaId = res.data.data.id_solicitud; // ✅ Usar id_solicitud, no id_solicitud_n09_toka
         console.log(`📤 Subiendo a TOKA con ID: ${tokaId}`);
         console.log(`📤 Archivo a subir:`, { name: file.name, size: file.size, type: file.type });
         
         const result = await SolicitudN09TokaArchivosService.subirArchivos(
-          tokaId, // Usar el ID específico de TOKA
+          tokaId, // Usar el ID de solicitud TOKA
           [file], 
           ['comprobante_pago']
         );

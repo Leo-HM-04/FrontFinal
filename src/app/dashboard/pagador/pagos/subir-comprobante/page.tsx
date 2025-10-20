@@ -9,6 +9,7 @@ import { SubirFacturaModal } from '@/components/pagos/SubirFacturaModal';
 import { VerComprobanteModal } from '@/components/pagos/VerComprobanteModal';
 import type { Comprobante } from '@/components/pagos/VerComprobanteModal';
 import { SolicitudesService } from '@/services/solicitudes.service';
+import { subirComprobante } from '@/services/pagosService';
 import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTukashDetailModal';
 import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
@@ -898,13 +899,18 @@ export default function HistorialPagosPage() {
                 onClose={() => setModalOpen(false)}
                 onSubmit={async (file, id) => {
                   try {
-                    const token = localStorage.getItem('auth_token');
-                    if (!token || !id) throw new Error('No hay token o id de solicitud');
-                    await SolicitudesService.subirFactura(id, file, token);
+                    if (!id) throw new Error('No hay id de solicitud');
+                    console.log(`🎯 Usando pagosService.subirComprobante para solicitud ${id}`);
+                    
+                    // 🔧 USAR EL NUEVO SERVICIO QUE MANEJA TOKA
+                    await subirComprobante(id, file);
+                    
                     await fetchPagosYComprobantes(); // Recargar datos tras subir comprobante
                     setSuccessMsg('¡Comprobante subido exitosamente!');
-                  } catch {
-                    alert('Error al subir la factura');
+                  } catch (error) {
+                    console.error('❌ Error en SubirFacturaModal:', error);
+                    const errorMsg = error instanceof Error ? error.message : 'Error desconocido al subir comprobante';
+                    setError(errorMsg);
                   } finally {
                     setModalOpen(false);
                   }
