@@ -33,9 +33,10 @@ interface SolicitudN09TokaExtended extends SolicitudN09TokaData {
 // Componente wrapper que recarga la solicitud TOKA con el parámetro correcto
 const PlantillaN09TokaReloadModal: React.FC<{
   solicitudId: number;
+  solicitud?: Solicitud; // Agregar prop opcional con los datos de la solicitud
   isOpen: boolean;
   onClose: () => void;
-}> = ({ solicitudId, isOpen, onClose }) => {
+}> = ({ solicitudId, solicitud, isOpen, onClose }) => {
   const [solicitudToka, setSolicitudToka] = useState<SolicitudN09TokaExtended | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +47,71 @@ const PlantillaN09TokaReloadModal: React.FC<{
         try {
           setLoading(true);
           setError(null);
+          
+          // NUEVO: Intentar usar los datos de la solicitud directamente si ya los tiene
+          if (solicitud) {
+            console.log('✅ Usando datos de solicitud existente, sin hacer petición adicional');
+            
+            // Extraer datos TOKA desde plantilla_datos
+            let solicitudN09Toka: SolicitudN09TokaExtended | null = null;
+            if (solicitud.plantilla_datos) {
+              try {
+                const plantillaData = typeof solicitud.plantilla_datos === 'string' 
+                  ? JSON.parse(solicitud.plantilla_datos) 
+                  : solicitud.plantilla_datos;
+                
+                solicitudN09Toka = {
+                  id_solicitud: solicitud.id_solicitud,
+                  asunto: plantillaData.asunto || (solicitud as any).asunto || 'TOKA_FONDEO_AVIT',
+                  cliente: plantillaData.cliente || (solicitud as any).cliente || '',
+                  beneficiario: plantillaData.beneficiario || (solicitud as any).beneficiario || '',
+                  proveedor: plantillaData.proveedor || (solicitud as any).proveedor || '',
+                  tipo_cuenta_clabe: plantillaData.tipo_cuenta_clabe || 'CLABE',
+                  numero_cuenta_clabe: plantillaData.numero_cuenta_clabe || (solicitud as any).numero_cuenta_clabe || '',
+                  banco_destino: plantillaData.banco_destino || solicitud.banco_destino || '',
+                  monto: Number(plantillaData.monto || solicitud.monto) || 0,
+                  tipo_moneda: (plantillaData.tipo_moneda || solicitud.tipo_moneda || 'MXN'),
+                  estado: solicitud.estado || '',
+                  fecha_creacion: solicitud.fecha_creacion || '',
+                  fecha_actualizacion: plantillaData.fecha_actualizacion || solicitud.updated_at || (solicitud as any).fecha_actualizacion || '',
+                  fecha_limite_pago: plantillaData.fecha_limite_pago || solicitud.fecha_limite_pago || '',
+                  usuario_creacion: plantillaData.usuario_creacion || solicitud.usuario_nombre || '',
+                  usuario_actualizacion: plantillaData.usuario_actualizacion || '',
+                  soporte_url: (solicitud as any).soporte_url || null,
+                };
+              } catch (parseError) {
+                console.error('Error parseando plantilla_datos TOKA:', parseError);
+              }
+            } else {
+              // Si no hay plantilla_datos, crear desde los campos directos de la solicitud
+              solicitudN09Toka = {
+                id_solicitud: solicitud.id_solicitud,
+                asunto: (solicitud as any).asunto || 'TOKA_FONDEO_AVIT',
+                cliente: (solicitud as any).cliente || '',
+                beneficiario: (solicitud as any).beneficiario || solicitud.concepto || '',
+                proveedor: (solicitud as any).proveedor || '',
+                tipo_cuenta_clabe: 'CLABE',
+                numero_cuenta_clabe: (solicitud as any).numero_cuenta_clabe || '',
+                banco_destino: (solicitud as any).banco_destino || '',
+                monto: Number(solicitud.monto) || 0,
+                tipo_moneda: (solicitud as any).tipo_moneda || 'MXN',
+                estado: solicitud.estado || '',
+                fecha_creacion: solicitud.fecha_creacion || '',
+                fecha_actualizacion: (solicitud as any).fecha_actualizacion || solicitud.fecha_creacion || '',
+                fecha_limite_pago: (solicitud as any).fecha_limite_pago || '',
+                usuario_creacion: solicitud.usuario_nombre || '',
+                usuario_actualizacion: '',
+                soporte_url: (solicitud as any).soporte_url || null,
+              };
+            }
+            
+            setSolicitudToka(solicitudN09Toka);
+            setLoading(false);
+            return;
+          }
+          
+          // FALLBACK: Si no hay datos de solicitud, hacer petición al backend
+          console.log('⚠️ No hay datos de solicitud, haciendo petición al backend');
           // Llamar específicamente con el parámetro tipo=toka
           const solicitudCorrecta = await SolicitudesService.getById(solicitudId, 'toka');
           
@@ -91,7 +157,7 @@ const PlantillaN09TokaReloadModal: React.FC<{
 
       fetchSolicitudToka();
     }
-  }, [solicitudId, isOpen]);
+  }, [solicitudId, solicitud, isOpen]);
 
   if (loading) {
     return (
@@ -1068,10 +1134,11 @@ export function SolicitudDetailModal({
 
   // Renderizado condicional del modal N09/TOKA
   if (isOpen && solicitud && isN09TokaSolicitud(solicitud)) {
-    // Para solicitudes TOKA, hacer una llamada específica para obtener los datos correctos
+    // Para solicitudes TOKA, usar los datos existentes sin hacer petición adicional
     return (
       <PlantillaN09TokaReloadModal
         solicitudId={solicitud.id_solicitud}
+        solicitud={solicitud}
         isOpen={isOpen}
         onClose={onClose}
       />
