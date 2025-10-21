@@ -496,13 +496,53 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                         </button>
                       </div>
                       
-                      <div className="relative h-36 bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
-                        <img
-                          src={buildFileUrl((solicitud as SolicitudN09TokaExtended).soporte_url!)}
-                          alt="Comprobante de pago"
-                          className="object-contain w-full h-full"
-                          onError={e => { e.currentTarget.style.display = 'none'; }}
-                        />
+                      <div className="relative bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                        {(() => {
+                          const url = buildFileUrl((solicitud as SolicitudN09TokaExtended).soporte_url!);
+                          const extension = (solicitud as SolicitudN09TokaExtended).soporte_url!.split('.').pop()?.toLowerCase() || '';
+                          const isPdf = extension === 'pdf';
+                          const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
+                          
+                          if (isPdf) {
+                            return (
+                              <div className="w-full">
+                                <iframe 
+                                  src={url} 
+                                  title="Comprobante de pago"
+                                  className="w-full" 
+                                  style={{ height: '200px' }} 
+                                />
+                                <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-700">
+                                  Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          if (isImage) {
+                            return (
+                              <div className="relative h-36 bg-gray-50 flex items-center justify-center">
+                                <img
+                                  src={url}
+                                  alt="Comprobante de pago"
+                                  className="object-contain w-full h-full"
+                                  onError={e => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <div className="h-36 bg-gray-50 flex items-center justify-center">
+                              <div className="text-center">
+                                <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                  <FileText className="w-8 h-8 text-blue-600" />
+                                </div>
+                                <p className="text-xs text-gray-600 font-medium">Archivo</p>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
