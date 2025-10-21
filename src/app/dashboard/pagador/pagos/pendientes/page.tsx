@@ -268,8 +268,9 @@ export default function PagosPendientesPage() {
   const exportToPDF = async () => {
     setIsExporting(true);
     try {
+      // Solo exportar el folio como identificador principal
       const columns = [
-        { key: 'folio', label: 'ID' },
+        { key: 'folio', label: 'Folio' },
         { key: 'fecha_creacion', label: 'Fecha Solicitud', formatter: (v: any) => ExportUtils.formatDate(v) },
         { key: 'departamento', label: 'Departamento' },
         { key: 'monto', label: 'Monto', formatter: (v: any) => ExportUtils.formatCurrency(v) },

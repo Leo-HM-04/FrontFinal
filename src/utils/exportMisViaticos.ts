@@ -84,9 +84,8 @@ function filtrarViaticosPorRango(viaticos: Viatico[], rango: string) {
 // Exportar a CSV
 export function exportMisViaticosCSV(viaticos: Viatico[], rango: string = 'total') {
   const datos = filtrarViaticosPorRango(viaticos, rango);
-  const headers = ['ID', 'Folio', 'Concepto', 'Monto', 'Departamento', 'Estado', 'Fecha Límite', 'Tipo de Pago', 'Cuenta Destino', 'Banco'];
+  const headers = [ 'Folio', 'Concepto', 'Monto', 'Departamento', 'Estado', 'Fecha Límite', 'Tipo de Pago', 'Cuenta Destino', 'Banco'];
   const rows = datos.map(v => [
-    v.id_viatico,
     v.folio || '',
     v.concepto || '',
     formatoMoneda(v.monto),
@@ -162,8 +161,9 @@ export async function exportMisViaticosExcel(viaticos: Viatico[], rango: string 
 
   // Encabezados de columnas
   const headerRow = sheet.addRow([
-    'ID',
     'Folio',
+    'Beneficiario',
+    'Descripción',
     'Concepto',
     'Monto',
     'Departamento',
@@ -188,8 +188,9 @@ export async function exportMisViaticosExcel(viaticos: Viatico[], rango: string 
     const monto = Number(v.monto) || 0;
 
     const row = sheet.addRow([
-      v.id_viatico,
       v.folio || '',
+      v.nombre_persona || '',
+      v.tipo_pago_descripcion || '',
       v.concepto || '',
       monto, // Guardamos el número, no el string formateado
       v.departamento || '',
@@ -430,8 +431,8 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
   lastY += 40;
 
   // Tabla de datos detallados
+
   const detallesHeaders = [
-    'ID',
     'Folio',
     'Concepto',
     'Monto',
@@ -443,7 +444,6 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
   ];
 
   const detallesData = datos.map(v => [
-    v.id_viatico.toString(),
     v.folio || '',
     v.concepto || '',
     formatoMoneda(v.monto),
@@ -463,7 +463,6 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
 
   // Agregar fila de totales al final
   detallesData.push([
-    '',
     '',
     'TOTAL GENERAL',
     formatoMoneda(totalesGenerales.total),
@@ -504,15 +503,14 @@ export async function exportMisViaticosPDF(viaticos: Viatico[], rango: string = 
       fillColor: [245, 247, 250]
     },
     columnStyles: {
-      0: { cellWidth: 35, halign: 'center' }, // ID
-      1: { cellWidth: 50 }, // Folio
-      2: { cellWidth: 90, overflow: 'linebreak' }, // Concepto
-      3: { cellWidth: 60, halign: 'right' }, // Monto
-      4: { cellWidth: 70, overflow: 'linebreak' }, // Departamento
-      5: { cellWidth: 50, halign: 'center' }, // Estado
-      6: { cellWidth: 55 }, // Fecha
-      7: { cellWidth: 50 }, // Tipo Pago
-      8: { cellWidth: 70 } // Cuenta
+      0: { cellWidth: 50 }, // Folio
+      1: { cellWidth: 90, overflow: 'linebreak' }, // Concepto
+      2: { cellWidth: 60, halign: 'right' }, // Monto
+      3: { cellWidth: 70, overflow: 'linebreak' }, // Departamento
+      4: { cellWidth: 50, halign: 'center' }, // Estado
+      5: { cellWidth: 55 }, // Fecha
+      6: { cellWidth: 50 }, // Tipo Pago
+      7: { cellWidth: 70 } // Cuenta
     },
     margin: { left: margin, right: margin },
     bodyStyles: {

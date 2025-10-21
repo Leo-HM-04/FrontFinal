@@ -428,7 +428,6 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
 
   const columns = ['Folio', 'Concepto', 'Monto', 'Departamento', 'Estado', 'Fecha Creación'];
   const rows = datos.map(s => {
-    // Convertir el monto a número
     let monto = 0;
     if (s.monto !== undefined && s.monto !== null) {
       if (typeof s.monto === 'number' && !isNaN(s.monto)) {
@@ -440,7 +439,6 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
         }
       }
     }
-    
     return [
       s.folio || '',
       s.concepto || '',
@@ -583,13 +581,12 @@ export async function exportMisSolicitudesPDF(solicitudes: Solicitud[], rango: s
     bodyStyles: { fontSize: 12, textColor: [40, 40, 40], cellPadding: 9, halign: 'center' },
     alternateRowStyles: { fillColor: [230, 240, 255] },
     columnStyles: {
-      0: { halign: 'center' }, // ID
-      1: { halign: 'center' }, // Folio
-      2: { halign: 'left' },   // Concepto
-      3: { halign: 'right' },  // Monto
-      4: { halign: 'center' }, // Departamento
-      5: { halign: 'center' }, // Estado
-      6: { halign: 'center' }  // Fecha Creación
+      0: { halign: 'center' }, // Folio
+      1: { halign: 'left' },   // Concepto
+      2: { halign: 'right' },  // Monto
+      3: { halign: 'center' }, // Departamento
+      4: { halign: 'center' }, // Estado
+      5: { halign: 'center' }  // Fecha Creación
     },
     styles: { cellPadding: 9, valign: 'middle' },
     didDrawPage: () => {
