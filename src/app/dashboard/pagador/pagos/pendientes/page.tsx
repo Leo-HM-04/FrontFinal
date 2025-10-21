@@ -18,6 +18,7 @@ import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal'
 import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
 import { isN09TokaSolicitud } from '@/utils/solicitudUtils';
 import { extraerFechaLimiteDesdeplantilla, esSolicitudConFechaLimitePlantilla } from '@/utils/plantillaUtils';
+import ExportUtils from '@/utils/exportUtils';
 
 export default function PagosPendientesPage() {
   const [selectedPago, setSelectedPago] = useState<Solicitud | null>(null);
@@ -264,13 +265,24 @@ export default function PagosPendientesPage() {
   });
 
   // Funciones de exportación
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     setIsExporting(true);
     try {
-      // const data = filteredPagos.map(pago => ({ ... }));
-
-      // Aquí implementarías la lógica de exportación a PDF
-  // console.log('Exportando a PDF:', data);
+      const columns = [
+        { key: 'folio', label: 'ID' },
+        { key: 'fecha_creacion', label: 'Fecha Solicitud', formatter: (v: any) => ExportUtils.formatDate(v) },
+        { key: 'departamento', label: 'Departamento' },
+        { key: 'monto', label: 'Monto', formatter: (v: any) => ExportUtils.formatCurrency(v) },
+        { key: 'cuenta_destino', label: 'Cuenta Destino' },
+        { key: 'tipo_cuenta_destino', label: 'Tipo de Cuenta/Tarjeta' },
+        { key: 'empresa_a_pagar', label: 'A quién se le va a pagar' },
+        { key: 'tipo_pago_descripcion', label: 'Descripción de pago' },
+        { key: 'concepto', label: 'Concepto' },
+        { key: 'estado', label: 'Estado' },
+        { key: 'usuario_nombre', label: 'Solicitante' },
+        { key: 'id_aprobador', label: 'Aprobador' }
+      ];
+      await ExportUtils.exportSolicitudesToPDF(filteredPagos, { customTitle: 'Pagos Pendientes', includeStats: false });
       toast.success('PDF exportado correctamente');
     } catch {
       toast.error('Error al exportar PDF');
@@ -280,13 +292,10 @@ export default function PagosPendientesPage() {
     }
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     setIsExporting(true);
     try {
-      // const data = filteredPagos.map(pago => ({ ... }));
-
-      // Aquí implementarías la lógica de exportación a Excel
-  // console.log('Exportando a Excel:', data);
+      await ExportUtils.exportSolicitudesToExcel(filteredPagos, { customTitle: 'Pagos Pendientes', includeStats: false });
       toast.success('Excel exportado correctamente');
     } catch {
       toast.error('Error al exportar Excel');
@@ -299,35 +308,7 @@ export default function PagosPendientesPage() {
   const exportToCSV = () => {
     setIsExporting(true);
     try {
-      const headers = ['Folio', 'Solicitante', 'Departamento', 'Monto', 'Fecha Solicitud', 'Fecha Límite', 'Estado', 'Aprobador'];
-      const csvContent = [
-        headers.join(','),
-        ...filteredPagos.map(pago => [
-          pago.folio,
-          pago.nombre_usuario || pago.usuario_nombre || '-',
-          pago.departamento,
-          pago.monto,
-          new Date(pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }),
-          new Date(
-            esSolicitudConFechaLimitePlantilla(pago) 
-              ? extraerFechaLimiteDesdeplantilla(pago.plantilla_datos || null, pago.fecha_limite_pago) || pago.fecha_creacion
-              : pago.fecha_limite_pago || pago.fecha_creacion
-          ).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }),
-          pago.estado?.charAt(0).toUpperCase() + pago.estado?.slice(1) || 'Autorizada',
-          pago.aprobador_nombre || '-'
-        ].join(','))
-      ].join('\n');
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `pagos-pendientes-${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
+      ExportUtils.exportSolicitudesToCSV(filteredPagos, { customTitle: 'Pagos Pendientes', includeStats: false });
       toast.success('CSV exportado correctamente');
     } catch {
       toast.error('Error al exportar CSV');
