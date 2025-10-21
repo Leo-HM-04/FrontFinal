@@ -621,7 +621,7 @@ export default function AprobadorGraficasPage() {
                                     cornerRadius: 12,
                                     padding: 16,
                                     callbacks: {
-                                      label: (context: TooltipItem<'bar'>) => formatCurrency(context.parsed.y)
+                                      label: (context: TooltipItem<'bar'>) => formatCurrency(context.parsed.y ?? 0)
                                     }
                                   }
                                 },

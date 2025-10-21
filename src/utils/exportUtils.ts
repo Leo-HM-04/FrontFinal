@@ -444,8 +444,10 @@ class ExportUtils {
         if (s.tipo_tarjeta) return s.tipo_tarjeta;
         return '-';
       } },
+  { key: 'empresa_a_pagar', label: 'A quién se le va a pagar', width: 30, formatter: (value, item) => value ? String(value) : (item && item.nombre_persona ? item.nombre_persona : '-') },
+  { key: 'tipo_pago_descripcion', label: 'Descripción de pago', width: 30, formatter: (value, item) => value ? String(value) : '-' },
+  { key: 'concepto', label: 'Concepto', width: 30 },
       { key: 'estado', label: 'Estado', width: 12, align: 'center' },
-      { key: 'concepto', label: 'Concepto', width: 30 },
       { key: 'usuario_nombre', label: 'Solicitante', width: 20, formatter: (value, item) => typeof value === 'string' && value ? value : item && typeof item.id_usuario === 'number' ? `Usuario ${item.id_usuario}` : '' },
       { key: 'aprobador_nombre', label: 'Aprobador', width: 20, formatter: (value, item) => typeof value === 'string' && value !== 'N/A' ? value : item && typeof item.id_aprobador === 'number' ? `Aprobador ${item.id_aprobador}` : 'N/A' }
     ];
