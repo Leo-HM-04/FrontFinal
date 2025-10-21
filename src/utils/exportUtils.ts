@@ -75,7 +75,7 @@ const COMPANY_CONFIG = {
 };
 
 const LOCALE_CONFIG = {
-  country: 'es-CO',
+  country: 'es-MX',
   currency: 'COP',
   timezone: 'America/Bogota'
 };
@@ -432,7 +432,7 @@ class ExportUtils {
   static async exportSolicitudesToExcel(solicitudes: Solicitud[], options: ExportOptions = {}): Promise<void> {
     // const hasFolio = solicitudes.length > 0 && 'folio' in solicitudes[0];
     const columns: ExportColumn<Solicitud & { tipoCuentaTarjeta?: string }>[] = [
-      { key: 'id_solicitud', label: 'ID', width: 8, align: 'center' },
+      { key: 'folio', label: 'Folio', width: 12, align: 'center' },
       { key: 'fecha_creacion', label: 'Fecha Solicitud', width: 14, align: 'center', formatter: (value) => this.formatDate(value as string) },
       { key: 'departamento', label: 'Departamento', width: 20 },
       { key: 'monto', label: 'Monto', width: 15, align: 'right', formatter: (value) => this.formatCurrency(typeof value === 'number' ? value : Number(value)) },
