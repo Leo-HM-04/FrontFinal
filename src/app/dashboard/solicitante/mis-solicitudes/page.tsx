@@ -11,7 +11,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/Button';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
-import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
 import { ConfirmDeleteSoli } from '@/components/common/ConfirmDeleteSoli';
 import { SolicitudesService } from '@/services/solicitudes.service';
 import { SolicitudesN09TokaService, SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
@@ -383,7 +382,6 @@ function MisSolicitudesContent() {
 
   // Modales
   const [selectedSolicitud, setSelectedSolicitud] = useState<Solicitud | null>(null);
-  const [selectedN09TokaSolicitud, setSelectedN09TokaSolicitud] = useState<SolicitudN09TokaData | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [solicitudAEliminar, setSolicitudAEliminar] = useState<Solicitud | null>(null);
@@ -690,53 +688,11 @@ function MisSolicitudesContent() {
     if (isN09TokaSolicitud(solicitud)) {
       console.log('✅ Es solicitud N09/TOKA, procesando...');
       try {
-        // Para solicitudes N09/TOKA transformadas, ya tenemos los datos en plantilla_datos
-        const solicitudExtendida = solicitud as SolicitudExtendida;
-        console.log('📋 Solicitud extendida:', solicitudExtendida);
-        console.log('🏷️ Tipo plantilla:', solicitudExtendida.tipo_plantilla);
-        
-        if (solicitudExtendida.tipo_plantilla === 'N09_TOKA') {
-          console.log('✅ Tipo plantilla confirmado, usando datos directos');
-          // Convertir los datos de la solicitud al formato esperado por el modal
-          const solicitudN09Toka: SolicitudN09TokaData & { folio?: string } = {
-            id_solicitud: solicitud.id_solicitud,
-            asunto: solicitudExtendida.asunto || 'TOKA_FONDEO_AVIT',
-            cliente: solicitudExtendida.cliente || '',
-            beneficiario: solicitudExtendida.beneficiario || '',
-            proveedor: solicitudExtendida.proveedor || '',
-            tipo_cuenta_clabe: solicitudExtendida.tipo_cuenta_clabe || 'CLABE',
-            numero_cuenta_clabe: solicitudExtendida.numero_cuenta_clabe || '',
-            banco_destino: solicitudExtendida.banco_destino || '',
-            monto: Number(solicitud.monto) || 0,
-            tipo_moneda: solicitudExtendida.tipo_moneda || 'MXN',
-            folio: solicitud.folio || '',
-            estado: solicitud.estado || 'pendiente',
-            fecha_creacion: solicitud.fecha_creacion,
-            fecha_actualizacion: solicitudExtendida.fecha_actualizacion || solicitud.fecha_creacion,
-            fecha_limite_pago: solicitudExtendida.fecha_limite_pago || '',
-            usuario_creacion: solicitudExtendida.usuario_creacion || solicitud.usuario_nombre || '',
-            usuario_actualizacion: solicitudExtendida.usuario_actualizacion || ''
-          };
-          console.log('🎯 Abriendo modal N09/TOKA con datos:', solicitudN09Toka);
-          setSelectedN09TokaSolicitud(solicitudN09Toka);
-          return; // ¡IMPORTANTE! Salir aquí para no continuar
-        } else {
-          console.log('⚠️ No tiene tipo_plantilla N09_TOKA, intentando servicio...');
-          // Fallback: intentar obtener desde el servicio
-          const response = await SolicitudesN09TokaService.obtenerPorSolicitudPrincipal(solicitud.id_solicitud);
-          if (response.success && response.data) {
-            console.log('✅ Datos obtenidos del servicio:', response.data);
-            setSelectedN09TokaSolicitud(response.data);
-            return; // ¡IMPORTANTE! Salir aquí para no continuar
-          } else {
-            console.log('❌ No se encontraron datos en el servicio, fallback a modal normal');
-            toast.error('No se encontraron datos de la plantilla N09/TOKA');
-            // Solo entonces fallback al modal normal
-            setSelectedSolicitud(solicitud);
-            setIsDetailModalOpen(true);
-            return; // ¡IMPORTANTE! Salir aquí para no continuar
-          }
-        }
+        // Para todas las solicitudes (incluyendo N09/TOKA), usar el mismo modal
+        console.log('📋 Abriendo modal para solicitud:', solicitud);
+        setSelectedSolicitud(solicitud);
+        setIsDetailModalOpen(true);
+        return;
       } catch (error) {
         console.error('❌ Error al obtener solicitud N09/TOKA:', error);
         toast.error('Error al cargar los detalles de la plantilla N09/TOKA');
@@ -1203,15 +1159,6 @@ function MisSolicitudesContent() {
                 setIsDetailModalOpen(false);
                 setSelectedSolicitud(null);
               }}
-            />
-          )}
-
-          {/* Modal de Detalle de Plantilla N09/TOKA */}
-          {selectedN09TokaSolicitud && (
-            <PlantillaN09TokaDetailModal
-              solicitud={selectedN09TokaSolicitud}
-              isOpen={!!selectedN09TokaSolicitud}
-              onClose={() => setSelectedN09TokaSolicitud(null)}
             />
           )}
 
