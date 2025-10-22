@@ -26,8 +26,33 @@ export default function HistorialAprobadorPage() {
   const [data, setData] = useState<Viatico[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedViatico, setSelectedViatico] = useState<Viatico | null>(null);
+  const [selectedViatico, setSelectedViatico] = useState<any | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // Normaliza un objeto recibido desde la API a la forma que espera ViaticoDetailModal
+  const mapToViatico = (v: any): any => {
+    if (!v) return null;
+    return {
+      id_viatico: (v.id_viatico ?? v.id ?? v.id_solicitud) || 0,
+      folio: v.folio ?? '',
+      monto: Number(v.monto) || 0,
+      departamento: v.departamento ?? '',
+      cuenta_destino: v.cuenta_destino ?? v.cuenta ?? '',
+      concepto: v.concepto ?? '',
+      estado: v.estado ?? '',
+      fecha_revision: v.fecha_revision ?? v.fecha_limite_pago ?? v.fecha_pago ?? '',
+      fecha_pago: v.fecha_pago ?? null,
+      comentario_aprobador: v.comentario_aprobador ?? '',
+      nombre_persona: v.nombre_solicitante ?? v.nombre_persona ?? '',
+      viatico_url: (v.viatico_url ?? v.soporte_url ?? v.archivo_url) || '',
+      tipo_pago: v.tipo_pago ?? 'viaticos',
+      tipo_cuenta_destino: v.tipo_cuenta_destino ?? v.tipo_cuenta ?? undefined,
+      tipo_tarjeta: v.tipo_tarjeta ?? undefined,
+      banco_destino: v.banco_destino ?? undefined,
+      // preserve any extra fields
+      ...v
+    };
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -83,34 +108,35 @@ export default function HistorialAprobadorPage() {
               ) : data.length === 0 ? (
                 <div className="p-6 text-center text-gray-500">No hay viáticos aprobados o rechazados por ti.</div>
               ) : (
-                <table className="min-w-[1050px] w-full border-collapse text-sm">
-                  <thead>
-                    <tr className="bg-gray-50/80">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Folio</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solicitante</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cuenta destino</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <table className="w-full table-auto border-collapse text-sm md:text-base">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left">Folio</th>
+                      <th className="px-6 py-4 text-left">Solicitante</th>
+                      <th className="px-6 py-4 text-left">Departamento</th>
+                      <th className="px-6 py-4 text-right">Monto</th>
+                      <th className="px-6 py-4 text-left">Cuenta destino</th>
+                      <th className="px-6 py-4 text-left">Concepto</th>
+                      <th className="px-6 py-4 text-left">Estado</th>
+                      <th className="px-6 py-4 text-left">Fecha</th>
+                      <th className="px-6 py-4 text-center">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {data.map((v) => (
                       <tr key={v.id} className="group hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.folio || v.id}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.nombre_solicitante || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.departamento}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">${v.monto?.toFixed?.(2) ?? v.monto}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.cuenta_destino || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.concepto || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800"><span className={v.estado === 'autorizada' ? 'text-green-600' : 'text-red-600'}>{v.estado}</span></td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.fecha_revision || v.fecha_pago || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800 text-center">
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.folio || v.id}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.nombre_solicitante || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.departamento}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800 text-right">${v.monto?.toFixed?.(2) ?? v.monto}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.cuenta_destino || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.concepto || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800"><span className={v.estado === 'autorizada' ? 'text-green-600' : 'text-red-600'}>{v.estado}</span></td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.fecha_revision || v.fecha_pago || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800 text-center">
                           <div className="flex items-center justify-center gap-3">
-                            {(v as any).viatico_url ? (
+                            {/** PDF link (if available) and view detail button, matching viáticos actions */}
+                            { (v as any).viatico_url ? (
                               <a
                                 href={`/uploads/viaticos/${(v as any).viatico_url.split('/').pop()}`}
                                 target="_blank"
@@ -125,7 +151,7 @@ export default function HistorialAprobadorPage() {
                             )}
 
                             <button
-                              onClick={() => { setSelectedViatico(v); setShowDetailModal(true); }}
+                              onClick={() => { setSelectedViatico(mapToViatico(v)); setShowDetailModal(true); }}
                               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 transition-colors"
                               title="Ver detalles del viático"
                             >
@@ -143,7 +169,7 @@ export default function HistorialAprobadorPage() {
           </div>
           {selectedViatico && (
             <ViaticoDetailModal
-              viatico={selectedViatico as any}
+              viatico={selectedViatico}
               isOpen={showDetailModal}
               onClose={() => setShowDetailModal(false)}
             />

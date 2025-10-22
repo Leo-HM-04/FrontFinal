@@ -235,6 +235,13 @@ const buildFileUrl = (url: string): string => {
   return url.startsWith('/') ? url : `/${url}`;
 };
 
+// Obtener el URL principal de archivos adjuntos desde la solicitud.
+// Acepta diferentes nombres de campo (soporte_url, viatico_url, archivo_url, factura_url)
+const getMainFileUrl = (s: any): string => {
+  if (!s) return '';
+  return s.factura_url || s.soporte_url || s.viatico_url || s.archivo_url || '';
+};
+
 // Utilidades para formateo de datos bancarios
 const formatBankInfo = (bankCode: string): string => {
   if (!bankCode) return '-';
@@ -2363,18 +2370,18 @@ function extraerDatosDelConcepto(concepto: string) {
               </h2>
               
               <div className="space-y-4">
-                {/* Factura principal */}
-                {solicitud.factura_url ? (
+                {/* Factura / archivo principal */}
+                {getMainFileUrl(solicitud) ? (
                   <div className="bg-blue-50/30 p-3 rounded-lg border border-blue-100">
                     <span className="text-sm text-blue-700 mb-2 flex items-center font-medium">
                       <FileText className="w-4 h-4 mr-1.5 text-blue-600" />
-                      Previsualización de factura:
+                      Previsualización de archivo:
                     </span>
                     <div className="mt-2">
                       <FilePreview 
-                        url={buildFileUrl(solicitud.factura_url)}
-                        fileName={solicitud.factura_url.split('/').pop() || ''}
-                        alt="Factura principal"
+                        url={buildFileUrl(getMainFileUrl(solicitud))}
+                        fileName={getMainFileUrl(solicitud).split('/').pop() || ''}
+                        alt="Archivo principal"
                       />
                     </div>
                   </div>
@@ -2434,19 +2441,17 @@ function extraerDatosDelConcepto(concepto: string) {
 
                 {/* Botones de acción para documentos principales */}
                 <div className="flex w-full justify-end mt-6">
-                  {(solicitud.factura_url || solicitud.soporte_url) ? (
+                  {getMainFileUrl(solicitud) ? (
                     <div className="flex gap-3 items-end">
-                      {solicitud.factura_url && (
-                        <Button
-                          size="lg"
-                          onClick={() => window.open(buildFileUrl(solicitud.factura_url), '_blank')}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
-                        >
-                          <FileText className="w-5 h-5" />
-                          Ver Factura
-                          <ExternalLink className="w-5 h-5" />
-                        </Button>
-                      )}
+                      <Button
+                        size="lg"
+                        onClick={() => window.open(buildFileUrl(getMainFileUrl(solicitud)), '_blank')}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
+                      >
+                        <FileText className="w-5 h-5" />
+                        Ver archivo
+                        <ExternalLink className="w-5 h-5" />
+                      </Button>
                     </div>
                   ) : (
                     <div className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">
@@ -2470,8 +2475,8 @@ function extraerDatosDelConcepto(concepto: string) {
                   ) : errors.comprobantes ? (
                     <ErrorMessage message={errors.comprobantes} />
                   ) : comprobantes.length === 0 ? (
-                    // Si no hay comprobantes en la tabla pero hay soporte_url, mostrar ese archivo
-                    solicitud.soporte_url ? (
+                    // Si no hay comprobantes en la tabla pero hay un archivo principal, mostrar ese archivo
+                    getMainFileUrl(solicitud) ? (
                       <div className="space-y-4">
                         <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
                           <div className="flex justify-between items-start mb-3">
@@ -2484,7 +2489,7 @@ function extraerDatosDelConcepto(concepto: string) {
                             </div>
                             <Button
                               size="sm"
-                              onClick={() => window.open(buildFileUrl(solicitud.soporte_url!), '_blank')}
+                              onClick={() => window.open(buildFileUrl(getMainFileUrl(solicitud)), '_blank')}
                               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3"
                             >
                               Ver completo
@@ -2492,8 +2497,8 @@ function extraerDatosDelConcepto(concepto: string) {
                           </div>
                           
                           <FilePreview 
-                            url={buildFileUrl(solicitud.soporte_url)}
-                            fileName={solicitud.soporte_url.split('/').pop() || 'comprobante'}
+                            url={buildFileUrl(getMainFileUrl(solicitud))}
+                            fileName={getMainFileUrl(solicitud).split('/').pop() || 'comprobante'}
                             alt="Comprobante de pago"
                             height="h-36"
                           />

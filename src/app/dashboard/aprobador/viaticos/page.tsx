@@ -13,7 +13,7 @@ import { AdvancedFilters } from '@/components/ui/AdvancedFilters';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import { exportViaticosToCSV, exportViaticosToExcel, exportViaticosToPDF } from '@/utils/exportUtils';
 import { ExportOptionsModal } from '@/components/solicitudes/ExportOptionsModal';
-import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
+import { ViaticoDetailModal } from '@/components/viaticos/ViaticoDetailModal';
 import RejectModal from '@/components/ui/RejectModal';
 import { toast } from 'react-hot-toast';
 
@@ -778,8 +778,10 @@ const Viaticos: React.FC = () => {
 
         {/* Detail Modal */}
         {selectedViatico && (
-          <SolicitudDetailModal 
-            solicitud={selectedViatico}
+          <ViaticoDetailModal
+            viatico={
+              ({ ...selectedViatico, id_viatico: (selectedViatico as any).id_viatico ?? (selectedViatico as any).id_solicitud ?? (selectedViatico as any).id }) as any
+            }
             isOpen={showDetailModal}
             onClose={() => {
               setShowDetailModal(false);
