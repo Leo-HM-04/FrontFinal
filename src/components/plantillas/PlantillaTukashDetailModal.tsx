@@ -263,7 +263,7 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
     } finally {
       setLoading(prev => ({ ...prev, archivos: false }));
     }
-  }, [solicitud, handleError]);
+  }, [solicitud, solicitudExtended, handleError]);
 
   // useEffect para cargar comprobantes cuando el modal se abre
   useEffect(() => {
@@ -422,11 +422,14 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
                       </div>
                       
                       <div className="relative h-36 bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
-                        <img
+                        <Image
                           src={buildFileUrl((solicitudExtended as SolicitudTukashExtended).soporte_url!)}
                           alt="Comprobante de pago"
                           className="object-contain w-full h-full"
-                          onError={e => { e.currentTarget.style.display = 'none'; }}
+                          width={300}
+                          height={144}
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                          unoptimized
                         />
                       </div>
                     </div>
@@ -479,11 +482,14 @@ export function PlantillaTukashDetailModal({ solicitud, isOpen, onClose }: Plant
                         </div>
                         
                         <div className="relative h-36 bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
-                          <img
+                          <Image
                             src={comprobanteUrl}
                             alt={`Comprobante de ${comprobante.nombre_usuario || 'usuario'}: ${fileName}`}
                             className="object-contain w-full h-full"
-                            onError={e => { e.currentTarget.style.display = 'none'; }}
+                            width={300}
+                            height={144}
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                            unoptimized
                           />
                         </div>
                       </div>

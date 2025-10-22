@@ -276,7 +276,7 @@ export default function PagosPendientesPage() {
         { key: 'monto', label: 'Monto', formatter: (v: any) => ExportUtils.formatCurrency(v) },
         { key: 'cuenta_destino', label: 'Cuenta Destino' },
         { key: 'tipo_cuenta_destino', label: 'Tipo de Cuenta/Tarjeta' },
-        { key: 'empresa_a_pagar', label: 'A quién se le va a pagar' },
+        { key: 'empresa_a_pagar', label: 'Beneficiario' },
         { key: 'tipo_pago_descripcion', label: 'Descripción de pago' },
         { key: 'concepto', label: 'Concepto' },
         { key: 'estado', label: 'Estado' },

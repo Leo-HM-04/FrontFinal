@@ -522,11 +522,14 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                           if (isImage) {
                             return (
                               <div className="relative h-36 bg-gray-50 flex items-center justify-center">
-                                <img
+                                <Image
                                   src={url}
                                   alt="Comprobante de pago"
                                   className="object-contain w-full h-full"
-                                  onError={e => { e.currentTarget.style.display = 'none'; }}
+                                  width={300}
+                                  height={144}
+                                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                                  unoptimized
                                 />
                               </div>
                             );
@@ -619,11 +622,14 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                             if (isImage) {
                               return (
                                 <div className="relative h-36 bg-gray-50 flex items-center justify-center">
-                                  <img
+                                  <Image
                                     src={comprobanteUrl}
                                     alt={`Comprobante de ${comprobante.nombre_usuario || 'usuario'}: ${fileName}`}
                                     className="object-contain w-full h-full"
-                                    onError={e => { e.currentTarget.style.display = 'none'; }}
+                                    width={300}
+                                    height={144}
+                                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                                    unoptimized
                                   />
                                 </div>
                               );
@@ -666,11 +672,14 @@ export function PlantillaN09TokaDetailModal({ solicitud, isOpen, onClose }: Plan
                       </div>
                       
                       <div className="relative h-36 bg-gray-50 flex items-center justify-center rounded-lg overflow-hidden">
-                        <img
+                        <Image
                           src={buildFileUrl(archivo.ruta_archivo)}
                           alt={`Comprobante: ${archivo.nombre_archivo}`}
                           className="object-contain w-full h-full"
-                          onError={e => { e.currentTarget.style.display = 'none'; }}
+                          width={300}
+                          height={144}
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                          unoptimized
                         />
                       </div>
                     </div>

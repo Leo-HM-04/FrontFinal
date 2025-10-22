@@ -4,7 +4,7 @@ import {
   FileBadge,
   X,
 } from 'lucide-react';
-// import Image from 'next/image';
+import Image from 'next/image';
 
 interface Pago {
   id_solicitud: number;
@@ -157,11 +157,14 @@ export const VerComprobanteModal: React.FC<VerComprobanteModalProps> = ({
                 <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full">
                   <div className="relative h-[300px] sm:h-[350px] md:h-[420px] bg-gray-50 flex items-center justify-center">
                     {isImage ? (
-                      <img
+                      <Image
                         src={comprobanteUrl}
                         alt="Comprobante de Pago"
                         className="object-contain w-full h-full rounded-lg shadow-sm p-2"
-                        onError={e => { e.currentTarget.style.display = 'none'; }}
+                        width={800}
+                        height={420}
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                        unoptimized
                       />
                     ) : isPdf ? (
                       <iframe

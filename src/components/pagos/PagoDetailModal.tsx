@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 // import { Button } from '@/components/ui/Button';
 import type { Solicitud } from '@/types/index';
 import { FileText, CreditCard } from 'lucide-react';
-// import Image from 'next/image';
+import Image from 'next/image';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 import { detectarPlantillaId } from '@/utils/plantillasLabels';
 import { PlantillaComisionesDetailModal } from '@/components/plantillas/PlantillaComisionesDetailModal';
@@ -319,12 +319,15 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                             style={{ minHeight: '420px', height: '420px' }}
                           />
                         ) : (
-                          <img
+                          <Image
                             src={pago.factura_url}
                             alt="Factura Adjunta"
                             className="object-contain w-full h-full rounded-lg shadow-sm"
                             style={{ maxHeight: '420px', width: '100%' }}
-                            onError={e => { e.currentTarget.style.display = 'none'; }}
+                            width={800}
+                            height={420}
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                            unoptimized
                           />
                         )}
                       </div>
@@ -356,12 +359,15 @@ export function PagoDetailModal({ isOpen, pago, onClose }: PagoDetailModalProps)
                                 style={{ minHeight: '420px', height: '420px' }}
                               />
                             ) : isImage ? (
-                              <img
+                              <Image
                                 src={fileUrl}
                                 alt={archivo.tipo || 'Archivo adjunto'}
                                 className="object-contain w-full h-full rounded-lg shadow-sm"
                                 style={{ maxHeight: '420px', width: '100%' }}
-                                onError={e => { e.currentTarget.style.display = 'none'; }}
+                                width={800}
+                                height={420}
+                                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                                unoptimized
                               />
                             ) : (
                               <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 w-full">

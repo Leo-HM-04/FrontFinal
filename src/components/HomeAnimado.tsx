@@ -110,10 +110,10 @@ export default function HomeAnimado() {
       </header>
 
       {/* Sección principal con mejor responsive y espaciado */}
-      <main className="relative flex-1 flex flex-col xl:flex-row items-center justify-between px-6 md:px-12 lg:px-16 xl:px-20 py-8 md:py-12 lg:py-16 xl:py-20 gap-12 xl:gap-16">
+  <main className="relative flex-1 flex flex-col xl:flex-row items-center justify-between px-4 sm:px-6 md:px-12 lg:px-16 xl:px-20 py-6 sm:py-8 md:py-12 lg:py-16 xl:py-20 gap-8 sm:gap-12 xl:gap-16">
         
         {/* Contenido de texto con mejor jerarquía visual */}
-        <div className="w-full xl:w-1/2 z-20 order-2 xl:order-1">
+  <div className="w-full xl:w-1/2 z-20 order-2 xl:order-1 max-w-xl mx-auto xl:mx-0">
           <div className="space-y-8 lg:space-y-12">
             
             {/* Título principal formal de bienvenida y panel de accesos, versión premium y solo azul */}
@@ -162,21 +162,21 @@ export default function HomeAnimado() {
 
         {/* Ilustración 3D mejorada con mejor responsive y profundidad visual */}
         <div className="w-full xl:w-1/2 flex justify-center items-center relative order-1 xl:order-2">
-          <div className="relative w-full max-w-md lg:max-w-lg xl:max-w-xl h-80 md:h-96 lg:h-[28rem] flex items-center justify-center perspective-[1200px]">
+          <div className="relative w-full max-w-[340px] sm:max-w-md md:max-w-lg xl:max-w-xl h-64 sm:h-80 md:h-96 lg:h-[28rem] flex items-center justify-center perspective-[1200px]">
             
             {/* Plataforma principal con sombras y profundidad mejoradas */}
             <div className="relative z-10 transform-gpu rotate-x-[12deg] rotate-y-[12deg] transition-all duration-1000 ease-[cubic-bezier(.4,0,.2,1)]">
               
                 {/* Dispositivo central con gradientes más sofisticados */}
-                <div className="w-72 lg:w-80 xl:w-96 h-44 lg:h-48 xl:h-56 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-3xl shadow-2xl relative overflow-hidden transform-gpu transition-all duration-700 ease-[cubic-bezier(.4,0,.2,1)] group border-2 border-blue-200/60">
+                <div className="w-64 sm:w-72 md:w-80 xl:w-96 h-32 sm:h-44 md:h-48 xl:h-56 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-3xl shadow-2xl relative overflow-hidden transform-gpu transition-all duration-700 ease-[cubic-bezier(.4,0,.2,1)] group border-2 border-blue-200/60">
                 {/* Pantalla interna con efecto glassmorphism premium */}
-                <div className="absolute inset-4 bg-gradient-to-br from-blue-100/80 via-white/70 to-blue-200/80 rounded-2xl backdrop-blur-xl border border-blue-200/80 shadow-inner ring-2 ring-blue-100/40">
+                <div className="absolute inset-2 sm:inset-4 bg-gradient-to-br from-blue-100/80 via-white/70 to-blue-200/80 rounded-2xl backdrop-blur-xl border border-blue-200/80 shadow-inner ring-2 ring-blue-100/40">
                     <div className="w-full h-full bg-gradient-to-tr from-transparent via-white/30 to-transparent relative overflow-hidden">
                     {/* Icono central con animación suave y glow */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="p-6 bg-white/50 rounded-2xl backdrop-blur-lg shadow-lg ring-2 ring-blue-200/40">
-                        <Globe className="text-blue-700 drop-shadow-[0_0_16px_rgba(37,99,235,0.25)]" size={56} />
-                        </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="p-4 sm:p-6 bg-white/50 rounded-2xl backdrop-blur-lg shadow-lg ring-2 ring-blue-200/40">
+            <Globe className="text-blue-700 drop-shadow-[0_0_16px_rgba(37,99,235,0.25)]" size={40} />
+            </div>
                     </div>
                     {/* Partículas flotantes dentro de la pantalla */}
                     <div className="absolute top-4 left-4 w-2 h-2 bg-blue-400/70 rounded-full animate-ping"></div>
@@ -243,9 +243,9 @@ export default function HomeAnimado() {
       </main>
 
       {/* Footer premium institucional, azul, con mejor contraste e iconografía */}
-      <footer className="relative w-full flex justify-center py-7 bg-gradient-to-t from-blue-50 via-white/60 to-transparent border-t-2 border-blue-200/60 backdrop-blur-md shadow-inner z-40">
-        <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6 w-full max-w-4xl px-4 justify-between">
-          <span className="text-blue-500 text-xs md:text-sm font-medium text-center md:text-left select-none">
+      <footer className="relative w-full flex justify-center py-5 sm:py-7 bg-gradient-to-t from-blue-50 via-white/60 to-transparent border-t-2 border-blue-200/60 backdrop-blur-md shadow-inner z-40">
+        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6 w-full max-w-4xl px-2 sm:px-4 justify-between">
+          <span className="text-blue-500 text-xs sm:text-sm font-medium text-center md:text-left select-none">
             © {new Date().getFullYear()} BECHAPRA. Todos los derechos reservados.
           </span>
         </div>
