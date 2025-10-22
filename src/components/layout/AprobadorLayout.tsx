@@ -13,6 +13,7 @@ import {
   Bell,
   Repeat,
   ClipboardList,
+  History,
   BarChart2,
   Briefcase,
 } from "lucide-react";
@@ -184,6 +185,7 @@ export function AprobadorLayout({ children }: AprobadorLayoutProps) {
                 { href: '/dashboard/aprobador/solicitudes/pendientes', label: 'Solicitudes Pendientes', icon: ClipboardList },
                 { href: '/dashboard/aprobador/solicitudes/historial', label: 'Historial de Aprobaciones', icon: CheckCircle },
                 { href: '/dashboard/aprobador/recurrentes', label: 'Solicitudes Recurrentes', icon: Repeat },
+                { href: '/dashboard/aprobador/solicitudes/viaticos/historial', label: 'Historial de Viáticos', icon: Briefcase },
                 { href: '/dashboard/aprobador/viaticos', label: 'Solicitudes de Viáticos', icon: Briefcase },
                 { href: '/dashboard/aprobador/graficas', label: 'Gráficas', icon: BarChart2 },
                 { href: '/dashboard/aprobador/perfil', label: 'Mi Perfil', icon: User },
