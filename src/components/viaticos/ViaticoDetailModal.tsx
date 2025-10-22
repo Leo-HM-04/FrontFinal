@@ -274,13 +274,13 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
 
                 {/* Sidebar derecho */}
                 <div>
-                  {/* Estado y propósito */}
+                  {/* Estado y Concepto */}
                   <div className="p-5 md:p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl mb-6">
                     <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
                       <div className="p-2 bg-blue-100 rounded-xl mr-3">
                         <MapPin className="w-6 h-6 text-blue-700" />
                       </div>
-                      Estado y Propósito
+                      Estado y Concepto
                     </h3>
                     <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 md:p-5 rounded-2xl border border-blue-300/50 mb-6 shadow-lg">
                       <span className="text-sm uppercase tracking-wider font-bold block mb-2 text-blue-100">Estado actual</span>
@@ -291,9 +291,9 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                       <div className="mt-2 h-1 bg-gradient-to-r from-green-400 to-green-300 rounded-full w-20"></div>
                     </div>
                     
-                    {/* Propósito del viático */}
+                    {/* Concepto */}
                     <div className="bg-blue-50/30 rounded-md p-3 border border-blue-100/80">
-                      <h4 className="text-sm font-medium text-blue-800 mb-2">Propósito del viático</h4>
+                      <h4 className="text-sm font-medium text-blue-800 mb-2">Concepto</h4>
                       <div className="bg-white p-3 rounded-md border border-blue-100">
                         <p className="text-blue-900 font-medium leading-relaxed">{viatico.concepto || '-'}</p>
                       </div>
