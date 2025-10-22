@@ -4,6 +4,9 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
+import { FaFilePdf } from 'react-icons/fa';
+import { Eye } from 'lucide-react';
+import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 
 type Viatico = {
   id: number;
@@ -23,6 +26,8 @@ export default function HistorialAprobadorPage() {
   const [data, setData] = useState<Viatico[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedViatico, setSelectedViatico] = useState<Viatico | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -78,32 +83,58 @@ export default function HistorialAprobadorPage() {
               ) : data.length === 0 ? (
                 <div className="p-6 text-center text-gray-500">No hay viáticos aprobados o rechazados por ti.</div>
               ) : (
-                <table className="min-w-[950px] w-full border-collapse text-xs md:text-sm">
+                <table className="w-full table-auto border-collapse text-sm md:text-base">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 text-left">Folio / ID</th>
-                      <th className="px-4 py-3 text-left">Solicitante</th>
-                      <th className="px-4 py-3 text-left">Departamento</th>
-                      <th className="px-4 py-3 text-right">Monto</th>
-                      <th className="px-4 py-3 text-left">Cuenta destino</th>
-                      <th className="px-4 py-3 text-left">Concepto</th>
-                      <th className="px-4 py-3 text-left">Estado</th>
-                      <th className="px-4 py-3 text-left">Fecha</th>
-                      <th className="px-4 py-3 text-left">Comentario</th>
+                      <th className="px-6 py-4 text-left">Folio / ID</th>
+                      <th className="px-6 py-4 text-left">Solicitante</th>
+                      <th className="px-6 py-4 text-left">Departamento</th>
+                      <th className="px-6 py-4 text-right">Monto</th>
+                      <th className="px-6 py-4 text-left">Cuenta destino</th>
+                      <th className="px-6 py-4 text-left">Concepto</th>
+                      <th className="px-6 py-4 text-left">Estado</th>
+                      <th className="px-6 py-4 text-left">Fecha</th>
+                      <th className="px-6 py-4 text-center">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {data.map((v) => (
                       <tr key={v.id} className="group hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.folio || v.id}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.nombre_solicitante || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.departamento}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800 text-right">${v.monto?.toFixed?.(2) ?? v.monto}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.cuenta_destino || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.concepto || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800"><span className={v.estado === 'autorizada' ? 'text-green-600' : 'text-red-600'}>{v.estado}</span></td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.fecha_revision || v.fecha_pago || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-800">{v.comentario_aprobador || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.folio || v.id}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.nombre_solicitante || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.departamento}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800 text-right">${v.monto?.toFixed?.(2) ?? v.monto}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.cuenta_destino || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.concepto || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800"><span className={v.estado === 'autorizada' ? 'text-green-600' : 'text-red-600'}>{v.estado}</span></td>
+                        <td className="px-6 py-4 text-sm text-gray-800">{v.fecha_revision || v.fecha_pago || '-'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-800 text-center">
+                          <div className="flex items-center justify-center gap-3">
+                            {/** PDF link (if available) and view detail button, matching viáticos actions */}
+                            { (v as any).viatico_url ? (
+                              <a
+                                href={`/uploads/viaticos/${(v as any).viatico_url.split('/').pop()}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-blue-700 hover:text-blue-800 hover:bg-blue-50 transition-colors"
+                              >
+                                <FaFilePdf className="text-red-500" />
+                                <span>Ver PDF</span>
+                              </a>
+                            ) : (
+                              <span className="text-sm text-gray-400">Sin archivo</span>
+                            )}
+
+                            <button
+                              onClick={() => { setSelectedViatico(v); setShowDetailModal(true); }}
+                              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 transition-colors"
+                              title="Ver detalles del viático"
+                            >
+                              <Eye className="w-4 h-4" />
+                              <span>Ver Detalle</span>
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -111,6 +142,13 @@ export default function HistorialAprobadorPage() {
               )}
             </div>
           </div>
+          {selectedViatico && (
+            <SolicitudDetailModal
+              solicitud={selectedViatico as any}
+              isOpen={showDetailModal}
+              onClose={() => setShowDetailModal(false)}
+            />
+          )}
         </div>
       </AprobadorLayout>
     </ProtectedRoute>
