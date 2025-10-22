@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AprobadorLayout } from '@/components/layout/AprobadorLayout';
 import { FaFilePdf } from 'react-icons/fa';
 import { Eye } from 'lucide-react';
-import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
+import { ViaticoDetailModal } from '@/components/viaticos/ViaticoDetailModal';
 
 type Viatico = {
   id: number;
@@ -83,35 +83,34 @@ export default function HistorialAprobadorPage() {
               ) : data.length === 0 ? (
                 <div className="p-6 text-center text-gray-500">No hay viáticos aprobados o rechazados por ti.</div>
               ) : (
-                <table className="w-full table-auto border-collapse text-sm md:text-base">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-4 text-left">Folio / ID</th>
-                      <th className="px-6 py-4 text-left">Solicitante</th>
-                      <th className="px-6 py-4 text-left">Departamento</th>
-                      <th className="px-6 py-4 text-right">Monto</th>
-                      <th className="px-6 py-4 text-left">Cuenta destino</th>
-                      <th className="px-6 py-4 text-left">Concepto</th>
-                      <th className="px-6 py-4 text-left">Estado</th>
-                      <th className="px-6 py-4 text-left">Fecha</th>
-                      <th className="px-6 py-4 text-center">Acciones</th>
+                <table className="min-w-[1050px] w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-gray-50/80">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Folio</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solicitante</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cuenta destino</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {data.map((v) => (
                       <tr key={v.id} className="group hover:bg-gray-50">
-                        <td className="px-6 py-4 text-sm text-gray-800">{v.folio || v.id}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800">{v.nombre_solicitante || '-'}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800">{v.departamento}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800 text-right">${v.monto?.toFixed?.(2) ?? v.monto}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800">{v.cuenta_destino || '-'}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800">{v.concepto || '-'}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800"><span className={v.estado === 'autorizada' ? 'text-green-600' : 'text-red-600'}>{v.estado}</span></td>
-                        <td className="px-6 py-4 text-sm text-gray-800">{v.fecha_revision || v.fecha_pago || '-'}</td>
-                        <td className="px-6 py-4 text-sm text-gray-800 text-center">
+                        <td className="px-4 py-3 text-sm text-gray-800">{v.folio || v.id}</td>
+                        <td className="px-4 py-3 text-sm text-gray-800">{v.nombre_solicitante || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-800">{v.departamento}</td>
+                        <td className="px-4 py-3 text-sm text-gray-800">${v.monto?.toFixed?.(2) ?? v.monto}</td>
+                        <td className="px-4 py-3 text-sm text-gray-800">{v.cuenta_destino || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-800">{v.concepto || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-800"><span className={v.estado === 'autorizada' ? 'text-green-600' : 'text-red-600'}>{v.estado}</span></td>
+                        <td className="px-4 py-3 text-sm text-gray-800">{v.fecha_revision || v.fecha_pago || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-800 text-center">
                           <div className="flex items-center justify-center gap-3">
-                            {/** PDF link (if available) and view detail button, matching viáticos actions */}
-                            { (v as any).viatico_url ? (
+                            {(v as any).viatico_url ? (
                               <a
                                 href={`/uploads/viaticos/${(v as any).viatico_url.split('/').pop()}`}
                                 target="_blank"
@@ -143,8 +142,8 @@ export default function HistorialAprobadorPage() {
             </div>
           </div>
           {selectedViatico && (
-            <SolicitudDetailModal
-              solicitud={selectedViatico as any}
+            <ViaticoDetailModal
+              viatico={selectedViatico as any}
               isOpen={showDetailModal}
               onClose={() => setShowDetailModal(false)}
             />
