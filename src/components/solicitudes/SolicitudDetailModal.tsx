@@ -2435,18 +2435,17 @@ function extraerDatosDelConcepto(concepto: string) {
 
                     const mainPath = getPathname(mainUrl);
 
-                    // DEBUG: Mostrar nombres y paths para diagnosticar duplicados (solo en desarrollo)
-                    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
-                      try {
+                    // DEBUG (temporal): Mostrar nombres y paths para diagnosticar duplicados
+                    try {
+                      const base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'http://localhost';
+                      // eslint-disable-next-line no-console
+                      console.log('[DEBUG FILES] mainFileName:', mainFileName, 'mainPath:', mainPath, 'mainUrlRaw:', mainUrl);
+                      archivos.forEach(a => {
                         // eslint-disable-next-line no-console
-                        console.log('[DEBUG] mainFileName:', mainFileName, 'mainPath:', mainPath);
-                        archivos.forEach(a => {
-                          // eslint-disable-next-line no-console
-                          console.log('[DEBUG] archivo:', { fileName: (getFileName(a.archivo_url) || '').toLowerCase(), path: getPathname(a.archivo_url), url: a.archivo_url });
-                        });
-                      } catch (e) {
-                        // ignore
-                      }
+                        console.log('[DEBUG FILES] archivo:', { fileName: (getFileName(a.archivo_url) || '').toLowerCase(), path: getPathname(a.archivo_url), url: a.archivo_url, built: buildFileUrl(a.archivo_url) });
+                      });
+                    } catch (e) {
+                      // ignore logging errors
                     }
 
                     // Preparar pathname normalizado usando buildFileUrl como paso adicional
@@ -2462,17 +2461,32 @@ function extraerDatosDelConcepto(concepto: string) {
                     };
 
                     const mainBuiltPath = normalizeWithBuild(mainUrl);
+                    // Normalizar y comparar la URL completa usando buildFileUrl + URL
+                    const normalizeFullUrl = (u: string | undefined) => {
+                      try {
+                        const built = u ? buildFileUrl(u) : '';
+                        const base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'http://localhost';
+                        return new URL(built, base).href.replace(/\/$/, '').toLowerCase();
+                      } catch {
+                        return (u || '').split('?')[0].replace(/\/$/, '').toLowerCase();
+                      }
+                    };
+
+                    const mainBuiltFull = normalizeFullUrl(mainUrl);
 
                     const archivosFiltrados = archivos.filter(a => {
                       const fname = (getFileName(a.archivo_url) || '').toLowerCase();
                       const p = getPathname(a.archivo_url);
                       const pBuilt = normalizeWithBuild(a.archivo_url);
+                      const fullBuilt = normalizeFullUrl(a.archivo_url);
 
                       // Excluir si filename coincide o si pathname coincide con el main
                       if (mainFileName && fname && fname === mainFileName) return false;
                       if (mainPath && p && p === mainPath) return false;
                       // Excluir si la ruta normalizada via build coincide
                       if (mainBuiltPath && pBuilt && mainBuiltPath === pBuilt) return false;
+                      // Excluir si la URL completa normalizada coincide
+                      if (mainBuiltFull && fullBuilt && mainBuiltFull === fullBuilt) return false;
                       return true;
                     });
 
