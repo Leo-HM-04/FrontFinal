@@ -2394,8 +2394,87 @@ function extraerDatosDelConcepto(concepto: string) {
                 ) : (
                   (() => {
                     // Evitar mostrar el archivo principal dentro de los archivos adicionales
-                    const mainUrl = getMainFileUrl(solicitud);
-                    const archivosFiltrados = archivos.filter(a => a.archivo_url !== mainUrl);
+                    const mainUrl = getMainFileUrl(solicitud) || '';
+                    const getFileName = (u: string | undefined) => {
+                      if (!u) return '';
+                      // Intentar usar el constructor URL para obtener pathname (maneja absolute y relative con base)
+                      try {
+                        const base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'http://localhost';
+                        const urlObj = new URL(u, base);
+                        const raw = (urlObj.pathname || '').split('/').pop() || '';
+                        return decodeURIComponent(raw).trim();
+                      } catch {
+                        // Fallback: eliminar query y obtener último segmento
+                        try {
+                          const clean = u.split('?')[0];
+                          const raw = clean.split('/').pop() || '';
+                          return decodeURIComponent(raw).trim();
+                        } catch {
+                          return '';
+                        }
+                      }
+                    };
+                    const mainFileName = (getFileName(mainUrl) || '').toLowerCase();
+
+                    // Normalizar pathname usando URL (ignora origin y query) y comparar también por pathname
+                    const getPathname = (u: string | undefined) => {
+                      if (!u) return '';
+                      try {
+                        const base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'http://localhost';
+                        const urlObj = new URL(u, base);
+                        return (urlObj.pathname || '').replace(/\/+/g, '/').replace(/^\/+/, '').toLowerCase();
+                      } catch {
+                        try {
+                          const clean = u.split('?')[0];
+                          return (clean.split('/').slice(-1)[0] || '').toLowerCase();
+                        } catch {
+                          return '';
+                        }
+                      }
+                    };
+
+                    const mainPath = getPathname(mainUrl);
+
+                    // DEBUG: Mostrar nombres y paths para diagnosticar duplicados (solo en desarrollo)
+                    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
+                      try {
+                        // eslint-disable-next-line no-console
+                        console.log('[DEBUG] mainFileName:', mainFileName, 'mainPath:', mainPath);
+                        archivos.forEach(a => {
+                          // eslint-disable-next-line no-console
+                          console.log('[DEBUG] archivo:', { fileName: (getFileName(a.archivo_url) || '').toLowerCase(), path: getPathname(a.archivo_url), url: a.archivo_url });
+                        });
+                      } catch (e) {
+                        // ignore
+                      }
+                    }
+
+                    // Preparar pathname normalizado usando buildFileUrl como paso adicional
+                    const normalizeWithBuild = (u: string | undefined) => {
+                      try {
+                        const built = u ? buildFileUrl(u) : '';
+                        const base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'http://localhost';
+                        const urlObj = new URL(built, base);
+                        return (urlObj.pathname || '').replace(/\/+/g, '/').replace(/^\/+/, '').toLowerCase();
+                      } catch {
+                        return (u || '').split('?')[0].split('/').pop() || '';
+                      }
+                    };
+
+                    const mainBuiltPath = normalizeWithBuild(mainUrl);
+
+                    const archivosFiltrados = archivos.filter(a => {
+                      const fname = (getFileName(a.archivo_url) || '').toLowerCase();
+                      const p = getPathname(a.archivo_url);
+                      const pBuilt = normalizeWithBuild(a.archivo_url);
+
+                      // Excluir si filename coincide o si pathname coincide con el main
+                      if (mainFileName && fname && fname === mainFileName) return false;
+                      if (mainPath && p && p === mainPath) return false;
+                      // Excluir si la ruta normalizada via build coincide
+                      if (mainBuiltPath && pBuilt && mainBuiltPath === pBuilt) return false;
+                      return true;
+                    });
 
                     return archivosFiltrados.length > 0 ? (
                       <div className="space-y-3">
