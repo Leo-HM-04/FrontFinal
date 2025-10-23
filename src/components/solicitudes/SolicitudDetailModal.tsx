@@ -2396,7 +2396,7 @@ function extraerDatosDelConcepto(concepto: string) {
                     </div>
                   )
                 )}
-
+                
                 {/* Archivos adicionales de la solicitud */}
                 {loading.archivos ? (
                   <LoadingSpinner message="Cargando archivos..." />
@@ -2475,58 +2475,29 @@ function extraerDatosDelConcepto(concepto: string) {
                   ) : errors.comprobantes ? (
                     <ErrorMessage message={errors.comprobantes} />
                   ) : comprobantes.length === 0 ? (
-                    // Si no hay comprobantes en la tabla pero hay un archivo principal, mostrar ese archivo
-                    getMainFileUrl(solicitud) ? (
-                      <div className="space-y-4">
-                        <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
-                          <div className="flex justify-between items-start mb-3">
-                            <div className="flex-1">
-                              <div className="flex items-center bg-white/80 px-3 py-1.5 rounded-md w-fit">
-                                <span className="text-xs text-blue-800 font-semibold">
-                                  Comprobante de Pago
-                                </span>
-                              </div>
-                            </div>
-                            <Button
-                              size="sm"
-                              onClick={() => window.open(buildFileUrl(getMainFileUrl(solicitud)), '_blank')}
-                              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3"
-                            >
-                              Ver completo
-                            </Button>
-                          </div>
-                          
-                          <FilePreview 
-                            url={buildFileUrl(getMainFileUrl(solicitud))}
-                            fileName={getMainFileUrl(solicitud).split('/').pop() || 'comprobante'}
-                            alt="Comprobante de pago"
-                            height="h-36"
-                          />
+                    // No hay comprobantes: mostrar estado pendiente.
+                    // No re-renderizamos el archivo principal aquí para evitar duplicados
+                    <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
+                      <div className="flex justify-center mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                          <FileCheck className="w-8 h-8 text-blue-600" />
                         </div>
                       </div>
-                    ) : (
-                      <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
-                        <div className="flex justify-center mb-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
-                            <FileCheck className="w-8 h-8 text-blue-600" />
-                          </div>
-                        </div>
-                        <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
-                        <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
-                          El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
-                        </p>
-                        <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
-                          <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
-                        </div>
+                      <h4 className="text-lg font-bold text-blue-900 mb-2">Comprobantes Pendientes</h4>
+                      <p className="text-sm text-blue-700 leading-relaxed max-w-md mx-auto">
+                        El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada
+                      </p>
+                      <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-100/50 rounded-lg border border-blue-200/50">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse" />
+                        <span className="text-xs font-medium text-blue-800">Estado: Esperando comprobantes</span>
                       </div>
-                    )
+                    </div>
                   ) : (
                     <div className="space-y-4">
                       {comprobantes.map((comprobante) => {
                         const comprobanteUrl = buildFileUrl(comprobante.ruta_archivo);
                         const fileName = comprobante.nombre_archivo || comprobanteUrl.split('/').pop() || '';
-                        
+
                         return (
                           <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
                             <div className="flex justify-between items-start mb-3">
@@ -2551,7 +2522,7 @@ function extraerDatosDelConcepto(concepto: string) {
                                 Ver completo
                               </Button>
                             </div>
-                            
+
                             <FilePreview 
                               url={comprobanteUrl}
                               fileName={fileName}
