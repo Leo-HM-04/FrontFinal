@@ -427,20 +427,9 @@ const FilePreview: React.FC<{
       </div>
     );
   }
-
-  return (
-    <div className="flex items-center gap-3 p-3 bg-white/80 rounded border border-blue-200">
-      <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
-      <div className="flex-1">
-        <p className="text-blue-900 font-medium text-sm break-words">
-          Archivo: {fileName}
-        </p>
-        <p className="text-xs text-gray-600 mt-1">
-          Haga clic en &quot;Ver completo&quot; para abrir el archivo
-        </p>
-      </div>
-    </div>
-  );
+  // Si no es imagen ni PDF, no hay previsualización especial aquí.
+  // Retornamos null para evitar render duplicado en otras secciones.
+  return null;
 };
 
 // Función para detectar si una solicitud es N09/TOKA
