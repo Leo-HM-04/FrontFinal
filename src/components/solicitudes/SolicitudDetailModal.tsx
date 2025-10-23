@@ -2391,42 +2391,50 @@ function extraerDatosDelConcepto(concepto: string) {
                   <LoadingSpinner message="Cargando archivos..." />
                 ) : errors.archivos ? (
                   <ErrorMessage message={errors.archivos} />
-                ) : archivos.length > 0 ? (
-                  <div className="space-y-3">
-                    <span className="text-sm text-blue-700 font-medium flex items-center">
-                      <FileText className="w-4 h-4 mr-1.5 text-blue-600" />
-                      Archivos adicionales ({archivos.length}):
-                    </span>
-                    {archivos.map((archivo) => (
-                      <div key={archivo.id} className="bg-blue-50/30 p-3 rounded-lg border border-blue-100">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex-1">
-                            <span className="text-xs text-blue-600 font-medium bg-white/60 px-2 py-1 rounded">
-                              {archivo.tipo || 'Documento'}
-                            </span>
-                            <p className="text-xs text-gray-600 mt-1">
-                              Subido: {new Date(archivo.fecha_subida).toLocaleDateString('es-MX')}
-                            </p>
+                ) : (
+                  (() => {
+                    // Evitar mostrar el archivo principal dentro de los archivos adicionales
+                    const mainUrl = getMainFileUrl(solicitud);
+                    const archivosFiltrados = archivos.filter(a => a.archivo_url !== mainUrl);
+
+                    return archivosFiltrados.length > 0 ? (
+                      <div className="space-y-3">
+                        <span className="text-sm text-blue-700 font-medium flex items-center">
+                          <FileText className="w-4 h-4 mr-1.5 text-blue-600" />
+                          Archivos adicionales ({archivosFiltrados.length}):
+                        </span>
+                        {archivosFiltrados.map((archivo) => (
+                          <div key={archivo.id} className="bg-blue-50/30 p-3 rounded-lg border border-blue-100">
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex-1">
+                                <span className="text-xs text-blue-600 font-medium bg-white/60 px-2 py-1 rounded">
+                                  {archivo.tipo || 'Documento'}
+                                </span>
+                                <p className="text-xs text-gray-600 mt-1">
+                                  Subido: {new Date(archivo.fecha_subida).toLocaleDateString('es-MX')}
+                                </p>
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => window.open(buildFileUrl(archivo.archivo_url), '_blank')}
+                                className="bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-lg px-3 py-1.5 text-xs"
+                              >
+                                Ver archivo
+                              </Button>
+                            </div>
+                            <div className="mt-2">
+                              <FilePreview 
+                                url={buildFileUrl(archivo.archivo_url)}
+                                fileName={archivo.archivo_url.split('/').pop() || ''}
+                                alt={`Archivo: ${archivo.tipo || 'Documento'}`}
+                              />
+                            </div>
                           </div>
-                          <Button
-                            size="sm"
-                            onClick={() => window.open(buildFileUrl(archivo.archivo_url), '_blank')}
-                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-lg px-3 py-1.5 text-xs"
-                          >
-                            Ver archivo
-                          </Button>
-                        </div>
-                        <div className="mt-2">
-                          <FilePreview 
-                            url={buildFileUrl(archivo.archivo_url)}
-                            fileName={archivo.archivo_url.split('/').pop() || ''}
-                            alt={`Archivo: ${archivo.tipo || 'Documento'}`}
-                          />
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                ) : null}
+                    ) : null;
+                  })()
+                )}
 
                 {/* Botones de acción para documentos principales */}
                 <div className="flex w-full justify-end mt-6">
