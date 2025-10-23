@@ -807,22 +807,29 @@ export default function NuevaSolicitudPage() {
       
 
       
-      const solicitudData = {
-      departamento: formData.departamento,
-      monto: formData.monto,
-      tipo_moneda: formData.tipo_moneda,
-      cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || null) : formData.cuenta_destino,
-      concepto: conceptoGenerado,
-      tipo_pago: formData.tipo_pago,
-      tipo_pago_descripcion: formData.tipo_pago_descripcion,
-      empresa_a_pagar: formData.empresa_a_pagar,
-      nombre_persona: formData.nombre_persona,
-      fecha_limite_pago: formData.fecha_limite_pago,
-      factura: formData.archivos_adicionales[0] as File,
-      tipo_cuenta_destino: formData.tipo_cuenta_destino,
-      tipo_tarjeta: formData.tipo_cuenta_destino === 'Número de Tarjeta' ? formData.tipo_tarjeta : '',
-      banco_destino: formData.banco_destino,
-      cuenta: formData.cuenta || null,
+  // Determine factura file and archivos adicionales to upload separately to avoid duplicates
+  const facturaFromAdicional = formData.archivos_adicionales.length > 0 && !formData.factura_file;
+  const facturaFile: File | null = formData.factura_file ? (formData.factura_file as File) : (facturaFromAdicional ? formData.archivos_adicionales[0] : null);
+  // If factura was taken from archivos_adicionales, exclude it from the files we will upload as "adicionales"
+  const archivosToUpload: File[] = facturaFromAdicional ? formData.archivos_adicionales.slice(1) : formData.archivos_adicionales;
+  const tiposToUpload: string[] = facturaFromAdicional ? formData.tipos_archivos_adicionales.slice(1) : formData.tipos_archivos_adicionales;
+
+  // Build solicitud data; include `factura` only if we actually have a file (avoids passing null)
+  const solicitudDataBase: any = {
+    departamento: formData.departamento,
+    monto: formData.monto,
+    tipo_moneda: formData.tipo_moneda,
+    cuenta_destino: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? (formData.cuenta_destino || null) : formData.cuenta_destino,
+    concepto: conceptoGenerado,
+    tipo_pago: formData.tipo_pago,
+    tipo_pago_descripcion: formData.tipo_pago_descripcion,
+    empresa_a_pagar: formData.empresa_a_pagar,
+    nombre_persona: formData.nombre_persona,
+    fecha_limite_pago: formData.fecha_limite_pago,
+    tipo_cuenta_destino: formData.tipo_cuenta_destino,
+    tipo_tarjeta: formData.tipo_cuenta_destino === 'Número de Tarjeta' ? formData.tipo_tarjeta : '',
+    banco_destino: formData.banco_destino,
+    cuenta: formData.cuenta || null,
       // Campos de tarjeta institucional
       link_pago: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.link_pago || null : null,
       usuario_acceso: formData.tipo_cuenta_destino === 'Tarjeta Institucional' ? formData.usuario_acceso || null : null,
@@ -841,8 +848,12 @@ export default function NuevaSolicitudPage() {
       usuario_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.usuario_acceso_2 || null) : null,
       contrasena_acceso_2: formData.tiene_segunda_forma_pago && formData.tipo_cuenta_destino_2 === 'Tarjeta Institucional' ? (formData.contrasena_acceso_2 || null) : null
       };
-      
-      const response = await SolicitudesService.createWithFiles(solicitudData);
+  // Add factura only when present
+  if (facturaFile) {
+    solicitudDataBase.factura = facturaFile;
+  }
+
+  const response = await SolicitudesService.createWithFiles(solicitudDataBase);
   // console.log('✅ Solicitud principal creada, response:', response);
   // console.log('🔍 DEBUGGING RESPONSE:');
   // console.log('📋 typeof response:', typeof response);
@@ -856,8 +867,8 @@ export default function NuevaSolicitudPage() {
       console.log('📋 Length:', formData.archivos_adicionales.length);
       console.log('📋 formData.tipos_archivos_adicionales:', formData.tipos_archivos_adicionales);
       
-      // Subir archivos adicionales si los hay
-      if (formData.archivos_adicionales.length > 0) {
+      // Subir archivos adicionales si los hay (usando archivosToUpload para evitar duplicar la factura)
+      if (archivosToUpload.length > 0) {
         console.log('🚀 INICIANDO SUBIDA DE ARCHIVOS ADICIONALES');
         
         try {
@@ -877,10 +888,10 @@ export default function NuevaSolicitudPage() {
             if (estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-n09-toka') {
               console.log('📤 LLAMANDO a SolicitudN09TokaArchivosService.subirArchivos (TOKA)');
               // Para TOKA, forzar todos los archivos como comprobante_pago
-              const tiposParaToka = formData.tipos_archivos_adicionales.map(() => 'comprobante_pago');
+              const tiposParaToka = tiposToUpload.length > 0 ? tiposToUpload.map(() => 'comprobante_pago') : new Array(archivosToUpload.length).fill('comprobante_pago');
               await SolicitudN09TokaArchivosService.subirArchivos(
                 solicitudId,
-                formData.archivos_adicionales,
+                archivosToUpload,
                 tiposParaToka
               );
               console.log('✅ Archivos adicionales TOKA subidos exitosamente');
@@ -888,8 +899,8 @@ export default function NuevaSolicitudPage() {
               console.log('📤 LLAMANDO a SolicitudArchivosService.subirArchivos (Normal)');
               await SolicitudArchivosService.subirArchivos(
                 solicitudId,
-                formData.archivos_adicionales,
-                formData.tipos_archivos_adicionales
+                archivosToUpload,
+                tiposToUpload
               );
               console.log('✅ Archivos adicionales subidos exitosamente');
             }
