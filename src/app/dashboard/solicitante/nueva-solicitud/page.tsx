@@ -21,7 +21,7 @@ import { formatDateForAPI } from '@/utils/dateUtils';
 import { SelectorPlantillas } from '@/components/plantillas/SelectorPlantillas';
 import { FormularioPlantilla } from '@/components/plantillas/FormularioPlantilla';
 import { usePlantillaSolicitud } from '@/hooks/usePlantillaSolicitud';
-import { obtenerPlantillasActivas, obtenerPlantillasInactivas } from '@/data/plantillas';
+import { obtenerPlantillasActivas, obtenerPlantillasInactivas, obtenerPlantillaPorId } from '@/data/plantillas';
 
 // Reducer para manejar el formulario
 type FormState = {
@@ -430,15 +430,34 @@ export default function NuevaSolicitudPage() {
         let archivosParaSubir: File[] = [];
   // console.log('Verificando archivos en estadoPlantilla.datos:', estadoPlantilla.datos);
         
-        if (estadoPlantilla.datos.archivos_adjuntos && Array.isArray(estadoPlantilla.datos.archivos_adjuntos)) {
-          archivosParaSubir = estadoPlantilla.datos.archivos_adjuntos;
-          // console.log('Archivos encontrados:', archivosParaSubir.length, archivosParaSubir.map(f => f.name));
-        } else {
-          // console.log('No se encontraron archivos o no es un array:', estadoPlantilla.datos.archivos_adjuntos);
+        // Buscar archivos en diferentes campos posibles
+        const camposArchivos = ['archivos_adjuntos', 'documentos', 'archivos'];
+        for (const campo of camposArchivos) {
+          if (estadoPlantilla.datos[campo] && Array.isArray(estadoPlantilla.datos[campo])) {
+            archivosParaSubir = estadoPlantilla.datos[campo];
+            break;
+          }
         }
 
-        // Validar que hay al menos un archivo
-        if (archivosParaSubir.length === 0) {
+        // Verificar si el campo de archivos es requerido según la plantilla
+        const plantillaActual = estadoPlantilla.plantillaSeleccionada;
+        let archivoRequerido = false;
+        
+        if (plantillaActual) {
+          // Buscar si algún campo de archivos es requerido
+          for (const seccion of plantillaActual.secciones) {
+            for (const campo of seccion.campos) {
+              if ((campo.tipo === 'archivos' || campo.tipo === 'archivo') && campo.validaciones?.requerido) {
+                archivoRequerido = true;
+                break;
+              }
+            }
+            if (archivoRequerido) break;
+          }
+        }
+
+        // Validar archivos solo si son requeridos
+        if (archivoRequerido && archivosParaSubir.length === 0) {
           // console.error('No hay archivos para subir. Datos completos:', estadoPlantilla.datos);
           throw new Error('Debe adjuntar al menos un archivo para la plantilla');
         }
