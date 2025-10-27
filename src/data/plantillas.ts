@@ -5,7 +5,8 @@ import {
   ArrowLeftRight, 
   Banknote,
   Shield,
-  FileText
+  FileText,
+  Settings
 } from 'lucide-react';
 
 /**
@@ -1503,6 +1504,127 @@ export const plantillaRegresosEfectivo: PlantillaSolicitud = {
   }
 };
 
+/**
+ * Plantilla: PAGO DE SERVICIOS INTERNOS
+ * 
+ * Propósito: Gestionar pagos de servicios internos entre departamentos
+ * Departamentos: Todos los departamentos
+ * Características: Descripción detallada, monto, fecha límite, documentos opcionales
+ */
+export const plantillaPagoServiciosInternos: PlantillaSolicitud = {
+  id: 'pago-servicios-internos',
+  nombre: 'PAGO DE SERVICIOS INTERNOS',
+  descripcion: 'Plantilla para solicitudes de pago de servicios internos entre departamentos',
+  version: '1.0.0',
+  activa: true,
+  categoria: 'Pagos Internos',
+  icono: Settings,
+  color: 'green',
+  secciones: [
+    {
+      id: 'informacion-pago',
+      titulo: 'Información del Pago',
+      descripcion: 'Datos principales del pago de servicios internos',
+      campos: [
+        {
+          id: 'descripcion_pago',
+          nombre: 'descripcion_pago',
+          tipo: 'textarea',
+          etiqueta: 'Descripción del Pago',
+          placeholder: 'Describa detalladamente el servicio interno a pagar...',
+          ayuda: 'Proporcione una descripción completa del servicio interno, incluyendo departamento solicitante, tipo de servicio, y cualquier detalle relevante',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minLength: 20,
+            maxLength: 1000,
+            mensaje: 'La descripción debe tener entre 20 y 1000 caracteres'
+          },
+          estilos: {
+            ancho: 'completo',
+            filas: 4
+          }
+        },
+        {
+          id: 'monto',
+          nombre: 'monto',
+          tipo: 'numero',
+          etiqueta: 'Monto del Pago',
+          placeholder: 'Ej. 15,000.00',
+          ayuda: 'Monto total del servicio interno a pagar',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            minimo: 0.01,
+            mensaje: 'El monto debe ser mayor a 0'
+          },
+          estilos: {
+            ancho: 'medio',
+            formato: 'moneda'
+          }
+        },
+        {
+          id: 'fecha_limite_pago',
+          nombre: 'fecha_limite_pago',
+          tipo: 'fecha',
+          etiqueta: 'Fecha Límite de Pago',
+          ayuda: 'Fecha límite para realizar el pago del servicio interno',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: true,
+            mensaje: 'Seleccione la fecha límite de pago'
+          },
+          estilos: {
+            ancho: 'medio'
+          }
+        }
+      ],
+      estilos: {
+        columnas: 2,
+        espaciado: 'normal'
+      }
+    },
+    {
+      id: 'documentacion',
+      titulo: 'Documentación de Soporte',
+      descripcion: 'Archivos que respalden la solicitud de pago',
+      campos: [
+        {
+          id: 'documentos',
+          nombre: 'documentos',
+          tipo: 'archivos',
+          etiqueta: 'Documentos de Soporte',
+          ayuda: 'Agregue los documentos que respalden el pago del servicio interno (cotizaciones, órdenes de servicio, facturas internas, etc.)',
+          valorPorDefecto: '',
+          validaciones: {
+            requerido: false
+          },
+          estilos: {
+            ancho: 'completo',
+            multiple: true
+          }
+        }
+      ],
+      estilos: {
+        columnas: 1,
+        espaciado: 'normal'
+      }
+    }
+  ],
+  configuracion: {
+    permiteArchivosMultiples: true,
+    tiposArchivosPermitidos: ['.pdf', '.jpg', '.jpeg', '.png', '.xlsx', '.xls', '.doc', '.docx'],
+    tamanoMaximoArchivo: 25 * 1024 * 1024, // 25MB
+    mostrarProgreso: true
+  },
+  metadatos: {
+    creadoPor: 'Sistema',
+    fechaCreacion: new Date().toISOString(),
+    fechaModificacion: new Date().toISOString(),
+    usosFrecuentes: 0
+  }
+};
+
 // ============================================================================
 // REGISTRO Y GESTIÓN DE PLANTILLAS
 // ============================================================================
@@ -1523,7 +1645,8 @@ export const plantillasDisponibles: PlantillaSolicitud[] = [
   plantillaPagoComisiones,
   plantillaPagoPolizasGnp,
   plantillaRegresosTransferencia,
-  plantillaRegresosEfectivo
+  plantillaRegresosEfectivo,
+  plantillaPagoServiciosInternos
 ];
 
 // ============================================================================

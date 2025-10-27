@@ -149,3 +149,10 @@ export interface PlantillaRecurrente {
   activo: boolean; // indica si la plantilla está activa o pausada
   com_recurrente?: string; // Ruta del comprobante de pago (opcional)
 }
+
+// Exportar tipos de la nueva plantilla de Servicios Internos
+export type { 
+  DatosServiciosInternos, 
+  ValidacionesServiciosInternos, 
+  ConfiguracionServiciosInternos 
+} from './plantillaServiciosInternos';
