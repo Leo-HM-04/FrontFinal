@@ -77,7 +77,10 @@ export async function subirComprobante(id_solicitud: number, file: File) {
     // Verificamos si es una solicitud TOKA consultando por solicitud principal
     try {
       console.log(`🔍 Verificando si solicitud ${id_solicitud} es TOKA...`);
-      const res = await api.get(`/solicitudes-n09-toka/por-solicitud/${id_solicitud}`);
+      const res = await api.get(`/solicitudes-n09-toka/por-solicitud/${id_solicitud}`, {
+        // Evitar que el interceptor muestre toast de error para verificación TOKA
+        headers: { 'X-Skip-Error-Toast': 'true' }
+      });
       console.log(`🔍 Respuesta de verificación TOKA:`, res.data);
       
       if (res.data && res.data.success && res.data.data) {

@@ -449,7 +449,7 @@ export default function PagosPendientesPage() {
       <PagadorLayout>
         <div className="container mx-auto px-4 py-8">
          {/* Header */}
-          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 mb-8 shadow-xl">
+          <div className="bg-linear-to-br from-blue-600 to-blue-800 rounded-2xl p-6 mb-8 shadow-xl">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex-1">
                 <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
@@ -782,7 +782,7 @@ export default function PagosPendientesPage() {
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4">
               {/* Header del Modal */}
-              <div className="bg-gradient-to-r from-gray-800 to-blue-900 p-6 rounded-t-2xl">
+              <div className="bg-linear-to-r from-gray-800 to-blue-900 p-6 rounded-t-2xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
@@ -920,8 +920,8 @@ export default function PagosPendientesPage() {
 
         {/* Modal de confirmación para procesar pago */}
         {showConfirmModal && pagoAConfirmar && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/10">
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70">
+          <div className="fixed inset-0 z-9999 flex items-center justify-center bg-white/10">
+          <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/70">
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg text-black relative">
               <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center justify-center">
                 <div className="bg-yellow-300 border-4 border-yellow-400 rounded-full p-3 shadow-lg animate-bounce">
@@ -930,7 +930,7 @@ export default function PagosPendientesPage() {
               </div>
               <h3 className="text-2xl font-extrabold mb-4 text-center mt-6">¡Advertencia Importante!</h3>
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-4 text-yellow-900 text-base font-medium flex items-center gap-2">
-                <AlertCircle className="w-6 h-6 text-yellow-500 flex-shrink-0" />
+                <AlertCircle className="w-6 h-6 text-yellow-500 shrink-0" />
                 <span>
                   Vas a procesar el pago <b>#{pagoAConfirmar.id_solicitud}</b>. Esta acción es irreversible y marcará la solicitud como <b>pagada</b>.<br/>
                   <span className="text-red-600 font-bold">Tienes 3 días</span> para subir el comprobante, de lo contrario la solicitud será reportada.

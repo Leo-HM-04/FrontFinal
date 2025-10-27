@@ -70,7 +70,11 @@ api.interceptors.response.use(
     } else if (response?.status === 403 && !isLoginRequest) {
       toast.error('No tienes permisos para realizar esta acción.');
     } else if (response?.status === 404) {
-      toast.error('Recurso no encontrado.');
+      // Solo mostrar toast si no tiene el header que suprime errores
+      const skipErrorToast = error.config?.headers?.['X-Skip-Error-Toast'];
+      if (!skipErrorToast) {
+        toast.error('Recurso no encontrado.');
+      }
     } else if (response?.status >= 500) {
       toast.error('Error del servidor. Intenta nuevamente.');
     } else if (response?.data?.message && !isLoginRequest) {
