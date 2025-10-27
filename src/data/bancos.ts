@@ -14,6 +14,7 @@ export const bancosMexico: Banco[] = [
   { codigo: '019', nombre: 'Banco Nacional del Ejército Fuerza Aérea y Armada S.N.C.', nombreCorto: 'BANJERCITO' },
   { codigo: '021', nombre: 'HSBC México S.A.', nombreCorto: 'HSBC' },
   { codigo: '030', nombre: 'Banco del Bajío S.A.', nombreCorto: 'BAJÍO' },
+  { codigo: '031', nombre: 'Banco Mercantil del Norte S.A.', nombreCorto: 'BANORTE' },
   { codigo: '032', nombre: 'ING Bank (México) S.A.', nombreCorto: 'ING' },
   { codigo: '036', nombre: 'Banco Inbursa S.A.', nombreCorto: 'INBURSA' },
   { codigo: '037', nombre: 'Banco Interacciones S.A.', nombreCorto: 'INTERACCIONES' },

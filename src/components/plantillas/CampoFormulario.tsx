@@ -575,15 +575,15 @@ export const CampoFormulario: React.FC<CampoFormularioProps> = ({
                       type="text"
                       value={metodo.referencia}
                       onChange={(e) => {
-                        // Solo números, máximo 20 dígitos
-                        const soloNumeros = e.target.value.replace(/\D/g, '').slice(0, 20);
+                        // Solo números, máximo 40 dígitos
+                        const soloNumeros = e.target.value.replace(/\D/g, '').slice(0, 40);
                         actualizarMetodoPago(index, 'referencia', soloNumeros);
                       }}
-                      placeholder="Ej. 11112222333344445555"
-                      maxLength={20}
+                      placeholder="Ej. 1111222233334444555566667777888899990000"
+                      maxLength={40}
                       className={`${baseClasses} px-3 py-2 font-mono`}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Hasta 20 dígitos máximo</p>
+                    <p className="text-xs text-gray-500 mt-1">Hasta 40 dígitos máximo</p>
                   </div>
                 </div>
               </div>
