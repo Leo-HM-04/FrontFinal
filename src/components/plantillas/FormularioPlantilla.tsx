@@ -87,7 +87,7 @@ export const FormularioPlantilla: React.FC<FormularioPlantillaProps> = ({
       {/* Header de la plantilla */}
       <div className="bg-blue-600 rounded-2xl border border-blue-700 p-4 sm:p-8 mb-8 w-full shadow-lg">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+          <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shrink-0">
             {typeof plantilla.icono === 'string' ? (
               <span className="text-xl text-white">{plantilla.icono}</span>
             ) : plantilla.icono ? (

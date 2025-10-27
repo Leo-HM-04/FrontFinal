@@ -463,67 +463,99 @@ export default function NuevaSolicitudPage() {
         }
 
         // Preparar datos para el nuevo servicio de plantillas
-        const solicitudPlantillaData = {
-          // Datos básicos de la solicitud - mapeo dinámico según la plantilla
-          departamento: 'Finanzas',
-          monto: (() => {
-            // Proceso más robusto para obtener el monto
-            const montoRaw = estadoPlantilla.datos.monto_total_cliente || 
-                            estadoPlantilla.datos.monto || 
-                            estadoPlantilla.datos.monto_total || 
-                            '0';
-            
-            console.log('🔍 [DEBUG MONTO] Monto raw:', montoRaw, 'tipo:', typeof montoRaw);
-            
-            // Convertir a string limpio
-            let montoString = String(montoRaw);
-            
-            // Si viene con formato de moneda, limpiarlo
-            if (typeof montoRaw === 'string') {
-              montoString = montoRaw.replace(/[$,\s]/g, '');
-            }
-            
-            console.log('🔍 [DEBUG MONTO] Monto procesado:', montoString);
-            return montoString;
-          })(),
-          tipo_moneda: String(estadoPlantilla.datos.moneda || 'MXN'),
-          cuenta_destino: String(
-            estadoPlantilla.datos.numero_tarjeta ||
-            estadoPlantilla.datos.numero_cuenta || 
-            ''
-          ),
-          concepto: `${estadoPlantilla.datos.asunto || 'Plantilla'} - ${
-            estadoPlantilla.datos.beneficiario_tarjeta ||
-            estadoPlantilla.datos.beneficiario || 
-            estadoPlantilla.datos.cliente ||
-            'Sin beneficiario'
-          }`,
-          tipo_pago: estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-tukash' ? 'tarjeta' : 'transferencia',
-          tipo_cuenta_destino: estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-tukash' 
-            ? 'Número de Tarjeta' 
-            : String(estadoPlantilla.datos.tipo_cuenta || 'CLABE'),
-          banco_destino: String(estadoPlantilla.datos.banco_destino || ''),
-          nombre_persona: String(
-            estadoPlantilla.datos.beneficiario_tarjeta ||
-            estadoPlantilla.datos.beneficiario || 
-            estadoPlantilla.datos.cliente ||
-            ''
-          ),
-          empresa_a_pagar: String(
-            estadoPlantilla.datos.cliente ||
-            estadoPlantilla.datos.beneficiario || 
-            ''
-          ),
-          fecha_limite_pago: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        let solicitudPlantillaData: any;
+
+        // Mapeo específico para Pago de Servicios Internos
+        if (estadoPlantilla.plantillaSeleccionada?.id === 'pago-servicios-internos') {
+          console.log('🔧 [SERVICIOS INTERNOS] Preparando datos específicos para servicios internos');
           
-          // Datos específicos de plantilla
-          plantilla_id: estadoPlantilla.plantillaSeleccionada?.id || 'unknown',
-          plantilla_version: estadoPlantilla.plantillaSeleccionada?.version || '1.0',
-          plantilla_datos: JSON.stringify(estadoPlantilla.datos),
+          solicitudPlantillaData = {
+            departamento: 'Finanzas',
+            monto: String(estadoPlantilla.datos.monto || '0'),
+            tipo_moneda: 'MXN',
+            cuenta_destino: 'PAGO_INTERNO',
+            concepto: String(estadoPlantilla.datos.descripcion_pago || 'Pago de Servicios Internos'),
+            tipo_pago: 'interno',
+            tipo_cuenta_destino: 'INTERNO',
+            banco_destino: 'INTERNO',
+            nombre_persona: 'SERVICIOS INTERNOS',
+            empresa_a_pagar: 'SERVICIOS INTERNOS',
+            fecha_limite_pago: String(estadoPlantilla.datos.fecha_limite_pago || new Date().toISOString().split('T')[0]),
+            
+            // Datos específicos de plantilla
+            plantilla_id: 'pago-servicios-internos',
+            plantilla_version: estadoPlantilla.plantillaSeleccionada?.version || '1.0',
+            plantilla_datos: JSON.stringify(estadoPlantilla.datos),
+            
+            // Archivos (opcionales)
+            archivos: archivosParaSubir
+          };
           
-          // Todos los archivos van juntos
-          archivos: archivosParaSubir
-        };
+          console.log('🔧 [SERVICIOS INTERNOS] Datos preparados:', solicitudPlantillaData);
+        } else {
+          // Mapeo genérico para otras plantillas
+          solicitudPlantillaData = {
+            // Datos básicos de la solicitud - mapeo dinámico según la plantilla
+            departamento: 'Finanzas',
+            monto: (() => {
+              // Proceso más robusto para obtener el monto
+              const montoRaw = estadoPlantilla.datos.monto_total_cliente || 
+                              estadoPlantilla.datos.monto || 
+                              estadoPlantilla.datos.monto_total || 
+                              '0';
+              
+              console.log('🔍 [DEBUG MONTO] Monto raw:', montoRaw, 'tipo:', typeof montoRaw);
+              
+              // Convertir a string limpio
+              let montoString = String(montoRaw);
+              
+              // Si viene con formato de moneda, limpiarlo
+              if (typeof montoRaw === 'string') {
+                montoString = montoRaw.replace(/[$,\s]/g, '');
+              }
+              
+              console.log('🔍 [DEBUG MONTO] Monto procesado:', montoString);
+              return montoString;
+            })(),
+            tipo_moneda: String(estadoPlantilla.datos.moneda || 'MXN'),
+            cuenta_destino: String(
+              estadoPlantilla.datos.numero_tarjeta ||
+              estadoPlantilla.datos.numero_cuenta || 
+              ''
+            ),
+            concepto: `${estadoPlantilla.datos.asunto || 'Plantilla'} - ${
+              estadoPlantilla.datos.beneficiario_tarjeta ||
+              estadoPlantilla.datos.beneficiario || 
+              estadoPlantilla.datos.cliente ||
+              'Sin beneficiario'
+            }`,
+            tipo_pago: estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-tukash' ? 'tarjeta' : 'transferencia',
+            tipo_cuenta_destino: estadoPlantilla.plantillaSeleccionada?.id === 'tarjetas-tukash' 
+              ? 'Número de Tarjeta' 
+              : String(estadoPlantilla.datos.tipo_cuenta || 'CLABE'),
+            banco_destino: String(estadoPlantilla.datos.banco_destino || ''),
+            nombre_persona: String(
+              estadoPlantilla.datos.beneficiario_tarjeta ||
+              estadoPlantilla.datos.beneficiario || 
+              estadoPlantilla.datos.cliente ||
+              ''
+            ),
+            empresa_a_pagar: String(
+              estadoPlantilla.datos.cliente ||
+              estadoPlantilla.datos.beneficiario || 
+              ''
+            ),
+            fecha_limite_pago: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            
+            // Datos específicos de plantilla
+            plantilla_id: estadoPlantilla.plantillaSeleccionada?.id || 'unknown',
+            plantilla_version: estadoPlantilla.plantillaSeleccionada?.version || '1.0',
+            plantilla_datos: JSON.stringify(estadoPlantilla.datos),
+            
+            // Todos los archivos van juntos
+            archivos: archivosParaSubir
+          };
+        }
 
   // console.log('Datos de plantilla para enviar al nuevo servicio:', solicitudPlantillaData);
   // console.log('Archivos a enviar:', archivosParaSubir.map(f => ({ name: f.name, size: f.size, type: f.type })));
@@ -1015,7 +1047,7 @@ export default function NuevaSolicitudPage() {
                 <Button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transform transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transform transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {loading ? (
                     <div className="flex items-center space-x-2">
@@ -1035,9 +1067,9 @@ export default function NuevaSolicitudPage() {
             // Formulario estándar (código original)
             <>
               {/* Mensaje informativo sobre días de pago - SOLO para formulario estándar */}
-              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-4 mb-6 w-full">
+              <div className="bg-linear-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-4 mb-6 w-full">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <div className="w-10 h-10 bg-linear-to-r from-orange-400 to-orange-500 rounded-full flex items-center justify-center shrink-0 shadow-lg">
                     <Calendar className="w-5 h-5 text-white" />
                   </div>
                   <div className="flex-1">
@@ -1069,7 +1101,7 @@ export default function NuevaSolicitudPage() {
             {isFormSubmitted && Object.keys(errors).length > 0 && (
               <div className="bg-red-500/20 border-2 border-red-500/50 rounded-xl p-6 mb-8 backdrop-blur-sm animate-pulse">
                 <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <span className="text-4xl animate-bounce">⚠️</span>
                   </div>
                   <div className="flex-1">
@@ -1957,7 +1989,7 @@ export default function NuevaSolicitudPage() {
                   {formData.archivos_adicionales.length > 0 && (
                     <div className="space-y-4">
                       {formData.archivos_adicionales.map((archivo, index) => (
-                        <div key={index} className="p-4 bg-gradient-to-r from-white/10 to-white/5 rounded-xl border border-white/20 backdrop-blur-sm">
+                        <div key={index} className="p-4 bg-linear-to-r from-white/10 to-white/5 rounded-xl border border-white/20 backdrop-blur-sm">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4 flex-1">
                               <div className="p-2 rounded-full bg-blue-500/20 border border-blue-400/30">
@@ -2024,7 +2056,7 @@ export default function NuevaSolicitudPage() {
                     (cuentaValida === false && formData.tipo_cuenta_destino !== 'Tarjeta Institucional') ||
                     (checkingCuenta && formData.tipo_cuenta_destino !== 'Tarjeta Institucional')
                   }
-                  className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:scale-105 shadow-xl border-0 px-10 py-4 font-semibold text-base flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="bg-linear-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:scale-105 shadow-xl border-0 px-10 py-4 font-semibold text-base flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {loading ? (
                     <>
