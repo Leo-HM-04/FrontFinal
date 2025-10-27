@@ -138,6 +138,8 @@ export function PlantillaServiciosInternosDetailModal({ solicitud, isOpen, onClo
   // Cargar archivos cuando se abre el modal
   useEffect(() => {
     if (isOpen && solicitud.id_solicitud) {
+      console.log('🔍 [SERVICIOS INTERNOS MODAL] Cargando archivos para solicitud:', solicitud.id_solicitud);
+      console.log('🔍 [SERVICIOS INTERNOS MODAL] soporte_url:', solicitud.soporte_url);
       cargarArchivos();
     }
   }, [isOpen, solicitud.id_solicitud]);
@@ -148,6 +150,7 @@ export function PlantillaServiciosInternosDetailModal({ solicitud, isOpen, onClo
 
     try {
       const archivosData = await SolicitudArchivosService.obtenerArchivos(solicitud.id_solicitud);
+      console.log('🔍 [SERVICIOS INTERNOS MODAL] Archivos cargados:', archivosData);
       setArchivos(archivosData || []);
     } catch (err) {
       const errorMessage = handleError(err);
@@ -301,53 +304,110 @@ export function PlantillaServiciosInternosDetailModal({ solicitud, isOpen, onClo
               {!loading.archivos && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {(() => {
-                    // Filtrar solo los comprobantes de pago (no facturas/documentos de soporte)
-                    const comprobantes = archivos.filter(archivo => 
+                    // Filtrar comprobantes de pago de archivos adjuntos
+                    const comprobantesArchivos = archivos.filter(archivo => 
                       archivo.tipo === 'comprobante_pago' || 
                       archivo.tipo === 'comprobante' ||
                       (archivo.tipo && archivo.tipo.toLowerCase().includes('comprobante'))
                     );
                     
-                    return comprobantes.length > 0 ? (
-                      comprobantes.map((archivo) => (
-                        <div key={archivo.id} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                          <div 
-                            onClick={() => handleFileClick(archivo)}
-                            className="relative h-40 bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
-                          >
-                            <div className="text-center">
-                              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-sm">
-                                <FileText className="w-8 h-8 text-blue-600" />
-                              </div>
-                              <p className="text-sm text-slate-600 font-semibold">Comprobante de Pago</p>
-                            </div>
-                          </div>
-                          <div className="p-4">
-                            <div className="flex items-center gap-2 mb-3">
-                              <div className="bg-blue-100 p-1.5 rounded-lg">
-                                <FileText className="w-4 h-4 text-blue-600" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold text-slate-900 truncate">Comprobante de Pago</p>
-                                <p className="text-xs text-slate-500">{formatDate(archivo.fecha_subida)}</p>
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => handleFileClick(archivo)}
-                              className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                    // Verificar si hay comprobante en soporte_url
+                    const tieneComprobanteUrl = solicitud.soporte_url && solicitud.soporte_url.trim() !== '';
+                    
+                    const handleComprobanteUrlClick = () => {
+                      if (solicitud.soporte_url) {
+                        const fileUrl = buildFileUrl(solicitud.soporte_url);
+                        window.open(fileUrl, '_blank', 'noopener,noreferrer');
+                      }
+                    };
+                    
+                    const totalComprobantes = comprobantesArchivos.length + (tieneComprobanteUrl ? 1 : 0);
+                    
+                    if (totalComprobantes > 0) {
+                      const elementos = [];
+                      
+                      // Agregar comprobante de soporte_url si existe
+                      if (tieneComprobanteUrl) {
+                        elementos.push(
+                          <div key="soporte-url" className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                            <div 
+                              onClick={handleComprobanteUrlClick}
+                              className="relative h-40 bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
                             >
-                              <ExternalLink className="w-4 h-4" />Ver comprobante
-                            </button>
+                              <div className="text-center">
+                                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-sm">
+                                  <FileText className="w-8 h-8 text-blue-600" />
+                                </div>
+                                <p className="text-sm text-slate-600 font-semibold">Comprobante de Pago</p>
+                              </div>
+                            </div>
+                            <div className="p-4">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="bg-blue-100 p-1.5 rounded-lg">
+                                  <FileText className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-bold text-slate-900 truncate">Comprobante de Pago</p>
+                                  <p className="text-xs text-slate-500">Subido por pagador</p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={handleComprobanteUrlClick}
+                                className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                              >
+                                <ExternalLink className="w-4 h-4" />Ver comprobante
+                              </button>
+                            </div>
                           </div>
+                        );
+                      }
+                      
+                      // Agregar comprobantes de archivos adjuntos
+                      comprobantesArchivos.forEach((archivo) => {
+                        elementos.push(
+                          <div key={archivo.id} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                            <div 
+                              onClick={() => handleFileClick(archivo)}
+                              className="relative h-40 bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
+                            >
+                              <div className="text-center">
+                                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-sm">
+                                  <FileText className="w-8 h-8 text-blue-600" />
+                                </div>
+                                <p className="text-sm text-slate-600 font-semibold">Comprobante de Pago</p>
+                              </div>
+                            </div>
+                            <div className="p-4">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="bg-blue-100 p-1.5 rounded-lg">
+                                  <FileText className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-bold text-slate-900 truncate">Comprobante de Pago</p>
+                                  <p className="text-xs text-slate-500">{formatDate(archivo.fecha_subida)}</p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleFileClick(archivo)}
+                                className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                              >
+                                <ExternalLink className="w-4 h-4" />Ver comprobante
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      });
+                      
+                      return elementos;
+                    } else {
+                      return (
+                        <div className="col-span-full text-center py-12 bg-blue-50 rounded-xl border-2 border-dashed border-blue-300">
+                          <FileText className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+                          <p className="text-blue-600 font-medium">No hay comprobantes de pago disponibles</p>
+                          <p className="text-blue-500 text-sm mt-2">Los comprobantes aparecerán aquí cuando sean subidos por el pagador</p>
                         </div>
-                      ))
-                    ) : (
-                      <div className="col-span-full text-center py-12 bg-blue-50 rounded-xl border-2 border-dashed border-blue-300">
-                        <FileText className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-                        <p className="text-blue-600 font-medium">No hay comprobantes de pago disponibles</p>
-                        <p className="text-blue-500 text-sm mt-2">Los comprobantes aparecerán aquí cuando sean subidos por el pagador</p>
-                      </div>
-                    );
+                      );
+                    }
                   })()}
                 </div>
               )}
