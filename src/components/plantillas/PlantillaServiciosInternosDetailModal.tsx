@@ -291,11 +291,57 @@ export function PlantillaServiciosInternosDetailModal({ solicitud, isOpen, onClo
                 Comprobante de Pago
               </h3>
               
-              <div className="col-span-full text-center py-12 bg-blue-50 rounded-xl border-2 border-dashed border-blue-300">
-                <FileText className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-                <p className="text-blue-600 font-medium">El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada</p>
-                <p className="text-blue-500 text-sm mt-2">Los documentos se mostrarán cuando el pagador suba el comprobante</p>
-              </div>
+              {loading.archivos && (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Cargando comprobantes...</p>
+                </div>
+              )}
+              
+              {!loading.archivos && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {archivos && archivos.length > 0 ? (
+                    archivos.map((archivo) => (
+                      <div key={archivo.id} className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                        <div 
+                          onClick={() => handleFileClick(archivo)}
+                          className="relative h-40 bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
+                        >
+                          <div className="text-center">
+                            <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-sm">
+                              <FileText className="w-8 h-8 text-blue-600" />
+                            </div>
+                            <p className="text-sm text-slate-600 font-semibold">{archivo.tipo || 'Comprobante'}</p>
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="bg-blue-100 p-1.5 rounded-lg">
+                              <FileText className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-slate-900 truncate">{archivo.tipo || 'Comprobante'}</p>
+                              <p className="text-xs text-slate-500">{formatDate(archivo.fecha_subida)}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleFileClick(archivo)}
+                            className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-2 px-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                          >
+                            <ExternalLink className="w-4 h-4" />Ver comprobante
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12 bg-blue-50 rounded-xl border-2 border-dashed border-blue-300">
+                      <FileText className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+                      <p className="text-blue-600 font-medium">No hay comprobantes de pago disponibles</p>
+                      <p className="text-blue-500 text-sm mt-2">Los comprobantes aparecerán aquí cuando sean subidos por el pagador</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           

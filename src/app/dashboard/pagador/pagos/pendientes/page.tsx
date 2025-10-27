@@ -13,6 +13,7 @@ import { Solicitud } from '@/types';
 import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { PlantillaTukashDetailModal } from '@/components/plantillas/PlantillaTukashDetailModal';
 import { PlantillaN09TokaDetailModal } from '@/components/plantillas/PlantillaN09TokaDetailModal';
+import { PlantillaServiciosInternosDetailModal } from '@/components/plantillas/PlantillaServiciosInternosDetailModal';
 import { SolicitudDetailModal } from '@/components/solicitudes/SolicitudDetailModal';
 import { SubirComprobanteModal } from '@/components/pagos/SubirComprobanteModal';
 import { SolicitudN09TokaData } from '@/services/solicitudesN09Toka.service';
@@ -387,6 +388,66 @@ export default function PagosPendientesPage() {
     return false;
   }
 
+  // Función para detectar si una solicitud es de servicios internos
+  function isServiciosInternosSolicitud(solicitud: Solicitud & { tipo_plantilla?: string }): boolean {
+    console.log(`🔍 [SERVICIOS INTERNOS] Iniciando detección para solicitud ${solicitud.id_solicitud}`);
+    
+    // 1. Verificar por tipo_plantilla
+    console.log(`🔍 [SERVICIOS INTERNOS] tipo_plantilla: ${solicitud.tipo_plantilla}`);
+    if (solicitud.tipo_plantilla === 'PAGO_SERVICIOS_INTERNOS' || solicitud.tipo_plantilla === 'pago-servicios-internos') {
+      console.log('✅ [SERVICIOS INTERNOS] Detectada por tipo_plantilla');
+      return true;
+    }
+    
+    // 2. Verificar por concepto que contenga "SERVICIOS INTERNOS"
+    console.log(`🔍 [SERVICIOS INTERNOS] concepto: ${solicitud.concepto}`);
+    if (solicitud.concepto && (
+        solicitud.concepto.includes('SERVICIOS INTERNOS') || 
+        solicitud.concepto.includes('PAGO INTERNO') ||
+        solicitud.concepto.includes('SERVICIO INTERNO')
+      )) {
+      console.log('✅ [SERVICIOS INTERNOS] Detectada por concepto');
+      return true;
+    }
+
+    // 3. Verificar por empresa_a_pagar
+    console.log(`🔍 [SERVICIOS INTERNOS] empresa_a_pagar: ${solicitud.empresa_a_pagar}`);
+    if (solicitud.empresa_a_pagar === 'SERVICIOS INTERNOS') {
+      console.log('✅ [SERVICIOS INTERNOS] Detectada por empresa_a_pagar');
+      return true;
+    }
+
+    // 4. Verificar por banco_destino
+    console.log(`🔍 [SERVICIOS INTERNOS] banco_destino: ${solicitud.banco_destino}`);
+    if (solicitud.banco_destino === 'INTERNO') {
+      console.log('✅ [SERVICIOS INTERNOS] Detectada por banco_destino');
+      return true;
+    }
+    
+    console.log('❌ [SERVICIOS INTERNOS] No se detectó como PAGO DE SERVICIOS INTERNOS');
+    return false;
+  }
+
+  // Función para mapear solicitud a datos de servicios internos
+  function mapSolicitudToServiciosInternosData(solicitud: Solicitud) {
+    return {
+      id_solicitud: solicitud.id_solicitud,
+      folio: solicitud.folio || '',
+      descripcion_pago: solicitud.concepto || solicitud.tipo_pago_descripcion || 'Pago de servicios internos',
+      monto: solicitud.monto || 0,
+      fecha_limite_pago: solicitud.fecha_limite_pago || '',
+      estado: (solicitud.estado === 'autorizada' ? 'aprobada' : solicitud.estado) || 'pendiente',
+      created_at: solicitud.fecha_creacion || '',
+      usuario_nombre: solicitud.usuario_nombre || solicitud.nombre_usuario || '',
+      nombre_aprobador: solicitud.aprobador_nombre || '',
+      fecha_aprobacion: solicitud.fecha_creacion || '', // Usando fecha_creacion como fallback
+      comentarios_aprobacion: solicitud.comentario_aprobador || '',
+      ruta_archivo: '', // No existe en Solicitud
+      soporte_url: solicitud.soporte_url || '',
+      tiene_archivos: false // No existe en Solicitud, se detectará por archivos cargados
+    };
+  }
+
   // Función para renderizar el modal correcto según plantilla
   function renderPlantillaModal() {
     console.log('🔴 RENDER MODAL - showDetailModal:', showDetailModal, 'selectedPago:', !!selectedPago);
@@ -402,7 +463,22 @@ export default function PagosPendientesPage() {
     console.log('🆔 Folio:', selectedPago.folio);
     console.log('📋 Departamento:', selectedPago.departamento);
     
-    // Detectar N09/TOKA primero
+    // Detectar Servicios Internos primero
+    const isServiciosInternos = isServiciosInternosSolicitud(selectedPago);
+    console.log('🔍 ¿Es SERVICIOS INTERNOS?:', isServiciosInternos);
+    
+    if (isServiciosInternos) {
+      console.log('✅ [SERVICIOS INTERNOS] Mostrando modal SERVICIOS INTERNOS con datos:', mapSolicitudToServiciosInternosData(selectedPago));
+      return (
+        <PlantillaServiciosInternosDetailModal
+          solicitud={mapSolicitudToServiciosInternosData(selectedPago)}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+        />
+      );
+    }
+    
+    // Detectar N09/TOKA
     const isN09Toka = isN09TokaSolicitud(selectedPago);
     console.log('🔍 ¿Es N09/TOKA?:', isN09Toka);
     
