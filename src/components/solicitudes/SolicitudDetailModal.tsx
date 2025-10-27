@@ -22,6 +22,7 @@ import { SolicitudTukashData } from '@/types/plantillaTukash';
 import { PlantillaSuaInternasDetailModal } from '@/components/plantillas/PlantillaSuaInternasDetailModal';
 import { SolicitudSuaInternasData } from '@/types/plantillaSuaInternas';
 import { PlantillaSuaFrenshetsiDetailModal } from '../plantillas/PlantillaSuaFrenshetsiDetailModal';
+import { PlantillaServiciosInternosDetailModal } from '../plantillas/PlantillaServiciosInternosDetailModal';
 import { extraerFechaLimiteDesdeplantilla, esSolicitudConFechaLimitePlantilla } from '@/utils/plantillaUtils';
 import { SolicitudSuaFrenshetsiData } from '@/types/plantillaSuaFrenshetsi';
 
@@ -382,7 +383,7 @@ const FilePreview: React.FC<{
   if (isImage) {
     return (
       <div className={`relative w-full ${height} group overflow-hidden rounded border border-blue-200 shadow-sm bg-white/90`}>
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-blue-100 animate-pulse" />
+        <div className="absolute inset-0 bg-linear-to-b from-blue-50 to-blue-100 animate-pulse" />
         <Image
           src={url}
           alt={alt || fileName}
@@ -955,6 +956,55 @@ function isPolizasSolicitud(solicitud: Solicitud & { tipo_plantilla?: string }):
   }
   
   console.log('❌ [POLIZAS DETECCIÓN] No se detectó como PAGO POLIZAS');
+  return false;
+}
+
+// Función auxiliar para detectar si es PAGO DE SERVICIOS INTERNOS
+function isServiciosInternosSolicitud(solicitud: Solicitud & { tipo_plantilla?: string }): boolean {
+  console.log(`🔍 [SERVICIOS INTERNOS DETECCIÓN] Iniciando detección para solicitud ${solicitud.id_solicitud}`);
+  
+  // 1. Verificar por plantilla_id directamente
+  const plantillaId = detectarPlantillaId(solicitud);
+  console.log(`🔍 [SERVICIOS INTERNOS DETECCIÓN] plantillaId detectado: ${plantillaId}`);
+  
+  if (plantillaId === 'pago-servicios-internos') {
+    console.log('✅ [SERVICIOS INTERNOS DETECCIÓN] Detectada por plantillaId = pago-servicios-internos');
+    return true;
+  }
+
+  // 2. Verificar por tipo_plantilla
+  console.log(`🔍 [SERVICIOS INTERNOS DETECCIÓN] tipo_plantilla: ${solicitud.tipo_plantilla}`);
+  if (solicitud.tipo_plantilla === 'PAGO_SERVICIOS_INTERNOS' || solicitud.tipo_plantilla === 'pago-servicios-internos') {
+    console.log('✅ [SERVICIOS INTERNOS DETECCIÓN] Detectada por tipo_plantilla');
+    return true;
+  }
+
+  // 3. Verificar por concepto que contenga "SERVICIOS INTERNOS"
+  console.log(`🔍 [SERVICIOS INTERNOS DETECCIÓN] concepto: ${solicitud.concepto}`);
+  if (solicitud.concepto && (
+      solicitud.concepto.includes('SERVICIOS INTERNOS') || 
+      solicitud.concepto.includes('PAGO INTERNO') ||
+      solicitud.concepto.includes('SERVICIO INTERNO')
+    )) {
+    console.log('✅ [SERVICIOS INTERNOS DETECCIÓN] Detectada por concepto');
+    return true;
+  }
+
+  // 4. Verificar por empresa_a_pagar
+  console.log(`🔍 [SERVICIOS INTERNOS DETECCIÓN] empresa_a_pagar: ${solicitud.empresa_a_pagar}`);
+  if (solicitud.empresa_a_pagar === 'SERVICIOS INTERNOS') {
+    console.log('✅ [SERVICIOS INTERNOS DETECCIÓN] Detectada por empresa_a_pagar');
+    return true;
+  }
+
+  // 5. Verificar por banco_destino
+  console.log(`🔍 [SERVICIOS INTERNOS DETECCIÓN] banco_destino: ${solicitud.banco_destino}`);
+  if (solicitud.banco_destino === 'INTERNO') {
+    console.log('✅ [SERVICIOS INTERNOS DETECCIÓN] Detectada por banco_destino');
+    return true;
+  }
+  
+  console.log('❌ [SERVICIOS INTERNOS DETECCIÓN] No se detectó como PAGO DE SERVICIOS INTERNOS');
   return false;
 }
 
@@ -1932,13 +1982,87 @@ function extraerDatosDelConcepto(concepto: string) {
     // Si no se pudo mapear, mostrar modal estándar
   }
 
+  // Renderizado condicional del modal SERVICIOS INTERNOS
+  if (isOpen && solicitud && isServiciosInternosSolicitud(solicitud)) {
+    console.log('🎯 [SERVICIOS INTERNOS] Detectada solicitud PAGO DE SERVICIOS INTERNOS, procesando datos...');
+    
+    let solicitudServiciosInternos = null;
+    
+    // Verificar que solicitud no sea null
+    if (!solicitud) return null;
+    
+    // Intentar obtener datos desde plantilla_datos
+    if (typeof solicitud === 'object' && solicitud.plantilla_datos) {
+      try {
+        const plantillaData = typeof solicitud.plantilla_datos === 'string' ? JSON.parse(solicitud.plantilla_datos) : solicitud.plantilla_datos;
+        console.log('📄 [SERVICIOS INTERNOS] Datos de plantilla_datos:', plantillaData);
+
+        // Construir datos de servicios internos
+        solicitudServiciosInternos = {
+          id_solicitud: solicitud.id_solicitud,
+          folio: solicitud.folio || `SOL-${solicitud.id_solicitud}`,
+          descripcion_pago: plantillaData.descripcion_pago || solicitud.concepto || 'Sin descripción',
+          monto: plantillaData.monto || solicitud.monto || 0,
+          fecha_limite_pago: plantillaData.fecha_limite_pago || solicitud.fecha_limite_pago || '',
+          estado: solicitud.estado,
+          created_at: solicitud.fecha_creacion,
+          usuario_nombre: solicitud.usuario_nombre || solicitud.nombre_usuario,
+          nombre_aprobador: solicitud.aprobador_nombre,
+          fecha_aprobacion: solicitud.fecha_revision,
+          comentarios_aprobacion: solicitud.comentario_aprobador,
+          ruta_archivo: undefined, // No hay campo directo para archivo de comprobante
+          soporte_url: solicitud.soporte_url,
+          tiene_archivos: undefined // Se calculará dinámicamente
+        };
+
+        console.log('🔧 [SERVICIOS INTERNOS] Datos construidos desde plantilla_datos:', solicitudServiciosInternos);
+      } catch (parseError) {
+        console.error('❌ [SERVICIOS INTERNOS] Error parsing plantilla_datos:', parseError);
+      }
+    }
+
+    // Si no hay plantilla_datos o falló el parsing, usar datos base
+    if (!solicitudServiciosInternos) {
+      solicitudServiciosInternos = {
+        id_solicitud: solicitud.id_solicitud,
+        folio: solicitud.folio || `SOL-${solicitud.id_solicitud}`,
+        descripcion_pago: solicitud.concepto || 'Sin descripción',
+        monto: solicitud.monto || 0,
+        fecha_limite_pago: solicitud.fecha_limite_pago || '',
+        estado: solicitud.estado,
+        created_at: solicitud.fecha_creacion,
+        usuario_nombre: solicitud.usuario_nombre || solicitud.nombre_usuario,
+        nombre_aprobador: solicitud.aprobador_nombre,
+        fecha_aprobacion: solicitud.fecha_revision,
+        comentarios_aprobacion: solicitud.comentario_aprobador,
+        ruta_archivo: undefined, // No hay campo directo en la interfaz
+        soporte_url: solicitud.soporte_url,
+        tiene_archivos: undefined // Se calculará dinámicamente
+      };
+
+      console.log('🔧 [SERVICIOS INTERNOS] Datos construidos desde campos base:', solicitudServiciosInternos);
+    }
+    
+    if (solicitudServiciosInternos) {
+      console.log('✅ [SERVICIOS INTERNOS] Mostrando modal SERVICIOS INTERNOS con datos:', solicitudServiciosInternos);
+      return (
+        <PlantillaServiciosInternosDetailModal
+          solicitud={solicitudServiciosInternos}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      );
+    }
+    // Si no se pudo mapear, mostrar modal estándar
+  }
+
   if (!isOpen || !solicitud) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
+        className="absolute inset-0 bg-linear-to-br from-slate-900/90 via-blue-900/80 to-indigo-900/70 backdrop-blur-md transition-all duration-500"
         onClick={onClose}
         role="button"
         tabIndex={-1}
@@ -1946,7 +2070,7 @@ function extraerDatosDelConcepto(concepto: string) {
       />
       
       {/* Modal container */}
-      <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-6xl xl:max-w-7xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
+      <div className="relative bg-linear-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[98vw] sm:max-w-6xl xl:max-w-7xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden border border-white/20 backdrop-blur-sm">
         
         {/* Botón de cerrar */}
         <button
@@ -1961,7 +2085,7 @@ function extraerDatosDelConcepto(concepto: string) {
         <div className="overflow-y-auto max-h-[98vh] sm:max-h-[95vh] scrollbar-thin scrollbar-track-blue-50 scrollbar-thumb-blue-300 hover:scrollbar-thumb-blue-400">
           
           {/* Header */}
-          <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+          <header className="bg-linear-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 sm:p-6 lg:p-8 relative overflow-hidden">
             {/* Elementos decorativos */}
             <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8 sm:-translate-y-12 sm:translate-x-12 lg:-translate-y-16 lg:translate-x-16" />
             <div className="absolute bottom-0 left-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-white/5 rounded-full translate-y-6 -translate-x-6 sm:translate-y-8 sm:-translate-x-8 lg:translate-y-12 lg:-translate-x-12" />
@@ -1993,7 +2117,7 @@ function extraerDatosDelConcepto(concepto: string) {
             <div className="mx-3 sm:mx-6 lg:mx-8 mb-4 sm:mb-6">
               <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 sm:p-6 shadow-md">
                 <div className="flex items-start">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
@@ -2020,7 +2144,7 @@ function extraerDatosDelConcepto(concepto: string) {
           <main className="p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
             
             {/* Resumen ejecutivo */}
-            <Card className="p-4 sm:p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl rounded-xl sm:rounded-2xl">
+            <Card className="p-4 sm:p-6 bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-xl rounded-xl sm:rounded-2xl">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
                 <div className="lg:col-span-1">
                   <span className="text-xs sm:text-sm uppercase tracking-wider text-blue-100 font-bold block mb-1 sm:mb-2">
@@ -2036,7 +2160,7 @@ function extraerDatosDelConcepto(concepto: string) {
                       </span>
                     )}
                   </div>
-                  <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-16 sm:w-20 lg:w-24" />
+                  <div className="mt-2 h-1 bg-linear-to-r from-yellow-400 to-yellow-300 rounded-full w-16 sm:w-20 lg:w-24" />
                 </div>
                 
                 <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -2073,7 +2197,7 @@ function extraerDatosDelConcepto(concepto: string) {
               <div className="space-y-4 sm:space-y-6">
                 
                 {/* Concepto */}
-                <Card className="p-4 sm:p-6 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200/50 shadow-lg rounded-xl sm:rounded-2xl">
+                <Card className="p-4 sm:p-6 bg-linear-to-br from-green-50 to-emerald-50 border border-green-200/50 shadow-lg rounded-xl sm:rounded-2xl">
                   <h2 className="text-lg sm:text-xl font-bold text-green-900 mb-3 sm:mb-4 flex items-center">
                     <div className="p-2 bg-green-100 rounded-lg sm:rounded-xl mr-3">
                       <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-green-700" />
@@ -2088,7 +2212,7 @@ function extraerDatosDelConcepto(concepto: string) {
                 </Card>
 
                 {/* Información de pago principal */}
-                <Card className="p-4 sm:p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl sm:rounded-2xl">
+                <Card className="p-4 sm:p-6 bg-linear-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl sm:rounded-2xl">
                   <h2 className="text-lg sm:text-xl font-bold text-blue-900 mb-4 sm:mb-6 flex items-center">
                     <div className="p-2 bg-blue-100 rounded-lg sm:rounded-xl mr-3">
                       <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-blue-700" />
@@ -2161,7 +2285,7 @@ function extraerDatosDelConcepto(concepto: string) {
 
                   {/* Información de acceso para Tarjeta Institucional */}
                   {esTarjetaInstitucional && tieneAccesoTarjetaInst && (
-                    <div className="bg-gradient-to-r from-blue-50/60 to-indigo-50/60 rounded-lg p-3 sm:p-4 border border-blue-200/60 mb-4">
+                    <div className="bg-linear-to-r from-blue-50/60 to-indigo-50/60 rounded-lg p-3 sm:p-4 border border-blue-200/60 mb-4">
                       <h3 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
                         <div className="w-2 h-2 bg-blue-600 rounded-full mr-2" />
                         Acceso - Tarjeta Institucional
@@ -2208,7 +2332,7 @@ function extraerDatosDelConcepto(concepto: string) {
 
                 {/* Segunda forma de pago */}
                 {solicitud.tiene_segunda_forma_pago && (
-                  <Card className="p-4 sm:p-6 bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200/50 shadow-lg rounded-xl sm:rounded-2xl">
+                  <Card className="p-4 sm:p-6 bg-linear-to-br from-emerald-50 to-green-50 border border-emerald-200/50 shadow-lg rounded-xl sm:rounded-2xl">
                     <h2 className="text-lg sm:text-xl font-bold text-emerald-900 mb-4 flex items-center">
                       <div className="p-2 bg-emerald-100 rounded-lg sm:rounded-xl mr-3">
                         <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-700" />
@@ -2260,7 +2384,7 @@ function extraerDatosDelConcepto(concepto: string) {
                     {(solicitud.tipo_cuenta_destino_2 === 'Tarjeta Institucional' || 
                       solicitud.tipo_cuenta_destino_2 === 'Tarjeta Instituciona') && 
                      (solicitud.link_pago_2 || solicitud.usuario_acceso_2 || solicitud.contrasena_acceso_2) && (
-                      <div className="mt-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/70 rounded p-3 border border-blue-200/40">
+                      <div className="mt-4 bg-linear-to-r from-blue-50/70 to-indigo-50/70 rounded p-3 border border-blue-200/40">
                         <span className="text-xs font-medium text-blue-800 mb-3 block">
                           Información de acceso
                         </span>
@@ -2350,7 +2474,7 @@ function extraerDatosDelConcepto(concepto: string) {
             </div>
 
             {/* Sección de documentos */}
-            <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+            <Card className="p-6 bg-linear-to-br from-white to-blue-50/30 border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
               <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
                 <div className="p-2 bg-blue-100 rounded-xl mr-3">
                   <ExternalLink className="w-6 h-6 text-blue-700" />
@@ -2536,7 +2660,7 @@ function extraerDatosDelConcepto(concepto: string) {
                       <Button
                         size="lg"
                         onClick={() => window.open(buildFileUrl(getMainFileUrl(solicitud)), '_blank')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-[160px]"
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2 text-base min-w-40"
                       >
                         <FileText className="w-5 h-5" />
                         Ver archivo
@@ -2567,9 +2691,9 @@ function extraerDatosDelConcepto(concepto: string) {
                   ) : comprobantes.length === 0 ? (
                     // No hay comprobantes: mostrar estado pendiente.
                     // No re-renderizamos el archivo principal aquí para evitar duplicados
-                    <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
+                    <div className="bg-linear-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl p-8 border border-blue-200/30 shadow-sm text-center">
                       <div className="flex justify-center mb-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                        <div className="w-16 h-16 bg-linear-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
                           <FileCheck className="w-8 h-8 text-blue-600" />
                         </div>
                       </div>
@@ -2606,7 +2730,7 @@ function extraerDatosDelConcepto(concepto: string) {
                               <Button
                                 size="sm"
                                 onClick={() => window.open(comprobanteUrl, '_blank')}
-                                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3"
+                                className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 ml-3"
                                 disabled={!comprobanteUrl}
                               >
                                 Ver completo

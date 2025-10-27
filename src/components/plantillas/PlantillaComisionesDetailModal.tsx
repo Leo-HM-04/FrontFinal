@@ -202,7 +202,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
             className="w-full border-0" 
             style={{ height: '220px' }} 
           />
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 text-xs text-center text-blue-700 font-medium border-t border-blue-100">
+          <div className="bg-linear-to-r from-blue-50 to-indigo-50 p-3 text-xs text-center text-blue-700 font-medium border-t border-blue-100">
             Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
           </div>
         </div>
@@ -210,7 +210,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
         {/* File info and actions */}
         <div className="p-5">
           <div className="flex items-start gap-3 mb-4">
-            <div className="bg-red-100 p-2 rounded-lg flex-shrink-0">
+            <div className="bg-red-100 p-2 rounded-lg shrink-0">
               <FileText className="w-5 h-5 text-red-600" />
             </div>
             <div className="flex-1 min-w-0">
@@ -225,7 +225,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
             href={fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             <ExternalLink className="w-4 h-4" />
             Ver completo
@@ -239,7 +239,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
       {/* Preview area */}
-      <div className="relative h-48 bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center border-b border-slate-200">
+      <div className="relative h-48 bg-linear-to-br from-slate-50 to-slate-100 flex items-center justify-center border-b border-slate-200">
         {isImage && !imageError ? (
           <Image
             src={fileUrl}
@@ -264,7 +264,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
       {/* File info */}
       <div className="p-5">
         <div className="flex items-start gap-3 mb-4">
-          <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+          <div className="bg-blue-100 p-2 rounded-lg shrink-0">
             <FileText className="w-5 h-5 text-blue-600" />
           </div>
           <div className="flex-1 min-w-0">
@@ -281,7 +281,7 @@ const FilePreview: React.FC<{ archivo: SolicitudArchivo }> = ({ archivo }) => {
           href={fileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           <ExternalLink className="w-4 h-4" />
           Ver completo
@@ -491,7 +491,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
         <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
           {/* Columna izquierda: info principal, auditoría y comprobantes */}
           <div className="flex-1 min-w-0">
-            <header className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
+            <header className="bg-linear-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
               <div className="bg-white/20 p-3 rounded-lg">
                 <CreditCard className="w-8 h-8 text-white" />
               </div>
@@ -631,7 +631,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
                     <div className="p-5 flex justify-end">
                       <button
                         onClick={() => window.open(comprobanteUrl, '_blank')}
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
+                        className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-xl px-4 py-2 text-xs"
                       >
                         Ver completo
                       </button>
@@ -647,7 +647,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
             </div>
           </div>
           {/* Columna derecha: archivos adjuntos */}
-          <div className="w-full lg:w-[420px] flex-shrink-0">
+          <div className="w-full lg:w-[420px] shrink-0">
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" />Archivos Adjuntos</h3>
               {loading.archivos && (
@@ -659,7 +659,7 @@ export function PlantillaComisionesDetailModal({ solicitud, isOpen, onClose }: P
               {errors.archivos && (
                 <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
                   <div className="flex">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <X className="h-5 w-5 text-red-400" />
                     </div>
                     <div className="ml-3">

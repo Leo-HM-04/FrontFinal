@@ -253,7 +253,7 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
         <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
           {/* Columna izquierda: información principal */}
           <div className="flex-1 min-w-0">
-            <header className="bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
+            <header className="bg-linear-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
               <div className="bg-white/20 p-3 rounded-lg">
                 <Banknote className="w-8 h-8 text-white" />
               </div>
@@ -296,7 +296,7 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Monto en Efectivo */}
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200 shadow-sm">
+                <div className="bg-linear-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200 shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
                     <Banknote className="w-5 h-5 text-blue-600" />
                     <h4 className="font-semibold text-blue-900 text-sm">Monto en Efectivo</h4>
@@ -305,10 +305,10 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
                 </div>
 
                 {/* Viáticos */}
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200 shadow-sm">
+                <div className="bg-linear-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200 shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
                     <DollarSign className="w-5 h-5 text-blue-600" />
-                    <h4 className="font-semibold text-blue-900 text-sm">Viáticos</h4>
+                    <h4 className="font-semibold text-blue-900 text-sm">Monto de Viáticos</h4>
                   </div>
                   <p className="text-2xl font-bold text-blue-900">{formatCurrency(solicitud.viaticos)}</p>
                 </div>
@@ -318,7 +318,7 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
             {/* Monto Total */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Monto Total</h3>
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-xl">
+              <div className="bg-linear-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-xl">
                 <div className="flex items-baseline gap-2">
                   <DollarSign className="w-6 h-6 text-yellow-300" />
                   <p className="text-2xl font-bold text-white tracking-tight">
@@ -328,7 +328,7 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
                 <div className="mt-2 text-sm text-blue-100">
                   Efectivo + Viáticos
                 </div>
-                <div className="mt-2 h-1 bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-full w-20" />
+                <div className="mt-2 h-1 bg-linear-to-r from-yellow-400 to-yellow-300 rounded-full w-20" />
               </div>
             </div>
 
@@ -392,7 +392,7 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
                         className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200"
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <FileCheck className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                          <FileCheck className="w-5 h-5 text-blue-500 shrink-0" />
                           <span className="text-sm font-medium text-gray-700 truncate">{fileName}</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -427,13 +427,13 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
           </div>
 
           {/* Columna derecha: Previsualización y archivos adjuntos */}
-          <div className="lg:w-[500px] flex-shrink-0">
+          <div className="lg:w-[500px] shrink-0">
             {/* Previsualización */}
             <div className="mb-6 bg-gray-50 rounded-xl p-4 border border-blue-100">
               <h3 className="text-lg font-semibold text-blue-900 mb-4">
                 {comprobantePreview ? 'Previsualización de Comprobante' : 'Previsualización de Archivo'}
               </h3>
-              <div className="aspect-[4/3] bg-white rounded-lg shadow-inner border border-blue-100">
+              <div className="aspect-4/3 bg-white rounded-lg shadow-inner border border-blue-100">
                 {renderPreview()}
               </div>
               {(archivoPreview || comprobantePreview) && (
@@ -483,8 +483,8 @@ export const PlantillaEfectivoDetailModal: React.FC<PlantillaEfectivoDetailModal
                         }`}
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                          <span className="text-sm font-medium text-blue-700 truncate">{fileName}</span>
+                          <FileText className="w-5 h-5 text-blue-500 shrink-0" />
+                          <span className="text-sm font-medium text-gray-700 truncate">{fileName}</span>
                         </div>
                         <div className="flex items-center gap-2 ml-2">
                           <button
