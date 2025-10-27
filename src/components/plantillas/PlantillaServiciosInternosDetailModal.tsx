@@ -56,6 +56,7 @@ const formatCurrency = (amount: number | string): string => {
 // Función para formatear fecha
 const formatDate = (dateString: string): string => {
   if (!dateString) return 'No especificada';
+  
   const date = new Date(dateString);
   return date.toLocaleDateString('es-MX', {
     year: 'numeric',
@@ -69,6 +70,7 @@ const formatDate = (dateString: string): string => {
 // Función para formatear solo fecha (sin hora)
 const formatDateOnly = (dateString: string): string => {
   if (!dateString) return 'No especificada';
+  
   const date = new Date(dateString);
   return date.toLocaleDateString('es-MX', {
     year: 'numeric',
@@ -84,7 +86,7 @@ const buildFileUrl = (rutaArchivo: string): string => {
   return rutaArchivo.startsWith('/') ? `${baseUrl}${rutaArchivo}` : `${baseUrl}/${rutaArchivo}`;
 };
 
-// Hook personalizado para manejo de errores
+// Hook para manejo de errores
 const useErrorHandler = () => {
   const handleError = useCallback((error: unknown): string => {
     console.error('Error:', error);
@@ -104,12 +106,12 @@ const InfoField: React.FC<{
   icon?: React.ReactNode;
   className?: string;
 }> = ({ label, value, icon, className = '' }) => (
-  <div className={`bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200 ${className}`}>
-    <div className="flex items-center gap-2 mb-2">
+  <div className={`text-slate-800 bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md space-y-3 ${className}`}>
+    <label className="flex items-center gap-2 text-sm font-semibold text-slate-600">
       {icon}
-      <span className="text-sm font-semibold text-blue-800 uppercase tracking-wide">{label}</span>
-    </div>
-    <div className="text-gray-800 font-medium">
+      {label}
+    </label>
+    <div className="text-slate-800">
       {typeof value === 'string' || typeof value === 'number' ? (
         <span className="wrap-break-word">{value}</span>
       ) : (
@@ -119,37 +121,8 @@ const InfoField: React.FC<{
   </div>
 );
 
-// Componente para mostrar el estado de la solicitud
-const EstadoBadge: React.FC<{ estado: string }> = ({ estado }) => {
-  const getEstadoStyles = (estado: string) => {
-    switch (estado.toLowerCase()) {
-      case 'pendiente':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'aprobada':
-      case 'autorizada':
-        return 'bg-green-100 text-green-800 border-green-300';
-      case 'rechazada':
-        return 'bg-red-100 text-red-800 border-red-300';
-      case 'pagada':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
-  };
-
-  return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getEstadoStyles(estado)}`}>
-      {estado.toUpperCase()}
-    </span>
-  );
-};
-
-// Componente principal del modal
-export const PlantillaServiciosInternosDetailModal: React.FC<PlantillaServiciosInternosDetailModalProps> = ({
-  solicitud,
-  isOpen,
-  onClose
-}) => {
+export function PlantillaServiciosInternosDetailModal({ solicitud, isOpen, onClose }: PlantillaServiciosInternosDetailModalProps) {
+  // Estado para archivos
   const [archivos, setArchivos] = useState<SolicitudArchivo[]>([]);
   const [loading, setLoading] = useState<LoadingStateServiciosInternos>({
     archivos: false,
@@ -197,208 +170,212 @@ export const PlantillaServiciosInternosDetailModal: React.FC<PlantillaServiciosI
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        {/* Header del modal */}
-        <div className="bg-linear-to-r from-green-600 to-green-700 text-white p-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-lg">
-              <Settings className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold">Pago de Servicios Internos</h2>
-              <p className="text-green-100 text-sm">Folio: {solicitud.folio}</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Contenido del modal */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
-          {/* Estado de la solicitud */}
-          <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800">Estado de la Solicitud</h3>
-            <EstadoBadge estado={solicitud.estado} />
-          </div>
-
-          {/* Información principal */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <InfoField
-              label="Descripción del Pago"
-              value={solicitud.descripcion_pago || 'No especificada'}
-              icon={<FileText className="w-4 h-4 text-blue-600" />}
-              className="md:col-span-2"
-            />
-            
-            <InfoField
-              label="Monto Total"
-              value={formatCurrency(solicitud.monto)}
-              icon={<DollarSign className="w-4 h-4 text-green-600" />}
-            />
-            
-            <InfoField
-              label="Fecha Límite de Pago"
-              value={formatDateOnly(solicitud.fecha_limite_pago)}
-              icon={<Calendar className="w-4 h-4 text-red-600" />}
-            />
-          </div>
-
-          {/* Información del solicitante */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Building className="w-5 h-5 text-blue-600" />
-              Información del Solicitante
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InfoField
-                label="Solicitante"
-                value={solicitud.usuario_nombre || 'No especificado'}
-                icon={<Building className="w-4 h-4 text-blue-600" />}
-              />
-              
-              <InfoField
-                label="Fecha de Solicitud"
-                value={formatDate(solicitud.created_at)}
-                icon={<Calendar className="w-4 h-4 text-blue-600" />}
-              />
-            </div>
-          </div>
-
-          {/* Información de aprobación (si aplica) */}
-          {(solicitud.nombre_aprobador || solicitud.fecha_aprobacion) && (
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Información de Aprobación</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {solicitud.nombre_aprobador && (
-                  <InfoField
-                    label="Aprobador"
-                    value={solicitud.nombre_aprobador}
-                    icon={<Building className="w-4 h-4 text-green-600" />}
-                  />
-                )}
-                
-                {solicitud.fecha_aprobacion && (
-                  <InfoField
-                    label="Fecha de Aprobación"
-                    value={formatDate(solicitud.fecha_aprobacion)}
-                    icon={<Calendar className="w-4 h-4 text-green-600" />}
-                  />
-                )}
-                
-                {solicitud.comentarios_aprobacion && (
-                  <InfoField
-                    label="Comentarios de Aprobación"
-                    value={solicitud.comentarios_aprobacion}
-                    className="md:col-span-2"
-                  />
-                )}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-4 bg-blue-900/60 backdrop-blur-sm">
+      <div className="absolute inset-0" onClick={onClose} role="button" tabIndex={-1} aria-label="Cerrar modal" />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[96vh] flex flex-col border border-blue-100">
+        <button 
+          onClick={onClose} 
+          className="absolute top-3 right-3 z-30 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-red-600 border border-blue-200 hover:border-red-300 rounded-full p-2 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300" 
+          aria-label="Cerrar modal"
+        >
+          <X className="w-6 h-6" />
+        </button>
+        <div className="flex flex-col lg:flex-row gap-6 overflow-y-auto max-h-[96vh] p-4 sm:p-6">
+          <div className="flex-1 min-w-0">
+            <header className="bg-linear-to-r from-blue-700 via-blue-500 to-blue-400 text-white p-4 rounded-xl mb-6 flex items-center gap-4 shadow-md">
+              <div className="bg-white/20 p-3 rounded-lg">
+                <Settings className="w-8 h-8 text-white" />
               </div>
-            </div>
-          )}
-
-          {/* Archivos adjuntos */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600" />
-              Documentos de Soporte
-            </h3>
-            
-            {loading.archivos ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                <span className="ml-2 text-gray-600">Cargando archivos...</span>
-              </div>
-            ) : error.archivos ? (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-800">Error al cargar archivos: {error.archivos}</p>
-                <button
-                  onClick={cargarArchivos}
-                  className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Reintentar
-                </button>
-              </div>
-            ) : archivos.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {archivos.map((archivo) => (
-                  <div
-                    key={archivo.id}
-                    onClick={() => handleFileClick(archivo)}
-                    className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200 cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-600 rounded-lg">
-                        <FileText className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-800 truncate">
-                          {archivo.tipo || 'Documento'}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {formatDate(archivo.fecha_subida)}
-                        </p>
-                      </div>
-                      <ExternalLink className="w-4 h-4 text-blue-600 shrink-0" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No hay documentos adjuntos</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Esta solicitud no incluye documentos de soporte
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Comprobante de pago (si existe) */}
-          {(solicitud.ruta_archivo || solicitud.soporte_url) && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Comprobante de Pago</h3>
-              <div
-                onClick={() => {
-                  const url = solicitud.ruta_archivo || solicitud.soporte_url;
-                  if (url) {
-                    window.open(buildFileUrl(url), '_blank', 'noopener,noreferrer');
-                  }
-                }}
-                className="bg-linear-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200 cursor-pointer hover:shadow-lg transition-all duration-200"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-600 rounded-lg">
-                    <FileText className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-800">Comprobante de Pago</p>
-                    <p className="text-sm text-gray-600">Clic para ver el comprobante</p>
-                  </div>
-                  <ExternalLink className="w-4 h-4 text-green-600" />
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                  <span>Pago de Servicios Internos</span>
+                </h2>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  <span className="inline-flex items-center gap-1 text-blue-100 text-sm">
+                    <Building className="w-4 h-4" />Solicitud #{solicitud.id_solicitud}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-blue-100 text-sm">
+                    <FileText className="w-4 h-4" />Folio: {solicitud.folio}
+                  </span>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+              <span className="px-4 py-2 rounded-full text-sm font-semibold border-2 bg-white/80 text-blue-700 border-blue-300 shadow-sm flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                {solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'}
+              </span>
+            </header>
 
-        {/* Footer del modal */}
-        <div className="bg-gray-50 px-6 py-4 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            Cerrar
-          </button>
+            {/* Información principal */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />Información Principal
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField
+                  label="Descripción del Pago"
+                  value={solicitud.descripcion_pago || 'No especificada'}
+                  icon={<FileText className="w-4 h-4 text-blue-600" />}
+                  className="md:col-span-2"
+                />
+                
+                <InfoField
+                  label="Monto Total"
+                  value={<span className="font-bold text-emerald-600">{formatCurrency(solicitud.monto)}</span>}
+                  icon={<DollarSign className="w-4 h-4 text-emerald-600" />}
+                />
+                
+                <InfoField
+                  label="Fecha Límite de Pago"
+                  value={formatDateOnly(solicitud.fecha_limite_pago)}
+                  icon={<Calendar className="w-4 h-4 text-red-600" />}
+                />
+              </div>
+            </div>
+
+            {/* Información del solicitante */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2">
+                <Building className="w-5 h-5 text-blue-500" />Información del Solicitante
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField
+                  label="Solicitante"
+                  value={solicitud.usuario_nombre || 'No especificado'}
+                  icon={<Building className="w-4 h-4 text-blue-600" />}
+                />
+                
+                <InfoField
+                  label="Fecha de Solicitud"
+                  value={formatDate(solicitud.created_at)}
+                  icon={<Calendar className="w-4 h-4 text-blue-600" />}
+                />
+              </div>
+            </div>
+
+            {/* Información de aprobación (si aplica) */}
+            {(solicitud.nombre_aprobador || solicitud.fecha_aprobacion) && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200">Información de Aprobación</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {solicitud.nombre_aprobador && (
+                    <InfoField
+                      label="Aprobador"
+                      value={solicitud.nombre_aprobador}
+                      icon={<Building className="w-4 h-4 text-green-600" />}
+                    />
+                  )}
+                  
+                  {solicitud.fecha_aprobacion && (
+                    <InfoField
+                      label="Fecha de Aprobación"
+                      value={formatDate(solicitud.fecha_aprobacion)}
+                      icon={<Calendar className="w-4 h-4 text-green-600" />}
+                    />
+                  )}
+                  
+                  {solicitud.comentarios_aprobacion && (
+                    <InfoField
+                      label="Comentarios de Aprobación"
+                      value={solicitud.comentarios_aprobacion}
+                      className="md:col-span-2"
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Comprobante de Pago */}
+            <div className="mb-6 w-full">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />
+                Comprobante de Pago
+              </h3>
+              
+              <div className="col-span-full text-center py-12 bg-blue-50 rounded-xl border-2 border-dashed border-blue-300">
+                <FileText className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+                <p className="text-blue-600 font-medium">El comprobante de pago aparecerá aquí una vez que la solicitud sea marcada como pagada</p>
+                <p className="text-blue-500 text-sm mt-2">Los documentos se mostrarán cuando el pagador suba el comprobante</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="w-full lg:w-[420px] shrink-0">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 pb-2 border-b border-blue-200 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />Documentos de Soporte
+              </h3>
+              
+              {loading.archivos && (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Cargando archivos...</p>
+                </div>
+              )}
+              {error.archivos && (
+                <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg">
+                  <div className="flex">
+                    <div className="shrink-0">
+                      <X className="h-5 w-5 text-red-400" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-800">{error.archivos}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!loading.archivos && !error.archivos && (
+                <div className="flex flex-col items-center justify-center w-full">
+                  {archivos && archivos.length > 0 ? (
+                    archivos.map((archivo) => (
+                      <div key={archivo.id} className="w-full flex justify-center">
+                        <div className="bg-white rounded-xl border border-blue-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 w-full max-w-xs lg:max-w-full">
+                          <div 
+                            onClick={() => handleFileClick(archivo)}
+                            className="relative h-[420px] bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
+                          >
+                            <div className="text-center">
+                              <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+                                <FileText className="w-10 h-10 text-blue-600" />
+                              </div>
+                              <p className="text-sm text-slate-600 font-semibold">{archivo.tipo || 'Documento'}</p>
+                              <p className="text-xs text-slate-500 mt-1">{formatDate(archivo.fecha_subida)}</p>
+                            </div>
+                          </div>
+                          <div className="p-5">
+                            <div className="flex items-start gap-3 mb-4">
+                              <div className="bg-blue-100 p-2 rounded-lg shrink-0">
+                                <FileText className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-slate-900 truncate">{archivo.tipo || 'Documento'}</p>
+                                <p className="text-xs text-slate-500 mt-1">{formatDate(archivo.fecha_subida)}</p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleFileClick(archivo)}
+                              className="w-full bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                            >
+                              <ExternalLink className="w-4 h-4" />Ver completo
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 font-medium">No hay archivos adjuntos disponibles</p>
+                      <p className="text-gray-500 text-sm mt-2">Los documentos aparecerán aquí cuando sean cargados</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default PlantillaServiciosInternosDetailModal;
