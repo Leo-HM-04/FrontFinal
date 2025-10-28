@@ -76,44 +76,44 @@ export default function HomeAnimado() {
 
         {/* Navigation - Debajo del logo en móvil */}
         <nav className="relative flex items-center order-2 lg:order-1 flex-1 justify-center w-full lg:w-auto">
-          <div className="nav-pill flex flex-col sm:flex-row items-center gap-3 sm:gap-3 md:gap-4 px-4 sm:px-3 py-4 sm:py-3 rounded-2xl sm:rounded-full bg-linear-to-r from-white to-blue-50 shadow-2xl border-2 border-blue-300 mx-auto max-w-[95vw] sm:max-w-[1100px] w-full lg:w-auto backdrop-blur-md">
+          <div className="nav-pill flex flex-col sm:flex-row items-center gap-3 sm:gap-3 md:gap-4 px-4 sm:px-3 py-4 sm:py-3 rounded-2xl sm:rounded-full bg-gray-50 shadow-2xl border-2 border-blue-400 mx-auto max-w-[95vw] sm:max-w-[1100px] w-full lg:w-auto backdrop-blur-md">
             <a
               href="#"
               onClick={handleDashboardRedirect}
-              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-900 px-3 sm:px-4 md:px-6 py-3 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start bg-blue-50 border border-blue-200 hover:bg-blue-700 hover:text-white shadow-lg"
+              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-extrabold px-3 sm:px-4 md:px-6 py-3 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start bg-white border-2 border-blue-500 hover:bg-blue-700 hover:text-white shadow-lg"
               aria-current="page"
-              style={{letterSpacing: '0.01em'}}
+              style={{letterSpacing: '0.01em', color: '#1e40af'}}
             >
-              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0 group-hover:bg-blue-100">
+              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-blue-100 shadow-sm shrink-0 group-hover:bg-blue-200">
                 <ArrowRight className="icon text-blue-700 group-hover:text-blue-800" size={16} />
               </span>
-              <span className="text-center sm:text-left font-bold">Sistema de Solicitudes y Gestión de Pagos</span>
+              <span className="text-center sm:text-left font-extrabold" style={{color: '#1e40af'}}>Sistema de Solicitudes y Gestión de Pagos</span>
             </a>
 
             <a
               href="https://bechapra.com.mx/envio-xml/"
               target="_blank"
               rel="noopener noreferrer"
-              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-900 px-3 sm:px-4 md:px-6 py-3 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start bg-blue-50 border border-blue-200 hover:bg-blue-700 hover:text-white shadow-lg"
-              style={{letterSpacing: '0.01em'}}
+              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-extrabold px-3 sm:px-4 md:px-6 py-3 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start bg-white border-2 border-blue-500 hover:bg-blue-700 hover:text-white shadow-lg"
+              style={{letterSpacing: '0.01em', color: '#1e40af'}}
             >
-              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0 group-hover:bg-blue-100">
+              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-blue-100 shadow-sm shrink-0 group-hover:bg-blue-200">
                 <Mail className="icon text-blue-700 group-hover:text-blue-800" size={16} />
               </span>
-              <span className="text-center sm:text-left font-bold">Envio Masivo de XML</span>
+              <span className="text-center sm:text-left font-extrabold" style={{color: '#1e40af'}}>Envio Masivo de XML</span>
             </a>
             
             <a
               href="https://bechapra.com.mx/panel/extractor"
               target="_blank"
               rel="noopener noreferrer"
-              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-900 px-3 sm:px-4 md:px-6 py-3 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start bg-blue-50 border border-blue-200 hover:bg-blue-700 hover:text-white shadow-lg"
-              style={{letterSpacing: '0.01em'}}
+              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-extrabold px-3 sm:px-4 md:px-6 py-3 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start bg-white border-2 border-blue-500 hover:bg-blue-700 hover:text-white shadow-lg"
+              style={{letterSpacing: '0.01em', color: '#1e40af'}}
             >
-              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0 group-hover:bg-blue-100">
+              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-blue-100 shadow-sm shrink-0 group-hover:bg-blue-200">
                 <Mail className="icon text-blue-700 group-hover:text-blue-800" size={16} />
               </span>
-              <span className="text-center sm:text-left font-bold">Extractor de Estados de Cuenta</span>
+              <span className="text-center sm:text-left font-extrabold" style={{color: '#1e40af'}}>Extractor de Estados de Cuenta</span>
             </a>
           </div>
         </nav>
