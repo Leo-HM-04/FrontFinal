@@ -67,6 +67,26 @@ const config: Config = {
         'blue': '0 4px 14px 0 rgba(0, 74, 183, 0.10)',
         'blue-lg': '0 10px 25px -3px rgba(0, 74, 183, 0.15)',
       },
+      backgroundImage: {
+        'linear-to-r': 'linear-gradient(to right, var(--tw-gradient-stops))',
+        'linear-to-br': 'linear-gradient(to bottom right, var(--tw-gradient-stops))',
+        'linear-to-tr': 'linear-gradient(to top right, var(--tw-gradient-stops))',
+        'linear-to-bl': 'linear-gradient(to bottom left, var(--tw-gradient-stops))',
+        'linear-to-t': 'linear-gradient(to top, var(--tw-gradient-stops))',
+      },
+      perspective: {
+        'distant': '1200px',
+      },
+      spacing: {
+        '112': '28rem',
+      },
+      rotate: {
+        'x-12': 'rotateX(12deg)',
+        'y-12': 'rotateY(12deg)',
+      },
+      transitionTimingFunction: {
+        'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      },
     },
   },
   plugins: [],

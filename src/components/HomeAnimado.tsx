@@ -47,13 +47,13 @@ export default function HomeAnimado() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden font-sans">
       {/* Fondo decorativo mejorado con capas y profundidad */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Capa principal de formas */}
-        <div className="absolute -top-64 -right-64 w-96 h-96 bg-gradient-to-br from-blue-100/40 to-indigo-100/60 rounded-full opacity-70 blur-3xl animate-drift-slow"></div>
-        <div className="absolute top-1/3 -left-48 w-80 h-80 bg-gradient-to-tr from-blue-200/30 to-slate-200/40 rounded-full opacity-60 blur-2xl animate-drift-reverse"></div>
-        <div className="absolute bottom-32 right-1/3 w-40 h-40 bg-gradient-to-bl from-indigo-200/50 to-blue-300/40 rounded-full opacity-50 blur-xl animate-float-gentle"></div>
+        <div className="absolute -top-64 -right-64 w-96 h-96 bg-linear-to-br from-blue-100/40 to-indigo-100/60 rounded-full opacity-70 blur-3xl animate-drift-slow"></div>
+        <div className="absolute top-1/3 -left-48 w-80 h-80 bg-linear-to-tr from-blue-200/30 to-slate-200/40 rounded-full opacity-60 blur-2xl animate-drift-reverse"></div>
+        <div className="absolute bottom-32 right-1/3 w-40 h-40 bg-linear-to-bl from-indigo-200/50 to-blue-300/40 rounded-full opacity-50 blur-xl animate-float-gentle"></div>
         
         {/* Capa secundaria para mayor profundidad */}
         <div className="absolute top-20 left-1/4 w-24 h-24 bg-blue-200/20 rounded-full blur-lg animate-pulse-soft"></div>
@@ -61,96 +61,98 @@ export default function HomeAnimado() {
       </div>
 
       {/* Header institucional premium: nav pill destacado a la izquierda, logo limpio a la derecha */}
-      <header className="relative w-full flex items-center justify-between px-4 md:px-12 py-6 md:py-4 bg-white/96 z-50 border-b-4 border-blue-700 shadow-sm min-h-[84px]">
-        <nav className="relative flex items-center order-2 xl:order-1 flex-1 justify-center">
-          <div className="nav-pill mt-2 md:mt-0 flex items-center gap-3 md:gap-4 px-2 md:px-3 py-2 md:py-3 rounded-full bg-white/92 shadow-2xl border border-blue-100/60 mx-auto max-w-[1100px] w-full md:w-auto">
+      <header className="relative w-full flex flex-col lg:flex-row items-center justify-between px-3 sm:px-4 md:px-8 lg:px-12 py-3 sm:py-4 md:py-6 bg-white/96 z-50 border-b-4 border-blue-700 shadow-sm min-h-[84px]">
+        {/* Logo - Siempre arriba en móvil */}
+        <div className="flex items-center justify-center lg:justify-end order-1 lg:order-2 mb-3 lg:mb-0 ml-0 lg:ml-8">
+          <Image 
+            src="/assets/images/bechapra-logo.png" 
+            alt="Logo BECHAPRA" 
+            width={128} 
+            height={128} 
+            className="object-contain select-none drop-shadow-md w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32"
+            priority 
+          />
+        </div>
+
+        {/* Navigation - Debajo del logo en móvil */}
+        <nav className="relative flex items-center order-2 lg:order-1 flex-1 justify-center w-full lg:w-auto">
+          <div className="nav-pill flex flex-col sm:flex-row items-center gap-2 sm:gap-3 md:gap-4 px-2 sm:px-3 py-2 sm:py-3 rounded-2xl sm:rounded-full bg-white/92 shadow-2xl border border-blue-100/60 mx-auto max-w-[95vw] sm:max-w-[1100px] w-full lg:w-auto">
             <a
               href="#"
               onClick={handleDashboardRedirect}
-              className="nav-item nav-cta group flex items-center gap-3 font-extrabold text-blue-800 px-4 md:px-6 py-2 md:py-3 rounded-full transition-all duration-200 text-lg md:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200"
+              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-800 px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start"
               aria-current="page"
               style={{letterSpacing: '0.01em'}}
             >
-              <span className="icon-wrap inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-sm">
-                <ArrowRight className="icon text-blue-700" size={18} />
+              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0">
+                <ArrowRight className="icon text-blue-700" size={16} />
               </span>
-              <span>Sistema de Solicitudes y Gestión de Pagos</span>
+              <span className="text-center sm:text-left">Sistema de Solicitudes y Gestión de Pagos</span>
             </a>
 
             <a
               href="https://bechapra.com.mx/envio-xml/"
               target="_blank"
               rel="noopener noreferrer"
-              className="nav-item nav-cta group flex items-center gap-3 font-extrabold text-blue-800 px-4 md:px-6 py-2 md:py-3 rounded-full transition-all duration-200 text-lg md:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200"
+              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-800 px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start"
               style={{letterSpacing: '0.01em'}}
             >
-              <span className="icon-wrap inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-sm">
-                <Mail className="icon text-blue-700" size={18} />
+              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0">
+                <Mail className="icon text-blue-700" size={16} />
               </span>
-              <span>Envio Masivo de XML</span>
+              <span className="text-center sm:text-left">Envio Masivo de XML</span>
             </a>
             
             <a
               href="https://bechapra.com.mx/panel/extractor"
               target="_blank"
               rel="noopener noreferrer"
-              className="nav-item nav-cta group flex items-center gap-3 font-extrabold text-blue-800 px-4 md:px-6 py-2 md:py-3 rounded-full transition-all duration-200 text-lg md:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200"
+              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-800 px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start"
               style={{letterSpacing: '0.01em'}}
             >
-              <span className="icon-wrap inline-flex items-center justify-center w-9 h-9 rounded-full bg-white shadow-sm">
-                <Mail className="icon text-blue-700" size={18} />
+              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0">
+                <Mail className="icon text-blue-700" size={16} />
               </span>
-              <span>Extractor de Estados de Cuenta (Tesorería)</span>
+              <span className="text-center sm:text-left">Extractor de Estados de Cuenta</span>
             </a>
           </div>
         </nav>
-
-        <div className="flex items-center order-1 xl:order-2 ml-2 md:ml-8">
-          <Image 
-            src="/assets/images/bechapra-logo.png" 
-            alt="Logo BECHAPRA" 
-            width={128} 
-            height={128} 
-            className="object-contain select-none drop-shadow-md w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32"
-            priority 
-          />
-        </div>
       </header>
 
       {/* Sección principal con mejor responsive y espaciado */}
-  <main className="relative flex-1 flex flex-col xl:flex-row items-center justify-between px-4 sm:px-6 md:px-12 lg:px-16 xl:px-20 py-6 sm:py-8 md:py-12 lg:py-16 xl:py-20 gap-8 sm:gap-12 xl:gap-16">
+  <main className="relative flex-1 flex flex-col xl:flex-row items-center justify-between px-3 sm:px-4 md:px-8 lg:px-12 xl:px-16 py-4 sm:py-6 md:py-8 lg:py-12 xl:py-16 gap-6 sm:gap-8 xl:gap-12">
         
         {/* Contenido de texto con mejor jerarquía visual */}
   <div className="w-full xl:w-1/2 z-20 order-2 xl:order-1 max-w-xl mx-auto xl:mx-0">
-          <div className="space-y-8 lg:space-y-12">
+          <div className="space-y-6 sm:space-y-8 lg:space-y-10">
             
             {/* Título principal formal de bienvenida y panel de accesos, versión premium y solo azul */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 animate-fade-in">
-                <Shield className="text-blue-700 drop-shadow-md" size={38} />
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-slate-800 leading-tight tracking-tight drop-shadow-md">
-                  Bienvenido a <span className="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400 bg-clip-text text-transparent drop-shadow-lg">BECHAPRA</span>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 animate-fade-in justify-center xl:justify-start">
+                <Shield className="text-blue-700 drop-shadow-md shrink-0" size={32} />
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-slate-800 leading-tight tracking-tight drop-shadow-md text-center xl:text-left">
+                  Bienvenido a <span className="bg-linear-to-r from-blue-700 via-blue-500 to-blue-400 bg-clip-text text-transparent drop-shadow-lg">BECHAPRA</span>
                 </h1>
               </div>
-              <div className="inline-block px-6 py-3 rounded-xl bg-gradient-to-r from-blue-50 via-white to-blue-100 border border-blue-100 shadow-md animate-fade-in delay-200">
-                <p className="text-blue-800 text-lg lg:text-xl xl:text-2xl font-semibold tracking-wide">
+              <div className="inline-block px-4 sm:px-6 py-3 rounded-xl bg-linear-to-r from-blue-50 via-white to-blue-100 border border-blue-100 shadow-md animate-fade-in delay-200 w-full max-w-none">
+                <p className="text-blue-800 text-base sm:text-lg lg:text-xl xl:text-2xl font-semibold tracking-wide text-center xl:text-left">
                   Panel de accesos exclusivo para personal autorizado
                 </p>
-                <p className="text-blue-500 text-base lg:text-lg mt-1">
+                <p className="text-blue-500 text-sm sm:text-base lg:text-lg mt-1 text-center xl:text-left">
                   Seleccione el sistema al que desea ingresar. Acceso restringido únicamente a colaboradores de BECHAPRA.
                 </p>
-                <div className="mt-4 flex flex-col gap-2 text-blue-700 text-base lg:text-lg">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="text-blue-500" size={18} />
-                    <span>Acceso seguro y validado para el personal de BECHAPRA.</span>
+                <div className="mt-3 sm:mt-4 flex flex-col gap-2 text-blue-700 text-sm sm:text-base lg:text-lg">
+                  <div className="flex items-start gap-2 justify-center xl:justify-start">
+                    <CheckCircle className="text-blue-500 shrink-0 mt-0.5" size={16} />
+                    <span className="text-center xl:text-left">Acceso seguro y validado para el personal de BECHAPRA.</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Shield className="text-blue-600" size={18} />
-                    <span>Confidencialidad y protección de la información institucional.</span>
+                  <div className="flex items-start gap-2 justify-center xl:justify-start">
+                    <Shield className="text-blue-600 shrink-0 mt-0.5" size={16} />
+                    <span className="text-center xl:text-left">Confidencialidad y protección de la información institucional.</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="text-blue-400" size={18} />
-                    <span>
+                  <div className="flex items-start gap-2 justify-center xl:justify-start">
+                    <Mail className="text-blue-400 shrink-0 mt-0.5" size={16} />
+                    <span className="text-center xl:text-left">
                       Soporte personalizado: 
                       <a
                         href={`mailto:${email}?subject=Soporte%20BECHAPRA&body=Hola%2C%20necesito%20ayuda%20con%20el%20acceso%20a%20los%20sistemas.`}
@@ -170,58 +172,58 @@ export default function HomeAnimado() {
 
         {/* Ilustración 3D mejorada con mejor responsive y profundidad visual */}
         <div className="w-full xl:w-1/2 flex justify-center items-center relative order-1 xl:order-2">
-          <div className="relative w-full max-w-[340px] sm:max-w-md md:max-w-lg xl:max-w-xl h-64 sm:h-80 md:h-96 lg:h-[28rem] flex items-center justify-center perspective-[1200px]">
+          <div className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-md lg:max-w-lg xl:max-w-xl h-48 sm:h-60 md:h-80 lg:h-96 xl:h-112 flex items-center justify-center perspective-distant">
             
             {/* Plataforma principal con sombras y profundidad mejoradas */}
-            <div className="relative z-10 transform-gpu rotate-x-[12deg] rotate-y-[12deg] transition-all duration-1000 ease-[cubic-bezier(.4,0,.2,1)]">
+            <div className="relative z-10 transform-gpu rotate-x-12 rotate-y-12 transition-all duration-1000 ease-in-out">
               
                 {/* Dispositivo central con gradientes más sofisticados */}
-                <div className="w-64 sm:w-72 md:w-80 xl:w-96 h-32 sm:h-44 md:h-48 xl:h-56 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-3xl shadow-2xl relative overflow-hidden transform-gpu transition-all duration-700 ease-[cubic-bezier(.4,0,.2,1)] group border-2 border-blue-200/60">
+                <div className="w-48 sm:w-56 md:w-64 lg:w-72 xl:w-80 h-24 sm:h-28 md:h-32 lg:h-40 xl:h-44 bg-linear-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl sm:rounded-3xl shadow-2xl relative overflow-hidden transform-gpu transition-all duration-700 ease-in-out group border-2 border-blue-200/60">
                 {/* Pantalla interna con efecto glassmorphism premium */}
-                <div className="absolute inset-2 sm:inset-4 bg-gradient-to-br from-blue-100/80 via-white/70 to-blue-200/80 rounded-2xl backdrop-blur-xl border border-blue-200/80 shadow-inner ring-2 ring-blue-100/40">
-                    <div className="w-full h-full bg-gradient-to-tr from-transparent via-white/30 to-transparent relative overflow-hidden">
+                <div className="absolute inset-1.5 sm:inset-2 md:inset-3 lg:inset-4 bg-linear-to-br from-blue-100/80 via-white/70 to-blue-200/80 rounded-xl sm:rounded-2xl backdrop-blur-xl border border-blue-200/80 shadow-inner ring-2 ring-blue-100/40">
+                    <div className="w-full h-full bg-linear-to-tr from-transparent via-white/30 to-transparent relative overflow-hidden">
                     {/* Icono central con animación suave y glow */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="p-4 sm:p-6 bg-white/50 rounded-2xl backdrop-blur-lg shadow-lg ring-2 ring-blue-200/40">
-            <Globe className="text-blue-700 drop-shadow-[0_0_16px_rgba(37,99,235,0.25)]" size={40} />
+            <div className="p-2 sm:p-3 md:p-4 lg:p-6 bg-white/50 rounded-xl sm:rounded-2xl backdrop-blur-lg shadow-lg ring-2 ring-blue-200/40">
+            <Globe className="text-blue-700 drop-shadow-[0_0_16px_rgba(37,99,235,0.25)]" size={24} />
             </div>
                     </div>
                     {/* Partículas flotantes dentro de la pantalla */}
-                    <div className="absolute top-4 left-4 w-2 h-2 bg-blue-400/70 rounded-full animate-ping"></div>
-                    <div className="absolute bottom-6 right-6 w-1.5 h-1.5 bg-blue-300/70 rounded-full animate-ping animation-delay-1000"></div>
-                    <div className="absolute top-1/3 right-8 w-1 h-1 bg-blue-200/70 rounded-full animate-pulse"></div>
+                    <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 w-1.5 sm:w-2 h-1.5 sm:h-2 bg-blue-400/70 rounded-full animate-ping"></div>
+                    <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 right-3 sm:right-4 md:right-6 w-1 sm:w-1.5 h-1 sm:h-1.5 bg-blue-300/70 rounded-full animate-ping animation-delay-1000"></div>
+                    <div className="absolute top-1/3 right-4 sm:right-6 md:right-8 w-0.5 sm:w-1 h-0.5 sm:h-1 bg-blue-200/70 rounded-full animate-pulse"></div>
                     </div>
                 </div>
                 {/* Efecto de resplandor premium */}
-                <div className="absolute -inset-2 bg-gradient-to-r from-blue-400/40 via-blue-500/50 to-blue-600/40 rounded-3xl opacity-80 blur-2xl transition-opacity duration-1000 ease-[cubic-bezier(.4,0,.2,1)] -z-10"></div>
+                <div className="absolute -inset-2 bg-linear-to-r from-blue-400/40 via-blue-500/50 to-blue-600/40 rounded-2xl sm:rounded-3xl opacity-80 blur-2xl transition-opacity duration-1000 ease-in-out -z-10"></div>
                 </div>
 
               {/* Elementos flotantes con paleta unificada y animaciones más suaves */}
-              <div className="absolute -top-6 -left-6 w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl shadow-xl animate-float-smooth transform-gpu transition-transform duration-700 ease-[cubic-bezier(.4,0,.2,1)]">
+              <div className="absolute -top-3 sm:-top-4 md:-top-6 -left-3 sm:-left-4 md:-left-6 w-8 sm:w-10 md:w-12 lg:w-14 h-8 sm:h-10 md:h-12 lg:h-14 bg-linear-to-br from-blue-400 to-blue-500 rounded-lg sm:rounded-xl shadow-xl animate-float-smooth transform-gpu transition-transform duration-700 ease-in-out">
                 <div className="w-full h-full flex items-center justify-center">
-                  <div className="w-6 h-6 bg-white/40 rounded-lg backdrop-blur-sm"></div>
+                  <div className="w-3 sm:w-4 md:w-5 lg:w-6 h-3 sm:h-4 md:h-5 lg:h-6 bg-white/40 rounded-md sm:rounded-lg backdrop-blur-sm"></div>
                 </div>
               </div>
-              <div className="absolute -top-2 -right-10 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl shadow-xl animate-float-smooth animation-delay-500 transform-gpu transition-transform duration-700 ease-[cubic-bezier(.4,0,.2,1)]">
+              <div className="absolute -top-1 sm:-top-2 -right-6 sm:-right-8 md:-right-10 w-10 sm:w-12 md:w-14 lg:w-16 h-10 sm:h-12 md:h-14 lg:h-16 bg-linear-to-br from-blue-500 to-blue-700 rounded-xl sm:rounded-2xl shadow-xl animate-float-smooth animation-delay-500 transform-gpu transition-transform duration-700 ease-in-out">
                 <div className="w-full h-full flex items-center justify-center">
-                  <CheckCircle className="text-white" size={28} />
+                  <CheckCircle className="text-white" size={18} />
                 </div>
               </div>
-              <div className="absolute -bottom-4 -left-12 w-20 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-xl animate-float-smooth animation-delay-1000 transform-gpu transition-transform duration-700 ease-[cubic-bezier(.4,0,.2,1)]">
+              <div className="absolute -bottom-2 sm:-bottom-3 md:-bottom-4 -left-6 sm:-left-8 md:-left-10 lg:-left-12 w-12 sm:w-16 md:w-18 lg:w-20 h-8 sm:h-10 md:h-11 lg:h-12 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl shadow-xl animate-float-smooth animation-delay-1000 transform-gpu transition-transform duration-700 ease-in-out">
                 <div className="w-full h-full flex items-center justify-center">
-                  <Zap className="text-white" size={24} />
+                  <Zap className="text-white" size={16} />
                 </div>
               </div>
-              <div className="absolute -bottom-6 -right-6 w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full shadow-xl animate-float-smooth animation-delay-700 transform-gpu transition-transform duration-700 ease-[cubic-bezier(.4,0,.2,1)]">
+              <div className="absolute -bottom-3 sm:-bottom-4 md:-bottom-6 -right-3 sm:-right-4 md:-right-6 w-8 sm:w-10 md:w-12 lg:w-14 h-8 sm:h-10 md:h-12 lg:h-14 bg-linear-to-br from-blue-600 to-blue-700 rounded-full shadow-xl animate-float-smooth animation-delay-700 transform-gpu transition-transform duration-700 ease-in-out">
                 <div className="w-full h-full flex items-center justify-center">
-                  <Shield className="text-white" size={20} />
+                  <Shield className="text-white" size={14} />
                 </div>
               </div>
 
               {/* Cubos pequeños con sombras mejoradas */}
-              <div className="absolute top-12 -left-16 w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg shadow-lg animate-bounce-gentle transform-gpu"></div>
-              <div className="absolute bottom-8 -right-16 w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg animate-bounce-gentle animation-delay-1500 transform-gpu"></div>
-              <div className="absolute top-4 right-20 w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-500 rounded shadow-lg animate-pulse-soft transform-gpu"></div>
+              <div className="absolute top-12 -left-16 w-10 h-10 bg-linear-to-br from-blue-600 to-blue-700 rounded-lg shadow-lg animate-bounce-gentle transform-gpu"></div>
+              <div className="absolute bottom-8 -right-16 w-8 h-8 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg animate-bounce-gentle animation-delay-1500 transform-gpu"></div>
+              <div className="absolute top-4 right-20 w-6 h-6 bg-linear-to-br from-blue-400 to-blue-500 rounded shadow-lg animate-pulse-soft transform-gpu"></div>
             </div>
 
             {/* Líneas de conexión con gradientes suaves */}
@@ -251,7 +253,7 @@ export default function HomeAnimado() {
       </main>
 
       {/* Footer premium institucional, azul, con mejor contraste e iconografía */}
-      <footer className="relative w-full flex justify-center py-5 sm:py-7 bg-gradient-to-t from-blue-50 via-white/60 to-transparent border-t-2 border-blue-200/60 backdrop-blur-md shadow-inner z-40">
+      <footer className="relative w-full flex justify-center py-5 sm:py-7 bg-linear-to-t from-blue-50 via-white/60 to-transparent border-t-2 border-blue-200/60 backdrop-blur-md shadow-inner z-40">
         <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6 w-full max-w-4xl px-2 sm:px-4 justify-between">
           <span className="text-blue-500 text-xs sm:text-sm font-medium text-center md:text-left select-none">
             © {new Date().getFullYear()} BECHAPRA. Todos los derechos reservados.
