@@ -1102,8 +1102,15 @@ export function SolicitudDetailModal({
   useEffect(() => {
     if (isOpen && solicitud) {
       fetchArchivos();
-      if (solicitud.estado === 'pagada') {
-        fetchComprobantes();
+      // Aceptar cualquier variante de mayúsculas/minúsculas para el estado
+      try {
+        if (String(solicitud.estado).toLowerCase() === 'pagada') {
+          fetchComprobantes();
+        }
+      } catch (e) {
+        // En caso de que solicitud.estado sea inesperado, no bloquear la ejecución
+        // eslint-disable-next-line no-console
+        console.warn('No se pudo evaluar el estado de la solicitud para cargar comprobantes:', e);
       }
     }
   }, [isOpen, solicitud, fetchArchivos, fetchComprobantes]);
@@ -2419,57 +2426,6 @@ function extraerDatosDelConcepto(concepto: string) {
                     )}
                   </Card>
                 )}
-
-                {/*
-                Diagnóstico de datos de plantilla SIEMPRE visible
-                <Card className="p-5 mb-8 bg-white border border-yellow-300 shadow rounded-xl">
-                  <div className="flex items-center mb-3">
-                    <FileText className="w-5 h-5 mr-2 text-yellow-700" />
-                    <h2 className="text-lg font-bold text-yellow-800">Diagnóstico de Plantilla</h2>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-900 mb-4">
-                    <div>
-                      <span className="font-semibold">ID de Plantilla:</span>
-                      <span className="ml-2 font-mono text-yellow-900">{String(plantillaData.plantillaId)}</span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">Descripción de Pago:</span>
-                      <span className="ml-2 font-mono text-yellow-900">{String(solicitud?.tipo_pago_descripcion)}</span>
-                    </div>
-                  </div>
-                  <div className="mb-2">
-                    <span className="font-semibold block mb-1">Mapeo de Plantilla:</span>
-                    {plantillaData.mapeoPlantilla && typeof plantillaData.mapeoPlantilla === 'object' ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-yellow-50 rounded p-3 border border-yellow-200">
-                        {Object.entries(plantillaData.mapeoPlantilla.etiquetas || {}).map(([campo, etiqueta]) => (
-                          <div key={campo} className="flex flex-col mb-1">
-                            <span className="text-xs text-yellow-700 font-semibold">{campo.replace(/_/g, ' ').toUpperCase()}</span>
-                            <span className="text-sm text-yellow-900">{String(etiqueta)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="italic text-yellow-700">No disponible</span>
-                    )}
-                  </div>
-                  <div>
-                    <span className="font-semibold block mb-1">Datos de Plantilla:</span>
-                    {plantillaData.datosPlantilla && typeof plantillaData.datosPlantilla === 'object' && Object.keys(plantillaData.datosPlantilla).length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-yellow-50 rounded p-3 border border-yellow-200">
-                        {Object.entries(plantillaData.datosPlantilla).map(([campo, valor]) => (
-                          <div key={campo} className="flex flex-col mb-1">
-                            <span className="text-xs text-yellow-700 font-semibold">{campo.replace(/_/g, ' ').toUpperCase()}</span>
-                            <span className="text-sm text-yellow-900">{String(valor)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="italic text-yellow-700">No disponible</span>
-                    )}
-                  </div>
-                </Card>
-                */}
-
               </div>
             </div>
 
@@ -2709,8 +2665,37 @@ function extraerDatosDelConcepto(concepto: string) {
                   ) : (
                     <div className="space-y-4">
                       {comprobantes.map((comprobante) => {
-                        const comprobanteUrl = buildFileUrl(comprobante.ruta_archivo);
-                        const fileName = comprobante.nombre_archivo || comprobanteUrl.split('/').pop() || '';
+                        // Normalizar la ruta del comprobante.
+                        // Puede venir como URL completa, ruta relativa (/uploads/...), o solo el nombre de archivo.
+                        const raw = comprobante.ruta_archivo || comprobante.nombre_archivo || '';
+                        let comprobanteUrl = '';
+
+                        if (!raw) {
+                          comprobanteUrl = '';
+                        } else if (raw.startsWith('http')) {
+                          comprobanteUrl = raw;
+                        } else if (raw.startsWith('/')) {
+                          // Ruta relativa desde la raíz del sitio
+                          comprobanteUrl = buildFileUrl(raw);
+                        } else if (raw.includes('/')) {
+                          // Contiene path relativo (ej. uploads/comprobantes/...), agregar slash si falta
+                          comprobanteUrl = buildFileUrl(raw.startsWith('/') ? raw : `/${raw}`);
+                        } else {
+                          // Probablemente solo el nombre de archivo -> usar la ruta estándar de comprobantes
+                          comprobanteUrl = buildFileUrl(`/uploads/comprobantes/${raw}`);
+                        }
+
+                        const fileName = comprobante.nombre_archivo || raw.split('/').pop() || '';
+
+                        // LOG para depuración de comprobantes
+                        // eslint-disable-next-line no-console
+                        console.log('[COMPROBANTE DEBUG]', {
+                          id_comprobante: comprobante.id_comprobante,
+                          raw,
+                          comprobanteUrl,
+                          fileName,
+                          comprobante
+                        });
 
                         return (
                           <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
