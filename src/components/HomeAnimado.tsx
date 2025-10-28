@@ -76,16 +76,16 @@ export default function HomeAnimado() {
 
         {/* Navigation - Debajo del logo en móvil */}
         <nav className="relative flex items-center order-2 lg:order-1 flex-1 justify-center w-full lg:w-auto">
-          <div className="nav-pill flex flex-col sm:flex-row items-center gap-2 sm:gap-3 md:gap-4 px-2 sm:px-3 py-2 sm:py-3 rounded-2xl sm:rounded-full bg-white/92 shadow-2xl border border-blue-100/60 mx-auto max-w-[95vw] sm:max-w-[1100px] w-full lg:w-auto">
+          <div className="nav-pill flex flex-col sm:flex-row items-center gap-2 sm:gap-3 md:gap-4 px-3 sm:px-3 py-3 sm:py-3 rounded-2xl sm:rounded-full bg-white shadow-2xl border-2 border-blue-200 mx-auto max-w-[95vw] sm:max-w-[1100px] w-full lg:w-auto backdrop-blur-md">
             <a
               href="#"
               onClick={handleDashboardRedirect}
-              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-800 px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start"
+              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-800 px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start bg-linear-to-r from-blue-50 via-white to-blue-100 hover:from-blue-700 hover:to-blue-800 hover:text-white shadow-md"
               aria-current="page"
               style={{letterSpacing: '0.01em'}}
             >
-              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0">
-                <ArrowRight className="icon text-blue-700" size={16} />
+              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0 group-hover:bg-blue-100">
+                <ArrowRight className="icon text-blue-700 group-hover:text-blue-800" size={16} />
               </span>
               <span className="text-center sm:text-left">Sistema de Solicitudes y Gestión de Pagos</span>
             </a>
@@ -94,11 +94,11 @@ export default function HomeAnimado() {
               href="https://bechapra.com.mx/envio-xml/"
               target="_blank"
               rel="noopener noreferrer"
-              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-800 px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start"
+              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-800 px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start bg-linear-to-r from-blue-50 via-white to-blue-100 hover:from-blue-700 hover:to-blue-800 hover:text-white shadow-md"
               style={{letterSpacing: '0.01em'}}
             >
-              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0">
-                <Mail className="icon text-blue-700" size={16} />
+              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0 group-hover:bg-blue-100">
+                <Mail className="icon text-blue-700 group-hover:text-blue-800" size={16} />
               </span>
               <span className="text-center sm:text-left">Envio Masivo de XML</span>
             </a>
@@ -107,11 +107,11 @@ export default function HomeAnimado() {
               href="https://bechapra.com.mx/panel/extractor"
               target="_blank"
               rel="noopener noreferrer"
-              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-800 px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start"
+              className="nav-item nav-cta group flex items-center gap-2 sm:gap-3 font-bold sm:font-extrabold text-blue-800 px-3 sm:px-4 md:px-6 py-2 sm:py-2 md:py-3 rounded-xl sm:rounded-full transition-all duration-200 text-sm sm:text-base md:text-lg lg:text-xl focus:outline-none focus:ring-4 focus:ring-blue-200 w-full sm:w-auto justify-center sm:justify-start bg-linear-to-r from-blue-50 via-white to-blue-100 hover:from-blue-700 hover:to-blue-800 hover:text-white shadow-md"
               style={{letterSpacing: '0.01em'}}
             >
-              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0">
-                <Mail className="icon text-blue-700" size={16} />
+              <span className="icon-wrap inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm shrink-0 group-hover:bg-blue-100">
+                <Mail className="icon text-blue-700 group-hover:text-blue-800" size={16} />
               </span>
               <span className="text-center sm:text-left">Extractor de Estados de Cuenta</span>
             </a>
