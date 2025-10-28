@@ -233,7 +233,9 @@ interface ErrorState {
 const buildFileUrl = (url: string): string => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  return url.startsWith('/') ? url : `/${url}`;
+  const baseUrl = 'https://bechapra.com.mx';
+  const normalizedPath = url.startsWith('/') ? url : `/${url}`;
+  return `${baseUrl}${normalizedPath}`;
 };
 
 // Obtener el URL principal de archivos adjuntos desde la solicitud.
@@ -2700,6 +2702,15 @@ function extraerDatosDelConcepto(concepto: string) {
                           comprobanteUrl = buildFileUrl(`/uploads/comprobantes/${raw}`);
                         }
                         const fileName = comprobante.nombre_archivo || raw.split('/').pop() || '';
+                        
+                        console.log('🔍 [MODAL ESTÁNDAR] Renderizando comprobante:', {
+                          id: comprobante.id_comprobante,
+                          raw,
+                          comprobanteUrl,
+                          fileName,
+                          nombre_usuario: comprobante.nombre_usuario
+                        });
+                        
                         return (
                           <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
                             <div className="flex justify-between items-start mb-3">
@@ -2724,12 +2735,20 @@ function extraerDatosDelConcepto(concepto: string) {
                                 Ver completo
                               </Button>
                             </div>
-                            <FilePreview 
-                              url={comprobanteUrl}
-                              fileName={fileName}
-                              alt={`Comprobante de ${comprobante.nombre_usuario || 'usuario'}: ${fileName}`}
-                              height="h-36"
-                            />
+                            {comprobanteUrl && (
+                              <div className="mt-3">
+                                <div className="text-xs text-blue-600 mb-2 flex items-center">
+                                  <FileCheck className="w-3 h-3 mr-1" />
+                                  Previsualización del comprobante:
+                                </div>
+                                <FilePreview 
+                                  url={comprobanteUrl}
+                                  fileName={fileName}
+                                  alt={`Comprobante de ${comprobante.nombre_usuario || 'usuario'}: ${fileName}`}
+                                  height="h-48"
+                                />
+                              </div>
+                            )}
                           </div>
                         );
                       })}
