@@ -1085,11 +1085,34 @@ export function SolicitudDetailModal({
 
   const fetchComprobantes = useCallback(async () => {
     if (!solicitud) return;
+    console.log('🔍 [MODAL ESTÁNDAR] Cargando comprobantes para solicitud:', solicitud.id_solicitud);
+    console.log('🔍 [MODAL ESTÁNDAR] soporte_url en solicitud:', solicitud.soporte_url);
     setLoading(prev => ({ ...prev, comprobantes: true }));
     setErrors(prev => ({ ...prev, comprobantes: null }));
     try {
       const data = await SolicitudesService.getComprobantes(solicitud.id_solicitud);
-      setComprobantes(data);
+      console.log('🔍 [MODAL ESTÁNDAR] Comprobantes obtenidos de tabla comprobantes_pago:', data);
+      
+      // Si no hay comprobantes en la tabla comprobantes_pago pero existe soporte_url,
+      // crear un comprobante virtual con los datos de soporte_url
+      if (data.length === 0 && solicitud.soporte_url && solicitud.soporte_url.trim() !== '') {
+        console.log('🔍 [MODAL ESTÁNDAR] No hay comprobantes en tabla, pero existe soporte_url:', solicitud.soporte_url);
+        
+        const comprobanteVirtual: Comprobante = {
+          id_comprobante: 0, // ID virtual
+          id_solicitud: solicitud.id_solicitud,
+          ruta_archivo: solicitud.soporte_url,
+          nombre_archivo: 'Comprobante de Pago',
+          fecha_subida: new Date().toISOString(),
+          usuario_subio: 0, // Usuario virtual
+          nombre_usuario: 'Pagador',
+          comentario: 'Comprobante subido por el pagador'
+        };
+        
+        setComprobantes([comprobanteVirtual]);
+      } else {
+        setComprobantes(data);
+      }
     } catch (error) {
       const errorMessage = handleError(error);
       setErrors(prev => ({ ...prev, comprobantes: errorMessage }));
