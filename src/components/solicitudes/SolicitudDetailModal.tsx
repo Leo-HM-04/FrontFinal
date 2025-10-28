@@ -381,6 +381,14 @@ const FilePreview: React.FC<{
 }> = ({ url, fileName, alt, height = 'h-40' }) => {
   const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
   const isPdf = /\.pdf$/i.test(fileName);
+  
+  console.log('🔍 [FilePreview] Procesando archivo:', {
+    url,
+    fileName,
+    isImage,
+    isPdf,
+    height
+  });
 
   if (isImage) {
     return (
@@ -441,9 +449,27 @@ const FilePreview: React.FC<{
       </div>
     );
   }
-  // Si no es imagen ni PDF, no hay previsualización especial aquí.
-  // Retornamos null para evitar render duplicado en otras secciones.
-  return null;
+  // Si no es imagen ni PDF, mostrar un preview genérico
+  return (
+    <div className="w-full rounded border border-blue-200 overflow-hidden shadow-sm bg-white">
+      <div className="p-8 text-center bg-blue-50">
+        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <FileText className="w-8 h-8 text-blue-600" />
+        </div>
+        <h4 className="text-sm font-medium text-blue-900 mb-2">Archivo: {fileName}</h4>
+        <p className="text-xs text-blue-700 mb-4">
+          Tipo de archivo: {fileName.split('.').pop()?.toUpperCase() || 'DESCONOCIDO'}
+        </p>
+        <button
+          onClick={() => window.open(url, '_blank')}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors font-medium"
+        >
+          <ExternalLink className="w-4 h-4" />
+          Abrir archivo
+        </button>
+      </div>
+    </div>
+  );
 };
 
 // Función para detectar si una solicitud es N09/TOKA
@@ -1111,16 +1137,25 @@ export function SolicitudDetailModal({
       if (data.length === 0 && solicitud.soporte_url && solicitud.soporte_url.trim() !== '') {
         console.log('🔍 [MODAL ESTÁNDAR] No hay comprobantes en tabla, pero existe soporte_url:', solicitud.soporte_url);
         
+        // Extraer el nombre del archivo de la URL
+        const fileName = solicitud.soporte_url.split('/').pop() || 'comprobante.pdf';
+        
         const comprobanteVirtual: Comprobante = {
           id_comprobante: 0, // ID virtual
           id_solicitud: solicitud.id_solicitud,
           ruta_archivo: solicitud.soporte_url,
-          nombre_archivo: 'Comprobante de Pago',
+          nombre_archivo: fileName,
           fecha_subida: new Date().toISOString(),
           usuario_subio: 0, // Usuario virtual
           nombre_usuario: 'Pagador',
           comentario: 'Comprobante subido por el pagador'
         };
+        
+        console.log('🔍 [MODAL ESTÁNDAR] Comprobante virtual creado:', {
+          soporte_url: solicitud.soporte_url,
+          fileName,
+          comprobanteVirtual
+        });
         
         setComprobantes([comprobanteVirtual]);
       } else {
@@ -2735,11 +2770,14 @@ function extraerDatosDelConcepto(concepto: string) {
                                 Ver completo
                               </Button>
                             </div>
-                            {comprobanteUrl && (
+                            {comprobanteUrl ? (
                               <div className="mt-3">
                                 <div className="text-xs text-blue-600 mb-2 flex items-center">
                                   <FileCheck className="w-3 h-3 mr-1" />
                                   Previsualización del comprobante:
+                                </div>
+                                <div className="text-xs text-gray-500 mb-2">
+                                  URL: {comprobanteUrl} | Archivo: {fileName}
                                 </div>
                                 <FilePreview 
                                   url={comprobanteUrl}
@@ -2747,6 +2785,15 @@ function extraerDatosDelConcepto(concepto: string) {
                                   alt={`Comprobante de ${comprobante.nombre_usuario || 'usuario'}: ${fileName}`}
                                   height="h-48"
                                 />
+                              </div>
+                            ) : (
+                              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div className="text-xs text-yellow-700">
+                                  ⚠️ No se pudo construir la URL del comprobante
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Raw: {raw} | Nombre: {fileName}
+                                </div>
                               </div>
                             )}
                           </div>
