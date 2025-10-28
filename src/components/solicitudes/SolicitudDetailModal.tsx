@@ -1127,26 +1127,7 @@ export function SolicitudDetailModal({
     }
   }, [isOpen]);
 
-  // Datos computados para el modal
-  // const modalData = useMemo(() => {
-  //   if (!solicitud || !plantillaData.mapeoPlantilla) return null;
-  //   
-  //   return Object.entries(plantillaData.datosPlantilla)
-  //     .filter(([campo]) => !debeOcultarse(campo))
-  //     .map(([campo, valor]) => ({
-  //       campo,
-  //       valor,
-  //       etiqueta: plantillaData.mapeoPlantilla?.[campo as keyof typeof plantillaData.mapeoPlantilla] || campo
-  //     }));
-  // }, [solicitud, plantillaData, debeOcultarse]);
-
-  // const bancoDestinoNombre = useMemo(() => {
-  //   return solicitud?.banco_destino ? formatBankInfo(solicitud.banco_destino) : '-';
-  // }, [solicitud?.banco_destino]);
-
-  // const montoFormateado = useMemo(() => {
-  //   return solicitud?.monto ? formatCurrency(Number(solicitud.monto)) : '-';
-  // }, [solicitud?.monto, formatCurrency]);
+  // ...existing code...
 
   // Verificaciones adicionales
   const hasCuentaAdicional = useMemo(() => {
@@ -2666,37 +2647,20 @@ function extraerDatosDelConcepto(concepto: string) {
                     <div className="space-y-4">
                       {comprobantes.map((comprobante) => {
                         // Normalizar la ruta del comprobante.
-                        // Puede venir como URL completa, ruta relativa (/uploads/...), o solo el nombre de archivo.
                         const raw = comprobante.ruta_archivo || comprobante.nombre_archivo || '';
                         let comprobanteUrl = '';
-
                         if (!raw) {
                           comprobanteUrl = '';
                         } else if (raw.startsWith('http')) {
                           comprobanteUrl = raw;
                         } else if (raw.startsWith('/')) {
-                          // Ruta relativa desde la raíz del sitio
                           comprobanteUrl = buildFileUrl(raw);
                         } else if (raw.includes('/')) {
-                          // Contiene path relativo (ej. uploads/comprobantes/...), agregar slash si falta
                           comprobanteUrl = buildFileUrl(raw.startsWith('/') ? raw : `/${raw}`);
                         } else {
-                          // Probablemente solo el nombre de archivo -> usar la ruta estándar de comprobantes
                           comprobanteUrl = buildFileUrl(`/uploads/comprobantes/${raw}`);
                         }
-
                         const fileName = comprobante.nombre_archivo || raw.split('/').pop() || '';
-
-                        // LOG para depuración de comprobantes
-                        // eslint-disable-next-line no-console
-                        console.log('[COMPROBANTE DEBUG]', {
-                          id_comprobante: comprobante.id_comprobante,
-                          raw,
-                          comprobanteUrl,
-                          fileName,
-                          comprobante
-                        });
-
                         return (
                           <div key={comprobante.id_comprobante} className="bg-blue-50/50 p-4 rounded-lg border border-blue-200/50 shadow-sm">
                             <div className="flex justify-between items-start mb-3">
@@ -2721,7 +2685,6 @@ function extraerDatosDelConcepto(concepto: string) {
                                 Ver completo
                               </Button>
                             </div>
-
                             <FilePreview 
                               url={comprobanteUrl}
                               fileName={fileName}
