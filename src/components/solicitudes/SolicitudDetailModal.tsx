@@ -419,11 +419,22 @@ const FilePreview: React.FC<{
         <iframe 
           src={url} 
           title={alt || fileName}
-          className="w-full" 
-          style={{ height: '200px' }} 
+          className="w-full border-0" 
+          style={{ height: '500px', minHeight: '400px' }} 
+          loading="lazy"
         />
-        <div className="bg-blue-50/80 p-2 text-xs text-center text-blue-700">
-          Vista previa limitada • Haga clic en &quot;Ver completo&quot; para el PDF completo
+        <div className="bg-blue-50/80 p-3 text-center border-t border-blue-100">
+          <div className="flex items-center justify-center gap-2 text-sm text-blue-700">
+            <FileText className="w-4 h-4" />
+            <span>Vista previa del documento</span>
+          </div>
+          <button
+            onClick={() => window.open(url, '_blank')}
+            className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-colors font-medium"
+          >
+            <ExternalLink className="w-3 h-3" />
+            Ver completo
+          </button>
         </div>
       </div>
     );
@@ -2445,12 +2456,17 @@ function extraerDatosDelConcepto(concepto: string) {
               <div className="space-y-4">
                 {/* Factura / archivo principal */}
                 {getMainFileUrl(solicitud) ? (
-                  <div className="bg-blue-50/30 p-3 rounded-lg border border-blue-100">
-                    <span className="text-sm text-blue-700 mb-2 flex items-center font-medium">
-                      <FileText className="w-4 h-4 mr-1.5 text-blue-600" />
-                      Previsualización de archivo:
-                    </span>
-                    <div className="mt-2">
+                  <div className="bg-blue-50/30 p-4 rounded-xl border border-blue-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm text-blue-700 flex items-center font-medium">
+                        <FileText className="w-4 h-4 mr-1.5 text-blue-600" />
+                        Previsualización de archivo:
+                      </span>
+                      <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                        {getMainFileUrl(solicitud).split('/').pop()?.split('.').pop()?.toUpperCase() || 'ARCHIVO'}
+                      </span>
+                    </div>
+                    <div className="rounded-lg overflow-hidden">
                       <FilePreview 
                         url={buildFileUrl(getMainFileUrl(solicitud))}
                         fileName={getMainFileUrl(solicitud).split('/').pop() || ''}
