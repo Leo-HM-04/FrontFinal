@@ -55,6 +55,30 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
   const [comprobanteToDelete, setComprobanteToDelete] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Función para formatear el nombre del departamento
+  const formatDepartamento = (dept: string | undefined | null): string => {
+    if (!dept) return '-';
+    
+    const departamentos: Record<string, string> = {
+      'contabilidad': 'CONTABILIDAD',
+      'facturacion': 'FACTURACIÓN',
+      'cobranza': 'COBRANZA',
+      'vinculacion': 'VINCULACIÓN',
+      'administracion': 'ADMINISTRACIÓN',
+      'ti': 'TI',
+      'automatizaciones': 'AUTOMATIZACIONES',
+      'comercial': 'COMERCIAL',
+      'atencion a clientes': 'ATENCIÓN A CLIENTES',
+      'tesoreria': 'TESORERÍA',
+      'nomina': 'NÓMINA',
+      'atraccion de talento': 'ATRACCIÓN DE TALENTO',
+      'direccion general': 'DIRECCIÓN GENERAL',
+      'juridico': 'JURÍDICO'
+    };
+    
+    return departamentos[dept.toLowerCase()] || dept.toUpperCase();
+  };
+
   // Cargar comprobantes de pago (pagador)
   useEffect(() => {
     const fetchComprobantes = async () => {
@@ -220,7 +244,7 @@ export function ViaticoDetailModal({ isOpen, viatico, onClose }: ViaticoDetailMo
                       </div>
                       <div className="bg-white p-3 rounded-md border border-blue-100">
                         <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Departamento</span>
-                        <p className="text-blue-900 font-medium capitalize">{viatico.departamento || '-'}</p>
+                        <p className="text-blue-900 font-medium">{formatDepartamento(viatico.departamento)}</p>
                       </div>
                       <div className="bg-white p-3 rounded-md border border-blue-100 md:col-span-2">
                         <span className="text-xs uppercase tracking-wider text-blue-700/70 block mb-1 font-medium">Tipo de pago</span>
