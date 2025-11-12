@@ -646,6 +646,7 @@ const generateImprovedTemplate = () => {
                         <option value="nomina">NÓMINA</option>
                         <option value="atraccion de talento">ATRACCIÓN DE TALENTO</option>
                         <option value="direccion general">DIRECCIÓN GENERAL</option>
+                        <option value="juridico">JURÍDICO</option>
                       </select>
                     </div>
                     
