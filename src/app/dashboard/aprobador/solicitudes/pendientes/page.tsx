@@ -384,7 +384,16 @@ export default function SolicitudesPendientesPage() {
   const formatDate = (date: string | Date) => {
     if (!date) return '-';
     try {
-      const d = new Date(date);
+      let d: Date;
+      
+      // Si la fecha está en formato YYYY-MM-DD, construir el Date manualmente para evitar problemas de zona horaria
+      if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        const [year, month, day] = date.split('-');
+        d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else {
+        d = new Date(date);
+      }
+      
       // Usar toLocaleDateString con zona horaria de México
       return d.toLocaleDateString('es-MX', {
         year: 'numeric',
