@@ -56,15 +56,15 @@ export function PagadorLayout({ children }: PagadorLayoutProps) {
 
   // Definir elementos de navegación en un arreglo para reducir código repetitivo
   const navItems = [
-    { href: '/dashboard/pagador', label: 'Inicio', icon: Home },
-    { href: '/dashboard/pagador/viaticos', label: 'Viáticos por Autorizar', icon: BriefcaseIcon },
-    { href: '/dashboard/pagador/pagos/pendientes', label: 'Pagos Pendientes de Procesar', icon: ClipboardList },
-    { href: '/dashboard/pagador/recurrentes', label: 'Pagos Recurrentes', icon: Repeat },
-    { href: '/dashboard/pagador/pagos/historial', label: 'Historial de Pagos Realizados', icon: FileText },
-    { href: '/dashboard/pagador/pagos/subir-comprobante', label: 'Subir Comprobante de Pago', icon: Upload },
-    { href: '/dashboard/pagador/comprobantes-viaticos', label: 'Comprobantes de Viáticos', icon: FileCheck2 },
-    { href: '/dashboard/pagador/graficas', label: 'Gráficas', icon: BarChart2 },
-    { href: '/dashboard/pagador/perfil', label: 'Mi Perfil', icon: User },
+    { href: '/dashboard/pagador', label: 'Inicio', icon: Home, disabled: false },
+    { href: '/dashboard/pagador/viaticos', label: 'Viáticos por Autorizar', icon: BriefcaseIcon, disabled: false },
+    { href: '/dashboard/pagador/pagos/pendientes', label: 'Pagos Pendientes de Procesar', icon: ClipboardList, disabled: false },
+    { href: '/dashboard/pagador/recurrentes', label: 'Pagos Recurrentes', icon: Repeat, disabled: false },
+    { href: '/dashboard/pagador/pagos/historial', label: 'Historial de Pagos Realizados', icon: FileText, disabled: true, tooltip: 'Sección en proceso de mejora' },
+    { href: '/dashboard/pagador/pagos/subir-comprobante', label: 'Subir Comprobante de Pago', icon: Upload, disabled: false },
+    { href: '/dashboard/pagador/comprobantes-viaticos', label: 'Comprobantes de Viáticos', icon: FileCheck2, disabled: false },
+    { href: '/dashboard/pagador/graficas', label: 'Gráficas', icon: BarChart2, disabled: false },
+    { href: '/dashboard/pagador/perfil', label: 'Mi Perfil', icon: User, disabled: false },
   ];
 
 // Icono de maletín para Viáticos por Autorizar
@@ -248,6 +248,30 @@ function BriefcaseIcon(props: React.SVGProps<SVGSVGElement>) {
               {navItems.map((item) => {
                 // Solo resalta la opción exacta
                 const isActive = pathname === item.href;
+                
+                // Si está deshabilitado, mostrar como div con tooltip
+                if (item.disabled) {
+                  return (
+                    <div key={item.href} className="relative group">
+                      <div
+                        className="relative flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-medium select-none cursor-not-allowed opacity-50 bg-gray-100 text-gray-400"
+                      >
+                        <item.icon className="w-5 h-5" />
+                        <span>{item.label}</span>
+                      </div>
+                      {/* Tooltip */}
+                      {item.tooltip && (
+                        <div className="absolute left-0 top-full mt-1 w-full px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-lg">
+                          <div className="flex items-center gap-2">
+                            <span className="text-yellow-400">⚠️</span>
+                            <span>{item.tooltip}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                
                 return (
                   <Link
                     key={item.href}
