@@ -783,11 +783,21 @@ export default function PagosPendientesPage() {
                                 {new Date(pago.fecha_creacion).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' })}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                {new Date(
-                                  esSolicitudConFechaLimitePlantilla(pago) 
+                                {(() => {
+                                  const fechaStr = esSolicitudConFechaLimitePlantilla(pago) 
                                     ? extraerFechaLimiteDesdeplantilla(pago.plantilla_datos || null, pago.fecha_limite_pago) || pago.fecha_creacion
-                                    : pago.fecha_limite_pago || pago.fecha_creacion
-                                ).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' })}
+                                    : pago.fecha_limite_pago || pago.fecha_creacion;
+                                  
+                                  // Si la fecha ya está en formato YYYY-MM-DD, formatearla directamente
+                                  if (typeof fechaStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fechaStr)) {
+                                    const [year, month, day] = fechaStr.split('-');
+                                    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+                                      .toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' });
+                                  }
+                                  
+                                  // De lo contrario, usar el método normal
+                                  return new Date(fechaStr).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' });
+                                })()}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
