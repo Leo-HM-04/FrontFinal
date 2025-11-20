@@ -498,25 +498,66 @@ export default function NuevaSolicitudPage() {
             // Datos básicos de la solicitud - mapeo dinámico según la plantilla
             departamento: 'Finanzas',
             monto: (() => {
-              // Proceso más robusto para obtener el monto
-              const montoRaw = estadoPlantilla.datos.monto_total_cliente || 
-                              estadoPlantilla.datos.monto || 
-                              estadoPlantilla.datos.monto_total || 
-                              '0';
+            // ESPECIAL: Para regresos-transferencia, calcular desde cuentas
+            if (estadoPlantilla.plantillaSeleccionada?.id === 'regresos-transferencia') {
+              const cuentas = estadoPlantilla.datos.cuentas_transferencia;
               
-              console.log('🔍 [DEBUG MONTO] Monto raw:', montoRaw, 'tipo:', typeof montoRaw);
-              
-              // Convertir a string limpio
-              let montoString = String(montoRaw);
-              
-              // Si viene con formato de moneda, limpiarlo
-              if (typeof montoRaw === 'string') {
-                montoString = montoRaw.replace(/[$,\s]/g, '');
+              if (Array.isArray(cuentas) && cuentas.length > 0) {
+                let montoTotal = 0;
+                
+                cuentas.forEach((cuenta: any) => {
+                  if (cuenta.monto) {
+                    const montoCuenta = parseFloat(String(cuenta.monto).replace(/[^0-9.-]/g, '')) || 0;
+                    montoTotal += montoCuenta;
+                    console.log(`✅ [MONTO REGRESOS] Cuenta: $${montoCuenta} | Total acum: $${montoTotal}`);
+                  }
+                });
+                
+                console.log('✅ [MONTO REGRESOS] Monto total calculado:', montoTotal);
+                return String(montoTotal);
               }
               
-              console.log('🔍 [DEBUG MONTO] Monto procesado:', montoString);
-              return montoString;
-            })(),
+              console.warn('⚠️ [MONTO REGRESOS] No se encontraron cuentas o están vacías');
+              return '0';
+            }
+            
+            // ESPECIAL: Para regresos-efectivo, sumar monto_efectivo + viaticos
+            if (estadoPlantilla.plantillaSeleccionada?.id === 'regresos-efectivo') {
+              let montoTotal = 0;
+              
+              if (estadoPlantilla.datos.monto_efectivo) {
+                const montoEfectivo = parseFloat(String(estadoPlantilla.datos.monto_efectivo).replace(/[^0-9.-]/g, '')) || 0;
+                montoTotal += montoEfectivo;
+                console.log(`✅ [MONTO EFECTIVO] Monto efectivo: $${montoEfectivo}`);
+              }
+              
+              if (estadoPlantilla.datos.viaticos) {
+                const viaticos = parseFloat(String(estadoPlantilla.datos.viaticos).replace(/[^0-9.-]/g, '')) || 0;
+                montoTotal += viaticos;
+                console.log(`✅ [MONTO EFECTIVO] Viáticos: $${viaticos}`);
+              }
+              
+              console.log('✅ [MONTO EFECTIVO] Monto total calculado:', montoTotal);
+              return String(montoTotal);
+            }
+            
+            // Para todas las demás plantillas, proceso normal
+            const montoRaw = estadoPlantilla.datos.monto_total_cliente || 
+                            estadoPlantilla.datos.monto || 
+                            estadoPlantilla.datos.monto_total || 
+                            '0';
+            
+            console.log('🔍 [DEBUG MONTO] Monto raw:', montoRaw, 'tipo:', typeof montoRaw);
+            
+            let montoString = String(montoRaw);
+            
+            if (typeof montoRaw === 'string') {
+              montoString = montoRaw.replace(/[$,\s]/g, '');
+            }
+            
+            console.log('🔍 [DEBUG MONTO] Monto procesado:', montoString);
+            return montoString;
+          })(),
             tipo_moneda: String(estadoPlantilla.datos.moneda || 'MXN'),
             cuenta_destino: String(
               estadoPlantilla.datos.numero_tarjeta ||
