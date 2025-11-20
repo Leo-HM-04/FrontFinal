@@ -159,14 +159,22 @@ export default function PagosPendientesPage() {
 
   const confirmarProcesarPago = async () => {
     if (!pagoAConfirmar) return;
-    setProcesandoPago(pagoAConfirmar.id_solicitud);
+    
+    const pagoId = pagoAConfirmar.id_solicitud;
+    setProcesandoPago(pagoId);
     setShowConfirmModal(false);
+    
+    // ⚡ OPTIMIZACIÓN: Actualización optimista de la UI
+    setPagosPendientes((prev) => prev.filter((p) => p.id_solicitud !== pagoId));
+    
     try {
-      const res = await marcarPagoComoPagado(pagoAConfirmar.id_solicitud, pagoAConfirmar);
+      const res = await marcarPagoComoPagado(pagoId, pagoAConfirmar);
       if (res && res.error) {
+        // Si hay error, revertir la actualización optimista
+        setPagosPendientes((prev) => [...prev, pagoAConfirmar].sort((a, b) => a.id_solicitud - b.id_solicitud));
         toast.error(res.error || 'No se pudo marcar como pagada.');
       } else {
-        toast.success(`Pago #${pagoAConfirmar.id_solicitud} procesado correctamente`);
+        toast.success(`Pago #${pagoId} procesado correctamente`, { duration: 3000 });
         toast((t) => (
           <div>
             <strong>¡Advertencia!</strong>
@@ -174,13 +182,16 @@ export default function PagosPendientesPage() {
             <Button onClick={() => toast.dismiss(t.id)} className="mt-2 bg-blue-600 text-white">Entendido</Button>
           </div>
         ), { duration: 8000 });
-        setPagosPendientes((prev) => prev.filter((p) => p.id_solicitud !== pagoAConfirmar.id_solicitud));
       }
-    } catch {
-      toast.error('Error al procesar el pago');
+    } catch (error) {
+      // Revertir la actualización optimista en caso de error
+      setPagosPendientes((prev) => [...prev, pagoAConfirmar].sort((a, b) => a.id_solicitud - b.id_solicitud));
+      toast.error('Error al procesar el pago. Intente nuevamente.');
+      console.error('Error procesando pago:', error);
+    } finally {
+      setProcesandoPago(null);
+      setPagoAConfirmar(null);
     }
-    setProcesandoPago(null);
-    setPagoAConfirmar(null);
   };
 
 
