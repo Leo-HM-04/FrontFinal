@@ -61,13 +61,16 @@ export default function HistorialPagosPage() {
       const token = localStorage.getItem('auth_token');
       if (!token) throw new Error('No hay token de autenticación');
       const { SolicitudesService } = await import('@/services/solicitudes.service');
-      const { ComprobantesService } = await import('@/services/comprobantes.service');
-      // 1. Solicitudes estándar
-      const data = await SolicitudesService.getAutorizadasYPagadas(token);
-      // 2. Solicitudes de plantillas pagadas
-      const plantillas = await SolicitudesService.getAllUnified();
+      
+      // ⚡ OPTIMIZACIÓN 1: Cargar solicitudes en paralelo
+      const [data, plantillas] = await Promise.all([
+        SolicitudesService.getAutorizadasYPagadas(token),
+        SolicitudesService.getAllUnified()
+      ]);
+      
       const plantillasPagadas = plantillas.filter((p) => p.estado === 'pagada');
-      // 3. Unir ambas listas y eliminar duplicados por id_solicitud
+      
+      // Unir y eliminar duplicados
       const solicitudesCombinadas = [...data.filter((p) => p.estado === 'pagada' || p.estado === 'autorizada'), ...plantillasPagadas];
       const solicitudesUnicas = Object.values(
         solicitudesCombinadas.reduce((acc, solicitud) => {
@@ -75,76 +78,88 @@ export default function HistorialPagosPage() {
           return acc;
         }, {} as { [id: number]: Solicitud })
       );
+      
       solicitudesUnicas.sort((a, b) => {
         const fechaA = new Date(a.fecha_pago || a.fecha_limite_pago || 0).getTime();
         const fechaB = new Date(b.fecha_pago || b.fecha_limite_pago || 0).getTime();
         return fechaB - fechaA;
       });
+      
+      // ⚡ OPTIMIZACIÓN 2: Mostrar solicitudes inmediatamente
       setPagos(solicitudesUnicas);
-      // Consultar comprobantes para cada solicitud pagada
+      setLoading(false);
+      
+      // ⚡ OPTIMIZACIÓN 3: Cargar comprobantes de forma lazy en segundo plano
+      const { ComprobantesService } = await import('@/services/comprobantes.service');
       const comprobantesObj: { [id: number]: Comprobante | null } = {};
-      await Promise.all(
-        solicitudesUnicas.map(async (pago: Solicitud) => {
-          if (pago.estado === 'pagada') {
-            
-            // Para TODAS las solicitudes (incluye TOKA): Buscar comprobantes reales de pago
-            // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
-            if (pago.soporte_url) {
-              comprobantesObj[pago.id_solicitud] = {
-                ruta_archivo: pago.soporte_url,
-                nombre_archivo: 'Comprobante de pago',
-                fecha_subida: pago.fecha_actualizacion || pago.fecha_pago
-              };
-            } else {
-              // Verificar si es solicitud TOKA antes de buscar comprobantes
-              try {
-                // Detectar si es solicitud TOKA
-                const isTokaResponse = await fetch(`/api/solicitudes-n09-toka/por-solicitud/${pago.id_solicitud}`, {
-                  headers: { Authorization: `Bearer ${token}` }
-                });
-                
-                if (isTokaResponse.ok) {
-                  const tokaData = await isTokaResponse.json();
-                  if (tokaData.success && tokaData.data) {
-                    console.log(`🎯 Solicitud ${pago.id_solicitud} es TOKA - buscando comprobantes específicos`);
-                    // Es TOKA - buscar en su tabla específica
-                    const { default: SolicitudN09TokaArchivosService } = await import('@/services/solicitudN09TokaArchivos.service');
-                    const archivos = await SolicitudN09TokaArchivosService.obtenerArchivos(tokaData.data.id_solicitud_n09_toka);
-                    
-                    const comprobante = archivos.find(archivo => 
-                      archivo.tipo_archivo === 'comprobante_pago' || 
-                      archivo.nombre_archivo.toLowerCase().includes('comprobante')
-                    );
-                    
-                    if (comprobante) {
-                      comprobantesObj[pago.id_solicitud] = {
-                        ruta_archivo: comprobante.ruta_archivo,
-                        nombre_archivo: comprobante.nombre_archivo,
-                        fecha_subida: comprobante.fecha_subida
-                      };
+      
+      // Procesar comprobantes en lotes de 10 para no saturar
+      const batchSize = 10;
+      for (let i = 0; i < solicitudesUnicas.length; i += batchSize) {
+        const batch = solicitudesUnicas.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(async (pago: Solicitud) => {
+            if (pago.estado === 'pagada') {
+              
+              // Para TODAS las solicitudes (incluye TOKA): Buscar comprobantes reales de pago
+              // Primero verificar si la solicitud tiene soporte_url (nuevo sistema)
+              if (pago.soporte_url) {
+                comprobantesObj[pago.id_solicitud] = {
+                  ruta_archivo: pago.soporte_url,
+                  nombre_archivo: 'Comprobante de pago',
+                  fecha_subida: pago.fecha_actualizacion || pago.fecha_pago
+                };
+              } else {
+                // Verificar si es solicitud TOKA antes de buscar comprobantes
+                try {
+                  // Detectar si es solicitud TOKA
+                  const isTokaResponse = await fetch(`/api/solicitudes-n09-toka/por-solicitud/${pago.id_solicitud}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                  });
+                  
+                  if (isTokaResponse.ok) {
+                    const tokaData = await isTokaResponse.json();
+                    if (tokaData.success && tokaData.data) {
+                      console.log(`🎯 Solicitud ${pago.id_solicitud} es TOKA - buscando comprobantes específicos`);
+                      // Es TOKA - buscar en su tabla específica
+                      const { default: SolicitudN09TokaArchivosService } = await import('@/services/solicitudN09TokaArchivos.service');
+                      const archivos = await SolicitudN09TokaArchivosService.obtenerArchivos(tokaData.data.id_solicitud_n09_toka);
+                      
+                      const comprobante = archivos.find(archivo => 
+                        archivo.tipo_archivo === 'comprobante_pago' || 
+                        archivo.nombre_archivo.toLowerCase().includes('comprobante')
+                      );
+                      
+                      if (comprobante) {
+                        comprobantesObj[pago.id_solicitud] = {
+                          ruta_archivo: comprobante.ruta_archivo,
+                          nombre_archivo: comprobante.nombre_archivo,
+                          fecha_subida: comprobante.fecha_subida
+                        };
+                      }
+                      return; // Salir temprano, ya procesamos TOKA
                     }
-                    return; // Salir temprano, ya procesamos TOKA
                   }
+                  
+                  // No es TOKA - usar método estándar
+                  console.log(`📝 Solicitud ${pago.id_solicitud} es estándar - buscando comprobantes normales`);
+                  const comprobantes = await ComprobantesService.getBySolicitud(pago.id_solicitud, token);
+                  if (comprobantes && comprobantes.length > 0) {
+                    comprobantesObj[pago.id_solicitud] = comprobantes[0];
+                  }
+                } catch (error) {
+                  console.error(`Error obteniendo comprobantes para solicitud ${pago.id_solicitud}:`, error);
                 }
-                
-                // No es TOKA - usar método estándar
-                console.log(`📝 Solicitud ${pago.id_solicitud} es estándar - buscando comprobantes normales`);
-                const comprobantes = await ComprobantesService.getBySolicitud(pago.id_solicitud, token);
-                if (comprobantes && comprobantes.length > 0) {
-                  comprobantesObj[pago.id_solicitud] = comprobantes[0];
-                }
-              } catch (error) {
-                console.error(`Error obteniendo comprobantes para solicitud ${pago.id_solicitud}:`, error);
               }
             }
-          }
-        })
-      );
-      setComprobantes(comprobantesObj);
+          })
+        );
+        // Actualizar comprobantes progresivamente después de cada lote
+        setComprobantes(prev => ({ ...prev, ...comprobantesObj }));
+      }
     } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError('Error desconocido');
-    } finally {
       setLoading(false);
     }
   };
@@ -902,17 +917,45 @@ export default function HistorialPagosPage() {
                     if (!id) throw new Error('No hay id de solicitud');
                     console.log(`🎯 Usando pagosService.subirComprobante para solicitud ${id}`);
                     
-                    // 🔧 USAR EL NUEVO SERVICIO QUE MANEJA TOKA
+                    setModalOpen(false);
+                    
+                    // ⚡ OPTIMIZACIÓN: Actualización optimista de la UI
+                    const tempComprobante: Comprobante = {
+                      ruta_archivo: URL.createObjectURL(file),
+                      nombre_archivo: file.name,
+                      fecha_subida: new Date().toISOString()
+                    };
+                    setComprobantes(prev => ({ ...prev, [id]: tempComprobante }));
+                    setSuccessMsg('Subiendo comprobante...');
+                    
+                    // Subir en segundo plano
                     await subirComprobante(id, file);
                     
-                    await fetchPagosYComprobantes(); // Recargar datos tras subir comprobante
+                    // Actualizar con datos reales del servidor
                     setSuccessMsg('¡Comprobante subido exitosamente!');
+                    
+                    // Recargar solo los comprobantes (no todas las solicitudes)
+                    const token = localStorage.getItem('auth_token');
+                    if (token) {
+                      const { ComprobantesService } = await import('@/services/comprobantes.service');
+                      const comprobantes = await ComprobantesService.getBySolicitud(id, token);
+                      if (comprobantes && comprobantes.length > 0) {
+                        setComprobantes(prev => ({ ...prev, [id]: comprobantes[0] }));
+                      }
+                    }
                   } catch (error) {
                     console.error('❌ Error en SubirFacturaModal:', error);
                     const errorMsg = error instanceof Error ? error.message : 'Error desconocido al subir comprobante';
                     setError(errorMsg);
-                  } finally {
-                    setModalOpen(false);
+                    toast.error(errorMsg);
+                    // Revertir actualización optimista
+                    if (id) {
+                      setComprobantes(prev => {
+                        const newComprobantes = { ...prev };
+                        delete newComprobantes[id];
+                        return newComprobantes;
+                      });
+                    }
                   }
                 }}
               />
